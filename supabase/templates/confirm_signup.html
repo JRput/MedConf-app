@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Your Email - MedConf</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: #0f172a;
+      color: #e2e8f0;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #1e293b;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+    .header {
+      background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .header h1 {
+      margin: 0;
+      color: #ffffff;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .content {
+      padding: 40px 30px;
+    }
+    .content p {
+      margin: 0 0 20px;
+      line-height: 1.6;
+      color: #cbd5e1;
+      font-size: 16px;
+    }
+    .button-container {
+      text-align: center;
+      margin: 35px 0;
+    }
+    .verify-button {
+      display: inline-block;
+      padding: 16px 40px;
+      background: linear-gradient(135deg, #06b6d4 0%, #14b8a6 100%);
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 16px;
+      box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.3);
+      transition: transform 0.2s;
+    }
+    .verify-button:hover {
+      transform: translateY(-2px);
+    }
+    .footer {
+      padding: 30px;
+      text-align: center;
+      background-color: #0f172a;
+      border-top: 1px solid #334155;
+    }
+    .footer p {
+      margin: 0;
+      color: #64748b;
+      font-size: 14px;
+    }
+    .signature {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #334155;
+      color: #94a3b8;
+      font-size: 15px;
+    }
+    @media only screen and (max-width: 600px) {
+      .email-container {
+        border-radius: 0;
+      }
+      .header {
+        padding: 30px 20px;
+      }
+      .header h1 {
+        font-size: 26px;
+      }
+      .content {
+        padding: 30px 20px;
+      }
+      .verify-button {
+        padding: 14px 30px;
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #0f172a; padding: 40px 20px;">
+    <tr>
+      <td>
+        <div class="email-container">
+          <!-- Header -->
+          <div class="header">
+            <h1>MedConf</h1>
+          </div>
+
+          <!-- Main Content -->
+          <div class="content">
+            <p>Thank you for signing up to MedConf!</p>
+            
+            <p>Please click on the link below to verify your email.</p>
+
+            <div class="button-container">
+              <a href="{{ .ConfirmationURL }}" class="verify-button">
+                Verify Email Address
+              </a>
+            </div>
+
+            <p style="font-size: 14px; color: #94a3b8; margin-top: 30px;">
+              If the button doesn't work, you can copy and paste this link into your browser:
+            </p>
+            <p style="font-size: 13px; color: #64748b; word-break: break-all; background-color: #0f172a; padding: 12px; border-radius: 8px;">
+              {{ .ConfirmationURL }}
+            </p>
+
+            <div class="signature">
+              <p><strong>Kind regards,</strong></p>
+              <p><strong>MedConf Team</strong></p>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="footer">
+            <p>If you didn't create an account with MedConf, you can safely ignore this email.</p>
+          </div>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+
+

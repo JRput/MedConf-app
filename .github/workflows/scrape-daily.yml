@@ -1,0 +1,70 @@
+name: Scrape sources
+
+# Triggers:
+#   - Every day at 02:00 UTC, automatically
+#   - On manual "Run workflow" button click in the GitHub Actions tab
+#
+# Each source runs as its own parallel cloud worker (matrix strategy). If one
+# source's site is down, the other workers still complete successfully.
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 02:00 UTC daily
+  workflow_dispatch:       # manual trigger from GitHub UI
+
+jobs:
+  scrape:
+    name: Source ${{ matrix.source_id }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false   # one source failing should NOT cancel the others
+      matrix:
+        source_id: [1, 2, 3]
+        include:
+          - source_id: 1
+            source_name: RCGP
+          - source_id: 2
+            source_name: RCSEng
+          - source_id: 3
+            source_name: RSM
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: medconf-scraper/requirements.txt
+
+      - name: Install Python dependencies
+        working-directory: medconf-scraper
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: Scrape source ${{ matrix.source_id }} (${{ matrix.source_name }})
+        working-directory: medconf-scraper
+        env:
+          KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+          KIMI_BASE_URL: https://integrate.api.nvidia.com/v1
+          KIMI_MODEL: moonshotai/kimi-k2.6
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SCRAPER_MAX_STEPS: '30'
+          SCRAPER_DELAY_SECONDS: '2'
+          SCRAPER_TIMEOUT_MS: '10000'
+        run: python main.py --run-now --source ${{ matrix.source_id }}
+
+      - name: Upload scraper logs as build artifact
+        if: always()    # upload even when the scrape step fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-${{ matrix.source_name }}-${{ github.run_id }}
+          path: medconf-scraper/*.log
+          if-no-files-found: ignore
+          retention-days: 14

@@ -1,0 +1,89 @@
+# =============================================================================
+# CREDENTIALS — never commit anything that looks like a secret
+# =============================================================================
+# Env files (allow .env.example templates only)
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Anything obviously a key / credential file
+*credential*
+*credentials*
+*secret*
+*secrets*
+*api_key*
+*api-key*
+*apikey*
+*.pem
+*.key
+*id_rsa*
+
+# Specific files we have / had at the project root
+KimiK2.5 api*
+NVIDIA*api*
+nvapi*.txt
+nvapi*.rtf
+
+# Anywhere named "credentials" — directory or file
+**/credentials/**
+**/secrets/**
+
+# =============================================================================
+# Python (scraper)
+# =============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+env/
+.eggs/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Scraper logs (keep them local — useful for debugging, not for git)
+medconf-scraper/*.log
+
+# =============================================================================
+# Node / Next.js (frontend)
+# =============================================================================
+node_modules/
+.next/
+out/
+build/
+dist/
+.turbo/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# =============================================================================
+# macOS / OS / Editor noise
+# =============================================================================
+.DS_Store
+*.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# =============================================================================
+# Project-specific
+# =============================================================================
+# Local mempalace ingestion artefacts
+.mempalace/
+mempalace.yaml
+entities.json
+
+# Skills/ — large vendored UI design content, not part of the app
+Skills/
+
+# Supabase CLI binary — too large for git, redownload as needed
+supabase-cli
+medconf-scraper/supabase

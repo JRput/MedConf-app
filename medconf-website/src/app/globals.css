@@ -1,0 +1,194 @@
+@import "tailwindcss";
+
+/* Custom CSS Variables for MedConf Design System */
+:root {
+  /* Primary palette - Cyan/Teal medical feel */
+  --color-primary-50: #ecfeff;
+  --color-primary-100: #cffafe;
+  --color-primary-200: #a5f3fc;
+  --color-primary-300: #67e8f9;
+  --color-primary-400: #22d3ee;
+  --color-primary-500: #06b6d4;
+  --color-primary-600: #0891b2;
+  --color-primary-700: #0e7490;
+  --color-primary-800: #155e75;
+  --color-primary-900: #164e63;
+  
+  /* Accent - Teal for CTAs */
+  --color-accent: #14b8a6;
+  --color-accent-light: #5eead4;
+  
+  /* Success - Green for CPD badges */
+  --color-success: #22c55e;
+  --color-success-light: #dcfce7;
+  
+  /* Warning - Amber for deadlines */
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  
+  /* Error */
+  --color-error: #ef4444;
+  --color-error-light: #fee2e2;
+  
+  /* Spacing rhythm - 4px base */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+}
+
+/* Font family utilities */
+.font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+.font-body {
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(34, 211, 238, 0.3);
+  color: white;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, #22d3ee 0%, #14b8a6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass morphism card */
+.glass-card {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+/* Subtle grid background pattern */
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Radial gradient glow effect */
+.glow-effect {
+  position: relative;
+}
+
+.glow-effect::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.4), rgba(20, 184, 166, 0.4));
+  border-radius: inherit;
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.glow-effect:hover::before {
+  opacity: 1;
+}
+
+/* Smooth transitions for interactive elements */
+.transition-smooth {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(30, 41, 59, 0.8) 25%,
+    rgba(51, 65, 85, 0.8) 50%,
+    rgba(30, 41, 59, 0.8) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Entrance animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Staggered animation delays */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* Input styling */
+input, select, textarea {
+  font-family: inherit;
+}
+
+/* Prevent layout shift from scrollbar */
+html {
+  overflow-y: scroll;
+}
