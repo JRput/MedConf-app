@@ -217,31 +217,34 @@ Respond with valid JSON only, no markdown, no extra text:
   "description": "concise 30-50 word summary built only from the page text" or null,
   "specialty": "primary clinical/topic area (e.g. Surgery, Dentistry, Exam Preparation, Oncology)" or null
 }}"""
+        # Always try the heuristic, even when the LLM call returned None.
+        # (Fixed regression: previous code had an early return on llm_call=None
+        # that bypassed the heuristic — leaving cloud-worker rows null when
+        # NVIDIA rate-limited the LLM call.)
+        result: Dict[str, Any] = {}
         raw = llm_call(prompt)
-        if not raw:
-            return {}
-        raw = raw.strip()
-        if raw.startswith("```"):
-            parts = raw.split("```")
-            if len(parts) >= 3:
-                raw = parts[1]
-                if raw.startswith("json"):
-                    raw = raw[4:]
-                raw = raw.strip()
-        m = re.search(r"\{.*\}", raw, re.DOTALL)
-        if m:
-            raw = m.group(0)
-        try:
-            parsed = json.loads(raw)
-            result = {
-                "description": parsed.get("description"),
-                "specialty": parsed.get("specialty"),
-            }
-        except json.JSONDecodeError as e:
-            logger.warning(f"RCSEng soft-fields JSON parse failed: {e}")
-            result = {}
+        if raw:
+            raw = raw.strip()
+            if raw.startswith("```"):
+                parts = raw.split("```")
+                if len(parts) >= 3:
+                    raw = parts[1]
+                    if raw.startswith("json"):
+                        raw = raw[4:]
+                    raw = raw.strip()
+            m = re.search(r"\{.*\}", raw, re.DOTALL)
+            if m:
+                raw = m.group(0)
+            try:
+                parsed = json.loads(raw)
+                result = {
+                    "description": parsed.get("description"),
+                    "specialty": parsed.get("specialty"),
+                }
+            except json.JSONDecodeError as e:
+                logger.warning(f"RCSEng soft-fields JSON parse failed: {e}")
 
-        # Heuristic specialty fallback for when the LLM call fails
+        # Specialty heuristic ALWAYS runs as fallback when LLM didn't yield one
         if not result.get("specialty"):
             heuristic = classify_specialty(shell.get("title"), text)
             if heuristic:
