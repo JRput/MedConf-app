@@ -19,6 +19,10 @@ CREATE TABLE IF NOT EXISTS scraper_sources (
     pagination_template TEXT,
     max_pages_hint INTEGER,
     last_full_walk_at TIMESTAMPTZ,
+    -- TRUE when a source's detail "page" is actually the homepage of a small
+    -- subsite (info split across /tickets, /programme, /abstracts, etc).
+    -- Triggers browser.fetch_multi_page_text() instead of single-page read.
+    detail_is_multipage BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

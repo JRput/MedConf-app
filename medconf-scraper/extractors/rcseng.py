@@ -27,6 +27,7 @@ from playwright.sync_api import Page
 
 from .base import BaseExtractor
 from .specialty_classifier import classify_specialty
+from .abstract_classifier import extract_abstract_info
 from logger import logger
 
 
@@ -56,6 +57,12 @@ class RCSEngExtractor(BaseExtractor):
         end_date = self._extract_end_date(page)
         if end_date:
             result["end_date"] = end_date
+
+        # Abstract / poster submission info (deterministic — no LLM)
+        page_text = page.evaluate("() => document.body.textContent || ''")
+        is_open, deadline = extract_abstract_info(page_text)
+        result["abstract_open"] = is_open
+        result["abstract_deadline"] = deadline.isoformat() if deadline else None
 
         # Description + specialty via small LLM call (RCSEng detail pages have
         # rich event-info prose)

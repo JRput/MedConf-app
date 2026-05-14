@@ -29,6 +29,7 @@ from playwright.sync_api import Page
 
 from .base import BaseExtractor
 from .specialty_classifier import classify_specialty
+from .abstract_classifier import extract_abstract_info
 from logger import logger
 
 
@@ -76,7 +77,16 @@ class RCGPExtractor(BaseExtractor):
         if end_date:
             result["end_date"] = end_date
 
-        # 5. Description: prefer listing description_hint (much richer than thin
+        # 5. Abstract / poster submission info (deterministic — no LLM)
+        # For RCGP engage pages the detail body is thin, so we ALSO scan the
+        # listing-card description_hint where calls for abstracts sometimes appear.
+        combined_text = ((shell.get("description_hint") or "") + " " +
+                          page.evaluate("() => document.body.textContent || ''"))
+        is_open, deadline = extract_abstract_info(combined_text)
+        result["abstract_open"] = is_open
+        result["abstract_deadline"] = deadline.isoformat() if deadline else None
+
+        # 6. Description: prefer listing description_hint (much richer than thin
         # engage detail page), fall back to LLM
         soft = self._extract_soft_fields_engage(page, shell, llm_call)
         result.update(soft)
@@ -279,6 +289,12 @@ Respond with valid JSON only, no markdown, no extra text:
 
     # ================================================================== #
     # Path B — rcgpac.org.uk (Annual Conference)
+    #
+    # This is a small standalone website rather than a single page. Info is
+    # split across /tickets, /programme, /programme/poster-abstract-submissions,
+    # /overview/why-attend, etc. We use browser.fetch_multi_page_text() to walk
+    # the relevant sub-pages and concatenate them, then apply our classifiers
+    # to the combined text.
     # ================================================================== #
     def _extract_rcgpac(
         self,
@@ -288,28 +304,230 @@ Respond with valid JSON only, no markdown, no extra text:
     ) -> Dict[str, Any]:
         result: Dict[str, Any] = {}
 
-        # Date + venue from <strong>Label</strong><p>Value</p> pattern
+        # 1. Multi-page crawl — walk the rcgpac.org.uk subsite
+        # We use page.url here so logging / debug paths can see which start URL
+        # triggered the crawl.
+        from browser import BrowserController  # local import to avoid circular
+        # The Page object's parent browser controller does the crawling. We
+        # access it via a small trick — the AgentLoop owns the BrowserController
+        # but the extractor only gets the Page. We grab the BrowserController
+        # via a passthrough on the page's context. Simpler: just re-import and
+        # use the page directly with our own multi-page logic.
+        # In practice, the agent passes us page; we need to call
+        # fetch_multi_page_text. Easiest is to construct a thin wrapper around
+        # the same page. But since the agent's browser owns the page and we
+        # already have it, let's just inline the walk here.
+        all_text = self._collect_rcgpac_text(page, max_pages=8)
+        text = "\n\n".join(all_text.values())
+
+        # 2. Sidebar metadata still works on the homepage (the <strong>Location</strong>
+        # pattern). We try the homepage first; if it lacks data, we'll have a
+        # broader fallback via the combined text.
         meta = self._extract_rcgpac_metadata(page)
         result.update(meta)
 
-        # Pricing on the public homepage is hidden behind "Ticket options" button.
-        # Skip — annual conf pricing varies and is best left as TBC until they
-        # publish a dedicated tickets page we can target.
-        result["pricing_tiers"] = []
+        # 3. If metadata didn't catch a date range, try a regex on combined text
+        if not result.get("start_date") or not result.get("end_date"):
+            date_range = self._parse_date_range_from_text(text)
+            if date_range:
+                start_iso, end_iso = date_range
+                # Don't overwrite an existing start_date with weaker data
+                if start_iso and not result.get("start_date"):
+                    result["start_date"] = start_iso
+                if end_iso and not result.get("end_date"):
+                    result["end_date"] = end_iso
 
-        # CPD — page mentions "CPD credits" via image alt text
-        text = page.evaluate("() => document.body.textContent || ''")
-        if re.search(r"\bCPD\s+credit", text, re.I):
+        # 4. Pricing — parse from the combined text (/tickets sub-page typically
+        # has Members/Non-members lines in £-amount format)
+        result["pricing_tiers"] = self._parse_rcgpac_pricing(text)
+
+        # 5. CPD — combined text has more chance of mentioning CPD credits
+        if re.search(r"\b(\d+)\s*CPD\s*(?:point|credit)s?\b", text, re.I) \
+                or re.search(r"\bCPD\s+(?:credit|accredit|approved)", text, re.I):
             result["cpd_accredited"] = True
+            cpd_match = re.search(r"\b(\d+)\s*CPD\s*(?:point|credit)s?\b", text, re.I)
+            if cpd_match:
+                result["cpd_points"] = int(cpd_match.group(1))
         else:
             result["cpd_accredited"] = False
-        result["cpd_points"] = None
+            result["cpd_points"] = None
 
-        # Description + specialty
-        soft = self._extract_soft_fields_rcgpac(page, shell, llm_call)
+        # 6. Abstract / poster submission info from combined text — much more
+        # likely to find the deadline on /programme/poster-abstract-submissions
+        is_open, deadline = extract_abstract_info(text)
+        result["abstract_open"] = is_open
+        result["abstract_deadline"] = deadline.isoformat() if deadline else None
+
+        # 7. Description + specialty — LLM gets richer context now
+        soft = self._extract_soft_fields_rcgpac_multi(text, shell, llm_call)
         result.update(soft)
 
         return result
+
+    def _collect_rcgpac_text(self, page: Page, max_pages: int = 8) -> Dict[str, str]:
+        """Walk same-domain sub-pages of the current rcgpac.org.uk page."""
+        # The BrowserController owns navigation; reach it via the page's owning
+        # browser if available — but the AgentLoop wires us with the page, not
+        # the controller. Simpler approach: drive navigation directly on the page.
+        try:
+            start_url = page.url
+            pages: Dict[str, str] = {}
+            pages[start_url] = page.evaluate("() => document.body.textContent || ''") or ""
+
+            # Discover candidate sub-pages on the homepage
+            candidates = page.evaluate(
+                """({allowlist, blocklist}) => {
+                    const out = [];
+                    const seen = new Set();
+                    const start = new URL(document.location.href);
+                    const startPath = start.origin + start.pathname;
+                    document.querySelectorAll('a[href]').forEach(a => {
+                        try {
+                            const u = new URL(a.href);
+                            if (u.hostname !== start.hostname) return;
+                            const clean = u.origin + u.pathname;
+                            if (clean === startPath) return;
+                            if (seen.has(clean)) return;
+                            const path = u.pathname.toLowerCase();
+                            if (blocklist.some(kw => path.includes(kw))) return;
+                            if (allowlist.some(kw => path.includes(kw))) {
+                                seen.add(clean);
+                                out.push(clean);
+                            }
+                        } catch (e) {}
+                    });
+                    return out;
+                }""",
+                {
+                    "allowlist": ["programme", "ticket", "venue", "location", "abstract",
+                                  "poster", "overview", "speakers", "registration",
+                                  "register", "whats-on", "faqs", "agenda", "schedule",
+                                  "about", "info", "highlights"],
+                    "blocklist": ["cookie", "privacy", "terms", "accessibility",
+                                  "sustainability", "sponsor", "exhibit", "phishing",
+                                  "contact", "press", "media", "policy", "covid",
+                                  "social-and-networking"],
+                },
+            ) or []
+
+            budget = max_pages - 1
+            for url in candidates[:budget]:
+                try:
+                    page.goto(url, wait_until="load", timeout=15000)
+                    page.wait_for_timeout(1500)
+                    txt = page.evaluate("() => document.body.textContent || ''") or ""
+                    if txt.strip():
+                        pages[url] = txt
+                except Exception as e:
+                    logger.warning(f"  rcgpac sub-page nav failed for {url}: {e}")
+                    continue
+
+            # Return to start URL
+            try:
+                page.goto(start_url, wait_until="load", timeout=15000)
+                page.wait_for_timeout(1000)
+            except Exception:
+                pass
+
+            return pages
+        except Exception as e:
+            logger.warning(f"  _collect_rcgpac_text failed: {e}")
+            try:
+                return {page.url: page.evaluate("() => document.body.textContent || ''") or ""}
+            except Exception:
+                return {}
+
+    @staticmethod
+    def _parse_rcgpac_pricing(text: str) -> List[Dict[str, Any]]:
+        """
+        Parse ticket-style pricing lines from rcgpac.org.uk's tickets page.
+        Common patterns:
+          'Member £495'
+          'Member rate: £495'
+          'Members - £525'
+          'Non-member £575'
+          'Early bird £395'
+          'Trainee £200'
+        """
+        if not text:
+            return []
+        # Reuse the engage-style regex but slightly more permissive (some sites use 'Early bird')
+        pattern = re.compile(
+            r"(Non[- ]?members?|Members?|Early\s+bird|Standard|Trainees?|Students?|Group)\b"
+            r"(?:\s+rate)?\s*[-:]?\s*£\s*([0-9]+(?:\.[0-9]+)?)",
+            re.I,
+        )
+        seen = set()
+        tiers: List[Dict[str, Any]] = []
+        for m in pattern.finditer(text):
+            raw_label = m.group(1).strip()
+            price = float(m.group(2))
+            label = RCGPExtractor._normalise_tier_label(raw_label)
+            key = (label, price)
+            if key in seen:
+                continue
+            seen.add(key)
+            tiers.append({
+                "tier_label": label,
+                "price_gbp": price,
+                "is_early_bird": "early" in raw_label.lower(),
+                "early_bird_deadline": None,
+            })
+        return tiers
+
+    @staticmethod
+    def _parse_date_range_from_text(text: str) -> Optional[tuple[Optional[str], Optional[str]]]:
+        """Find '29-30 October 2026' or '5-6 March 2026' style date ranges."""
+        if not text:
+            return None
+        # "DD-DD Month YYYY" or "DD – DD Month YYYY"
+        m = re.search(
+            r"\b(\d{1,2})\s*[-–]\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})\b",
+            text,
+        )
+        if not m:
+            return None
+        months = {"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,
+                  "jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12}
+        mon = months.get(m.group(3).lower()[:3])
+        if not mon:
+            return None
+        d1, d2, year = int(m.group(1)), int(m.group(2)), int(m.group(4))
+        try:
+            return (f"{year:04d}-{mon:02d}-{d1:02d}",
+                    f"{year:04d}-{mon:02d}-{d2:02d}")
+        except ValueError:
+            return None
+
+    def _extract_soft_fields_rcgpac_multi(
+        self,
+        combined_text: str,
+        shell: Dict[str, Any],
+        llm_call: Callable[[str], Optional[str]],
+    ) -> Dict[str, Any]:
+        """LLM call for description + specialty using the combined multi-page text."""
+        # Truncate to a reasonable size for the prompt — combined text can be 30K+ chars
+        text_for_llm = combined_text[:6000]
+
+        prompt = f"""You are summarising a multi-page medical conference website.
+
+EVENT TITLE: {shell.get('title')}
+
+CONTENT FROM SEVERAL PAGES OF THE CONFERENCE WEBSITE:
+{text_for_llm}
+
+Respond with valid JSON only:
+{{
+  "description": "30-50 word summary built only from the page text above" or null,
+  "specialty": "General Practice"
+}}"""
+        raw = llm_call(prompt)
+        if not raw:
+            return {"specialty": "General Practice"}
+        parsed = self._parse_soft_json(raw)
+        if not parsed.get("specialty"):
+            parsed["specialty"] = "General Practice"
+        return parsed
 
     def _extract_rcgpac_metadata(self, page: Page) -> Dict[str, Any]:
         """

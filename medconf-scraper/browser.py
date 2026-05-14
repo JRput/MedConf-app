@@ -400,6 +400,114 @@ class BrowserController:
 
         return all_shells
 
+    # ------------------------------------------------------------------------
+    # Multi-page hub crawler — for sources whose "detail page" is actually the
+    # homepage of a small subsite with info split across sub-pages.
+    # Example: rcgpac.org.uk has /tickets, /programme, /abstract-submissions
+    # etc. — none of which appear on the landing page.
+    # ------------------------------------------------------------------------
+    # Same-domain link path keywords that probably contain event detail
+    URL_ALLOWLIST_KEYWORDS = [
+        "programme", "ticket", "venue", "location", "abstract", "poster",
+        "overview", "speakers", "registration", "register", "whats-on",
+        "what-s-on", "faqs", "faq", "agenda", "schedule", "about", "info",
+        "highlights",
+    ]
+    # Same-domain link path keywords we never want to follow
+    URL_BLOCKLIST_KEYWORDS = [
+        "cookie", "privacy", "terms", "accessibility", "sustainability",
+        "sponsor", "exhibit", "phishing", "contact", "press", "media",
+        "policy", "covid", "social-and-networking",
+    ]
+
+    def fetch_multi_page_text(
+        self,
+        start_url: str,
+        max_pages: int = 8,
+    ) -> Dict[str, str]:
+        """
+        Visit start_url + up to (max_pages-1) same-domain sub-pages whose URL
+        path matches the event-relevance allowlist. Returns {url -> textContent}.
+
+        Used for detail pages that are micro-websites (e.g. annual conference
+        landing pages with /tickets, /programme, /abstracts sub-pages).
+        """
+        if not self.page:
+            raise RuntimeError("Browser not launched.")
+
+        pages: Dict[str, str] = {}
+
+        # 1. Visit the start page
+        try:
+            self.navigate(start_url)
+            self.page.wait_for_timeout(2000)
+            pages[start_url] = self.page.evaluate("() => document.body.textContent || ''") or ""
+        except Exception as e:
+            import logging
+            logging.getLogger("medconf-scraper").warning(
+                f"  fetch_multi_page_text: start navigation failed for {start_url}: {e}"
+            )
+            return pages
+
+        # 2. Discover same-domain candidate URLs (allowlist filter)
+        try:
+            candidates = self.page.evaluate(
+                """({allowlist, blocklist}) => {
+                    const out = [];
+                    const seen = new Set();
+                    const start = new URL(document.location.href);
+                    const startPath = start.origin + start.pathname;
+                    document.querySelectorAll('a[href]').forEach(a => {
+                        try {
+                            const u = new URL(a.href);
+                            if (u.hostname !== start.hostname) return;
+                            const clean = u.origin + u.pathname;
+                            if (clean === startPath) return;
+                            if (seen.has(clean)) return;
+                            const path = u.pathname.toLowerCase();
+                            if (blocklist.some(kw => path.includes(kw))) return;
+                            if (allowlist.some(kw => path.includes(kw))) {
+                                seen.add(clean);
+                                out.push(clean);
+                            }
+                        } catch (e) {}
+                    });
+                    return out;
+                }""",
+                {"allowlist": self.URL_ALLOWLIST_KEYWORDS, "blocklist": self.URL_BLOCKLIST_KEYWORDS},
+            ) or []
+        except Exception as e:
+            import logging
+            logging.getLogger("medconf-scraper").warning(
+                f"  fetch_multi_page_text: candidate discovery failed: {e}"
+            )
+            candidates = []
+
+        # 3. Visit each candidate up to the cap
+        budget = max_pages - 1  # already visited start_url
+        for url in candidates[:budget]:
+            try:
+                self.navigate(url)
+                self.page.wait_for_timeout(1500)
+                txt = self.page.evaluate("() => document.body.textContent || ''") or ""
+                if txt.strip():
+                    pages[url] = txt
+            except Exception as e:
+                import logging
+                logging.getLogger("medconf-scraper").warning(
+                    f"  fetch_multi_page_text: sub-page nav failed for {url}: {e}"
+                )
+                continue
+
+        # 4. Return browser state to the start URL so the caller's expectations hold
+        try:
+            self.navigate(start_url)
+            self.page.wait_for_timeout(1000)
+        except Exception:
+            pass
+
+        return pages
+
     def _detect_max_pages(self) -> Optional[int]:
         """Inspect pagination anchors to find the largest ?page=N value."""
         if not self.page:

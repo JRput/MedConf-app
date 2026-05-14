@@ -18,6 +18,34 @@ Each is a sign the source's HTML structure isn't being read correctly by the gen
 
 ---
 
+## Two layouts: single-page vs multi-page detail
+
+Before building, classify the source's detail URLs into ONE of two layouts:
+
+### Single-page detail (the usual)
+Each event's detail URL renders a self-contained page with all the info — pricing tables, venue, dates, abstract status, all on one URL. Example: `engage.rcgp.org.uk/event/<id>`, `rsm.ac.uk/events/<faculty>/<year>/<slug>/`, `rcseng.ac.uk/news-and-events/events/calendar/<slug>/`.
+
+**No special configuration needed.** Build a normal per-source extractor.
+
+### Multi-page detail (flagship conferences with their own subsite)
+Each event has a homepage that's mostly marketing — the actual data is on sub-pages like `/tickets`, `/programme`, `/programme/poster-abstract-submissions`, `/overview/why-attend`. Example: `rcgpac.org.uk` (RCGP Annual Conference).
+
+**Configuration:**
+1. In the `scraper_sources` row, set `detail_is_multipage = TRUE`.
+2. The `FallbackExtractor` automatically walks same-domain sub-pages and concatenates text. URL allowlist:
+   - **Visit**: `programme`, `ticket`, `venue`, `location`, `abstract`, `poster`, `overview`, `speakers`, `registration`, `whats-on`, `faqs`, `info`, `highlights`
+   - **Skip**: `cookie`, `privacy`, `terms`, `accessibility`, `sponsor`, `exhibit`, `contact`
+3. Capped at 8 pages per event. Adds ~15-30 sec per event in the cloud.
+
+**How to detect during the probe phase:**
+- Homepage has <2K chars of *real* content after stripping nav/footer
+- Has 10+ same-domain navigation links with "info-looking" paths
+- Things like prices/dates/abstracts are absent from the homepage but the page has a "Tickets" / "Programme" link
+
+If a source has BOTH layouts within one site (like RCGP — most events are single-page via engage.*, but the Annual Conference is multi-page via rcgpac.*), handle the split inside the per-source extractor with URL-based branching, as `extractors/rcgp.py:_extract_rcgpac` does.
+
+---
+
 ## The four-step build
 
 ### 1. Probe the listing page

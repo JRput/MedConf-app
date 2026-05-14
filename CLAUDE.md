@@ -2,6 +2,8 @@
 
 > Auto-loaded by Claude Code at session start. This file is the single source of truth for project context, conventions, and how-to-run. Keep it short and current — link out to deeper docs rather than duplicate them here.
 
+> **Production state (2026-05-14):** Phase 6 complete. Scraper runs daily at 02:00 UTC on GitHub Actions (`.github/workflows/scrape-daily.yml`) with one parallel cloud worker per source. 3 active sources (RCGP, RCSEng, RSM), ~291 events in Supabase. Repo: https://github.com/JRput/MedConf-app. See [memory/project_phase6_architecture.md](file:///Users/Sushil/.claude/projects/-Users-Sushil-Documents-Documents-IMT2-Side-hustle-myTalk-conference-app/memory/project_phase6_architecture.md) for full architecture.
+
 ---
 
 ## 1. Identity & Aim
@@ -39,22 +41,24 @@ Authoritative documents:
 └──────────────────────────┘         └──────────────────────────┘
 ```
 
-### 2.1 `medconf-scraper/` — Agentic Python scraper
-LLM-driven reasoning loop (no per-site selectors). Each step the LLM picks `navigate` / `extract` / `done`.
+### 2.1 `medconf-scraper/` — Two-phase scraper with per-source extractors
+**Replaced the original agentic LLM loop in Phase 6.** Listing pages are now walked deterministically; only soft fields (description, specialty) involve the LLM, with heuristic classifiers as backstops.
 
 | File | Role |
 |---|---|
-| [main.py](medconf-scraper/main.py) | Entry point; `--run-now` for immediate, otherwise starts scheduler |
-| [scheduler.py](medconf-scraper/scheduler.py) | APScheduler weekly cron (Sun 02:00) + archives expired events |
-| [llm_agent.py](medconf-scraper/llm_agent.py) | Agentic loop using Kimi K2.5 via NVIDIA OpenAI-compatible API |
-| [browser.py](medconf-scraper/browser.py) | Browser controller used by the agent |
-| [scraper.py](medconf-scraper/scraper.py) | Orchestrates agent → validate → upsert (dedupe on `source_url`) |
+| [main.py](medconf-scraper/main.py) | Entry point; `--run-now [--source N]` for cloud workers, plain `main.py` starts APScheduler (legacy local-only) |
+| [scheduler.py](medconf-scraper/scheduler.py) | Loops all active sources; runs multi-rule archival (expired / undated-past / unseen-14d) |
+| [scraper.py](medconf-scraper/scraper.py) | `scrape_source()` — incremental hash decision: fast-skip unchanged events, slow-path for new/changed |
+| [llm_agent.py](medconf-scraper/llm_agent.py) | `list_shells()` (Phase A — DOM walk) + `extract_detail_for_shell()` (Phase B — per-source extractor) |
+| [browser.py](medconf-scraper/browser.py) | `get_event_cards_paginated()` — walks `?page=1..N` with auto-detection, dedup |
+| [extractors/](medconf-scraper/extractors/) | Per-source modules: `rcgp.py`, `rcseng.py`, `rsm.py`, plus shared `specialty_classifier.py` (and pending `abstract_classifier.py`) |
+| [extractors/PLAYBOOK.md](medconf-scraper/extractors/PLAYBOOK.md) | The four-step protocol for onboarding a new source |
 | [validator.py](medconf-scraper/validator.py) | Schema/sanity checks before insert |
-| [database.py](medconf-scraper/database.py) | Supabase upsert + archival ops |
-| [config.py](medconf-scraper/config.py) | Loads env (KIMI_API_KEY, KIMI_BASE_URL, KIMI_MODEL, SUPABASE_URL, SUPABASE_KEY) |
-| [logger.py](medconf-scraper/logger.py) | Structured logging + `scraper_logs` writer |
+| [database.py](medconf-scraper/database.py) | Supabase ops including incremental helpers (`bump_last_seen`, `archive_stale_conferences`) |
 
-⚠ **APScheduler caveat (HQ LESSONS #1):** APScheduler `BlockingScheduler` is unreliable on macOS due to App Nap, sleep/wake, network changes. For production, prefer launchd `StartCalendarInterval` (macOS), systemd timers (Linux), or Task Scheduler (Windows). Add a watchdog (L3) that confirms the run fired by checking `scraper_logs` within minutes.
+**Current model:** `moonshotai/kimi-k2.6` via NVIDIA OpenAI-compatible API. Two prior models EOL'd (kimi-k2.5 → kimi-k2-instruct → kimi-k2.6). See [memory/project_kimi_eol.md](file:///Users/Sushil/.claude/projects/-Users-Sushil-Documents-Documents-IMT2-Side-hustle-myTalk-conference-app/memory/project_kimi_eol.md) for the rotation runbook.
+
+⚠ **APScheduler caveat (HQ LESSONS #1):** APScheduler `BlockingScheduler` is unreliable on macOS. **Production uses GitHub Actions cron, not APScheduler.** The local APScheduler path stays for dev convenience only.
 
 ### 2.2 `medconf-website/` — Next.js 16 frontend
 - **Stack:** Next 16.1.6, React 19.2.3, Tailwind v4, `@supabase/ssr` 0.8 + `@supabase/supabase-js` 2.95, `lucide-react` icons.
@@ -80,20 +84,22 @@ PORT=3001 npm run dev      # 3000 may be in use locally
 # → http://localhost:3001
 ```
 
-### Scraper (one-shot, for testing)
-```bash
-cd medconf-scraper
-python main.py --run-now
-```
+### Scraper — production path (GitHub Actions, automated)
+- Daily at 02:00 UTC via `.github/workflows/scrape-daily.yml`
+- Manual trigger from https://github.com/JRput/MedConf-app/actions (or `gh workflow run scrape-daily.yml --repo JRput/MedConf-app`)
+- Each source runs on its own cloud worker in parallel
 
-### Scraper (start the weekly scheduler)
+### Scraper — local dev paths
 ```bash
 cd medconf-scraper
-python main.py
+./.venv/bin/python main.py --run-now                    # all 3 sources
+./.venv/bin/python main.py --run-now --source 1         # just RCGP
+./.venv/bin/python main.py --run-now --source 3         # just RSM
 ```
 
 ### Required environment
-- **Scraper** ([medconf-scraper/.env](medconf-scraper/.env)): `KIMI_API_KEY`, `KIMI_BASE_URL` (default `https://integrate.api.nvidia.com/v1`), `KIMI_MODEL` (default `moonshotai/kimi-k2.5`), `SUPABASE_URL`, `SUPABASE_KEY`, optional `SCRAPER_MAX_STEPS` (30), `SCRAPER_DELAY_SECONDS` (2), `SCRAPER_TIMEOUT_MS` (10000).
+- **Scraper** ([medconf-scraper/.env](medconf-scraper/.env)): `KIMI_API_KEY`, `KIMI_BASE_URL` (default `https://integrate.api.nvidia.com/v1`), `KIMI_MODEL` (currently `moonshotai/kimi-k2.6`), `SUPABASE_URL`, `SUPABASE_KEY`, optional `SCRAPER_MAX_STEPS` (30), `SCRAPER_DELAY_SECONDS` (2), `SCRAPER_TIMEOUT_MS` (10000).
+- **GitHub Actions secrets** ([repo settings](https://github.com/JRput/MedConf-app/settings/secrets/actions)): same `KIMI_API_KEY`, `SUPABASE_URL`, `SUPABASE_KEY` — workflow reads these via `${{ secrets.* }}`.
 - **Website** ([medconf-website/.env.local](medconf-website/.env.local)): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
 ---
