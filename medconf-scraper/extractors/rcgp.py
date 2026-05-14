@@ -28,6 +28,7 @@ from typing import Dict, Any, Optional, Callable, List
 from playwright.sync_api import Page
 
 from .base import BaseExtractor
+from .specialty_classifier import classify_specialty
 from logger import logger
 
 
@@ -264,9 +265,17 @@ Respond with valid JSON only, no markdown, no extra text:
   "specialty": "clinical/topic area (e.g. General Practice, Minor Surgery, Exam Preparation, Dermatology)" or null
 }}"""
         raw = llm_call(prompt)
-        if not raw:
-            return {}
-        return self._parse_soft_json(raw)
+        parsed = self._parse_soft_json(raw) if raw else {}
+
+        # Heuristic fallback for specialty — runs even when the LLM call fails
+        # (common when cloud workers hit NVIDIA rate limits). Title + listing
+        # description usually contain enough signal to classify deterministically.
+        if not parsed.get("specialty"):
+            heuristic = classify_specialty(shell.get("title"), text_for_llm)
+            if heuristic:
+                parsed["specialty"] = heuristic
+
+        return parsed
 
     # ================================================================== #
     # Path B — rcgpac.org.uk (Annual Conference)

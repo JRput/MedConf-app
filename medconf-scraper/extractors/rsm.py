@@ -22,6 +22,7 @@ from typing import Dict, Any, Optional, Callable, List
 from playwright.sync_api import Page
 
 from .base import BaseExtractor
+from .specialty_classifier import classify_specialty
 from logger import logger
 
 
@@ -407,10 +408,17 @@ Respond with valid JSON only, no markdown, no extra text:
 
         try:
             parsed = json.loads(raw)
-            return {
+            result = {
                 "description": parsed.get("description"),
                 "specialty": parsed.get("specialty"),
             }
         except json.JSONDecodeError as e:
             logger.warning(f"RSM soft-fields JSON parse failed: {e}; raw[:200]={raw[:200]!r}")
-            return {}
+            result = {}
+
+        # Heuristic specialty fallback (runs whenever LLM didn't return one)
+        if not result.get("specialty"):
+            heuristic = classify_specialty(shell.get("title"), text)
+            if heuristic:
+                result["specialty"] = heuristic
+        return result

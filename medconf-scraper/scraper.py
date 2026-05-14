@@ -123,17 +123,15 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
             # Slow path: new event OR listing changed → fetch detail page and re-extract
             merged = agent.extract_detail_for_shell(shell)
 
-            # Detect whether the detail extraction actually returned meaningful
-            # data, or whether it fell back to shell-only (LLM failure / navigation
-            # timeout). For shell-only rows, leave listing_hash NULL so the next
-            # scrape will re-attempt detail extraction. Otherwise we'd be stuck
-            # serving incomplete rows indefinitely whenever the listing is stable.
+            # Detect whether the SOFT (LLM-dependent) fields succeeded. We use
+            # these as the proxy for "the LLM call worked" — they're the parts
+            # most likely to fail under rate-limit pressure. If they're both
+            # null, leave listing_hash NULL so the next scrape retries. Other
+            # fields like pricing/format come from deterministic HTML parsing
+            # and don't tell us anything about LLM health.
             detail_succeeded = bool(
                 merged.get("description")
                 or merged.get("specialty")
-                or merged.get("pricing_tiers")
-                or merged.get("event_format")
-                or merged.get("venue_name")
             )
 
             # Stamp the row with source_id, hash (only if detail succeeded),
