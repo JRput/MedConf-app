@@ -481,8 +481,11 @@ Respond with valid JSON only, no markdown, no extra text:
         if not text:
             return None
         # "DD-DD Month YYYY" or "DD – DD Month YYYY"
+        # Note: no leading \b — textContent can concatenate adjacent elements with
+        # no whitespace ("dates29-30 October 2026"), and \b between letter↔digit
+        # word chars would never match in that case.
         m = re.search(
-            r"\b(\d{1,2})\s*[-–]\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})\b",
+            r"(\d{1,2})\s*[-–]\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})",
             text,
         )
         if not m:
