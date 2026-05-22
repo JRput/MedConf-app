@@ -142,15 +142,21 @@ class AgentLoop:
         if not city and location_hint and location_hint.lower() != "online":
             city = location_hint
 
+        # Date precedence: listing card is usually canonical, but for multi-page
+        # micro-sites (e.g. rcgpac.org.uk) the listing card may only carry the
+        # end date or no date at all — fall back to detail-extracted dates then.
+        start_date = shell.get("start_date") or detail.get("start_date")
+        end_date = detail.get("end_date") or shell.get("start_date") or detail.get("start_date")
+
         return {
             # Deterministic from listing
             "conference_name": shell["title"],
             "booking_url": booking_url,
             "is_sold_out": shell.get("is_sold_out", False),
-            "start_date": shell.get("start_date"),
+            "start_date": start_date,
             "start_time": shell.get("start_time"),
             # LLM-derived from detail page
-            "end_date": detail.get("end_date") or shell.get("start_date"),  # default end=start for single-day
+            "end_date": end_date,  # default end=start for single-day
             "description": detail.get("description"),
             "specialty": detail.get("specialty"),
             "venue_name": detail.get("venue_name"),
