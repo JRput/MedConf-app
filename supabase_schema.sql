@@ -99,11 +99,13 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT NOT NULL,
     full_name TEXT,
+    role TEXT,
     specialty TEXT,
     region TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_user_profiles_role ON user_profiles(role);
 
 -- Table: saved_conferences
 -- User's saved/bookmarked conferences
