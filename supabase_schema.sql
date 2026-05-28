@@ -241,10 +241,20 @@ CREATE POLICY "Anyone can view pricing tiers"
 -- RLS POLICIES - SCRAPER TABLES (Admin Only via Service Key)
 -- ============================================
 
--- Scraper sources: no public access (use service key)
+-- Scraper sources: writes are admin-only (service key bypasses RLS).
 CREATE POLICY "Scraper sources are admin only"
     ON scraper_sources FOR ALL
     USING (FALSE);
+
+-- ...but the public site needs to read source names/base URLs to label
+-- conference cards and build the source filter. This SELECT-only policy is
+-- OR'd with the admin-only one above, so reads are public while writes stay
+-- blocked. The table holds no secrets (API keys live in env / GH secrets).
+-- NOTE: this was lost in the 2026-05 project migration and had to be re-added,
+-- which is why source labels briefly disappeared from the cards.
+CREATE POLICY "Anyone can view scraper sources"
+    ON scraper_sources FOR SELECT
+    USING (TRUE);
 
 -- Scraper logs: no public access (use service key)
 CREATE POLICY "Scraper logs are admin only"
