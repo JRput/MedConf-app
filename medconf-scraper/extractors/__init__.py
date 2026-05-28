@@ -26,6 +26,7 @@ from .fallback import FallbackExtractor
 from .rsm import RSMExtractor
 from .rcseng import RCSEngExtractor
 from .rcgp import RCGPExtractor
+from .rcp import RCPExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -33,6 +34,7 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     1: RCGPExtractor,                   # Royal College of General Practitioners
     2: RCSEngExtractor,                 # Royal College of Surgeons of England
     3: RSMExtractor,                    # Royal Society of Medicine
+    4: RCPExtractor,                    # Royal College of Physicians
 }
 
 

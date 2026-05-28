@@ -2,7 +2,7 @@
 
 > Auto-loaded by Claude Code at session start. This file is the single source of truth for project context, conventions, and how-to-run. Keep it short and current — link out to deeper docs rather than duplicate them here.
 
-> **Production state (2026-05-14):** Phase 6 complete. Scraper runs daily at 02:00 UTC on GitHub Actions (`.github/workflows/scrape-daily.yml`) with one parallel cloud worker per source. 3 active sources (RCGP, RCSEng, RSM), ~291 events in Supabase. Repo: https://github.com/JRput/MedConf-app. See [memory/project_phase6_architecture.md](file:///Users/Sushil/.claude/projects/-Users-Sushil-Documents-Documents-IMT2-Side-hustle-myTalk-conference-app/memory/project_phase6_architecture.md) for full architecture.
+> **Production state (2026-05-21):** Phase 6 complete + data-quality fixes shipped + **Supabase project migrated** to the hotmail org. Daily scraper runs at 02:00 UTC on GitHub Actions with one parallel cloud worker per source. 3 active sources (RCGP, RCSEng, RSM), **~297 active events** with ~94% specialty coverage. Repo: https://github.com/JRput/MedConf-app · Latest commit: `64c257c` · **Active Supabase project:** `zcpszfbmvfylicpxgsfc` (jai_rajput96@hotmail.com org). **Previous Supabase project** (`ystpjjhfgfraxcnvbish`, gmail org, Vercel-managed) is still alive as a fallback — planned for deletion once new project proves stable. **For next-session handoff** see [memory/project_pending_work.md](file:///Users/Sushil/.claude/projects/-Users-Sushil-Documents-Documents-IMT2-Side-hustle-myTalk-conference-app/memory/project_pending_work.md).
 
 ---
 
@@ -51,7 +51,7 @@ Authoritative documents:
 | [scraper.py](medconf-scraper/scraper.py) | `scrape_source()` — incremental hash decision: fast-skip unchanged events, slow-path for new/changed |
 | [llm_agent.py](medconf-scraper/llm_agent.py) | `list_shells()` (Phase A — DOM walk) + `extract_detail_for_shell()` (Phase B — per-source extractor) |
 | [browser.py](medconf-scraper/browser.py) | `get_event_cards_paginated()` — walks `?page=1..N` with auto-detection, dedup |
-| [extractors/](medconf-scraper/extractors/) | Per-source modules: `rcgp.py`, `rcseng.py`, `rsm.py`, plus shared `specialty_classifier.py` (and pending `abstract_classifier.py`) |
+| [extractors/](medconf-scraper/extractors/) | Per-source modules: `rcgp.py`, `rcseng.py`, `rsm.py`, `rcp.py`. Shared classifiers: `specialty_classifier.py` (~40 title→specialty rules), `abstract_classifier.py` (text→abstract_open/deadline). `fallback.py` is LLM-only for unflagged new sources |
 | [extractors/PLAYBOOK.md](medconf-scraper/extractors/PLAYBOOK.md) | The four-step protocol for onboarding a new source |
 | [validator.py](medconf-scraper/validator.py) | Schema/sanity checks before insert |
 | [database.py](medconf-scraper/database.py) | Supabase ops including incremental helpers (`bump_last_seen`, `archive_stale_conferences`) |

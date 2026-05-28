@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false   # one source failing should NOT cancel the others
       matrix:
-        source_id: [1, 2, 3]
+        source_id: [1, 2, 3, 4]
         include:
           - source_id: 1
             source_name: RCGP
@@ -26,6 +26,8 @@ jobs:
             source_name: RCSEng
           - source_id: 3
             source_name: RSM
+          - source_id: 4
+            source_name: RCP
 
     steps:
       - name: Check out repository

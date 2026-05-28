@@ -121,6 +121,7 @@ class BrowserController:
               '[class*="eventItem"]',
               '.resultMain',                                  // RCSEng calendar
               '[class*="search-results__result"]',
+              '.event-results__result',                       // RCP upcoming-events cards
             ];
             for (const sel of containerSelectors) {
               for (const el of document.querySelectorAll(sel)) {
@@ -189,6 +190,19 @@ class BrowserController:
 
               // Sold-out indicator
               const isSoldOut = /\\bsold\\s*out\\b/i.test(blockText);
+
+              // Category badge (RCP exposes .event-results__first-tag with values
+              // like Conference / Workshop / Webinar / Social / Ceremony). Resolve
+              // it from the enclosing card so both detection passes see the badge.
+              // Null for sources that don't use this markup.
+              let category = null;
+              const cardRoot = block.closest('.event-results__result') ||
+                               (block.classList && block.classList.contains('event-results__result') ? block : null);
+              const catEl = (cardRoot || block).querySelector('.event-results__first-tag, [class*="first-tag"]');
+              if (catEl) category = (catEl.textContent || '').trim();
+              // Exclude ceremony events entirely — admission/graduation ceremonies
+              // are not CPD/conference content. Match on the badge or the title.
+              if ((category && /ceremon(y|ies)/i.test(category)) || /\\bceremon(y|ies)\\b/i.test(title)) continue;
 
               // Date — try three formats, in priority order
               let startDate = null;
@@ -304,7 +318,8 @@ class BrowserController:
                 start_date: startDate,
                 start_time: startTime,
                 location_hint: locationHint,
-                description_hint: descriptionHint
+                description_hint: descriptionHint,
+                category: category
               });
             }
             return out;
