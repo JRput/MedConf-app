@@ -12,6 +12,7 @@ import Link from 'next/link'
 export default function SavedPage() {
   const [conferences, setConferences] = useState<Conference[]>([])
   const [pricingMap, setPricingMap] = useState<Record<number, PricingTier[]>>({})
+  const [sourceMap, setSourceMap] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(true)
   const { user } = useAuth()
   const supabase = createSupabaseClient()
@@ -49,11 +50,23 @@ export default function SavedPage() {
 
       if (tiers) {
         const map: Record<number, PricingTier[]> = {}
-        tiers.forEach(t => { 
+        tiers.forEach(t => {
           if (!map[t.conference_id]) map[t.conference_id] = []
-          map[t.conference_id].push(t) 
+          map[t.conference_id].push(t)
         })
         setPricingMap(map)
+      }
+
+      // Source names so saved cards can show the source society too
+      const { data: sources } = await supabase
+        .from('scraper_sources')
+        .select('id, source_name')
+        .eq('active', true)
+
+      if (sources) {
+        const sm: Record<number, string> = {}
+        sources.forEach(s => { sm[s.id] = s.source_name })
+        setSourceMap(sm)
       }
 
       setLoading(false)
@@ -114,7 +127,7 @@ export default function SavedPage() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {conferences.map(c => (
-                <ConferenceCard key={c.id} conference={c} tiers={pricingMap[c.id] || []} />
+                <ConferenceCard key={c.id} conference={c} tiers={pricingMap[c.id] || []} sourceName={c.source_id ? sourceMap[c.source_id] : null} />
               ))}
             </div>
           </>
