@@ -28,10 +28,15 @@ class AgentLoop:
         # Kimi K2 Instruct via NVIDIA's OpenAI-compatible API.
         # max_retries=5 lets the client auto-retry 429s with exponential backoff
         # — addresses the rate-limit failures we saw in the multi-source test.
+        # timeout=90s: NVIDIA's gateway only returns its own 504 after ~300s, so
+        # without an explicit client timeout a hung request burns ~5 min before we
+        # even retry. Failing fast at 90s lets the retry hit a (possibly healthier)
+        # backend node sooner. max_retries=5 still covers transient 429s/504s.
         self.client = OpenAI(
             api_key=KIMI_API_KEY,
             base_url=KIMI_BASE_URL,
             max_retries=5,
+            timeout=90.0,
         )
         self.browser = BrowserController()
         self.step_count = 0
@@ -224,9 +229,14 @@ class AgentLoop:
         built-in retry policy (max_retries=5) handle transient 429s.
         """
         try:
+            # max_tokens=512: the soft-fields prompt only needs a ~50-word
+            # description + a specialty (~120 tokens). The old 4096 ceiling let
+            # the model hold the connection long enough to trip NVIDIA's ~300s
+            # gateway timeout (the 504s). A tight cap finishes generation in
+            # seconds and makes 504s rare.
             response = self.client.chat.completions.create(
                 model=KIMI_MODEL,
-                max_tokens=4096,
+                max_tokens=512,
                 temperature=0.3,
                 messages=[{"role": "user", "content": prompt}],
                 extra_body={"chat_template_kwargs": {"thinking": False}},
