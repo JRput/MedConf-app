@@ -390,4 +390,30 @@ Respond with valid JSON only, no markdown, no extra text:
             heuristic = classify_specialty(shell.get("title"), text)
             if heuristic:
                 result["specialty"] = heuristic
+
+        # Description fallback — when the LLM call didn't produce one (NVIDIA
+        # 504/timeout etc.), take the first chunk of Overview tab text directly.
+        # RCP's Overview tab is already a clean human-written summary, so a
+        # simple truncate-at-sentence-boundary is good enough as a fallback.
+        # This guarantees every row gets a description regardless of LLM health.
+        if not result.get("description") and text:
+            first_chunk = text.split(" \n ", 1)[0].strip()
+            if len(first_chunk) > 40:
+                result["description"] = self._truncate_to_sentence(first_chunk, 320)
+
         return result
+
+    @staticmethod
+    def _truncate_to_sentence(text: str, max_chars: int = 320) -> str:
+        """Trim text to <= max_chars, ending at the last full sentence boundary."""
+        text = text.strip()
+        if len(text) <= max_chars:
+            return text
+        cut = text[:max_chars]
+        # Prefer to end at the last sentence terminator within the cut
+        candidates = [cut.rfind(p + " ") for p in (".", "!", "?")]
+        last_end = max(candidates)
+        # Only use the sentence boundary if it's not too early (>50% through)
+        if last_end > max_chars * 0.5:
+            return cut[: last_end + 1].rstrip()
+        return cut.rstrip() + "…"
