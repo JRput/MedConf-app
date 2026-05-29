@@ -8,7 +8,7 @@ import { PricingTable } from '@/components/conferences/PricingTable'
 import { SaveButton } from '@/components/ui/SaveButton'
 import type { Conference, PricingTier } from '@/lib/types'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, MapPin, FileText, Clock, ExternalLink, Loader2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Calendar, MapPin, FileText, Clock, ExternalLink, Loader2, AlertCircle, Globe, Building2 } from 'lucide-react'
 
 export default function ConferenceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
@@ -136,19 +136,42 @@ export default function ConferenceDetailPage({ params }: { params: Promise<{ id:
               </div>
             )}
 
-            {(c.venue_name || c.city) && (
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-slate-400 flex items-center gap-2">
+            {/* Location — format-aware. Always renders so users know
+                whether an event is online/in-person even before a venue is
+                published. */}
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-slate-400 flex items-center gap-2">
+                {c.event_format === 'online' ? (
+                  <Globe className="w-4 h-4" />
+                ) : c.event_format === 'in_person' ? (
+                  <Building2 className="w-4 h-4" />
+                ) : (
                   <MapPin className="w-4 h-4" />
-                  Venue
-                </p>
+                )}
+                Location
+              </p>
+              {c.event_format === 'online' ? (
+                <p className="text-cyan-300 font-medium">Online</p>
+              ) : c.event_format === 'hybrid' ? (
                 <p className="text-white">
-                  {c.venue_name}
-                  {c.city && `, ${c.city}`}
+                  <span className="text-cyan-300 font-medium">Hybrid</span>
+                  {(c.venue_name || c.city) && (
+                    <span className="text-slate-300">
+                      {' — '}
+                      {[c.venue_name, c.city].filter(Boolean).join(', ')}
+                      {c.region && ` (${c.region})`}
+                    </span>
+                  )}
+                </p>
+              ) : (c.venue_name || c.city) ? (
+                <p className="text-white">
+                  {[c.venue_name, c.city].filter(Boolean).join(', ')}
                   {c.region && ` (${c.region})`}
                 </p>
-              </div>
-            )}
+              ) : (
+                <p className="text-slate-500 italic">Location TBC</p>
+              )}
+            </div>
 
             <div className="space-y-1">
               <p className="text-sm font-medium text-slate-400 flex items-center gap-2">

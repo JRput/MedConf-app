@@ -99,18 +99,30 @@ export function ConferenceCard({ conference: c, tiers, sourceName }: ConferenceC
           </div>
         )}
 
-        {(c.venue_name || c.city || formatBadge) && (
-          <div className="flex items-center gap-2">
-            {formatBadge ? (
-              <formatBadge.Icon className="w-4 h-4 text-slate-500" />
-            ) : (
-              <MapPin className="w-4 h-4 text-slate-500" />
-            )}
+        {/* Location row — always renders. For online events we show "Online"
+            even when no venue is published; otherwise venue+city, or a
+            "Location TBC" placeholder when neither is known yet. */}
+        <div className="flex items-center gap-2">
+          {formatBadge ? (
+            <formatBadge.Icon className="w-4 h-4 text-slate-500" />
+          ) : (
+            <MapPin className="w-4 h-4 text-slate-500" />
+          )}
+          {c.event_format === 'online' ? (
+            <span className="text-cyan-300 font-medium">Online</span>
+          ) : c.event_format === 'hybrid' && (c.venue_name || c.city) ? (
             <span>
-              {[c.venue_name, c.city].filter(Boolean).join(', ') || formatBadge?.label}
+              <span className="text-cyan-300 font-medium">Hybrid</span>
+              <span className="text-slate-400">
+                {' — '}{[c.venue_name, c.city].filter(Boolean).join(', ')}
+              </span>
             </span>
-          </div>
-        )}
+          ) : (c.venue_name || c.city) ? (
+            <span>{[c.venue_name, c.city].filter(Boolean).join(', ')}</span>
+          ) : (
+            <span className="text-slate-500 italic">Location TBC</span>
+          )}
+        </div>
 
         <div className="flex items-center gap-2">
           <PoundSterling className="w-4 h-4 text-slate-500" />

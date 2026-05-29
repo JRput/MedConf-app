@@ -65,6 +65,25 @@ class RCPExtractor(BaseExtractor):
         # 3. Venue / city / region / format (from Location panel value)
         result.update(self._extract_venue(panel.get("Location")))
 
+        # 3b. Title fallback when the page didn't publish a Location panel item.
+        # Common case: "Update in medicine – Exeter 2026" — RCP hasn't yet
+        # posted the venue on the detail page, but the city is right in the
+        # title. Also detect online/webinar/virtual in title.
+        if not result.get("event_format"):
+            title_l = (shell.get("title") or "").lower()
+            if re.search(r"\b(online|webinar|virtual|livestream|live stream)\b", title_l):
+                result["event_format"] = "online"
+                result["venue_name"] = None
+                result["city"] = None
+                result["region"] = None
+            else:
+                for key, region in self._UK_REGIONS.items():
+                    if re.search(rf"\b{re.escape(key)}\b", title_l):
+                        result["city"] = key.title()
+                        result["region"] = region
+                        result["event_format"] = "in_person"
+                        break
+
         # 4. CPD points (panel "CPD credits" → fallback to body text)
         cpd_points, cpd_accredited = self._extract_cpd(panel.get("CPD credits"), page)
         result["cpd_points"] = cpd_points
