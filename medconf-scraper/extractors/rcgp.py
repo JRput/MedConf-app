@@ -68,6 +68,18 @@ class RCGPExtractor(BaseExtractor):
         # 2. Format & venue inferred from title + listing hints
         result.update(self._infer_format_from_listing(shell))
 
+        # 2b. RCGP's engage portal now exposes a "Primary venue" label on the
+        # detail page (e.g. "Ardoe House Hotel, Aberdeen" or "Portishead Marina,
+        # Portishead, Bristol, GB"). When that's present and the listing hint
+        # didn't already say "online", prefer the detail-page venue — it's more
+        # specific (gives us venue_name as well as city/region).
+        detail_venue = self._extract_primary_venue(page)
+        if detail_venue and result.get("event_format") != "online":
+            # Only overwrite fields the detail page actually populated
+            for k, v in detail_venue.items():
+                if v is not None:
+                    result[k] = v
+
         # 3. CPD: detail page rarely has it — listing card text might mention "CPD"
         result["cpd_accredited"] = self._infer_cpd_from_shell(shell)
         result["cpd_points"] = None  # Detail page doesn't carry numeric CPD
@@ -194,23 +206,108 @@ class RCGPExtractor(BaseExtractor):
     @staticmethod
     def _infer_uk_region(city: str) -> Optional[str]:
         c = (city or "").lower()
-        regions = {
-            "london": "London", "manchester": "North West England",
-            "liverpool": "North West England", "leeds": "Yorkshire and the Humber",
-            "sheffield": "Yorkshire and the Humber", "york": "Yorkshire and the Humber",
-            "newcastle": "North East England", "middlesbrough": "North East England",
-            "birmingham": "West Midlands", "bristol": "South West England",
-            "exeter": "South West England", "cardiff": "Wales",
-            "edinburgh": "Scotland", "glasgow": "Scotland",
-            "belfast": "Northern Ireland", "cambridge": "East of England",
-            "norwich": "East of England", "oxford": "South East England",
-            "doncaster": "Yorkshire and the Humber", "warrington": "North West England",
-            "reigate": "South East England",
-        }
+        regions = RCGPExtractor._UK_REGIONS
         for key, val in regions.items():
             if key in c:
                 return val
         return None
+
+    _UK_REGIONS: Dict[str, str] = {
+        "london": "London",
+        "manchester": "North West England", "liverpool": "North West England",
+        "warrington": "North West England", "preston": "North West England",
+        "leeds": "Yorkshire and the Humber", "sheffield": "Yorkshire and the Humber",
+        "york": "Yorkshire and the Humber", "doncaster": "Yorkshire and the Humber",
+        "hull": "Yorkshire and the Humber",
+        "newcastle": "North East England", "middlesbrough": "North East England",
+        "sunderland": "North East England", "durham": "North East England",
+        "birmingham": "West Midlands", "coventry": "West Midlands",
+        "wolverhampton": "West Midlands", "stoke": "West Midlands",
+        "bristol": "South West England", "exeter": "South West England",
+        "plymouth": "South West England", "bath": "South West England",
+        "portishead": "South West England",
+        "cardiff": "Wales", "swansea": "Wales", "newport": "Wales",
+        "edinburgh": "Scotland", "glasgow": "Scotland", "aberdeen": "Scotland",
+        "dundee": "Scotland", "inverness": "Scotland", "stirling": "Scotland",
+        "belfast": "Northern Ireland",
+        "cambridge": "East of England", "norwich": "East of England",
+        "ipswich": "East of England", "luton": "East of England",
+        "oxford": "South East England", "brighton": "South East England",
+        "reading": "South East England", "southampton": "South East England",
+        "portsmouth": "South East England", "reigate": "South East England",
+        "leicester": "East Midlands", "nottingham": "East Midlands",
+        "derby": "East Midlands", "northampton": "East Midlands",
+    }
+
+    # ------------------------------------------------------------------ #
+    # Primary venue extraction — engage.rcgp.org.uk detail pages
+    # ------------------------------------------------------------------ #
+    UK_POSTCODE_RE = re.compile(r"^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$", re.I)
+    _COUNTRY_TOKENS = {"gb", "uk", "united kingdom", "england", "scotland", "wales", "northern ireland"}
+
+    def _extract_primary_venue(self, page: Page) -> Optional[Dict[str, Any]]:
+        """
+        Find the "Primary venue" label on engage.rcgp.org.uk and read its
+        value. The value is the next sibling element's text. Examples:
+          "Ardoe House Hotel, Aberdeen"
+          "Portishead Marina, Portishead, Bristol, GB"
+          "Online"  (some webinar pages — handle just in case)
+        Returns {event_format, venue_name, city, region} or None when no
+        Primary venue is present.
+        """
+        try:
+            value = page.evaluate(r"""() => {
+                // RCGP engage's Lightning portal puts "Primary venue" and the
+                // venue value inside a single concatenated textContent (no
+                // separator). So find the smallest (leaf-most) element whose
+                // textContent STARTS with "Primary venue" and strip the label
+                // prefix to recover the value.
+                let best = null;
+                for (const el of document.querySelectorAll('*')) {
+                    const t = (el.textContent || '').trim();
+                    if (!/^primary\s*venue/i.test(t)) continue;
+                    if (t.length < 15 || t.length > 250) continue;
+                    if (!best || t.length < best.length) best = t;
+                }
+                if (!best) return null;
+                // Strip the label prefix
+                const stripped = best.replace(/^primary\s*venue\s*:?\s*/i, '').trim();
+                return stripped || null;
+            }""")
+        except Exception as e:
+            logger.warning(f"RCGP primary-venue probe failed: {e}")
+            return None
+
+        if not value:
+            return None
+        value = value.strip()
+
+        # Online keyword
+        if re.search(r"\b(online|webinar|virtual|zoom|microsoft teams|ms teams|teams|livestream)\b", value, re.I):
+            return {"event_format": "online", "venue_name": None, "city": None, "region": None}
+
+        # Comma-split address. Strip postcodes and country tokens before picking
+        # venue/city, so "Portishead Marina, Portishead, Bristol, GB" gives a
+        # clean ["Portishead Marina","Portishead","Bristol"].
+        parts = [p.strip() for p in value.split(",") if p.strip()]
+        cleaned = [
+            p for p in parts
+            if p.lower() not in self._COUNTRY_TOKENS and not self.UK_POSTCODE_RE.match(p)
+        ]
+        if not cleaned:
+            return None
+
+        # Heuristic: first part = venue; last part = city (postal town).
+        venue_name = cleaned[0][:200]
+        city = cleaned[-1][:80] if len(cleaned) >= 2 else None
+        region = self._infer_uk_region(city) if city else None
+
+        return {
+            "event_format": "in_person",
+            "venue_name": venue_name,
+            "city": city,
+            "region": region,
+        }
 
     @staticmethod
     def _infer_cpd_from_shell(shell: Dict[str, Any]) -> bool:
