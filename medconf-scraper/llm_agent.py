@@ -153,6 +153,16 @@ class AgentLoop:
         start_date = shell.get("start_date") or detail.get("start_date")
         end_date = detail.get("end_date") or shell.get("start_date") or detail.get("start_date")
 
+        # Description fallback: if the detail page's description is null
+        # (typical when the LLM call timed out / 504'd), fall back to the
+        # listing card's description_hint. RCGP and many other listing
+        # cards already carry a rich human-written summary — far better
+        # than a null. Per-source extractors that have their own
+        # deterministic fallback (e.g. RCP's Overview-tab paragraph) will
+        # have set detail.description before this point, so they're
+        # unaffected by this fallback.
+        description = detail.get("description") or shell.get("description_hint")
+
         return {
             # Deterministic from listing
             "conference_name": shell["title"],
@@ -162,7 +172,7 @@ class AgentLoop:
             "start_time": shell.get("start_time"),
             # LLM-derived from detail page
             "end_date": end_date,  # default end=start for single-day
-            "description": detail.get("description"),
+            "description": description,
             "specialty": detail.get("specialty"),
             "venue_name": detail.get("venue_name"),
             "city": city,

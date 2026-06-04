@@ -200,6 +200,44 @@ The schema has a `region` field but most source pages don't print it explicitly.
 
 ---
 
+## Soft-field architecture — every LLM-only field needs a deterministic fallback
+
+The scraper used to treat `description` and `specialty` as LLM-only. That
+broke any time NVIDIA's gateway 504'd: rows ended up with null fields,
+and (worse) the listing-hash machinery stamped them as "done" so they
+never retried. The cure is the same in every extractor:
+
+| Field | Primary | Deterministic fallback |
+|---|---|---|
+| `description` | LLM summary (~50 words) | First paragraph of detail-page Overview, OR the listing card's `description_hint` (set automatically in the merge — RCGP, RSM, RCSEng all benefit) |
+| `specialty` | LLM | `specialty_classifier.classify_specialty(title, body)` — already wired in every extractor |
+| `venue_name` / `city` / `region` | Detail-page structured field (e.g. RCP `event-panel__item` Location, RCGP `Primary venue`) | Title-based city detection (RCP "Update in medicine – Exeter 2026") |
+| `event_format` | Same detail-page field, OR listing-hint "Online" | Title regex for `online|webinar|virtual`; default to null only when genuinely unknown |
+| `abstract_open` / `abstract_deadline` | `abstract_classifier.extract_abstract_info(text)` — already deterministic |
+
+**Rule of thumb for new extractors:** when you reach for `llm_call`, also write
+the fallback in the same method. Never `return {"description": None}` and
+hope it'll get retried — the row will lock in.
+
+## Self-healing for late-published source data
+
+Sources often publish details progressively — RCGP, for instance, posts an
+event months ahead with the venue still TBC, then fills `Primary venue`
+later. The listing-hash check in `scraper.py` would normally skip those
+rows forever (the listing card text doesn't change when the detail page
+updates). It now re-fetches whenever:
+
+- `event_format IS NULL`, OR
+- `event_format = 'in_person' AND (venue_name IS NULL OR city IS NULL)`
+
+So **as long as your extractor leaves these fields null when the data
+isn't on the page yet**, the next nightly run will pick up the update
+automatically. Don't fabricate values to "complete" a row — null means
+"come back next time," and that's now first-class behaviour.
+
+For online events you should set `event_format = 'online'` even when
+venue/city are correctly null, so the row fast-skips on subsequent runs.
+
 ## Common mistakes we've made (don't repeat)
 
 1. **Picking second-to-last comma part as the city** — that's the postcode in UK addresses. Always filter postcodes first.

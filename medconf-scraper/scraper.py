@@ -110,8 +110,24 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
                 logger.warning(f"  Lookup failed for {booking_url[:60]}: {e}")
                 existing = None
 
-            # Fast path: nothing changed at the listing level → just confirm presence
-            if existing and existing.get("listing_hash") == new_hash:
+            # Fast path: nothing changed at the listing level → just confirm
+            # presence. BUT: the listing hash is computed from listing-card
+            # fields only, so when a source later publishes details on the
+            # event detail page (e.g. RCGP filling in the Primary venue
+            # closer to the event date), the hash stays the same and the row
+            # would never get re-extracted. To make incremental scrapes
+            # SELF-HEALING for late-published detail data, force a re-fetch
+            # whenever key detail-page fields are still pending:
+            #   - event_format unknown (couldn't determine in-person vs online)
+            #   - in-person event but venue or city not yet known
+            # Online events with venue/city deliberately null fast-skip as
+            # before — those nulls are correct, not pending.
+            fmt = (existing or {}).get("event_format") if existing else None
+            needs_refresh_for_pending_fields = bool(existing) and (
+                fmt is None
+                or (fmt == "in_person" and not (existing.get("venue_name") and existing.get("city")))
+            )
+            if existing and existing.get("listing_hash") == new_hash and not needs_refresh_for_pending_fields:
                 try:
                     bump_last_seen(existing["id"])
                     seen_bumped += 1
