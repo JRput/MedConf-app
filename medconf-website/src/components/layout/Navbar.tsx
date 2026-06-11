@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
 import { useState } from 'react'
 import { Menu, X, Calendar, Bookmark, Settings, LogOut, LayoutDashboard } from 'lucide-react'
+import { NotificationBell } from './NotificationBell'
 
 export function Navbar() {
   const { user, signOut, loading } = useAuth()
@@ -40,7 +41,8 @@ export function Navbar() {
                 <NavLink href="/settings" icon={<Settings className="w-4 h-4" />}>
                   Settings
                 </NavLink>
-                <button 
+                <NotificationBell />
+                <button
                   onClick={signOut}
                   className="flex items-center gap-2 text-sm text-slate-400 hover:text-rose-400 px-4 py-2 rounded-lg hover:bg-slate-800/50 transition-all duration-200"
                 >

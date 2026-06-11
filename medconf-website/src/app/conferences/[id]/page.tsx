@@ -5,6 +5,7 @@ import { useState, useEffect, use } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { CPDBadge } from '@/components/conferences/CPDBadge'
 import { PricingTable } from '@/components/conferences/PricingTable'
+import { ReminderPanel } from '@/components/conferences/ReminderPanel'
 import { SaveButton } from '@/components/ui/SaveButton'
 import type { Conference, PricingTier } from '@/lib/types'
 import Link from 'next/link'
@@ -196,6 +197,9 @@ export default function ConferenceDetailPage({ params }: { params: Promise<{ id:
               <p className="text-slate-300 leading-relaxed">{c.description}</p>
             </div>
           )}
+
+          {/* Reminders */}
+          <ReminderPanel conference={c} />
 
           {/* Pricing */}
           <div className="space-y-4">

@@ -1,0 +1,38 @@
+name: Fire reminders
+
+# Runs daily at 08:00 UTC and turns due user_reminders rows into
+# in-app notifications. Idempotent — re-running the same day finds
+# nothing because the first run flips status from 'scheduled' to 'sent'.
+on:
+  schedule:
+    - cron: '0 8 * * *'   # 08:00 UTC daily
+  workflow_dispatch:       # manual trigger from GitHub UI
+
+jobs:
+  fire:
+    name: Fire due reminders
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: medconf-scraper/requirements.txt
+
+      - name: Install Python dependencies
+        working-directory: medconf-scraper
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Fire reminders
+        working-directory: medconf-scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python fire_reminders.py

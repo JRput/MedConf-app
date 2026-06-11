@@ -57,8 +57,6 @@ export interface SavedConference {
 }
 
 // Matches the actual notification_preferences columns in supabase_schema.sql.
-// The /settings page currently reads different column names — that's a
-// pre-existing bug we'll fix when wiring in-app reminders properly.
 export interface NotificationPreferences {
   id: string
   email_new_conferences: boolean
@@ -67,6 +65,37 @@ export interface NotificationPreferences {
   email_frequency: string // 'immediate' | 'daily' | 'weekly'
   created_at: string
   updated_at: string
+}
+
+export type ReminderType = 'abstract_deadline' | 'conference_start' | 'registration_deadline'
+export type ReminderStatus = 'scheduled' | 'sent' | 'cancelled'
+
+export interface UserReminder {
+  id: string
+  user_id: string
+  conference_id: number
+  reminder_type: ReminderType
+  lead_time_days: number
+  target_date: string // YYYY-MM-DD
+  scheduled_for: string // YYYY-MM-DD
+  status: ReminderStatus
+  sent_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type NotificationType = 'reminder' | 'new_in_specialty' | 'conference_change' | 'system'
+
+export interface NotificationItem {
+  id: string
+  user_id: string
+  type: NotificationType
+  title: string
+  body: string | null
+  conference_id: number | null
+  reminder_id: string | null
+  read_at: string | null
+  created_at: string
 }
 
 // Scraper types

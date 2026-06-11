@@ -136,6 +136,48 @@ CREATE TABLE IF NOT EXISTS notification_preferences (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- pgcrypto provides gen_random_uuid() used below.
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- Table: user_reminders
+-- Reminders a user has set on a saved conference. The daily reminder
+-- cron looks for rows where scheduled_for <= today AND status = 'scheduled',
+-- creates a notification row, and marks the reminder as sent.
+CREATE TABLE IF NOT EXISTS user_reminders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    conference_id INTEGER NOT NULL REFERENCES conferences(id) ON DELETE CASCADE,
+    reminder_type TEXT NOT NULL CHECK (reminder_type IN ('abstract_deadline','conference_start','registration_deadline')),
+    lead_time_days INTEGER NOT NULL,
+    target_date DATE NOT NULL,
+    scheduled_for DATE NOT NULL,
+    status TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled','sent','cancelled')),
+    sent_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE (user_id, conference_id, reminder_type, lead_time_days)
+);
+CREATE INDEX IF NOT EXISTS idx_user_reminders_user ON user_reminders(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_reminders_scheduled ON user_reminders(scheduled_for) WHERE status = 'scheduled';
+
+-- Table: notifications
+-- The in-app notification feed surfaced in the bell dropdown.
+-- Only the cron (service role) writes here — there's no INSERT policy
+-- for end users. Users can read/update/delete their own rows only.
+CREATE TABLE IF NOT EXISTS notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    type TEXT NOT NULL CHECK (type IN ('reminder','new_in_specialty','conference_change','system')),
+    title TEXT NOT NULL,
+    body TEXT,
+    conference_id INTEGER REFERENCES conferences(id) ON DELETE CASCADE,
+    reminder_id UUID REFERENCES user_reminders(id) ON DELETE SET NULL,
+    read_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON notifications(user_id, read_at);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications(user_id, created_at DESC);
+
 -- ============================================
 -- INDEXES
 -- ============================================
@@ -162,6 +204,8 @@ CREATE INDEX IF NOT EXISTS idx_scraper_logs_source ON scraper_logs(source_id);
 ALTER TABLE user_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_conferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notification_preferences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_reminders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pricing_tiers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE scraper_sources ENABLE ROW LEVEL SECURITY;
@@ -225,6 +269,43 @@ CREATE POLICY "Users can update own notification preferences"
     ON notification_preferences FOR UPDATE
     USING (auth.uid() = id)
     WITH CHECK (auth.uid() = id);
+
+-- ============================================
+-- RLS POLICIES - USER REMINDERS (Owner-only)
+-- ============================================
+
+CREATE POLICY "Owner can select own user_reminders"
+    ON user_reminders FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Owner can insert own user_reminders"
+    ON user_reminders FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Owner can update own user_reminders"
+    ON user_reminders FOR UPDATE
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Owner can delete own user_reminders"
+    ON user_reminders FOR DELETE
+    USING (auth.uid() = user_id);
+
+-- ============================================
+-- RLS POLICIES - NOTIFICATIONS (Owner read-only; cron writes via service key)
+-- ============================================
+
+CREATE POLICY "Owner can select own notifications"
+    ON notifications FOR SELECT
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Owner can update own notifications"
+    ON notifications FOR UPDATE
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Owner can delete own notifications"
+    ON notifications FOR DELETE
+    USING (auth.uid() = user_id);
+-- No INSERT policy — only the service role (reminder cron) creates notifications.
 
 -- ============================================
 -- RLS POLICIES - CONFERENCES (Public Read)
