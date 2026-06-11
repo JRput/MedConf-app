@@ -43,17 +43,60 @@ def update_conference(conference_id: int, data: Dict[str, Any]) -> None:
 
 
 def insert_pricing_tiers(conference_id: int, tiers: List[Dict[str, Any]]) -> None:
-    """Insert pricing tier rows for a conference."""
-    rows = [{
-        "conference_id": conference_id,
-        "tier_label": t["tier_label"],
-        "price_gbp": t["price_gbp"],
-        "is_early_bird": t.get("is_early_bird", False),
-        "early_bird_deadline": t.get("early_bird_deadline")
-    } for t in tiers]
-    
+    """Insert pricing tier rows for a conference.
+
+    Each tier may carry a `session_id` (UUID string) to scope it to one
+    course_sessions row. Pass it through if present; conference-flat tiers
+    leave it null."""
+    rows = []
+    for t in tiers:
+        row = {
+            "conference_id": conference_id,
+            "tier_label": t["tier_label"],
+            "price_gbp": t["price_gbp"],
+            "is_early_bird": t.get("is_early_bird", False),
+            "early_bird_deadline": t.get("early_bird_deadline"),
+        }
+        if t.get("session_id"):
+            row["session_id"] = t["session_id"]
+        rows.append(row)
+
     if rows:
         supabase.table("pricing_tiers").insert(rows).execute()
+
+
+def delete_course_sessions(course_id: int) -> None:
+    """Remove all course_sessions rows for a course before re-inserting."""
+    supabase.table("course_sessions").delete().eq("course_id", course_id).execute()
+
+
+def insert_course_sessions(course_id: int, sessions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Insert course_sessions rows for a course. Returns the inserted rows so
+    the caller can map per-session pricing back to the new UUIDs.
+
+    Strips extractor-private keys (those starting with '_') before insert.
+    """
+    if not sessions:
+        return []
+    rows = []
+    for s in sessions:
+        rows.append({
+            "course_id": course_id,
+            "start_date": s["start_date"],
+            "end_date": s.get("end_date"),
+            "start_time": s.get("start_time"),
+            "duration_text": s.get("duration_text"),
+            "availability_status": s.get("availability_status", "unknown"),
+            "spots_left": s.get("spots_left"),
+            "booking_url": s.get("booking_url"),
+            "venue_name": s.get("venue_name"),
+            "city": s.get("city"),
+            "region": s.get("region"),
+            "notes": s.get("notes"),
+        })
+    response = supabase.table("course_sessions").insert(rows).execute()
+    return response.data or []
 
 
 def delete_pricing_tiers(conference_id: int) -> None:

@@ -44,6 +44,9 @@ export interface CourseSession {
   availability_status: AvailabilityStatus
   spots_left: number | null
   booking_url: string | null
+  venue_name: string | null
+  city: string | null
+  region: string | null
   notes: string | null
   created_at: string
   updated_at: string

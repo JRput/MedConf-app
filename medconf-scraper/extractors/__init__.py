@@ -27,6 +27,7 @@ from .rsm import RSMExtractor
 from .rcseng import RCSEngExtractor
 from .rcgp import RCGPExtractor
 from .rcp import RCPExtractor
+from .rcseng_courses import RCSEngCoursesExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -35,6 +36,7 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     2: RCSEngExtractor,                 # Royal College of Surgeons of England
     3: RSMExtractor,                    # Royal Society of Medicine
     4: RCPExtractor,                    # Royal College of Physicians
+    5: RCSEngCoursesExtractor,          # RCSEng Surgical Courses (event_type='course')
 }
 
 

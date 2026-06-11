@@ -23,6 +23,24 @@ class BaseExtractor(ABC):
         self.source_id = source["id"]
         self.source_name = source.get("source_name", "")
 
+    def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
+        """
+        Optional listing-phase override. Return a list of shell dicts to
+        bypass the standard browser.get_event_cards_paginated() DOM walker.
+
+        Use this when a source has a more reliable listing alternative — e.g.
+        course catalogues whose primary listing is a JS-rendered SPA with
+        pagination but whose sitemap.xml lists every detail URL directly.
+
+        Each returned shell must include at least `title` and `booking_url`
+        — the standard listing-hash + slow-path-extract flow runs from there.
+
+        Default returns None → the scraper falls through to the standard
+        browser-based DOM walker. Per-source extractors override when they
+        want sitemap, API, or alternative listing access.
+        """
+        return None
+
     @abstractmethod
     def extract_detail(
         self,

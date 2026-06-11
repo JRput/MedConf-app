@@ -75,6 +75,39 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
         warnings.append(f"Invalid event_format '{fmt}' — set to null")
         cleaned["event_format"] = None
 
+    # Validate event_type — defaults to 'conference' if missing/invalid
+    et = cleaned.get("event_type")
+    if et not in ("conference", "course"):
+        if et is not None:
+            warnings.append(f"Invalid event_type '{et}' — defaulted to 'conference'")
+        cleaned["event_type"] = "conference"
+
+    # course_sessions array is a sidecar payload, not a conferences column.
+    # Validate it minimally if present so a malformed row doesn't crash the upsert.
+    sessions = cleaned.get("sessions")
+    if sessions is not None:
+        if not isinstance(sessions, list):
+            warnings.append(f"Invalid sessions type {type(sessions).__name__} — dropped")
+            cleaned["sessions"] = []
+        else:
+            valid_sessions = []
+            for s in sessions:
+                if not isinstance(s, dict):
+                    continue
+                if not s.get("start_date"):
+                    continue
+                try:
+                    datetime.strptime(s["start_date"], "%Y-%m-%d")
+                except (ValueError, TypeError):
+                    continue
+                # Coerce booleans / strings
+                status = s.get("availability_status") or "unknown"
+                if status not in ("available", "limited", "sold_out", "unknown"):
+                    status = "unknown"
+                s["availability_status"] = status
+                valid_sessions.append(s)
+            cleaned["sessions"] = valid_sessions
+
     # Validate start_time — must be HH:MM or HH:MM:SS or null
     st = cleaned.get("start_time")
     if st:

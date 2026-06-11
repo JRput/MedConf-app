@@ -106,6 +106,12 @@ CREATE TABLE IF NOT EXISTS course_sessions (
     spots_left INTEGER,
     -- Some sources expose a different booking URL per session
     booking_url TEXT,
+    -- Per-session venue. Many course sources run the same course at multiple
+    -- regional centres, so we keep these on the session rather than the parent.
+    -- Parent (conferences) row's venue/city/region stays null when sessions vary.
+    venue_name TEXT,
+    city TEXT,
+    region TEXT,
     notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -113,6 +119,7 @@ CREATE TABLE IF NOT EXISTS course_sessions (
 CREATE INDEX IF NOT EXISTS idx_course_sessions_course ON course_sessions(course_id);
 CREATE INDEX IF NOT EXISTS idx_course_sessions_start_date ON course_sessions(start_date);
 CREATE INDEX IF NOT EXISTS idx_course_sessions_status ON course_sessions(availability_status);
+CREATE INDEX IF NOT EXISTS idx_course_sessions_city ON course_sessions(city);
 
 -- Table: pricing_tiers
 -- Conference / course pricing information (multiple tiers per parent).

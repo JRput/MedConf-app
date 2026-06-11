@@ -60,6 +60,18 @@ class AgentLoop:
 
         Caller is responsible for launching/closing the browser before/after.
         """
+        # Per-source extractors may bypass the DOM walker when they have a
+        # more reliable listing (e.g. sitemap.xml for course catalogues).
+        try:
+            override = self.extractor.list_shells_override()
+        except Exception as e:
+            logger.warning(f"Extractor.list_shells_override failed: {e}")
+            override = None
+
+        if override is not None:
+            logger.info(f"Listing phase: {len(override)} shells from extractor override")
+            return override
+
         try:
             shells = self.browser.get_event_cards_paginated(self.source)
         except Exception as e:
@@ -163,9 +175,24 @@ class AgentLoop:
         # unaffected by this fallback.
         description = detail.get("description") or shell.get("description_hint")
 
+        # Course extractors pull the proper course title from the detail
+        # page's h1 (slug-derived titles in the sitemap-listed shell are
+        # ugly). For conferences, shell["title"] from the listing card is
+        # canonical. Prefer detail's value when present.
+        conference_name = detail.get("conference_name") or shell["title"]
+
+        # event_type lets the detail extractor flag a row as a course.
+        # Defaults to 'conference' for backwards compatibility with every
+        # existing source that doesn't set it.
+        event_type = detail.get("event_type") or "conference"
+
+        # Sessions array is course-specific. Pass through to the upsert layer.
+        sessions = detail.get("sessions")
+
         return {
             # Deterministic from listing
-            "conference_name": shell["title"],
+            "conference_name": conference_name,
+            "event_type": event_type,
             "booking_url": booking_url,
             "is_sold_out": shell.get("is_sold_out", False),
             "start_date": start_date,
@@ -173,6 +200,7 @@ class AgentLoop:
             # LLM-derived from detail page
             "end_date": end_date,  # default end=start for single-day
             "description": description,
+            "sessions": sessions,
             "specialty": detail.get("specialty"),
             "venue_name": detail.get("venue_name"),
             "city": city,

@@ -24,6 +24,8 @@ from database import (
     update_conference,
     insert_pricing_tiers,
     delete_pricing_tiers,
+    delete_course_sessions,
+    insert_course_sessions,
     bump_last_seen,
 )
 from logger import logger
@@ -172,6 +174,8 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
 
             cleaned = validation["data"]
             tiers = cleaned.pop("pricing_tiers", []) or []
+            # course_sessions is a sidecar payload, not a conferences column
+            sessions = cleaned.pop("sessions", None)
 
             try:
                 if existing:
@@ -179,16 +183,34 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
                     changes = {k: v for k, v in cleaned.items() if existing.get(k) != v}
                     if changes:
                         update_conference(existing["id"], changes)
-                    # Refresh pricing tiers wholesale when we re-fetched detail
-                    delete_pricing_tiers(existing["id"])
-                    if tiers:
-                        insert_pricing_tiers(existing["id"], tiers)
+                    conference_id = existing["id"]
                     summary["conferences_updated"] += 1
                 else:
-                    new_id = insert_conference(cleaned)
-                    if tiers:
-                        insert_pricing_tiers(new_id, tiers)
+                    conference_id = insert_conference(cleaned)
                     summary["conferences_inserted"] += 1
+
+                # ---- Sessions (course_sessions) ----
+                # For course rows: delete-and-reinsert sessions every detail
+                # re-fetch so the table mirrors the source page. Then map any
+                # per-session pricing tiers to the new session UUIDs.
+                idx_to_session_id: Dict[int, str] = {}
+                if sessions is not None:
+                    delete_course_sessions(conference_id)
+                    inserted = insert_course_sessions(conference_id, sessions)
+                    # Pair returned rows with input order (insert preserves order
+                    # in PostgREST) — gives us per-row UUIDs to wire into pricing.
+                    for src, dst in zip(sessions, inserted):
+                        if "_idx" in src and dst.get("id"):
+                            idx_to_session_id[src["_idx"]] = dst["id"]
+
+                # ---- Pricing tiers (with optional session_id wiring) ----
+                delete_pricing_tiers(conference_id)
+                if tiers:
+                    for t in tiers:
+                        sidx = t.pop("_session_idx", None)
+                        if sidx is not None and sidx in idx_to_session_id:
+                            t["session_id"] = idx_to_session_id[sidx]
+                    insert_pricing_tiers(conference_id, tiers)
             except Exception as db_error:
                 summary["errors_encountered"] += 1
                 msg = f"DB error for '{cleaned.get('conference_name', '?')}': {db_error}"
