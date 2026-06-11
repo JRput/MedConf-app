@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { ConferenceCard } from '@/components/conferences/ConferenceCard'
-import type { Conference, PricingTier } from '@/lib/types'
+import type { Conference, PricingTier, CourseSession } from '@/lib/types'
 import { useAuth } from '@/hooks/useAuth'
 import { Bookmark, Loader2, Calendar, SlidersHorizontal } from 'lucide-react'
 import Link from 'next/link'
@@ -20,6 +20,7 @@ interface SavedRow {
 export default function SavedPage() {
   const [conferences, setConferences] = useState<Conference[]>([])
   const [pricingMap, setPricingMap] = useState<Record<number, PricingTier[]>>({})
+  const [sessionsMap, setSessionsMap] = useState<Record<number, CourseSession[]>>({})
   const [sourceMap, setSourceMap] = useState<Record<number, string>>({})
   const [savedAtMap, setSavedAtMap] = useState<Record<number, string>>({})
   const [loading, setLoading] = useState(true)
@@ -47,9 +48,10 @@ export default function SavedPage() {
       saved.forEach((s: SavedRow) => { savedAt[s.conference_id] = s.saved_at })
       setSavedAtMap(savedAt)
 
-      const [confResp, tierResp, sourceResp] = await Promise.all([
+      const [confResp, tierResp, sessionResp, sourceResp] = await Promise.all([
         supabase.from('conferences').select('*').in('id', ids),
         supabase.from('pricing_tiers').select('*').in('conference_id', ids),
+        supabase.from('course_sessions').select('*').in('course_id', ids).order('start_date', { ascending: true }),
         supabase.from('scraper_sources').select('id, source_name').eq('active', true),
       ])
 
@@ -62,6 +64,15 @@ export default function SavedPage() {
           map[t.conference_id].push(t)
         })
         setPricingMap(map)
+      }
+
+      if (sessionResp.data) {
+        const sm: Record<number, CourseSession[]> = {}
+        sessionResp.data.forEach(s => {
+          if (!sm[s.course_id]) sm[s.course_id] = []
+          sm[s.course_id].push(s)
+        })
+        setSessionsMap(sm)
       }
 
       if (sourceResp.data) {
@@ -225,6 +236,7 @@ export default function SavedPage() {
                           key={c.id}
                           conference={c}
                           tiers={pricingMap[c.id] || []}
+                          sessions={sessionsMap[c.id]}
                           sourceName={c.source_id ? sourceMap[c.source_id] : null}
                         />
                       ))}

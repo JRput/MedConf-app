@@ -5,9 +5,10 @@ import { useState, useEffect, use } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { CPDBadge } from '@/components/conferences/CPDBadge'
 import { PricingTable } from '@/components/conferences/PricingTable'
+import { SessionsTable } from '@/components/conferences/SessionsTable'
 import { ReminderPanel } from '@/components/conferences/ReminderPanel'
 import { SaveButton } from '@/components/ui/SaveButton'
-import type { Conference, PricingTier } from '@/lib/types'
+import type { Conference, PricingTier, CourseSession } from '@/lib/types'
 import Link from 'next/link'
 import { ArrowLeft, Calendar, MapPin, FileText, Clock, ExternalLink, Loader2, AlertCircle, Globe, Building2, Download, Share2, Check } from 'lucide-react'
 import { downloadIcs } from '@/lib/ics'
@@ -17,24 +18,22 @@ export default function ConferenceDetailPage({ params }: { params: Promise<{ id:
   const resolvedParams = use(params)
   const [conference, setConference] = useState<Conference | null>(null)
   const [tiers, setTiers] = useState<PricingTier[]>([])
+  const [sessions, setSessions] = useState<CourseSession[]>([])
   const [loading, setLoading] = useState(true)
   const supabase = createSupabaseClient()
 
   useEffect(() => {
     async function fetchConference() {
-      const { data: conf } = await supabase
-        .from('conferences')
-        .select('*')
-        .eq('id', Number(resolvedParams.id))
-        .single()
-      
-      const { data: pricing } = await supabase
-        .from('pricing_tiers')
-        .select('*')
-        .eq('conference_id', Number(resolvedParams.id))
+      const id = Number(resolvedParams.id)
+      const [confResp, pricingResp, sessionsResp] = await Promise.all([
+        supabase.from('conferences').select('*').eq('id', id).single(),
+        supabase.from('pricing_tiers').select('*').eq('conference_id', id),
+        supabase.from('course_sessions').select('*').eq('course_id', id).order('start_date', { ascending: true }),
+      ])
 
-      if (conf) setConference(conf)
-      if (pricing) setTiers(pricing)
+      if (confResp.data) setConference(confResp.data)
+      if (pricingResp.data) setTiers(pricingResp.data)
+      if (sessionsResp.data) setSessions(sessionsResp.data)
       setLoading(false)
     }
 
@@ -205,13 +204,31 @@ export default function ConferenceDetailPage({ params }: { params: Promise<{ id:
           )}
 
           {/* Reminders */}
-          <ReminderPanel conference={c} />
+          <ReminderPanel conference={c} sessions={sessions} />
 
-          {/* Pricing */}
-          <div className="space-y-4">
-            <h2 className="font-bold text-white text-lg">Pricing</h2>
-            <PricingTable tiers={tiers} />
-          </div>
+          {/* Sessions (for courses) or Pricing (for conferences) */}
+          {c.event_type === 'course' ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-bold text-white text-lg">Upcoming sessions</h2>
+                {sessions.length > 0 && (
+                  <span className="text-xs text-slate-500">
+                    {sessions.filter(s => s.availability_status !== 'sold_out').length} of {sessions.length} available
+                  </span>
+                )}
+              </div>
+              <SessionsTable
+                sessions={sessions}
+                pricingTiers={tiers}
+                parentBookingUrl={c.booking_url ?? c.organiser_url}
+              />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <h2 className="font-bold text-white text-lg">Pricing</h2>
+              <PricingTable tiers={tiers} />
+            </div>
+          )}
 
           {/* Book CTA */}
           <div className="bg-gradient-to-r from-cyan-500/10 to-teal-500/10 border border-cyan-500/20 rounded-xl p-6 text-center">

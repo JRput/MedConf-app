@@ -2,14 +2,15 @@
 import Link from 'next/link'
 import { CPDBadge } from '@/components/conferences/CPDBadge'
 import { SaveButton } from '@/components/ui/SaveButton'
-import type { Conference, PricingTier } from '@/lib/types'
-import { isAbstractEffectivelyOpen } from '@/lib/conference-helpers'
-import { Calendar, Clock, MapPin, PoundSterling, ArrowRight, ExternalLink, FileText, Globe, Building2 } from 'lucide-react'
+import type { Conference, PricingTier, CourseSession } from '@/lib/types'
+import { isAbstractEffectivelyOpen, courseSessionSummary } from '@/lib/conference-helpers'
+import { Calendar, Clock, MapPin, PoundSterling, ArrowRight, ExternalLink, FileText, Globe, Building2, Layers } from 'lucide-react'
 
 interface ConferenceCardProps {
   conference: Conference
   tiers: PricingTier[]
   sourceName?: string | null
+  sessions?: CourseSession[]
 }
 
 const FORMAT_LABEL: Record<string, { label: string; Icon: typeof Globe }> = {
@@ -18,12 +19,17 @@ const FORMAT_LABEL: Record<string, { label: string; Icon: typeof Globe }> = {
   hybrid: { label: 'Hybrid', Icon: Globe },
 }
 
-export function ConferenceCard({ conference: c, tiers, sourceName }: ConferenceCardProps) {
+export function ConferenceCard({ conference: c, tiers, sourceName, sessions }: ConferenceCardProps) {
+  const isCourse = c.event_type === 'course'
+  const courseSummary = isCourse ? courseSessionSummary(sessions) : null
+
   const minPrice = tiers.length ? Math.min(...tiers.map(t => t.price_gbp)) : null
   const maxPrice = tiers.length ? Math.max(...tiers.map(t => t.price_gbp)) : null
-  const priceLabel = minPrice !== null
-    ? (minPrice === maxPrice ? `£${minPrice}` : `£${minPrice} – £${maxPrice}`)
-    : 'Price TBC'
+  const priceLabel = isCourse && minPrice !== null
+    ? (minPrice === maxPrice ? `From £${minPrice}` : `From £${minPrice}`)
+    : minPrice !== null
+      ? (minPrice === maxPrice ? `£${minPrice}` : `£${minPrice} – £${maxPrice}`)
+      : 'Price TBC'
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return null
@@ -39,13 +45,31 @@ export function ConferenceCard({ conference: c, tiers, sourceName }: ConferenceC
     return timeStr.slice(0, 5) // HH:MM:SS → HH:MM
   }
 
-  const startFormatted = formatDate(c.start_date)
-  const endFormatted = formatDate(c.end_date)
-  const dateDisplay = startFormatted
-    ? (endFormatted && c.end_date !== c.start_date
-        ? `${startFormatted} – ${endFormatted}`
-        : startFormatted)
-    : 'Date TBC'
+  // For courses, the headline date is the next available session's date.
+  // For conferences, the conference's own date range.
+  let dateDisplay: string
+  if (isCourse) {
+    const next = courseSummary?.next
+    if (next) {
+      const ns = formatDate(next.start_date)
+      const ne = formatDate(next.end_date)
+      dateDisplay = ne && next.end_date !== next.start_date && ne !== ns
+        ? `Next: ${ns} – ${ne}`
+        : `Next: ${ns}`
+    } else if (courseSummary?.total === 0) {
+      dateDisplay = 'No scheduled dates'
+    } else {
+      dateDisplay = 'Date TBC'
+    }
+  } else {
+    const startFormatted = formatDate(c.start_date)
+    const endFormatted = formatDate(c.end_date)
+    dateDisplay = startFormatted
+      ? (endFormatted && c.end_date !== c.start_date
+          ? `${startFormatted} – ${endFormatted}`
+          : startFormatted)
+      : 'Date TBC'
+  }
 
   const startTimeDisplay = formatTime(c.start_time)
   const formatBadge = c.event_format ? FORMAT_LABEL[c.event_format] : null
@@ -79,9 +103,17 @@ export function ConferenceCard({ conference: c, tiers, sourceName }: ConferenceC
       {/* Header */}
       <div className="flex justify-between items-start gap-3">
         <div className="flex flex-col gap-1.5 min-w-0">
-          <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider truncate">
-            {c.specialty || 'General'}
-          </span>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider truncate">
+              {c.specialty || 'General'}
+            </span>
+            {isCourse && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-300 border border-violet-500/30 flex-shrink-0">
+                <Layers className="w-3 h-3" />
+                Course
+              </span>
+            )}
+          </div>
           {sourceName && (
             <span className="inline-flex items-center self-start text-[10px] font-medium uppercase tracking-wider text-slate-400 bg-slate-800/60 border border-slate-700 rounded px-1.5 py-0.5">
               {sourceName}
@@ -130,6 +162,27 @@ export function ConferenceCard({ conference: c, tiers, sourceName }: ConferenceC
                 {' — '}{[c.venue_name, c.city].filter(Boolean).join(', ')}
               </span>
             </span>
+          ) : isCourse && courseSummary && courseSummary.total > 0 ? (
+            // Course mode: prefer next-session city, fall back to "Multiple
+            // locations" when sessions span more than one venue.
+            (() => {
+              const cities = new Set(
+                courseSummary.upcoming
+                  .map(s => s.city)
+                  .filter((c): c is string => !!c)
+              )
+              const nextCity = courseSummary.next?.city
+              if (cities.size === 0) return <span className="text-slate-500 italic">Location TBC</span>
+              if (cities.size === 1 && nextCity) return <span>{nextCity}</span>
+              return (
+                <span>
+                  {nextCity ?? 'Multiple locations'}
+                  <span className="text-slate-500">
+                    {' '}· {cities.size} location{cities.size === 1 ? '' : 's'}
+                  </span>
+                </span>
+              )
+            })()
           ) : (c.venue_name || c.city) ? (
             <span>{[c.venue_name, c.city].filter(Boolean).join(', ')}</span>
           ) : (
@@ -142,7 +195,31 @@ export function ConferenceCard({ conference: c, tiers, sourceName }: ConferenceC
           <span className="font-medium text-white">{priceLabel}</span>
         </div>
 
-        {showDeadlineBadge ? (
+        {/* Status line — semantics depend on event_type. Course cards
+            replace the abstracts indicator with a session-count badge. */}
+        {isCourse && courseSummary ? (
+          courseSummary.total === 0 ? (
+            <div className="flex items-center gap-2 text-slate-500">
+              <Layers className="w-4 h-4" />
+              <span className="text-xs font-medium">On-demand · no scheduled dates</span>
+            </div>
+          ) : courseSummary.allSoldOut ? (
+            <div className="flex items-center gap-2 text-rose-400">
+              <Layers className="w-4 h-4" />
+              <span className="text-xs font-medium">
+                All {courseSummary.total} upcoming sold out
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-cyan-400">
+              <Layers className="w-4 h-4" />
+              <span className="text-xs font-medium">
+                {courseSummary.available} of {courseSummary.total} upcoming{' '}
+                session{courseSummary.total === 1 ? '' : 's'} available
+              </span>
+            </div>
+          )
+        ) : showDeadlineBadge ? (
           <div className="flex items-center gap-2 text-amber-400">
             <FileText className="w-4 h-4" />
             <span className="text-xs font-semibold uppercase tracking-wider">
@@ -157,9 +234,6 @@ export function ConferenceCard({ conference: c, tiers, sourceName }: ConferenceC
             <span className="text-xs font-medium">Abstracts Open</span>
           </div>
         ) : c.abstract_deadline ? (
-          // Deadline existed but has passed (or abstract_open was always
-          // false). Tell the user explicitly so they don't keep thinking
-          // a conference they saved is still accepting submissions.
           <div className="flex items-center gap-2 text-slate-500">
             <FileText className="w-4 h-4" />
             <span className="text-xs font-medium">Abstracts Closed</span>

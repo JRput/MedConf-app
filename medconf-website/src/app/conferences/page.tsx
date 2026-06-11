@@ -2,7 +2,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useConferences, type SortMode } from '@/hooks/useConferences'
+import { useConferences, type SortMode, type TypeFilter } from '@/hooks/useConferences'
 import { FilterPanel } from '@/components/conferences/FilterPanel'
 import { SearchBar } from '@/components/conferences/SearchBar'
 import { ConferenceCard } from '@/components/conferences/ConferenceCard'
@@ -17,6 +17,7 @@ export default function ConferencesPage() {
     conferences,
     allConferences,
     pricingMap,
+    sessionsMap,
     sources,
     sourceMap,
     loading,
@@ -150,6 +151,34 @@ export default function ConferencesPage() {
           </div>
         )}
 
+        {/* Type filter chips — Conference vs Course vs All */}
+        <div className="mb-6 flex flex-wrap gap-2 items-center">
+          <span className="text-xs uppercase tracking-wider text-slate-500 font-semibold mr-1">
+            Type:
+          </span>
+          {(['all', 'conference', 'course'] as TypeFilter[]).map(t => {
+            const label = t === 'all' ? 'All'
+              : t === 'conference' ? 'Conferences'
+              : 'Courses'
+            const count = t === 'all'
+              ? allConferences.length
+              : allConferences.filter(c => c.event_type === t).length
+            return (
+              <button
+                key={t}
+                onClick={() => setFilters({ ...filters, eventType: t })}
+                className={`text-sm px-3.5 py-1.5 rounded-full border transition-all ${
+                  filters.eventType === t
+                    ? 'bg-violet-500/20 text-violet-200 border-violet-500/50'
+                    : 'bg-slate-800/40 text-slate-300 border-slate-700 hover:border-slate-600'
+                }`}
+              >
+                {label} <span className="text-slate-500">· {count}</span>
+              </button>
+            )
+          })}
+        </div>
+
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar filters */}
           <div className="w-full lg:w-80 shrink-0">
@@ -174,6 +203,7 @@ export default function ConferencesPage() {
                       key={c.id}
                       conference={c}
                       tiers={pricingMap[c.id] || []}
+                      sessions={sessionsMap[c.id]}
                       sourceName={c.source_id ? sourceMap[c.source_id] : null}
                     />
                   ))}
@@ -212,7 +242,7 @@ export default function ConferencesPage() {
                 <p className="text-slate-500 text-sm mb-6">Try adjusting your search or filters</p>
                 {hasActiveFilters && (
                   <button
-                    onClick={() => setFilters({ specialty: '', region: '', maxPrice: 0, searchTerm: '', sourceId: null, sort: filters.sort })}
+                    onClick={() => setFilters({ specialty: '', region: '', maxPrice: 0, searchTerm: '', sourceId: null, sort: filters.sort, eventType: 'all' })}
                     className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300"
                   >
                     Clear all filters
@@ -226,6 +256,7 @@ export default function ConferencesPage() {
                     key={c.id}
                     conference={c}
                     tiers={pricingMap[c.id] || []}
+                    sessions={sessionsMap[c.id]}
                     sourceName={c.source_id ? sourceMap[c.source_id] : null}
                   />
                 ))}

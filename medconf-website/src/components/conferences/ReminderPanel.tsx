@@ -4,11 +4,13 @@
 import { useState, useEffect } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
-import type { Conference, UserReminder, ReminderType } from '@/lib/types'
+import type { Conference, UserReminder, ReminderType, CourseSession } from '@/lib/types'
+import { upcomingSessions } from '@/lib/conference-helpers'
 import { Bell, Plus, X, Clock, AlertCircle, Check } from 'lucide-react'
 
 interface Props {
   conference: Conference
+  sessions?: CourseSession[]
 }
 
 const LEAD_TIMES = [
@@ -19,7 +21,7 @@ const LEAD_TIMES = [
   { days: 30, label: '1 month before' },
 ]
 
-export function ReminderPanel({ conference }: Props) {
+export function ReminderPanel({ conference, sessions }: Props) {
   const { user } = useAuth()
   const supabase = createSupabaseClient()
   const [reminders, setReminders] = useState<UserReminder[]>([])
@@ -27,19 +29,33 @@ export function ReminderPanel({ conference }: Props) {
   const [showForm, setShowForm] = useState(false)
   const [reminderType, setReminderType] = useState<ReminderType>('abstract_deadline')
   const [leadDays, setLeadDays] = useState<number>(7)
+  // For courses, the user picks a specific upcoming session to be reminded
+  // about. selectedSessionDate is the session's start_date — it becomes the
+  // target_date for the reminder row.
+  const [selectedSessionDate, setSelectedSessionDate] = useState<string>('')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
   const [justSaved, setJustSaved] = useState(false)
 
-  // Available reminder types for THIS conference (based on which dates exist)
-  const availableTypes: { type: ReminderType; label: string; targetDate: string | null }[] = [
-    conference.abstract_deadline
-      ? { type: 'abstract_deadline', label: 'Abstract deadline', targetDate: conference.abstract_deadline }
-      : null,
-    conference.start_date
-      ? { type: 'conference_start', label: 'Conference start', targetDate: conference.start_date }
-      : null,
-  ].filter((t): t is { type: ReminderType; label: string; targetDate: string } => t !== null)
+  const isCourse = conference.event_type === 'course'
+  const availableSessions = isCourse ? upcomingSessions(sessions) : []
+
+  // Available reminder types for THIS event. Courses use 'conference_start'
+  // with a per-session target_date (one user_reminders row per session-
+  // reminder; we still call the type 'conference_start' since the firing
+  // logic and DB enum is shared).
+  const availableTypes: { type: ReminderType; label: string; targetDate: string | null }[] = isCourse
+    ? (availableSessions.length > 0
+        ? [{ type: 'conference_start', label: 'Course session', targetDate: selectedSessionDate || availableSessions[0].start_date }]
+        : [])
+    : [
+        conference.abstract_deadline
+          ? { type: 'abstract_deadline', label: 'Abstract deadline', targetDate: conference.abstract_deadline }
+          : null,
+        conference.start_date
+          ? { type: 'conference_start', label: 'Conference start', targetDate: conference.start_date }
+          : null,
+      ].filter((t): t is { type: ReminderType; label: string; targetDate: string } => t !== null)
 
   useEffect(() => {
     if (!user) return
@@ -71,13 +87,28 @@ export function ReminderPanel({ conference }: Props) {
 
   const handleAdd = async () => {
     setError('')
-    const typeInfo = availableTypes.find(t => t.type === reminderType)
-    if (!typeInfo || !typeInfo.targetDate) {
-      setError('This conference does not have a date for that reminder.')
-      return
+
+    // For courses, the target_date is the chosen session's start_date.
+    // For conferences, it comes from availableTypes (deadline / start).
+    let targetDate: string | null = null
+    let effectiveType: ReminderType = reminderType
+    if (isCourse) {
+      effectiveType = 'conference_start'
+      targetDate = selectedSessionDate || availableSessions[0]?.start_date || null
+      if (!targetDate) {
+        setError('No upcoming sessions available.')
+        return
+      }
+    } else {
+      const typeInfo = availableTypes.find(t => t.type === reminderType)
+      if (!typeInfo || !typeInfo.targetDate) {
+        setError('This conference does not have a date for that reminder.')
+        return
+      }
+      targetDate = typeInfo.targetDate
     }
 
-    const target = new Date(typeInfo.targetDate)
+    const target = new Date(targetDate)
     const scheduled = new Date(target.getTime() - leadDays * 86400_000)
     const today = new Date(new Date().toISOString().slice(0, 10))
 
@@ -92,9 +123,9 @@ export function ReminderPanel({ conference }: Props) {
       .insert({
         user_id: user.id,
         conference_id: conference.id,
-        reminder_type: reminderType,
+        reminder_type: effectiveType,
         lead_time_days: leadDays,
-        target_date: typeInfo.targetDate,
+        target_date: targetDate,
         scheduled_for: scheduled.toISOString().slice(0, 10),
         status: 'scheduled',
       })
@@ -192,18 +223,40 @@ export function ReminderPanel({ conference }: Props) {
 
       {showForm && (
         <div className="space-y-3 border-t border-slate-800 pt-4">
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Remind me about</label>
-            <select
-              value={reminderType}
-              onChange={e => setReminderType(e.target.value as ReminderType)}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all appearance-none cursor-pointer"
-            >
-              {availableTypes.map(t => (
-                <option key={t.type} value={t.type} className="bg-slate-800">{t.label}</option>
-              ))}
-            </select>
-          </div>
+          {isCourse ? (
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">Which session</label>
+              <select
+                value={selectedSessionDate || availableSessions[0]?.start_date || ''}
+                onChange={e => setSelectedSessionDate(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+              >
+                {availableSessions.map(s => {
+                  const dateLabel = new Date(s.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                  const locLabel = s.city ?? 'Online'
+                  const soldOut = s.availability_status === 'sold_out' ? ' · SOLD OUT' : ''
+                  return (
+                    <option key={s.id} value={s.start_date} className="bg-slate-800">
+                      {dateLabel} · {locLabel}{soldOut}
+                    </option>
+                  )
+                })}
+              </select>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">Remind me about</label>
+              <select
+                value={reminderType}
+                onChange={e => setReminderType(e.target.value as ReminderType)}
+                className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+              >
+                {availableTypes.map(t => (
+                  <option key={t.type} value={t.type} className="bg-slate-800">{t.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <label className="block text-xs font-medium text-slate-400 mb-1.5">When</label>
             <select

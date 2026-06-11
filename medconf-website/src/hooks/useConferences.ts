@@ -4,9 +4,10 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { createSupabaseClient } from '@/lib/supabase'
-import type { Conference, PricingTier, SourceSummary } from '@/lib/types'
+import type { Conference, PricingTier, SourceSummary, CourseSession, EventType } from '@/lib/types'
 
 export type SortMode = 'deadline' | 'date' | 'recently_added' | 'alphabetical'
+export type TypeFilter = 'all' | 'conference' | 'course'
 
 export interface Filters {
   specialty: string // '' means all
@@ -15,6 +16,7 @@ export interface Filters {
   searchTerm: string
   sourceId: number | null // null means all sources
   sort: SortMode
+  eventType: TypeFilter // 'all' is the default
 }
 
 const DEFAULT_FILTERS: Filters = {
@@ -24,18 +26,19 @@ const DEFAULT_FILTERS: Filters = {
   searchTerm: '',
   sourceId: null,
   sort: 'deadline',
+  eventType: 'all',
 }
 
 function readFiltersFromUrl(params: URLSearchParams): Filters {
-  const raw = {
+  return {
     specialty: params.get('specialty') ?? '',
     region: params.get('region') ?? '',
     searchTerm: params.get('q') ?? '',
     maxPrice: Number(params.get('maxPrice') ?? '0') || 0,
     sourceId: params.get('source') ? Number(params.get('source')) : null,
     sort: (params.get('sort') as SortMode) || 'deadline',
+    eventType: (params.get('type') as TypeFilter) || 'all',
   }
-  return raw
 }
 
 function writeFiltersToUrl(f: Filters): URLSearchParams {
@@ -46,6 +49,7 @@ function writeFiltersToUrl(f: Filters): URLSearchParams {
   if (f.maxPrice > 0) p.set('maxPrice', String(f.maxPrice))
   if (f.sourceId !== null) p.set('source', String(f.sourceId))
   if (f.sort !== 'deadline') p.set('sort', f.sort)
+  if (f.eventType !== 'all') p.set('type', f.eventType)
   return p
 }
 
@@ -57,6 +61,7 @@ export function useConferences() {
 
   const [conferences, setConferences] = useState<Conference[]>([])
   const [pricingMap, setPricingMap] = useState<Record<number, PricingTier[]>>({})
+  const [sessionsMap, setSessionsMap] = useState<Record<number, CourseSession[]>>({})
   const [sources, setSources] = useState<SourceSummary[]>([])
   const [loading, setLoading] = useState(true)
   const [filters, setFiltersState] = useState<Filters>(() => ({
@@ -64,12 +69,12 @@ export function useConferences() {
     ...readFiltersFromUrl(new URLSearchParams(searchParams?.toString() ?? '')),
   }))
 
-  // Fetch once on mount
   useEffect(() => {
     async function fetchData() {
-      const [confResp, tierResp, sourceResp] = await Promise.all([
+      const [confResp, tierResp, sessionResp, sourceResp] = await Promise.all([
         supabase.from('conferences').select('*').eq('archived', false).order('start_date', { ascending: true }),
         supabase.from('pricing_tiers').select('*'),
+        supabase.from('course_sessions').select('*').order('start_date', { ascending: true }),
         supabase.from('scraper_sources').select('id, source_name, base_url').eq('active', true).order('source_name'),
       ])
 
@@ -84,6 +89,15 @@ export function useConferences() {
         setPricingMap(map)
       }
 
+      if (sessionResp.data) {
+        const map: Record<number, CourseSession[]> = {}
+        sessionResp.data.forEach(s => {
+          if (!map[s.course_id]) map[s.course_id] = []
+          map[s.course_id].push(s)
+        })
+        setSessionsMap(map)
+      }
+
       if (sourceResp.data) setSources(sourceResp.data as SourceSummary[])
 
       setLoading(false)
@@ -92,7 +106,6 @@ export function useConferences() {
     fetchData()
   }, [])
 
-  // Setter that also writes to the URL — keeps filter state shareable/bookmarkable
   const setFilters = useCallback((next: Filters) => {
     setFiltersState(next)
     const p = writeFiltersToUrl(next)
@@ -106,9 +119,9 @@ export function useConferences() {
     return m
   }, [sources])
 
-  // Apply filters
   const filtered = useMemo(() => {
     return conferences.filter(c => {
+      if (filters.eventType !== 'all' && c.event_type !== filters.eventType) return false
       if (filters.sourceId !== null && c.source_id !== filters.sourceId) return false
       if (filters.specialty && c.specialty?.toLowerCase() !== filters.specialty.toLowerCase()) return false
       if (filters.region && c.region?.toLowerCase() !== filters.region.toLowerCase()) return false
@@ -128,12 +141,9 @@ export function useConferences() {
     })
   }, [conferences, pricingMap, filters])
 
-  // Apply sort. Default 'deadline' puts events with closest abstract deadline
-  // first, falling through to start_date when no deadline is published.
   const sorted = useMemo(() => {
     const arr = [...filtered]
     const veryHigh = '9999-12-31'
-    const veryHighTs = '9999-12-31T00:00:00Z'
     arr.sort((a, b) => {
       switch (filters.sort) {
         case 'date':
@@ -144,8 +154,6 @@ export function useConferences() {
           return a.conference_name.localeCompare(b.conference_name)
         case 'deadline':
         default: {
-          // Deadlines first (soonest), then events with no deadline ordered
-          // by start_date so the directory remains a sensible chronological list.
           const aKey = a.abstract_deadline ?? veryHigh
           const bKey = b.abstract_deadline ?? veryHigh
           if (aKey !== bKey) return aKey.localeCompare(bKey)
@@ -160,6 +168,7 @@ export function useConferences() {
     conferences: sorted,
     allConferences: conferences,
     pricingMap,
+    sessionsMap,
     sources,
     sourceMap,
     loading,
