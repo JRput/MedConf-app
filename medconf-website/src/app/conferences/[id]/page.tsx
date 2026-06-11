@@ -9,7 +9,8 @@ import { ReminderPanel } from '@/components/conferences/ReminderPanel'
 import { SaveButton } from '@/components/ui/SaveButton'
 import type { Conference, PricingTier } from '@/lib/types'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, MapPin, FileText, Clock, ExternalLink, Loader2, AlertCircle, Globe, Building2 } from 'lucide-react'
+import { ArrowLeft, Calendar, MapPin, FileText, Clock, ExternalLink, Loader2, AlertCircle, Globe, Building2, Download, Share2, Check } from 'lucide-react'
+import { downloadIcs } from '@/lib/ics'
 
 export default function ConferenceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
@@ -114,7 +115,11 @@ export default function ConferenceDetailPage({ params }: { params: Promise<{ id:
                 {c.conference_name}
               </h1>
             </div>
-            <SaveButton conferenceId={c.id} />
+            <div className="flex items-center gap-2">
+              <ShareButton conference={c} />
+              <CalendarButton conference={c} />
+              <SaveButton conferenceId={c.id} />
+            </div>
           </div>
 
           {/* CPD badge */}
@@ -229,6 +234,57 @@ export default function ConferenceDetailPage({ params }: { params: Promise<{ id:
         </div>
       </div>
     </div>
+  )
+}
+
+function CalendarButton({ conference }: { conference: Conference }) {
+  // Only useful when we have a date to put on the calendar
+  if (!conference.start_date && !conference.abstract_deadline) return null
+  return (
+    <button
+      onClick={() => downloadIcs(conference)}
+      aria-label="Add to calendar"
+      className="flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-white border border-slate-700 hover:border-cyan-500/50 rounded-md px-2.5 py-1.5 transition-colors"
+    >
+      <Download className="w-3.5 h-3.5" />
+      <span className="hidden sm:inline">Add to calendar</span>
+    </button>
+  )
+}
+
+function ShareButton({ conference }: { conference: Conference }) {
+  const [copied, setCopied] = useState(false)
+
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : ''
+    const title = conference.conference_name
+    // Try the native share sheet first (mobile / supported browsers)
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({ title, url })
+        return
+      } catch {
+        // user cancelled, fall through to clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // ignore — most browsers allow clipboard.writeText in user gesture
+    }
+  }
+
+  return (
+    <button
+      onClick={handleShare}
+      aria-label="Share conference"
+      className="flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-white border border-slate-700 hover:border-cyan-500/50 rounded-md px-2.5 py-1.5 transition-colors"
+    >
+      {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
+      <span className="hidden sm:inline">{copied ? 'Copied' : 'Share'}</span>
+    </button>
   )
 }
 

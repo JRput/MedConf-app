@@ -1,9 +1,12 @@
 // src/hooks/useConferences.ts
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { createSupabaseClient } from '@/lib/supabase'
 import type { Conference, PricingTier, SourceSummary } from '@/lib/types'
+
+export type SortMode = 'deadline' | 'date' | 'recently_added' | 'alphabetical'
 
 export interface Filters {
   specialty: string // '' means all
@@ -11,21 +14,59 @@ export interface Filters {
   maxPrice: number // 0 means no limit
   searchTerm: string
   sourceId: number | null // null means all sources
+  sort: SortMode
+}
+
+const DEFAULT_FILTERS: Filters = {
+  specialty: '',
+  region: '',
+  maxPrice: 0,
+  searchTerm: '',
+  sourceId: null,
+  sort: 'deadline',
+}
+
+function readFiltersFromUrl(params: URLSearchParams): Filters {
+  const raw = {
+    specialty: params.get('specialty') ?? '',
+    region: params.get('region') ?? '',
+    searchTerm: params.get('q') ?? '',
+    maxPrice: Number(params.get('maxPrice') ?? '0') || 0,
+    sourceId: params.get('source') ? Number(params.get('source')) : null,
+    sort: (params.get('sort') as SortMode) || 'deadline',
+  }
+  return raw
+}
+
+function writeFiltersToUrl(f: Filters): URLSearchParams {
+  const p = new URLSearchParams()
+  if (f.specialty) p.set('specialty', f.specialty)
+  if (f.region) p.set('region', f.region)
+  if (f.searchTerm) p.set('q', f.searchTerm)
+  if (f.maxPrice > 0) p.set('maxPrice', String(f.maxPrice))
+  if (f.sourceId !== null) p.set('source', String(f.sourceId))
+  if (f.sort !== 'deadline') p.set('sort', f.sort)
+  return p
 }
 
 export function useConferences() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const supabase = createSupabaseClient()
+
   const [conferences, setConferences] = useState<Conference[]>([])
   const [pricingMap, setPricingMap] = useState<Record<number, PricingTier[]>>({})
   const [sources, setSources] = useState<SourceSummary[]>([])
   const [loading, setLoading] = useState(true)
-  const [filters, setFilters] = useState<Filters>({
-    specialty: '', region: '', maxPrice: 0, searchTerm: '', sourceId: null
-  })
-  const supabase = createSupabaseClient()
+  const [filters, setFiltersState] = useState<Filters>(() => ({
+    ...DEFAULT_FILTERS,
+    ...readFiltersFromUrl(new URLSearchParams(searchParams?.toString() ?? '')),
+  }))
 
+  // Fetch once on mount
   useEffect(() => {
     async function fetchData() {
-      // Fetch in parallel
       const [confResp, tierResp, sourceResp] = await Promise.all([
         supabase.from('conferences').select('*').eq('archived', false).order('start_date', { ascending: true }),
         supabase.from('pricing_tiers').select('*'),
@@ -34,7 +75,6 @@ export function useConferences() {
 
       if (confResp.data) setConferences(confResp.data)
 
-      // Build a map: conference_id -> [tiers]
       if (tierResp.data) {
         const map: Record<number, PricingTier[]> = {}
         tierResp.data.forEach(t => {
@@ -52,44 +92,78 @@ export function useConferences() {
     fetchData()
   }, [])
 
-  // Build a quick lookup for cards: source_id -> source_name
+  // Setter that also writes to the URL — keeps filter state shareable/bookmarkable
+  const setFilters = useCallback((next: Filters) => {
+    setFiltersState(next)
+    const p = writeFiltersToUrl(next)
+    const qs = p.toString()
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+  }, [pathname, router])
+
   const sourceMap = useMemo(() => {
     const m: Record<number, string> = {}
     sources.forEach(s => { m[s.id] = s.source_name })
     return m
   }, [sources])
 
-  // Filtering logic — runs client-side on the fetched data
+  // Apply filters
   const filtered = useMemo(() => {
     return conferences.filter(c => {
-      // Source filter
       if (filters.sourceId !== null && c.source_id !== filters.sourceId) return false
-
-      // Specialty filter
       if (filters.specialty && c.specialty?.toLowerCase() !== filters.specialty.toLowerCase()) return false
-
-      // Region filter
       if (filters.region && c.region?.toLowerCase() !== filters.region.toLowerCase()) return false
 
-      // Price filter — checks if ANY tier is under the max
       if (filters.maxPrice > 0) {
         const tiers = pricingMap[c.id] || []
         const hasAffordableTier = tiers.some(t => t.price_gbp <= filters.maxPrice)
         if (tiers.length > 0 && !hasAffordableTier) return false
       }
 
-      // Search filter — matches name, specialty, city, or description
       if (filters.searchTerm) {
         const term = filters.searchTerm.toLowerCase()
         const searchable = `${c.conference_name} ${c.specialty} ${c.city} ${c.description}`.toLowerCase()
         if (!searchable.includes(term)) return false
       }
-
       return true
     })
   }, [conferences, pricingMap, filters])
 
-  return { conferences: filtered, pricingMap, sources, sourceMap, loading, filters, setFilters }
+  // Apply sort. Default 'deadline' puts events with closest abstract deadline
+  // first, falling through to start_date when no deadline is published.
+  const sorted = useMemo(() => {
+    const arr = [...filtered]
+    const veryHigh = '9999-12-31'
+    const veryHighTs = '9999-12-31T00:00:00Z'
+    arr.sort((a, b) => {
+      switch (filters.sort) {
+        case 'date':
+          return (a.start_date ?? veryHigh).localeCompare(b.start_date ?? veryHigh)
+        case 'recently_added':
+          return (b.created_at ?? '').localeCompare(a.created_at ?? '')
+        case 'alphabetical':
+          return a.conference_name.localeCompare(b.conference_name)
+        case 'deadline':
+        default: {
+          // Deadlines first (soonest), then events with no deadline ordered
+          // by start_date so the directory remains a sensible chronological list.
+          const aKey = a.abstract_deadline ?? veryHigh
+          const bKey = b.abstract_deadline ?? veryHigh
+          if (aKey !== bKey) return aKey.localeCompare(bKey)
+          return (a.start_date ?? veryHigh).localeCompare(b.start_date ?? veryHigh)
+        }
+      }
+    })
+    return arr
+  }, [filtered, filters.sort])
+
+  return {
+    conferences: sorted,
+    allConferences: conferences,
+    pricingMap,
+    sources,
+    sourceMap,
+    loading,
+    filters,
+    setFilters,
+  }
 }
-
-

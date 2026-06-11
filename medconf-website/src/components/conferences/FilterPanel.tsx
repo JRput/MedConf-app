@@ -43,7 +43,7 @@ export function FilterPanel({ filters, setFilters, sources }: FilterPanelProps) 
         </h2>
         {hasActiveFilters && (
           <button
-            onClick={() => setFilters({ specialty: '', region: '', maxPrice: 0, searchTerm: filters.searchTerm, sourceId: null })}
+            onClick={() => setFilters({ specialty: '', region: '', maxPrice: 0, searchTerm: filters.searchTerm, sourceId: null, sort: filters.sort })}
             className="text-xs text-slate-400 hover:text-cyan-400 flex items-center gap-1 transition-colors"
           >
             <X className="w-3 h-3" />

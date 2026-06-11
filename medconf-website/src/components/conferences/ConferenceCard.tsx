@@ -50,6 +50,18 @@ export function ConferenceCard({ conference: c, tiers, sourceName }: ConferenceC
   const formatBadge = c.event_format ? FORMAT_LABEL[c.event_format] : null
   const externalUrl = c.booking_url ?? c.organiser_url
 
+  // Days until the abstract deadline, if any. Returned for the urgency
+  // badge — only shown when the deadline is between today and 14 days
+  // away. After that we drop into the normal abstract badge below.
+  const daysUntilDeadline: number | null = (() => {
+    if (!c.abstract_deadline) return null
+    const diff = Math.ceil(
+      (new Date(c.abstract_deadline).getTime() - Date.now()) / 86_400_000
+    )
+    return diff
+  })()
+  const showDeadlineBadge = daysUntilDeadline !== null && daysUntilDeadline >= 0 && daysUntilDeadline <= 14
+
   return (
     <div className={`group glass-card rounded-xl p-5 flex flex-col gap-4 transition-all duration-300 relative ${
       c.is_sold_out
@@ -129,7 +141,16 @@ export function ConferenceCard({ conference: c, tiers, sourceName }: ConferenceC
           <span className="font-medium text-white">{priceLabel}</span>
         </div>
 
-        {c.abstract_open && (
+        {showDeadlineBadge ? (
+          <div className="flex items-center gap-2 text-amber-400">
+            <FileText className="w-4 h-4" />
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              {daysUntilDeadline === 0 ? 'Deadline today' :
+               daysUntilDeadline === 1 ? '1 day left' :
+               `${daysUntilDeadline} days left`}
+            </span>
+          </div>
+        ) : c.abstract_open && (
           <div className="flex items-center gap-2 text-amber-400">
             <FileText className="w-4 h-4" />
             <span className="text-xs font-medium">Abstracts Open</span>
