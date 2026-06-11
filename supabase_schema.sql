@@ -102,10 +102,17 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     role TEXT,
     specialty TEXT,
     region TEXT,
+    institution TEXT,
+    country TEXT DEFAULT 'United Kingdom',
+    -- NULL = onboarding wizard not yet completed. Route guard uses this
+    -- to bounce signed-in users to /onboarding until they finish the
+    -- 3-step wizard. Set on the final wizard step's submit.
+    profile_completed_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_user_profiles_role ON user_profiles(role);
+CREATE INDEX IF NOT EXISTS idx_user_profiles_profile_completed ON user_profiles(profile_completed_at);
 
 -- Table: saved_conferences
 -- User's saved/bookmarked conferences

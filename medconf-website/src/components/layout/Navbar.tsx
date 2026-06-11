@@ -4,7 +4,7 @@
 import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Menu, X, Calendar, Bookmark, Settings, LogOut } from 'lucide-react'
+import { Menu, X, Calendar, Bookmark, Settings, LogOut, LayoutDashboard } from 'lucide-react'
 
 export function Navbar() {
   const { user, signOut, loading } = useAuth()
@@ -28,6 +28,9 @@ export function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             {!loading && user ? (
               <>
+                <NavLink href="/dashboard" icon={<LayoutDashboard className="w-4 h-4" />}>
+                  Dashboard
+                </NavLink>
                 <NavLink href="/conferences" icon={<Calendar className="w-4 h-4" />}>
                   Conferences
                 </NavLink>
@@ -79,6 +82,9 @@ export function Navbar() {
           <div className="px-4 py-4 space-y-2">
             {!loading && user ? (
               <>
+                <MobileNavLink href="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                  Dashboard
+                </MobileNavLink>
                 <MobileNavLink href="/conferences" onClick={() => setIsMenuOpen(false)}>
                   Conferences
                 </MobileNavLink>

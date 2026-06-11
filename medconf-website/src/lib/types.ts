@@ -38,9 +38,15 @@ export interface PricingTier {
 export interface UserProfile {
   id: string
   email: string
-  role: string // e.g. Student, Consultant, Registrar, Nurse
+  full_name: string | null
+  role: string | null
   specialty: string | null
-  preferred_region: string | null
+  region: string | null
+  institution: string | null
+  country: string
+  profile_completed_at: string | null
+  created_at: string
+  updated_at: string
 }
 
 export interface SavedConference {
@@ -50,13 +56,17 @@ export interface SavedConference {
   saved_at: string
 }
 
+// Matches the actual notification_preferences columns in supabase_schema.sql.
+// The /settings page currently reads different column names — that's a
+// pre-existing bug we'll fix when wiring in-app reminders properly.
 export interface NotificationPreferences {
-  id: number
-  user_id: string
-  new_event_alerts: boolean
-  deadline_reminders: boolean
-  notification_channel: string // 'email' | 'both'
-  digest_frequency: string // 'immediate' | 'daily' | 'weekly'
+  id: string
+  email_new_conferences: boolean
+  email_abstract_deadlines: boolean
+  email_price_changes: boolean
+  email_frequency: string // 'immediate' | 'daily' | 'weekly'
+  created_at: string
+  updated_at: string
 }
 
 // Scraper types
