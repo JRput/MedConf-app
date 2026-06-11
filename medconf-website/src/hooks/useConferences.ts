@@ -4,6 +4,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { createSupabaseClient } from '@/lib/supabase'
+import { fetchAllPages } from '@/lib/fetch-pages'
 import type { Conference, PricingTier, SourceSummary, CourseSession, EventType } from '@/lib/types'
 
 export type SortMode = 'deadline' | 'date' | 'recently_added' | 'alphabetical'
@@ -71,37 +72,32 @@ export function useConferences() {
 
   useEffect(() => {
     async function fetchData() {
-      // Supabase silently caps SELECTs at 1000 rows by default — pricing_tiers
-      // crossed that the moment per-session course pricing landed (currently
-      // ~1300 rows). Use .range() to lift the cap per request. Same for
-      // course_sessions and conferences so future growth doesn't quietly
-      // truncate and surface as "Price TBC" / missing data on cards.
-      const [confResp, tierResp, sessionResp, sourceResp] = await Promise.all([
-        supabase.from('conferences').select('*').eq('archived', false).order('start_date', { ascending: true }).range(0, 9999),
-        supabase.from('pricing_tiers').select('*').range(0, 9999),
-        supabase.from('course_sessions').select('*').order('start_date', { ascending: true }).range(0, 9999),
+      // Supabase enforces a server-side cap (db_max_rows = 1000) that
+      // .range(0, 9999) silently truncates against. pricing_tiers has
+      // already crossed 1000 with per-session course pricing, so we
+      // paginate in chunks of 1000 to guarantee a complete fetch.
+      const [confs, tiers, sessions, sourceResp] = await Promise.all([
+        fetchAllPages<Conference>(() => supabase.from('conferences').select('*').eq('archived', false).order('start_date', { ascending: true })),
+        fetchAllPages<PricingTier>(() => supabase.from('pricing_tiers').select('*')),
+        fetchAllPages<CourseSession>(() => supabase.from('course_sessions').select('*').order('start_date', { ascending: true })),
         supabase.from('scraper_sources').select('id, source_name, base_url').eq('active', true).order('source_name'),
       ])
 
-      if (confResp.data) setConferences(confResp.data)
+      setConferences(confs)
 
-      if (tierResp.data) {
-        const map: Record<number, PricingTier[]> = {}
-        tierResp.data.forEach(t => {
-          if (!map[t.conference_id]) map[t.conference_id] = []
-          map[t.conference_id].push(t)
-        })
-        setPricingMap(map)
-      }
+      const pMap: Record<number, PricingTier[]> = {}
+      tiers.forEach(t => {
+        if (!pMap[t.conference_id]) pMap[t.conference_id] = []
+        pMap[t.conference_id].push(t)
+      })
+      setPricingMap(pMap)
 
-      if (sessionResp.data) {
-        const map: Record<number, CourseSession[]> = {}
-        sessionResp.data.forEach(s => {
-          if (!map[s.course_id]) map[s.course_id] = []
-          map[s.course_id].push(s)
-        })
-        setSessionsMap(map)
-      }
+      const sMap: Record<number, CourseSession[]> = {}
+      sessions.forEach(s => {
+        if (!sMap[s.course_id]) sMap[s.course_id] = []
+        sMap[s.course_id].push(s)
+      })
+      setSessionsMap(sMap)
 
       if (sourceResp.data) setSources(sourceResp.data as SourceSummary[])
 

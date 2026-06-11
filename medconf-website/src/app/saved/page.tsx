@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { ConferenceCard } from '@/components/conferences/ConferenceCard'
 import type { Conference, PricingTier, CourseSession } from '@/lib/types'
+import { fetchAllPages } from '@/lib/fetch-pages'
 import { useAuth } from '@/hooks/useAuth'
 import { Bookmark, Loader2, Calendar, SlidersHorizontal } from 'lucide-react'
 import Link from 'next/link'
@@ -48,35 +49,29 @@ export default function SavedPage() {
       saved.forEach((s: SavedRow) => { savedAt[s.conference_id] = s.saved_at })
       setSavedAtMap(savedAt)
 
-      // Use .range() to lift Supabase's default 1000-row cap — a user with
-      // many saved courses (per-session pricing × N sessions × M saves) can
-      // easily exceed it.
-      const [confResp, tierResp, sessionResp, sourceResp] = await Promise.all([
-        supabase.from('conferences').select('*').in('id', ids).range(0, 9999),
-        supabase.from('pricing_tiers').select('*').in('conference_id', ids).range(0, 9999),
-        supabase.from('course_sessions').select('*').in('course_id', ids).order('start_date', { ascending: true }).range(0, 9999),
+      // Paginate against the Supabase 1000-row cap (see lib/fetch-pages).
+      const [confs, tiers, sess, sourceResp] = await Promise.all([
+        fetchAllPages<Conference>(() => supabase.from('conferences').select('*').in('id', ids)),
+        fetchAllPages<PricingTier>(() => supabase.from('pricing_tiers').select('*').in('conference_id', ids)),
+        fetchAllPages<CourseSession>(() => supabase.from('course_sessions').select('*').in('course_id', ids).order('start_date', { ascending: true })),
         supabase.from('scraper_sources').select('id, source_name').eq('active', true),
       ])
 
-      if (confResp.data) setConferences(confResp.data)
+      setConferences(confs)
 
-      if (tierResp.data) {
-        const map: Record<number, PricingTier[]> = {}
-        tierResp.data.forEach(t => {
-          if (!map[t.conference_id]) map[t.conference_id] = []
-          map[t.conference_id].push(t)
-        })
-        setPricingMap(map)
-      }
+      const pMap: Record<number, PricingTier[]> = {}
+      tiers.forEach(t => {
+        if (!pMap[t.conference_id]) pMap[t.conference_id] = []
+        pMap[t.conference_id].push(t)
+      })
+      setPricingMap(pMap)
 
-      if (sessionResp.data) {
-        const sm: Record<number, CourseSession[]> = {}
-        sessionResp.data.forEach(s => {
-          if (!sm[s.course_id]) sm[s.course_id] = []
-          sm[s.course_id].push(s)
-        })
-        setSessionsMap(sm)
-      }
+      const sMap: Record<number, CourseSession[]> = {}
+      sess.forEach(s => {
+        if (!sMap[s.course_id]) sMap[s.course_id] = []
+        sMap[s.course_id].push(s)
+      })
+      setSessionsMap(sMap)
 
       if (sourceResp.data) {
         const sm: Record<number, string> = {}
