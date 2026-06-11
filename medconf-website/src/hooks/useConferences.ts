@@ -71,10 +71,15 @@ export function useConferences() {
 
   useEffect(() => {
     async function fetchData() {
+      // Supabase silently caps SELECTs at 1000 rows by default — pricing_tiers
+      // crossed that the moment per-session course pricing landed (currently
+      // ~1300 rows). Use .range() to lift the cap per request. Same for
+      // course_sessions and conferences so future growth doesn't quietly
+      // truncate and surface as "Price TBC" / missing data on cards.
       const [confResp, tierResp, sessionResp, sourceResp] = await Promise.all([
-        supabase.from('conferences').select('*').eq('archived', false).order('start_date', { ascending: true }),
-        supabase.from('pricing_tiers').select('*'),
-        supabase.from('course_sessions').select('*').order('start_date', { ascending: true }),
+        supabase.from('conferences').select('*').eq('archived', false).order('start_date', { ascending: true }).range(0, 9999),
+        supabase.from('pricing_tiers').select('*').range(0, 9999),
+        supabase.from('course_sessions').select('*').order('start_date', { ascending: true }).range(0, 9999),
         supabase.from('scraper_sources').select('id, source_name, base_url').eq('active', true).order('source_name'),
       ])
 

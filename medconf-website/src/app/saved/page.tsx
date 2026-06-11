@@ -48,10 +48,13 @@ export default function SavedPage() {
       saved.forEach((s: SavedRow) => { savedAt[s.conference_id] = s.saved_at })
       setSavedAtMap(savedAt)
 
+      // Use .range() to lift Supabase's default 1000-row cap — a user with
+      // many saved courses (per-session pricing × N sessions × M saves) can
+      // easily exceed it.
       const [confResp, tierResp, sessionResp, sourceResp] = await Promise.all([
-        supabase.from('conferences').select('*').in('id', ids),
-        supabase.from('pricing_tiers').select('*').in('conference_id', ids),
-        supabase.from('course_sessions').select('*').in('course_id', ids).order('start_date', { ascending: true }),
+        supabase.from('conferences').select('*').in('id', ids).range(0, 9999),
+        supabase.from('pricing_tiers').select('*').in('conference_id', ids).range(0, 9999),
+        supabase.from('course_sessions').select('*').in('course_id', ids).order('start_date', { ascending: true }).range(0, 9999),
         supabase.from('scraper_sources').select('id, source_name').eq('active', true),
       ])
 
