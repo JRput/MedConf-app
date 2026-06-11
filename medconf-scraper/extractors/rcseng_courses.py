@@ -187,7 +187,7 @@ class RCSEngCoursesExtractor(BaseExtractor):
             # its session_id slot so the scraper layer can wire it through.
             # We use the synthetic session __index__ key for now; the scraper
             # remaps after sessions get UUIDs assigned on insert.
-            "pricing_tiers": self._build_pricing_tiers(sessions),
+            "pricing_tiers": self._build_pricing_tiers(sessions) or self._body_price_fallback(body_text),
         }
 
     # ------------------------------------------------------------------ #
@@ -215,6 +215,12 @@ class RCSEngCoursesExtractor(BaseExtractor):
                         from: pickDate(r.querySelector('.durationFrom')),
                         to:   pickDate(r.querySelector('.durationTo')),
                         price_text: pick(r, '.optionPrice'),
+                        // Full textual content of the row — used to recover prices
+                        // when .optionPrice is just a "View" toggle (happens on
+                        // free courses) or only contains a non-GBP figure (e.g.
+                        // overseas regional courses priced in local currency
+                        // with a GBP equivalent further down the row).
+                        row_text: (r.innerText || r.textContent || '').replace(/\s+/g,' ').trim().slice(0, 800),
                         location_text: pick(r, '.optionLocation'),
                         // Full postal address from the expanded panel
                         address_text: (() => {
@@ -244,7 +250,16 @@ class RCSEngCoursesExtractor(BaseExtractor):
                 continue  # without a date, the row is unusable
             end_date = self._parse_iso(raw.get("to")) or start_date
 
+            # Three-tier price extraction:
+            # 1. .optionPrice text (the common case — "£990.00")
+            # 2. Whole-row text (free-course toggles only show "View" in
+            #    .optionPrice; the £0.00 lives elsewhere in the row;
+            #    overseas regional courses show a non-GBP figure in
+            #    .optionPrice with a GBP equivalent further down)
+            # 3. Leave None → upper layer will try a body-level fallback
             price = self._parse_gbp(raw.get("price_text"))
+            if price is None:
+                price = self._parse_gbp(raw.get("row_text"))
             loc_text = (raw.get("location_text") or "").strip()
             addr_text = (raw.get("address_text") or "").strip()
             venue, city, region = self._parse_venue(loc_text, addr_text)
@@ -292,6 +307,37 @@ class RCSEngCoursesExtractor(BaseExtractor):
                 "_session_idx": s["_idx"],
             })
         return tiers
+
+    def _body_price_fallback(self, body_text: str) -> List[Dict[str, Any]]:
+        """
+        Emit a single flat-priced tier (session_id=null) when no session-scoped
+        price was found. Covers two real source patterns:
+
+        - "Back to the Scalpel" — no .bookingRow at all, but the body text
+          mentions "£150.00 2 Days 9.00 CPD Points" in the course summary.
+        - The 12 self-paced courses without scheduled sessions where the
+          source still publishes a flat price somewhere in the description.
+
+        Heuristic: find the FIRST plausible-looking £ amount in the body
+        (£10–£10,000 range). We deliberately stay conservative; a future
+        false positive is better tolerated than guessing wrong on a free
+        course or splash text.
+        """
+        if not body_text:
+            return []
+        for raw in re.findall(r"£\s*([0-9]+(?:,[0-9]{3})*(?:\.[0-9]+)?)", body_text):
+            try:
+                value = float(raw.replace(",", ""))
+            except ValueError:
+                continue
+            if 10 <= value <= 10_000:
+                return [{
+                    "tier_label": "Course fee",
+                    "price_gbp": value,
+                    "is_early_bird": False,
+                    "early_bird_deadline": None,
+                }]
+        return []
 
     # ------------------------------------------------------------------ #
     # Description — Overview blurb → fallback paragraph → LLM
