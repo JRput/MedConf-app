@@ -1,12 +1,18 @@
 // src/lib/types.ts
 
+export type EventType = 'conference' | 'course'
+
 export interface Conference {
   id: number
   source_id: number | null
   source_url: string
   conference_name: string
   specialty: string | null
-  start_date: string | null // YYYY-MM-DD
+  // 'conference' is the historical default; 'course' rows have child rows
+  // in course_sessions for each scheduled run.
+  event_type: EventType
+  start_date: string | null // YYYY-MM-DD — for courses, this mirrors the
+                            // SOONEST upcoming session for sort/list purposes
   end_date: string | null
   start_time: string | null // HH:MM:SS
   venue_name: string | null
@@ -26,9 +32,29 @@ export interface Conference {
   updated_at: string
 }
 
+export type AvailabilityStatus = 'available' | 'limited' | 'sold_out' | 'unknown'
+
+export interface CourseSession {
+  id: string
+  course_id: number
+  start_date: string // YYYY-MM-DD
+  end_date: string | null
+  start_time: string | null
+  duration_text: string | null
+  availability_status: AvailabilityStatus
+  spots_left: number | null
+  booking_url: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface PricingTier {
   id: number
   conference_id: number
+  // NULL = the tier applies to the whole course (or to the conference).
+  // Non-null = the tier is scoped to one specific course session.
+  session_id: string | null
   tier_label: string
   price_gbp: number
   is_early_bird: boolean
@@ -107,6 +133,8 @@ export interface ScraperSource {
   active: boolean
   last_scraped_at: string | null
   last_status: string
+  // What the source primarily produces. Per-event extractors can override.
+  default_event_type: 'conference' | 'course' | 'mixed'
   created_at: string
   updated_at: string
 }

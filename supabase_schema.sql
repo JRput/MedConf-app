@@ -23,6 +23,10 @@ CREATE TABLE IF NOT EXISTS scraper_sources (
     -- subsite (info split across /tickets, /programme, /abstracts, etc).
     -- Triggers browser.fetch_multi_page_text() instead of single-page read.
     detail_is_multipage BOOLEAN DEFAULT FALSE,
+    -- Hint to the scraper for which event_type the source primarily emits.
+    -- Per-source extractors can override per row; this just sets the default.
+    default_event_type TEXT NOT NULL DEFAULT 'conference'
+        CHECK (default_event_type IN ('conference','course','mixed')),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -72,22 +76,61 @@ CREATE TABLE IF NOT EXISTS conferences (
     booking_url TEXT,
     source_url TEXT UNIQUE NOT NULL,
     description TEXT,
+    -- 'conference' (the default; single event, optional abstract submissions)
+    -- 'course' (a recurring offering — see course_sessions for the dates).
+    event_type TEXT NOT NULL DEFAULT 'conference'
+        CHECK (event_type IN ('conference','course')),
     archived BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- Table: course_sessions
+-- One row per scheduled run of a course. A course parent row in conferences
+-- (event_type = 'course') has many of these; each session has its own date
+-- range, availability state, and optionally its own booking URL and pricing.
+-- Conferences (event_type = 'conference') do not use this table.
+CREATE TABLE IF NOT EXISTS course_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    course_id INTEGER NOT NULL REFERENCES conferences(id) ON DELETE CASCADE,
+    start_date DATE NOT NULL,
+    end_date DATE,
+    start_time TEXT,
+    -- Free text when the source publishes duration as words rather than a
+    -- precise date span (e.g. "3 days", "Half day", "6 evenings").
+    duration_text TEXT,
+    -- Source-truth booking status for THIS specific session
+    availability_status TEXT NOT NULL DEFAULT 'unknown'
+        CHECK (availability_status IN ('available','limited','sold_out','unknown')),
+    -- Only set when the source publishes a number ("Only 3 spots left")
+    spots_left INTEGER,
+    -- Some sources expose a different booking URL per session
+    booking_url TEXT,
+    notes TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_course_sessions_course ON course_sessions(course_id);
+CREATE INDEX IF NOT EXISTS idx_course_sessions_start_date ON course_sessions(start_date);
+CREATE INDEX IF NOT EXISTS idx_course_sessions_status ON course_sessions(availability_status);
+
 -- Table: pricing_tiers
--- Conference pricing information (multiple tiers per conference)
+-- Conference / course pricing information (multiple tiers per parent).
+-- For courses with FLAT pricing across all sessions, session_id IS NULL.
+-- For courses with per-session pricing (e.g. early-bird per session),
+-- session_id references a specific course_sessions row.
 CREATE TABLE IF NOT EXISTS pricing_tiers (
     id SERIAL PRIMARY KEY,
     conference_id INTEGER REFERENCES conferences(id) ON DELETE CASCADE,
+    session_id UUID REFERENCES course_sessions(id) ON DELETE CASCADE,
     tier_label TEXT NOT NULL,
     price_gbp DECIMAL(10,2) NOT NULL,
     is_early_bird BOOLEAN DEFAULT FALSE,
     early_bird_deadline DATE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_pricing_tiers_session ON pricing_tiers(session_id);
+CREATE INDEX IF NOT EXISTS idx_conferences_event_type ON conferences(event_type);
 
 -- ============================================
 -- USER TABLES
@@ -210,6 +253,7 @@ ALTER TABLE user_reminders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pricing_tiers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE course_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE scraper_sources ENABLE ROW LEVEL SECURITY;
 ALTER TABLE scraper_logs ENABLE ROW LEVEL SECURITY;
 
@@ -325,6 +369,11 @@ CREATE POLICY "Anyone can view conferences"
 -- Anyone can view pricing tiers
 CREATE POLICY "Anyone can view pricing tiers"
     ON pricing_tiers FOR SELECT
+    USING (TRUE);
+
+-- Anyone can view course sessions
+CREATE POLICY "Anyone can view course sessions"
+    ON course_sessions FOR SELECT
     USING (TRUE);
 
 -- ============================================

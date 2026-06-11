@@ -200,6 +200,100 @@ The schema has a `region` field but most source pages don't print it explicitly.
 
 ---
 
+## Course-type sources (event_type = 'course')
+
+Most existing sources publish ONE event per row — a conference on fixed
+dates. Course-type sources publish ONE offering that runs on MANY dates
+("Trauma Refresher: 14 Oct · 21 Nov · 12 Feb"). The data model splits
+the parent (the course's shared metadata) from its child rows (the
+scheduled sessions).
+
+### Data shape
+
+```
+conferences (event_type = 'course') — the course itself
+  + course_sessions[]                 — one row per scheduled run
+    - start_date / end_date / start_time
+    - duration_text         ("3 days", "Half day", "6 evenings")
+    - availability_status   ('available' | 'limited' | 'sold_out' | 'unknown')
+    - spots_left            (only when the source publishes a number)
+    - booking_url           (per-session if it differs from the parent)
+  + pricing_tiers[]                   — one of two shapes:
+    - session_id = NULL → tier applies to ALL sessions (flat course pricing)
+    - session_id = <uuid> → tier scoped to that one session (e.g. variable pricing)
+```
+
+The parent row's `start_date` should be set to the **earliest upcoming session's start_date** so the row sorts sensibly in the directory list view. The full date picture lives in `course_sessions`.
+
+### When to flag a source as a course source
+
+Add a row to `scraper_sources` with `default_event_type = 'course'`. The
+per-source extractor then emits course parents + sessions. A source that
+serves BOTH conferences and courses uses `'mixed'` and the extractor sets
+`event_type` per row.
+
+### What the extractor returns
+
+In addition to the usual conference fields, a course extractor returns:
+
+```python
+{
+    # ... all the usual conference fields (name, description, specialty,
+    # CPD, format, venue, organiser_url, source_url) ...
+    "event_type": "course",
+    "sessions": [
+        {
+            "start_date": "2026-10-14",
+            "end_date": None,
+            "start_time": "09:00",
+            "duration_text": "3 days",
+            "availability_status": "available",   # or 'limited' / 'sold_out' / 'unknown'
+            "spots_left": None,                   # set only when a number is published
+            "booking_url": None,                  # only if it differs from parent
+            "notes": None,
+        },
+        # ... more sessions
+    ],
+    # Pricing same shape as conferences. Add session_id only if the
+    # source has per-session pricing.
+    "pricing_tiers": [
+        {"tier_label": "Member", "price_gbp": 295.0, "session_id": None},
+        # ...
+    ],
+}
+```
+
+The scraper's upsert logic will:
+1. Upsert the parent into `conferences` (by `source_url`).
+2. Delete + insert child `course_sessions` rows for that course.
+3. Delete + insert `pricing_tiers` rows (mixing flat and per-session as emitted).
+
+### How to read availability text from a source page
+
+Three patterns, in order of common-ness:
+
+| Pattern | Example text | Map to |
+|---|---|---|
+| Plain labels | "Sold out" / "Book now" / "Fully booked" | `sold_out` / `available` |
+| Limited-spots note | "Only 3 places left", "Last few spots" | `limited` + parse `spots_left` if possible |
+| Live capacity widget | Booking iframe with seat count | `available`/`limited`/`sold_out` based on a numeric threshold (e.g. ≤5 → `limited`) |
+
+If none of the above is unambiguously present on a session row, set
+`availability_status = 'unknown'` — better than guessing.
+
+### How to handle flat vs per-session pricing
+
+- **Flat** (the common case): emit pricing tiers with `session_id = None`. One set of tier rows covers all sessions.
+- **Per-session** (e.g. early bird per session): emit each tier row with the relevant session UUID. The frontend will display the tiers under the chosen session.
+
+If unsure, start with **flat** and revisit if the source clearly shows different prices on different sessions.
+
+### Reminders + saving
+
+User-facing: a user **saves the course** (not a session), but **sets reminders on a specific session**. The schema already supports this — `saved_conferences.conference_id` references the parent; `user_reminders.conference_id` does too, with session info implicit in the reminder type/date. No schema changes needed when onboarding a course source.
+
+---
+
 ## Soft-field architecture — every LLM-only field needs a deterministic fallback
 
 The scraper used to treat `description` and `specialty` as LLM-only. That
