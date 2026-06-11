@@ -31,9 +31,11 @@ export default function DashboardPage() {
 
     const load = async () => {
       const today = new Date().toISOString().slice(0, 10)
-      const in14 = new Date(Date.now() + 14 * 86400_000).toISOString().slice(0, 10)
-      const oneWeekAgo = new Date(Date.now() - 7 * 86400_000).toISOString()
+      const in14 = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10)
+      const oneWeekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
 
+      // Round 1: profile (needed for the specialty filter) + saved IDs.
+      // Both come from small tables keyed by user_id, so they're fast.
       const [profileResp, savedIdsResp] = await Promise.all([
         supabase
           .from('user_profiles')
@@ -51,20 +53,21 @@ export default function DashboardPage() {
       const savedIds = (savedIdsResp.data ?? []).map(r => r.conference_id)
       const totalSaved = savedIds.length
 
-      let upcomingSaved: Conference[] = []
-      if (savedIds.length > 0) {
-        const { data: rows } = await supabase
-          .from('conferences')
-          .select('*')
-          .in('id', savedIds)
-          .eq('archived', false)
-          .gte('start_date', today)
-          .order('start_date', { ascending: true })
-          .limit(3)
-        upcomingSaved = rows ?? []
-      }
+      // Round 2: the three conferences queries run in parallel. Skipping
+      // ones whose precondition isn't met (no saved IDs / no specialty)
+      // by resolving an empty array, so Promise.all stays balanced.
+      const upcomingP = savedIds.length > 0
+        ? supabase
+            .from('conferences')
+            .select('*')
+            .in('id', savedIds)
+            .eq('archived', false)
+            .gte('start_date', today)
+            .order('start_date', { ascending: true })
+            .limit(3)
+        : Promise.resolve({ data: [] as Conference[] })
 
-      const { data: closingRows } = await supabase
+      const closingP = supabase
         .from('conferences')
         .select('*')
         .eq('archived', false)
@@ -74,26 +77,29 @@ export default function DashboardPage() {
         .order('abstract_deadline', { ascending: true })
         .limit(3)
 
-      let newInSpecialty: Conference[] = []
-      if (specialty) {
-        const { data: rows } = await supabase
-          .from('conferences')
-          .select('*')
-          .eq('archived', false)
-          .ilike('specialty', specialty)
-          .gte('created_at', oneWeekAgo)
-          .order('created_at', { ascending: false })
-          .limit(3)
-        newInSpecialty = rows ?? []
-      }
+      // Use eq instead of ilike — specialty values come from a controlled
+      // dropdown, so case matches. ilike was forcing a sequential scan
+      // because there's no functional lower() index.
+      const newInSpecP = specialty
+        ? supabase
+            .from('conferences')
+            .select('*')
+            .eq('archived', false)
+            .eq('specialty', specialty)
+            .gte('created_at', oneWeekAgo)
+            .order('created_at', { ascending: false })
+            .limit(3)
+        : Promise.resolve({ data: [] as Conference[] })
+
+      const [upcomingResp, closingResp, newInSpecResp] = await Promise.all([upcomingP, closingP, newInSpecP])
 
       setData({
         fullName,
         specialty,
         totalSaved,
-        upcomingSaved,
-        closingDeadlines: closingRows ?? [],
-        newInSpecialty,
+        upcomingSaved: (upcomingResp.data ?? []) as Conference[],
+        closingDeadlines: (closingResp.data ?? []) as Conference[],
+        newInSpecialty: (newInSpecResp.data ?? []) as Conference[],
       })
       setLoading(false)
     }

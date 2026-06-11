@@ -191,6 +191,8 @@ CREATE INDEX IF NOT EXISTS idx_conferences_is_sold_out ON conferences(is_sold_ou
 CREATE INDEX IF NOT EXISTS idx_conferences_event_format ON conferences(event_format);
 CREATE INDEX IF NOT EXISTS idx_conferences_source_id ON conferences(source_id);
 CREATE INDEX IF NOT EXISTS idx_conferences_source_url ON conferences(source_url);
+CREATE INDEX IF NOT EXISTS idx_conferences_abstract_deadline ON conferences(abstract_deadline) WHERE archived = FALSE;
+CREATE INDEX IF NOT EXISTS idx_conferences_created_at ON conferences(created_at) WHERE archived = FALSE;
 CREATE INDEX IF NOT EXISTS idx_pricing_tiers_conference ON pricing_tiers(conference_id);
 CREATE INDEX IF NOT EXISTS idx_saved_conferences_user ON saved_conferences(user_id);
 CREATE INDEX IF NOT EXISTS idx_saved_conferences_conf ON saved_conferences(conference_id);
