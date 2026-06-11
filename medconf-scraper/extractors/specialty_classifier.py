@@ -36,7 +36,9 @@ SPECIALTY_RULES: List[Tuple[str, List[str]]] = [
     ("Respiratory",                  ["respirator", "asthma", "copd", "pulmonary"]),
     ("Musculoskeletal & Trauma",     ["musculoskeletal", " msk ", "orthopaedic", "orthopedic", "joint injection",
                                       "joint pain", "back pain", "rheumat", "trauma symposium",
-                                      "trauma management", "fracture"]),
+                                      "trauma management", "fracture",
+                                      "trauma life support", "atls", "advanced trauma life",
+                                      "trauma nursing", "atnc", "tnc"]),
     ("Neurology",                    ["neurolog", "stroke", "epilepsy", "migraine", "headache", "parkinson"]),
     ("Oncology",                     ["oncolog", "cancer ", "tumour", "chemotherap", "palliative", "breast cancer"]),
     ("Gastroenterology",             ["gastroenterolog", "gastrointestinal", " ibd ", " ibs ",
@@ -58,7 +60,11 @@ SPECIALTY_RULES: List[Tuple[str, List[str]]] = [
                                       "virtual consult", "telephone consulting"]),
     ("Primary Care AI / Digital",    ["clinical ai", "ai in primary", "ambient voice", "digital health",
                                       "ehr", "clinical risk management"]),
-    ("Surgery (RCS)",                ["mrcs ", "general surgery", "surgical training"]),
+    ("Surgery (RCS)",                ["mrcs ", " mrcs", "frcs", " frcs", "general surgery", "surgical training",
+                                      "surgical skills", "basic surgical", " bss ",
+                                      "applied anatomy", "scalpel",
+                                      "ccrisp", "critically ill surgical", "care of the critically ill",
+                                      "surgical care", "surgical patient", "stratos", "anatomy for surgical"]),
 
     # --- Practice / training / professional development ---
     ("Exam Preparation",             ["mrcgp", "sca exam", "akt exam", "akt preparation", "preparation course",
@@ -91,13 +97,28 @@ def classify_specialty(title: Optional[str], description: Optional[str] = None) 
     """
     Return the FIRST matching specialty by keyword. None if nothing matched.
 
-    Designed to be cheap and never raise — safe to call on every event.
+    Title runs first; description is only consulted as a tiebreaker when the
+    title alone yields nothing. Why: many sources have site-wide navigation
+    or boilerplate text (e.g. RCSEng's "Dental Courses" nav link) that leaks
+    into the page body and was making the classifier mis-tag clearly-surgical
+    courses as "Dentistry". Trusting the title first avoids that.
     """
     if not title and not description:
         return None
-    text = f" {(title or '').lower()} {(description or '').lower()} "
-    for label, keywords in SPECIALTY_RULES:
-        for kw in keywords:
-            if kw in text:
-                return label
+
+    title_lc = f" {(title or '').lower()} "
+    if title_lc.strip():
+        for label, keywords in SPECIALTY_RULES:
+            for kw in keywords:
+                if kw in title_lc:
+                    return label
+
+    # Title didn't match — fall back to the body. The body still helps for
+    # short titles like "MRCS prep" where the topic is only stated below.
+    desc_lc = f" {(description or '').lower()} "
+    if desc_lc.strip():
+        for label, keywords in SPECIALTY_RULES:
+            for kw in keywords:
+                if kw in desc_lc:
+                    return label
     return None
