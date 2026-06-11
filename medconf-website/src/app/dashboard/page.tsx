@@ -10,6 +10,7 @@ import {
   Bookmark, Calendar, Bell, FileText, Sparkles, Clock,
   ArrowRight, Loader2, MapPin, Building2,
 } from 'lucide-react'
+import { isAbstractEffectivelyOpen } from '@/lib/conference-helpers'
 
 interface DashboardData {
   fullName: string | null
@@ -336,14 +337,36 @@ function MiniConferenceCard({ c, highlightDeadline = false }: { c: Conference; h
             </span>
           </div>
         )}
-        {highlightDeadline && deadlineLabel && (
+        {/* Abstract submission state — always surfaced when relevant so a saved
+            conference whose deadline has passed doesn't quietly look the same
+            as one that's still accepting. */}
+        {highlightDeadline && deadlineLabel ? (
           <div className="flex items-center gap-2 text-amber-400 font-medium">
             <Clock className="w-3.5 h-3.5" />
             <span>
               Deadline {deadlineLabel}{daysLeft !== null ? ` · ${daysLeft}d left` : ''}
             </span>
           </div>
-        )}
+        ) : isAbstractEffectivelyOpen(c) && deadlineLabel && daysLeft !== null && daysLeft <= 14 ? (
+          <div className="flex items-center gap-2 text-amber-400 font-medium">
+            <FileText className="w-3.5 h-3.5" />
+            <span>
+              {daysLeft === 0 ? 'Deadline today' :
+               daysLeft === 1 ? '1 day left' :
+               `${daysLeft} days left`}
+            </span>
+          </div>
+        ) : isAbstractEffectivelyOpen(c) ? (
+          <div className="flex items-center gap-2 text-amber-400">
+            <FileText className="w-3.5 h-3.5" />
+            <span>Abstracts open</span>
+          </div>
+        ) : c.abstract_deadline ? (
+          <div className="flex items-center gap-2 text-slate-500">
+            <FileText className="w-3.5 h-3.5" />
+            <span>Abstracts closed</span>
+          </div>
+        ) : null}
       </div>
     </Link>
   )

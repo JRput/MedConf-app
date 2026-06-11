@@ -151,12 +151,20 @@ export function ConferenceCard({ conference: c, tiers, sourceName }: ConferenceC
                `${daysUntilDeadline} days left`}
             </span>
           </div>
-        ) : isAbstractEffectivelyOpen(c) && (
+        ) : isAbstractEffectivelyOpen(c) ? (
           <div className="flex items-center gap-2 text-amber-400">
             <FileText className="w-4 h-4" />
             <span className="text-xs font-medium">Abstracts Open</span>
           </div>
-        )}
+        ) : c.abstract_deadline ? (
+          // Deadline existed but has passed (or abstract_open was always
+          // false). Tell the user explicitly so they don't keep thinking
+          // a conference they saved is still accepting submissions.
+          <div className="flex items-center gap-2 text-slate-500">
+            <FileText className="w-4 h-4" />
+            <span className="text-xs font-medium">Abstracts Closed</span>
+          </div>
+        ) : null}
       </div>
 
       {/* Actions */}
