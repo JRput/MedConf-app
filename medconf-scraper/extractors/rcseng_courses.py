@@ -330,7 +330,9 @@ class RCSEngCoursesExtractor(BaseExtractor):
                 value = float(raw.replace(",", ""))
             except ValueError:
                 continue
-            if 10 <= value <= 10_000:
+            # 0 is allowed (legitimate "free course" signal). Upper bound stays
+            # at 10k so phone numbers, CPD-points counts etc. don't sneak in.
+            if 0 <= value <= 10_000:
                 return [{
                     "tier_label": "Course fee",
                     "price_gbp": value,

@@ -25,11 +25,13 @@ export function ConferenceCard({ conference: c, tiers, sourceName, sessions }: C
 
   const minPrice = tiers.length ? Math.min(...tiers.map(t => t.price_gbp)) : null
   const maxPrice = tiers.length ? Math.max(...tiers.map(t => t.price_gbp)) : null
-  const priceLabel = isCourse && minPrice !== null
-    ? (minPrice === maxPrice ? `From £${minPrice}` : `From £${minPrice}`)
-    : minPrice !== null
-      ? (minPrice === maxPrice ? `£${minPrice}` : `£${minPrice} – £${maxPrice}`)
-      : 'Price TBC'
+  const priceLabel = minPrice === 0
+    ? (maxPrice === 0 ? 'Free' : `Free – £${maxPrice}`)
+    : isCourse && minPrice !== null
+      ? `From £${minPrice}`
+      : minPrice !== null
+        ? (minPrice === maxPrice ? `£${minPrice}` : `£${minPrice} – £${maxPrice}`)
+        : 'Price TBC'
 
   const formatDate = (dateStr: string | null) => {
     if (!dateStr) return null
