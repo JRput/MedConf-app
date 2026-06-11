@@ -7,6 +7,7 @@ from database import (
     archive_expired_conferences,
     archive_stale_conferences,
     archive_undated_past_conferences,
+    close_passed_abstract_deadlines,
     update_source_last_full_walk,
 )
 from scraper import scrape_source
@@ -34,10 +35,12 @@ def run_all_sources() -> None:
     expired = archive_expired_conferences()
     undated_past = archive_undated_past_conferences()
     stale = archive_stale_conferences(stale_days=14)
+    closed_abstracts = close_passed_abstract_deadlines()
     logger.info(
         f"Archival sweep: end_date<today archived, "
         f"{undated_past or 0} undated-past archived, "
-        f"{stale or 0} unseen-14d archived"
+        f"{stale or 0} unseen-14d archived, "
+        f"{closed_abstracts or 0} stale abstract_open flipped"
     )
 
     logger.info("=== Scraper run complete ===")

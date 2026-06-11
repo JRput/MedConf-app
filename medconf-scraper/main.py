@@ -20,6 +20,7 @@ from database import (
     archive_expired_conferences,
     archive_stale_conferences,
     archive_undated_past_conferences,
+    close_passed_abstract_deadlines,
     update_source_last_full_walk,
 )
 from logger import logger, log_scrape_run
@@ -44,14 +45,17 @@ def run_single_source(source_id: int) -> int:
         except Exception as e:
             logger.warning(f"Failed to update last_full_walk_at: {e}")
 
-    # Archival sweep runs regardless of single/multi-source flow.
-    # Cheap and idempotent — better to run too often than miss it.
+    # Archival + housekeeping sweep runs regardless of single/multi-source
+    # flow. Cheap and idempotent — better to run too often than miss it.
     try:
         archive_expired_conferences()
         archive_undated_past_conferences()
         archive_stale_conferences(stale_days=14)
+        closed = close_passed_abstract_deadlines()
+        if closed:
+            logger.info(f"Flipped abstract_open=FALSE on {closed} past-deadline rows")
     except Exception as e:
-        logger.warning(f"Archival sweep failed: {e}")
+        logger.warning(f"Housekeeping sweep failed: {e}")
 
     return 0 if summary["status"] in ("success", "partial") else 1
 

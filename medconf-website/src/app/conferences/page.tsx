@@ -10,6 +10,7 @@ import {
   Calendar, Loader2, FileText, Clock, Sparkles, SlidersHorizontal,
 } from 'lucide-react'
 import Link from 'next/link'
+import { isAbstractEffectivelyOpen } from '@/lib/conference-helpers'
 
 export default function ConferencesPage() {
   const {
@@ -31,7 +32,7 @@ export default function ConferencesPage() {
     let abstractsOpen = 0
     let closingSoon = 0
     for (const c of allConferences) {
-      if (c.abstract_open) abstractsOpen++
+      if (isAbstractEffectivelyOpen(c)) abstractsOpen++
       if (c.abstract_deadline && c.abstract_deadline >= today && c.abstract_deadline <= in14) closingSoon++
     }
     return { total: allConferences.length, abstractsOpen, closingSoon }

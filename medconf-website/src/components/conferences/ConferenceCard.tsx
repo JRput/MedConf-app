@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { CPDBadge } from '@/components/conferences/CPDBadge'
 import { SaveButton } from '@/components/ui/SaveButton'
 import type { Conference, PricingTier } from '@/lib/types'
+import { isAbstractEffectivelyOpen } from '@/lib/conference-helpers'
 import { Calendar, Clock, MapPin, PoundSterling, ArrowRight, ExternalLink, FileText, Globe, Building2 } from 'lucide-react'
 
 interface ConferenceCardProps {
@@ -150,7 +151,7 @@ export function ConferenceCard({ conference: c, tiers, sourceName }: ConferenceC
                `${daysUntilDeadline} days left`}
             </span>
           </div>
-        ) : c.abstract_open && (
+        ) : isAbstractEffectivelyOpen(c) && (
           <div className="flex items-center gap-2 text-amber-400">
             <FileText className="w-4 h-4" />
             <span className="text-xs font-medium">Abstracts Open</span>

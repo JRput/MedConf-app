@@ -11,6 +11,7 @@ import type { Conference, PricingTier } from '@/lib/types'
 import Link from 'next/link'
 import { ArrowLeft, Calendar, MapPin, FileText, Clock, ExternalLink, Loader2, AlertCircle, Globe, Building2, Download, Share2, Check } from 'lucide-react'
 import { downloadIcs } from '@/lib/ics'
+import { isAbstractEffectivelyOpen } from '@/lib/conference-helpers'
 
 export default function ConferenceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
@@ -184,9 +185,9 @@ export default function ConferenceDetailPage({ params }: { params: Promise<{ id:
                 <FileText className="w-4 h-4" />
                 Abstract Submissions
               </p>
-              <p className={c.abstract_open ? 'text-emerald-400 font-semibold' : 'text-slate-300'}>
-                {c.abstract_open ? 'Open' : 'Closed'}
-                {c.abstract_open && c.abstract_deadline && (
+              <p className={isAbstractEffectivelyOpen(c) ? 'text-emerald-400 font-semibold' : 'text-slate-300'}>
+                {isAbstractEffectivelyOpen(c) ? 'Open' : 'Closed'}
+                {isAbstractEffectivelyOpen(c) && c.abstract_deadline && (
                   <span className="text-amber-400 ml-2">
                     – deadline {new Date(c.abstract_deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
                   </span>

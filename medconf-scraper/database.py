@@ -96,6 +96,26 @@ def archive_undated_past_conferences() -> int:
     return len(response.data) if response.data else 0
 
 
+def close_passed_abstract_deadlines() -> int:
+    """
+    Flip abstract_open = FALSE on rows whose abstract_deadline has passed.
+
+    The scraper extracts abstract_open from the source page's text ("abstracts
+    open" etc.), but the source rarely updates that phrasing the moment the
+    deadline passes — so without a cleanup pass the directory keeps showing
+    closed submissions as still open. The deadline date is the source of
+    truth, so this just enforces consistency between the two fields.
+
+    Returns the number of rows updated.
+    """
+    today = date.today().isoformat()
+    response = supabase.table("conferences").update({
+        "abstract_open": False,
+        "updated_at": datetime.utcnow().isoformat()
+    }).eq("abstract_open", True).lt("abstract_deadline", today).eq("archived", False).execute()
+    return len(response.data) if response.data else 0
+
+
 def bump_last_seen(conference_id: int) -> None:
     """Update last_seen_at for a conference confirmed by the current scrape."""
     supabase.table("conferences").update({
