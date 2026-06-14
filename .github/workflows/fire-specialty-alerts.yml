@@ -1,0 +1,40 @@
+name: Fire specialty alerts
+
+# Runs daily at 03:00 UTC — one hour after the main scrape (02:00 UTC)
+# so it sees any newly-added events. Per user, finds events created
+# after their last_specialty_alert_at watermark, fires one batched
+# in-app notification ("3 new Cardiology events"), and advances the
+# watermark. In-app only; no email send.
+on:
+  schedule:
+    - cron: '0 3 * * *'   # 03:00 UTC daily
+  workflow_dispatch:       # manual trigger
+
+jobs:
+  alerts:
+    name: Fire specialty alerts
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: medconf-scraper/requirements.txt
+
+      - name: Install Python dependencies
+        working-directory: medconf-scraper
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Fire alerts
+        working-directory: medconf-scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python fire_specialty_alerts.py

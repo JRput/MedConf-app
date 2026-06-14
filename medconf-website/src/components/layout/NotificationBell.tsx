@@ -154,13 +154,30 @@ export function NotificationBell() {
   )
 }
 
+function extractSpecialtyFromTitle(title: string): string {
+  // The cron emits titles like "3 new Cardiology events" or
+  // "5 new Surgery (RCS) courses". The specialty is the slice between
+  // "X new" and the trailing noun (event/conference/course/...).
+  const parts = title.split(' ')
+  if (parts.length < 4) return ''
+  return parts.slice(2, -1).join(' ')
+}
+
 function NotificationRow({ item, onClick }: { item: NotificationItem; onClick: () => void }) {
   const unread = !item.read_at
   const style = TYPE_STYLE[item.type] ?? TYPE_STYLE.system
   const Icon = style.icon
 
-  // If the notification has a conference, link to it; otherwise to the full list
-  const href = item.conference_id ? `/conferences/${item.conference_id}` : '/dashboard/notifications'
+  // Click target depends on the notification type:
+  // - reminder / conference_change: open the specific conference
+  // - new_in_specialty: open the directory pre-filtered to that specialty,
+  //   sorted by recently_added so the new arrivals surface at the top
+  // - everything else: the full notifications list
+  const href = item.conference_id
+    ? `/conferences/${item.conference_id}`
+    : item.type === 'new_in_specialty'
+      ? `/conferences?specialty=${encodeURIComponent(extractSpecialtyFromTitle(item.title))}&sort=recently_added`
+      : '/dashboard/notifications'
 
   return (
     <Link

@@ -118,6 +118,11 @@ export default function OnboardingPage() {
     setSaving(true)
     setError('')
 
+    // Stamp last_specialty_alert_at = NOW() so the daily specialty-alert
+    // cron only notifies this user about events added AFTER they signed up.
+    // Without this, a fresh user with Cardiology specialty would otherwise
+    // get a giant "127 new Cardiology conferences" alert on the next run.
+    const nowIso = new Date().toISOString()
     const profilePayload = {
       id: user.id,
       email: user.email ?? '',
@@ -127,7 +132,8 @@ export default function OnboardingPage() {
       institution: institution.trim() || null,
       country,
       region: country === 'United Kingdom' ? (region || null) : null,
-      profile_completed_at: new Date().toISOString(),
+      profile_completed_at: nowIso,
+      last_specialty_alert_at: nowIso,
     }
 
     // upsert covers both fresh signups and partial-profile users from the old flow

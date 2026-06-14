@@ -158,6 +158,13 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     -- to bounce signed-in users to /onboarding until they finish the
     -- 3-step wizard. Set on the final wizard step's submit.
     profile_completed_at TIMESTAMPTZ,
+    -- Watermark for the "new in your specialty" daily alerts cron.
+    -- Each run finds conferences created AFTER this timestamp matching
+    -- the user's specialty, fires one batched notification, and advances
+    -- the watermark. Stamped to NOW() on onboarding completion so new
+    -- users only get alerted about events added after they joined
+    -- (rather than every match in the catalogue).
+    last_specialty_alert_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

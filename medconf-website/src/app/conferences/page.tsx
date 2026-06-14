@@ -258,6 +258,7 @@ export default function ConferencesPage() {
                     tiers={pricingMap[c.id] || []}
                     sessions={sessionsMap[c.id]}
                     sourceName={c.source_id ? sourceMap[c.source_id] : null}
+                    showNewBadge={filters.sort === 'recently_added'}
                   />
                 ))}
               </div>

@@ -144,11 +144,21 @@ function FilterTab({ label, active, onClick }: { label: string; active: boolean;
   )
 }
 
+function extractSpecialtyFromTitle(title: string): string {
+  const parts = title.split(' ')
+  if (parts.length < 4) return ''
+  return parts.slice(2, -1).join(' ')
+}
+
 function Row({ item, onClick }: { item: NotificationItem; onClick: () => void }) {
   const unread = !item.read_at
   const style = TYPE_STYLE[item.type] ?? TYPE_STYLE.system
   const Icon = style.icon
-  const href = item.conference_id ? `/conferences/${item.conference_id}` : '#'
+  const href = item.conference_id
+    ? `/conferences/${item.conference_id}`
+    : item.type === 'new_in_specialty'
+      ? `/conferences?specialty=${encodeURIComponent(extractSpecialtyFromTitle(item.title))}&sort=recently_added`
+      : '#'
 
   return (
     <Link

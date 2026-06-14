@@ -11,6 +11,11 @@ interface ConferenceCardProps {
   tiers: PricingTier[]
   sourceName?: string | null
   sessions?: CourseSession[]
+  /** When true, render the "NEW" badge if the conference was added in the
+   * last 7 days. Used by the directory when sort=recently_added so users
+   * arriving from a "new in your specialty" notification can spot the
+   * newcomers at a glance. */
+  showNewBadge?: boolean
 }
 
 const FORMAT_LABEL: Record<string, { label: string; Icon: typeof Globe }> = {
@@ -19,9 +24,12 @@ const FORMAT_LABEL: Record<string, { label: string; Icon: typeof Globe }> = {
   hybrid: { label: 'Hybrid', Icon: Globe },
 }
 
-export function ConferenceCard({ conference: c, tiers, sourceName, sessions }: ConferenceCardProps) {
+export function ConferenceCard({ conference: c, tiers, sourceName, sessions, showNewBadge = false }: ConferenceCardProps) {
   const isCourse = c.event_type === 'course'
   const courseSummary = isCourse ? courseSessionSummary(sessions) : null
+
+  const isNew = showNewBadge && c.created_at
+    && (Date.now() - new Date(c.created_at).getTime()) < 7 * 86_400_000
 
   const minPrice = tiers.length ? Math.min(...tiers.map(t => t.price_gbp)) : null
   const maxPrice = tiers.length ? Math.max(...tiers.map(t => t.price_gbp)) : null
@@ -113,6 +121,11 @@ export function ConferenceCard({ conference: c, tiers, sourceName, sessions }: C
               <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-300 border border-violet-500/30 flex-shrink-0">
                 <Layers className="w-3 h-3" />
                 Course
+              </span>
+            )}
+            {isNew && (
+              <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex-shrink-0">
+                New
               </span>
             )}
           </div>
