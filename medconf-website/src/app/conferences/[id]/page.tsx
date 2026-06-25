@@ -12,7 +12,7 @@ import type { Conference, PricingTier, CourseSession } from '@/lib/types'
 import Link from 'next/link'
 import { ArrowLeft, Calendar, MapPin, FileText, Clock, ExternalLink, Loader2, AlertCircle, Globe, Building2, Download, Share2, Check } from 'lucide-react'
 import { downloadIcs } from '@/lib/ics'
-import { isAbstractEffectivelyOpen } from '@/lib/conference-helpers'
+import { isAbstractEffectivelyOpen, hasAbstractInfo } from '@/lib/conference-helpers'
 
 export default function ConferenceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params)
@@ -179,20 +179,24 @@ export default function ConferenceDetailPage({ params }: { params: Promise<{ id:
               )}
             </div>
 
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-slate-400 flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                Abstract Submissions
-              </p>
-              <p className={isAbstractEffectivelyOpen(c) ? 'text-emerald-400 font-semibold' : 'text-slate-300'}>
-                {isAbstractEffectivelyOpen(c) ? 'Open' : 'Closed'}
-                {isAbstractEffectivelyOpen(c) && c.abstract_deadline && (
+            {hasAbstractInfo(c) && (
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-slate-400 flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Abstract Submissions
+                </p>
+                <p className={isAbstractEffectivelyOpen(c) ? 'text-emerald-400 font-semibold' : 'text-slate-300'}>
+                  {isAbstractEffectivelyOpen(c) ? 'Open' : 'Closed'}
                   <span className="text-amber-400 ml-2">
-                    – deadline {new Date(c.abstract_deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
+                    {c.abstract_deadline_note
+                      ? `– ${c.abstract_deadline_note}`
+                      : c.abstract_deadline
+                        ? `– deadline ${new Date(c.abstract_deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`
+                        : null}
                   </span>
-                )}
-              </p>
-            </div>
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Description */}
@@ -206,8 +210,11 @@ export default function ConferenceDetailPage({ params }: { params: Promise<{ id:
           {/* Reminders */}
           <ReminderPanel conference={c} sessions={sessions} />
 
-          {/* Sessions (for courses) or Pricing (for conferences) */}
-          {c.event_type === 'course' ? (
+          {/* Sessions (for multi-session courses) or Pricing (everything
+              else). A row tagged 'course' without any course_sessions
+              children is a single-date "course" — show its parent-row
+              pricing rather than an empty sessions table. */}
+          {c.event_type === 'course' && sessions.length > 0 ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="font-bold text-white text-lg">Upcoming sessions</h2>

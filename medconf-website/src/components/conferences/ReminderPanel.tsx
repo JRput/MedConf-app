@@ -37,7 +37,10 @@ export function ReminderPanel({ conference, sessions }: Props) {
   const [saving, setSaving] = useState(false)
   const [justSaved, setJustSaved] = useState(false)
 
-  const isCourse = conference.event_type === 'course'
+  // Only multi-session courses use the session picker. Single-date courses
+  // (no course_sessions rows) fall back to the conventional date-based
+  // reminder so users can still set one.
+  const isCourse = conference.event_type === 'course' && (sessions?.length ?? 0) > 0
   const availableSessions = isCourse ? upcomingSessions(sessions) : []
 
   // Available reminder types for THIS event. Courses use 'conference_start'

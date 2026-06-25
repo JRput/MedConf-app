@@ -26,7 +26,7 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
             }
 
     # Validate and parse dates
-    for date_field in ["start_date", "end_date", "abstract_deadline"]:
+    for date_field in ["start_date", "end_date", "abstract_deadline", "on_demand_original_date"]:
         val = cleaned.get(date_field)
         if val:
             try:
@@ -63,7 +63,7 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
             cleaned["cpd_points"] = None
     
     # Ensure booleans are correct type
-    for bool_field in ["cpd_accredited", "abstract_open", "is_sold_out"]:
+    for bool_field in ["cpd_accredited", "abstract_open", "is_sold_out", "is_on_demand", "is_flagship"]:
         cleaned[bool_field] = bool(cleaned.get(bool_field, False))
 
     # Ensure archived is False by default (so frontend can see new conferences)
@@ -77,7 +77,7 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Validate event_type — defaults to 'conference' if missing/invalid
     et = cleaned.get("event_type")
-    if et not in ("conference", "course"):
+    if et not in ("conference", "course", "workshop"):
         if et is not None:
             warnings.append(f"Invalid event_type '{et}' — defaulted to 'conference'")
         cleaned["event_type"] = "conference"

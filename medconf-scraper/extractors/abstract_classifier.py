@@ -172,8 +172,12 @@ def extract_abstract_info(
     # 4c. If a deadline is in the future → open
     if deadline and deadline >= today:
         return True, deadline
-    # 4d. Positive language but no parseable date → open with null deadline
-    if has_open_signal:
-        return True, None
-    # 4e. Default → not accepting submissions
+    # 4d. Default → no confirmed abstract submission.
+    # We deliberately do NOT flag open just because "abstract" appears with
+    # open-sounding wording and no parseable date — most such matches are
+    # false positives ("abstracts" mentioned in marketing copy, blog,
+    # speaker bios, or recap of a previous edition). A genuine open
+    # submission needs a deadline date here; if an organiser is accepting
+    # without a published date, a curator can set `abstract_deadline_note`
+    # post-scrape (see [Conference.abstract_deadline_note]).
     return False, None

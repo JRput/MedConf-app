@@ -200,6 +200,46 @@ The schema has a `region` field but most source pages don't print it explicitly.
 
 ---
 
+## Flagship detection (international/national major conferences)
+
+`conferences.is_flagship` separates **international/national major conferences** (RCEM Annual Conference, RCOG World Congress, RCGP Annual Conference) from **regional/local conferences** (everything else with `event_type='conference'`). The directory's Type filter splits these into separate "Major" and "Regional" chips so users planning year-ahead CPD can find the big flagship events without scrolling through study days.
+
+**Decision chain (in `llm_agent._merge_shell_and_detail`):**
+1. `detail["is_flagship"]` — per-source extractor explicitly set it (RCEM source 8, RCOG source 10 do this for their dedicated flagship subsites)
+2. Otherwise: title heuristic via `_is_flagship_from_title()` — matches `annual conference`, `world congress`, `international congress`, `annual meeting`, `annual scientific (meeting|conference)`, `national conference`, etc.
+3. Only fires when `event_type == 'conference'` AND `is_on_demand == False`. Workshops named "Annual Skills Day" stay workshops; past-flagship on-demand recordings live on the On-Demand chip.
+
+**When to set `is_flagship=True` in an extractor:**
+- The source is dedicated to ONE event and that event is a flagship (RCEM Annual Conference 2027, RCOG World Congress 2027).
+- The source publishes a category badge that specifically marks flagships (none of our current sources do).
+
+Otherwise leave it to the title heuristic.
+
+## 3-way event_type classification (conference / course / workshop)
+
+Every row we store has `event_type` set to ONE of three values:
+
+- **`conference`** — single dated event, plenaries + parallel sessions, usually one or multi-day. Default if nothing else fits.
+- **`course`** — taught offering that re-runs across multiple sessions (see "Course-type sources" below).
+- **`workshop`** — short focused training (½–2 days), usually one session. Includes webinars, seminars, masterclasses, study days, skills labs.
+
+How the merge layer in `llm_agent._merge_shell_and_detail` decides:
+
+```
+detail.event_type            # what the per-source extractor explicitly returned
+  or shell.category          # the listing-card badge ("Workshop"/"Conference"/"Course" — see rcp.py)
+  or _event_type_from_title  # falls back to title keywords (masterclass, webinar, congress, …)
+  or 'conference'            # default
+```
+
+**When writing a new extractor:**
+
+1. If the source publishes a category/badge on its listing cards (RCP does), surface it into `shell["category"]` in `list_shells_override()` — the merge layer maps `"workshop"|"webinar"` → workshop, `"course"` → course, `"conference"` → conference.
+2. If you have detail-page certainty (e.g. the URL pattern itself signals "course"), set `detail["event_type"]` directly in the extractor — it takes precedence over everything else.
+3. Otherwise let the title heuristic in `llm_agent._event_type_from_title` handle it. The keyword lists live there — extend them if you find false positives/negatives in your source.
+
+**Skip rule.** Application-based programmes (Chief Registrar scheme, fellowships requiring CV submission, leadership rotations etc.) are NOT events — they're job-track programmes. The extractor should not emit them. If you can't tell from a listing badge, filter on detail-page heuristics ("apply by", "selection process", "Chief Registrar", "Fellowship Programme" in title without a date range).
+
 ## Course-type sources (event_type = 'course')
 
 Most existing sources publish ONE event per row — a conference on fixed
@@ -342,6 +382,9 @@ venue/city are correctly null, so the row fast-skips on subsequent runs.
 6. **Asking the LLM to extract pricing from prose** — it fabricates. Give it the rendered HTML structure or skip the LLM entirely for that field.
 7. **Hardcoding selectors deeply nested in `if`/`else`** — split each field into its own `_extract_X()` method so unit tests can cover them individually.
 8. **Forgetting to deduplicate** — pricing tables often have responsive shadow copies in DOM (mobile + desktop versions). De-dupe by `(tier_label, price_gbp)` after extraction.
+9. **Passing raw `document.body.innerText` to the LLM for description** — every detail page leads with a nav menu, the title (often duplicated), the date line and the venue line BEFORE the actual prose. The LLM (and the fallback truncate) ends up summarising contact details and registered-charity-numbers. **Always extract just the About/Overview section content before passing to soft fields.** Pattern that works on RCEM / RCP / RCOG / most others: find the `Overview` / `About this event` heading, walk siblings until the next `<h2>`/`<h3>`, collect their paragraph text, filter out noise rows (`Register`, `View programme`, `Disclaimer`, `T +44`, `Venue |`, email addresses). See `RCOGExtractor._extract_overview_text` for the reference implementation. Sanity check: print the cleaned text in your probe phase — if you'd happily read it as the description on a card, the LLM will produce a good summary too. If it contains menu items or contact lines, fix the extractor before going live.
+10. **Reading `page` after navigating it away to a sub-page** — extracting `description` after walking to `/fees-and-how-to-book` means you're reading the empty fees page. Capture all detail-page content (Overview, sold-out flag, booking anchors) BEFORE any sub-page navigation, or navigate back afterwards.
+11. **Trusting `shell["title"]` from the listing as the canonical event name** — JS-rendered listings (RCSEng calendar, RCOG events page, RCEM Elementor grid) can momentarily render their empty-state or error view during shell harvesting, so a card text might read "There are no results matching your search criteria." or "Loading…". Always set `result["conference_name"]` from the detail page's `<h1>` (the merge layer prefers `detail["conference_name"]` over the shell title). The merge also rejects junk shell titles via `_is_junk_title()` as a safety net — but extractors should not rely on the safety net; they should read h1 directly.
 
 ---
 

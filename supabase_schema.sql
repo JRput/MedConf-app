@@ -25,8 +25,12 @@ CREATE TABLE IF NOT EXISTS scraper_sources (
     detail_is_multipage BOOLEAN DEFAULT FALSE,
     -- Hint to the scraper for which event_type the source primarily emits.
     -- Per-source extractors can override per row; this just sets the default.
+    -- Short organisation label (e.g. "RCEM", "RCSEng") used to fold
+    -- multiple sources from the same society into a single chip on the
+    -- directory's source filter row.
+    society TEXT,
     default_event_type TEXT NOT NULL DEFAULT 'conference'
-        CHECK (default_event_type IN ('conference','course','mixed')),
+        CHECK (default_event_type IN ('conference','workshop','course','mixed')),
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -71,15 +75,35 @@ CREATE TABLE IF NOT EXISTS conferences (
     cpd_accredited BOOLEAN DEFAULT FALSE,
     cpd_points INTEGER,
     abstract_open BOOLEAN DEFAULT FALSE,
+    -- Curator-set free text shown in place of the date when an organiser
+    -- confirms abstract submissions are open but hasn't published a deadline
+    -- (e.g. "see event page for details"). When NULL, the date governs.
+    abstract_deadline_note TEXT,
     abstract_deadline DATE,
     organiser_url TEXT,
     booking_url TEXT,
     source_url TEXT UNIQUE NOT NULL,
     description TEXT,
-    -- 'conference' (the default; single event, optional abstract submissions)
-    -- 'course' (a recurring offering — see course_sessions for the dates).
+    -- Three-way classification:
+    --   'conference' — multi-day scheduled event with talks (default)
+    --   'workshop'   — single-session practical learning event (CPD courses,
+    --                  webinars, training sessions)
+    --   'course'     — recurring offering with multiple bookable session dates
+    --                  (see course_sessions for the per-date rows)
     event_type TEXT NOT NULL DEFAULT 'conference'
-        CHECK (event_type IN ('conference','course')),
+        CHECK (event_type IN ('conference','workshop','course')),
+    -- On-demand catch-up content. When TRUE the event is a recording of a past
+    -- live session that users can register to watch until the access deadline.
+    -- start_date holds the access deadline (so the row ages out of the directory
+    -- after it expires); on_demand_original_date is the date the live session
+    -- actually ran (informational, surfaced in the UI as "Originally aired …").
+    is_on_demand BOOLEAN NOT NULL DEFAULT FALSE,
+    on_demand_original_date DATE,
+    -- International / national flagship conference (Annual Conference,
+    -- World Congress, etc). Distinct from regional/local events which
+    -- keep event_type='conference' but is_flagship=FALSE. Drives the
+    -- Major / Regional split on the directory's type filter.
+    is_flagship BOOLEAN NOT NULL DEFAULT FALSE,
     archived BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -131,7 +155,12 @@ CREATE TABLE IF NOT EXISTS pricing_tiers (
     conference_id INTEGER REFERENCES conferences(id) ON DELETE CASCADE,
     session_id UUID REFERENCES course_sessions(id) ON DELETE CASCADE,
     tier_label TEXT NOT NULL,
+    -- `price_gbp` is a historical column name. The real currency for the
+    -- amount is the `currency` column below; most rows are GBP (the
+    -- default) but international events (RCOG World Congress, etc.) can be
+    -- USD/EUR/etc.
     price_gbp DECIMAL(10,2) NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'GBP',
     is_early_bird BOOLEAN DEFAULT FALSE,
     early_bird_deadline DATE,
     created_at TIMESTAMPTZ DEFAULT NOW()

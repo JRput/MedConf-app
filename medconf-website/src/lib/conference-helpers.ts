@@ -12,11 +12,16 @@ import type { Conference, CourseSession } from './types'
 /**
  * True only when abstracts are genuinely still being accepted right now.
  * - The stored abstract_open flag must be true
- * - AND a deadline must be set (open with no deadline is meaningless to a user)
- * - AND that deadline must be today or later
+ * - AND a deadline must be set, today or later
+ * - OR abstract_deadline_note is set (organiser confirmed open, no date)
+ *
+ * Rows with abstract_open=true but no deadline AND no note are treated as
+ * unknown — the scraper occasionally trips on the word "abstract" in
+ * unrelated body text, so we require an explicit date or curator note.
  */
 export function isAbstractEffectivelyOpen(c: Conference): boolean {
   if (!c.abstract_open) return false
+  if (c.abstract_deadline_note) return true
   if (!c.abstract_deadline) return false
   const today = new Date().toISOString().slice(0, 10)
   return c.abstract_deadline >= today
@@ -29,6 +34,29 @@ export function daysUntilDeadline(c: Conference): number | null {
   if (!c.abstract_deadline) return null
   const diff = (new Date(c.abstract_deadline).getTime() - Date.now()) / 86_400_000
   return Math.ceil(diff)
+}
+
+/** Currency code (ISO 4217) → display symbol. Falls back to the code
+ * itself for currencies we haven't mapped yet (e.g. "AUD 250"). */
+export function currencySymbol(code: string | undefined | null): string {
+  switch ((code || 'GBP').toUpperCase()) {
+    case 'GBP': return '£'
+    case 'USD': return '$'
+    case 'EUR': return '€'
+    case 'AUD': return 'A$'
+    case 'CAD': return 'C$'
+    case 'INR': return '₹'
+    default: return `${code} `
+  }
+}
+
+/**
+ * Whether the conference has any abstract submission info worth showing.
+ * If no deadline AND no curator note, we don't render the abstract panel
+ * at all — "Closed with no date" tells the user nothing useful.
+ */
+export function hasAbstractInfo(c: Conference): boolean {
+  return !!(c.abstract_deadline || c.abstract_deadline_note)
 }
 
 /**

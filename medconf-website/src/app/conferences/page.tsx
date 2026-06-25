@@ -56,6 +56,7 @@ export default function ConferencesPage() {
     filters.specialty !== '' ||
     filters.region !== '' ||
     filters.sourceId !== null ||
+    filters.society !== null ||
     filters.maxPrice > 0
   )
 
@@ -95,7 +96,7 @@ export default function ConferencesPage() {
             label="Conferences tracked"
             value={stats.total}
             tint="cyan"
-            onClick={() => setFilters({ ...filters, specialty: '', region: '', sourceId: null, maxPrice: 0, searchTerm: '' })}
+            onClick={() => setFilters({ ...filters, specialty: '', region: '', sourceId: null, society: null, maxPrice: 0, searchTerm: '' })}
           />
           <StatTile
             icon={FileText}
@@ -119,54 +120,90 @@ export default function ConferencesPage() {
           />
         </div>
 
-        {/* Source quick-select chips */}
-        {sources.length > 1 && (
-          <div className="mb-6 flex flex-wrap gap-2 items-center">
-            <span className="text-xs uppercase tracking-wider text-slate-500 font-semibold mr-1">
-              Source:
-            </span>
-            <button
-              onClick={() => setFilters({ ...filters, sourceId: null })}
-              className={`text-sm px-3.5 py-1.5 rounded-full border transition-all ${
-                filters.sourceId === null
-                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
-                  : 'bg-slate-800/40 text-slate-300 border-slate-700 hover:border-slate-600'
-              }`}
-            >
-              All
-            </button>
-            {sources.map(s => (
+        {/* Source quick-select chips — folded by society, so e.g. the three
+            RCEM sources (events, on-demand, Annual Conference) appear as a
+            single chip rather than three. Sources without a society tag
+            fall back to their own chip. */}
+        {sources.length > 1 && (() => {
+          const seen = new Set<string>()
+          const chips: { key: string; label: string; isSociety: boolean; sourceId: number | null; count: number }[] = []
+          for (const s of sources) {
+            const sourceCount = allConferences.filter(c => c.source_id === s.id).length
+            if (s.society) {
+              if (seen.has(s.society)) {
+                const existing = chips.find(c => c.isSociety && c.label === s.society)
+                if (existing) existing.count += sourceCount
+                continue
+              }
+              seen.add(s.society)
+              chips.push({ key: `soc:${s.society}`, label: s.society, isSociety: true, sourceId: null, count: sourceCount })
+            } else {
+              chips.push({ key: `src:${s.id}`, label: s.source_name, isSociety: false, sourceId: s.id, count: sourceCount })
+            }
+          }
+          const allActive = filters.sourceId === null && filters.society === null
+          return (
+            <div className="mb-6 flex flex-wrap gap-2 items-center">
+              <span className="text-xs uppercase tracking-wider text-slate-500 font-semibold mr-1">
+                Source:
+              </span>
               <button
-                key={s.id}
-                onClick={() => setFilters({ ...filters, sourceId: filters.sourceId === s.id ? null : s.id })}
+                onClick={() => setFilters({ ...filters, sourceId: null, society: null })}
                 className={`text-sm px-3.5 py-1.5 rounded-full border transition-all ${
-                  filters.sourceId === s.id
+                  allActive
                     ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
                     : 'bg-slate-800/40 text-slate-300 border-slate-700 hover:border-slate-600'
                 }`}
               >
-                {s.source_name}
+                All
               </button>
-            ))}
-          </div>
-        )}
+              {chips.map(chip => {
+                const active = chip.isSociety
+                  ? filters.society === chip.label
+                  : filters.sourceId === chip.sourceId
+                return (
+                  <button
+                    key={chip.key}
+                    onClick={() => setFilters({
+                      ...filters,
+                      society: active ? null : (chip.isSociety ? chip.label : null),
+                      sourceId: active ? null : (chip.isSociety ? null : chip.sourceId),
+                    })}
+                    className={`text-sm px-3.5 py-1.5 rounded-full border transition-all ${
+                      active
+                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
+                        : 'bg-slate-800/40 text-slate-300 border-slate-700 hover:border-slate-600'
+                    }`}
+                  >
+                    {chip.label}
+                    <span className="ml-1.5 text-slate-500">· {chip.count}</span>
+                  </button>
+                )
+              })}
+            </div>
+          )
+        })()}
 
         {/* Type filter chips — Conference vs Course vs All */}
         <div className="mb-6 flex flex-wrap gap-2 items-center">
           <span className="text-xs uppercase tracking-wider text-slate-500 font-semibold mr-1">
             Type:
           </span>
-          {(['all', 'conference', 'course'] as TypeFilter[]).map(t => {
+          {(['all', 'conference', 'course', 'workshop', 'on_demand'] as TypeFilter[]).map(t => {
             const label = t === 'all' ? 'All'
               : t === 'conference' ? 'Conferences'
-              : 'Courses'
+              : t === 'course' ? 'Courses'
+              : t === 'workshop' ? 'Workshops'
+              : 'On-Demand'
             const count = t === 'all'
               ? allConferences.length
-              : allConferences.filter(c => c.event_type === t).length
+              : t === 'on_demand'
+                ? allConferences.filter(c => c.is_on_demand).length
+                : allConferences.filter(c => c.event_type === t && !c.is_on_demand).length
             return (
               <button
                 key={t}
-                onClick={() => setFilters({ ...filters, eventType: t })}
+                onClick={() => setFilters({ ...filters, eventType: t, conferenceScope: 'all' })}
                 className={`text-sm px-3.5 py-1.5 rounded-full border transition-all ${
                   filters.eventType === t
                     ? 'bg-violet-500/20 text-violet-200 border-violet-500/50'
@@ -178,6 +215,40 @@ export default function ConferencesPage() {
             )
           })}
         </div>
+
+        {/* Conference sub-filter — only shown when the "Conferences" type
+            chip is selected. Splits live conferences into international/
+            national flagships and regional/local events. */}
+        {filters.eventType === 'conference' && (
+          <div className="mb-6 -mt-3 flex flex-wrap gap-2 items-center pl-3 border-l-2 border-violet-500/30">
+            <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mr-1">
+              Scope:
+            </span>
+            {(['all', 'major', 'regional'] as const).map(s => {
+              const label = s === 'all' ? 'All conferences'
+                : s === 'major' ? 'International / National'
+                : 'Regional / Local'
+              const count = s === 'all'
+                ? allConferences.filter(c => c.event_type === 'conference' && !c.is_on_demand).length
+                : s === 'major'
+                  ? allConferences.filter(c => c.event_type === 'conference' && c.is_flagship && !c.is_on_demand).length
+                  : allConferences.filter(c => c.event_type === 'conference' && !c.is_flagship && !c.is_on_demand).length
+              return (
+                <button
+                  key={s}
+                  onClick={() => setFilters({ ...filters, conferenceScope: s })}
+                  className={`text-xs px-3 py-1 rounded-full border transition-all ${
+                    filters.conferenceScope === s
+                      ? 'bg-yellow-500/15 text-yellow-300 border-yellow-500/40'
+                      : 'bg-slate-800/40 text-slate-300 border-slate-700 hover:border-slate-600'
+                  }`}
+                >
+                  {label} <span className="text-slate-500">· {count}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar filters */}
@@ -242,7 +313,7 @@ export default function ConferencesPage() {
                 <p className="text-slate-500 text-sm mb-6">Try adjusting your search or filters</p>
                 {hasActiveFilters && (
                   <button
-                    onClick={() => setFilters({ specialty: '', region: '', maxPrice: 0, searchTerm: '', sourceId: null, sort: filters.sort, eventType: 'all' })}
+                    onClick={() => setFilters({ specialty: '', region: '', maxPrice: 0, searchTerm: '', sourceId: null, society: null, sort: filters.sort, eventType: 'all', conferenceScope: 'all' })}
                     className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300"
                   >
                     Clear all filters

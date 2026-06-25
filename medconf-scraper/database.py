@@ -54,6 +54,7 @@ def insert_pricing_tiers(conference_id: int, tiers: List[Dict[str, Any]]) -> Non
             "conference_id": conference_id,
             "tier_label": t["tier_label"],
             "price_gbp": t["price_gbp"],
+            "currency": t.get("currency", "GBP"),
             "is_early_bird": t.get("is_early_bird", False),
             "early_bird_deadline": t.get("early_bird_deadline"),
         }
@@ -105,12 +106,22 @@ def delete_pricing_tiers(conference_id: int) -> None:
 
 
 def archive_expired_conferences() -> None:
-    """Mark conferences whose end_date has passed as archived."""
+    """Mark conferences whose end_date has passed as archived.
+
+    On-demand rows are excluded — their start_date IS the access deadline,
+    so the archival logic for is_on_demand rows uses start_date instead of
+    end_date and is handled in archive_undated_past_conferences below.
+    """
     today = date.today().isoformat()
     supabase.table("conferences").update({
         "archived": True,
         "updated_at": datetime.utcnow().isoformat()
-    }).lt("end_date", today).eq("archived", False).execute()
+    }).lt("end_date", today).eq("archived", False).eq("is_on_demand", False).execute()
+    # On-demand rows expire when their start_date (= access deadline) passes
+    supabase.table("conferences").update({
+        "archived": True,
+        "updated_at": datetime.utcnow().isoformat()
+    }).lt("start_date", today).eq("archived", False).eq("is_on_demand", True).execute()
 
 
 def archive_stale_conferences(stale_days: int = 14) -> int:
@@ -130,12 +141,17 @@ def archive_stale_conferences(stale_days: int = 14) -> int:
 
 
 def archive_undated_past_conferences() -> int:
-    """Events with no end_date but a start_date that has already passed → archive."""
+    """Events with no end_date but a start_date that has already passed → archive.
+
+    Excludes on-demand rows whose start_date is the access deadline — those
+    are handled by archive_expired_conferences above so we don't get
+    duplicate archive sweeps over the same row.
+    """
     today = date.today().isoformat()
     response = supabase.table("conferences").update({
         "archived": True,
         "updated_at": datetime.utcnow().isoformat()
-    }).is_("end_date", "null").lt("start_date", today).eq("archived", False).execute()
+    }).is_("end_date", "null").lt("start_date", today).eq("archived", False).eq("is_on_demand", False).execute()
     return len(response.data) if response.data else 0
 
 

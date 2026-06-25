@@ -170,14 +170,22 @@ export default function DashboardPage() {
             icon={Clock}
             label="Deadlines in next 14 days"
             value={data.closingDeadlines.length.toString()}
-            href="/conferences"
+            // Land on the directory sorted by deadline (the default) so
+            // the closing-soon abstract deadlines surface at the top.
+            href="/conferences?sort=deadline"
             tint="amber"
           />
           <StatCard
             icon={Sparkles}
             label={data.specialty ? `New in ${data.specialty}` : 'New this week'}
             value={data.newInSpecialty.length.toString()}
-            href="/conferences"
+            // Deep-link straight into the specialty-filtered directory,
+            // sorted by recently-added so the new arrivals are at the top
+            // with the green NEW pill. Matches the click target the
+            // notification bell uses for the same content.
+            href={data.specialty
+              ? `/conferences?specialty=${encodeURIComponent(data.specialty)}&sort=recently_added`
+              : `/conferences?sort=recently_added`}
             tint="teal"
           />
         </div>

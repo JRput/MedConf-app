@@ -1,6 +1,6 @@
 // src/lib/types.ts
 
-export type EventType = 'conference' | 'course'
+export type EventType = 'conference' | 'workshop' | 'course'
 
 export interface Conference {
   id: number
@@ -24,9 +24,25 @@ export interface Conference {
   cpd_points: number | null
   abstract_open: boolean
   abstract_deadline: string | null
+  // Optional curator-set free text used when an organiser confirms
+  // submissions are open but hasn't published a deadline date.
+  // When non-null, the detail-page abstract panel renders this in place
+  // of the date — e.g. "see event page for details".
+  abstract_deadline_note: string | null
   organiser_url: string | null
   booking_url: string | null
   description: string | null
+  // On-demand catch-up content (recordings of past live events). When true:
+  //   - start_date holds the "available until" deadline
+  //   - on_demand_original_date is when the live session originally ran
+  //   - event_format is always 'online'
+  is_on_demand: boolean
+  on_demand_original_date: string | null
+  // International / national major conference (Annual Conference, World
+  // Congress, etc). Distinct from regional/local conferences which keep
+  // event_type='conference' but is_flagship=false. Used to split the
+  // "Conferences" directory chip into Major + Regional.
+  is_flagship: boolean
   archived: boolean
   created_at: string
   updated_at: string
@@ -59,7 +75,11 @@ export interface PricingTier {
   // Non-null = the tier is scoped to one specific course session.
   session_id: string | null
   tier_label: string
+  // `price_gbp` is a historical column name; the actual currency is in
+  // `currency`. Most rows are GBP — the column default — but international
+  // events (e.g. RCOG World Congress 2027) can be USD/EUR etc.
   price_gbp: number
+  currency: string
   is_early_bird: boolean
   early_bird_deadline: string | null
 }
@@ -149,6 +169,10 @@ export interface SourceSummary {
   id: number
   source_name: string
   base_url: string
+  // Short organisation label so multiple sources from the same society
+  // (e.g. RCEM events + on-demand + Annual Conference) can be folded into
+  // one chip on the directory. Null for sources not yet tagged.
+  society: string | null
 }
 
 export interface ScraperLog {

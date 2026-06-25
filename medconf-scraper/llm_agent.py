@@ -13,6 +13,134 @@ from urllib.parse import urlparse
 from logger import logger
 
 
+# ----------------------------------------------------------------------
+# event_type classifiers — used by the merge layer when the per-source
+# extractor doesn't return an explicit event_type.
+# ----------------------------------------------------------------------
+
+def _event_type_from_category(cat: Optional[str]) -> Optional[str]:
+    """Map a source-provided listing-card category badge to event_type.
+
+    RCP exposes 'Conference' / 'Workshop' / 'Webinar' / 'Social' / 'Ceremony'.
+    Most other sources don't expose this — they pass None and we fall through
+    to the title heuristic.
+    """
+    if not cat:
+        return None
+    c = cat.strip().lower()
+    if c in ("workshop", "webinar"):
+        return "workshop"
+    if c in ("course",):
+        return "course"
+    if c in ("conference",):
+        return "conference"
+    # 'social' / 'ceremony' fall through to None → title heuristic / default
+    return None
+
+
+# Title-keyword rules. Order matters — more-specific terms first.
+# Each entry is (regex, event_type).
+_TITLE_RULES = [
+    # "Course" is overloaded — "ATLS Provider course" is a course, but "Trauma
+    # Symposium 2026" is a conference. We trust the word when it appears.
+    (re.compile(r"\b(?:masterclass|workshop|webinar|seminar|short course|study day|training day|teaching day|skills lab|simulation)\b", re.I), "workshop"),
+    (re.compile(r"\b(?:course|programme|cpd|certification|fellowship programme|training programme)\b", re.I), "course"),
+    (re.compile(r"\b(?:conference|congress|symposium|summit|annual meeting|forum|expo)\b", re.I), "conference"),
+]
+
+
+def _event_type_from_title(title: Optional[str]) -> Optional[str]:
+    """Title keyword heuristic. Returns None when nothing matches confidently
+    — caller falls through to 'conference' as the safe default."""
+    if not title:
+        return None
+    for rx, kind in _TITLE_RULES:
+        if rx.search(title):
+            return kind
+    return None
+
+
+# Flagship = international or national-level major conference. These are
+# the once-a-year flagship events of a Royal College / specialty society
+# (RCEM Annual Conference, RCOG World Congress, RCP Annual Conference,
+# RCGP Annual Conference, etc). Distinct from regional / local events.
+_FLAGSHIP_TITLE_RE = re.compile(
+    r"\b("
+    r"world\s+congress"
+    r"|international\s+congress"
+    r"|international\s+conference"
+    r"|annual\s+conference"
+    r"|annual\s+congress"
+    r"|annual\s+meeting"
+    r"|annual\s+symposium"
+    r"|annual\s+scientific\s+(?:meeting|conference)"
+    r"|national\s+conference"
+    r"|national\s+congress"
+    r")\b",
+    re.I,
+)
+
+
+_JUNK_TITLE_RE = re.compile(
+    r"^("
+    r"there are no results"
+    r"|no results"
+    r"|no events"
+    r"|no upcoming events"
+    r"|loading"
+    r"|page not found"
+    r"|sorry,?\s*(?:something|we)"
+    r"|search results"
+    r"|select a"
+    r"|\.\.\."
+    r")",
+    re.I,
+)
+
+
+def _is_junk_title(title: Optional[str]) -> bool:
+    """True when the listing-card title is an empty-state / loading / error
+    message that slipped in because a JS-rendered listing rendered its
+    not-found view at the moment of harvest. These are NEVER real event
+    titles and should never reach `conferences.conference_name`."""
+    if not title:
+        return True
+    t = title.strip()
+    return bool(_JUNK_TITLE_RE.match(t))
+
+
+def _is_flagship_from_title(title: Optional[str]) -> bool:
+    """Detect international/national flagship conferences from the title.
+
+    Used as the merge-layer default. Per-source extractors can force-set
+    is_flagship=True (RCEM source 8, RCOG source 10) when the source IS
+    the flagship event and don't need to round-trip through this regex.
+
+    Also used against the description as a secondary check — many
+    flagships use a tagline as their title (e.g. "Defining the future
+    of general practice…") but then say "RCGP Annual Conference" inside
+    the description body.
+    """
+    if not title:
+        return False
+    return bool(_FLAGSHIP_TITLE_RE.search(title))
+
+
+# Dedicated subsites for known flagship events. The detail URL is the
+# most reliable signal when the visible title is a marketing tagline.
+_FLAGSHIP_URL_HOSTS = (
+    "rcgpac.org.uk",      # RCGP Annual Conference subsite
+    "rcem-events.uk",     # RCEM conference registration domain (annual conf etc.)
+)
+
+
+def _is_flagship_from_url(url: Optional[str]) -> bool:
+    if not url:
+        return False
+    u = url.lower()
+    return any(host in u for host in _FLAGSHIP_URL_HOSTS)
+
+
 class AgentLoop:
     """
     The agentic loop that uses an LLM to navigate websites and extract conference data.
@@ -179,12 +307,33 @@ class AgentLoop:
         # page's h1 (slug-derived titles in the sitemap-listed shell are
         # ugly). For conferences, shell["title"] from the listing card is
         # canonical. Prefer detail's value when present.
-        conference_name = detail.get("conference_name") or shell["title"]
+        #
+        # Safety net: reject obvious empty-state shell titles ("There are
+        # no results matching…", "No events found", "Loading…"). These
+        # happen when a JS-rendered listing page briefly shows its empty
+        # / loading state during shell harvesting. When the shell title
+        # looks junk and the extractor didn't supply a real one, fall
+        # back to a URL-slug-derived placeholder so the row is at least
+        # identifiable until the next scrape repairs it.
+        shell_title = (shell.get("title") or "").strip()
+        if _is_junk_title(shell_title):
+            slug = (shell.get("booking_url") or "").rstrip("/").rsplit("/", 1)[-1]
+            shell_title = slug.replace("-", " ").strip().title() if slug else shell_title
+        conference_name = detail.get("conference_name") or shell_title
 
-        # event_type lets the detail extractor flag a row as a course.
-        # Defaults to 'conference' for backwards compatibility with every
-        # existing source that doesn't set it.
-        event_type = detail.get("event_type") or "conference"
+        # event_type chain:
+        #   1. detail extractor's explicit value (highest priority — e.g. RCSEng
+        #      courses always set 'course'; RCP sets from category badge)
+        #   2. shell.category badge text (RCP captures this via .event-results__first-tag)
+        #   3. title-keyword heuristic (covers RCGP/RSM/RCSEng-events whose listing
+        #      cards don't expose a category)
+        #   4. fallback to 'conference'
+        event_type = (
+            detail.get("event_type")
+            or _event_type_from_category(shell.get("category"))
+            or _event_type_from_title(conference_name)
+            or "conference"
+        )
 
         # Sessions array is course-specific. Pass through to the upsert layer.
         sessions = detail.get("sessions")
@@ -193,7 +342,6 @@ class AgentLoop:
             # Deterministic from listing
             "conference_name": conference_name,
             "event_type": event_type,
-            "booking_url": booking_url,
             "is_sold_out": shell.get("is_sold_out", False),
             "start_date": start_date,
             "start_time": shell.get("start_time"),
@@ -210,9 +358,42 @@ class AgentLoop:
             "cpd_accredited": bool(detail.get("cpd_accredited", False)),
             "abstract_open": bool(detail.get("abstract_open", False)),
             "abstract_deadline": detail.get("abstract_deadline"),
+            "abstract_deadline_note": detail.get("abstract_deadline_note"),
             "pricing_tiers": detail.get("pricing_tiers", []) or [],
-            # Identity
-            "organiser_url": booking_url,
+            # On-demand catch-up flag (RCEM source 7). When True, start_date
+            # holds the "available until" deadline rather than a live date.
+            "is_on_demand": bool(detail.get("is_on_demand", False)),
+            "on_demand_original_date": detail.get("on_demand_original_date"),
+            # Flagship = international/national major LIVE conference. Detection chain:
+            #   1. Per-source extractor set detail["is_flagship"] directly
+            #      (RCEM source 8, RCOG source 10) — highest priority.
+            #   2. Dedicated-subsite URL — `rcgpac.org.uk` is the RCGP
+            #      Annual Conference's standalone marketing site; the
+            #      title there is typically the year's tagline (e.g.
+            #      "Defining the future of general practice…") and won't
+            #      hit the title regex, so the URL is the safer signal.
+            #   3. Title regex — matches "Annual Conference", "World
+            #      Congress", etc.
+            # Deliberately NOT matched against `description` — descriptions
+            # often reference OTHER flagships ("ahead of RCGP Annual
+            # Conference") or use "national" generically, producing too
+            # many false positives.
+            # Only fires when event_type is conference AND the row isn't
+            # an on-demand recording (past-flagship recordings live on
+            # the On-Demand chip).
+            "is_flagship": bool(detail.get("is_flagship") or (
+                event_type == "conference"
+                and not detail.get("is_on_demand", False)
+                and (
+                    _is_flagship_from_url(booking_url)
+                    or _is_flagship_from_title(conference_name)
+                )
+            )),
+            # Identity — prefer the extractor's explicit organiser/booking_url
+            # (some sources distinguish the rcem.ac.uk landing page from the
+            # third-party registration form) and fall back to the shell.
+            "organiser_url": detail.get("organiser_url") or booking_url,
+            "booking_url": detail.get("booking_url") or booking_url,
             "source_url": booking_url or self._fallback_source_url(shell["title"]),
         }
 

@@ -41,6 +41,20 @@ class RCSEngExtractor(BaseExtractor):
     ) -> Dict[str, Any]:
         result: Dict[str, Any] = {}
 
+        # Canonical title from the detail page's <h1>. The listing scrape
+        # can pick up empty-state copy ("There are no results matching your
+        # search criteria.") when the RCSEng calendar's JS layer briefly
+        # renders a no-results state during shell harvesting. Reading h1
+        # from the real detail page guarantees the right title.
+        try:
+            h1 = (page.evaluate(
+                "() => (document.querySelector('h1')||{}).textContent || ''"
+            ) or "").strip()
+            if h1 and len(h1) < 200:
+                result["conference_name"] = h1
+        except Exception:
+            pass
+
         # Pricing tiers (deterministic — split "£0 - £15" range into Member/Non-Member)
         result["pricing_tiers"] = self._extract_pricing(page)
 

@@ -32,7 +32,7 @@ interface FilterPanelProps {
 export function FilterPanel({ filters, setFilters, sources }: FilterPanelProps) {
   const update = (key: keyof Filters, value: string | number | null) => setFilters({ ...filters, [key]: value })
 
-  const hasActiveFilters = filters.specialty || filters.region || filters.maxPrice > 0 || filters.sourceId !== null
+  const hasActiveFilters = filters.specialty || filters.region || filters.maxPrice > 0 || filters.sourceId !== null || filters.society !== null
 
   return (
     <div className="glass-card rounded-xl p-5 space-y-6">
@@ -43,7 +43,7 @@ export function FilterPanel({ filters, setFilters, sources }: FilterPanelProps) 
         </h2>
         {hasActiveFilters && (
           <button
-            onClick={() => setFilters({ specialty: '', region: '', maxPrice: 0, searchTerm: filters.searchTerm, sourceId: null, sort: filters.sort, eventType: filters.eventType })}
+            onClick={() => setFilters({ specialty: '', region: '', maxPrice: 0, searchTerm: filters.searchTerm, sourceId: null, society: null, sort: filters.sort, eventType: filters.eventType, conferenceScope: filters.conferenceScope })}
             className="text-xs text-slate-400 hover:text-cyan-400 flex items-center gap-1 transition-colors"
           >
             <X className="w-3 h-3" />
@@ -61,28 +61,51 @@ export function FilterPanel({ filters, setFilters, sources }: FilterPanelProps) 
           </label>
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => update('sourceId', null)}
+              onClick={() => setFilters({ ...filters, sourceId: null, society: null })}
               className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                filters.sourceId === null
+                filters.sourceId === null && filters.society === null
                   ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40'
                   : 'bg-slate-800/50 text-slate-400 border-slate-700 hover:border-slate-600 hover:text-slate-300'
               }`}
             >
               All sources
             </button>
-            {sources.map(s => (
-              <button
-                key={s.id}
-                onClick={() => update('sourceId', filters.sourceId === s.id ? null : s.id)}
-                className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                  filters.sourceId === s.id
-                    ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40'
-                    : 'bg-slate-800/50 text-slate-400 border-slate-700 hover:border-slate-600 hover:text-slate-300'
-                }`}
-              >
-                {s.source_name}
-              </button>
-            ))}
+            {(() => {
+              // Fold sources that share a society into a single chip.
+              const seen = new Set<string>()
+              const chips: { key: string; label: string; isSociety: boolean; sourceId: number | null }[] = []
+              for (const s of sources) {
+                if (s.society) {
+                  if (seen.has(s.society)) continue
+                  seen.add(s.society)
+                  chips.push({ key: `soc:${s.society}`, label: s.society, isSociety: true, sourceId: null })
+                } else {
+                  chips.push({ key: `src:${s.id}`, label: s.source_name, isSociety: false, sourceId: s.id })
+                }
+              }
+              return chips.map(chip => {
+                const active = chip.isSociety
+                  ? filters.society === chip.label
+                  : filters.sourceId === chip.sourceId
+                return (
+                  <button
+                    key={chip.key}
+                    onClick={() => setFilters({
+                      ...filters,
+                      society: active ? null : (chip.isSociety ? chip.label : null),
+                      sourceId: active ? null : (chip.isSociety ? null : chip.sourceId),
+                    })}
+                    className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
+                      active
+                        ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40'
+                        : 'bg-slate-800/50 text-slate-400 border-slate-700 hover:border-slate-600 hover:text-slate-300'
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                )
+              })
+            })()}
           </div>
         </div>
       )}

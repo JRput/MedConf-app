@@ -37,13 +37,21 @@ def _supabase() -> Client:
     return create_client(url, key)
 
 
-def _format_title(count: int, specialty: str, has_courses: bool, has_conferences: bool) -> str:
-    """Title shown in the bell + notifications list."""
-    # Pick the noun that matches what arrived
-    if has_courses and not has_conferences:
-        noun = "course" if count == 1 else "courses"
-    elif has_conferences and not has_courses:
-        noun = "conference" if count == 1 else "conferences"
+def _format_title(count: int, specialty: str, kinds: set) -> str:
+    """Title shown in the bell + notifications list.
+
+    `kinds` is the set of event_type values present in the matched rows
+    ({'conference','course','workshop'} subset). Pure batches use the
+    specific noun; mixed batches collapse to 'events'.
+    """
+    if len(kinds) == 1:
+        kind = next(iter(kinds))
+        if kind == "course":
+            noun = "course" if count == 1 else "courses"
+        elif kind == "workshop":
+            noun = "workshop" if count == 1 else "workshops"
+        else:
+            noun = "conference" if count == 1 else "conferences"
     else:
         noun = "event" if count == 1 else "events"
 
@@ -117,10 +125,9 @@ def fire_alerts(sb: Client) -> dict:
             continue
 
         matches_total += len(matches)
-        has_courses = any(m["event_type"] == "course" for m in matches)
-        has_conferences = any(m["event_type"] == "conference" for m in matches)
+        kinds = {m.get("event_type") or "conference" for m in matches}
 
-        title = _format_title(len(matches), specialty, has_courses, has_conferences)
+        title = _format_title(len(matches), specialty, kinds)
         body = _format_body(matches, specialty)
 
         try:

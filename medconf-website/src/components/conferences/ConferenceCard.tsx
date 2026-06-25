@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { CPDBadge } from '@/components/conferences/CPDBadge'
 import { SaveButton } from '@/components/ui/SaveButton'
 import type { Conference, PricingTier, CourseSession } from '@/lib/types'
-import { isAbstractEffectivelyOpen, courseSessionSummary } from '@/lib/conference-helpers'
+import { isAbstractEffectivelyOpen, courseSessionSummary, currencySymbol } from '@/lib/conference-helpers'
 import { Calendar, Clock, MapPin, PoundSterling, ArrowRight, ExternalLink, FileText, Globe, Building2, Layers } from 'lucide-react'
 
 interface ConferenceCardProps {
@@ -25,20 +25,32 @@ const FORMAT_LABEL: Record<string, { label: string; Icon: typeof Globe }> = {
 }
 
 export function ConferenceCard({ conference: c, tiers, sourceName, sessions, showNewBadge = false }: ConferenceCardProps) {
+  // A row is "multi-session" only if it really has sessions in course_sessions.
+  // Some rows got tagged event_type='course'|'workshop' via the title heuristic
+  // (e.g. RCGP "preparation course") but have no per-session children — those
+  // are single-date offerings that should display like a conference, using the
+  // parent row's start_date/end_date directly.
+  const hasSessions = (sessions?.length ?? 0) > 0
   const isCourse = c.event_type === 'course'
-  const courseSummary = isCourse ? courseSessionSummary(sessions) : null
+  const isWorkshop = c.event_type === 'workshop'
+  const isOnDemand = c.is_on_demand
+  const isMultiSessionCourse = isCourse && hasSessions
+  const courseSummary = isMultiSessionCourse ? courseSessionSummary(sessions) : null
 
   const isNew = showNewBadge && c.created_at
     && (Date.now() - new Date(c.created_at).getTime()) < 7 * 86_400_000
 
   const minPrice = tiers.length ? Math.min(...tiers.map(t => t.price_gbp)) : null
   const maxPrice = tiers.length ? Math.max(...tiers.map(t => t.price_gbp)) : null
+  // Currency on the cheapest tier — events almost always price in one
+  // currency so this is good enough for the headline label.
+  const sym = currencySymbol(tiers[0]?.currency)
   const priceLabel = minPrice === 0
-    ? (maxPrice === 0 ? 'Free' : `Free – £${maxPrice}`)
-    : isCourse && minPrice !== null
-      ? `From £${minPrice}`
+    ? (maxPrice === 0 ? 'Free' : `Free – ${sym}${maxPrice}`)
+    : isMultiSessionCourse && minPrice !== null
+      ? `From ${sym}${minPrice}`
       : minPrice !== null
-        ? (minPrice === maxPrice ? `£${minPrice}` : `£${minPrice} – £${maxPrice}`)
+        ? (minPrice === maxPrice ? `${sym}${minPrice}` : `${sym}${minPrice} – ${sym}${maxPrice}`)
         : 'Price TBC'
 
   const formatDate = (dateStr: string | null) => {
@@ -55,10 +67,11 @@ export function ConferenceCard({ conference: c, tiers, sourceName, sessions, sho
     return timeStr.slice(0, 5) // HH:MM:SS → HH:MM
   }
 
-  // For courses, the headline date is the next available session's date.
-  // For conferences, the conference's own date range.
+  // Multi-session courses surface the next session's date. Everything else
+  // (conferences, workshops, single-date "courses" without session children)
+  // uses the parent row's start_date/end_date directly.
   let dateDisplay: string
-  if (isCourse) {
+  if (isMultiSessionCourse) {
     const next = courseSummary?.next
     if (next) {
       const ns = formatDate(next.start_date)
@@ -71,6 +84,10 @@ export function ConferenceCard({ conference: c, tiers, sourceName, sessions, sho
     } else {
       dateDisplay = 'Date TBC'
     }
+  } else if (isOnDemand) {
+    // On-demand: start_date holds the access deadline.
+    const deadline = formatDate(c.start_date)
+    dateDisplay = deadline ? `Available until ${deadline}` : 'Available now'
   } else {
     const startFormatted = formatDate(c.start_date)
     const endFormatted = formatDate(c.end_date)
@@ -121,6 +138,16 @@ export function ConferenceCard({ conference: c, tiers, sourceName, sessions, sho
               <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-violet-500/15 text-violet-300 border border-violet-500/30 flex-shrink-0">
                 <Layers className="w-3 h-3" />
                 Course
+              </span>
+            )}
+            {isWorkshop && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 flex-shrink-0">
+                Workshop
+              </span>
+            )}
+            {isOnDemand && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-fuchsia-500/15 text-fuchsia-300 border border-fuchsia-500/30 flex-shrink-0">
+                On-Demand
               </span>
             )}
             {isNew && (
@@ -177,7 +204,7 @@ export function ConferenceCard({ conference: c, tiers, sourceName, sessions, sho
                 {' — '}{[c.venue_name, c.city].filter(Boolean).join(', ')}
               </span>
             </span>
-          ) : isCourse && courseSummary && courseSummary.total > 0 ? (
+          ) : isMultiSessionCourse && courseSummary && courseSummary.total > 0 ? (
             // Course mode: prefer next-session city, fall back to "Multiple
             // locations" when sessions span more than one venue.
             (() => {
@@ -210,9 +237,10 @@ export function ConferenceCard({ conference: c, tiers, sourceName, sessions, sho
           <span className="font-medium text-white">{priceLabel}</span>
         </div>
 
-        {/* Status line — semantics depend on event_type. Course cards
-            replace the abstracts indicator with a session-count badge. */}
-        {isCourse && courseSummary ? (
+        {/* Status line — semantics depend on event_type. Multi-session course
+            cards replace the abstracts indicator with a session-count badge;
+            single-date courses/workshops fall through to the normal one. */}
+        {isMultiSessionCourse && courseSummary ? (
           courseSummary.total === 0 ? (
             <div className="flex items-center gap-2 text-slate-500">
               <Layers className="w-4 h-4" />

@@ -28,6 +28,8 @@ from .rcseng import RCSEngExtractor
 from .rcgp import RCGPExtractor
 from .rcp import RCPExtractor
 from .rcseng_courses import RCSEngCoursesExtractor
+from .rcem import RCEMExtractor
+from .rcog import RCOGExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -37,6 +39,11 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     3: RSMExtractor,                    # Royal Society of Medicine
     4: RCPExtractor,                    # Royal College of Physicians
     5: RCSEngCoursesExtractor,          # RCSEng Surgical Courses (event_type='course')
+    6: RCEMExtractor,                   # RCEM events calendar (live)
+    7: RCEMExtractor,                   # RCEM on-demand catch-up (is_on_demand=TRUE)
+    8: RCEMExtractor,                   # RCEM Annual Conference 2027 (flagship subsite)
+    9: RCOGExtractor,                   # RCOG events & courses (eventsair.com detail pages)
+    10: RCOGExtractor,                  # RCOG World Congress 2027 (USD pricing, KL)
 }
 
 
