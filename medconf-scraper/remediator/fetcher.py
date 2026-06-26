@@ -28,7 +28,27 @@ class PageCache:
 
     def __init__(self):
         self._cache: Dict[str, Optional[str]] = {}
+        self._html_cache: Dict[str, Optional[str]] = {}
         self._browser = None  # lazy-init
+
+    def get_html(self, url: str) -> Optional[str]:
+        """Return raw HTML for the URL (for anchor / image discovery).
+        Always httpx-served — even for JS-rendered hosts we can usually
+        still find static <a> and <img> tags in the shell HTML for
+        sub-page discovery purposes."""
+        if url in self._html_cache:
+            return self._html_cache[url]
+        try:
+            with httpx.Client(timeout=20, follow_redirects=True,
+                              headers={"User-Agent": USER_AGENT}) as c:
+                r = c.get(url)
+                r.raise_for_status()
+                self._html_cache[url] = r.text
+                return r.text
+        except Exception as e:
+            logger.warning(f"remediator: html fetch failed for {url}: {e}")
+            self._html_cache[url] = None
+            return None
 
     def get(self, url: str) -> Optional[str]:
         """Return body innerText for the URL. None on failure.

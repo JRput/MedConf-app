@@ -22,12 +22,40 @@ def write_report(
     patches_rejected: List[dict],
     patches_couldnt_fix: List[dict],
     duration_sec: float,
+    explorer_trails: List[dict] | None = None,
 ) -> Path:
     repo_root = Path(__file__).resolve().parent.parent.parent
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     out_dir = repo_root / "reports" / "remediation" / today
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / f"source-{source_id}.json"
+    # Attach the audit trail to each couldnt_fix entry so the verdict is
+    # provable. The next session's Claude (or the user) can re-verify by
+    # walking the trail.
+    trails_by_conf: dict = {}
+    for t in (explorer_trails or []):
+        trails_by_conf.setdefault(t["conference_id"], []).append(t)
+    for entry in patches_couldnt_fix:
+        cid = entry["conference_id"]
+        trails = trails_by_conf.get(cid, [])
+        # Only attach trails for unfixed fields
+        unfixed_fields = set(entry.get("fields") or [])
+        entry["exploration_evidence"] = [
+            {
+                "field": t["field"],
+                "method": t["method"],
+                "places_looked": {
+                    "tabs_visited": t["audit_trail"].get("tabs_visited", []),
+                    "subpages_fetched": t["audit_trail"].get("subpages_fetched", []),
+                    "images_ocred": t["audit_trail"].get("images_ocred", 0),
+                    "total_text_chars": t["audit_trail"].get("total_text_chars", 0),
+                },
+                "llm_reasoning": t["audit_trail"].get("llm_reasoning", ""),
+                "notes": t["audit_trail"].get("notes", []),
+            }
+            for t in trails if t["field"] in unfixed_fields
+        ]
+
     report = {
         "source_id": source_id,
         "source_name": source_name,
@@ -40,6 +68,8 @@ def write_report(
         "patches_applied": patches_applied,
         "patches_rejected_by_validator": patches_rejected,
         "patches_couldnt_fix": patches_couldnt_fix,
+        "explorer_runs": len(explorer_trails or []),
+        "explorer_successes": sum(1 for t in (explorer_trails or []) if t.get("found")),
         "duration_sec": round(duration_sec, 1),
     }
     out_path.write_text(json.dumps(report, indent=2, default=str))
@@ -70,9 +100,22 @@ def print_summary(report_path: Path) -> None:
             print(f"    {f:20} ×{n}")
     if data["patches_couldnt_fix"]:
         print()
-        print("  Couldn't fix:")
+        print("  Couldn't fix (with audit trail):")
         for p in data["patches_couldnt_fix"][:5]:
-            print(f"    [{p['conference_id']}] {p['fields']} — source genuinely missing")
+            print(f"    [{p['conference_id']}] {p['fields']}")
+            for ev in p.get("exploration_evidence", []):
+                trail = ev.get("places_looked", {})
+                print(f"      ↳ {ev['field']}: looked at "
+                      f"{len(trail.get('tabs_visited', []))} tabs, "
+                      f"{len(trail.get('subpages_fetched', []))} subpages, "
+                      f"{trail.get('images_ocred', 0)} images "
+                      f"({trail.get('total_text_chars', 0)} chars total)")
+                if ev.get("llm_reasoning"):
+                    print(f"        reason: {ev['llm_reasoning'][:120]}")
+    if data.get("explorer_runs", 0):
+        print()
+        print(f"  Explorer Tier 2 escalations: {data['explorer_runs']} runs, "
+              f"{data['explorer_successes']} successful")
     print(border)
     print(f"  Report: {report_path}")
     print(f"  Duration: {data['duration_sec']}s")

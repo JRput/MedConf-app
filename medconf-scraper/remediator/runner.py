@@ -20,6 +20,8 @@ from .fetcher import PageCache
 from .fixers import REGISTRY as FIXERS
 from .validators import validate
 from .report import write_report
+from .explorer import EXPLORERS
+from .learned_patterns import record_success
 
 logger = logging.getLogger(__name__)
 
@@ -149,29 +151,71 @@ def remediate_source(source_id: int) -> dict:
     patches_applied: list = []
     patches_rejected: list = []
     patches_couldnt_fix: list = []
+    explorer_trails: list = []  # audit trails from Tier 2 escalations
 
     with PageCache() as cache:
         for row, gaps in gaps_per_row:
             url = row.get("source_url")
             page_text = cache.get(url) if url else None
+            page_html = cache.get_html(url) if url else None
             unfixed = []
             for field in gaps:
                 fixer = FIXERS.get(field)
-                if not fixer:
-                    unfixed.append(field)
-                    continue
-                try:
-                    if field == "specialty":
-                        value, method = fixer(row, page_text or "",
-                                              llm_call, society=society)
-                    else:
-                        value, method = fixer(row, page_text or "", llm_call)
-                except Exception as e:
-                    logger.warning(
-                        f"remediator: fixer {field} crashed on {row['id']}: {e}"
-                    )
-                    unfixed.append(field)
-                    continue
+                value: Any = None
+                method: Optional[str] = None
+                trail_dict: Optional[dict] = None
+
+                # TIER 1 — quick fixer
+                if fixer:
+                    try:
+                        if field == "specialty":
+                            value, method = fixer(row, page_text or "",
+                                                  llm_call, society=society)
+                        else:
+                            value, method = fixer(row, page_text or "", llm_call)
+                    except Exception as e:
+                        logger.warning(
+                            f"remediator: fixer {field} crashed on {row['id']}: {e}"
+                        )
+
+                # TIER 2 — explorer escalation when Tier 1 returns null
+                if value is None and field in EXPLORERS and url:
+                    try:
+                        explorer = EXPLORERS[field]
+                        result = explorer(
+                            row=row,
+                            page_text=page_text or "",
+                            page_html=page_html,
+                            base_url=url,
+                            llm_call=llm_call,
+                        )
+                        trail_dict = result.to_dict()
+                        explorer_trails.append({
+                            "conference_id": row["id"],
+                            "conference_name": (row.get("conference_name") or "")[:60],
+                            **trail_dict,
+                        })
+                        if result.found and result.value is not None:
+                            value = result.value
+                            method = f"explorer:{result.method}"
+                            # Record for learning loop
+                            try:
+                                subpath = None
+                                if result.method.startswith("subpage"):
+                                    if result.audit_trail.subpages_fetched:
+                                        subpath = result.audit_trail.subpages_fetched[-1]
+                                record_success(
+                                    source_url=url, field=field,
+                                    method=result.method,
+                                    subpage_path=subpath,
+                                )
+                            except Exception as e:
+                                logger.warning(f"learned_patterns record failed: {e}")
+                    except Exception as e:
+                        logger.warning(
+                            f"remediator: explorer {field} crashed on {row['id']}: {e}"
+                        )
+
                 if value is None:
                     unfixed.append(field)
                     continue
@@ -213,6 +257,7 @@ def remediate_source(source_id: int) -> dict:
         patches_rejected=patches_rejected,
         patches_couldnt_fix=patches_couldnt_fix,
         duration_sec=duration,
+        explorer_trails=explorer_trails,
     )
 
     return {
