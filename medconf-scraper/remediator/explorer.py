@@ -32,6 +32,7 @@ can re-verify by walking the same trail.
 """
 
 from __future__ import annotations
+import html as _html
 import json
 import logging
 import re
@@ -87,6 +88,70 @@ SKIP_SUBPAGE_GUESS_DOMAINS = (
     "engage.rcgp.org.uk",
     "rcem.ac.uk",
 )
+
+# Junk external hosts to never follow (site dev credits, social, etc)
+JUNK_EXTERNAL_HOSTS = (
+    "rouge-media.com", "facebook.com", "twitter.com", "x.com",
+    "linkedin.com", "youtube.com", "instagram.com", "tiktok.com",
+    "google.com", "doubleclick.net", "googletagmanager.com",
+    "wordpress.com", "wp.org", "wpengine.com", "cloudflare.com",
+    "addthis.com", "sharethis.com",
+)
+
+# Link text keywords that suggest "the real event page is here"
+EXTERNAL_FOLLOW_TEXT_RE = re.compile(
+    r"(register|book\s+now|book\s+here|more\s+info|find\s+out\s+more|"
+    r"learn\s+more|view\s+course|course\s+(?:details?|page)|module\s+details?|"
+    r"official(?:\s+(?:website|page))?|programme\s+(?:details?|page)|"
+    r"event\s+(?:page|website)|conference\s+website|"
+    r"visit\s+(?:the\s+)?(?:event|conference)|hosted\s+by)",
+    re.I,
+)
+
+
+def find_external_event_links(
+    html: str, base_url: str, limit: int = 3,
+) -> list[tuple[str, str]]:
+    """External (cross-domain) anchors whose link TEXT suggests they lead
+    to the official event page. Returns (url, link_text) tuples.
+
+    Used as a Tier 3 fallback when same-domain exploration found no fees
+    (typical for aggregator sites that list 3rd-party events and link
+    out to the actual course host for details — e.g. BOPA listing a
+    Royal Marsden module). Caller MUST still apply identity-token +
+    LLM event-match gates before extracting from these pages.
+    """
+    host = urlparse(base_url).netloc.lower()
+    candidates: list[tuple[str, str]] = []
+    seen: set = set()
+    for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>([^<]{1,120})</a>', html):
+        href = m.group(1).strip()
+        text = re.sub(r"\s+", " ", m.group(2)).strip()
+        if not href or not text or href.startswith("#") or href.startswith("javascript:"):
+            continue
+        if not href.startswith("http"):
+            continue
+        parsed = urlparse(href)
+        if not parsed.netloc:
+            continue
+        ext_host = parsed.netloc.lower()
+        # Skip same-domain (handled by find_same_domain_anchors)
+        if ext_host == host or ext_host.endswith("." + host) or host.endswith("." + ext_host):
+            continue
+        # Skip junk hosts
+        if any(j in ext_host for j in JUNK_EXTERNAL_HOSTS):
+            continue
+        # Link text must look like an "official event page" pointer
+        if not EXTERNAL_FOLLOW_TEXT_RE.search(text):
+            continue
+        clean = href.split("#")[0]
+        if clean in seen:
+            continue
+        seen.add(clean)
+        candidates.append((clean, text[:80]))
+        if len(candidates) >= limit:
+            break
+    return candidates
 
 
 def find_same_domain_anchors(html: str, base_url: str, limit: int = 25) -> list[str]:
@@ -208,16 +273,25 @@ def find_money_images(html: str, base_url: str, limit: int = 8) -> list[str]:
     return urls
 
 
+EXPLORER_UA = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+)
+
+
 def fetch_page_text_and_html(url: str, *, timeout: float = 25.0) -> tuple[Optional[str], Optional[str]]:
     """Return (text_only, raw_html) — text stripped of tags, html for anchor scanning."""
     try:
         with httpx.Client(timeout=timeout, follow_redirects=True,
-                          headers={"User-Agent": "Mozilla/5.0 (MedConf explorer)"}) as c:
+                          headers={"User-Agent": EXPLORER_UA, "Accept": "text/html,application/xhtml+xml"}) as c:
             r = c.get(url)
             r.raise_for_status()
             html = r.text
             text = re.sub(r"<[^>]+>", " ", html)
             text = re.sub(r"\s+", " ", text).strip()
+            # Decode HTML entities (&pound; → £, &amp; → &, etc) so price
+            # regexes can match. Many sites use entity-encoded currency.
+            text = _html.unescape(text)
             return text[:25000], html
     except Exception as e:
         logger.warning(f"explorer: fetch failed for {url}: {e}")
@@ -391,6 +465,62 @@ def explore_for_pricing(
     # banner on every event detail page). Image-based fees only make sense
     # on DEDICATED event sub-pages (handled by vision_subpage above, where
     # the identity-token gate ensures the sub-page is about THIS event).
+
+    # 3. TIER 3 — External-link follow for aggregator sites
+    # If the event page links out to an external "Register" / "More info"
+    # page (typical when a society lists 3rd-party events — e.g. BOPA
+    # listing a Royal Marsden School module), follow it. Same identity
+    # gate applies on the external page text.
+    if page_html and identity_tokens:
+        externals = find_external_event_links(page_html, base_url, limit=3)
+        for ext_url, link_text in externals:
+            if ext_url in (trail.subpages_fetched):
+                continue
+            sub_text, sub_html = fetch_page_text_and_html(ext_url)
+            if not sub_text:
+                trail.notes.append(f"external_fetch_failed: {ext_url}")
+                continue
+            trail.subpages_fetched.append(ext_url)
+            trail.total_text_chars += len(sub_text)
+            trail.notes.append(f"external_followed: {ext_url} (link text: {link_text!r})")
+            if not page_matches_event(sub_text, ext_url):
+                continue
+            # External text regex sweep
+            tiers = _text_pricing_sweep(sub_text)
+            if tiers:
+                trail.llm_reasoning = (
+                    f"Followed external link {link_text!r} to {ext_url} "
+                    f"(aggregator-style listing). Found prices via text regex."
+                )
+                trail.notes.append(f"external_text: {len(tiers)} tiers from {ext_url}")
+                return ExploreResult(
+                    field="pricing", value=tiers,
+                    method=f"external_text:{urlparse(ext_url).netloc}",
+                    audit_trail=trail, found=True,
+                )
+            # External page might also have fee images
+            if sub_html:
+                images = find_money_images(sub_html, ext_url, limit=4)
+                if images:
+                    try:
+                        from vision import extract_pricing_from_images
+                        vtiers = extract_pricing_from_images(images)
+                        trail.images_ocred += len(images)
+                        if vtiers:
+                            trail.llm_reasoning = (
+                                f"Followed external link {link_text!r} to {ext_url}. "
+                                f"Found prices via vision LLM on {len(images)} image(s)."
+                            )
+                            trail.notes.append(
+                                f"external_vision: {len(vtiers)} tiers from {ext_url}"
+                            )
+                            return ExploreResult(
+                                field="pricing", value=vtiers,
+                                method=f"external_vision:{urlparse(ext_url).netloc}",
+                                audit_trail=trail, found=True,
+                            )
+                    except Exception as e:
+                        trail.notes.append(f"external_vision_failed: {e}")
 
     # 4. LLM with full context: ask if anywhere we've collected mentions money
     title = row.get("conference_name") or ""

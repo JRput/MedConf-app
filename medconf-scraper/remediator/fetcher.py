@@ -9,11 +9,15 @@ import logging
 import re
 from typing import Optional, Dict
 
+import html as _html
 import httpx
 
 logger = logging.getLogger(__name__)
 
-USER_AGENT = "Mozilla/5.0 (MedConf remediator/0.1)"
+USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+)
 
 # JS-rendered hosts that need a real browser. Add hosts here as we discover them.
 _JS_HOSTS = (
@@ -73,9 +77,10 @@ class PageCache:
                               headers={"User-Agent": USER_AGENT}) as c:
                 r = c.get(url)
                 r.raise_for_status()
-                # Strip HTML tags, collapse whitespace
+                # Strip HTML tags, collapse whitespace, decode entities
                 t = re.sub(r"<[^>]+>", " ", r.text)
                 t = re.sub(r"\s+", " ", t).strip()
+                t = _html.unescape(t)
                 return t[:20000]
         except Exception as e:
             logger.warning(f"remediator: httpx fetch failed for {url}: {e}")

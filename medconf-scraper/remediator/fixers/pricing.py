@@ -41,33 +41,43 @@ def _find_fee_image_urls(html: str, page_url: str) -> List[str]:
     return urls
 
 
+_PRICE_LABEL_WORDS = (
+    "cost", "fee", "fees", "tuition", "price", "rate", "rates",
+    "members?", "non[- ]members?", "standard", "early[- ]bird",
+    "late", "charge", "registration", "ticket", "delegate",
+    "consultant", "trainee", "resident", "junior", "senior",
+    "student", "associate",
+)
+
+
 def _text_pricing_sweep(page_text: str) -> List[dict]:
-    """Find line-form pricing rows like "Standard rate | £100.00"."""
+    """Find pricing rows in three patterns:
+       - Line A: "Label | £100.00"
+       - Line B: "Label £100.00" (label and price on same line)
+       - Inline C: "...Cost £1400 ..." (label-word immediately before
+         price within a longer text block, used for sites that flatten
+         to one line e.g. Royal Marsden School module pages)
+    """
     if not page_text:
         return []
     tiers: List[dict] = []
-    for line in page_text.splitlines():
-        line = line.strip()
-        if "£" not in line and "$" not in line and "€" not in line:
-            continue
-        # Pattern A: "Label | £100.00"
-        m = re.search(r"^(.*?)[|:]\s*([£$€])\s*([\d,]+(?:\.\d+)?)\s*$", line)
-        if not m:
-            # Pattern B: "Label £100.00"
-            m = re.search(r"^(.+?)\s+([£$€])\s*([\d,]+(?:\.\d+)?)\s*$", line)
-        if not m:
-            continue
-        label = m.group(1).strip()[:200]
+    seen_keys: set = set()
+
+    def add(label: str, symbol: str, price_str: str) -> None:
+        label = label.strip()[:200]
         if not label or len(label) < 3:
-            continue
+            return
         try:
-            price = float(m.group(3).replace(",", ""))
+            price = float(price_str.replace(",", ""))
         except ValueError:
-            continue
+            return
         if price <= 0 or price > 50000:
-            continue
-        symbol = m.group(2)
+            return
         currency = {"£": "GBP", "$": "USD", "€": "EUR"}[symbol]
+        key = (label.lower(), price)
+        if key in seen_keys:
+            return
+        seen_keys.add(key)
         tiers.append({
             "tier_label": label,
             "price_gbp": price,
@@ -75,16 +85,36 @@ def _text_pricing_sweep(page_text: str) -> List[dict]:
             "is_early_bird": "early" in label.lower(),
             "early_bird_deadline": None,
         })
-    # Dedupe
-    seen = set()
-    out: List[dict] = []
-    for t in tiers:
-        key = (t["tier_label"], t["price_gbp"])
-        if key in seen:
+
+    # Pattern A & B — line-form
+    for line in page_text.splitlines():
+        line = line.strip()
+        if "£" not in line and "$" not in line and "€" not in line:
             continue
-        seen.add(key)
-        out.append(t)
-    return out
+        m = re.search(r"^(.*?)[|:]\s*([£$€])\s*([\d,]+(?:\.\d+)?)\s*$", line)
+        if not m:
+            m = re.search(r"^(.+?)\s+([£$€])\s*([\d,]+(?:\.\d+)?)\s*$", line)
+        if not m:
+            continue
+        add(m.group(1), m.group(2), m.group(3))
+
+    # Pattern C — inline "<label-word> £<amount>" within paragraphs. Many
+    # WordPress / academic course sites flatten to one big line in
+    # html→text conversion, so line patterns miss them. Anchor to a
+    # KNOWN label word to avoid false positives like "page 1400" or
+    # "in 1400 hours". Captures up to 3 leading words for context
+    # (e.g. "Late registration £200").
+    label_alt = "|".join(_PRICE_LABEL_WORDS)
+    inline_rx = re.compile(
+        rf"((?:[A-Za-z][A-Za-z-]{{2,30}}\s+){{0,3}}(?:{label_alt}))"
+        r"\s*[:\-]?\s*"
+        r"([£$€])\s*([\d,]+(?:\.\d+)?)",
+        re.I,
+    )
+    for m in inline_rx.finditer(page_text):
+        add(m.group(1), m.group(2), m.group(3))
+
+    return tiers
 
 
 def fix_pricing(
