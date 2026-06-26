@@ -190,7 +190,12 @@ class AgentLoop:
         """
         # Per-source extractors may bypass the DOM walker when they have a
         # more reliable listing (e.g. sitemap.xml for course catalogues).
+        # We expose the existing browser to overrides that need JS-rendered
+        # pages (e.g. RCR's Salesforce portal) so they don't have to start
+        # a second sync_playwright instance, which would conflict with the
+        # one already running in self.browser.
         try:
+            self.extractor.browser = self.browser  # type: ignore[attr-defined]
             override = self.extractor.list_shells_override()
         except Exception as e:
             logger.warning(f"Extractor.list_shells_override failed: {e}")

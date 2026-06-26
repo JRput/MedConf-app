@@ -11,20 +11,27 @@ import type { Conference, CourseSession } from './types'
 
 /**
  * True only when abstracts are genuinely still being accepted right now.
- * - The stored abstract_open flag must be true
- * - AND a deadline must be set, today or later
- * - OR abstract_deadline_note is set (organiser confirmed open, no date)
  *
- * Rows with abstract_open=true but no deadline AND no note are treated as
- * unknown — the scraper occasionally trips on the word "abstract" in
- * unrelated body text, so we require an explicit date or curator note.
+ * Order of precedence (a real date beats a free-text note):
+ *  1. abstract_open must be true
+ *  2. If abstract_deadline is set, it dictates: open ONLY when today-or-later
+ *  3. If abstract_deadline is null and abstract_deadline_note is set,
+ *     treat as curator-confirmed open with no published date
+ *  4. Otherwise closed
+ *
+ * The validator at insert/update time also enforces #2 — but the helper
+ * runs the check independently so a stale row (deadline ticked past today
+ * since the last scrape) is rendered correctly without waiting for the
+ * cleanup cron.
  */
 export function isAbstractEffectivelyOpen(c: Conference): boolean {
   if (!c.abstract_open) return false
+  if (c.abstract_deadline) {
+    const today = new Date().toISOString().slice(0, 10)
+    return c.abstract_deadline >= today
+  }
   if (c.abstract_deadline_note) return true
-  if (!c.abstract_deadline) return false
-  const today = new Date().toISOString().slice(0, 10)
-  return c.abstract_deadline >= today
+  return false
 }
 
 /**

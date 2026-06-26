@@ -30,6 +30,7 @@ from .rcp import RCPExtractor
 from .rcseng_courses import RCSEngCoursesExtractor
 from .rcem import RCEMExtractor
 from .rcog import RCOGExtractor
+from .rcr import RCRAIConferenceExtractor, RCREventsPortalExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -44,6 +45,8 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     8: RCEMExtractor,                   # RCEM Annual Conference 2027 (flagship subsite)
     9: RCOGExtractor,                   # RCOG events & courses (eventsair.com detail pages)
     10: RCOGExtractor,                  # RCOG World Congress 2027 (USD pricing, KL)
+    11: RCRAIConferenceExtractor,       # RCR Global AI Conference 2026 (flagship subsite)
+    12: RCREventsPortalExtractor,       # RCR events portal (Salesforce LWC, shadow DOM)
 }
 
 

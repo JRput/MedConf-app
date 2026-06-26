@@ -66,6 +66,39 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
     for bool_field in ["cpd_accredited", "abstract_open", "is_sold_out", "is_on_demand", "is_flagship"]:
         cleaned[bool_field] = bool(cleaned.get(bool_field, False))
 
+    # Abstract-status consistency check — every extractor's output passes through
+    # here, so this is the canonical place to enforce the rule:
+    #   abstract_open=True is ONLY valid when EITHER
+    #     (a) abstract_deadline is set and today-or-later, OR
+    #     (b) abstract_deadline_note is set AND abstract_deadline is null
+    #         (curator-confirmed open, no published date)
+    # Anything else → force abstract_open=False. This catches:
+    #   - extractor sets open=True with a past deadline
+    #   - extractor sets open=True with a stale note that no longer applies
+    #   - extractor sets open=True without any supporting info
+    from datetime import date as _date
+    today_iso = _date.today().isoformat()
+    if cleaned["abstract_open"]:
+        deadline = cleaned.get("abstract_deadline")
+        note = cleaned.get("abstract_deadline_note")
+        if deadline:
+            # Deadline takes priority over note. Past → closed.
+            if deadline < today_iso:
+                warnings.append(
+                    f"abstract_open=True but abstract_deadline {deadline} is in the past — forced to False"
+                )
+                cleaned["abstract_open"] = False
+                cleaned["abstract_deadline_note"] = None
+        elif note:
+            # No deadline + note = curator-confirmed open. Fine.
+            pass
+        else:
+            # No date and no note — extractor shouldn't be claiming open.
+            warnings.append(
+                "abstract_open=True without abstract_deadline or note — forced to False"
+            )
+            cleaned["abstract_open"] = False
+
     # Ensure archived is False by default (so frontend can see new conferences)
     cleaned["archived"] = bool(cleaned.get("archived", False))
 
