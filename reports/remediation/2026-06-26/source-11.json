@@ -1,0 +1,14 @@
+{
+  "source_id": 11,
+  "source_name": "RCR Global AI Conference 2026",
+  "society": "RCR",
+  "run_at": "2026-06-26T09:49:54.453519+00:00",
+  "events_scraped": 1,
+  "events_with_gaps_at_first": 0,
+  "events_fixed": 0,
+  "events_still_incomplete": 0,
+  "patches_applied": [],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [],
+  "duration_sec": 0.8
+}
