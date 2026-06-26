@@ -90,11 +90,21 @@ SKIP_SUBPAGE_GUESS_DOMAINS = (
 
 
 def find_same_domain_anchors(html: str, base_url: str, limit: int = 25) -> list[str]:
-    """Extract candidate same-domain URLs from HTML that LOOK relevant
-    (contain fee/abstract/programme/registration keywords)."""
+    """Extract candidate same-domain URLs from HTML that LOOK relevant.
+
+    Two passes:
+      1. Direct keyword match: fee/abstract/programme/registration/cost
+      2. Conference-subsite shapes: "latest-conference", "annual",
+         "conference-YYYY" — these often host year-specific event sub-sites
+         with rich fee + abstract content (e.g. BOPA's /latest-conference-2026/).
+    """
     host = urlparse(base_url).netloc.lower()
     keywords_rx = re.compile(
-        r"(fees?|tickets?|abstract|programme|agenda|registration|prices?|cost)",
+        r"(fees?|tickets?|abstract|programme|agenda|registration|prices?|cost|"
+        r"submission|booking|cpd|latest[-/]conference|annual[-/]conference|"
+        r"conference[-/]\d{4}|symposium[-/]\d{4}|congress[-/]\d{4}|"
+        r"\d{4}[-/]conference|"
+        r"-latest|/latest|annual|summit)",
         re.I,
     )
     candidates: list[str] = []
@@ -120,6 +130,59 @@ def find_same_domain_anchors(html: str, base_url: str, limit: int = 25) -> list[
         if len(candidates) >= limit:
             break
     return candidates
+
+
+def llm_classify_anchors(
+    *, html: str, base_url: str, field: str,
+    event_title: str, llm_call: Callable[[str], Optional[str]],
+    limit: int = 10,
+) -> list[str]:
+    """Safety-net anchor discovery for unusual URL shapes. Ask the LLM to
+    pick same-domain anchors most likely to host {field} content,
+    including link TEXT (e.g. "Latest Conference 2026" → /latest-conference-2026/).
+    Returns absolute URLs."""
+    host = urlparse(base_url).netloc.lower()
+    anchors: list[tuple[str, str]] = []
+    seen: set = set()
+    for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>([^<]{1,120})</a>', html):
+        href = m.group(1).strip()
+        text = re.sub(r"\s+", " ", m.group(2)).strip()
+        if not href or not text or href.startswith("#") or href.startswith("javascript:"):
+            continue
+        try:
+            absolute = urljoin(base_url, href)
+        except Exception:
+            continue
+        parsed = urlparse(absolute)
+        if parsed.netloc and parsed.netloc.lower() != host:
+            continue
+        clean = absolute.split("#")[0].split("?")[0]
+        if clean in seen or clean == base_url:
+            continue
+        seen.add(clean)
+        anchors.append((clean, text[:80]))
+        if len(anchors) >= 80:
+            break
+    if not anchors:
+        return []
+    lines = "\n".join(f"{u}  ←  {t}" for u, t in anchors[:80])
+    prompt = (
+        f"You're locating {field} information for a medical event titled "
+        f"\"{event_title}\". From these same-domain links, pick AT MOST {limit} "
+        f"URLs most likely to contain {field} (e.g. registration fees, abstract "
+        f"deadlines). Reply with one URL per line, no commentary.\n\n{lines}"
+    )
+    raw = llm_call(prompt)
+    if not raw:
+        return []
+    chosen: list[str] = []
+    for line in raw.splitlines():
+        url = line.strip().split()[0] if line.strip() else ""
+        if url.startswith("http") and url in seen:
+            chosen.append(url)
+        if len(chosen) >= limit:
+            break
+    return chosen
 
 
 def find_money_images(html: str, base_url: str, limit: int = 8) -> list[str]:
@@ -193,10 +256,96 @@ def explore_for_pricing(
     if page_html and not any(d in host for d in SKIP_SUBPAGE_GUESS_DOMAINS):
         # Discover relevant sub-pages via anchor scanning (smarter than fixed guesses)
         anchors = find_same_domain_anchors(page_html, base_url, limit=15)
+        # Walk homepage too — many sites put fees on a dedicated sub-site
+        # (e.g. /latest-conference-2026/) that isn't linked from the
+        # individual event page but IS on the homepage.
+        try:
+            home_url = f"https://{host}/"
+            _, home_html = fetch_page_text_and_html(home_url)
+            if home_html:
+                home_anchors = find_same_domain_anchors(home_html, home_url, limit=10)
+                anchors.extend(home_anchors)
+        except Exception:
+            pass
+        # If keyword filter found very few anchors, ask LLM to classify
+        if len(anchors) < 3:
+            try:
+                llm_anchors = llm_classify_anchors(
+                    html=page_html, base_url=base_url, field="registration fees",
+                    event_title=row.get("conference_name") or "",
+                    llm_call=llm_call, limit=6,
+                )
+                anchors.extend(llm_anchors)
+                trail.notes.append(f"llm_classified_anchors: {len(llm_anchors)}")
+            except Exception as e:
+                trail.notes.append(f"llm_classify_failed: {e}")
         # Also try common suffixes off the base URL
         seed = base_url.split("?")[0].rstrip("/")
         for suffix in COMMON_SUBPAGE_SUFFIXES[:6]:
             anchors.append(seed + suffix)
+        # CRITICAL: gate to verify any sub-page is actually about THIS event
+        # before extracting pricing. Prevents cross-contamination across
+        # events on the same domain (e.g. a Geriatric Oncology module
+        # accidentally getting fees from a different /latest-conference-2026/
+        # sub-site that happens to contain the words "oncology" and "royal").
+        event_name = (row.get("conference_name") or "").lower()
+        STOPWORDS = {
+            "the","a","an","of","and","or","to","for","in","on","at","with",
+            "by","from","as","is","are","be","this","that","these","those",
+            "course","event","conference","training","module","webinar",
+            "study","day","programme","program","update","session","online",
+            "uk","london","england","british","national","royal","royale",
+            # Society / topic-wide words — these appear on every page of the
+            # domain regardless of which event the page is about
+            "oncology","pharmacy","medicine","medical","clinical","health",
+            "healthcare","school","hospital","trust","nhs","association",
+            "society","college","institute","centre","center","faculty",
+            "department","group","network","council","board",
+            # Year tokens are too common
+            "2024","2025","2026","2027","2028",
+        }
+        identity_tokens = {
+            t for t in re.findall(r"[a-z]{4,}", event_name)
+            if t not in STOPWORDS
+        }
+        if not identity_tokens:
+            identity_tokens = {t for t in re.findall(r"[a-z]{3,}", event_name)
+                               if t not in STOPWORDS}
+
+        def page_matches_event(sub_text: str, url: str) -> bool:
+            """Two-stage match. First check ≥1 distinctive token is present —
+            cheap rejection. If at least one matches but it's ambiguous,
+            ask the LLM to verify."""
+            if not identity_tokens:
+                return True
+            sub_l = sub_text.lower()
+            matched = [t for t in identity_tokens if t in sub_l]
+            if not matched:
+                trail.notes.append(f"skipped_unrelated_zero_tokens: {url}")
+                return False
+            # If most identity tokens match, accept without LLM call
+            if len(matched) >= max(2, len(identity_tokens) // 2):
+                return True
+            # Ambiguous: 1 of several tokens matched. Ask the LLM —
+            # cheap insurance against cross-event contamination.
+            sample = sub_text[:3000]
+            prompt = (
+                f"You are checking if a web page is about a specific event.\n\n"
+                f"EVENT TITLE: {row.get('conference_name')}\n"
+                f"EVENT DATE: {row.get('start_date')}\n\n"
+                f"Is the page below DESCRIBING that exact event (not a "
+                f"different one that shares a domain)? Reply with one word: "
+                f"yes or no.\n\n"
+                f"PAGE TEXT:\n{sample}"
+            )
+            raw = llm_call(prompt) or ""
+            verdict = raw.strip().lower()[:3]
+            ok = verdict.startswith("yes")
+            trail.notes.append(
+                f"llm_event_match {url}: matched={matched} verdict={verdict!r} ok={ok}"
+            )
+            return ok
+
         seen: set = set()
         for url in anchors:
             if url in seen or url == base_url:
@@ -207,6 +356,9 @@ def explore_for_pricing(
                 continue
             trail.subpages_fetched.append(url)
             trail.total_text_chars += len(sub_text)
+            # Event-identity gate — skip if this sub-page isn't about our event
+            if not page_matches_event(sub_text, url):
+                continue
             tiers = _text_pricing_sweep(sub_text)
             if tiers:
                 trail.llm_reasoning = f"Found prices on sub-page {url} via text regex sweep."
@@ -233,23 +385,12 @@ def explore_for_pricing(
                     except Exception as e:
                         trail.notes.append(f"vision_failed_on_{url}: {e}")
 
-    # 3. Try vision LLM on images on the main page
-    if page_html:
-        images = find_money_images(page_html, base_url, limit=6)
-        if images:
-            try:
-                from vision import extract_pricing_from_images
-                vtiers = extract_pricing_from_images(images)
-                trail.images_ocred += len(images)
-                if vtiers:
-                    trail.llm_reasoning = f"Found prices via vision LLM on {len(images)} main-page image(s)."
-                    trail.notes.append(f"vision_main: {len(vtiers)} tiers")
-                    return ExploreResult(
-                        field="pricing", value=vtiers, method="vision_main",
-                        audit_trail=trail, found=True,
-                    )
-            except Exception as e:
-                trail.notes.append(f"vision_main_failed: {e}")
+    # Note: We deliberately do NOT run vision LLM on the main event page's
+    # images here. Doing so picks up unrelated site-wide promo banners (e.g.
+    # an org's flagship-conference reg-fee.jpeg appearing as a "register now"
+    # banner on every event detail page). Image-based fees only make sense
+    # on DEDICATED event sub-pages (handled by vision_subpage above, where
+    # the identity-token gate ensures the sub-page is about THIS event).
 
     # 4. LLM with full context: ask if anywhere we've collected mentions money
     title = row.get("conference_name") or ""
