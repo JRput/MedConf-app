@@ -75,9 +75,22 @@ def detect_gaps(
     if not has_pricing and not row.get("is_on_demand"):
         gaps.append("pricing")
 
-    # Abstract status — composite check
+    # Abstract status — flag whenever:
+    #   (a) abstract_open=True but there's no supporting deadline/note
+    #       (extractor was inconsistent), OR
+    #   (b) it's a conference (event_type='conference') and we don't have
+    #       deadline info — conferences typically have abstract calls; if
+    #       the page genuinely has none, the fixer returns
+    #       {"abstract_open": False} and we stop flagging on next run.
+    # Courses/workshops typically don't have abstracts, so we skip them
+    # to avoid wasted LLM calls.
     if row.get("abstract_open") and not row.get("abstract_deadline") \
             and not row.get("abstract_deadline_note"):
+        gaps.append("abstract_status")
+    elif row.get("event_type") == "conference" \
+            and not row.get("abstract_deadline") \
+            and not row.get("abstract_deadline_note") \
+            and not row.get("is_on_demand"):
         gaps.append("abstract_status")
 
     return gaps

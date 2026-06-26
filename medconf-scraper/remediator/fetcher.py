@@ -165,7 +165,12 @@ class PageCache:
                         }""",
                         label,
                     )
-                    self._browser.page.wait_for_timeout(2200)
+                    # Wait long enough for content-heavy panels (e.g. Abstracts
+                    # with multiple sub-sections) to fully render.
+                    self._browser.page.wait_for_timeout(5500)
+                    # Scroll to bottom of newly revealed content
+                    self._browser.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                    self._browser.page.wait_for_timeout(1500)
                     text = self._browser.page.evaluate(
                         "() => document.body.innerText || ''"
                     ) or ""
