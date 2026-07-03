@@ -93,17 +93,32 @@ def _detect_format(title: str, body_text: str) -> str:
 
 def _extract_pricing(text: str) -> List[dict]:
     """BTOG puts fees inline: '... £330 Full rate for Drs ... £600 Per day
-    charge £220 ...'. We match preceding label words up to 3 words back."""
+    charge £220 ...'. We match preceding label words up to 3 words back.
+
+    Explicitly reject no-show/penalty fees ("charged a fee of £75 to cover
+    the cost of your place if you do not attend") which are penalties,
+    not registration prices.
+    """
     tiers: List[dict] = []
     seen = set()
-    # 3-word label preceding £NNN — captures phrases like
-    # "Non-profit and patient group rate £330"
+
+    # Reject: look at 80 chars BEFORE the price for penalty/no-show wording
+    def is_penalty_context(text: str, price_start: int) -> bool:
+        window = text[max(0, price_start - 120):price_start].lower()
+        return any(k in window for k in (
+            "do not attend", "if you do not", "no-show", "no show",
+            "penalty", "will be charged a fee", "charged a fee of",
+            "cover the cost", "cancellation fee",
+        ))
+
     for m in re.finditer(
         r"((?:[A-Za-z][A-Za-z\-/]{2,30}\s+){1,8}?(?:rate|charge|day pass|charge|dinner|conference)|"
         r"(?:Non-profit|Sponsor|Agency|Consultant|Trainee|Student|Full))"
         r"[^£]{0,80}?£\s*(\d{1,4})",
         text, re.I,
     ):
+        if is_penalty_context(text, m.start(2)):
+            continue
         label = re.sub(r"\s+", " ", m.group(1)).strip()[:200]
         try:
             price = float(m.group(2))
@@ -123,6 +138,115 @@ def _extract_pricing(text: str) -> List[dict]:
             "early_bird_deadline": None,
         })
     return tiers
+
+
+def _parse_uk_date_to_iso(text: str) -> Optional[str]:
+    """Parse "Monday 7th December 2026" → "2026-12-07"."""
+    m = re.search(
+        r"(\d{1,2})(?:st|nd|rd|th)?\s+"
+        r"(January|February|March|April|May|June|July|August|September|October|November|December)"
+        r"\s+(\d{4})",
+        text, re.I,
+    )
+    if not m:
+        return None
+    d, mon_name, y = int(m.group(1)), m.group(2).lower(), int(m.group(3))
+    mon = _MONTHS.get(mon_name)
+    if not mon or not (1 <= d <= 31):
+        return None
+    return f"{y:04d}-{mon:02d}-{d:02d}"
+
+
+def _extract_abstract_info(text: str) -> dict:
+    """Extract abstract submission dates from BTOG-style text:
+       'Abstract Submission Opens Tuesday 1st September 2026
+        Abstract submission closes: Monday 7th December 2026 23:59 GMT
+        Abstract notification: Monday 11th January 2027'
+    Returns dict of fields to patch: abstract_open, abstract_deadline,
+    abstract_deadline_note."""
+    from datetime import date as _date
+    out: dict = {}
+
+    # Find deadline (closes / closing / submission deadline)
+    close_m = re.search(
+        r"(?i)abstract\s+(?:submissions?\s+)?"
+        r"(?:closes?|closing|deadline|submission\s+closes?)[:\s]+"
+        r"(?:[A-Za-z]+day\s+)?"
+        r"(\d{1,2}(?:st|nd|rd|th)?\s+"
+        r"(?:January|February|March|April|May|June|July|August|September|October|November|December)"
+        r"\s+\d{4})",
+        text,
+    )
+    deadline_iso: Optional[str] = None
+    if close_m:
+        deadline_iso = _parse_uk_date_to_iso(close_m.group(1))
+        if deadline_iso:
+            out["abstract_deadline"] = deadline_iso
+
+    # Find opening date
+    open_m = re.search(
+        r"(?i)abstract\s+submission\s+opens?[:\s]+"
+        r"(?:[A-Za-z]+day\s+)?"
+        r"(\d{1,2}(?:st|nd|rd|th)?\s+"
+        r"(?:January|February|March|April|May|June|July|August|September|October|November|December)"
+        r"\s+\d{4})",
+        text,
+    )
+    open_iso: Optional[str] = None
+    if open_m:
+        open_iso = _parse_uk_date_to_iso(open_m.group(1))
+
+    # Compute abstract_open based on today vs open/deadline
+    today = _date.today().isoformat()
+    if deadline_iso:
+        if deadline_iso < today:
+            out["abstract_open"] = False
+        else:
+            # Deadline is future — abstract is/will be open
+            out["abstract_open"] = True
+            if open_iso and open_iso > today:
+                # Not open yet but will be — surface via note
+                out["abstract_deadline_note"] = (
+                    f"Opens {open_m.group(1) if open_m else open_iso}"
+                )
+    elif open_iso and open_iso <= today:
+        out["abstract_open"] = True
+    return out
+
+
+def _extract_og_image(html: str) -> Optional[str]:
+    """Parse Open Graph image URL from HTML head, with sensible fallbacks
+    for sites that don't use OG meta tags (BTOG is one)."""
+    m = re.search(
+        r'<meta[^>]+property="og:image"[^>]+content="([^"]+)"',
+        html, re.I,
+    )
+    if m:
+        return m.group(1)
+    m = re.search(
+        r'<meta[^>]+name="twitter:image"[^>]+content="([^"]+)"',
+        html, re.I,
+    )
+    if m:
+        return m.group(1)
+    # Fallback: first prominent content <img> that isn't a logo / icon /
+    # tracking pixel. Prefer any image whose URL mentions BTOG /
+    # conference / banner / hero — those are typically the event artwork.
+    prefer_re = re.compile(r"btog|conference|banner|hero|event", re.I)
+    reject_re = re.compile(r"logo|icon|favicon|\.svg$|thumbnail|small|avatar|wp-includes", re.I)
+    prefer: Optional[str] = None
+    fallback: Optional[str] = None
+    for m in re.finditer(r'<img[^>]+src="(https?://[^"]+\.(?:png|jpg|jpeg))"', html, re.I):
+        src = m.group(1)
+        if reject_re.search(src):
+            continue
+        if prefer_re.search(src) and not prefer:
+            prefer = src
+        elif not fallback:
+            fallback = src
+        if prefer:
+            break
+    return prefer or fallback
 
 
 class BTOGExtractor(BaseExtractor):
@@ -275,13 +399,25 @@ class BTOGExtractor(BaseExtractor):
         if tiers:
             out["pricing_tiers"] = tiers
 
-        # Society + specialty
+        # Society + specialty. BTOG = British Thoracic Oncology Group —
+        # every event is oncology-focused. classify_specialty defaults
+        # unknown titles to "General Practice" which is wrong here, so
+        # force Oncology for this source.
         out["society"] = "BTOG"
-        out["specialty"] = classify_specialty(title) or "Oncology"
+        out["specialty"] = "Oncology"
 
-        # Abstract status — check for "abstract submission" text near title
-        if "abstract" in txt.lower():
-            # Look for open/closed cues
+        # Note: image_url extraction removed — the conferences schema
+        # doesn't currently have an image column. Add one when the
+        # frontend wants event artwork; the _extract_og_image helper
+        # still exists and can be wired back in trivially.
+
+        # Abstract status — extract opening + closing dates from BTOG-style
+        # "Abstract Submission Opens X / Abstract submission closes: Y / GMT"
+        # patterns. Falls back to explicit open/closed wording elsewhere.
+        abstract_fields = _extract_abstract_info(txt)
+        if abstract_fields:
+            out.update(abstract_fields)
+        elif "abstract" in txt.lower():
             tl = txt.lower()
             if re.search(r"submissions?\s+(?:are\s+)?(?:now\s+)?closed", tl):
                 out["abstract_open"] = False
