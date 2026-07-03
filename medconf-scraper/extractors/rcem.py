@@ -108,14 +108,38 @@ class RCEMExtractor(BaseExtractor):
         else:
             return None
 
-        try:
-            with httpx.Client(timeout=30.0, follow_redirects=True,
-                              headers={"User-Agent": "Mozilla/5.0 (MedConf scraper)"}) as client:
-                resp = client.get(listing_url)
-                resp.raise_for_status()
-                html = resp.text
-        except Exception as e:
-            logger.warning(f"RCEM source {self.source_id}: listing fetch failed: {e}")
+        # Retry with backoff — GitHub Actions runners occasionally see
+        # transient DNS/TLS failures reaching rcem.ac.uk. 2026-07-03 job
+        # failed here because both httpx + Playwright browser paths timed
+        # out in the same minute. Three attempts, 5s between them, gives
+        # the network a chance to recover without lengthening the run.
+        import time
+        html: Optional[str] = None
+        last_err: Optional[Exception] = None
+        for attempt in range(3):
+            try:
+                with httpx.Client(timeout=30.0, follow_redirects=True,
+                                  headers={"User-Agent":
+                                           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                                           "AppleWebKit/537.36 (KHTML, like Gecko) "
+                                           "Chrome/123.0.0.0 Safari/537.36"}) as client:
+                    resp = client.get(listing_url)
+                    resp.raise_for_status()
+                    html = resp.text
+                    break
+            except Exception as e:
+                last_err = e
+                logger.warning(
+                    f"RCEM source {self.source_id}: listing fetch attempt "
+                    f"{attempt + 1}/3 failed: {e}"
+                )
+                if attempt < 2:
+                    time.sleep(5)
+        if html is None:
+            logger.warning(
+                f"RCEM source {self.source_id}: listing fetch failed after 3 "
+                f"attempts: {last_err}"
+            )
             return None
 
         seen: set = set()
