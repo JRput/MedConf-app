@@ -77,11 +77,18 @@ class PageCache:
                               headers={"User-Agent": USER_AGENT}) as c:
                 r = c.get(url)
                 r.raise_for_status()
-                # Strip HTML tags, collapse whitespace, decode entities
+                # Strip tags, decode entities, THEN normalize whitespace.
+                # Order matters: &nbsp; decodes to \xa0 which regex \s+
+                # matches — but only if we normalize AFTER unescape. Doing
+                # it in the other order leaves \xa0 embedded and breaks
+                # any downstream regex that expects normal spaces.
+                # Cap at 200k chars — many WordPress event pages are
+                # 100k-200k after tag stripping, and critical content
+                # (abstract deadlines, fees) often lives near the bottom.
                 t = re.sub(r"<[^>]+>", " ", r.text)
-                t = re.sub(r"\s+", " ", t).strip()
                 t = _html.unescape(t)
-                return t[:20000]
+                t = re.sub(r"\s+", " ", t).strip()
+                return t[:200000]
         except Exception as e:
             logger.warning(f"remediator: httpx fetch failed for {url}: {e}")
             return None
@@ -118,7 +125,7 @@ class PageCache:
                 if new_lines:
                     combined_parts.append("\n".join(new_lines))
             combined = "\n\n".join(combined_parts)
-            return combined[:50000]
+            return combined[:200000]
         except Exception as e:
             logger.warning(f"remediator: browser fetch failed for {url}: {e}")
             return None

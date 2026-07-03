@@ -330,9 +330,13 @@ class BTOGExtractor(BaseExtractor):
                 title = clean_title
                 out["conference_name"] = title
 
+        # ORDER MATTERS: unescape BEFORE whitespace normalization so
+        # &nbsp; (→ \xa0) gets collapsed by \s+. Doing it after leaves
+        # \xa0 embedded and breaks any regex that expects normal spaces
+        # (e.g. "London\xa0Join BTOG" fails our venue-boundary lookahead).
         txt = re.sub(r"<[^>]+>", " ", html)
-        txt = re.sub(r"\s+", " ", txt)
         txt = _html.unescape(txt)
+        txt = re.sub(r"\s+", " ", txt)
 
         # Event type + format
         et = _classify_event_type(title, url)
@@ -363,18 +367,49 @@ class BTOGExtractor(BaseExtractor):
         # (not incidental city mentions elsewhere in the programme). Look for
         # patterns like "held at the EICC Edinburgh", "hosted at Sheffield City
         # Hall", "at the ICC Birmingham". Falls back to online for webinars.
+        # Capture generously (up to 150 chars) then trim at any common
+        # English sentence-start word. Trying to enumerate every possible
+        # terminator in a regex lookahead was fragile — "Join" wasn't in
+        # the list and killed the match entirely. This capture-then-trim
+        # is more robust and generalises to other sources.
         venue_m = re.search(
             r"(?i)(?:will\s+be\s+held\s+at|held\s+at|hosted\s+at|takes?\s+place\s+at|"
-            r"located\s+at|venue[:\s]+is|conference\s+venue[:\s]+)\s*"
-            r"(?:the\s+)?([A-Z][A-Za-z0-9 &,\-'.]{4,80}?)"
-            r"(?=\s+(?:from|on|between|,|\.|and|Wednesday|Thursday|Friday|Saturday|Sunday|Monday|Tuesday)|$)",
+            r"located\s+at|venue[:\s]+is|conference\s+venue[:\s]+|"
+            r"Venue[:\s]+)\s*"
+            r"(?:the\s+)?([A-Z][A-Za-z0-9 &,\-'.]{4,150})",
             txt,
         )
         if venue_m:
-            venue = venue_m.group(1).strip().rstrip(",.")
-            if 4 < len(venue) < 120:
+            venue = venue_m.group(1).strip()
+            # Trim at the first common sentence-start word or field label.
+            # Case-sensitive because these are almost always capitalized
+            # (start of a new sentence or a field label like "Date:").
+            # Terminators fall into three groups:
+            #   - Days of the week (introduce a date range: "from Wednesday 3rd")
+            #   - Prepositions (introduce a date/time: "from", "on")
+            #   - Common event-page sentence-start words
+            #   - Field labels ("Date:", "Time:")
+            #   - Event/society names appearing after the venue
+            SENTENCE_STARTS = (
+                " from ", " on ", " between ",
+                " Monday", " Tuesday", " Wednesday", " Thursday",
+                " Friday", " Saturday", " Sunday",
+                " Join ", " Please ", " Note ", " Overview ", " Programme ",
+                " Registration ", " Book ", " This ", " These ", " The day ",
+                " For ", " Cost", " Fee", " Speaker", " Times:", " Time:",
+                " Date:", " Address:", " Tel:", " Email:", " Contact",
+                " Free ", " Online ", " In-person ", " Poster ", " Format",
+                " Sponsor", " CPD", " Abstract", " BTOG ",
+            )
+            for stop in SENTENCE_STARTS:
+                idx = venue.find(stop)
+                if idx > 4:
+                    venue = venue[:idx]
+                    break
+            venue = venue.strip().rstrip(",.-")
+            if 4 < len(venue) < 200:
                 out["venue_name"] = venue
-                # Try to extract city from the venue string itself
+                # Extract city from the venue string itself
                 for city in ("Edinburgh", "London", "Sheffield", "Manchester",
                              "Birmingham", "Belfast", "Glasgow", "Cardiff",
                              "Liverpool", "Bristol", "Leeds", "Newcastle"):

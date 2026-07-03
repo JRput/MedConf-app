@@ -287,12 +287,16 @@ def fetch_page_text_and_html(url: str, *, timeout: float = 25.0) -> tuple[Option
             r = c.get(url)
             r.raise_for_status()
             html = r.text
+            # Order matters: unescape BEFORE whitespace normalization so
+            # &nbsp;/&pound; entities become \xa0/£ and \s+ can collapse
+            # \xa0 into normal spaces. Doing whitespace normalize first
+            # would leave \xa0 embedded and break downstream regex.
             text = re.sub(r"<[^>]+>", " ", html)
-            text = re.sub(r"\s+", " ", text).strip()
-            # Decode HTML entities (&pound; → £, &amp; → &, etc) so price
-            # regexes can match. Many sites use entity-encoded currency.
             text = _html.unescape(text)
-            return text[:25000], html
+            text = re.sub(r"\s+", " ", text).strip()
+            # Cap at 200k — matches the fetcher's cap. 25k truncation
+            # broke abstract detection on BTOG (content at offset 148k).
+            return text[:200000], html
     except Exception as e:
         logger.warning(f"explorer: fetch failed for {url}: {e}")
         return None, None
