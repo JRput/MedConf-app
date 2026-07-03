@@ -32,6 +32,7 @@ from .rcem import RCEMExtractor
 from .rcog import RCOGExtractor
 from .rcr import RCRAIConferenceExtractor, RCREventsPortalExtractor
 from .bopa import BOPAExtractor
+from .btog import BTOGExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -49,6 +50,7 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     11: RCRAIConferenceExtractor,       # RCR Global AI Conference 2026 (flagship subsite)
     12: RCREventsPortalExtractor,       # RCR events portal (Salesforce LWC, shadow DOM)
     13: BOPAExtractor,                  # British Oncology Pharmacy Association (Tribe Events API)
+    14: BTOGExtractor,                  # British Thoracic Oncology Group (WordPress /events/ future section)
 }
 
 
