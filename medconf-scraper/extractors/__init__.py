@@ -33,6 +33,8 @@ from .rcog import RCOGExtractor
 from .rcr import RCRAIConferenceExtractor, RCREventsPortalExtractor
 from .bopa import BOPAExtractor
 from .btog import BTOGExtractor
+from .asco import ASCOAnnualExtractor
+from .esmo import ESMOExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -51,6 +53,8 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     12: RCREventsPortalExtractor,       # RCR events portal (Salesforce LWC, shadow DOM)
     13: BOPAExtractor,                  # British Oncology Pharmacy Association (Tribe Events API)
     14: BTOGExtractor,                  # British Thoracic Oncology Group (WordPress /events/ future section)
+    15: ASCOAnnualExtractor,            # American Society of Clinical Oncology — Annual Meeting flagship
+    17: ESMOExtractor,                  # European Society for Medical Oncology — meeting calendar (Nuxt SPA)
 }
 
 

@@ -50,6 +50,9 @@ SOCIETY_EXPECTED_SPECIALTY = {
     "RCR": ["Radiology", "Clinical Oncology"],
     "BOPA": ["Oncology"],
     "BTOG": ["Oncology"],
+    "ASCO": ["Oncology", "Clinical Oncology"],
+    "ESMO": ["Oncology", "Medical Oncology"],
+    "ASTRO": ["Radiation Oncology", "Oncology"],
 }
 
 # Suspicious specialty defaults — if a specialty appears here on a source
@@ -126,9 +129,27 @@ def _has_evidence_of(page_text: str, pattern: str) -> Optional[str]:
 def check_description(row, page_text, page_html, source) -> FieldVerdict:
     v = (row.get("description") or "").strip()
     if v and 50 <= len(v) <= 700:
-        if any(bad in v.lower() for bad in ("register", "login", "menu", "cookie policy")):
+        if any(bad in v.lower() for bad in ("register now", "login", "menu",
+                                              "cookie policy", "javascript is required")):
             return FieldVerdict("description", "SUSPECT", v[:80],
                                 reason="Contains nav-leak phrases")
+        # Title-relevance check: description should share ≥1 distinctive
+        # token with the event title. Prevents ambient meta descriptions
+        # (about a different event on the same site) from being accepted.
+        title = (row.get("conference_name") or "").lower()
+        STOPWORDS = {"the","a","an","of","and","or","to","for","in","on","at",
+                     "with","by","from","as","annual","meeting","conference",
+                     "congress","event","symposium","summit","workshop","2024",
+                     "2025","2026","2027","2028"}
+        title_tokens = {t for t in re.findall(r"[a-z]{4,}", title)
+                        if t not in STOPWORDS}
+        if title_tokens:
+            v_lower = v.lower()
+            matched = [t for t in title_tokens if t in v_lower]
+            if not matched:
+                return FieldVerdict("description", "SUSPECT", v[:100],
+                    reason=f"Description shares no distinctive token with "
+                           f"event title (tokens sought: {sorted(title_tokens)[:4]})")
         return FieldVerdict("description", "OK", v[:80])
     if v and len(v) < 50:
         return FieldVerdict("description", "SUSPECT", v[:80],
@@ -136,7 +157,6 @@ def check_description(row, page_text, page_html, source) -> FieldVerdict:
     if v and len(v) > 700:
         return FieldVerdict("description", "SUSPECT", v[:80],
                             reason=f"Too long ({len(v)} chars)")
-    # Missing — check page has text
     if page_text and len(page_text) > 500:
         return FieldVerdict("description", "MISSING",
                             reason="Page has text but description not extracted")
@@ -233,10 +253,22 @@ def check_city(row, page_text, page_html, source) -> FieldVerdict:
 
 def check_event_format(row, page_text, page_html, source) -> FieldVerdict:
     v = row.get("event_format")
-    if v in ("online", "in_person", "hybrid"):
-        return FieldVerdict("event_format", "OK", v)
-    return FieldVerdict("event_format", "MISSING", v,
-                        reason="event_format must be online|in_person|hybrid")
+    if v not in ("online", "in_person", "hybrid"):
+        return FieldVerdict("event_format", "MISSING", v,
+                            reason="event_format must be online|in_person|hybrid")
+    # Cross-check: if title names a city, event shouldn't be online
+    title = (row.get("conference_name") or "")
+    known_cities = ("Lugano", "Madrid", "Zurich", "Munich", "Singapore",
+                    "Barcelona", "Vienna", "Berlin", "Paris", "Milan",
+                    "London", "Chicago", "Edinburgh", "Sheffield",
+                    "Manchester", "Boston", "Kuala Lumpur", "Melbourne",
+                    "Amsterdam", "Geneva", "Basel", "Brussels", "Dublin",
+                    "Lisbon")
+    city_in_title = any(c in title for c in known_cities)
+    if city_in_title and v == "online":
+        return FieldVerdict("event_format", "SUSPECT", v,
+            reason=f"Title names a city, but event_format=online")
+    return FieldVerdict("event_format", "OK", v)
 
 
 def check_event_type(row, page_text, page_html, source) -> FieldVerdict:
@@ -333,9 +365,15 @@ def check_abstract_status(row, page_text, page_html, source) -> FieldVerdict:
                             reason="No abstract programme on page")
 
     # Page has abstract content — verify DB reflects it
-    # Check for a closing date pattern on the page
+    # Check for a closing date pattern that's specifically abstract-context
+    # (not a registration deadline that happens to say "deadline")
     close_date = re.search(
-        r"(?:closes?|deadline|closing\s+date)[:\s]+(?:[A-Za-z]+day\s+)?"
+        r"(?:abstract\s+submissions?\s+(?:close|deadline|end)|"
+        r"abstract\s+(?:submission\s+)?deadline|"
+        r"deadline\s+for\s+(?:abstract\s+)?submissions?|"
+        r"submit\s+(?:your\s+)?abstract\s+by|"
+        r"abstract\s+submission\s+deadline\s+(?:of|is|on|:))"
+        r"[:\s\w]{0,40}"
         r"(\d{1,2}(?:st|nd|rd|th)?\s+"
         r"(?:January|February|March|April|May|June|July|August|September|October|November|December)"
         r"\s+\d{4})",
