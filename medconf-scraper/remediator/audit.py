@@ -136,11 +136,15 @@ def check_description(row, page_text, page_html, source) -> FieldVerdict:
         # Title-relevance check: description should share ≥1 distinctive
         # token with the event title. Prevents ambient meta descriptions
         # (about a different event on the same site) from being accepted.
+        # Skip when the title has NO distinctive tokens after stopword
+        # filtering (e.g. "ESMO Academy 2026" — both esmo and academy are
+        # generic).
         title = (row.get("conference_name") or "").lower()
         STOPWORDS = {"the","a","an","of","and","or","to","for","in","on","at",
                      "with","by","from","as","annual","meeting","conference",
                      "congress","event","symposium","summit","workshop","2024",
-                     "2025","2026","2027","2028"}
+                     "2025","2026","2027","2028","esmo","academy","course",
+                     "preceptorship","webinar","webcast","series"}
         title_tokens = {t for t in re.findall(r"[a-z]{4,}", title)
                         if t not in STOPWORDS}
         if title_tokens:
@@ -229,10 +233,12 @@ def check_venue_name(row, page_text, page_html, source) -> FieldVerdict:
                                 reason="Contains sentence-shaped content "
                                        "(date/prose leaked past boundary)")
         return FieldVerdict("venue_name", "OK", v)
-    # Missing — look for venue anchors
+    # Missing — look for specific venue-anchor phrases followed by a name.
+    # Exclude generic phrases like "Venue common areas" that are section
+    # headers rather than named venues.
     ev = _has_evidence_of(page_text,
-        r"(?:will\s+be\s+held\s+at|held\s+at|hosted\s+at|takes?\s+place\s+at|"
-        r"venue[:\s])[\s\w'&,\-.]{5,80}")
+        r"(?:will\s+be\s+held\s+at|held\s+at|hosted\s+at|takes?\s+place\s+at)\s+"
+        r"the\s+[A-Z][\w'&,\-. ]{5,80}")
     if ev:
         return FieldVerdict("venue_name", "MISSING", None, page_evidence=ev,
                             reason="Page mentions venue but venue_name null")
