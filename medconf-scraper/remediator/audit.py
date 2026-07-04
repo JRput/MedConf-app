@@ -151,6 +151,19 @@ def check_description(row, page_text, page_html, source) -> FieldVerdict:
             v_lower = v.lower()
             matched = [t for t in title_tokens if t in v_lower]
             if not matched:
+                # Fallback: accept if description is event-shaped
+                # (mentions congress/meeting/course/preceptorship/etc)
+                # AND matches the source-society context (mentions the
+                # society name). This handles generic "The <congress name>
+                # is for <region>..." descriptions from ESMO's calendar.
+                EVENT_SHAPE = ("congress", "meeting", "course", "workshop",
+                                "symposium", "preceptorship", "academy",
+                                "webinar", "conference")
+                society = (source.get("society") or "").lower()
+                event_shaped = any(k in v_lower for k in EVENT_SHAPE)
+                society_present = bool(society) and society in v_lower
+                if event_shaped and society_present:
+                    return FieldVerdict("description", "OK", v[:80])
                 return FieldVerdict("description", "SUSPECT", v[:100],
                     reason=f"Description shares no distinctive token with "
                            f"event title (tokens sought: {sorted(title_tokens)[:4]})")

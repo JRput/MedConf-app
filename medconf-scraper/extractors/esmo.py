@@ -206,6 +206,147 @@ def _unescape_json_html(s: str) -> str:
     return re.sub(r"\\u([0-9a-fA-F]{4})", lambda m: chr(int(m.group(1), 16)), s)
 
 
+def _extract_venue_from_paragraphs(rendered_text: str) -> Optional[str]:
+    """Look for a paragraph containing 'will take place at the <Venue>' or
+    'will be held at the <Venue>'. Also handles ESMO venue-subpage layout
+    where the venue name stands on its own as a paragraph followed by
+    a street address on the next line.
+
+    The venue extraction is case-sensitive on the FIRST character of the
+    capture (must be a REAL uppercase letter — venue names are capitalised
+    proper nouns like "ICM-International Congress Center"). This prevents
+    matches on lowercase phrases like "the heart of Europe" (case-
+    insensitive `re.I` would otherwise let `[A-Z]` match lowercase 'h').
+    """
+    paragraphs = [p.strip() for p in rendered_text.split("\n\n") if p.strip()]
+
+    # Strategy 1: find a full-sentence venue paragraph
+    # "The <event> will take place at the <Venue> in <City>"
+    for p in paragraphs:
+        if p.count("\n") > 4:
+            continue
+        m = re.search(
+            r"(?:will\s+take\s+place\s+at|will\s+be\s+held\s+at|"
+            r"is\s+hosted\s+at|hosted\s+at)\s+"
+            r"the\s+"
+            r"([A-Z][A-Za-z0-9 .,'&\-–—]{5,150})",
+            p,
+        )
+        if not m:
+            continue
+        v = m.group(1)
+        for stop in (" in ", " from ", " on ", " which ", " where ",
+                     " during ", " and ", ",", "\n"):
+            idx = v.find(stop)
+            if idx > 4:
+                v = v[:idx]
+                break
+        # Also trim at street-address markers (street number after venue
+        # name — e.g. "Suntec Singapore Convention & Exhibition Centre
+        # 1 Raffles Boulevard" — cut at " <digit> " that starts an address)
+        addr_m = re.search(r"\s+\d{1,4}\s+[A-Z]", v)
+        if addr_m and addr_m.start() > 4:
+            v = v[:addr_m.start()]
+        # Trim at phone / postal markers
+        v = re.split(
+            r"\b(?:Tel[.:]|Phone[.:]|Fax[.:]|Email[:]|www\.|\+\d)",
+            v,
+        )[0]
+        v = v.strip().rstrip(",.-;:")
+        if 4 < len(v) < 120:
+            return v
+
+    # Strategy 2: ESMO venue-subpage often has "<Venue Name>\n<street>\n<city postcode>"
+    # as a standalone paragraph (paragraph 1 in venue subpage tests).
+    # The first line of such a paragraph, if it starts with capitalised
+    # words and contains "Centre"/"Center"/"Convention"/"Hotel"/"Palace"
+    # etc, is the venue name.
+    venue_keyword_re = re.compile(
+        r"(Centre|Center|Convention|Congress|Hotel|Palace|Building|"
+        r"Hospital|Institute|Auditorium|Complex|Ballroom|Arena|Hall|Plaza|"
+        r"Casino|Cinema|Villa|Chateau|Novotel|Marriott|Hilton|Sheraton|"
+        r"Radisson)\b",
+        re.I,
+    )
+    for p in paragraphs:
+        if p.count("\n") > 4 or p.count("\n") < 1:
+            continue
+        first_line = p.split("\n")[0].strip()
+        if not first_line:
+            continue
+        # Must start with capital letter and contain a venue keyword
+        if not re.match(r"^[A-Z]", first_line):
+            continue
+        if not venue_keyword_re.search(first_line):
+            continue
+        # Cut at phone/postal/HTML markers
+        cleaned = re.split(
+            r"\b(?:Tel[.:]|Phone[.:]|Fax[.:]|Email[:]|www\.|\+\d)",
+            first_line,
+        )[0].strip()
+        # Also cut at street number (e.g. "Suntec ... Centre 1 Raffles Blvd")
+        addr_m = re.search(r"\s+\d{1,4}\s+[A-Z]", cleaned)
+        if addr_m and addr_m.start() > 4:
+            cleaned = cleaned[:addr_m.start()]
+        cleaned = cleaned.rstrip(",.-;:")
+        if 4 < len(cleaned) < 120:
+            return cleaned
+    return None
+
+
+def _extract_description_from_paragraphs(
+    rendered_text: str, title_tokens: set,
+) -> Optional[str]:
+    """Pick the best paragraph as the event description.
+
+    Preferred order:
+      1. A paragraph with a title-token match (most event-specific)
+      2. A paragraph mentioning "congress", "meeting", "course",
+         "workshop" (event-shaped generic descriptions)
+      3. Longest surviving paragraph
+    """
+    paragraphs = [p.strip() for p in rendered_text.split("\n\n") if p.strip()]
+    title_match: List[str] = []
+    event_intro: List[str] = []
+    EVENT_KEYWORDS = ("congress", "meeting", "course", "workshop",
+                       "symposium", "preceptorship", "academy", "webinar")
+    # Admin / logistical paragraphs to reject — these appear across many
+    # ESMO event pages and cannot serve as a description of the event.
+    REJECT_PHRASES = (
+        "oncologypro", "daily reporter", "no results found",
+        "meeting calendar", "home>meeting calendar", "cookie",
+        "javascript", "sign in", "log in", "©", "esmo.org", "back to",
+        "search",
+        # Admin / registration / logistics
+        "in addition to", "travel grant", "travel award",
+        "hotel accommodation", "visa cost", "hotel booking",
+        "housing agency", "official housing",
+        "registration is now", "registration fee", "how to register",
+        "how to submit", "abstract submission",
+        "getting there", "how to reach", "public transport",
+        "transportation", "airport is",
+        "photography policy", "code of conduct", "terms and conditions",
+        "privacy policy",
+    )
+    for p in paragraphs:
+        if p.count("\n") > 3:
+            continue
+        pl = p.lower()
+        if any(bad in pl for bad in REJECT_PHRASES):
+            continue
+        if not (80 <= len(p) <= 700):
+            continue
+        if title_tokens and any(t in pl for t in title_tokens):
+            title_match.append(p)
+        elif any(k in pl for k in EVENT_KEYWORDS):
+            event_intro.append(p)
+    pool = title_match or event_intro
+    if pool:
+        pool.sort(key=len, reverse=True)
+        return pool[0]
+    return None
+
+
 class ESMOExtractor(BaseExtractor):
     """European Society for Medical Oncology meeting calendar."""
 
@@ -224,15 +365,42 @@ class ESMOExtractor(BaseExtractor):
             for _ in range(3):
                 br.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
                 br.page.wait_for_timeout(2000)
-            cards = br.page.evaluate("""() => {
-                const out = [];
-                document.querySelectorAll('a[href*="/meeting-calendar/"]').forEach(a => {
-                    const url = a.href;
-                    const t = (a.innerText || '').trim();
-                    if (t.length > 5 && !url.includes('?')) out.push({url, title: t});
-                });
-                return out;
-            }""") or []
+
+            # Harvest cards from every pagination page. The listing renders
+            # ~18 events per page and has numbered [aria-label="Page N"]
+            # buttons at the bottom. Click each one in turn.
+            all_cards: List[dict] = []
+            page_num = 1
+            while page_num <= 20:  # hard cap for safety
+                # Harvest current page's meeting URLs
+                cards = br.page.evaluate("""() => {
+                    const out = [];
+                    document.querySelectorAll('a[href*="/meeting-calendar/"]').forEach(a => {
+                        const url = a.href;
+                        const t = (a.innerText || '').trim();
+                        if (t.length > 5 && !url.includes('?')) out.push({url, title: t});
+                    });
+                    return out;
+                }""") or []
+                all_cards.extend(cards)
+                # Try to click the next-page button
+                next_button_clicked = br.page.evaluate(
+                    "(nextPage) => { "
+                    "const btn = document.querySelector(`button[aria-label=\"Page ${nextPage}\"]`); "
+                    "if (btn) { btn.scrollIntoView(); btn.click(); return true; } "
+                    "return false; }",
+                    page_num + 1,
+                )
+                if not next_button_clicked:
+                    break
+                # Wait for the new page to render
+                br.page.wait_for_timeout(4000)
+                for _ in range(2):
+                    br.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                    br.page.wait_for_timeout(1500)
+                page_num += 1
+            logger.info(f"ESMO: walked {page_num} pagination page(s)")
+            cards = all_cards
         except Exception as e:
             logger.warning(f"ESMO listing failed: {e}")
             return None
@@ -292,10 +460,28 @@ class ESMOExtractor(BaseExtractor):
             city_raw = (kontent.get("city") or {}).get("value")
             city = _parse_city(city_raw)
 
+            # Kontent stores venue as HTML like:
+            #   <p><a href="...">Suntec Singapore Convention Centre</a><br>
+            #   1 Raffles Boulevard<br>Suntec City<br>Tel: +65 ...</p>
+            # We want only the FIRST line (the venue name) — split on <br>
+            # before stripping other tags.
             venue_raw = (kontent.get("venue") or {}).get("value", "")
-            venue_text = _strip_html_to_text(venue_raw)
-            if venue_text and len(venue_text) >= 4 and venue_text != " ":
-                out["venue_name"] = venue_text
+            if venue_raw:
+                # Split on <br> variants, take the first non-empty line
+                lines = re.split(r"<br\s*/?>", venue_raw, flags=re.I)
+                first_line = _strip_html_to_text(lines[0]) if lines else ""
+                if first_line and len(first_line) >= 4 and first_line != " ":
+                    # Trim at phone / postal / street number
+                    v = re.split(
+                        r"\b(?:Tel[.:]|Phone[.:]|Fax[.:]|Email[:]|www\.|\+\d)",
+                        first_line,
+                    )[0].strip()
+                    addr_m = re.search(r"\s+\d{1,4}\s+[A-Z]", v)
+                    if addr_m and addr_m.start() > 4:
+                        v = v[:addr_m.start()]
+                    v = v.strip().rstrip(",.-;:")
+                    if 4 < len(v) < 120:
+                        out["venue_name"] = v
 
             country_val = (kontent.get("country") or {}).get("value")
             country_name = None
@@ -359,9 +545,10 @@ class ESMOExtractor(BaseExtractor):
             if desc_text and 50 <= len(desc_text) <= 700:
                 out["description"] = desc_text
 
-        # 2. Fetch HTML for the fee table (Kontent registration_fees is rich
-        # text that's hard to regex; the decoded page HTML has the same info
-        # in a more parseable form)
+        # 2. Fetch HTML for fee table + venue + description.
+        # The main page is JS-rendered so httpx alone misses the visible
+        # description. We use httpx for the fee table (Nuxt payload) AND
+        # Playwright for the rendered body text (description, venue link).
         try:
             with httpx.Client(timeout=30, follow_redirects=True,
                               headers={"User-Agent": USER_AGENT}) as c:
@@ -371,6 +558,57 @@ class ESMOExtractor(BaseExtractor):
         except Exception as e:
             logger.warning(f"ESMO detail fetch failed for {url}: {e}")
             raw = ""
+
+        # Playwright-rendered body text — contains the visible description
+        # AND any /venue sub-page link. Reuses scraper's shared browser.
+        rendered_text = ""
+        venue_subpage_url: Optional[str] = None
+        br = getattr(self, "browser", None)
+        if br is not None and br.page is not None:
+            try:
+                br.navigate(url)
+                br.page.wait_for_timeout(8000)
+                for _ in range(2):
+                    br.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                    br.page.wait_for_timeout(1500)
+                rendered_text = br.page.evaluate(
+                    "() => document.body.innerText || ''"
+                ) or ""
+                # Look for a /venue sub-page link on this event
+                venue_subpage_url = br.page.evaluate(
+                    "(base) => { "
+                    "const a = Array.from(document.querySelectorAll('a')) "
+                    ".find(a => (a.href || '').startsWith(base) && "
+                    "(a.href || '').toLowerCase().endsWith('/venue')); "
+                    "return a ? a.href : null; }",
+                    url,
+                )
+            except Exception as e:
+                logger.warning(f"ESMO Playwright detail fetch failed: {e}")
+
+        # If venue is still missing AND a /venue sub-page exists, fetch it
+        if "venue_name" not in out and venue_subpage_url:
+            try:
+                if br is not None and br.page is not None:
+                    br.navigate(venue_subpage_url)
+                    br.page.wait_for_timeout(6000)
+                    for _ in range(2):
+                        br.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                        br.page.wait_for_timeout(1500)
+                    venue_text = br.page.evaluate(
+                        "() => document.body.innerText || ''"
+                    ) or ""
+                    v = _extract_venue_from_paragraphs(venue_text)
+                    if v:
+                        out["venue_name"] = v
+            except Exception as e:
+                logger.warning(f"ESMO venue-subpage fetch failed: {e}")
+
+        # If venue STILL missing, look in the main event page's rendered text
+        if "venue_name" not in out and rendered_text:
+            v = _extract_venue_from_paragraphs(rendered_text)
+            if v:
+                out["venue_name"] = v
 
         if raw:
             decoded = _unescape_json_html(raw)
@@ -410,8 +648,21 @@ class ESMOExtractor(BaseExtractor):
                         out["venue_name"] = v
 
             # Description fallback chain:
-            # 1. og:description (most reliable — set by page author)
-            # 2. First long <p> containing the event's title tokens
+            # 1. Rendered body text (highest priority — real user-facing content)
+            # 2. og:description meta tag
+            # 3. Long <p> in raw HTML
+            # 4. Synthetic template
+            if "description" not in out and rendered_text:
+                title_tokens = set(re.findall(
+                    r"[a-z]{5,}",
+                    (out.get("conference_name") or "").lower(),
+                )) - {"esmo", "cancer", "meeting", "conference", "congress",
+                       "webinar", "workshop", "course", "preceptorship",
+                       "academy", "webcast", "advanced", "series",
+                       "annual", "summit", "symposium"}
+                d = _extract_description_from_paragraphs(rendered_text, title_tokens)
+                if d:
+                    out["description"] = d
             if "description" not in out:
                 m = re.search(
                     r'<meta[^>]+property="og:description"[^>]+content="([^"]+)"',
