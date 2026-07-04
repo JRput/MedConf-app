@@ -206,6 +206,94 @@ def _unescape_json_html(s: str) -> str:
     return re.sub(r"\\u([0-9a-fA-F]{4})", lambda m: chr(int(m.group(1), 16)), s)
 
 
+def _pricing_from_registration_text(text: str) -> List[dict]:
+    """Extract pricing from ESMO Registration sub-page rendered text.
+
+    ESMO registration pages typically render a multi-column table like:
+        ESMO Member                SGD 465.00  SGD 670.00  SGD 990.00
+        ESMO Member Industry*      SGD 645.00  SGD 895.00  SGD 1,280.00
+        ...
+    with column headers Early / Late / Full registration.
+
+    Currency is EUR / USD / GBP / SGD depending on the event.
+    """
+    tiers: List[dict] = []
+    seen: set = set()
+
+    # Detect column labels from headers
+    hdr = re.search(
+        r"(Early\s+registration).{0,200}?(Late\s+registration).{0,200}?"
+        r"(Full\s+registration|Standard\s+registration|Onsite)",
+        text, re.I | re.S,
+    )
+    col_labels = ["Early registration", "Late registration",
+                  "Full registration"] if hdr else None
+
+    # Detect currency
+    if "SGD" in text and "SGD " in text:
+        currency = "SGD"
+        cur_re = r"SGD\s*([\d,]+(?:\.\d{2})?)"
+    elif "USD" in text or "US$" in text:
+        currency = "USD"
+        cur_re = r"(?:USD|US\$|\$)\s*([\d,]+(?:\.\d{2})?)"
+    elif "GBP" in text or "£" in text:
+        currency = "GBP"
+        cur_re = r"(?:GBP|£)\s*([\d,]+(?:\.\d{2})?)"
+    else:
+        currency = "EUR"
+        cur_re = r"(?:EUR|€)\s*([\d,]+(?:\.\d{2})?)"
+
+    # ESMO row labels (member category rows only — NOT column headers)
+    row_label_re = re.compile(
+        r"(ESMO\s+Member(?:\s+Industry)?"
+        r"(?:\s+Developing\s+Countries?)?"
+        r"(?:\s+in\s+Training)?[*]{0,3}|"
+        r"Non\s+ESMO\s+Members?(?:\s+Industry)?[*]{0,3}|"
+        r"Members?\s+affiliated\s+to\s+[A-Z]+(?:[/\-\s]+[A-Z]+)*[*]{0,3}|"
+        r"Standard\s+rate|Regular\s+rate|"
+        r"Patient\s+Advocates?)",
+        re.I,
+    )
+
+    # Number of prices per row = number of column labels (if detected).
+    # If not detected, cap at 4 as a safety limit.
+    max_prices_per_row = len(col_labels) if col_labels else 4
+
+    for lm in row_label_re.finditer(text):
+        label = re.sub(r"\s+", " ", lm.group(1)).strip()
+        window = text[lm.end(): lm.end() + 300]
+        raw_prices = re.findall(cur_re, window)
+        if not raw_prices:
+            continue
+        prices: List[float] = []
+        for p in raw_prices[:max_prices_per_row]:
+            try:
+                prices.append(float(p.replace(",", "")))
+            except ValueError:
+                pass
+        if not prices:
+            continue
+        for idx, price in enumerate(prices):
+            if not (10 <= price <= 20000):
+                continue
+            if col_labels and idx < len(col_labels):
+                full_label = f"{label} — {col_labels[idx]}"
+            else:
+                full_label = label
+            full_label = full_label.strip()[:200]
+            key = (full_label.lower(), price)
+            if key in seen:
+                continue
+            seen.add(key)
+            tiers.append({
+                "tier_label": full_label, "price_gbp": price,
+                "currency": currency,
+                "is_early_bird": "early" in full_label.lower(),
+                "early_bird_deadline": None,
+            })
+    return tiers
+
+
 def _extract_venue_from_paragraphs(rendered_text: str) -> Optional[str]:
     """Look for a paragraph containing 'will take place at the <Venue>' or
     'will be held at the <Venue>'. Also handles ESMO venue-subpage layout
@@ -574,17 +662,100 @@ class ESMOExtractor(BaseExtractor):
                 rendered_text = br.page.evaluate(
                     "() => document.body.innerText || ''"
                 ) or ""
-                # Look for a /venue sub-page link on this event
-                venue_subpage_url = br.page.evaluate(
+                # Look for known sub-page links on this event (venue,
+                # registration, abstracts). ESMO's larger congresses expose
+                # each of these as a dedicated /base/<slug> page. Smaller
+                # events (preceptorships, courses) don't have them.
+                subpage_urls = br.page.evaluate(
                     "(base) => { "
-                    "const a = Array.from(document.querySelectorAll('a')) "
-                    ".find(a => (a.href || '').startsWith(base) && "
-                    "(a.href || '').toLowerCase().endsWith('/venue')); "
-                    "return a ? a.href : null; }",
+                    "const suffixes = ['venue','registration','abstracts',"
+                    "'individual-registration','group-registration']; "
+                    "const found = {}; "
+                    "document.querySelectorAll('a').forEach(a => { "
+                    "  const href = (a.href || '').toLowerCase(); "
+                    "  if (!href.startsWith(base.toLowerCase())) return; "
+                    "  suffixes.forEach(s => { "
+                    "    if (href.endsWith('/' + s) && !found[s]) found[s] = a.href; "
+                    "  }); "
+                    "}); "
+                    "return found; }",
                     url,
+                ) or {}
+                venue_subpage_url = subpage_urls.get("venue")
+                # Plain /registration is the parent that has the summary
+                # fee table; sub-tabs (individual/group/third-party) are
+                # forms and don't have the pricing table.
+                registration_subpage_url = (
+                    subpage_urls.get("registration")
+                    or subpage_urls.get("individual-registration")
                 )
+                abstracts_subpage_url = subpage_urls.get("abstracts")
             except Exception as e:
                 logger.warning(f"ESMO Playwright detail fetch failed: {e}")
+
+        # Registration sub-page — fetch when present. Congresses expose
+        # detailed multi-tier tables here in currencies that vary by region
+        # (SGD for ESMO Asia, EUR for European events, USD for global).
+        # This overrides any pricing already gathered from the main page's
+        # inline fees table.
+        if br is not None and br.page is not None and 'registration_subpage_url' in dir():
+            pass  # variable exists
+        if br is not None and br.page is not None and locals().get("registration_subpage_url"):
+            try:
+                br.navigate(locals()["registration_subpage_url"])
+                br.page.wait_for_timeout(8000)
+                for _ in range(2):
+                    br.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                    br.page.wait_for_timeout(1500)
+                reg_text = br.page.evaluate(
+                    "() => document.body.innerText || ''"
+                ) or ""
+                reg_tiers = _pricing_from_registration_text(reg_text)
+                if reg_tiers:
+                    out["pricing_tiers"] = reg_tiers
+            except Exception as e:
+                logger.warning(f"ESMO registration-subpage fetch failed: {e}")
+
+        # Abstracts sub-page — fetch if abstract deadline is still missing
+        if (br is not None and br.page is not None
+                and locals().get("abstracts_subpage_url")
+                and "abstract_deadline" not in out):
+            try:
+                br.navigate(locals()["abstracts_subpage_url"])
+                br.page.wait_for_timeout(8000)
+                for _ in range(2):
+                    br.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                    br.page.wait_for_timeout(1500)
+                abs_text = br.page.evaluate(
+                    "() => document.body.innerText || ''"
+                ) or ""
+                # Look for "Submission Deadline: <date>" or similar
+                m = re.search(
+                    r"(?:submission\s+deadline|deadline\s+for\s+(?:abstract\s+)?submission|"
+                    r"abstract\s+submission\s+deadline|deadline)"
+                    r"[^A-Za-z0-9]{1,20}"
+                    r"(\d{1,2}(?:st|nd|rd|th)?\s+"
+                    r"(?:January|February|March|April|May|June|July|August|"
+                    r"September|October|November|December|Jan|Feb|Mar|Apr|"
+                    r"Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)"
+                    r"\s+\d{4})",
+                    abs_text, re.I,
+                )
+                if m:
+                    dm = re.match(
+                        r"(\d{1,2})(?:st|nd|rd|th)?\s+(\w+)\s+(\d{4})",
+                        m.group(1),
+                    )
+                    if dm:
+                        d, mon_name, y = int(dm.group(1)), dm.group(2).lower(), int(dm.group(3))
+                        mon = _MONTHS.get(mon_name) or _MONTHS.get(mon_name[:3])
+                        if mon:
+                            iso = f"{y:04d}-{mon:02d}-{d:02d}"
+                            out["abstract_deadline"] = iso
+                            today = date.today().isoformat()
+                            out["abstract_open"] = iso >= today
+            except Exception as e:
+                logger.warning(f"ESMO abstracts-subpage fetch failed: {e}")
 
         # If venue is still missing AND a /venue sub-page exists, fetch it
         if "venue_name" not in out and venue_subpage_url:

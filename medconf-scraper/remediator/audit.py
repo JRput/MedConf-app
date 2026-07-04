@@ -483,6 +483,70 @@ def _get_supabase():
     return supabase
 
 
+def _check_pagination_on_listing(base_url: str, db_row_count: int) -> Optional[dict]:
+    """Fetch the source's listing page via Playwright and check for
+    pagination controls. Compare expected total to DB row count.
+
+    Returns None if no pagination found (single-page source), or a dict
+    with pagination status and any warning message.
+    """
+    try:
+        from browser import BrowserController
+    except Exception:
+        return None
+    b = BrowserController()
+    try:
+        b.launch()
+        b.navigate(base_url)
+        b.page.wait_for_timeout(8000)
+        for _ in range(3):
+            b.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            b.page.wait_for_timeout(1500)
+        info = b.page.evaluate("""() => {
+            const result = {pageButtons: 0, nextButton: false,
+                            showMore: false, loadMore: false,
+                            totalPagesLabel: null};
+            const btns = document.querySelectorAll('[aria-label^="Page "]');
+            result.pageButtons = btns.length;
+            document.querySelectorAll('button, a').forEach(el => {
+                const t = (el.innerText || '').trim().toLowerCase();
+                if (t === 'next' || t === 'next page' || t === '>')
+                    result.nextButton = true;
+                if (t === 'show more' || t === 'more')
+                    result.showMore = true;
+                if (t === 'load more')
+                    result.loadMore = true;
+            });
+            const totalMatch = document.body.innerText.match(
+                /(\\d+)\\s*(?:events?|meetings?|results?|entries|of\\s+\\d+)/i);
+            if (totalMatch) result.totalPagesLabel = totalMatch[0];
+            return result;
+        }""") or {}
+        has_pagination = (
+            info.get("pageButtons", 0) > 1
+            or info.get("nextButton")
+            or info.get("showMore")
+            or info.get("loadMore")
+        )
+        return {
+            "has_pagination": has_pagination,
+            "page_buttons": info.get("pageButtons", 0),
+            "next_button": info.get("nextButton", False),
+            "show_more": info.get("showMore", False),
+            "load_more": info.get("loadMore", False),
+            "total_hint": info.get("totalPagesLabel"),
+            "db_rows": db_row_count,
+        }
+    except Exception as e:
+        logger.warning(f"pagination check failed for {base_url}: {e}")
+        return None
+    finally:
+        try:
+            b.close()
+        except Exception:
+            pass
+
+
 def audit_source(source_id: int) -> dict:
     from .fetcher import PageCache
     sb = _get_supabase()
@@ -520,6 +584,31 @@ def audit_source(source_id: int) -> dict:
         sum(a.completeness_score for a in audits) / max(1, total_rows), 1
     )
 
+    # Source-level pagination check — detects pagination controls on the
+    # source's listing page and warns if the DB row count seems too low.
+    # This catches sources where a new extractor forgot to walk pagination.
+    pagination_status = _check_pagination_on_listing(
+        source.get("base_url") or "", total_rows,
+    )
+    pagination_warning = None
+    if pagination_status and pagination_status.get("has_pagination"):
+        pb = pagination_status.get("page_buttons") or 0
+        # Assume ~15-20 items per page. If DB rows < pages × 15, warn.
+        if pb > 1 and total_rows < pb * 15:
+            pagination_warning = (
+                f"Listing has {pb} pagination pages but only {total_rows} rows "
+                f"in DB — extractor may be missing later pages"
+            )
+        elif pagination_status.get("show_more") or pagination_status.get("load_more"):
+            pagination_warning = (
+                "Listing has 'Show more'/'Load more' button — extractor "
+                "must click these until exhausted"
+            )
+
+    # Pagination warning counts as a SUSPECT-level issue
+    if pagination_warning:
+        total_suspect += 1
+
     result = {
         "source_id": source_id,
         "source_name": source.get("source_name"),
@@ -530,6 +619,8 @@ def audit_source(source_id: int) -> dict:
         "total_suspect_fields": total_suspect,
         "avg_completeness": avg_score,
         "verdict": "PASS" if total_missing == 0 and total_suspect == 0 else "FAIL",
+        "pagination": pagination_status,
+        "pagination_warning": pagination_warning,
         "audits": [asdict(a) for a in audits],
         "audited_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -557,6 +648,11 @@ def _print_summary(result: dict) -> None:
     print(f"  Total SUSPECT:       {result['total_suspect_fields']}")
     print(f"  Avg completeness:    {result['avg_completeness']}%")
     print(f"  Verdict:             {verdict_line}")
+    if result.get("pagination_warning"):
+        print(f"  ⚠ Pagination:       {result['pagination_warning']}")
+    elif result.get("pagination") and result["pagination"].get("has_pagination"):
+        p = result["pagination"]
+        print(f"  ✓ Pagination:        {p.get('page_buttons', 0)} page button(s) — extractor covered")
     print()
     for a in result["audits"]:
         if a["total_missing"] > 0 or a["total_suspect"] > 0:
