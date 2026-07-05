@@ -104,8 +104,15 @@ def _fetch_asco_subpage(base_url: str, suffix: str, timeout: float = 25) -> Opti
 
 def _extract_asco_pricing(sub_html: str) -> List[dict]:
     """ASCO uses USD tiers. Common formats:
+
+    Format 1 - Member/Non-member across 3 timeframes (Quality Care 2026):
+      Physician/Scientist    $945/$1,450  $1,095/$1,600  $1,170/$1,675
+      In-Training*           $275/$360    $425/$510      $500/$585
+
+    Format 2 - Single-price rows (simpler events):
       Member — $850    Non-member — $1,200
-      Early bird — Member $850
+
+    Format 3 - Column table:
       Registration Type       Early    Standard   Late
       Member                  $850     $1050      $1250
     """
@@ -114,64 +121,101 @@ def _extract_asco_pricing(sub_html: str) -> List[dict]:
     txt = re.sub(r"<[^>]+>", " ", sub_html)
     txt = _html.unescape(txt); txt = re.sub(r"\s+", " ", txt)
 
-    # Detect column headers if a table has Early / Regular / Late structure
+    # Column labels — try to detect Early/Regular/Late from context
+    # (ASCO uses "Advance" / "Regular" / "Late" or "Early" / "Regular" / "Late")
     hdr = re.search(
-        r"(Early(?:\s+(?:bird|registration))?)"
-        r".{0,150}?"
-        r"(Regular\s+registration|Standard\s+registration|Advance\s+registration)"
-        r".{0,150}?"
-        r"(Late\s+registration|Onsite\s+registration)?",
-        txt, re.I,
+        r"(?i)(Advance|Early)(?:\s+registration|\s+bird)?"
+        r".{0,300}?"
+        r"(Regular|Standard)(?:\s+registration)?"
+        r".{0,300}?"
+        r"(Late|Onsite)(?:\s+registration)?",
+        txt,
     )
     col_labels = None
     if hdr:
-        col_labels = [g for g in hdr.groups() if g]
+        col_labels = [
+            f"{hdr.group(1).title()} registration",
+            f"{hdr.group(2).title()} registration",
+            f"{hdr.group(3).title()} registration",
+        ]
 
-    # Row labels — common ASCO categories
+    # Row labels — expanded to include the Quality Care categories
     row_label_re = re.compile(
         r"(ASCO\s+Member(?:\s+in\s+Training)?|"
         r"Non-?member(?:\s+Physician)?|Non\s+Member|"
-        r"Physician\s+Member|Allied\s+Health\s+Professional|"
-        r"Patient\s+Advocate|Trainee|Student|Resident|"
+        r"Physician(?:/Scientist)?(?:\s+Member)?|Scientist|"
+        r"In-?Training\*?|Trainee|Student|Resident|"
+        r"Affiliated\s+Health\s+Professional\*?|"
+        r"Allied\s+Health\s+Professional\*?|"
+        r"Patient\s+Advocate\*?|"
+        r"Early\s+Career,?\s+Retired,?\s+or\s+Emeritus"
+        r"(?:\s+\(Member\s+Only\))?|"
+        r"Low\s+or\s+Middle\s+Income\s+Country(?:\s+Member\s+Only)?|"
         r"Industry|Press|Media|"
         r"Standard\s+registration|Early\s+registration|Late\s+registration)",
         re.I,
     )
-    price_re = re.compile(r"\$\s*([\d,]+(?:\.\d{2})?)")
-    max_prices = len(col_labels) if col_labels else 4
+
+    # Match member/non-member pairs like "$945/$1,450" or singles like "$945"
+    # in a row window (up to 400 chars after the label). Order matters:
+    # try the pair pattern first so "$945/$1,450" isn't split into two singles.
+    pair_re = re.compile(
+        r"\$\s*([\d,]+(?:\.\d{2})?)\s*/\s*\$\s*([\d,]+(?:\.\d{2})?)"
+    )
+    single_re = re.compile(r"\$\s*([\d,]+(?:\.\d{2})?)")
+
+    def _add(label: str, price: float, currency: str = "USD"):
+        label = label.strip()[:200]
+        if not label or not (50 <= price <= 20000):
+            return
+        key = (label.lower(), price)
+        if key in seen:
+            return
+        seen.add(key)
+        tiers.append({
+            "tier_label": label, "price_gbp": price, "currency": currency,
+            "is_early_bird": "early" in label.lower() or "advance" in label.lower(),
+            "early_bird_deadline": None,
+        })
 
     for lm in row_label_re.finditer(txt):
         label = re.sub(r"\s+", " ", lm.group(1)).strip()
-        window = txt[lm.end(): lm.end() + 300]
-        raw_prices = price_re.findall(window)
+        window = txt[lm.end(): lm.end() + 400]
+        # Try pair format first — indicates member/non-member split.
+        # BUT skip pair-splitting if the label already denotes member/nonmember
+        # (would produce nonsense like "Nonmember (Member)").
+        label_low = label.lower()
+        label_already_membership = (
+            "member" in label_low or "nonmember" in label_low
+            or "non-member" in label_low
+        )
+        pairs = list(pair_re.finditer(window))
+        if pairs and len(pairs) >= 1 and not label_already_membership:
+            for idx, pm in enumerate(pairs[:3]):
+                col = col_labels[idx] if col_labels and idx < len(col_labels) else None
+                try:
+                    p_member = float(pm.group(1).replace(",", ""))
+                    p_nonmember = float(pm.group(2).replace(",", ""))
+                except ValueError:
+                    continue
+                m_label = f"{label} (Member)" + (f" — {col}" if col else "")
+                nm_label = f"{label} (Non-member)" + (f" — {col}" if col else "")
+                _add(m_label, p_member)
+                _add(nm_label, p_nonmember)
+            continue
+
+        # Otherwise fall back to single-price rows
+        raw_prices = single_re.findall(window)
         if not raw_prices:
             continue
-        prices: List[float] = []
-        for p in raw_prices[:max_prices]:
+        max_prices = len(col_labels) if col_labels else 4
+        for idx, p in enumerate(raw_prices[:max_prices]):
             try:
-                prices.append(float(p.replace(",", "")))
+                price = float(p.replace(",", ""))
             except ValueError:
-                pass
-        if not prices:
-            continue
-        for idx, price in enumerate(prices):
-            if not (50 <= price <= 20000):
                 continue
-            if col_labels and idx < len(col_labels):
-                full_label = f"{label} — {col_labels[idx]}"
-            else:
-                full_label = label
-            full_label = full_label.strip()[:200]
-            key = (full_label.lower(), price)
-            if key in seen:
-                continue
-            seen.add(key)
-            tiers.append({
-                "tier_label": full_label, "price_gbp": price,
-                "currency": "USD",
-                "is_early_bird": "early" in full_label.lower(),
-                "early_bird_deadline": None,
-            })
+            col = col_labels[idx] if col_labels and idx < len(col_labels) else None
+            _add(f"{label}" + (f" — {col}" if col else ""), price)
     return tiers
 
 
@@ -542,8 +586,12 @@ class ASCOMeetingsExtractor(BaseExtractor):
                     f"Abstract submission opens {opens_raw}"
                 )
 
-        # Registration sub-page for USD pricing tiers
-        for suffix in ("attend/register", "attend/registration",
+        # Registration sub-page for USD pricing tiers. Try nested paths
+        # first (used by Quality Care and future symposia).
+        for suffix in ("registration-hotels/registration-details",
+                        "registration-hotels/registration-and-hotels",
+                        "attend/registration-details",
+                        "attend/register", "attend/registration",
                         "registration", "register"):
             reg_html = _fetch_asco_subpage(url, suffix)
             if reg_html:
