@@ -238,6 +238,54 @@ def _extract_asco_abstract_opens(sub_html_or_main: str) -> Optional[str]:
     return None
 
 
+def _parse_asco_dates_to_know(raw_html: str) -> dict:
+    """ASCO's /dates-know sub-page has a structured list of key dates.
+
+    HTML pattern:
+      <p><strong>DATE STRING</strong><br>LABEL DESCRIPTION</p>
+
+    Returns dict with:
+      abstract_opens: raw date string (e.g. "November 4, 2026")
+      abstract_deadline: ISO date if parseable (e.g. "2027-01-26")
+      abstract_deadline_raw: raw date string of the deadline
+      late_breaking_deadline: LBA deadline (ISO if parseable)
+      registration_opens: registration opening date
+      hotel_registration_deadline: hotel/early registration deadline
+      all_dates: list of (raw_date, label) tuples for audit trail
+    """
+    out: dict = {"all_dates": []}
+    for m in re.finditer(
+        r"<p>\s*<strong>([^<]+)</strong>[^<]*<br[^>]*>([^<]+)</p>",
+        raw_html, re.I,
+    ):
+        date_raw = _html.unescape(m.group(1).strip())
+        label = _html.unescape(m.group(2).strip())
+        out["all_dates"].append((date_raw, label))
+        ll = label.lower()
+
+        # Match label -> field
+        if re.search(r"abstract\s+submission\s+(?:opens?|launches?|"
+                     r"begin|starts?|site\s+open)", ll):
+            out.setdefault("abstract_opens", date_raw)
+        elif "abstract submission deadline" in ll:
+            out["abstract_deadline_raw"] = date_raw
+            iso = _parse_us_date_single(re.sub(r",?\s*at\s+.*$", "", date_raw))
+            if iso:
+                out["abstract_deadline"] = iso
+        elif re.search(r"late[\-\s]?breaking\s+(?:abstract\s+)?"
+                       r"(?:submission\s+)?(?:deadline|due)", ll):
+            iso = _parse_us_date_single(re.sub(r",?\s*at\s+.*$", "", date_raw))
+            if iso:
+                out["late_breaking_deadline"] = iso
+        elif re.search(r"registration\s+(?:and\s+hotel\s+reservations?\s+)?"
+                       r"(?:opens?|available)", ll):
+            out.setdefault("registration_opens", date_raw)
+        elif re.search(r"(?:hotel\s+reservation\s+and\s+)?early\s+registration"
+                       r"\s+deadline", ll):
+            out.setdefault("hotel_registration_deadline", date_raw)
+    return out
+
+
 class ASCOMeetingsExtractor(BaseExtractor):
     """Source 16: ASCO Meetings-Education listing.
 
@@ -440,39 +488,59 @@ class ASCOMeetingsExtractor(BaseExtractor):
             candidates.sort(key=len, reverse=True)
             out["description"] = candidates[0]
 
-        # Abstract opening date (when future) — check main page first
-        # then abstracts sub-page
-        opens_raw = _extract_asco_abstract_opens(txt)
+        # Dates-to-Know sub-page — ASCO's authoritative structured
+        # key-dates page. Contains abstract opening/closing dates AND
+        # registration deadlines in a consistent <p><strong>date</strong>
+        # <br>label</p> pattern.
+        dates_html = _fetch_asco_subpage(url, "dates-know")
+        opens_raw: Optional[str] = None
         deadline: Optional[str] = None
-        for suffix in ("abstracts", "program/abstracts",
-                        "attend/abstract-submissions",
-                        "abstracts-and-presentations"):
-            abs_html = _fetch_asco_subpage(url, suffix)
-            if abs_html:
-                if not deadline:
-                    deadline = _extract_asco_abstract_deadline(abs_html)
-                if not opens_raw:
-                    opens_raw = _extract_asco_abstract_opens(abs_html)
-                if deadline and opens_raw:
-                    break
+        if dates_html:
+            dtk = _parse_asco_dates_to_know(dates_html)
+            opens_raw = dtk.get("abstract_opens")
+            deadline = dtk.get("abstract_deadline")
+
+        # Fallback: main page + generic sub-pages
+        if not opens_raw:
+            opens_raw = _extract_asco_abstract_opens(txt)
+        if not deadline:
+            for suffix in ("abstracts", "program/abstracts",
+                            "attend/abstract-submissions",
+                            "abstracts-and-presentations"):
+                abs_html = _fetch_asco_subpage(url, suffix)
+                if abs_html:
+                    if not deadline:
+                        deadline = _extract_asco_abstract_deadline(abs_html)
+                    if not opens_raw:
+                        opens_raw = _extract_asco_abstract_opens(abs_html)
+                    if deadline and opens_raw:
+                        break
 
         today = date.today().isoformat()
         if deadline:
             out["abstract_deadline"] = deadline
-            out["abstract_open"] = deadline >= today
             if opens_raw:
-                # Only add opening note if opening date is in the future
-                # relative to today
                 opens_iso = _parse_us_date_single(opens_raw) or ""
                 if opens_iso and opens_iso > today:
+                    out["abstract_open"] = False
                     out["abstract_deadline_note"] = f"Opens {opens_raw}"
+                else:
+                    out["abstract_open"] = deadline >= today
+            else:
+                out["abstract_open"] = deadline >= today
         elif opens_raw:
+            # Try to parse opens_raw to decide if abstract is now open
             opens_iso = _parse_us_date_single(opens_raw)
-            # Some pages say "Abstract submission will open in October 2026"
-            # (month + year, no day). If we can't parse to a full ISO date,
-            # still surface it as a note so users see when submissions open.
-            out["abstract_deadline_note"] = f"Abstract submission opens {opens_raw}"
-            out["abstract_open"] = False
+            if opens_iso and opens_iso <= today:
+                out["abstract_open"] = True
+                out["abstract_deadline_note"] = (
+                    f"Submissions opened {opens_raw} — deadline TBC"
+                )
+            else:
+                out["abstract_open"] = False
+                out["abstract_deadline_note"] = (
+                    f"Abstract submission opens {opens_raw}"
+                )
 
         # Registration sub-page for USD pricing tiers
         for suffix in ("attend/register", "attend/registration",
@@ -621,28 +689,45 @@ class ASCOAnnualExtractor(BaseExtractor):
                     out["pricing_tiers"] = tiers
                     break
 
-        # Abstracts sub-page — deadline AND opening date
-        opens_raw = _extract_asco_abstract_opens(txt)
+        # Dates-to-Know sub-page — ASCO's structured key-dates page has
+        # the authoritative abstract opening/closing + registration dates
+        dates_html = _fetch_asco_subpage(url, "dates-know")
+        opens_raw: Optional[str] = None
         deadline: Optional[str] = None
-        for suffix in ("abstracts", "program/abstracts",
-                        "attend/abstract-submissions",
-                        "abstracts-and-presentations"):
-            abs_html = _fetch_asco_subpage(url, suffix)
-            if abs_html:
-                if not deadline:
-                    deadline = _extract_asco_abstract_deadline(abs_html)
-                if not opens_raw:
-                    opens_raw = _extract_asco_abstract_opens(abs_html)
-                if deadline and opens_raw:
-                    break
+        if dates_html:
+            dtk = _parse_asco_dates_to_know(dates_html)
+            opens_raw = dtk.get("abstract_opens")
+            deadline = dtk.get("abstract_deadline")
+
+        # Fallback: main page + generic sub-pages
+        if not opens_raw:
+            opens_raw = _extract_asco_abstract_opens(txt)
+        if not deadline:
+            for suffix in ("abstracts", "program/abstracts",
+                            "attend/abstract-submissions",
+                            "abstracts-and-presentations"):
+                abs_html = _fetch_asco_subpage(url, suffix)
+                if abs_html:
+                    if not deadline:
+                        deadline = _extract_asco_abstract_deadline(abs_html)
+                    if not opens_raw:
+                        opens_raw = _extract_asco_abstract_opens(abs_html)
+                    if deadline and opens_raw:
+                        break
+
         today = date.today().isoformat()
         if deadline:
             out["abstract_deadline"] = deadline
-            out["abstract_open"] = deadline >= today
+            # Determine open status: if opens date is future → not open yet
             if opens_raw:
                 opens_iso = _parse_us_date_single(opens_raw) or ""
                 if opens_iso and opens_iso > today:
+                    out["abstract_open"] = False
                     out["abstract_deadline_note"] = f"Opens {opens_raw}"
+                else:
+                    out["abstract_open"] = deadline >= today
+            else:
+                out["abstract_open"] = deadline >= today
         elif opens_raw:
             out["abstract_deadline_note"] = (
                 f"Abstract submission opens {opens_raw}"
