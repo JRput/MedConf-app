@@ -78,6 +78,29 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
     #   - extractor sets open=True without any supporting info
     from datetime import date as _date
     today_iso = _date.today().isoformat()
+
+    # Stale-deadline guard — catches sources that roll a URL forward to
+    # next year's event but leave the previous cycle's abstract deadline
+    # on the page (observed on ASCO /breakthrough, /quality). If deadline
+    # is >240 days before start_date, it can't be for THIS event; drop it
+    # so the daily scrape re-picks the real date once the source updates.
+    _dl = cleaned.get("abstract_deadline")
+    _sd = cleaned.get("start_date")
+    if _dl and _sd:
+        try:
+            _ddl = _date.fromisoformat(_dl)
+            _dsd = _date.fromisoformat(_sd)
+            if (_dsd - _ddl).days > 240:
+                warnings.append(
+                    f"abstract_deadline {_dl} is {(_dsd - _ddl).days} days "
+                    f"before start_date {_sd} — treating as stale, dropped"
+                )
+                cleaned["abstract_deadline"] = None
+                cleaned["abstract_deadline_note"] = None
+                cleaned["abstract_open"] = False
+        except ValueError:
+            pass
+
     if cleaned["abstract_open"]:
         deadline = cleaned.get("abstract_deadline")
         note = cleaned.get("abstract_deadline_note")
