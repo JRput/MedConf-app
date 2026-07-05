@@ -191,10 +191,12 @@ def _extract_asco_abstract_deadline(sub_html: str) -> Optional[str]:
     )
     if not m:
         return None
-    dm = re.match(
-        r"(\w+)\s+(\d{1,2}),?\s+(\d{4})",
-        m.group(1),
-    )
+    return _parse_us_date_single(m.group(1))
+
+
+def _parse_us_date_single(s: str) -> Optional[str]:
+    """Parse 'February 6, 2027' → '2027-02-06'."""
+    dm = re.match(r"(\w+)\s+(\d{1,2}),?\s+(\d{4})", s)
     if not dm:
         return None
     mon_name = dm.group(1).lower()
@@ -205,32 +207,142 @@ def _extract_asco_abstract_deadline(sub_html: str) -> Optional[str]:
     return f"{y:04d}-{mon:02d}-{d:02d}"
 
 
+def _extract_asco_abstract_opens(sub_html_or_main: str) -> Optional[str]:
+    """Look for 'Abstract submission opens' patterns.
+    Returns the raw date string (for display in a note) if found.
+    """
+    txt = re.sub(r"<[^>]+>", " ", sub_html_or_main)
+    txt = _html.unescape(txt); txt = re.sub(r"\s+", " ", txt)
+    m = re.search(
+        r"(?i)abstract\s+submission\s+(?:opens?|begin|starts?|will\s+open|"
+        r"is\s+open|available)\s*(?:on|from)?\s*"
+        r"("
+        r"(?:January|February|March|April|May|June|July|August|September|"
+        r"October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)"
+        r"\s+\d{1,2},?\s+\d{4})",
+        txt,
+    )
+    if m:
+        return m.group(1)
+    # Also match "will open in <Month YYYY>"
+    m = re.search(
+        r"(?i)abstract\s+submission[^.]{0,60}?(?:will\s+open|opens?)\s+"
+        r"(?:in\s+)?"
+        r"("
+        r"(?:January|February|March|April|May|June|July|August|September|"
+        r"October|November|December)\s+\d{4})",
+        txt,
+    )
+    if m:
+        return m.group(1)
+    return None
+
+
 class ASCOMeetingsExtractor(BaseExtractor):
     """Source 16: ASCO Meetings-Education listing.
 
-    The /meetings-education/meetings page lists several ASCO event types.
-    Most are ongoing licensing programs (ASCO Direct, Best of ASCO) with
-    no specific dates OR external co-sponsored meetings (IASLC lung
-    cancer, SNO CNS metastases, AACR methods workshop) hosted on partner
-    sites. The ONE self-hosted single event from this listing is:
-      - ASCO Breakthrough — annual Asia meeting (Singapore for 2027)
+    ASCO hosts 4 self-published event pages (short paths on asco.org):
+      - /breakthrough  -> ASCO Breakthrough (Asia annual meeting)
+      - /gi            -> ASCO Gastrointestinal Cancers Symposium
+      - /gu            -> ASCO Genitourinary Cancers Symposium
+      - /quality       -> ASCO Quality Care Symposium
 
-    This extractor returns Breakthrough as one row. If ASCO adds more
-    self-hosted single events later, add them to the shells list.
+    (Also on the listing but excluded: ongoing licensed programs like
+    /meetings-education/meetings/asco-direct and /best-of-asco, and
+    externally co-sponsored partner meetings like IASLC | ASCO Lung
+    Cancer, SNO/ASCO CNS Metastases, AACR/ASCO Methods Workshop and
+    Multidisciplinary Head & Neck Symposium.)
     """
 
     _EVENT_URLS = [
         {
             "title": "ASCO Breakthrough",
             "url": "https://www.asco.org/breakthrough",
+            "desc_tokens": ("breakthrough", "asia"),
+            "candidate_cities": ("Singapore", "Bangkok", "Kuala Lumpur",
+                                  "Hong Kong", "Tokyo", "Yokohama",
+                                  "Seoul", "Taipei"),
+        },
+        {
+            "title": "ASCO Gastrointestinal Cancers Symposium",
+            "url": "https://www.asco.org/gi",
+            "desc_tokens": ("gastrointestinal", "gi cancers"),
+            "candidate_cities": ("San Francisco",),
+        },
+        {
+            "title": "ASCO Genitourinary Cancers Symposium",
+            "url": "https://www.asco.org/gu",
+            "desc_tokens": ("genitourinary", "gu cancers"),
+            "candidate_cities": ("San Francisco",),
+        },
+        {
+            "title": "ASCO Quality Care Symposium",
+            "url": "https://www.asco.org/quality",
+            "desc_tokens": ("quality care", "quality, safety"),
+            "candidate_cities": ("Boston",),
         },
     ]
 
+    # Discovery — scan the /meetings-education/meetings page for any
+    # short-path URLs like /gi, /gu, /breakthrough, /quality that link
+    # to standalone event subsites. This catches new symposia when ASCO
+    # adds them (they've historically added ~1 new event per year).
+    _LISTING_URL = "https://www.asco.org/meetings-education/meetings"
+
+    # Short paths on asco.org that ARE real event pages, but excluded
+    # because they're not single-event pages
+    _EXCLUDED_SHORT_PATHS = {
+        "search", "contact-us", "abstracts", "posters", "slides", "videos",
+        "guidelines", "journals", "annual-meeting",  # separate source
+        "asco-licensing-opportunities", "meetings-education",
+    }
+
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
+        # Start with the hardcoded curated list — these are known-good
+        # entries with proper metadata (candidate_cities, desc_tokens).
+        # Then auto-discover any additional short-path event URLs on the
+        # listing page — if ASCO adds "ASCO Breast Cancer Symposium" at
+        # /breast, we'll pick it up on the next scrape.
+        curated_by_url = {e["url"]: e for e in self._EVENT_URLS}
+        discovered_urls: set = set()
+        try:
+            with httpx.Client(timeout=25, follow_redirects=True,
+                              headers={"User-Agent": USER_AGENT}) as c:
+                r = c.get(self._LISTING_URL)
+                raw = r.text
+            # Find /<short-path> hrefs where short-path is 2-30 chars,
+            # single segment, no /meetings-education/ prefix
+            for m in re.finditer(
+                r'href=["\'](/[a-z][a-z0-9\-]{1,29}|'
+                r'https://www\.asco\.org/[a-z][a-z0-9\-]{1,29})["\']',
+                raw,
+            ):
+                url = m.group(1)
+                if url.startswith("/"):
+                    url = "https://www.asco.org" + url
+                url = url.rstrip("/")
+                slug = url.rsplit("/", 1)[-1]
+                if slug in self._EXCLUDED_SHORT_PATHS:
+                    continue
+                discovered_urls.add(url)
+        except Exception as e:
+            logger.warning(f"ASCO listing discovery failed: {e}")
+
+        # Warn if we found any URLs that AREN'T in our curated list —
+        # they may be new events we need to add metadata for.
+        for url in sorted(discovered_urls):
+            if url not in curated_by_url:
+                logger.warning(
+                    f"ASCO: discovered short-path URL not in curated list: "
+                    f"{url} — verify if this is a new event and add to "
+                    f"_EVENT_URLS if so"
+                )
+
         return [{
             "title": e["title"],
             "booking_url": e["url"],
             "source_url": e["url"],
+            "_meta": e,
         } for e in self._EVENT_URLS]
 
     def extract_detail(
@@ -240,6 +352,11 @@ class ASCOMeetingsExtractor(BaseExtractor):
         llm_call: Callable[[str], Optional[str]],
     ) -> Dict[str, Any]:
         url = shell.get("source_url") or shell.get("booking_url") or ""
+        meta = shell.get("_meta") or {}
+        title_hint = meta.get("title") or shell.get("title") or ""
+        desc_tokens = meta.get("desc_tokens") or (title_hint.lower(),)
+        candidate_cities = meta.get("candidate_cities") or ()
+
         out: Dict[str, Any] = {}
         try:
             with httpx.Client(timeout=30, follow_redirects=True,
@@ -260,18 +377,36 @@ class ASCOMeetingsExtractor(BaseExtractor):
             if end and end != start:
                 out["end_date"] = end
             year = start[:4]
-            out["conference_name"] = f"{year} ASCO Breakthrough"
+            out["conference_name"] = f"{year} {title_hint}"
         else:
-            out["conference_name"] = "ASCO Breakthrough"
+            out["conference_name"] = title_hint
 
-        # Location — Breakthrough rotates Asian cities; check known ones
-        for city in ("Singapore", "Bangkok", "Kuala Lumpur", "Hong Kong",
-                      "Tokyo", "Yokohama", "Seoul", "Taipei"):
+        # Location — try known candidate cities for this event first
+        for city in candidate_cities:
             if city in txt:
                 out["city"] = city
                 break
 
-        # Format: hybrid if "& online" or virtual mention
+        # Venue detection — ASCO uses "location_on Venue Name | City"
+        # or "at Moscone West" or "Hynes Convention Center, Boston"
+        venue_m = re.search(
+            r"location_on\s+([A-Z][A-Za-z0-9 .,'&-]{4,80}?)\s*\|",
+            txt,
+        )
+        if venue_m:
+            out["venue_name"] = venue_m.group(1).strip()
+        else:
+            # Fallback — "Hynes Convention Center, Boston, MA & Online"
+            for city in candidate_cities:
+                venue_m = re.search(
+                    rf"([A-Z][A-Za-z0-9 .,'&-]{{4,80}}?),\s+{re.escape(city)}\b",
+                    txt,
+                )
+                if venue_m:
+                    out["venue_name"] = venue_m.group(1).strip()
+                    break
+
+        # Format detection
         low = txt.lower()
         if re.search(r"(?:&|and)\s+online", low) or "hybrid" in low:
             out["event_format"] = "hybrid"
@@ -281,12 +416,11 @@ class ASCOMeetingsExtractor(BaseExtractor):
             out["event_format"] = "in_person"
 
         out["event_type"] = "conference"
-        out["is_flagship"] = True  # ASCO's flagship Asian meeting
+        out["is_flagship"] = True
         out["specialty"] = "Oncology"
         out["society"] = "ASCO"
 
-        # Description — must mention "Breakthrough" AND be about the event
-        target_tokens = ("breakthrough", "asia")
+        # Description — must mention title-specific tokens
         candidates: List[str] = []
         for tag in ("h1", "h2", "p"):
             for m in re.finditer(rf"<{tag}[^>]*>(.*?)</{tag}>", raw, re.I | re.S):
@@ -295,10 +429,9 @@ class ASCOMeetingsExtractor(BaseExtractor):
                 if not (50 <= len(d) <= 700):
                     continue
                 dl = d.lower()
-                if not any(t in dl for t in target_tokens):
+                if not any(t in dl for t in desc_tokens):
                     continue
-                if any(bad in dl for bad in ("cookie", "javascript",
-                                              "annual meeting")):
+                if any(bad in dl for bad in ("cookie", "javascript")):
                     continue
                 if dl.startswith(("couldn", "did", "want", "why", "how", "what")):
                     continue
@@ -307,7 +440,41 @@ class ASCOMeetingsExtractor(BaseExtractor):
             candidates.sort(key=len, reverse=True)
             out["description"] = candidates[0]
 
-        # Fetch sub-pages for pricing, abstracts, venue
+        # Abstract opening date (when future) — check main page first
+        # then abstracts sub-page
+        opens_raw = _extract_asco_abstract_opens(txt)
+        deadline: Optional[str] = None
+        for suffix in ("abstracts", "program/abstracts",
+                        "attend/abstract-submissions",
+                        "abstracts-and-presentations"):
+            abs_html = _fetch_asco_subpage(url, suffix)
+            if abs_html:
+                if not deadline:
+                    deadline = _extract_asco_abstract_deadline(abs_html)
+                if not opens_raw:
+                    opens_raw = _extract_asco_abstract_opens(abs_html)
+                if deadline and opens_raw:
+                    break
+
+        today = date.today().isoformat()
+        if deadline:
+            out["abstract_deadline"] = deadline
+            out["abstract_open"] = deadline >= today
+            if opens_raw:
+                # Only add opening note if opening date is in the future
+                # relative to today
+                opens_iso = _parse_us_date_single(opens_raw) or ""
+                if opens_iso and opens_iso > today:
+                    out["abstract_deadline_note"] = f"Opens {opens_raw}"
+        elif opens_raw:
+            opens_iso = _parse_us_date_single(opens_raw)
+            # Some pages say "Abstract submission will open in October 2026"
+            # (month + year, no day). If we can't parse to a full ISO date,
+            # still surface it as a note so users see when submissions open.
+            out["abstract_deadline_note"] = f"Abstract submission opens {opens_raw}"
+            out["abstract_open"] = False
+
+        # Registration sub-page for USD pricing tiers
         for suffix in ("attend/register", "attend/registration",
                         "registration", "register"):
             reg_html = _fetch_asco_subpage(url, suffix)
@@ -316,36 +483,6 @@ class ASCOMeetingsExtractor(BaseExtractor):
                 if tiers:
                     out["pricing_tiers"] = tiers
                     break
-
-        for suffix in ("abstracts", "program/abstracts",
-                        "attend/abstract-submissions"):
-            abs_html = _fetch_asco_subpage(url, suffix)
-            if abs_html:
-                deadline = _extract_asco_abstract_deadline(abs_html)
-                if deadline:
-                    out["abstract_deadline"] = deadline
-                    out["abstract_open"] = deadline >= date.today().isoformat()
-                    break
-
-        # Venue: often stated as "Marina Bay Sands, Singapore" on Breakthrough
-        if "venue_name" not in out:
-            venue_m = re.search(
-                r"(?:held\s+at|will\s+take\s+place\s+at|at\s+the)\s+"
-                r"([A-Z][A-Za-z0-9 .,'&-]{5,80})",
-                txt,
-            )
-            if venue_m:
-                v = venue_m.group(1)
-                for stop in (" in ", " from ", " on ", " where ", " and ",
-                              " which ", ",", ". ", " Subscribe",
-                              " Register", " Learn", " View", " Meeting"):
-                    idx = v.find(stop)
-                    if idx > 4:
-                        v = v[:idx]
-                        break
-                v = v.strip().rstrip(",.-;:")
-                if 4 < len(v) < 100:
-                    out["venue_name"] = v
 
         return out
 
@@ -484,17 +621,33 @@ class ASCOAnnualExtractor(BaseExtractor):
                     out["pricing_tiers"] = tiers
                     break
 
-        # Abstracts sub-page — for abstract submission deadline
+        # Abstracts sub-page — deadline AND opening date
+        opens_raw = _extract_asco_abstract_opens(txt)
+        deadline: Optional[str] = None
         for suffix in ("abstracts", "program/abstracts",
                         "attend/abstract-submissions",
                         "abstracts-and-presentations"):
             abs_html = _fetch_asco_subpage(url, suffix)
             if abs_html:
-                deadline = _extract_asco_abstract_deadline(abs_html)
-                if deadline:
-                    out["abstract_deadline"] = deadline
-                    out["abstract_open"] = deadline >= date.today().isoformat()
+                if not deadline:
+                    deadline = _extract_asco_abstract_deadline(abs_html)
+                if not opens_raw:
+                    opens_raw = _extract_asco_abstract_opens(abs_html)
+                if deadline and opens_raw:
                     break
+        today = date.today().isoformat()
+        if deadline:
+            out["abstract_deadline"] = deadline
+            out["abstract_open"] = deadline >= today
+            if opens_raw:
+                opens_iso = _parse_us_date_single(opens_raw) or ""
+                if opens_iso and opens_iso > today:
+                    out["abstract_deadline_note"] = f"Opens {opens_raw}"
+        elif opens_raw:
+            out["abstract_deadline_note"] = (
+                f"Abstract submission opens {opens_raw}"
+            )
+            out["abstract_open"] = False
 
         # Venue sub-page — for detailed venue info if main page didn't
         # have "McCormick Place, Chicago" pattern
