@@ -239,16 +239,44 @@ def _extract_asco_abstract_deadline(sub_html: str) -> Optional[str]:
 
 
 def _parse_us_date_single(s: str) -> Optional[str]:
-    """Parse 'February 6, 2027' → '2027-02-06'."""
-    dm = re.match(r"(\w+)\s+(\d{1,2}),?\s+(\d{4})", s)
-    if not dm:
+    """Parse 'February 6, 2027' → '2027-02-06'.
+
+    Also handles fuzzy prefixes like 'EARLY/MID/LATE MONTH YEAR' by
+    substituting approximate day numbers (Early=5, Mid=15, Late=25).
+    This lets us reason about "LATE APRIL 2026" being in the past vs
+    the future rather than treating it as unparseable.
+    """
+    if not s:
         return None
-    mon_name = dm.group(1).lower()
-    mon = _MONTHS_ANY.get(mon_name) or _MONTHS_ANY.get(mon_name[:3])
-    if not mon:
-        return None
-    d, y = int(dm.group(2)), int(dm.group(3))
-    return f"{y:04d}-{mon:02d}-{d:02d}"
+    ss = s.strip()
+    # Try exact Month Day, Year first
+    dm = re.match(r"(\w+)\s+(\d{1,2}),?\s+(\d{4})", ss)
+    if dm:
+        mon_name = dm.group(1).lower()
+        mon = _MONTHS_ANY.get(mon_name) or _MONTHS_ANY.get(mon_name[:3])
+        if mon:
+            d, y = int(dm.group(2)), int(dm.group(3))
+            return f"{y:04d}-{mon:02d}-{d:02d}"
+    # Try fuzzy: "EARLY/MID/LATE Month Year"
+    fm = re.match(r"(?i)(early|mid|late)\s+([A-Za-z]+),?\s+(\d{4})", ss)
+    if fm:
+        prefix = fm.group(1).lower()
+        mon_name = fm.group(2).lower()
+        mon = _MONTHS_ANY.get(mon_name) or _MONTHS_ANY.get(mon_name[:3])
+        if mon:
+            day_by_prefix = {"early": 5, "mid": 15, "late": 25}
+            d = day_by_prefix[prefix]
+            y = int(fm.group(3))
+            return f"{y:04d}-{mon:02d}-{d:02d}"
+    # Try month + year only (no prefix, no day) → assume mid-month
+    my = re.match(r"(?i)^([A-Za-z]+)\s+(\d{4})$", ss)
+    if my:
+        mon_name = my.group(1).lower()
+        mon = _MONTHS_ANY.get(mon_name) or _MONTHS_ANY.get(mon_name[:3])
+        if mon:
+            y = int(my.group(2))
+            return f"{y:04d}-{mon:02d}-15"
+    return None
 
 
 def _extract_asco_abstract_opens(sub_html_or_main: str) -> Optional[str]:
@@ -566,21 +594,32 @@ class ASCOMeetingsExtractor(BaseExtractor):
             if opens_raw:
                 opens_iso = _parse_us_date_single(opens_raw) or ""
                 if opens_iso and opens_iso > today:
+                    # Opening date is future → not open yet
                     out["abstract_open"] = False
                     out["abstract_deadline_note"] = f"Opens {opens_raw}"
                 else:
+                    # Opening date is past (or unknown) → open until deadline
                     out["abstract_open"] = deadline >= today
             else:
                 out["abstract_open"] = deadline >= today
         elif opens_raw:
-            # Try to parse opens_raw to decide if abstract is now open
+            # No explicit deadline. Decide open-status from the opening date.
             opens_iso = _parse_us_date_single(opens_raw)
             if opens_iso and opens_iso <= today:
+                # Opening date is past — submissions have started (may still
+                # be open or may have closed without a published deadline).
                 out["abstract_open"] = True
                 out["abstract_deadline_note"] = (
                     f"Submissions opened {opens_raw} — deadline TBC"
                 )
+            elif opens_iso and opens_iso > today:
+                # Opening date is future
+                out["abstract_open"] = False
+                out["abstract_deadline_note"] = (
+                    f"Abstract submission opens {opens_raw}"
+                )
             else:
+                # Unparseable fuzzy date — display raw and default to False
                 out["abstract_open"] = False
                 out["abstract_deadline_note"] = (
                     f"Abstract submission opens {opens_raw}"
@@ -766,7 +805,6 @@ class ASCOAnnualExtractor(BaseExtractor):
         today = date.today().isoformat()
         if deadline:
             out["abstract_deadline"] = deadline
-            # Determine open status: if opens date is future → not open yet
             if opens_raw:
                 opens_iso = _parse_us_date_single(opens_raw) or ""
                 if opens_iso and opens_iso > today:
@@ -777,10 +815,17 @@ class ASCOAnnualExtractor(BaseExtractor):
             else:
                 out["abstract_open"] = deadline >= today
         elif opens_raw:
-            out["abstract_deadline_note"] = (
-                f"Abstract submission opens {opens_raw}"
-            )
-            out["abstract_open"] = False
+            opens_iso = _parse_us_date_single(opens_raw)
+            if opens_iso and opens_iso <= today:
+                out["abstract_open"] = True
+                out["abstract_deadline_note"] = (
+                    f"Submissions opened {opens_raw} — deadline TBC"
+                )
+            else:
+                out["abstract_open"] = False
+                out["abstract_deadline_note"] = (
+                    f"Abstract submission opens {opens_raw}"
+                )
 
         # Venue sub-page — for detailed venue info if main page didn't
         # have "McCormick Place, Chicago" pattern
