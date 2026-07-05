@@ -612,6 +612,26 @@ class ASCOMeetingsExtractor(BaseExtractor):
                     if deadline and opens_raw:
                         break
 
+        # Stale-data guard. When ASCO rolls the /breakthrough or /quality
+        # URL forward to the next year's event but forgets to refresh the
+        # abstract deadline, we end up storing last cycle's date. Drop it
+        # if it's implausibly early (>8 months before the event) — next
+        # scrape picks up the real one once ASCO updates the page.
+        if deadline and out.get("start_date"):
+            try:
+                d = date.fromisoformat(deadline)
+                s = date.fromisoformat(out["start_date"])
+                if (s - d).days > 240:
+                    logger.info(
+                        f"ASCO {shell.get('title', 'event')}: dropping stale "
+                        f"abstract deadline {deadline} ({(s - d).days} days "
+                        f"before event {out['start_date']})"
+                    )
+                    deadline = None
+                    opens_raw = None
+            except ValueError:
+                pass
+
         today = date.today().isoformat()
         if deadline:
             out["abstract_deadline"] = deadline
@@ -811,6 +831,26 @@ class ASCOAnnualExtractor(BaseExtractor):
                         opens_raw = _extract_asco_abstract_opens(abs_html)
                     if deadline and opens_raw:
                         break
+
+        # Stale-data guard. When ASCO rolls the /breakthrough or /quality
+        # URL forward to the next year's event but forgets to refresh the
+        # abstract deadline, we end up storing last cycle's date. Drop it
+        # if it's implausibly early (>8 months before the event) — next
+        # scrape picks up the real one once ASCO updates the page.
+        if deadline and out.get("start_date"):
+            try:
+                d = date.fromisoformat(deadline)
+                s = date.fromisoformat(out["start_date"])
+                if (s - d).days > 240:
+                    logger.info(
+                        f"ASCO {shell.get('title', 'event')}: dropping stale "
+                        f"abstract deadline {deadline} ({(s - d).days} days "
+                        f"before event {out['start_date']})"
+                    )
+                    deadline = None
+                    opens_raw = None
+            except ValueError:
+                pass
 
         today = date.today().isoformat()
         if deadline:
