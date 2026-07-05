@@ -114,6 +114,17 @@ export function ConferenceCard({ conference: c, tiers, sourceName, sessions, sho
   })()
   const showDeadlineBadge = daysUntilDeadline !== null && daysUntilDeadline >= 0 && daysUntilDeadline <= 14
 
+  // If abstracts are closed but the source published a future opening
+  // date (via abstract_deadline_note like "Opens November 4, 2026" or
+  // "Abstract submission opens LATE APRIL 2026"), pull the date fragment
+  // to show on the card so users see when submissions start.
+  const opensOnLabel: string | null = (() => {
+    const note = c.abstract_deadline_note
+    if (!note || isAbstractEffectivelyOpen(c)) return null
+    const m = note.match(/(?:abstract\s+submission\s+)?opens?\s+(.+)$/i)
+    return m ? m[1].trim().replace(/\s+/g, ' ') : null
+  })()
+
   return (
     <div className={`group glass-card rounded-xl p-5 flex flex-col gap-4 transition-all duration-300 relative ${
       c.is_sold_out
@@ -275,6 +286,13 @@ export function ConferenceCard({ conference: c, tiers, sourceName, sessions, sho
           <div className="flex items-center gap-2 text-amber-400">
             <FileText className="w-4 h-4" />
             <span className="text-xs font-medium">Abstracts Open</span>
+          </div>
+        ) : opensOnLabel ? (
+          <div className="flex items-center gap-2 text-slate-400">
+            <FileText className="w-4 h-4" />
+            <span className="text-xs font-medium">
+              Abstracts open {opensOnLabel}
+            </span>
           </div>
         ) : c.abstract_deadline ? (
           <div className="flex items-center gap-2 text-slate-500">

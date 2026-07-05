@@ -326,12 +326,35 @@ def _parse_asco_dates_to_know(raw_html: str) -> dict:
       all_dates: list of (raw_date, label) tuples for audit trail
     """
     out: dict = {"all_dates": []}
-    for m in re.finditer(
-        r"<p>\s*<strong>([^<]+)</strong>[^<]*<br[^>]*>([^<]+)</p>",
-        raw_html, re.I,
-    ):
-        date_raw = _html.unescape(m.group(1).strip())
-        label = _html.unescape(m.group(2).strip())
+    # ASCO wraps each date row in a <p>. Common shapes:
+    #   <p><strong>DATE</strong><br>LABEL</p>
+    #   <p><strong>DATE AT</strong> <strong>TIME (TZ)</strong><br>LABEL</p>
+    #   <p><strong>DATE<br></strong>LABEL</p>
+    #   <p><strong>DATE</strong><br>LABEL <strong>PRODUCT</strong></p>
+    # A single regex can't cover all cleanly, so grab each <p>...</p>, split
+    # on <br>, and strip tags on each half.
+    def _clean(s: str) -> str:
+        s = re.sub(r"<[^>]+>", " ", s)
+        s = _html.unescape(s)
+        s = re.sub(r"\s+", " ", s).strip()
+        return s
+
+    for pm in re.finditer(r"<p\b[^>]*>(.*?)</p>", raw_html, re.I | re.DOTALL):
+        inner = pm.group(1)
+        if "<br" not in inner.lower():
+            continue
+        parts = re.split(r"<br\s*/?>", inner, maxsplit=1, flags=re.I)
+        if len(parts) != 2:
+            continue
+        date_raw = _clean(parts[0])
+        label = _clean(parts[1])
+        if not date_raw or not label:
+            continue
+        # Skip prose paragraphs — date side must contain a month name or year
+        if not re.search(r"(?i)\b(?:january|february|march|april|may|june|"
+                         r"july|august|september|october|november|december|"
+                         r"early|mid|late|20\d{2})\b", date_raw):
+            continue
         out["all_dates"].append((date_raw, label))
         ll = label.lower()
 
@@ -349,7 +372,8 @@ def _parse_asco_dates_to_know(raw_html: str) -> dict:
             iso = _parse_us_date_single(re.sub(r",?\s*at\s+.*$", "", date_raw))
             if iso:
                 out["late_breaking_deadline"] = iso
-        elif re.search(r"registration\s+(?:and\s+hotel\s+reservations?\s+)?"
+        elif re.search(r"registration\s+(?:and\s+"
+                       r"(?:hotel\s+reservations?|housing|hotel)\s+)?"
                        r"(?:opens?|available)", ll):
             out.setdefault("registration_opens", date_raw)
         elif re.search(r"(?:hotel\s+reservation\s+and\s+)?early\s+registration"
