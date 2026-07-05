@@ -109,6 +109,69 @@ def _classify_event_type(title: str, meeting_type_kontent: list) -> str:
     return "workshop"
 
 
+def _is_esmo_flagship(title: str, meeting_type_kontent: list) -> bool:
+    """ESMO flagship congresses (international specialty meetings). All ESMO
+    congresses named after a specialty are considered flagships — they
+    draw thousands of international attendees and are the field-defining
+    annual meetings.
+
+    Flagship criteria:
+      - Meeting type contains "Congress" (Kontent classification)
+      - Title contains "Congress" (case-insensitive)
+      - Explicit named flagships (European Lung Cancer Congress,
+        Molecular Analysis for Precision Oncology Congress,
+        Optimising Antibody-Drug Conjugate Safety etc are not flagship —
+        despite being called Congress by ESMO, they're smaller focused
+        events; the true flagships are the ESMO-branded specialty
+        congresses)
+
+    Explicit flagship list — the ~14 events that draw thousands and are
+    international, not regional, ESMO branded:
+      - ESMO Congress (the main annual congress)
+      - ESMO Asia Congress
+      - ESMO Breast Cancer / Breast Cancer Congress
+      - ESMO Gastrointestinal Cancers Congress
+      - ESMO Gynaecological Cancers Congress
+      - ESMO Immuno-Oncology & Advanced Therapies Congress
+      - ESMO AI and Digital Oncology Congress
+      - ESMO Sarcoma and Rare Cancers Congress
+      - ESMO Targeted Anticancer Therapies Congress (Europe + Asia)
+      - ESMO Genitourinary Cancers Asia
+      - ESMO Novel Cancer Therapies
+      - European Lung Cancer Congress (ELCC — ESMO-endorsed)
+      - Molecular Analysis for Precision Oncology (MAP — ESMO-endorsed)
+    """
+    tl = title.lower()
+    mt_names = [m.get("name", "").lower() for m in (meeting_type_kontent or [])]
+
+    # Kontent meeting_type direct signal — ESMO's own type taxonomy
+    kontent_flagship_types = (
+        "esmo congress",           # ESMO Congress (annual)
+        "esmo symposium",          # ESMO Symposia
+        "esmo joint conference",   # Joint conferences (e.g. ELCC)
+    )
+    if any(kt in n for n in mt_names for kt in kontent_flagship_types):
+        return True
+
+    # Title-based flagship recognition
+    flagship_patterns = (
+        "esmo congress",
+        "esmo asia congress",
+        "esmo breast cancer",
+        "esmo gastrointestinal cancers",
+        "esmo gynaecological cancers",
+        "esmo immuno-oncology",
+        "esmo ai and digital oncology",
+        "esmo sarcoma and rare cancers",
+        "esmo targeted anticancer therapies",
+        "esmo genitourinary cancers",
+        "esmo novel cancer therapies",
+        "european lung cancer congress",
+        "molecular analysis for precision oncology",
+    )
+    return any(p in tl for p in flagship_patterns)
+
+
 def _pricing_from_esmo_fee_table(decoded_html: str) -> List[dict]:
     """Extract fee tiers from ESMO's decoded fee table.
 
@@ -229,16 +292,23 @@ def _pricing_from_registration_text(text: str) -> List[dict]:
     col_labels = ["Early registration", "Late registration",
                   "Full registration"] if hdr else None
 
-    # Detect currency
-    if "SGD" in text and "SGD " in text:
-        currency = "SGD"
-        cur_re = r"SGD\s*([\d,]+(?:\.\d{2})?)"
-    elif "USD" in text or "US$" in text:
-        currency = "USD"
-        cur_re = r"(?:USD|US\$|\$)\s*([\d,]+(?:\.\d{2})?)"
-    elif "GBP" in text or "£" in text:
-        currency = "GBP"
-        cur_re = r"(?:GBP|£)\s*([\d,]+(?:\.\d{2})?)"
+    # Detect currency — check each in order of specificity. ESMO regional
+    # events use local currency: SGD (Asia/Singapore), HKD (Hong Kong),
+    # BRL (Latin America/Brazil), USD (global), GBP (UK/London), CHF
+    # (Switzerland). Default falls to EUR (European events).
+    for code, pattern in [
+        ("HKD", r"HKD\s*([\d,]+(?:\.\d{2})?)"),
+        ("SGD", r"SGD\s*([\d,]+(?:\.\d{2})?)"),
+        ("BRL", r"(?:BRL|R\$)\s*([\d,]+(?:\.\d{2})?)"),
+        ("CHF", r"CHF\s*([\d,]+(?:\.\d{2})?)"),
+        ("USD", r"(?:USD|US\$)\s*([\d,]+(?:\.\d{2})?)"),
+        ("GBP", r"(?:GBP|£)\s*([\d,]+(?:\.\d{2})?)"),
+        ("EUR", r"(?:EUR|€)\s*([\d,]+(?:\.\d{2})?)"),
+    ]:
+        if re.search(pattern, text):
+            currency = code
+            cur_re = pattern
+            break
     else:
         currency = "EUR"
         cur_re = r"(?:EUR|€)\s*([\d,]+(?:\.\d{2})?)"
@@ -415,6 +485,11 @@ def _extract_description_from_paragraphs(
         "transportation", "airport is",
         "photography policy", "code of conduct", "terms and conditions",
         "privacy policy",
+        # People-list / faculty pages (title-role structure like
+        # "Workshop Convenors / Prof X - Convenor / Prof Y - Deputy")
+        "convenor", "chairperson", " chair", "faculty list",
+        "committee members", "speakers list", "programme committee",
+        "scientific committee",
     )
     for p in paragraphs:
         if p.count("\n") > 3:
@@ -612,11 +687,13 @@ class ESMOExtractor(BaseExtractor):
             if end_iso:
                 out["end_date"] = end_iso
 
-            # Event type
+            # Event type + flagship classification
+            title_for_class = out.get("conference_name") or shell.get("title", "")
             out["event_type"] = _classify_event_type(
-                out.get("conference_name") or shell.get("title", ""),
-                meeting_type_val,
+                title_for_class, meeting_type_val,
             )
+            if _is_esmo_flagship(title_for_class, meeting_type_val):
+                out["is_flagship"] = True
 
             # Abstract deadline
             abs_dl = _iso_from_kontent_date(
