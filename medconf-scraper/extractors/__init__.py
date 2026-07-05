@@ -33,7 +33,7 @@ from .rcog import RCOGExtractor
 from .rcr import RCRAIConferenceExtractor, RCREventsPortalExtractor
 from .bopa import BOPAExtractor
 from .btog import BTOGExtractor
-from .asco import ASCOAnnualExtractor
+from .asco import ASCOAnnualExtractor, ASCOMeetingsExtractor
 from .esmo import ESMOExtractor
 
 # source_id → extractor class
@@ -54,6 +54,7 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     13: BOPAExtractor,                  # British Oncology Pharmacy Association (Tribe Events API)
     14: BTOGExtractor,                  # British Thoracic Oncology Group (WordPress /events/ future section)
     15: ASCOAnnualExtractor,            # American Society of Clinical Oncology — Annual Meeting flagship
+    16: ASCOMeetingsExtractor,          # ASCO Meetings-Education (Breakthrough Singapore + future satellites)
     17: ESMOExtractor,                  # European Society for Medical Oncology — meeting calendar (Nuxt SPA)
 }
 
