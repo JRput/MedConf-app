@@ -603,27 +603,13 @@ class ASCOMeetingsExtractor(BaseExtractor):
             else:
                 out["abstract_open"] = deadline >= today
         elif opens_raw:
-            # No explicit deadline. Decide open-status from the opening date.
-            opens_iso = _parse_us_date_single(opens_raw)
-            if opens_iso and opens_iso <= today:
-                # Opening date is past — submissions have started (may still
-                # be open or may have closed without a published deadline).
-                out["abstract_open"] = True
-                out["abstract_deadline_note"] = (
-                    f"Submissions opened {opens_raw} — deadline TBC"
-                )
-            elif opens_iso and opens_iso > today:
-                # Opening date is future
-                out["abstract_open"] = False
-                out["abstract_deadline_note"] = (
-                    f"Abstract submission opens {opens_raw}"
-                )
-            else:
-                # Unparseable fuzzy date — display raw and default to False
-                out["abstract_open"] = False
-                out["abstract_deadline_note"] = (
-                    f"Abstract submission opens {opens_raw}"
-                )
+            # No explicit deadline. We know when submissions opened but not
+            # when they close, so we can't confirm they're still open. Default
+            # to closed and surface the opening date so users see the timeline.
+            out["abstract_open"] = False
+            out["abstract_deadline_note"] = (
+                f"Abstract submission opens {opens_raw}"
+            )
 
         # Registration sub-page for USD pricing tiers. Try nested paths
         # first (used by Quality Care and future symposia).
@@ -808,24 +794,23 @@ class ASCOAnnualExtractor(BaseExtractor):
             if opens_raw:
                 opens_iso = _parse_us_date_single(opens_raw) or ""
                 if opens_iso and opens_iso > today:
+                    # Opening date is future → not open yet
                     out["abstract_open"] = False
                     out["abstract_deadline_note"] = f"Opens {opens_raw}"
                 else:
+                    # Opening date is past, deadline known → open until deadline
                     out["abstract_open"] = deadline >= today
             else:
                 out["abstract_open"] = deadline >= today
         elif opens_raw:
-            opens_iso = _parse_us_date_single(opens_raw)
-            if opens_iso and opens_iso <= today:
-                out["abstract_open"] = True
-                out["abstract_deadline_note"] = (
-                    f"Submissions opened {opens_raw} — deadline TBC"
-                )
-            else:
-                out["abstract_open"] = False
-                out["abstract_deadline_note"] = (
-                    f"Abstract submission opens {opens_raw}"
-                )
+            # No explicit deadline. Only mark open when both opens is past
+            # AND we know the deadline is still future — which we don't here.
+            # So default to closed and surface the opening date in the note
+            # (users can decide whether to check the source page for status).
+            out["abstract_open"] = False
+            out["abstract_deadline_note"] = (
+                f"Abstract submission opens {opens_raw}"
+            )
 
         # Venue sub-page — for detailed venue info if main page didn't
         # have "McCormick Place, Chicago" pattern
