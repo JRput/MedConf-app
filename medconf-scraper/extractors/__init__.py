@@ -35,6 +35,8 @@ from .bopa import BOPAExtractor
 from .btog import BTOGExtractor
 from .asco import ASCOAnnualExtractor, ASCOMeetingsExtractor
 from .esmo import ESMOExtractor
+from .aacr import AACRExtractor
+from .estro import ESTROExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -56,6 +58,8 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     15: ASCOAnnualExtractor,            # American Society of Clinical Oncology — Annual Meeting flagship
     16: ASCOMeetingsExtractor,          # ASCO Meetings-Education (Breakthrough Singapore + future satellites)
     17: ESMOExtractor,                  # European Society for Medical Oncology — meeting calendar (Nuxt SPA)
+    18: AACRExtractor,                  # American Association for Cancer Research — meetings & workshops calendar (WordPress, 5-page pagination)
+    19: ESTROExtractor,                 # European Society for Radiotherapy and Oncology — congresses (server-rendered, 2 events)
 }
 
 

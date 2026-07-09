@@ -2,40 +2,204 @@
   "source_id": 12,
   "source_name": "Royal College of Radiologists (Events Portal)",
   "society": "RCR",
-  "run_at": "2026-06-26T09:56:41.082080+00:00",
+  "run_at": "2026-06-26T11:03:16.509633+00:00",
   "events_scraped": 29,
-  "events_with_gaps_at_first": 28,
-  "events_fixed": 0,
-  "events_still_incomplete": 28,
-  "patches_applied": [],
-  "patches_rejected_by_validator": [],
-  "patches_couldnt_fix": [
+  "events_with_gaps_at_first": 25,
+  "events_fixed": 23,
+  "events_still_incomplete": 17,
+  "patches_applied": [
     {
       "conference_id": 760,
       "conference_name": "AI fundamentals for imaging and healthcare (Sept 2026)",
-      "fields": [
-        "pricing"
-      ]
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
     },
     {
-      "conference_id": 762,
-      "conference_name": "5th Annual RCR/BSPR Study Day: Suspected physical abuse in c",
-      "fields": [
-        "pricing"
-      ]
+      "conference_id": 750,
+      "conference_name": "Human + machine: clinician-led AI for tomorrow's healthcare",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
     },
+    {
+      "conference_id": 752,
+      "conference_name": "RCR Portfolio Pathway Drop-in Clinic, 14 July 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 764,
+      "conference_name": "RCR UK HPB Oncology Education Day",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 765,
+      "conference_name": "Measuring What Matters: Audit and QSI in Practice (September",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 766,
+      "conference_name": "AI in healthcare: Implementation, regulation and clinical be",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 771,
+      "conference_name": "RCR Portfolio Pathway Drop-in Clinic, 3 November 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 768,
+      "conference_name": "Advanced Educational Supervisor (October 2026)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 770,
+      "conference_name": "Management Skills for Radiologists (November 2026)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 773,
+      "conference_name": "CO Joint Heads of Training and Heads of Service Networking E",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 775,
+      "conference_name": "Building Interventional Radiology Skills for Paediatrics (No",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 776,
+      "conference_name": "Management Skills for Oncologists (November 2026)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 749,
+      "conference_name": "BSIR/RCR- National subspecialty lecture series on interventi",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 753,
+      "conference_name": "Radiology Special Interest Showcase - Session 6 (July 2026)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 754,
+      "conference_name": "RCR Portfolio Pathway Drop-in Clinic, 11 August 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 755,
+      "conference_name": "Radiology Special Interest Showcase - Session 7 (August 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 756,
+      "conference_name": "Clinical Oncology Resident Welcome Event (September 2026)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 757,
+      "conference_name": "Clinical Radiology Resident Welcome Event (September 2026)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 758,
+      "conference_name": "RCR Portfolio Pathway Drop-in Clinic, 8 September 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 767,
+      "conference_name": "RCR Portfolio Pathway Drop-in Clinic, 6 October 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 769,
+      "conference_name": "SAS Engagement Day (October 2026)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 774,
+      "conference_name": "Introduction to Supervision (November 2026)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 777,
+      "conference_name": "RCR Portfolio Pathway Drop-in Clinic, 1 December 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
     {
       "conference_id": 750,
       "conference_name": "Human + machine: clinician-led AI for tomorrow's healthcare",
       "fields": [
         "cpd_points",
-        "pricing"
-      ]
-    },
-    {
-      "conference_id": 763,
-      "conference_name": "The RCR and SABR Consortium Liver Workshop",
-      "fields": [
         "pricing"
       ]
     },
@@ -51,31 +215,21 @@
       "conference_id": 764,
       "conference_name": "RCR UK HPB Oncology Education Day",
       "fields": [
-        "cpd_points",
-        "pricing"
+        "cpd_points"
       ]
     },
     {
       "conference_id": 759,
       "conference_name": "FRCR 2B (Radiology) Exam Preparation Course: Tips & Techniqu",
       "fields": [
-        "cpd_points",
-        "pricing"
+        "cpd_points"
       ]
     },
     {
       "conference_id": 765,
       "conference_name": "Measuring What Matters: Audit and QSI in Practice (September",
       "fields": [
-        "cpd_points",
-        "pricing"
-      ]
-    },
-    {
-      "conference_id": 766,
-      "conference_name": "AI in healthcare: Implementation, regulation and clinical be",
-      "fields": [
-        "pricing"
+        "cpd_points"
       ]
     },
     {
@@ -87,45 +241,10 @@
       ]
     },
     {
-      "conference_id": 768,
-      "conference_name": "Advanced Educational Supervisor (October 2026)",
-      "fields": [
-        "pricing"
-      ]
-    },
-    {
-      "conference_id": 770,
-      "conference_name": "Management Skills for Radiologists (November 2026)",
-      "fields": [
-        "pricing"
-      ]
-    },
-    {
-      "conference_id": 772,
-      "conference_name": "7th National Radiology Events and Learning (REAL) Conference",
-      "fields": [
-        "pricing"
-      ]
-    },
-    {
       "conference_id": 773,
       "conference_name": "CO Joint Heads of Training and Heads of Service Networking E",
       "fields": [
         "cpd_points",
-        "pricing"
-      ]
-    },
-    {
-      "conference_id": 775,
-      "conference_name": "Building Interventional Radiology Skills for Paediatrics (No",
-      "fields": [
-        "pricing"
-      ]
-    },
-    {
-      "conference_id": 776,
-      "conference_name": "Management Skills for Oncologists (November 2026)",
-      "fields": [
         "pricing"
       ]
     },
@@ -188,15 +307,7 @@
       "conference_id": 751,
       "conference_name": "FRCR Part 1 (Radiology) Physics Exam Preparation Course (Jul",
       "fields": [
-        "cpd_points",
-        "pricing"
-      ]
-    },
-    {
-      "conference_id": 761,
-      "conference_name": "Advanced Gynaecology \u2013 Brachytherapy Workshop 2026",
-      "fields": [
-        "pricing"
+        "cpd_points"
       ]
     },
     {
@@ -204,13 +315,6 @@
       "conference_name": "RCR Portfolio Pathway Drop-in Clinic, 6 October 2026",
       "fields": [
         "cpd_points",
-        "pricing"
-      ]
-    },
-    {
-      "conference_id": 774,
-      "conference_name": "Introduction to Supervision (November 2026)",
-      "fields": [
         "pricing"
       ]
     },
@@ -223,5 +327,5 @@
       ]
     }
   ],
-  "duration_sec": 391.8
+  "duration_sec": 961.7
 }

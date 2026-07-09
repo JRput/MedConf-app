@@ -1,0 +1,25 @@
+{
+  "source_id": 13,
+  "source_name": "British Oncology Pharmacy Association",
+  "society": "BOPA",
+  "run_at": "2026-06-26T12:34:00.756268+00:00",
+  "events_scraped": 4,
+  "events_with_gaps_at_first": 1,
+  "events_fixed": 1,
+  "events_still_incomplete": 0,
+  "patches_applied": [
+    {
+      "conference_id": 788,
+      "conference_name": "Principles of Geriatric Oncology Module at Royal Marsden Sch",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Geriatric Oncology Cost', 'price_gbp': 1400.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "explorer:external_text:www.royalmarsdenschool.ac.uk"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [],
+  "explorer_runs": 1,
+  "explorer_successes": 1,
+  "duration_sec": 7.1
+}

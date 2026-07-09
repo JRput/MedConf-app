@@ -1,0 +1,4826 @@
+{
+  "source_id": 17,
+  "source_name": "ESMO Meeting Calendar",
+  "rows": 49,
+  "passing_rows": 49,
+  "failing_rows": 0,
+  "total_missing_fields": 0,
+  "total_suspect_fields": 0,
+  "avg_completeness": 100.0,
+  "verdict": "PASS",
+  "pagination": {
+    "has_pagination": true,
+    "page_buttons": 3,
+    "next_button": false,
+    "show_more": false,
+    "load_more": false,
+    "total_hint": null,
+    "db_rows": 49
+  },
+  "pagination_warning": null,
+  "audits": [
+    {
+      "conference_id": 884,
+      "conference_name": "ESMO Genitourinary Cancers Asia 2027",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-genitourinary-cancers-asia-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The ESMO Genitourinary Cancers Asia congress brings ESMO\u2019s scientific excellence",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-01-15",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-01-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Kerry Hotel",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Hong Kong SAR",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "OK",
+          "db_value": "open=True deadline=2026-10-13 note=None",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 876,
+      "conference_name": "ESMO Guidelines: Real World Cases - Webinar Series: Uveal Melanoma 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-guidelines-real-world-cases-webinar-series-uveal-melanoma-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "It is with great pleasure that I invite you to participate in the next ESMO Clin",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 888,
+      "conference_name": "ESMO Preceptorship on Non-Small-Cell Lung Cancer 2027: Helsinki",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-non-small-cell-lung-cancer-2027-helsinki",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO Preceptorship on Non-Small-Cell Lung Cancer 2027: Helsinki is an ESMO educa",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-24",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Helsinki",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 870,
+      "conference_name": "ESMO Advanced Course on Brain Metastases in Lung and Breast Cancer 2026: Barcelona",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-advanced-course-on-brain-metastases-in-lung-and-breast-cancer-2026-barcelona",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Barcelona",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 885,
+      "conference_name": "ESMO Preceptorship on Breast Cancer 2027: Cape Town",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-breast-cancer-2027-cape-town",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO Preceptorship on Breast Cancer 2027: Cape Town is an ESMO educational meeti",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Cape Town",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 890,
+      "conference_name": "ESMO Novel Cancer Therapies 2027",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-novel-cancer-therapies-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Join healthcare professionals at the ESMO Novel Cancer Therapies Symposium, taki",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-08",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Convention Centre",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Lugano",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "29 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 849,
+      "conference_name": "ESMO Preceptorship on Endocrine Tumours 2026: Lugano",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-endocrine-tumours-2026-lugano",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO Preceptorship on Endocrine Tumours 2026: Lugano is an ESMO educational meet",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-08",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Novotel Lugano Paradiso, Viale S. Salvatore 11, 6900 Lugano-Paradiso",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Lugano",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 852,
+      "conference_name": "ESMO Preceptorship on Breast Cancer 2026: Munich",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-breast-cancer-2026-munich",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Munich",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 850,
+      "conference_name": "ESMO Preceptorship on Ovarian Cancer 2026: Munich",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-ovarian-cancer-2026-munich",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-08",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Munich",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 872,
+      "conference_name": "ESMO AI and Digital Oncology Congress 2026",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-ai-and-digital-oncology-congress-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Bringing together healthcare and digital health experts from around the world, i",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "CityCube",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Berlin",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "OK",
+          "db_value": "open=True deadline=2026-09-01 note=None",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "25 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 11,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 875,
+      "conference_name": "ESMO Advanced Course on Defining Endocrine Sensitivity & Optimising Treatment Strategies in HR+/HER2- mBC Patients 2026: Barcelona",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-advanced-course-on-defining-endocrine-sensitivity-optimising-treatment-strategies-in-hr-her2-mbc-patients-2026-barcelona",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-26",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Barcelona",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 886,
+      "conference_name": "ESMO Summit Africa 2027",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-summit-africa-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO Summit Africa 2027 is an ESMO educational meeting for oncology professional",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-07",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Cape Town",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 862,
+      "conference_name": "ACORD Workshop 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/acord-workshop-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Since its launch, ACORD has trained more than 550 early-career researchers throu",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Novotel Sydney Olympic Park",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Sydney",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 853,
+      "conference_name": "ESMO Course in Medical Oncology for Medical Students 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-course-in-medical-oncology-for-medical-students-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This annual four-day residential course\u00a0is open to fourth and fifth-year medical",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-24",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-28",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "University Clinical Hospital of Valencia",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Valencia",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "1 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 860,
+      "conference_name": "ESMO Preceptorship on Tumour-agnostic and Cancer of Unknown Primary 2026: Zurich",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-tumour-agnostic-and-cancer-of-unknown-primary-2026-zurich",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Zurich",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 891,
+      "conference_name": "European Lung Cancer Congress 2027",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/european-lung-cancer-congress-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The European Lung Cancer Congress is a collaborative effort of leading multidisc",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-20",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "ICM-International Congress Center of the Munich Messe",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Munich",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 859,
+      "conference_name": "ESMO Preceptorship on Prostate Cancer 2026: Zurich",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-prostate-cancer-2026-zurich",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Zurich",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 893,
+      "conference_name": "ESMO Breast Cancer 2027",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-breast-cancer-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Discover the most cutting-edge science, exchange real-world insights with global",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-05-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-05-14",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Allianz",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Milan",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 868,
+      "conference_name": "ESMO Deep Dive: Gynaecological Cancers:\u00a0The Evolving Landscape in the Treatment of Relapse Ovarian Cancer 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-deep-dive-gynaecological-cancers-the-evolving-landscape-in-the-treatment-of-relapse-ovarian-cancer-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Welcome to this edition of the ESMO Deep Dive Webinar Series on Gynaecological C",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-07",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-07",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 856,
+      "conference_name": "ESMO Deep Dive: Gynaecological Cancers: The Challenge of First-Line Therapy for Patients with HRD Negative Advanced Ovarian Cancer 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-deep-dive-gynaecological-cancers-the-challenge-of-first-line-therapy-for-patients-with-hrd-negative-advanced-ovarian-cancer-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "We will begin with a critical evaluation of the current HRD testing landscape, e",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 867,
+      "conference_name": "ESMO Advanced Course on Optimising Treatment Sequencing in Advanced NSCLC 2026: Singapore",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-advanced-course-on-optimising-treatment-sequencing-in-advanced-nsclc-2026-singapore",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Singapore",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 897,
+      "conference_name": "ESMO Congress 2027",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-congress-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Participants can look forward to impactful new data, interactive educational ses",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-09-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-09-21",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Barcelona",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 4
+    },
+    {
+      "conference_id": 894,
+      "conference_name": "ESMO Gynaecological Cancers Congress 2027",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-gynaecological-cancers-congress-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Be part of an influential international meeting where innovation, education and ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-06-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-06-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Vienna",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 4
+    },
+    {
+      "conference_id": 887,
+      "conference_name": "ESMO Targeted Anticancer Therapies Congress 2027",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-targeted-anticancer-therapies-congress-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "For professionals in pharma, biotech and diagnostics, ESMO TAT 2027 offers a uni",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-22",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-24",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Palais des Congr",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Paris",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 889,
+      "conference_name": "ESMO Sarcoma and Rare Cancers Congress 2027",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-sarcoma-and-rare-cancers-congress-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Over three days, participants will explore the most recent developments in tumou",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-06",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Convention Centre",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Lugano",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 892,
+      "conference_name": "ESMO Summit Latin America 2027",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-summit-latin-america-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO Summit Latin America 2027 is an ESMO educational meeting for oncology profe",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-04-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-04-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Mexico City",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 896,
+      "conference_name": "ESMO Gastrointestinal Cancers Congress\u00a02027",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-gastrointestinal-cancers-congress-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This leading congress will bring together experts from around the world to discu",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-06-30",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-07-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Barcelona",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 4
+    },
+    {
+      "conference_id": 863,
+      "conference_name": "ESMO Preceptorship on Supportive Care Needs and Cachexia Management in Cancer Patients 2026: Lugano",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-supportive-care-needs-and-cachexia-management-in-cancer-patients-2026-lugano",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-29",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-30",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Lugano",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 855,
+      "conference_name": "ESMO Academy 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-academy-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO Academy 2026 will take place in an online format. The programme will be del",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-08-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "5 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 857,
+      "conference_name": "Optimising Antibody\u2013Drug Conjugate Safety: Mechanisms, Monitoring and Management of Toxicities 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/optimising-antibody-drug-conjugate-safety-mechanisms-monitoring-and-management-of-toxicities-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The programme will begin with a presentation on prevention and risk mitigation s",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 858,
+      "conference_name": "Molecular Analysis for Precision Oncology Congress 2026",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/molecular-analysis-for-precision-oncology-congress-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Through keynote sessions, discussions, and networking opportunities, participant",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Business Design Centre",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "OK",
+          "db_value": "open=False deadline=2026-06-02 note=None",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "26 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 11,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 854,
+      "conference_name": "ESMO Guidelines: Real World Cases - Webinar Series: Rectal Cancer 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-guidelines-real-world-cases-webinar-series-rectal-cancer-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "It is with great pleasure that I invite you to participate in the next ESMO Clin",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-29",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-29",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 864,
+      "conference_name": "ESMO Guidelines: Real World Cases Webinar: Early Stage Locally Advanced Non-Small-Cell Lung Cancer 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-guidelines-real-world-cases-webinar-early-stage-locally-advanced-non-small-cell-lung-cancer-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "It is with great pleasure that I invite you to participate in the next ESMO Clin",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-30",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-30",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 877,
+      "conference_name": "ESMO Advanced Course on Pancreatic Cancer: From Standard Treatment To Individualization 2026: Barcelona",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-advanced-course-on-pancreatic-cancer-from-standard-treatment-to-individualization-2026-barcelona",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The programme of this event has been accredited with\u00a09\u00a0ESMO-MORA category 1 poin",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-27",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-28",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Barcelona",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 865,
+      "conference_name": "ESMO Preceptorship on Colorectal Cancer October 2026: Lugano",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-colorectal-cancer-october-2026-lugano",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-01",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Lugano",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 866,
+      "conference_name": "ESMO Advanced Course on Precision Treatment Sequencing in Metastatic Breast Cancer 2026: Singapore",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-advanced-course-on-precision-treatment-sequencing-in-metastatic-breast-cancer-2026-singapore",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Singapore",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 895,
+      "conference_name": "ESMO Targeted Anticancer Therapies Asia Congress 2027",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-tat-asia-congress-2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The ESMO Targeted Anticancer Therapies (TAT) Asia Congress 2027 will bring toget",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-06-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-06-20",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Hong Kong SAR",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 4
+    },
+    {
+      "conference_id": 883,
+      "conference_name": "ESMO Immuno-Oncology & Advanced Therapies Congress 2026",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-immuno-oncology-advanced-therapies-congress-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Join the global immuno-oncology community to learn, share your expertise and eng",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-14",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Queen Elizabeth",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "40 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 869,
+      "conference_name": "ESMO Congress 2026",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-congress-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Participants can expect impactful new data, interactive education, excellent net",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-27",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "IFEMA MADRID",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Madrid",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "32 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 871,
+      "conference_name": "ESMO Advanced Course on Cholangiocarcinoma 2026: Barcelona",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-advanced-course-on-cholangiocarcinoma-2026-barcelona",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-13",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-14",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Barcelona",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 874,
+      "conference_name": "ESMO Advanced Course on Early Drug Development 2026: Istanbul",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-advanced-course-on-early-drug-development-2026-istanbul",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO Advanced Course on Early Drug Development 2026: Istanbul is an ESMO educati",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-24",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Istanbul",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 881,
+      "conference_name": "ESMO Asia Congress 2026",
+      "event_type": "conference",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-asia-congress-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The ESMO Asia Congress 2026 is for Asia, in Asia\u2014a dynamic platform where region",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-06",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Suntec Singapore Convention & Exhibition Centre",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Singapore",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "OK",
+          "db_value": "open=True deadline=2026-07-21 note=None",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "21 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 11,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 882,
+      "conference_name": "ESMO Preceptorship on NSCLC and SCLC 2026: Singapore",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-nsclc-and-sclc-2026-singapore",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-07",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-08",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Singapore",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 878,
+      "conference_name": "ESMO Preceptorship on Breast Cancer 2026: Singapore",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-breast-cancer-2026-singapore",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO Preceptorship on Breast Cancer 2026: Singapore is an ESMO educational meeti",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Singapore",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 879,
+      "conference_name": "ESMO Preceptorship on Gastric Cancer 2026: Singapore",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-preceptorship-on-gastric-cancer-2026-singapore",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESMO bears no responsibility for any untoward events in connection with, before,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Singapore",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "Page indicates free event"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 851,
+      "conference_name": "Clinical Development and Therapeutic Applications of Antibody\u2013Drug Conjugates 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/clinical-development-and-therapeutic-applications-of-antibody-drug-conjugates-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "We will begin with an introduction, followed by a detailed review of ADCs in uro",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-08",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-08",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 861,
+      "conference_name": "ESMO-NCCS-DukeNUS Course in Medical Oncology for Medical Students 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-nccs-dukenus-course-in-medical-oncology-for-medical-students-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This\u00a0two-and-a-half-day course\u00a0is open to medical students from the fourth year ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-20",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Singapore",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "1 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 873,
+      "conference_name": "ESMO Deep Dive: Gynaecological Cancers: Are We Defeating Cervical Cancer? 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-deep-dive-gynaecological-cancers-are-we-defeating-cervical-cancer-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "We will open with an exploration of the current ceiling of pembrolizumab combine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 880,
+      "conference_name": "ESMO Deep Dive: Gynaecological Cancers: Is Molecular Classification Leading to Individualized Therapy in Endometrial Cancer? 2026",
+      "event_type": "workshop",
+      "source_url": "https://www.esmo.org/meeting-calendar/esmo-deep-dive-gynaecological-cancers-is-molecular-classification-leading-to-individualized-therapy-in-endometrial-cancer-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "We will open with an examination of how the updated FIGO 2023 staging system has",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    }
+  ],
+  "audited_at": "2026-07-04T18:15:51.449875+00:00"
+}

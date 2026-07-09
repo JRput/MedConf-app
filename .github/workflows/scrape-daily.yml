@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false   # one source failing should NOT cancel the others
       matrix:
-        source_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+        source_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
         include:
           - source_id: 1
             source_name: RCGP
@@ -44,6 +44,20 @@ jobs:
             source_name: RCR-AIConference2026
           - source_id: 12
             source_name: RCR-EventsPortal
+          - source_id: 13
+            source_name: BOPA
+          - source_id: 14
+            source_name: BTOG
+          - source_id: 15
+            source_name: ASCO-AnnualMeeting
+          - source_id: 16
+            source_name: ASCO-MeetingsEducation
+          - source_id: 17
+            source_name: ESMO
+          - source_id: 18
+            source_name: AACR
+          - source_id: 19
+            source_name: ESTRO
 
     steps:
       - name: Check out repository

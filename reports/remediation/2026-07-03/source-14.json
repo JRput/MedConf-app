@@ -1,0 +1,149 @@
+{
+  "source_id": 14,
+  "source_name": "British Thoracic Oncology Group",
+  "society": "BTOG",
+  "run_at": "2026-07-03T13:39:31.361461+00:00",
+  "events_scraped": 5,
+  "events_with_gaps_at_first": 5,
+  "events_fixed": 1,
+  "events_still_incomplete": 5,
+  "patches_applied": [
+    {
+      "conference_id": 842,
+      "conference_name": "25th BTOG Annual Conference 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 838,
+      "conference_name": "How to know which trial is best for your patient",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.btog.org/feed/",
+              "https://www.btog.org/comments/feed/",
+              "https://www.btog.org/latest/",
+              "https://www.btog.org/annual-reports/",
+              "https://www.btog.org/download/btog-national-trials-meeting-2026-programme/",
+              "https://www.btog.org/25th-btog-annual-conference-2027/",
+              "https://www.btog.org/category/events-annual-conference/"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 170233
+          },
+          "llm_reasoning": "The provided text appears to be only technical JavaScript, CSS, and WordPress configuration code from the BTOG (British Thoracic Oncology Group) website. There is no actual event content, page structure, or registration information visible. The text contains no event details, tabs, sections, or any ",
+          "notes": [
+            "llm_event_match https://www.btog.org/comments/feed/: matched=['best'] verdict='con' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.btog.org/latest/",
+            "skipped_unrelated_zero_tokens: https://www.btog.org/annual-reports/",
+            "llm_event_match https://www.btog.org/download/btog-national-trials-meeting-2026-programme/: matched=['trial'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.btog.org/25th-btog-annual-conference-2027/",
+            "skipped_unrelated_zero_tokens: https://www.btog.org/category/events-annual-conference/"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 842,
+      "conference_name": "25th BTOG Annual Conference 2027",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 839,
+      "conference_name": "BTOG WCLC Update Webcast",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.btog.org/feed/",
+              "https://www.btog.org/comments/feed/",
+              "https://www.btog.org/latest/",
+              "https://www.btog.org/annual-reports/",
+              "https://www.btog.org/25th-btog-annual-conference-2027/",
+              "https://www.btog.org/category/events-annual-conference/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 145233
+          },
+          "llm_reasoning": "The provided page text contains only technical JavaScript/CSS code (WordPress/Divi theme configuration, jQuery setup, CSS variables for styling). There is no visible content about the BTOG WCLC Update Webcast event itself - no Overview, Programme, Speakers, or any Fees section. The text is purely ba",
+          "notes": [
+            "llm_event_match https://www.btog.org/feed/: matched=['btog'] verdict='no' ok=False",
+            "llm_event_match https://www.btog.org/comments/feed/: matched=['btog'] verdict='no' ok=False",
+            "llm_event_match https://www.btog.org/latest/: matched=['btog'] verdict='no' ok=False",
+            "llm_event_match https://www.btog.org/annual-reports/: matched=['btog'] verdict='no' ok=False",
+            "llm_event_match https://www.btog.org/25th-btog-annual-conference-2027/: matched=['btog'] verdict='no' ok=False",
+            "llm_event_match https://www.btog.org/category/events-annual-conference/: matched=['btog'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 840,
+      "conference_name": "BTOG Small Cell Lung Cancer Essential Update",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 841,
+      "conference_name": "BTOG ESMO 2026 Update Webcast",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.btog.org/feed/",
+              "https://www.btog.org/comments/feed/",
+              "https://www.btog.org/latest/",
+              "https://www.btog.org/annual-reports/",
+              "https://www.btog.org/25th-btog-annual-conference-2027/",
+              "https://www.btog.org/category/events-annual-conference/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 145233
+          },
+          "llm_reasoning": "The provided text consists entirely of JavaScript code, CSS styling, and WordPress configuration data. There is no actual event content, page structure, or registration information visible. The text does not contain any sections such as Overview, Programme, Speakers, or Fees. It appears to be techni",
+          "notes": [
+            "llm_event_match https://www.btog.org/feed/: matched=['btog'] verdict='no' ok=False",
+            "llm_event_match https://www.btog.org/comments/feed/: matched=['btog'] verdict='no' ok=False",
+            "llm_event_match https://www.btog.org/latest/: matched=['btog'] verdict='no' ok=False",
+            "llm_event_match https://www.btog.org/annual-reports/: matched=['btog'] verdict='no' ok=False",
+            "llm_event_match https://www.btog.org/25th-btog-annual-conference-2027/: matched=['btog'] verdict='no' ok=False",
+            "llm_event_match https://www.btog.org/category/events-annual-conference/: matched=['btog'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 3,
+  "explorer_successes": 0,
+  "duration_sec": 260.4
+}

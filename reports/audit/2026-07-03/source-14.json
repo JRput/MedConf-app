@@ -1,0 +1,504 @@
+{
+  "source_id": 14,
+  "source_name": "British Thoracic Oncology Group",
+  "rows": 5,
+  "passing_rows": 5,
+  "failing_rows": 0,
+  "total_missing_fields": 0,
+  "total_suspect_fields": 0,
+  "avg_completeness": 100.0,
+  "verdict": "PASS",
+  "audits": [
+    {
+      "conference_id": 838,
+      "conference_name": "How to know which trial is best for your patient",
+      "event_type": "workshop",
+      "source_url": "https://www.btog.org/btog-trials-meeting-2026/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Join BTOG in London for a full day dedicated to the latest treatment strategies,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-22",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-22",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Cavendish Conference Centre, Duchess Mews, London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 839,
+      "conference_name": "BTOG WCLC Update Webcast",
+      "event_type": "workshop",
+      "source_url": "https://www.btog.org/btog-wclc-update-webinar/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "A concise round-up of the most practice-changing thoracic oncology research pres",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 8,
+      "total_ok": 5,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 840,
+      "conference_name": "BTOG Small Cell Lung Cancer Essential Update",
+      "event_type": "workshop",
+      "source_url": "https://www.btog.org/btog-small-cell-lung-cancer-essential-update/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Join BTOG in London for an education event dedicated to Small Cell Lung Cancer \u2013",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-14",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-14",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Cavendish Conference Centre, The Minster Building, London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "1 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 841,
+      "conference_name": "BTOG ESMO 2026 Update Webcast",
+      "event_type": "workshop",
+      "source_url": "https://www.btog.org/btog-esmo-update-webinar/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "A concise round-up of the most practice-changing thoracic oncology research pres",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 8,
+      "total_ok": 5,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 842,
+      "conference_name": "25th BTOG Annual Conference 2027",
+      "event_type": "conference",
+      "source_url": "https://www.btog.org/25th-btog-annual-conference-2027/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "BTOG 2027 will be held at the EICC Edinburgh from Wednesday 3rd to Friday 5th Ma",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "EICC Edinburgh",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Edinburgh",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": true,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "OK",
+          "db_value": "open=True deadline=2026-12-07 note=Opens 1st September 2026",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "7 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 11,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    }
+  ],
+  "audited_at": "2026-07-03T14:07:36.343153+00:00"
+}

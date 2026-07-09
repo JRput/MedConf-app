@@ -1,0 +1,37 @@
+{
+  "patterns": {
+    "www.bopa.org.uk|abstract_status|subpage:/abstract-submission-the-29th-annual-bopa-conference-in-2026/|https://www.bopa.org.uk/abstract-submission-the-29th-annual-bopa-conference-in-2026/": {
+      "domain": "www.bopa.org.uk",
+      "field": "abstract_status",
+      "hits": 1,
+      "method": "subpage:/abstract-submission-the-29th-annual-bopa-conference-in-2026/",
+      "promoted": false,
+      "subpage_path": "https://www.bopa.org.uk/abstract-submission-the-29th-annual-bopa-conference-in-2026/"
+    },
+    "www.bopa.org.uk|pricing|external_text:www.royalmarsdenschool.ac.uk": {
+      "domain": "www.bopa.org.uk",
+      "field": "pricing",
+      "hits": 1,
+      "method": "external_text:www.royalmarsdenschool.ac.uk",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.bopa.org.uk|pricing|vision_main": {
+      "domain": "www.bopa.org.uk",
+      "field": "pricing",
+      "hits": 1,
+      "method": "vision_main",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.bopa.org.uk|pricing|vision_subpage:/latest-conference-2026/": {
+      "domain": "www.bopa.org.uk",
+      "field": "pricing",
+      "hits": 6,
+      "method": "vision_subpage:/latest-conference-2026/",
+      "promoted": true,
+      "subpage_path": null
+    }
+  },
+  "version": 1
+}
