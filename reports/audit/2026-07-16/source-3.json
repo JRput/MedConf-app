@@ -1,0 +1,4532 @@
+{
+  "source_id": 3,
+  "source_name": "Royal Society of Medicine",
+  "rows": 46,
+  "passing_rows": 33,
+  "failing_rows": 13,
+  "total_missing_fields": 6,
+  "total_suspect_fields": 8,
+  "avg_completeness": 97.3,
+  "verdict": "FAIL",
+  "pagination": {
+    "has_pagination": true,
+    "page_buttons": 0,
+    "next_button": true,
+    "show_more": false,
+    "load_more": false,
+    "total_hint": "10 of 145",
+    "db_rows": 46
+  },
+  "pagination_warning": null,
+  "audits": [
+    {
+      "conference_id": 498,
+      "conference_name": "Invisible exposures, real consequences: understanding how plastics impact human health",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/nephrology/2025-26/neu04/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Free\nInvisible exposures, real consequences: understanding how plastics impact h",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Diabetes & Endocrinology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "9 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 10,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 140,
+      "conference_name": "The 45th Annual Update for GP & Primary Care: Clinical Complexity, Preventative Medicine and the Future of Practice",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/general-practice-with-primary-healthcare/2025-26/gpu02/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The 45th Annual Update for GP & Primary Care: Clinical Complexity, Preventative ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "General Practice",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "SUSPECT",
+          "db_value": "open=True deadline=2026-08-12",
+          "page_evidence": null,
+          "reason": "No abstract programme on page but abstract_open=True"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "32 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 91.7,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 1,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 795,
+      "conference_name": "Norah Schuster Prize and Bynum Lecture: Arm transplantation",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/history-of-medicine/2026-27/hsv04/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Norah Schuster Prize and Bynum Lecture: Arm transplantation\nJoin the Royal Socie",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Research",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "10 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 605,
+      "conference_name": "The human experimental model: Disease biology, discovery and translation",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/pathology/2026-27/ptv01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The human experimental model: Disease biology, discovery and translation\nBook bo",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-01-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-01-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "GP Training",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "31 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1000,
+      "conference_name": "Contact Dermatitis Training: A Joint RSM and BSCA Course for Resident Doctors",
+      "event_type": "course",
+      "source_url": "https://www.rsm.ac.uk/events/dermatology/2025-26/deu12/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Contact Dermatitis Training: A Joint RSM and BSCA Course for Resident Doctors\nFo",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Dermatology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "3 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 1004,
+      "conference_name": "Diet, neurobehaviour and GLP-1 therapy: From treatment to cessation",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/food-health/2026-27/fhv01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Diet, neurobehaviour and GLP-1 therapy: From treatment to cessation\nJoin the Roy",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Diabetes & Endocrinology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "9 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 10,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 706,
+      "conference_name": "Retrospective diagnosis: Medicine, history and the art of the human head",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/history-of-medicine/2026-27/hsv01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Retrospective diagnosis: Medicine, history and the art of the human head\nJoin th",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-21",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-21",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Gastroenterology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 551,
+      "conference_name": "Question Time Panel: Weight-loss Drugs and the Future of Obesity Care",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/rsm-studios/2025-26/ceu11/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Free\nQuestion Time Panel: Weight-loss Drugs and the Future of Obesity Care\nJoin ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-14",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-14",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Cardiology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "9 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 136,
+      "conference_name": "General Day 8: Innovations in coronary artery disease management",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/cardiology/2025-26/cdu08/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Webinar\nGeneral Day 8: Innovations in coronary artery disease management\nJoin th",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "9 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 10,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 812,
+      "conference_name": "Community paediatrics - London School of Paediatrics day",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/paediatrics-and-child-health/2026-27/pdv03/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Community paediatrics - London School of Paediatrics day\nJoin the Royal Society ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "SUSPECT",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": "Title names a city, but event_format=online"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "3 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 90.0,
+      "total_checked": 10,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 1,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 122,
+      "conference_name": "The final reaches of Regent's Canal",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/senior-fellows-forum/2025-2026/rtu18/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The final reaches of Regent's Canal\nVenture to the East and enjoy the watery del",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Regent's Canal",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No specialty set"
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 83.3,
+      "total_checked": 12,
+      "total_ok": 7,
+      "total_missing": 2,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 814,
+      "conference_name": "Paediatric haematology (non - malignant) - London School of Paediatrics day",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/paediatrics-and-child-health/2026-27/pdv04/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Paediatric haematology (non - malignant) - London School of Paediatrics day\nJoin",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "SUSPECT",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": "Title names a city, but event_format=online"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 90.0,
+      "total_checked": 10,
+      "total_ok": 6,
+      "total_missing": 0,
+      "total_suspect": 1,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 707,
+      "conference_name": "Obesity pharmacotherapy masterclass",
+      "event_type": "workshop",
+      "source_url": "https://www.rsm.ac.uk/events/endocrinology-and-diabetes/2026-2027/edv01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Obesity pharmacotherapy masterclass\nJoin the Royal Society of Medicine Endocrino",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-24",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-24",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Cardiology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "14 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 811,
+      "conference_name": "Paediatric respiratory and ENT - London School of Paediatrics day",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/paediatrics-and-child-health/2026-27/pdv02/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Webinar\nPaediatric respiratory and ENT - London School of Paediatrics day\nJoin t",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-20",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-20",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "SUSPECT",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": "Title names a city, but event_format=online"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "3 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 90.0,
+      "total_checked": 10,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 1,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 385,
+      "conference_name": "Library Tour",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/library/2025-26/lbu22/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Free\nLibrary Tour\nThe Royal Society of Medicine, founded in 1805, is home to a r",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-08-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-08-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No specialty set"
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "8 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 91.7,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 1,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 390,
+      "conference_name": "Library Tour",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/library/2026-27/lbv01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Free\nLibrary Tour\nThe Royal Society of Medicine, founded in 1805, is home to a r",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-07",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-07",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No specialty set"
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "8 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 91.7,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 1,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 480,
+      "conference_name": "Library Tour",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/library/2026-27/lbv03/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Free\nLibrary Tour\nThe Royal Society of Medicine, founded in 1805, is home to a r",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No specialty set"
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "8 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 91.7,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 1,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 142,
+      "conference_name": "Christmas Carols Concert 2026",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/club/2025-26/xcv01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Christmas Carols Concert 2026\nIn preparation for Christmas, the Royal Society of",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Faculty & Networking",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 128,
+      "conference_name": "RSM Aesthetics Congress XIV",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/aesthetic-medicine-and-surgery/2025-26/amu04/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "RSM Aesthetics Congress XIV\nJoin us for the flagship annual Congress of the RSM ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Aesthetic & Cosmetic Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "14 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 120,
+      "conference_name": "Training, Transformation, Excellence: The Surgeon\u2019s Cycle of Life",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/surgery/2025-26/suu01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "CPD\nTraining, Transformation, Excellence: The Surgeon\u2019s Cycle of Life\nModern sur",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Surgery (General)",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "32 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 126,
+      "conference_name": "General Day 5: Preparing for consultant practice and President Prize",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/cardiology/2025-26/cdu05/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "General Day 5: Preparing for consultant practice and President Prize\nIf you are ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Cardiology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "14 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 913,
+      "conference_name": "Spotlight on: The National Maternity and Neonatal Investigation",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/rsm-studios/2025-26/ceu09/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Webinar\nSpotlight on: The National Maternity and Neonatal Investigation\nJoin the",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-28",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-28",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Women's Health",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "9 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 10,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 613,
+      "conference_name": "Medicine and Me: Menopause, myths and moving forward after breast cancer",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/medicine-and-me/2025-26/mmu04/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Free\nMedicine and Me: Menopause, myths and moving forward after breast cancer\nJo",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-15",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-15",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Women's Health",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "11 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 132,
+      "conference_name": "RSM Fine Wine Tasting and Dinner - Drinking in Georgian and Victorian Britain",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/club/2025-26/xcu05/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "RSM Fine Wine Tasting and Dinner - Drinking in Georgian and Victorian Britain\nJo",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No specialty set"
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 91.7,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 1,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 716,
+      "conference_name": "Sleep medicine: Emerging science, technology and new therapies",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/sleep-medicine/2026-27/slv01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Sleep medicine: Emerging science, technology and new therapies\nIf you are bookin",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Sleep Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "16 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 130,
+      "conference_name": "Seeing the Whole Person: Psychiatric Formulation in the 21st Century",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/psychiatry/2025-26/pyu02/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Seeing the Whole Person: Psychiatric Formulation in the 21st Century\nIf you are ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Mental Health",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "23 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 810,
+      "conference_name": "Paediatric emergency medicine - London School of Paediatrics day",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/paediatrics-and-child-health/2026-27/pdv01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Webinar\nPaediatric emergency medicine - London School of Paediatrics day\nJoin th",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-01",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-01",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "SUSPECT",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": "Title names a city, but event_format=online"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "3 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 90.0,
+      "total_checked": 10,
+      "total_ok": 7,
+      "total_missing": 0,
+      "total_suspect": 1,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 362,
+      "conference_name": "Vaccination and Prevention of Infection in the Immunocompromised Host",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/clinical-immunology-and-allergy/2025-56/cau01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Vaccination and Prevention of Infection in the Immunocompromised Host\nIf you are",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Infectious Disease",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "SUSPECT",
+          "db_value": "open=True deadline=2026-08-12",
+          "page_evidence": null,
+          "reason": "No abstract programme on page but abstract_open=True"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "14 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 91.7,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 1,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 124,
+      "conference_name": "Financial Planning in your first 10 years of consultancy by Medical Family Finance",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/partner-symposium/2025-26/syu09/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Free Webinar Partner Symposium\nFinancial Planning in your first 10 years of cons",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-07-22",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-07-22",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Finance & Pensions",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "10 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 10,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 829,
+      "conference_name": "Transforming Patient Care with AI: Outcomes, Safety, and Quality at Scale",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/partner-symposium/2025-26/syu10/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Free Partner Symposium\nTransforming Patient Care with AI: Outcomes, Safety, and ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 364,
+      "conference_name": "Biology of Ageing 2026",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/geriatrics-and-gerontology/2025-26/ggu01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Webinar\nBiology of Ageing 2026\nAs medical innovation continues to evolve through",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Diabetes & Endocrinology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "9 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 10,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 549,
+      "conference_name": "RSM Respiratory Careers Evening",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/respiratory-medicine/2026-27/rmv01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "RSM Respiratory Careers Evening\nJoin this in-person careers evening to learn fro",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Respiratory",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "9 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 499,
+      "conference_name": "Renal-Haematology Summit: Exploring Intersections of Haematology and Renal Care",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/nephrology/2025-26/neu03/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Renal-Haematology Summit: Exploring Intersections of Haematology and Renal Care\n",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "21 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 813,
+      "conference_name": "The 38th annual cystic fibrosis symposium",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/paediatrics-and-child-health/2026-27/pdv11/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The 38th annual cystic fibrosis symposium\nIf you are booking a non-member ticket",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "16 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 791,
+      "conference_name": "Patient-Specific Implants: From Concept to Clinical Practice",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/partner-symposium/2025-26/syu08/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Live Stream CPD Partner Symposium\nPatient-Specific Implants: From Concept to Cli",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-21",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-21",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "4 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 792,
+      "conference_name": "Two revolutions in medicine: The history of open-heart surgery and beta cell therapy",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/history-of-medicine/2026-27/hsv02/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Two revolutions in medicine: The history of open-heart surgery and beta cell the",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-01-13",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-01-13",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Cardiology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "10 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 550,
+      "conference_name": "Bridging Movement and Medicine: Integrating Sports, Rheumatology, and Rehabilitation",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/rheumatology-and-rehabilitation/2025-26/rru02/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Bridging Movement and Medicine: Integrating Sports, Rheumatology, and Rehabilita",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Musculoskeletal & Trauma",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "12 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 920,
+      "conference_name": "Neurodevelopmental disorders: The female experience",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/intellectual-disability/2026-27/idv01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Neurodevelopmental disorders: The female experience\nJoin us for a full-day webin",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Mental Health",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "10 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 10,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 781,
+      "conference_name": "An evening with the RSM Coloproctology Section: John of Arderne Prize and Presidential Address",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/coloproctology/2026-27/cov01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "An evening with the RSM Coloproctology Section: John of Arderne Prize and Presid",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-21",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-21",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "SUSPECT",
+          "db_value": "open=True deadline=2026-08-09",
+          "page_evidence": null,
+          "reason": "No abstract programme on page but abstract_open=True"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "18 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 91.7,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 1,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 796,
+      "conference_name": "Guy's Hospital: Shaping medicine, education and clinical practice",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/history-of-medicine/2026-27/hsv05/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Guy's Hospital: Shaping medicine, education and clinical practice\nJoin the Royal",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-05-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-05-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Research",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "10 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 823,
+      "conference_name": "President\u2019s address: The Privilege of Practice, The Power of Inclusion",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/urology/2026-27/urv02/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Free\nPresident\u2019s address: The Privilege of Practice, The Power of Inclusion\nStep",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Urology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "30 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 822,
+      "conference_name": "Trauma and On-call Urology",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/urology/2026-27/urv01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Trauma and On-call Urology\nIf you are an SPR trainee or a CNS Nurse and want to ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-01-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-01-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Urology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "23 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 967,
+      "conference_name": "In Conversation Live with Dr Puja Khajuria",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/philanthropy/2025-26/phu01/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Public\nIn Conversation Live with Dr Puja Khajuria\nJoin the Royal Society of Medi",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Aesthetic & Cosmetic Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "10 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 794,
+      "conference_name": "Medicine through a historical lens: Surgical innovation and the history of addiction",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/history-of-medicine/2026-27/hsv03/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Medicine through a historical lens: Surgical innovation and the history of addic",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Mental Health",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "10 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 134,
+      "conference_name": "History of Medicine Society visit to Oxford",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/history-of-medicine/2025-26/hsu07/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Sold Out\nHistory of Medicine Society visit to Oxford\nJoin the Royal Society of M",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Rhodes House",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "South Parks Road",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Medical History & Humanities",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "6 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 138,
+      "conference_name": "The integrated pelvis: Advancing collaborative surgery in women\u2019s pelvic care",
+      "event_type": "conference",
+      "source_url": "https://www.rsm.ac.uk/events/coloproctology/2025-26/cou04/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The integrated pelvis: Advancing collaborative surgery in women\u2019s pelvic care\nIf",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal Society of Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Women's Health",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "SUSPECT",
+          "db_value": "open=True deadline=2026-07-16",
+          "page_evidence": null,
+          "reason": "No abstract programme on page but abstract_open=True"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "14 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 91.7,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 1,
+      "total_absent": 1
+    }
+  ],
+  "audited_at": "2026-07-16T12:48:05.815403+00:00"
+}

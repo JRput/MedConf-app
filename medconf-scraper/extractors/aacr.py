@@ -334,13 +334,19 @@ def _extract_dollar_price(text: str) -> Optional[float]:
         return None
 
 
+_INCOME_HEADERS = ("Upper Income", "Middle Income", "Lower/Middle Low Income")
+
+
 def _parse_registration_tables(html: str) -> List[Dict[str, Any]]:
     """Parse pricing tables. AACR uses one table per member/nonmember
-    with multi-column pricing (Upper / Middle / Lower Income).
+    with 3 price columns per row: Upper / Middle / Lower-Middle Low
+    income economies (World Bank classification).
 
-    We publish ONE canonical tier per row using the "Upper Income" (first
-    column) as the standard rate — that matches how UK users would read
-    the sticker price. Column labels come from the first row's cells.
+    Emit ONE tier per (row × column) so users can see all rates for
+    their income tier. Composite label:
+        "Member · Active Member · Upper Income"
+    PricingTable.tsx splits on ' · ' for tabs + sub-filters, so users
+    get Member/Nonmember as top-level tabs and Income Tier as sub-filter.
     """
     tiers: List[Dict[str, Any]] = []
     tables = re.findall(r"<table[^>]*>(.*?)</table>", html, re.DOTALL)
@@ -349,6 +355,9 @@ def _parse_registration_tables(html: str) -> List[Dict[str, Any]]:
         if not rows:
             continue
         section = None
+        # Column labels — filled in when we hit the "Regular Meeting Sessions
+        # ... Upper Income Middle Income Lower/Middle Low Income" row.
+        col_labels: List[str] = list(_INCOME_HEADERS)
         for row in rows:
             cells = re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", row, re.DOTALL)
             if not cells:
@@ -357,31 +366,36 @@ def _parse_registration_tables(html: str) -> List[Dict[str, Any]]:
             first = cell_texts[0]
             if not first:
                 continue
-            # Header row: "MEMBER RATES1"/"NONMEMBER RATES2"
+            # Header row: "MEMBER RATES1" / "NONMEMBER RATES2"
             if re.search(r"(member|nonmember)\s+rates?", first, re.I):
-                section = "member" if "nonmember" not in first.lower() else "nonmember"
+                section = "Nonmember" if "nonmember" in first.lower() else "Member"
                 continue
-            # Column-header row: "Regular Meeting Sessions ..."
-            if "meeting sessions" in first.lower() or "income" in first.lower():
+            # Column-header row: try to read actual income-tier labels
+            if "income" in " ".join(cell_texts[1:]).lower():
+                actual = [_clean_text(c) for c in cell_texts[1:] if _clean_text(c)]
+                if actual:
+                    col_labels = actual
+                continue
+            if "meeting sessions" in first.lower():
                 continue
             # Data row: label + N price columns
-            label = first
-            # Take first $ price (Upper Income column)
-            price = None
-            for c in cell_texts[1:]:
-                price = _extract_dollar_price(c)
-                if price is not None:
-                    break
-            if price is None:
-                continue
-            prefix = "Nonmember - " if section == "nonmember" else "Member - "
-            tiers.append({
-                "tier_label": f"{prefix}{label}"[:100],
-                "price_gbp": price,  # numeric; currency below distinguishes
-                "currency": "USD",
-                "is_early_bird": False,
-                "early_bird_deadline": None,
-            })
+            row_label = first
+            for idx, cell in enumerate(cell_texts[1:]):
+                price = _extract_dollar_price(cell)
+                if price is None:
+                    continue
+                income = (
+                    col_labels[idx] if idx < len(col_labels) else f"Column {idx+1}"
+                )
+                sec = section or "Member"
+                tier_label = f"{sec} · {row_label} · {income}"[:120]
+                tiers.append({
+                    "tier_label": tier_label,
+                    "price_gbp": price,
+                    "currency": "USD",
+                    "is_early_bird": False,
+                    "early_bird_deadline": None,
+                })
     return tiers
 
 

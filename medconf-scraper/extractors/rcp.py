@@ -40,6 +40,44 @@ from .abstract_classifier import extract_abstract_info
 from logger import logger
 
 
+_RCP_GRADE_WORDS = {
+    "consultant", "resident", "trainee", "student", "medical", "sas",
+    "doctor", "grades", "equivalent", "allied", "healthcare", "professional",
+    "professionals", "and", "or",
+}
+
+
+def _normalise_rcp_label(label: str) -> str:
+    """Fold dash variants and case inconsistencies so 'Member – resident
+    doctor', 'Member - resident doctor', 'Member – Resident doctor' all
+    dedupe to the same tier ('Member · Resident doctor')."""
+    if not label:
+        return label
+    # Split only on dash *surrounded by spaces* (the delimiter between
+    # membership + grade). This protects prefix hyphens in "Non-Member"
+    # and inline hyphens in words like "e-learning".
+    parts = re.split(r"\s+[–—-]\s+", label, maxsplit=1)
+    if len(parts) == 2:
+        membership, grade = parts[0].strip(), parts[1].strip()
+        # Preserve acronyms (SAS, GP, IMT, STR, HCP, NHS, RCP, MRCP, etc.)
+        # by lowercasing then re-uppering known acronyms.
+        _ACRONYMS = {"sas", "gp", "imt", "str", "hcp", "nhs", "rcp",
+                     "mrcp", "fy", "sho", "cmt"}
+        grade_lower = grade[:1].upper() + grade[1:].lower() if grade else grade
+        def _restore(w: str) -> str:
+            return w.upper() if w.lower() in _ACRONYMS else w
+        grade_norm = " ".join(_restore(w) for w in grade_lower.split())
+        # Also protect slash-joined acronyms: "IMT/STR"
+        grade_norm = re.sub(
+            r"\b([a-z]{2,4})/([a-z]{2,4})\b",
+            lambda m: f"{_restore(m.group(1).lower()) if m.group(1).lower() in _ACRONYMS else m.group(1)}/"
+                      f"{_restore(m.group(2).lower()) if m.group(2).lower() in _ACRONYMS else m.group(2)}",
+            grade_norm,
+        )
+        return f"{membership} · {grade_norm}"
+    return label
+
+
 _MONTHS = {
     "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
     "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
@@ -159,6 +197,12 @@ class RCPExtractor(BaseExtractor):
             label = re.split(r"\s*:?\s*£", text)[0].strip(" :–-")
             if not label:
                 label = "Member" if row.get("isMember") else "Standard"
+            # Normalise: RCP mixes ASCII "-", en-dash "–", em-dash "—"
+            # AND inconsistent case ("Consultant" vs "consultant") across
+            # events, splitting what should be one tier into three. Use the
+            # standard " · " separator and title-case the grade portion so
+            # PricingTable can group them properly.
+            label = _normalise_rcp_label(label)
             tiers.append({
                 "tier_label": label[:120],
                 "price_gbp": price,

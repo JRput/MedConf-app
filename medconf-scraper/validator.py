@@ -1,6 +1,7 @@
 # validator.py
 """Data validation - validates extracted conference data before database insertion."""
 
+import re
 from datetime import datetime
 from typing import Dict, Any, List
 
@@ -38,17 +39,47 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
     # Validate pricing tiers
     tiers = cleaned.get("pricing_tiers", [])
     valid_tiers: List[Dict[str, Any]] = []
-    
+
+    # Junk labels that carry no user-facing meaning. BOPA's Tribe API
+    # returns cost ranges as two synthetic tiers labelled "From"/"To";
+    # RCOG detail pages sometimes surface an empty "Fees" placeholder;
+    # BTOG scraped labels like "sponsor" alone are unhelpful. Drop them.
+    _JUNK_LABELS = {"from", "to", "fees", "fee", "sponsor", "cost",
+                    "price", "prices", "n/a", "tbc", "tba"}
+
+    def _clean_label(lbl: str) -> str:
+        if not lbl:
+            return lbl
+        # Fold narrow no-break space (U+202F, used by RCR labels)
+        lbl = lbl.replace(" ", " ").replace(" ", " ")
+        # Trailing punctuation first (RCR labels end with " -")
+        lbl = lbl.strip(" -–—:·|/")
+        # Then strip footnote-marker runs ("Members**", "***")
+        lbl = re.sub(r"\**\s*$", "", lbl).strip()
+        # Sometimes there is ANOTHER pass of punctuation after
+        lbl = lbl.strip(" -–—:·|/")
+        # Collapse repeated whitespace
+        lbl = re.sub(r"\s+", " ", lbl).strip()
+        return lbl
+
     for t in tiers:
-        if t.get("tier_label") and t.get("price_gbp") is not None:
-            try:
-                t["price_gbp"] = float(t["price_gbp"])
-                valid_tiers.append(t)
-            except (ValueError, TypeError):
-                warnings.append(f"Invalid price for tier '{t.get('tier_label')}' — skipped")
-        else:
+        if not (t.get("tier_label") and t.get("price_gbp") is not None):
             warnings.append(f"Incomplete pricing tier — skipped: {t}")
-    
+            continue
+        try:
+            t["price_gbp"] = float(t["price_gbp"])
+        except (ValueError, TypeError):
+            warnings.append(f"Invalid price for tier '{t.get('tier_label')}' — skipped")
+            continue
+        cleaned_label = _clean_label(t["tier_label"])
+        if not cleaned_label or cleaned_label.lower() in _JUNK_LABELS:
+            warnings.append(
+                f"Junk tier label '{t['tier_label']}' — skipped (no user-facing meaning)"
+            )
+            continue
+        t["tier_label"] = cleaned_label
+        valid_tiers.append(t)
+
     cleaned["pricing_tiers"] = valid_tiers
 
     # Validate and convert cpd_points to integer (database expects INTEGER, not float)

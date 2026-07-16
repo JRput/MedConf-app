@@ -3,7 +3,7 @@
 
 import { useMemo, useState } from 'react'
 import type { PricingTier } from '@/lib/types'
-import { Clock } from 'lucide-react'
+import { Clock, ChevronDown, ChevronRight } from 'lucide-react'
 import { currencySymbol } from '@/lib/conference-helpers'
 
 interface PricingTableProps {
@@ -19,16 +19,41 @@ interface PricingTableProps {
 const SEP = ' · '
 const GROUP_THRESHOLD = 12 // below this, no point in tabbing — show everything
 
+// Tokens that mean a tier is an optional add-on (lunch, dinner, workshop,
+// etc.) rather than a core registration fee. When >=2 tiers match, we
+// collapse them into a "Optional add-ons" section below the main table.
+const ADD_ON_TOKEN_RE = /\b(?:lunch|dinner|reception|banquet|gala|workshop|masterclass|networking|add[-\s]?on|extras?|social)\b|\(optional\)/i
+
+function isAddOn(label: string): boolean {
+  return ADD_ON_TOKEN_RE.test(label)
+}
+
 export function PricingTable({ tiers }: PricingTableProps) {
+  // Separate optional add-ons (lunch, dinner, workshop) from core
+  // registration tiers. Only bucket if there are >=2 add-ons — a single
+  // one is noise not worth its own section.
+  const { mainTiers, addOnTiers } = useMemo(() => {
+    const addOns: PricingTier[] = []
+    const main: PricingTier[] = []
+    for (const t of tiers) {
+      if (isAddOn(t.tier_label)) addOns.push(t)
+      else main.push(t)
+    }
+    if (addOns.length < 2) {
+      return { mainTiers: tiers, addOnTiers: [] as PricingTier[] }
+    }
+    return { mainTiers: main, addOnTiers: addOns }
+  }, [tiers])
+
   const { groups, useTabs } = useMemo(() => {
-    const parsed = tiers.map(t => {
+    const parsed = mainTiers.map(t => {
       const parts = t.tier_label.includes(SEP)
         ? t.tier_label.split(SEP).map(p => p.trim()).filter(Boolean)
         : [t.tier_label]
       return { tier: t, parts }
     })
     const allHaveBand = parsed.length > 0 && parsed.every(p => p.parts.length >= 2)
-    const enable = tiers.length >= GROUP_THRESHOLD && allHaveBand
+    const enable = mainTiers.length >= GROUP_THRESHOLD && allHaveBand
 
     // group by leading piece preserving original order
     const seen = new Set<string>()
@@ -45,7 +70,9 @@ export function PricingTable({ tiers }: PricingTableProps) {
     }
     const groupList = order.map(name => ({ name, rows: map[name] }))
     return { groups: groupList, useTabs: enable }
-  }, [tiers])
+  }, [mainTiers])
+
+  const [addOnsExpanded, setAddOnsExpanded] = useState(false)
 
   const [activeBand, setActiveBand] = useState<string>(groups[0]?.name ?? '')
   const active = groups.find(g => g.name === activeBand) ?? groups[0]
@@ -161,6 +188,40 @@ export function PricingTable({ tiers }: PricingTableProps) {
           </tbody>
         </table>
       </div>
+
+      {addOnTiers.length >= 2 && (
+        <div className="rounded-lg border border-slate-800 bg-slate-900/40">
+          <button
+            onClick={() => setAddOnsExpanded(v => !v)}
+            className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-slate-800/40 transition-colors"
+            aria-expanded={addOnsExpanded}
+          >
+            <span className="text-sm text-slate-300">
+              Optional add-ons
+              <span className="ml-2 text-slate-500 text-xs">
+                · {addOnTiers.length} option{addOnTiers.length === 1 ? '' : 's'}
+              </span>
+            </span>
+            {addOnsExpanded
+              ? <ChevronDown className="w-4 h-4 text-slate-400" />
+              : <ChevronRight className="w-4 h-4 text-slate-400" />}
+          </button>
+          {addOnsExpanded && (
+            <table className="w-full text-sm border-t border-slate-800">
+              <tbody>
+                {addOnTiers.map((tier, i) => (
+                  <tr key={tier.id} className={i % 2 === 0 ? 'bg-slate-800/20' : 'bg-slate-800/40'}>
+                    <td className="px-4 py-2.5 text-slate-200">{tier.tier_label}</td>
+                    <td className="px-4 py-2.5 text-right text-white font-semibold">
+                      {currencySymbol(tier.currency)}{tier.price_gbp.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
     </div>
   )
 }

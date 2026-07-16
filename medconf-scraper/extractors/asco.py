@@ -198,8 +198,11 @@ def _extract_asco_pricing(sub_html: str) -> List[dict]:
                     p_nonmember = float(pm.group(2).replace(",", ""))
                 except ValueError:
                     continue
-                m_label = f"{label} (Member)" + (f" — {col}" if col else "")
-                nm_label = f"{label} (Non-member)" + (f" — {col}" if col else "")
+                # Composite label separated by " · " so PricingTable
+                # renders "Member/Non-member" as tabs and the timeframe
+                # as a sub-filter instead of a flat wall.
+                m_label = f"Member · {label}" + (f" · {col}" if col else "")
+                nm_label = f"Non-member · {label}" + (f" · {col}" if col else "")
                 _add(m_label, p_member)
                 _add(nm_label, p_nonmember)
             continue
@@ -215,7 +218,7 @@ def _extract_asco_pricing(sub_html: str) -> List[dict]:
             except ValueError:
                 continue
             col = col_labels[idx] if col_labels and idx < len(col_labels) else None
-            _add(f"{label}" + (f" — {col}" if col else ""), price)
+            _add(f"{label}" + (f" · {col}" if col else ""), price)
     return tiers
 
 

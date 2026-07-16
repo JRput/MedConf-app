@@ -192,7 +192,23 @@ class RSMExtractor(BaseExtractor):
                 else:
                     parts = [tab_norm, accordion_role, label or col]
 
-                tier_label = " - ".join(p for p in parts if p)
+                # PricingTable.tsx splits on ' · ' to build tabs +
+                # sub-filters. Emit that separator so multi-dimension
+                # RSM tiers (Member/Non-Member · Grade · Session) group
+                # cleanly instead of rendering as one flat 32-row wall.
+                # Normalise each part and drop duplicates so a Non-Member
+                # tab whose accordion role is also "Non - Member" doesn't
+                # produce "Non-Member · Non - Member".
+                def _norm_part(p: str) -> str:
+                    return re.sub(r"\s*-\s*", "-", (p or "").strip())
+                seen_parts: set = set()
+                clean_parts: List[str] = []
+                for p in parts:
+                    np = _norm_part(p)
+                    if np and np.lower() not in seen_parts:
+                        seen_parts.add(np.lower())
+                        clean_parts.append(np)
+                tier_label = " · ".join(clean_parts)
 
                 tiers.append({
                     "tier_label": tier_label[:120],
