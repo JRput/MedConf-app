@@ -18,7 +18,10 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 # Scraper configuration
 SCRAPER_MAX_STEPS = int(os.getenv("SCRAPER_MAX_STEPS", "30"))
 SCRAPER_DELAY_SECS = int(os.getenv("SCRAPER_DELAY_SECONDS", "2"))
-SCRAPER_TIMEOUT_MS = int(os.getenv("SCRAPER_TIMEOUT_MS", "10000"))
+# Default Playwright page.goto / locator timeout. Raised 10 s → 30 s
+# after RCEM's on-demand listing timed out on 2 of 4 daily scrapes in
+# July 2026 — the site occasionally takes 15-20 s to render at 05:00 UTC.
+SCRAPER_TIMEOUT_MS = int(os.getenv("SCRAPER_TIMEOUT_MS", "30000"))
 
 # Validate required configuration
 def validate_config():

@@ -109,16 +109,17 @@ class RCEMExtractor(BaseExtractor):
             return None
 
         # Retry with backoff — GitHub Actions runners occasionally see
-        # transient DNS/TLS failures reaching rcem.ac.uk. 2026-07-03 job
-        # failed here because both httpx + Playwright browser paths timed
-        # out in the same minute. Three attempts, 5s between them, gives
-        # the network a chance to recover without lengthening the run.
+        # transient DNS/TLS failures reaching rcem.ac.uk. Failures on
+        # 2026-07-03, 07-15, 07-16 all hit the same 05:00-UTC slow spell
+        # where both httpx and Playwright timed out in the same minute.
+        # Widened to 5 attempts and 60s per request + longer backoff so a
+        # bad-day scrape still recovers on the next attempt.
         import time
         html: Optional[str] = None
         last_err: Optional[Exception] = None
-        for attempt in range(3):
+        for attempt in range(5):
             try:
-                with httpx.Client(timeout=30.0, follow_redirects=True,
+                with httpx.Client(timeout=60.0, follow_redirects=True,
                                   headers={"User-Agent":
                                            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                                            "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -131,13 +132,13 @@ class RCEMExtractor(BaseExtractor):
                 last_err = e
                 logger.warning(
                     f"RCEM source {self.source_id}: listing fetch attempt "
-                    f"{attempt + 1}/3 failed: {e}"
+                    f"{attempt + 1}/5 failed: {e}"
                 )
-                if attempt < 2:
-                    time.sleep(5)
+                if attempt < 4:
+                    time.sleep(5 * (attempt + 1))  # 5s, 10s, 15s, 20s
         if html is None:
             logger.warning(
-                f"RCEM source {self.source_id}: listing fetch failed after 3 "
+                f"RCEM source {self.source_id}: listing fetch failed after 5 "
                 f"attempts: {last_err}"
             )
             return None
