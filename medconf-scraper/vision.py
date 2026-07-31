@@ -31,7 +31,12 @@ from config import KIMI_API_KEY, KIMI_BASE_URL
 
 logger = logging.getLogger(__name__)
 
-VISION_MODEL = os.environ.get("KIMI_VISION_MODEL", "meta/llama-3.2-90b-vision-instruct")
+# Rotated 2026-07-31: meta/llama-3.2-90b-vision-instruct returns wordy
+# prose on complex fee tables (fails JSON parse), and Llama-3.2-11b-vision
+# collapses multi-column pricing to a single price per row.
+# nvidia/nemotron-nano-12b-v2-vl correctly extracts row × column into
+# separate tiers (verified 2026-07-31 on ESTRO Meets Asia FEE-EmA.jpg).
+VISION_MODEL = os.environ.get("KIMI_VISION_MODEL", "nvidia/nemotron-nano-12b-v2-vl")
 
 _client: Optional[OpenAI] = None
 
@@ -129,14 +134,13 @@ def extract_json(
 # Convenience: pricing-from-images
 # --------------------------------------------------------------------------
 
-PRICING_PROMPT = """You are looking at one or more registration-fee tables for a medical conference. Extract EVERY price row visible across all images into a structured JSON list.
+PRICING_PROMPT = """This image is a registration-fee table for a medical conference. It has two dimensions:
+- ROWS group by attendee type (e.g. "Consultant", "Trainee", "Emerging Countries", "EmA Registration") within sections (e.g. "All Day Registration", "One Day Registration", "Full Congress", "Day Rate").
+- COLUMNS are timeframes or bands (e.g. "Early Rate", "Late Rate", "Desk Rate", "Standard", "Super Early Bird").
 
-For each row, identify:
-- the tier label (e.g. "Consultant — Member, 2-day", "Trainee — Non-member, 1-day", "LMIC — Online only")
-- the price (numeric only, no currency symbol)
-- the currency (GBP / USD / EUR — read from context; default GBP if unclear)
-- early-bird status (true ONLY if the table heading or row explicitly says "early bird" or "super early bird")
-- early-bird deadline (ISO date YYYY-MM-DD ONLY if visible in the table heading)
+Emit ONE JSON tier per (row × column) cell. Use a composite tier_label that preserves ALL dimensions, joined by " · ", e.g.
+    "All Day Registration · Emerging Countries · Early Rate"
+    "Consultant · Member · 2-day"
 
 Output ONLY this JSON shape, no prose, no markdown fences:
 
@@ -153,11 +157,13 @@ Output ONLY this JSON shape, no prose, no markdown fences:
 }
 
 Rules:
-- Be exhaustive. If an image shows 12 prices, return 12 rows.
-- Each tier label should be unambiguous on its own (include format/day-count/grade where applicable).
-- If multiple bands are visible (e.g. "Super early bird until 30 Sep 2026" and "Standard"), reflect both via is_early_bird/early_bird_deadline.
-- Do NOT invent rows that aren't visible.
-- If no fee table is visible in the images, return {"tiers": []}.
+- Include EVERY dimension (section, attendee type, timeframe/band) in every tier_label, separated by " · ".
+- currency: read €/£/$ symbols. Use "GBP", "USD", "EUR" — default GBP if unclear.
+- is_early_bird true ONLY for columns/rows explicitly labelled "Early", "Super Early Bird" etc.
+- early_bird_deadline: ISO YYYY-MM-DD ONLY if the year is visible in the image. Do NOT guess a year.
+- If a single price spans multiple columns (one flat rate shown across a merged cell), emit ONE tier for that row (not duplicates).
+- Be exhaustive but do NOT invent rows that aren't visible.
+- If no fee table is visible in the image, return {"tiers": []}.
 """
 
 

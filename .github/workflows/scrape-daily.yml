@@ -84,7 +84,9 @@ jobs:
         env:
           KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
           KIMI_BASE_URL: https://integrate.api.nvidia.com/v1
-          KIMI_MODEL: moonshotai/kimi-k2.6
+          # Rotated from kimi-k2.6 on 2026-07-31 after NVIDIA retired the
+          # entire Moonshot family (all kimi-k2.* variants → 404/410).
+          KIMI_MODEL: meta/llama-3.3-70b-instruct
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           SCRAPER_MAX_STEPS: '30'
