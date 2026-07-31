@@ -37,6 +37,9 @@ from .asco import ASCOAnnualExtractor, ASCOMeetingsExtractor
 from .esmo import ESMOExtractor
 from .aacr import AACRExtractor
 from .estro import ESTROExtractor
+from .sabcs import SABCSExtractor
+from .esgo import ESGOCongressExtractor, ESGOCoursesExtractor
+from .sitc import SITCExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -60,6 +63,10 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     17: ESMOExtractor,                  # European Society for Medical Oncology — meeting calendar (Nuxt SPA)
     18: AACRExtractor,                  # American Association for Cancer Research — meetings & workshops calendar (WordPress, 5-page pagination)
     19: ESTROExtractor,                 # European Society for Radiotherapy and Oncology — congresses (server-rendered, 2 events)
+    20: SABCSExtractor,                 # San Antonio Breast Cancer Symposium — flagship WordPress (USD tables, /key-dates)
+    21: ESGOCongressExtractor,          # ESGO Annual Congress (congress.esgo.org, EUR HTML tables)
+    22: ESGOCoursesExtractor,           # ESGO courses listing (esgo.org/esgo-courses, BEM cards)
+    23: SITCExtractor,                  # SITC 41st Annual Meeting 2026 (Wix flagship; 2026 pricing behind JS role picker → deferred to remediator)
 }
 
 

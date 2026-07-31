@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false   # one source failing should NOT cancel the others
       matrix:
-        source_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+        source_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
         include:
           - source_id: 1
             source_name: RCGP
@@ -58,6 +58,14 @@ jobs:
             source_name: AACR
           - source_id: 19
             source_name: ESTRO
+          - source_id: 20
+            source_name: SABCS
+          - source_id: 21
+            source_name: ESGO-Congress
+          - source_id: 22
+            source_name: ESGO-Courses
+          - source_id: 23
+            source_name: SITC
 
     steps:
       - name: Check out repository
