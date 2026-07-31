@@ -200,10 +200,126 @@ class SITCExtractor(BaseExtractor):
                 else:
                     out["abstract_open"] = deadline >= today
 
-        # 6. Pricing: NOT extracted here — 2026 rates are behind a
-        # JS role picker. The remediator's Tier-2 explorer will pick
-        # them up once they're published in plain-text form (as 2025
-        # was). Leave pricing_tiers empty; the frontend shows "Pricing
-        # information not yet available."
+        # 6. Pricing — the /2026/attendee-resources/registration page
+        # is Wix-hydrated: httpx sees zero prices, but after client-side
+        # render the DOM exposes the full USD ladder as plain text like
+        # "Member $815 Save $270 Non-member $1,085". Use the passed
+        # Playwright page to fetch + parse.
+        try:
+            tiers = _extract_pricing_via_playwright(page)
+            if tiers:
+                out["pricing_tiers"] = tiers[:80]
+        except Exception as e:
+            logger.warning(f"SITC: pricing extraction via Playwright failed: {e}")
 
         return out
+
+
+# ---------------------------------------------------------------------------
+# Pricing extraction (Wix-hydrated Playwright required)
+# ---------------------------------------------------------------------------
+
+_PRICE_RE = re.compile(r"\$\s*([\d,]+(?:\.\d{2})?)")
+
+
+def _parse_registration_body_text(body_text: str) -> List[Dict[str, Any]]:
+    """Parse SITC's registration page body.innerText which arranges tiers
+    as a sequence of blocks like:
+
+        Friday, Saturday & Sunday · Nov. 6-8
+        CURRENT RATE
+        EARLY
+        Ends Aug. 24
+        Member
+        $815
+        Save $270
+        Non-member
+        $1,085
+        REGULAR
+        Ends Oct. 30
+        Member
+        $1,015
+        ...
+
+    Emit one tier per (section × band × role) with composite label
+    "[Section] · [Role] · [Band]".
+    """
+    tiers: List[Dict[str, Any]] = []
+    lines = [ln.strip() for ln in body_text.splitlines() if ln.strip()]
+
+    _BANDS = {"EARLY", "REGULAR", "ONSITE", "VIRTUAL", "CURRENT RATE"}
+    section: Optional[str] = None
+    band: Optional[str] = None
+    band_deadline: Optional[str] = None
+
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        # Section header — line containing "·" and a month name
+        if "·" in line and re.search(
+            r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)", line
+        ) and "$" not in line:
+            section = line.strip()
+            i += 1
+            continue
+        # Band header
+        if line.upper() in _BANDS:
+            band = line.upper()
+            band_deadline = None
+            # Next line often "Ends Aug. 24" or "Starts Oct. 31"
+            if i + 1 < len(lines) and re.match(
+                r"(?i)(Ends|Starts|Open\s+through)\s+", lines[i + 1]
+            ):
+                band_deadline = lines[i + 1]
+                i += 1
+            i += 1
+            continue
+        # Role line: "Member" or "Non-member" followed by a price line
+        if line in ("Member", "Non-member") and i + 1 < len(lines):
+            price_m = _PRICE_RE.match(lines[i + 1])
+            if price_m and section and band:
+                price = float(price_m.group(1).replace(",", ""))
+                # Skip "Save $X" (discount amounts)
+                role = line
+                # Skip if a "Save $" line — we only want the base price
+                if band == "CURRENT RATE":
+                    band_label = "Current Rate"
+                else:
+                    band_label = band.title()
+                label = f"{section} · {role} · {band_label}"
+                # Trim overly long labels
+                label = label[:120]
+                tiers.append({
+                    "tier_label": label,
+                    "price_gbp": price,
+                    "currency": "USD",
+                    "is_early_bird": band in ("EARLY", "CURRENT RATE"),
+                    "early_bird_deadline": None,
+                })
+                i += 2
+                continue
+        i += 1
+    # Dedupe by (label, price)
+    seen: set = set()
+    out: List[Dict[str, Any]] = []
+    for t in tiers:
+        key = (t["tier_label"], t["price_gbp"])
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(t)
+    return out
+
+
+def _extract_pricing_via_playwright(page: Page) -> List[Dict[str, Any]]:
+    """Load the SITC registration page in the existing Playwright browser,
+    wait for Wix hydration, then parse the body text."""
+    url = "https://www.sitcancer.org/2026/attendee-resources/registration"
+    page.goto(url, wait_until="domcontentloaded", timeout=45000)
+    # Wix takes ~5-8s to hydrate pricing widgets
+    page.wait_for_timeout(8000)
+    body = page.evaluate("document.body.innerText")
+    if not body or "$" not in body:
+        logger.warning("SITC: registration page has no $ after hydration")
+        return []
+    return _parse_registration_body_text(body)
