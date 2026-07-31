@@ -194,24 +194,88 @@ def extract_pricing_from_images(image_urls: List[str]) -> list[dict]:
             price = float(t.get("price"))
         except (TypeError, ValueError):
             continue
-        label = str(t.get("tier_label", "")).strip()[:200]
+        label = _clean_vision_label(str(t.get("tier_label", "")))[:200]
         if not label or price <= 0:
             continue
         currency = str(t.get("currency", "GBP")).upper()[:3]
+        deadline = t.get("early_bird_deadline")
+        # Reject year-guessed deadlines (e.g. LLM defaulting to 2024 when
+        # the image just said "Until 27 May"). Only trust a full date.
+        if deadline and (not isinstance(deadline, str) or len(deadline) != 10):
+            deadline = None
         tiers.append({
             "tier_label": label,
             "price_gbp": price,        # historical column name; currency disambiguates
             "currency": currency,
             "is_early_bird": bool(t.get("is_early_bird")),
-            "early_bird_deadline": t.get("early_bird_deadline"),
+            "early_bird_deadline": deadline,
         })
-    # Dedupe by (label, price)
-    seen = set()
-    out: list[dict] = []
-    for t in tiers:
-        key = (t["tier_label"], t["price_gbp"])
-        if key in seen:
+    return _dedupe_composite_tiers(tiers)
+
+
+# Acronyms that must NOT be lower-cased inside labels ("EmA", "LMIC",
+# "GBP", "SAS" etc.). Add to this whitelist when a new source uses one.
+_LABEL_ACRONYMS = {
+    "EmA", "LMIC", "GBP", "USD", "EUR", "SGD", "HKD", "SAS", "GP",
+    "NHS", "RCP", "RCR", "MRCP", "IMT", "STR", "HCP", "FY", "SHO",
+    "AACR", "ASCO", "ESMO", "ESTRO", "BOPA", "BTOG", "RCEM", "RSM",
+}
+_ACRO_LOOKUP = {a.lower(): a for a in _LABEL_ACRONYMS}
+
+
+def _clean_vision_label(raw: str) -> str:
+    """Normalise a vision-LLM label so it merges cleanly with the rest
+    of the tier catalogue. Vision models often shout in ALL CAPS and
+    leak date/period text into the label.
+    """
+    if not raw:
+        return ""
+    lbl = raw.strip()
+    # Strip date suffixes the LLM appended to column-header text:
+    #   "Early Rate Until 27 May"  → "Early Rate"
+    #   "Late Rate From 28 May to 29 July" → "Late Rate"
+    #   "Desk Rate From 30 July"   → "Desk Rate"
+    lbl = re.sub(
+        r"\s+(?:Until|From|Ending|Ends|Before|After|Starting|Starts)\s+"
+        r"\d{1,2}\s+[A-Za-z]{3,}(?:\s+to\s+\d{1,2}\s+[A-Za-z]{3,})?",
+        "", lbl, flags=re.I,
+    )
+    # Title-case each " · "-separated part, preserving whitelisted acronyms.
+    parts = [p.strip() for p in lbl.split(" · ")]
+    out_parts: List[str] = []
+    for p in parts:
+        if not p:
             continue
-        seen.add(key)
-        out.append(t)
-    return out
+        # If part is a URL-safe already-cased word (has ANY lowercase),
+        # trust the LLM.
+        if any(c.islower() for c in p) and not p.isupper():
+            out_parts.append(p)
+            continue
+        # ALL-CAPS from vision LLM — title-case and restore acronyms.
+        words = p.split()
+        fixed = []
+        for w in words:
+            base = w.strip(",;.")
+            if base.lower() in _ACRO_LOOKUP:
+                fixed.append(w.replace(base, _ACRO_LOOKUP[base.lower()]))
+            else:
+                fixed.append(w[:1].upper() + w[1:].lower())
+        out_parts.append(" ".join(fixed))
+    return " · ".join(out_parts)
+
+
+def _dedupe_composite_tiers(tiers: list[dict]) -> list[dict]:
+    """Vision LLMs sometimes emit BOTH the 2-part and 3-part composite
+    label for the same table cell (e.g. "All Day · Emerging Countries"
+    at £275 AND "All Day · Emerging Countries · Early Rate" at £275).
+    Keep the MOST descriptive label — the one with the most " · "
+    segments — for each (first-2-parts, price) key.
+    """
+    best: dict = {}
+    for t in tiers:
+        parts = t["tier_label"].split(" · ")
+        key = (parts[0] if parts else "", parts[1] if len(parts) > 1 else "", t["price_gbp"])
+        current = best.get(key)
+        if current is None or t["tier_label"].count(" · ") > current["tier_label"].count(" · "):
+            best[key] = t
+    return list(best.values())

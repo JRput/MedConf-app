@@ -1,0 +1,67 @@
+name: Remediator daily
+
+# Runs 04:00 UTC daily — two hours after scrape-daily (02:00 UTC) and
+# one hour after specialty-alerts (03:00 UTC), so it sees any events
+# freshly added or updated by the morning's scrape. Fills gaps the
+# base extractor couldn't (image-based pricing via vision LLM,
+# tab-hidden Salesforce content, sparse landing pages).
+#
+# Runs against ALL sources (`--all`) rather than per-source matrix —
+# most sources will have nothing to fix and return in seconds; the
+# heavyweights (RCR portal, ESTRO images) take a few minutes each.
+# Total budget is well under GitHub Actions' 6-hour job limit.
+#
+# One-shot per day; failure of any single fixer does NOT fail the job
+# (remediator swallows per-event errors and continues). The workflow
+# only fails if the process crashes outright.
+on:
+  schedule:
+    - cron: '0 4 * * *'   # 04:00 UTC daily
+  workflow_dispatch:       # manual trigger
+
+jobs:
+  remediate:
+    name: Remediator (all sources)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: medconf-scraper/requirements.txt
+
+      - name: Install Python dependencies
+        working-directory: medconf-scraper
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: Run remediator across all sources
+        working-directory: medconf-scraper
+        env:
+          KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+          KIMI_BASE_URL: https://integrate.api.nvidia.com/v1
+          # Rotated from kimi-k2.6 on 2026-07-31 after NVIDIA revoked
+          # the account's grant. See vision.py for vision-model choice.
+          KIMI_MODEL: meta/llama-3.3-70b-instruct
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python -m remediator --all
+
+      - name: Upload remediation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: remediation-reports-${{ github.run_id }}
+          path: reports/remediation/**
+          if-no-files-found: warn
+          retention-days: 30
