@@ -438,11 +438,33 @@ def check_pricing(row, page_text, page_html, source, pricing_tiers,
                                 page_evidence="Page has £ amounts",
                                 reason="Prices on page but no tiers in DB")
 
-    # Second-look Playwright probe. httpx sees no prices on this page,
-    # but that's exactly the false-negative Wix/React sources produce.
-    # Probe /registration, /fees, /rates via a real browser and check
-    # for currency symbols in body.innerText. Only fires when we would
-    # otherwise pass — this is a targeted escalation, not a per-row cost.
+    # Second look #1 — plain-number pricing tables in the raw HTML.
+    # WordPress-style pages render fees as <table> rows under a
+    # "Registration Fees" / "Course Package Fee" heading with prices
+    # as plain numbers (no £/$/€ prefix). The has_prices check above
+    # misses those entirely.
+    try:
+        from extractors.pricing_tables import parse_pricing_tables
+        candidate_tiers = parse_pricing_tables(page_html or "", max_tiers=6)
+        if len(candidate_tiers) >= 2:
+            sample = ", ".join(
+                f"{t['currency']} {t['price_gbp']:.0f} ({t['tier_label'][:40]})"
+                for t in candidate_tiers[:3]
+            )
+            return FieldVerdict(
+                "pricing_tiers", "MISSING", "0 tiers",
+                page_evidence=sample,
+                reason=(f"Plain-number pricing table detected in raw HTML — "
+                        f"{len(candidate_tiers)}+ tiers under a fee-related "
+                        "heading, but extractor emitted 0 tiers"),
+            )
+    except Exception as e:
+        logger.debug(f"audit: plain-table probe failed: {e}")
+
+    # Second look #2 — Playwright hydration probe for SPA sources.
+    # Loads /registration, /fees, /rates via a real browser and checks
+    # for currency symbols in body.innerText. Targeted escalation only
+    # when the other checks were negative.
     hydrated = _hydrated_registration_probe(row.get("source_url") or "", cache)
     if hydrated:
         return FieldVerdict("pricing_tiers", "MISSING", "0 tiers",

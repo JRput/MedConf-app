@@ -575,8 +575,14 @@ class ESGOCoursesExtractor(BaseExtractor):
                         out["description"] = txt
                         break
 
-            # Pricing table (Registration section)
-            tiers = _parse_course_pricing_tables(detail)
+            # Pricing table (Registration section). Prefer the shared
+            # helper (handles all number formats + currency detection);
+            # keep _parse_course_pricing_tables as a fallback for parity
+            # with the earlier version.
+            from .pricing_tables import parse_pricing_tables
+            tiers = parse_pricing_tables(detail, default_currency="EUR")
+            if not tiers:
+                tiers = _parse_course_pricing_tables(detail)
             if tiers:
                 out["pricing_tiers"] = tiers[:30]
 
