@@ -415,60 +415,60 @@ class RCREventsPortalExtractor(BaseExtractor):
                 br.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
                 br.page.wait_for_timeout(2000)
 
-            # Harvest tile titles + venue snippets via shadow DOM walk
+            # Harvest event tiles. RCR's Salesforce portal rewrote the LWC
+            # in mid-2026: `.tile-item` no longer exists. Every event now
+            # renders as an anchor `<a href="https://my.rcr.ac.uk/event/<id>">`
+            # containing the title (usually in an <h*>) and a short snippet.
+            # Walk the shadow DOM for those anchors, skipping the two nav
+            # links whose href carries a `?redirect=` / `?_gl=` query string.
             tiles = br.page.evaluate(r"""() => {
-                function findTiles(root, acc) {
-                    root.querySelectorAll('.tile-item').forEach(t => acc.push(t));
-                    root.querySelectorAll('*').forEach(el => { if (el.shadowRoot) findTiles(el.shadowRoot, acc); });
+                const EVENT_ID_RE = /\/event\/([A-Za-z0-9]{15,})/;
+                function walk(root, acc) {
+                    root.querySelectorAll('a[href*="/event/"]').forEach(a => acc.push(a));
+                    root.querySelectorAll('*').forEach(el => { if (el.shadowRoot) walk(el.shadowRoot, acc); });
                 }
                 const acc = [];
-                findTiles(document, acc);
-                return [...new Set(acc)].map(t => {
-                    const titleEl = t.querySelector('.tile-item__title');
-                    return {
-                        title: titleEl ? titleEl.textContent.trim() : null,
-                        text: t.textContent.replace(/\s+/g, " ").trim().slice(0, 400),
-                    };
-                }).filter(t => t.title);
+                walk(document, acc);
+                const seen = new Set();
+                const out = [];
+                for (const a of acc) {
+                    const url = new URL(a.href, location.href);
+                    if (url.search) continue;                       // nav links
+                    const m = url.pathname.match(EVENT_ID_RE);
+                    if (!m) continue;
+                    const id = m[1];
+                    if (seen.has(id)) continue;
+                    seen.add(id);
+                    const titleEl = a.querySelector('h1,h2,h3,h4,strong,b');
+                    const rawTitle = titleEl ? titleEl.textContent.trim()
+                        : a.textContent.replace(/\s+/g, ' ').trim().split(/(?<=\))\s|\.\s/, 1)[0];
+                    out.push({
+                        title: (rawTitle || '').trim(),
+                        booking_url: url.origin + url.pathname,
+                        text: a.textContent.replace(/\s+/g, ' ').trim().slice(0, 400),
+                    });
+                }
+                return out.filter(t => t.title);
             }""") or []
             logger.info(f"RCR portal: harvested {len(tiles)} tiles")
 
-            # For each tile, either re-use stored URL or click to capture
+            # Anchor already carries the /event/<id> URL — no more
+            # click-to-capture round-trip needed. If a title matches an
+            # existing DB row, keep the stored URL for stability.
             shells: List[Dict[str, Any]] = []
             seen_titles: set = set()
-            for idx, t in enumerate(tiles):
+            for t in tiles:
                 title = t["title"]
-                if title in seen_titles:
+                if not title or title in seen_titles:
                     continue
                 seen_titles.add(title)
-                h = _title_hash(title)
-                # Re-use stored URL for known events (no click needed)
-                if h in known_by_hash and known_by_hash[h]:
-                    shells.append({
-                        "title": title,
-                        "booking_url": known_by_hash[h],
-                        "category": None,
-                        "_listing_snippet": t.get("text", ""),
-                    })
-                    continue
-                # NEW tile — click it to capture URL
-                captured = self._click_and_capture(br, title, idx)
-                if captured:
-                    shells.append({
-                        "title": title,
-                        "booking_url": captured,
-                        "category": None,
-                        "_listing_snippet": t.get("text", ""),
-                    })
-                else:
-                    # Fallback: synthesised URL so the row still gets created
-                    # and re-tries on next scrape
-                    shells.append({
-                        "title": title,
-                        "booking_url": _synthetic_url(title),
-                        "category": None,
-                        "_listing_snippet": t.get("text", ""),
-                    })
+                stored = known_by_hash.get(_title_hash(title))
+                shells.append({
+                    "title": title,
+                    "booking_url": stored or t["booking_url"],
+                    "category": None,
+                    "_listing_snippet": t.get("text", ""),
+                })
             return shells
         except Exception as e:
             logger.warning(f"RCR portal listing failed: {e}")
