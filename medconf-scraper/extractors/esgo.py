@@ -387,6 +387,118 @@ def _parse_city_country(addr: str) -> Tuple[Optional[str], Optional[str]]:
     return parts[0], None
 
 
+# --------------------------------------------------------------------------
+# ESGO course pricing parser
+#
+# ESGO course detail pages carry inline HTML pricing tables in three
+# format variants (found across the 3 upcoming courses):
+#   Variant A (European):  "1 200,00" (space thousand, comma decimal)
+#   Variant B (US-ish):    "550.00"   (no thousand, dot decimal)
+#   Variant C (mixed):     "1.500 EUR" (dot thousand, no decimals, EUR suffix)
+# All are EUR. Number without currency symbol → default to EUR.
+# --------------------------------------------------------------------------
+
+
+def _parse_esgo_number(raw: str) -> Optional[float]:
+    """Accept "1 200,00", "550.00", "1.500 EUR", "50" — return float."""
+    if not raw:
+        return None
+    s = raw.strip()
+    # Strip "EUR" / "€" and whitespace
+    s = re.sub(r"\s*(?:EUR|€|£|\$)\s*$", "", s, flags=re.I).strip()
+    # Detect thousand separator: if there's a period AND >1 digits after it,
+    # treat period as decimal; otherwise as thousand separator.
+    if "," in s and "." in s:
+        # Both present — assume US style (1,200.50)
+        s = s.replace(",", "")
+    elif "," in s:
+        # European decimal (1 200,00 or 1200,50)
+        s = s.replace(" ", "").replace(",", ".")
+    elif re.match(r"^\d{1,3}(?:\.\d{3})+$", s):
+        # 1.500 (European thousand-sep, no decimal)
+        s = s.replace(".", "")
+    else:
+        s = s.replace(" ", "")
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
+_FEE_HEADING_TOKENS = (
+    "registration fee", "course package fee", "regular rate",
+    "course fee", "pricing", "fees", "registration"
+)
+
+
+def _parse_course_pricing_tables(html: str) -> List[Dict[str, Any]]:
+    """Walk the detail-page HTML for pricing tables. Anchors on the last
+    <h2>/<h3>/<h4> before a table containing (label + numeric price)
+    rows. Default currency EUR (all ESGO courses price in EUR)."""
+    tiers: List[Dict[str, Any]] = []
+    # Iterate <table>...</table> blocks with preceding heading context
+    for m in re.finditer(r"<table[^>]*>(.*?)</table>", html, re.DOTALL):
+        table_html = m.group(1)
+        # Find nearest H2/H3/H4 in the 2000 chars BEFORE this table
+        head_slice = html[max(0, m.start() - 2000):m.start()]
+        head_matches = list(re.finditer(
+            r"<h[234][^>]*>(.*?)</h[234]>", head_slice, re.DOTALL | re.I,
+        ))
+        # Walk backwards through candidate headings to find the last one
+        # that names a pricing section. CTA links ("You can register HERE")
+        # sometimes render as H3s and shouldn't be used as tier prefixes.
+        heading = ""
+        for candidate in reversed(head_matches):
+            c = _clean(candidate.group(1))
+            if any(t in c.lower() for t in _FEE_HEADING_TOKENS):
+                heading = c
+                break
+        # Skip tables that don't have a fee-section heading AND don't
+        # advertise pricing in their own header row
+        if not heading and not re.search(
+            r"(?i)(registration\s+fees?|regular\s+rate|course\s+package)",
+            table_html,
+        ):
+            continue
+        rows = re.findall(r"<tr[^>]*>(.*?)</tr>", table_html, re.DOTALL)
+        for row in rows:
+            cells = re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", row, re.DOTALL)
+            if len(cells) < 2:
+                continue
+            label = _clean(cells[0])
+            price_cell = _clean(cells[-1])
+            if not label:
+                continue
+            # Skip header row ("Registration Fees | Regular Rate (EUR)")
+            if not re.search(r"\d", price_cell):
+                continue
+            price = _parse_esgo_number(price_cell)
+            if price is None or price <= 0:
+                continue
+            # Compose "<Heading> · <Label>" so the frontend can group
+            if heading:
+                tier_label = f"{heading} · {label}"[:120]
+            else:
+                tier_label = label[:120]
+            tiers.append({
+                "tier_label": tier_label,
+                "price_gbp": price,
+                "currency": "EUR",
+                "is_early_bird": False,
+                "early_bird_deadline": None,
+            })
+    # Dedupe by (label, price)
+    seen: set = set()
+    out: List[Dict[str, Any]] = []
+    for t in tiers:
+        key = (t["tier_label"], t["price_gbp"])
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(t)
+    return out
+
+
 class ESGOCoursesExtractor(BaseExtractor):
     """Source 22: ESGO course listing (BEM cards, ~38 courses)."""
 
@@ -441,8 +553,10 @@ class ESGOCoursesExtractor(BaseExtractor):
         if sold_out is True:
             out["is_sold_out"] = True
 
-        # Detail page for a proper description; pricing is often
-        # off-site (link to Register) so we don't force tier extraction.
+        # Detail page for a proper description + inline pricing table.
+        # ESGO course pages carry an HTML pricing table inside the
+        # "Registration" / "Course Package Fee" section with prices in
+        # EUR — variants: "1 200,00" / "550.00" / "1.500 EUR" / "50".
         detail = _fetch(shell["booking_url"])
         if detail:
             og = re.search(
@@ -460,5 +574,10 @@ class ESGOCoursesExtractor(BaseExtractor):
                     if 150 <= len(txt) <= 700 and "cookie" not in txt.lower():
                         out["description"] = txt
                         break
+
+            # Pricing table (Registration section)
+            tiers = _parse_course_pricing_tables(detail)
+            if tiers:
+                out["pricing_tiers"] = tiers[:30]
 
         return out
