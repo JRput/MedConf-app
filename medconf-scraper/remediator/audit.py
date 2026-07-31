@@ -31,7 +31,7 @@ import sys
 from dataclasses import dataclass, field, asdict
 from datetime import date, datetime, timezone
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -412,7 +412,8 @@ def check_abstract_status(row, page_text, page_html, source) -> FieldVerdict:
                         f"open={ao} deadline={ad} note={an}")
 
 
-def check_pricing(row, page_text, page_html, source, pricing_tiers) -> FieldVerdict:
+def check_pricing(row, page_text, page_html, source, pricing_tiers,
+                   cache=None) -> FieldVerdict:
     n = len(pricing_tiers or [])
     tl = (page_text or "").lower()
     is_free = re.search(r"(?:free\s+(?:to\s+attend|of\s+charge|event|admission)|"
@@ -436,8 +437,106 @@ def check_pricing(row, page_text, page_html, source, pricing_tiers) -> FieldVerd
             return FieldVerdict("pricing_tiers", "MISSING", "0 tiers",
                                 page_evidence="Page has £ amounts",
                                 reason="Prices on page but no tiers in DB")
+
+    # Second-look Playwright probe. httpx sees no prices on this page,
+    # but that's exactly the false-negative Wix/React sources produce.
+    # Probe /registration, /fees, /rates via a real browser and check
+    # for currency symbols in body.innerText. Only fires when we would
+    # otherwise pass — this is a targeted escalation, not a per-row cost.
+    hydrated = _hydrated_registration_probe(row.get("source_url") or "", cache)
+    if hydrated:
+        return FieldVerdict("pricing_tiers", "MISSING", "0 tiers",
+                            page_evidence=hydrated["evidence"],
+                            reason=("Hydrated pricing detected — "
+                                    f"{hydrated['count']} $/£/€ prices on "
+                                    f"{hydrated['url']} via Playwright, "
+                                    "but extractor emitted 0 tiers"))
     return FieldVerdict("pricing_tiers", "GENUINELY_ABSENT", "0 tiers",
                         reason="No pricing content on page")
+
+
+# Cache Playwright probe results per audit run to avoid re-fetching the
+# same registration URL for multiple events under one source.
+_HYDRATED_CACHE: Dict[str, Optional[dict]] = {}
+
+
+def _hydrated_registration_probe(source_url: str, cache=None) -> Optional[dict]:
+    """Load likely registration sub-pages in Playwright, hydrate 8 s,
+    then count $/£/€ symbols in body.innerText. Returns None if no
+    prices found — meaning we're genuinely absent, not hydrated-missed.
+
+    Reuses the PageCache's browser if one is passed — otherwise launches
+    a fresh BrowserController (used by ad-hoc direct calls).
+    """
+    if not source_url:
+        return None
+    if source_url in _HYDRATED_CACHE:
+        return _HYDRATED_CACHE[source_url]
+    base = source_url.rstrip("/") + "/"
+    candidates = [
+        base + "registration/",
+        base + "registration",
+        base + "registration-2/",
+        base + "attend/registration/",
+        base + "attendee-resources/registration",
+        base + "fees/",
+        base + "fees-and-how-to-book/",
+        base + "rates/",
+        base + "register/",
+        base + "register-now/",
+        source_url,   # the main page itself
+    ]
+    # Prefer reusing the PageCache's browser to avoid a second Chromium
+    # instance colliding with the one already handling page_text fetches.
+    b = None
+    owned = False
+    if cache is not None and getattr(cache, "_browser", None) is not None:
+        b = cache._browser
+    else:
+        try:
+            from browser import BrowserController
+            b = BrowserController()
+            b.launch()
+            owned = True
+        except Exception as e:
+            logger.debug(f"audit: browser launch failed for hydration probe: {e}")
+            _HYDRATED_CACHE[source_url] = None
+            return None
+    try:
+        for u in candidates:
+            try:
+                b.navigate(u)
+                b.page.wait_for_timeout(8000)
+                body = b.page.evaluate("document.body.innerText") or ""
+                prices = re.findall(r"[£$€]\s*[\d,]{2,7}(?:\.\d{2})?", body)
+                if len(prices) >= 5 and _looks_like_registration(body):
+                    result = {
+                        "url": u,
+                        "count": len(prices),
+                        "evidence": ", ".join(prices[:5]),
+                    }
+                    _HYDRATED_CACHE[source_url] = result
+                    return result
+            except Exception:
+                continue
+    finally:
+        if owned:
+            try:
+                b.close()
+            except Exception:
+                pass
+    _HYDRATED_CACHE[source_url] = None
+    return None
+
+
+def _looks_like_registration(body_text: str) -> bool:
+    """Guardrail — reject pages that just happen to have $ amounts but
+    aren't registration/fees pages (e.g. sponsor tiers, awards)."""
+    tl = body_text.lower()
+    return sum(1 for k in (
+        "registration", "member", "non-member", "trainee", "student",
+        "early", "standard", "onsite", "rate", "fee", "delegate",
+    ) if k in tl) >= 3
 
 
 CHECKS = [
@@ -453,7 +552,7 @@ CHECKS = [
 # ---------------------------------------------------------------- #
 
 def audit_row(row: dict, page_text: str, page_html: Optional[str],
-              source: dict, pricing_tiers: list) -> RowAudit:
+              source: dict, pricing_tiers: list, cache=None) -> RowAudit:
     audit = RowAudit(
         conference_id=row["id"],
         conference_name=row.get("conference_name") or "",
@@ -467,9 +566,10 @@ def audit_row(row: dict, page_text: str, page_html: Optional[str],
             v = FieldVerdict(check.__name__.replace("check_", ""),
                              "SUSPECT", None, reason=f"Check crashed: {e}")
         audit.add(v)
-    # Pricing needs the tier list explicitly
+    # Pricing needs the tier list + cache (for shared browser reuse in
+    # the hydrated-pricing second-look probe).
     try:
-        v = check_pricing(row, page_text, page_html, source, pricing_tiers)
+        v = check_pricing(row, page_text, page_html, source, pricing_tiers, cache)
         audit.add(v)
     except Exception as e:
         audit.add(FieldVerdict("pricing_tiers", "SUSPECT", None,
@@ -572,7 +672,7 @@ def audit_source(source_id: int) -> dict:
             page_text = cache.get(url) if url else ""
             page_html = cache.get_html(url) if url else None
             a = audit_row(row, page_text or "", page_html, source,
-                          tiers_by_conf.get(row["id"], []))
+                          tiers_by_conf.get(row["id"], []), cache=cache)
             audits.append(a)
 
     # Aggregate stats

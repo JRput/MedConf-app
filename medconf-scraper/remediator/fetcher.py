@@ -19,12 +19,33 @@ USER_AGENT = (
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
 )
 
-# JS-rendered hosts that need a real browser. Add hosts here as we discover them.
+# JS-rendered hosts that ALWAYS need Playwright. Skips the httpx fast-path
+# and goes straight to the browser. Add hosts here for absolute cases (SPA
+# where httpx returns literally nothing useful).
 _JS_HOSTS = (
-    "my.rcr.ac.uk",        # Salesforce LWC
-    "events.engage.rcgp",  # not actually JS but here for safety
-    "rcgpac.org.uk",       # rcgp annual conf subsite
+    "my.rcr.ac.uk",         # Salesforce LWC
+    "events.engage.rcgp",   # not actually JS but here for safety
+    "rcgpac.org.uk",        # rcgp annual conf subsite
+    "sitcancer.org",        # Wix — pricing tables hydrate client-side
 )
+
+# Content markers that indicate a SPA / heavily-JS-rendered page. If the
+# httpx-fetched HTML contains one of these AND yielded a short body, we
+# auto-escalate to Playwright. This catches new sources without needing
+# an allowlist edit each time.
+_SPA_MARKERS = (
+    "wix-code-",          # Wix
+    'src="https://static.parastorage.com',  # Wix bundler
+    "__NUXT__",           # Nuxt
+    "__NEXT_DATA__",      # Next.js
+    'id="root"></div>',   # Empty React root (whitespace-insensitive check applied below)
+    'id="app"></div>',    # Empty Vue mount
+    "ng-app=",            # Angular
+    "data-turbo",         # Rails Turbo
+)
+
+# Body-text threshold below which we assume httpx missed the real content.
+_SHORT_BODY_THRESHOLD = 3000
 
 
 class PageCache:
@@ -67,9 +88,28 @@ class PageCache:
         return text
 
     def _fetch(self, url: str) -> Optional[str]:
+        # Explicit allowlist — always Playwright, skip httpx.
         if any(h in url for h in _JS_HOSTS):
             return self._fetch_browser(url)
-        return self._fetch_httpx(url)
+        # httpx first. If it comes back short + shows SPA markers in the
+        # raw HTML, escalate to Playwright — this catches new Wix / React /
+        # Nuxt hosts without needing to add them to _JS_HOSTS first.
+        text = self._fetch_httpx(url)
+        if text is not None and len(text) < _SHORT_BODY_THRESHOLD:
+            raw = self._html_cache.get(url) or ""
+            raw_compact = re.sub(r"\s+", "", raw)
+            if any(
+                (m.replace(" ", "") in raw_compact) or (m in raw)
+                for m in _SPA_MARKERS
+            ):
+                logger.info(
+                    f"remediator: {url} looks SPA "
+                    f"(httpx body={len(text)} chars) — escalating to Playwright"
+                )
+                pw_text = self._fetch_browser(url)
+                if pw_text and len(pw_text) > len(text):
+                    return pw_text
+        return text
 
     def _fetch_httpx(self, url: str) -> Optional[str]:
         try:
