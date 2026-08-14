@@ -27,6 +27,48 @@ from .abstract_classifier import extract_abstract_info
 from logger import logger
 
 
+# RSM event URLs are /events/<specialty-group>/<year>/<code>/. Most groups
+# are real medical specialties (cardiology, urology, paediatrics-and-child-
+# health, geriatrics-and-gerontology, …). A few are non-clinical: library
+# tours, wine-tasting club nights, senior-fellows social outings. Map the
+# non-clinical ones to a stable label; leave real specialties for the
+# specialty_classifier to canonicalise.
+_RSM_URL_SPECIALTY_MAP = {
+    "library": "General",
+    "club": "General",
+    "senior-fellows-forum": "General",
+    "students": "General",
+    "history-of-medicine-and-health": "General",
+}
+
+
+def _rsm_specialty_from_url(url: Optional[str]) -> Optional[str]:
+    if not url:
+        return None
+    # Match the specialty-group slug (segment after /events/)
+    m = re.search(r"/events/([a-z0-9\-]+)/", url)
+    if not m:
+        return None
+    slug = m.group(1)
+    if slug in _RSM_URL_SPECIALTY_MAP:
+        return _RSM_URL_SPECIALTY_MAP[slug]
+    # Title-case the slug words as a last-resort readable label
+    return " ".join(w.capitalize() for w in slug.split("-"))
+
+
+# Known UK venue → city map for cases where the extractor's venue-block
+# splitter fails to detect a city separately (single-word venues like
+# "The Buckingham Palace" or "Salen" that get treated as the venue name).
+_UK_VENUE_CITIES = {
+    "buckingham palace": "London",
+    "the buckingham palace": "London",
+    "royal albert hall": "London",
+    "the shard": "London",
+    "houses of parliament": "London",
+    "salen": "Salen",  # Ardnamurchan, Scotland — treat venue as city
+}
+
+
 class RSMExtractor(BaseExtractor):
 
     def extract_detail(
@@ -308,6 +350,17 @@ class RSMExtractor(BaseExtractor):
             # Just venue + city/country
             out["city"] = non_postcode[1][:80]
 
+        # Last-resort city lookup: single-word venues like "Salen" or
+        # famous UK landmarks named without a city suffix ("The Buckingham
+        # Palace") end up with no city set. Map them via _UK_VENUE_CITIES.
+        if not out.get("city") and out.get("venue_name"):
+            key = out["venue_name"].strip().lower()
+            city = _UK_VENUE_CITIES.get(key)
+            if city:
+                out["city"] = city
+                if not out.get("region"):
+                    out["region"] = self._infer_uk_region(city)
+
         return out
 
     @staticmethod
@@ -445,4 +498,14 @@ Respond with valid JSON only, no markdown, no extra text:
             heuristic = classify_specialty(shell.get("title"), text)
             if heuristic:
                 result["specialty"] = heuristic
+        # Final fallback: URL-slug parse. RSM's event URL is always
+        # /events/<specialty-group>/<year>/<code>/ so even non-medical
+        # rows (Library Tour, Fine Wine Tasting, Senior Fellows Forum
+        # events) get a category rather than a null. Shell keys the URL
+        # under booking_url; source_url only appears on some paths.
+        if not result.get("specialty"):
+            url = shell.get("booking_url") or shell.get("source_url")
+            slug = _rsm_specialty_from_url(url)
+            if slug:
+                result["specialty"] = slug
         return result
