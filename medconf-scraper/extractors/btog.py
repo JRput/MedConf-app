@@ -253,14 +253,30 @@ class BTOGExtractor(BaseExtractor):
     """British Thoracic Oncology Group."""
 
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
-        try:
-            with httpx.Client(timeout=30, follow_redirects=True,
-                              headers={"User-Agent": USER_AGENT}) as c:
-                r = c.get(LISTING_URL)
-                r.raise_for_status()
-                html = r.text
-        except Exception as e:
-            logger.warning(f"BTOG listing fetch failed: {e}")
+        # BTOG's WordPress host was intermittently slow (30-60s to
+        # respond) during 2026-08-10 and 2026-08-14 scrape windows,
+        # causing back-to-back failures. Widened timeout + added a
+        # single httpx retry before falling through to the browser.
+        import time
+        html: Optional[str] = None
+        last_err: Optional[Exception] = None
+        for attempt in range(3):
+            try:
+                with httpx.Client(timeout=60.0, follow_redirects=True,
+                                  headers={"User-Agent": USER_AGENT}) as c:
+                    r = c.get(LISTING_URL)
+                    r.raise_for_status()
+                    html = r.text
+                    break
+            except Exception as e:
+                last_err = e
+                logger.warning(
+                    f"BTOG listing fetch attempt {attempt + 1}/3 failed: {e}"
+                )
+                if attempt < 2:
+                    time.sleep(5 * (attempt + 1))
+        if html is None:
+            logger.warning(f"BTOG listing fetch failed after 3 attempts: {last_err}")
             return None
 
         # Slice future section between #future anchor and #past

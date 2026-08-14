@@ -99,7 +99,12 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           SCRAPER_MAX_STEPS: '30'
           SCRAPER_DELAY_SECONDS: '2'
-          SCRAPER_TIMEOUT_MS: '10000'
+          # Bumped 10000 → 30000 to match config.py default (2026-07-16
+          # fix). Old 10 s was hitting Playwright false-timeouts on
+          # slow-day fetches to rcem.ac.uk and btog.org during the
+          # 03:00-04:00 UTC scrape window — 3 job failures in the last
+          # week were all this.
+          SCRAPER_TIMEOUT_MS: '30000'
         run: python main.py --run-now --source ${{ matrix.source_id }}
 
       - name: Upload scraper logs as build artifact
