@@ -1,10 +1,13 @@
 # database.py
 """Database layer - all Supabase read/write operations."""
 
+import logging
 from supabase import create_client
 from config import SUPABASE_URL, SUPABASE_KEY
 from datetime import datetime, date, timedelta
 from typing import Optional, List, Dict, Any
+
+logger = logging.getLogger(__name__)
 
 # Initialize Supabase client
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -130,13 +133,60 @@ def archive_stale_conferences(stale_days: int = 14) -> int:
     listing has disappeared from the source). Implements the L3 staleness
     rule from HQ LESSONS #2.
 
+    SOURCE-HEALTH GUARD: only archive rows whose source has completed at
+    least one SUCCESSFUL scrape in the stale window. Without this guard, a
+    source that fails 14 days straight (e.g. network flakes on rcem.ac.uk,
+    Cloudflare-challenged host, matrix job crash) would silently vaporise
+    its entire catalogue on day 14 — the stale-detection would fire on
+    every row it stopped stamping last_seen_at on.
+
     Returns the number of rows archived.
     """
     threshold = (datetime.utcnow() - timedelta(days=stale_days)).isoformat()
-    response = supabase.table("conferences").update({
-        "archived": True,
-        "updated_at": datetime.utcnow().isoformat()
-    }).lt("last_seen_at", threshold).eq("archived", False).execute()
+
+    # Identify sources with at least one successful scrape in the window.
+    healthy_logs = (
+        supabase.table("scraper_logs")
+        .select("source_id")
+        .eq("status", "success")
+        .gte("run_started_at", threshold)
+        .execute()
+        .data
+        or []
+    )
+    healthy_source_ids = {row["source_id"] for row in healthy_logs}
+
+    if not healthy_source_ids:
+        logger.warning(
+            "archive_stale_conferences: NO sources have a successful "
+            f"scrape in the last {stale_days} days — skipping archival "
+            "sweep entirely to avoid mass-vaporising the catalogue"
+        )
+        return 0
+
+    unhealthy_all = supabase.table("scraper_sources").select("id").execute().data or []
+    unhealthy_source_ids = [
+        r["id"] for r in unhealthy_all if r["id"] not in healthy_source_ids
+    ]
+    if unhealthy_source_ids:
+        logger.warning(
+            f"archive_stale_conferences: {len(unhealthy_source_ids)} source(s) "
+            f"had no success in {stale_days} days — their rows will NOT be "
+            f"archived: {sorted(unhealthy_source_ids)}"
+        )
+
+    # Only archive rows whose source is healthy AND the row itself is stale
+    response = (
+        supabase.table("conferences")
+        .update({
+            "archived": True,
+            "updated_at": datetime.utcnow().isoformat(),
+        })
+        .lt("last_seen_at", threshold)
+        .eq("archived", False)
+        .in_("source_id", sorted(healthy_source_ids))
+        .execute()
+    )
     return len(response.data) if response.data else 0
 
 

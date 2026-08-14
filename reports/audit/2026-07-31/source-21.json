@@ -1,0 +1,122 @@
+{
+  "source_id": 21,
+  "source_name": "ESGO Congress",
+  "rows": 1,
+  "passing_rows": 1,
+  "failing_rows": 0,
+  "total_missing_fields": 0,
+  "total_suspect_fields": 0,
+  "avg_completeness": 100.0,
+  "verdict": "PASS",
+  "pagination": {
+    "has_pagination": false,
+    "page_buttons": 0,
+    "next_button": false,
+    "show_more": false,
+    "load_more": false,
+    "total_hint": null,
+    "db_rows": 1
+  },
+  "pagination_warning": null,
+  "audits": [
+    {
+      "conference_id": 1097,
+      "conference_name": "ESGO 2027 Congress",
+      "event_type": "conference",
+      "source_url": "https://congress.esgo.org/",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ESGO 2027 Congress February 25 \u2013 27, 2027 London, United Kingdom Add to calendar",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-27",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Gynaecological Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": true,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "OK",
+          "db_value": "open=True deadline=2026-10-30 note=None",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "57 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    }
+  ],
+  "audited_at": "2026-07-31T19:27:22.414765+00:00"
+}

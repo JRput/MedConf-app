@@ -1,0 +1,82 @@
+{
+  "source_id": 19,
+  "source_name": "ESTRO Congresses",
+  "society": "ESTRO",
+  "run_at": "2026-07-31T18:08:01.452276+00:00",
+  "events_scraped": 2,
+  "events_with_gaps_at_first": 2,
+  "events_fixed": 0,
+  "events_still_incomplete": 2,
+  "patches_applied": [],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 925,
+      "conference_name": "ESTRO 2027",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.estro.org/Congresses",
+              "https://www.estro.org/Membership",
+              "https://www.estro.org/MyESTRO",
+              "https://www.estro.org/Congresses/ESTRO-2027-(1)/pages/fees"
+            ],
+            "images_ocred": 3,
+            "total_text_chars": 13383
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 3",
+            "llm_event_match https://www.estro.org/Congresses: matched=['estro'] verdict='yes' ok=True",
+            "llm_event_match https://www.estro.org/Membership: matched=['estro'] verdict='no' ok=False",
+            "llm_event_match https://www.estro.org/MyESTRO: matched=['estro'] verdict='no' ok=False",
+            "llm_event_match https://www.estro.org/Congresses/ESTRO-2027-(1)/pages/fees: matched=['estro'] verdict='yes' ok=True"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 924,
+      "conference_name": "ESTRO meets Asia 2026",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.estro.org/Event-Booking/",
+              "https://www.estro.org/Oxford-Abstracts-External-SSO",
+              "http://www.estro.org/Congresses/ESTRO-meets-Asia-2026/ESTRO-meets-Asia-2026-Abstract-Submission-Guidelin",
+              "http://www.estro.org/Congresses/ESTRO-meets-Asia-2026/ESTRO-meets-Asia-2026-Abstract-Topics",
+              "https://www.estro.org/Congresses/ESTRO-meets-asia-2026/Programme",
+              "https://www.estro.org/Congresses/ESTRO-meets-Asia-2026/pages/fees",
+              "https://events.gmtc.com.au/estro-2026-singapore"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 41679
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_event_match https://www.estro.org/Event-Booking/: matched=['estro'] verdict='no' ok=False",
+            "llm_event_match https://www.estro.org/Oxford-Abstracts-External-SSO: matched=['estro'] verdict='' ok=False",
+            "external_followed: https://events.gmtc.com.au/estro-2026-singapore (link text: 'Book here')"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 2,
+  "explorer_successes": 0,
+  "duration_sec": 738.2
+}

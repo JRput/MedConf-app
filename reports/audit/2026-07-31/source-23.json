@@ -1,0 +1,122 @@
+{
+  "source_id": 23,
+  "source_name": "SITC 41st Annual Meeting",
+  "rows": 1,
+  "passing_rows": 0,
+  "failing_rows": 1,
+  "total_missing_fields": 1,
+  "total_suspect_fields": 0,
+  "avg_completeness": 91.7,
+  "verdict": "FAIL",
+  "pagination": {
+    "has_pagination": false,
+    "page_buttons": 0,
+    "next_button": false,
+    "show_more": false,
+    "load_more": false,
+    "total_hint": null,
+    "db_rows": 1
+  },
+  "pagination_warning": null,
+  "audits": [
+    {
+      "conference_id": 1101,
+      "conference_name": "SITC 41st Annual Meeting",
+      "event_type": "conference",
+      "source_url": "https://www.sitcancer.org/2026/home",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "SITC 2026 provides a multidisciplinary educational and interactive environment f",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-08",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Phoenix",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Oncology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": true,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "OK",
+          "db_value": "open=False deadline=2026-06-25 note=None",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "$815, $270, $1,085, $1,015, $270",
+          "reason": "Hydrated pricing detected \u2014 72 $/\u00a3/\u20ac prices on https://www.sitcancer.org/2026/home/registration/ via Playwright, but extractor emitted 0 tiers"
+        }
+      ],
+      "completeness_score": 91.7,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 1,
+      "total_suspect": 0,
+      "total_absent": 2
+    }
+  ],
+  "audited_at": "2026-07-31T19:56:29.541724+00:00"
+}

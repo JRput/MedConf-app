@@ -9,7 +9,12 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
-const PROTECTED_PATHS = ['/conferences', '/saved', '/settings', '/dashboard', '/onboarding']
+// /conferences is intentionally PUBLIC — the directory is the product's
+// discovery surface and gating it defeats both the public-read RLS
+// policy on conferences/pricing_tiers and SEO. Personal surfaces
+// (/saved, /settings, /dashboard) and the signup wizard (/onboarding)
+// stay protected.
+const PROTECTED_PATHS = ['/saved', '/settings', '/dashboard', '/onboarding']
 const AUTH_PATHS = ['/auth/login', '/auth/signup']
 
 function isUnder(path: string, candidates: string[]) {

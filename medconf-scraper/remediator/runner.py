@@ -21,7 +21,7 @@ from .fixers import REGISTRY as FIXERS
 from .validators import validate
 from .report import write_report
 from .explorer import EXPLORERS
-from .learned_patterns import record_success
+from .learned_patterns import record_success, get_promoted_patterns
 
 logger = logging.getLogger(__name__)
 
@@ -177,6 +177,38 @@ def remediate_source(source_id: int) -> dict:
                         logger.warning(
                             f"remediator: fixer {field} crashed on {row['id']}: {e}"
                         )
+
+                # TIER 1.5 — try previously-promoted patterns before Tier 2.
+                # If Tier 2 explorer has previously found <field> via
+                # <method>/<subpage> on this domain 3+ times, skip the LLM
+                # step and go straight to that sub-page. Saves an LLM
+                # call per event on well-known sources.
+                if value is None and url:
+                    try:
+                        promoted = get_promoted_patterns(url, field)
+                        for p in promoted:
+                            sub = p.get("subpage_path")
+                            if not sub:
+                                continue
+                            sub_url = url.rstrip("/") + sub
+                            sub_text = cache.get(sub_url)
+                            if not sub_text:
+                                continue
+                            # Re-run the fixer against the sub-page text
+                            if fixer:
+                                try:
+                                    if field == "specialty":
+                                        v, m = fixer(row, sub_text, llm_call, society=society)
+                                    else:
+                                        v, m = fixer(row, sub_text, llm_call)
+                                    if v is not None:
+                                        value = v
+                                        method = f"promoted:{p['method']}:{sub}"
+                                        break
+                                except Exception:
+                                    pass
+                    except Exception as e:
+                        logger.debug(f"promoted-pattern replay failed: {e}")
 
                 # TIER 2 — explorer escalation when Tier 1 returns null
                 if value is None and field in EXPLORERS and url:

@@ -9,7 +9,11 @@ load_dotenv()
 # API Keys - Kimi K2.5 via NVIDIA API
 KIMI_API_KEY = os.getenv("KIMI_API_KEY")
 KIMI_BASE_URL = os.getenv("KIMI_BASE_URL", "https://integrate.api.nvidia.com/v1")
-KIMI_MODEL = os.getenv("KIMI_MODEL", "moonshotai/kimi-k2.5")
+# Default text model. NVIDIA revoked our account's grant to every
+# moonshotai/kimi-k2.* variant on 2026-07-31 (410 Gone). Anyone
+# running without a .env file needs a fallback that actually works.
+# meta/llama-3.3-70b-instruct is what our .env + CI both use.
+KIMI_MODEL = os.getenv("KIMI_MODEL", "meta/llama-3.3-70b-instruct")
 
 # Supabase configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")

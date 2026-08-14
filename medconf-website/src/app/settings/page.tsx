@@ -136,37 +136,49 @@ export default function SettingsPage() {
               Alerts
             </h2>
 
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-200">
+              <strong className="font-semibold">Email digests are not yet available.</strong>{' '}
+              The preferences below are saved to your profile but no
+              emails are sent yet. In-app notifications for saved-event
+              reminders and specialty alerts are live and can be viewed
+              from the bell icon.
+            </div>
+
             {toggles.map(item => (
-              <div key={item.key} className="flex items-start justify-between gap-4 p-4 bg-slate-800/30 rounded-xl">
+              <div key={item.key} className="flex items-start justify-between gap-4 p-4 bg-slate-800/30 rounded-xl opacity-60">
                 <div>
-                  <p className="font-medium text-white">{item.label}</p>
+                  <p className="font-medium text-white flex items-center gap-2">
+                    {item.label}
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                      Coming soon
+                    </span>
+                  </p>
                   <p className="text-sm text-slate-400 mt-1">{item.desc}</p>
                 </div>
                 <button
-                  onClick={() => toggle(item.key)}
-                  className={`relative w-12 h-7 rounded-full transition-all flex-shrink-0 ${
-                    prefs[item.key] ? 'bg-cyan-500' : 'bg-slate-700'
-                  }`}
+                  disabled
+                  aria-disabled="true"
+                  className={`relative w-12 h-7 rounded-full flex-shrink-0 bg-slate-700 cursor-not-allowed`}
                 >
-                  <span
-                    className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${
-                      prefs[item.key] ? 'translate-x-5' : ''
-                    }`}
-                  />
+                  <span className="absolute top-1 left-1 w-5 h-5 bg-white/40 rounded-full shadow" />
                 </button>
               </div>
             ))}
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 opacity-60">
             <h2 className="font-bold text-white text-lg flex items-center gap-2">
               <Clock className="w-5 h-5 text-cyan-400" />
               Digest frequency
+              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                Coming soon
+              </span>
             </h2>
             <select
+              disabled
               value={prefs.email_frequency}
               onChange={e => setPrefs(p => p ? { ...p, email_frequency: e.target.value } : p)}
-              className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+              className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white cursor-not-allowed appearance-none"
             >
               <option value="immediate" className="bg-slate-800">Immediate</option>
               <option value="daily" className="bg-slate-800">Daily digest</option>
