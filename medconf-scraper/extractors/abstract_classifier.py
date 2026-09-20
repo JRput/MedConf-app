@@ -144,6 +144,13 @@ def extract_abstract_info(
     """Classify abstract submission status from a detail-page's text content."""
     if not page_text:
         return False, None
+    # Guard: a page that never mentions abstracts/posters/papers cannot have
+    # an abstract-submission window. Application-based courses (RCSEd HEST-UK,
+    # RCPSG PG Diploma in Expedition Medicine — observed 2026-08-16) publish
+    # "Applications are now open … Application deadline - <date>" wording that
+    # the open/deadline patterns below otherwise misread as abstract info.
+    if not re.search(r"abstract|poster|call for papers", page_text, re.I):
+        return False, None
     today = today or date.today()
 
     # 1. Explicit "closed" wording takes precedence

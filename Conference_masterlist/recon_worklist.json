@@ -1,0 +1,2090 @@
+[
+ {
+  "domain": "rcpath.org",
+  "rows": 14,
+  "provider": "Royal College of Pathologists",
+  "urls": [
+   "https://www.rcpath.org/profession/training.html"
+  ],
+  "expect": [
+   "Histopathology Training",
+   "Chemical Pathology Training",
+   "Medical Microbiology Training",
+   "Medical Virology Training",
+   "Haematology Training"
+  ]
+ },
+ {
+  "domain": "rcsed.ac.uk",
+  "rows": 12,
+  "provider": "Royal College of Surgeons of Edinburgh",
+  "urls": [
+   "https://www.rcsed.ac.uk/events-courses"
+  ],
+  "expect": [
+   "Edinburgh MRCS OSCE Preparation Course",
+   "Non-Technical Skills for Surgeons (NOTSS)",
+   "Training the Trainers",
+   "Future Surgeons Key Skills",
+   "Future Leaders Programme for Surgeons"
+  ]
+ },
+ {
+  "domain": "resus.org.uk",
+  "rows": 12,
+  "provider": "Resuscitation Council UK",
+  "urls": [
+   "https://www.resus.org.uk/training-courses"
+  ],
+  "expect": [
+   "Advanced Life Support (ALS)",
+   "Immediate Life Support (ILS)",
+   "ALS Recertification",
+   "Out-of-Hospital Advanced Life Support (OH-ALS)",
+   "Newborn Life Support (NLS)"
+  ]
+ },
+ {
+  "domain": "rcpe.ac.uk",
+  "rows": 10,
+  "provider": "Royal College of Physicians of Edinburgh",
+  "urls": [
+   "https://www.rcpe.ac.uk/events"
+  ],
+  "expect": [
+   "RCPE Evening Medical Updates",
+   "RCPE Symposia",
+   "RCPE Online Education",
+   "MRCP PACES Preparation",
+   "Acute Medicine Updates"
+  ]
+ },
+ {
+  "domain": "rcophth.ac.uk",
+  "rows": 10,
+  "provider": "Royal College of Ophthalmologists",
+  "urls": [
+   "https://www.rcophth.ac.uk/events-courses/"
+  ],
+  "expect": [
+   "Introduction to Ophthalmic Surgery",
+   "Basic Phacoemulsification",
+   "Ocular Trauma",
+   "Cataract Surgery Complications",
+   "Microsurgical Skills Courses"
+  ]
+ },
+ {
+  "domain": "rcpch.ac.uk",
+  "rows": 10,
+  "provider": "Royal College of Paediatrics and Child Health",
+  "urls": [
+   "https://www.rcpch.ac.uk/events"
+  ],
+  "expect": [
+   "Safeguarding Level 3",
+   "Child Protection Portal Courses",
+   "Paediatric Sub-specialty Careers Event",
+   "Advisory Appointments Committee Training Day",
+   "Trainee Research Network National Conference"
+  ]
+ },
+ {
+  "domain": "rcpsych.ac.uk",
+  "rows": 10,
+  "provider": "Royal College of Psychiatrists",
+  "urls": [
+   "https://www.rcpsych.ac.uk/events"
+  ],
+  "expect": [
+   "Leadership and Management Skills Course",
+   "Faculty of General Adult Psychiatry Annual Conference",
+   "Quality Improvement Conference",
+   "Old Age Psychiatry Conference",
+   "Child and Adolescent Psychiatry Conference"
+  ]
+ },
+ {
+  "domain": "rcpsg.ac.uk",
+  "rows": 8,
+  "provider": "Royal College of Physicians and Surgeons of Glasgow",
+  "urls": [
+   "https://rcpsg.ac.uk/education"
+  ],
+  "expect": [
+   "Basic Surgical Skills",
+   "MRCS Part B Preparation",
+   "Clinical Skills Courses",
+   "Faculty of Travel Medicine Annual Conference",
+   "Travel Medicine Courses"
+  ]
+ },
+ {
+  "domain": "alsg.org",
+  "rows": 8,
+  "provider": "Advanced Life Support Group",
+  "urls": [
+   "https://www.alsg.org/"
+  ],
+  "expect": [
+   "Advanced Paediatric Life Support (APLS)",
+   "Major Incident Medical Management and Support (MIMMS)",
+   "Hospital Major Incident Medical Management and Support (HMIMMS)",
+   "Pre-Hospital Trauma Life Support (PHTLS)",
+   "Paediatric Life Support Courses"
+  ]
+ },
+ {
+  "domain": "rcemlearning.co.uk",
+  "rows": 7,
+  "provider": "Royal College of Emergency Medicine",
+  "urls": [
+   "https://www.rcemlearning.co.uk/"
+  ],
+  "expect": [
+   "Beyond the Forgotten Tribe",
+   "Safe Sedation Procedures in Adults",
+   "Emergency Medicine Ultrasound Courses",
+   "Major Incident Training",
+   "Paediatric Emergency Medicine Courses"
+  ]
+ },
+ {
+  "domain": "ficm.ac.uk",
+  "rows": 5,
+  "provider": "Faculty of Intensive Care Medicine",
+  "urls": [
+   "https://www.ficm.ac.uk"
+  ],
+  "expect": [
+   "ICM Curriculum Courses",
+   "ICM Teaching Days",
+   "FFICM Exam Preparation",
+   "Critical Care Ultrasound Courses",
+   "ICM Annual Meeting"
+  ]
+ },
+ {
+  "domain": "fph.org.uk",
+  "rows": 5,
+  "provider": "Faculty of Public Health",
+  "urls": [
+   "https://www.fph.org.uk"
+  ],
+  "expect": [
+   "Public Health Training",
+   "Diplomate Exam Preparation",
+   "CPD Events",
+   "Public Health Conference",
+   "Health Protection Courses"
+  ]
+ },
+ {
+  "domain": "cosrh.org",
+  "rows": 5,
+  "provider": "College of Sexual and Reproductive Healthcare",
+  "urls": [
+   "https://www.cosrh.org"
+  ],
+  "expect": [
+   "Diploma in Sexual and Reproductive Healthcare",
+   "Letter of Competence IUT",
+   "Letter of Competence SDI",
+   "Postpartum Contraception Training",
+   "CoSRH Conference"
+  ]
+ },
+ {
+  "domain": "fom.ac.uk",
+  "rows": 4,
+  "provider": "Faculty of Occupational Medicine",
+  "urls": [
+   "https://www.fom.ac.uk"
+  ],
+  "expect": [
+   "Occupational Medicine Training",
+   "MFOM Exam Preparation",
+   "Occupational Health Updates",
+   "Ethics in Occupational Medicine"
+  ]
+ },
+ {
+  "domain": "fsem.ac.uk",
+  "rows": 4,
+  "provider": "Faculty of Sport and Exercise Medicine",
+  "urls": [
+   "https://www.fsem.ac.uk"
+  ],
+  "expect": [
+   "SEM Training",
+   "Musculoskeletal Ultrasound Courses",
+   "Exercise Medicine Courses",
+   "Sports Injury Courses"
+  ]
+ },
+ {
+  "domain": "fpm.org.uk",
+  "rows": 4,
+  "provider": "Faculty of Pharmaceutical Medicine",
+  "urls": [
+   "https://www.fpm.org.uk"
+  ],
+  "expect": [
+   "Pharmaceutical Medicine Training",
+   "MFPM Exam Preparation",
+   "Clinical Trials Courses",
+   "Medicines Development Courses"
+  ]
+ },
+ {
+  "domain": "rcoa.ac.uk",
+  "rows": 3,
+  "provider": "Royal College of Anaesthetists / e-Learning for Healthcare",
+  "urls": [
+   "https://www.rcoa.ac.uk/events-professional-development"
+  ],
+  "expect": [
+   "Neonatal Airway Course",
+   "Anaesthesia Updates",
+   "Airway Management Courses"
+  ]
+ },
+ {
+  "domain": "escardio.org",
+  "rows": 2,
+  "provider": "European Society of Cardiology",
+  "urls": [
+   "https://www.escardio.org/Sub-specialty-communities/Heart-Failure-Association-of-the-ESC-HFA"
+  ],
+  "expect": [
+   "ESC Congress",
+   "Heart Failure Congress"
+  ]
+ },
+ {
+  "domain": "asgbi.org.uk",
+  "rows": 1,
+  "provider": "Association of Surgeons of Great Britain and Ireland (ASGBI)",
+  "urls": [
+   "https://www.asgbi.org.uk"
+  ],
+  "expect": [
+   "ASGBI International Surgical Congress"
+  ]
+ },
+ {
+  "domain": "acpgbi.org.uk",
+  "rows": 1,
+  "provider": "Association of Coloproctology of Great Britain and Ireland (ACPGBI)",
+  "urls": [
+   "https://www.acpgbi.org.uk"
+  ],
+  "expect": [
+   "ACPGBI Annual Meeting"
+  ]
+ },
+ {
+  "domain": "augis.org",
+  "rows": 1,
+  "provider": "Association of Upper Gastrointestinal Surgery (AUGIS)",
+  "urls": [
+   "https://www.augis.org"
+  ],
+  "expect": [
+   "AUGIS Annual Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "associationofbreastsurgery.org.uk",
+  "rows": 1,
+  "provider": "Association of Breast Surgery (ABS)",
+  "urls": [
+   "https://associationofbreastsurgery.org.uk"
+  ],
+  "expect": [
+   "ABS Conference"
+  ]
+ },
+ {
+  "domain": "baets.org.uk",
+  "rows": 1,
+  "provider": "British Association of Endocrine and Thyroid Surgeons (BAETS)",
+  "urls": [
+   "https://www.baets.org.uk"
+  ],
+  "expect": [
+   "BAETS Annual Meeting"
+  ]
+ },
+ {
+  "domain": "vascularsociety.org.uk",
+  "rows": 1,
+  "provider": "Vascular Society of Great Britain and Ireland",
+  "urls": [
+   "https://www.vascularsociety.org.uk"
+  ],
+  "expect": [
+   "Vascular Societies Annual Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "baus.org.uk",
+  "rows": 1,
+  "provider": "British Association of Urological Surgeons (BAUS)",
+  "urls": [
+   "https://www.baus.org.uk"
+  ],
+  "expect": [
+   "BAUS Annual Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "bapras.org.uk",
+  "rows": 1,
+  "provider": "British Association of Plastic, Reconstructive and Aesthetic Surgeons (BAPRAS)",
+  "urls": [
+   "https://www.bapras.org.uk"
+  ],
+  "expect": [
+   "BAPRAS Congress"
+  ]
+ },
+ {
+  "domain": "baaps.org.uk",
+  "rows": 1,
+  "provider": "British Association of Aesthetic Plastic Surgeons (BAAPS)",
+  "urls": [
+   "https://baaps.org.uk"
+  ],
+  "expect": [
+   "BAAPS Annual Conference"
+  ]
+ },
+ {
+  "domain": "sbns.org.uk",
+  "rows": 1,
+  "provider": "Society of British Neurological Surgeons (SBNS)",
+  "urls": [
+   "https://www.sbns.org.uk"
+  ],
+  "expect": [
+   "SBNS Meeting"
+  ]
+ },
+ {
+  "domain": "entuk.org",
+  "rows": 1,
+  "provider": "ENT UK",
+  "urls": [
+   "https://www.entuk.org"
+  ],
+  "expect": [
+   "ENT UK Annual Meeting"
+  ]
+ },
+ {
+  "domain": "boa.ac.uk",
+  "rows": 1,
+  "provider": "British Orthopaedic Association (BOA)",
+  "urls": [
+   "https://www.boa.ac.uk"
+  ],
+  "expect": [
+   "BOA Annual Congress"
+  ]
+ },
+ {
+  "domain": "baskonline.com",
+  "rows": 1,
+  "provider": "British Association for Surgery of the Knee (BASK)",
+  "urls": [
+   "https://baskonline.com"
+  ],
+  "expect": [
+   "BASK Annual Meeting"
+  ]
+ },
+ {
+  "domain": "britishhipsociety.com",
+  "rows": 1,
+  "provider": "British Hip Society (BHS)",
+  "urls": [
+   "https://britishhipsociety.com"
+  ],
+  "expect": [
+   "British Hip Society Annual Meeting"
+  ]
+ },
+ {
+  "domain": "bess.ac.uk",
+  "rows": 1,
+  "provider": "British Elbow and Shoulder Society (BESS)",
+  "urls": [
+   "https://bess.ac.uk"
+  ],
+  "expect": [
+   "BESS Annual Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "bofas.org.uk",
+  "rows": 1,
+  "provider": "British Orthopaedic Foot & Ankle Society (BOFAS)",
+  "urls": [
+   "https://www.bofas.org.uk"
+  ],
+  "expect": [
+   "BOFAS Annual Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "bssh.ac.uk",
+  "rows": 1,
+  "provider": "British Society for Surgery of the Hand (BSSH)",
+  "urls": [
+   "https://www.bssh.ac.uk"
+  ],
+  "expect": [
+   "BSSH Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "bsir.org",
+  "rows": 1,
+  "provider": "British Society of Interventional Radiology (BSIR)",
+  "urls": [
+   "https://www.bsir.org"
+  ],
+  "expect": [
+   "BSIR Annual Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "bsbr.org.uk",
+  "rows": 1,
+  "provider": "British Society of Breast Radiology (BSBR)",
+  "urls": [
+   "https://www.bsbr.org.uk"
+  ],
+  "expect": [
+   "BSBR Annual Meeting"
+  ]
+ },
+ {
+  "domain": "ukio.org.uk",
+  "rows": 1,
+  "provider": "UK Imaging and Oncology Congress (UKIO)",
+  "urls": [
+   "https://www.ukio.org.uk"
+  ],
+  "expect": [
+   "UKIO Annual Congress"
+  ]
+ },
+ {
+  "domain": "ncri.org.uk",
+  "rows": 1,
+  "provider": "National Cancer Research Institute (NCRI)",
+  "urls": [
+   "https://www.ncri.org.uk"
+  ],
+  "expect": [
+   "NCRI Cancer Conference"
+  ]
+ },
+ {
+  "domain": "bsg.org.uk",
+  "rows": 1,
+  "provider": "British Society of Gastroenterology (BSG)",
+  "urls": [
+   "https://www.bsg.org.uk"
+  ],
+  "expect": [
+   "BSG LIVE"
+  ]
+ },
+ {
+  "domain": "basl.org.uk",
+  "rows": 1,
+  "provider": "British Association for the Study of the Liver (BASL)",
+  "urls": [
+   "https://www.basl.org.uk"
+  ],
+  "expect": [
+   "BASL Annual Meeting"
+  ]
+ },
+ {
+  "domain": "brit-thoracic.org.uk",
+  "rows": 1,
+  "provider": "British Thoracic Society (BTS)",
+  "urls": [
+   "https://www.brit-thoracic.org.uk"
+  ],
+  "expect": [
+   "BTS Winter Meeting"
+  ]
+ },
+ {
+  "domain": "britishcardiovascularsociety.org",
+  "rows": 1,
+  "provider": "British Cardiovascular Society (BCS)",
+  "urls": [
+   "https://britishcardiovascularsociety.org"
+  ],
+  "expect": [
+   "BCS Annual Conference"
+  ]
+ },
+ {
+  "domain": "bcis.org.uk",
+  "rows": 1,
+  "provider": "British Cardiovascular Intervention Society (BCIS)",
+  "urls": [
+   "https://www.bcis.org.uk"
+  ],
+  "expect": [
+   "BCIS Annual Conference"
+  ]
+ },
+ {
+  "domain": "theabn.org",
+  "rows": 1,
+  "provider": "Association of British Neurologists (ABN)",
+  "urls": [
+   "https://www.theabn.org"
+  ],
+  "expect": [
+   "ABN Annual Meeting"
+  ]
+ },
+ {
+  "domain": "biasp.org",
+  "rows": 1,
+  "provider": "British and Irish Association of Stroke Physicians (BIASP)",
+  "urls": [
+   "https://biasp.org"
+  ],
+  "expect": [
+   "UK Stroke Forum"
+  ]
+ },
+ {
+  "domain": "endocrinology.org",
+  "rows": 1,
+  "provider": "Society for Endocrinology",
+  "urls": [
+   "https://www.endocrinology.org"
+  ],
+  "expect": [
+   "SfE BES Conference"
+  ]
+ },
+ {
+  "domain": "diabetes.org.uk",
+  "rows": 1,
+  "provider": "Diabetes UK",
+  "urls": [
+   "https://www.diabetes.org.uk"
+  ],
+  "expect": [
+   "Diabetes UK Professional Conference"
+  ]
+ },
+ {
+  "domain": "rheumatology.org.uk",
+  "rows": 1,
+  "provider": "British Society for Rheumatology (BSR)",
+  "urls": [
+   "https://www.rheumatology.org.uk"
+  ],
+  "expect": [
+   "BSR Annual Conference"
+  ]
+ },
+ {
+  "domain": "bad.org.uk",
+  "rows": 1,
+  "provider": "British Association of Dermatologists (BAD)",
+  "urls": [
+   "https://www.bad.org.uk"
+  ],
+  "expect": [
+   "BAD Annual Meeting"
+  ]
+ },
+ {
+  "domain": "britishinfection.org",
+  "rows": 1,
+  "provider": "British Infection Association (BIA)",
+  "urls": [
+   "https://www.britishinfection.org"
+  ],
+  "expect": [
+   "BIA Spring Meeting"
+  ]
+ },
+ {
+  "domain": "his.org.uk",
+  "rows": 1,
+  "provider": "Healthcare Infection Society (HIS)",
+  "urls": [
+   "https://www.his.org.uk"
+  ],
+  "expect": [
+   "HIS Conference"
+  ]
+ },
+ {
+  "domain": "fisconference.com",
+  "rows": 1,
+  "provider": "Federation of Infection Societies (FIS)",
+  "urls": [
+   "https://fisconference.com"
+  ],
+  "expect": [
+   "FIS Conference"
+  ]
+ },
+ {
+  "domain": "bapm.org",
+  "rows": 1,
+  "provider": "British Association of Perinatal Medicine (BAPM)",
+  "urls": [
+   "https://www.bapm.org"
+  ],
+  "expect": [
+   "BAPM Annual Conference"
+  ]
+ },
+ {
+  "domain": "bsped.org.uk",
+  "rows": 1,
+  "provider": "British Society for Paediatric Endocrinology and Diabetes (BSPED)",
+  "urls": [
+   "https://www.bsped.org.uk"
+  ],
+  "expect": [
+   "BSPED Annual Meeting"
+  ]
+ },
+ {
+  "domain": "bpna.org.uk",
+  "rows": 1,
+  "provider": "British Paediatric Neurology Association (BPNA)",
+  "urls": [
+   "https://bpna.org.uk"
+  ],
+  "expect": [
+   "BPNA Annual Conference"
+  ]
+ },
+ {
+  "domain": "bsge.org.uk",
+  "rows": 1,
+  "provider": "British Society for Gynaecological Endoscopy (BSGE)",
+  "urls": [
+   "https://www.bsge.org.uk"
+  ],
+  "expect": [
+   "BSGE Annual Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "bmfms.org.uk",
+  "rows": 1,
+  "provider": "British Maternal & Fetal Medicine Society (BMFMS)",
+  "urls": [
+   "https://www.bmfms.org.uk"
+  ],
+  "expect": [
+   "BMFMS Conference"
+  ]
+ },
+ {
+  "domain": "bsccp.org.uk",
+  "rows": 1,
+  "provider": "British Society for Colposcopy and Cervical Pathology (BSCCP)",
+  "urls": [
+   "https://www.bsccp.org.uk"
+  ],
+  "expect": [
+   "BSCCP Annual Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "bdiap.org",
+  "rows": 1,
+  "provider": "British Division of the International Academy of Pathology (BDIAP)",
+  "urls": [
+   "https://bdiap.org"
+  ],
+  "expect": [
+   "BDIAP Symposium"
+  ]
+ },
+ {
+  "domain": "b-s-h.org.uk",
+  "rows": 1,
+  "provider": "British Society for Haematology (BSH)",
+  "urls": [
+   "https://b-s-h.org.uk"
+  ],
+  "expect": [
+   "BSH Annual Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "bbts.org.uk",
+  "rows": 1,
+  "provider": "British Blood Transfusion Society (BBTS)",
+  "urls": [
+   "https://www.bbts.org.uk"
+  ],
+  "expect": [
+   "BBTS Annual Conference"
+  ]
+ },
+ {
+  "domain": "ics.ac.uk",
+  "rows": 1,
+  "provider": "Intensive Care Society (ICS)",
+  "urls": [
+   "https://ics.ac.uk"
+  ],
+  "expect": [
+   "State of the Art Conference"
+  ]
+ },
+ {
+  "domain": "acutemedicine.org.uk",
+  "rows": 1,
+  "provider": "Society for Acute Medicine (SAM)",
+  "urls": [
+   "https://www.acutemedicine.org.uk"
+  ],
+  "expect": [
+   "SAM Annual Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "apmonline.org",
+  "rows": 1,
+  "provider": "Association for Palliative Medicine (APM)",
+  "urls": [
+   "https://apmonline.org"
+  ],
+  "expect": [
+   "APM Supportive & Palliative Care Conference"
+  ]
+ },
+ {
+  "domain": "astro.org",
+  "rows": 1,
+  "provider": "American Society for Radiation Oncology",
+  "urls": [
+   "https://www.astro.org"
+  ],
+  "expect": [
+   "ASTRO Annual Meeting"
+  ]
+ },
+ {
+  "domain": "hematology.org",
+  "rows": 1,
+  "provider": "American Society of Hematology",
+  "urls": [
+   "https://www.hematology.org"
+  ],
+  "expect": [
+   "ASH Annual Meeting"
+  ]
+ },
+ {
+  "domain": "ehaweb.org",
+  "rows": 1,
+  "provider": "European Hematology Association",
+  "urls": [
+   "https://ehaweb.org"
+  ],
+  "expect": [
+   "EHA Congress"
+  ]
+ },
+ {
+  "domain": "ddw.org",
+  "rows": 1,
+  "provider": "DDW",
+  "urls": [
+   "https://ddw.org"
+  ],
+  "expect": [
+   "Digestive Disease Week (DDW)"
+  ]
+ },
+ {
+  "domain": "ueg.eu",
+  "rows": 1,
+  "provider": "United European Gastroenterology",
+  "urls": [
+   "https://ueg.eu"
+  ],
+  "expect": [
+   "UEG Week"
+  ]
+ },
+ {
+  "domain": "ecco-ibd.eu",
+  "rows": 1,
+  "provider": "European Crohn's and Colitis Organisation",
+  "urls": [
+   "https://www.ecco-ibd.eu"
+  ],
+  "expect": [
+   "ECCO Congress"
+  ]
+ },
+ {
+  "domain": "easl.eu",
+  "rows": 1,
+  "provider": "European Association for the Study of the Liver",
+  "urls": [
+   "https://easl.eu"
+  ],
+  "expect": [
+   "EASL Congress"
+  ]
+ },
+ {
+  "domain": "aasld.org",
+  "rows": 1,
+  "provider": "American Association for the Study of Liver Diseases",
+  "urls": [
+   "https://www.aasld.org"
+  ],
+  "expect": [
+   "AASLD The Liver Meeting"
+  ]
+ },
+ {
+  "domain": "esge.com",
+  "rows": 1,
+  "provider": "European Society of Gastrointestinal Endoscopy",
+  "urls": [
+   "https://www.esge.com"
+  ],
+  "expect": [
+   "ESGE Days"
+  ]
+ },
+ {
+  "domain": "acc.org",
+  "rows": 1,
+  "provider": "American College of Cardiology",
+  "urls": [
+   "https://www.acc.org"
+  ],
+  "expect": [
+   "ACC Annual Scientific Session"
+  ]
+ },
+ {
+  "domain": "heart.org",
+  "rows": 1,
+  "provider": "American Heart Association",
+  "urls": [
+   "https://www.heart.org"
+  ],
+  "expect": [
+   "AHA Scientific Sessions"
+  ]
+ },
+ {
+  "domain": "pcronline.com",
+  "rows": 1,
+  "provider": "PCR Online",
+  "urls": [
+   "https://www.pcronline.com"
+  ],
+  "expect": [
+   "EuroPCR"
+  ]
+ },
+ {
+  "domain": "crf.org",
+  "rows": 1,
+  "provider": "Cardiovascular Research Foundation",
+  "urls": [
+   "https://www.crf.org/tct"
+  ],
+  "expect": [
+   "TCT Conference"
+  ]
+ },
+ {
+  "domain": "ersnet.org",
+  "rows": 1,
+  "provider": "European Respiratory Society",
+  "urls": [
+   "https://www.ersnet.org"
+  ],
+  "expect": [
+   "ERS Congress"
+  ]
+ },
+ {
+  "domain": "thoracic.org",
+  "rows": 1,
+  "provider": "American Thoracic Society",
+  "urls": [
+   "https://www.thoracic.org"
+  ],
+  "expect": [
+   "ATS International Conference"
+  ]
+ },
+ {
+  "domain": "chestnet.org",
+  "rows": 1,
+  "provider": "American College of Chest Physicians",
+  "urls": [
+   "https://www.chestnet.org"
+  ],
+  "expect": [
+   "CHEST Annual Meeting"
+  ]
+ },
+ {
+  "domain": "sccm.org",
+  "rows": 1,
+  "provider": "Society of Critical Care Medicine",
+  "urls": [
+   "https://www.sccm.org"
+  ],
+  "expect": [
+   "SCCM Critical Care Congress"
+  ]
+ },
+ {
+  "domain": "esicm.org",
+  "rows": 1,
+  "provider": "European Society of Intensive Care Medicine",
+  "urls": [
+   "https://www.esicm.org"
+  ],
+  "expect": [
+   "ESICM LIVES"
+  ]
+ },
+ {
+  "domain": "aan.com",
+  "rows": 1,
+  "provider": "American Academy of Neurology",
+  "urls": [
+   "https://www.aan.com"
+  ],
+  "expect": [
+   "AAN Annual Meeting"
+  ]
+ },
+ {
+  "domain": "ean.org",
+  "rows": 1,
+  "provider": "European Academy of Neurology",
+  "urls": [
+   "https://www.ean.org"
+  ],
+  "expect": [
+   "EAN Congress"
+  ]
+ },
+ {
+  "domain": "professional.heart.org",
+  "rows": 1,
+  "provider": "American Heart Association / ASA",
+  "urls": [
+   "https://professional.heart.org"
+  ],
+  "expect": [
+   "International Stroke Conference"
+  ]
+ },
+ {
+  "domain": "ectrims.eu",
+  "rows": 1,
+  "provider": "European Committee for Treatment and Research in Multiple Sclerosis",
+  "urls": [
+   "https://ectrims.eu"
+  ],
+  "expect": [
+   "ECTRIMS Congress"
+  ]
+ },
+ {
+  "domain": "aaic.alz.org",
+  "rows": 1,
+  "provider": "Alzheimer's Association International Conference",
+  "urls": [
+   "https://aaic.alz.org"
+  ],
+  "expect": [
+   "AAIC"
+  ]
+ },
+ {
+  "domain": "aans.org",
+  "rows": 1,
+  "provider": "American Association of Neurological Surgeons",
+  "urls": [
+   "https://www.aans.org"
+  ],
+  "expect": [
+   "AANS Annual Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "cns.org",
+  "rows": 1,
+  "provider": "Congress of Neurological Surgeons",
+  "urls": [
+   "https://www.cns.org"
+  ],
+  "expect": [
+   "CNS Annual Meeting"
+  ]
+ },
+ {
+  "domain": "eans.org",
+  "rows": 1,
+  "provider": "European Association of Neurosurgical Societies",
+  "urls": [
+   "https://www.eans.org"
+  ],
+  "expect": [
+   "EANS Congress"
+  ]
+ },
+ {
+  "domain": "wfns.info",
+  "rows": 1,
+  "provider": "World Federation of Neurosurgical Societies",
+  "urls": [
+   "https://wfns.info"
+  ],
+  "expect": [
+   "WFNS World Congress"
+  ]
+ },
+ {
+  "domain": "aaos.org",
+  "rows": 1,
+  "provider": "American Academy of Orthopaedic Surgeons",
+  "urls": [
+   "https://www.aaos.org"
+  ],
+  "expect": [
+   "AAOS Annual Meeting"
+  ]
+ },
+ {
+  "domain": "efort.org",
+  "rows": 1,
+  "provider": "European Federation of National Associations of Orthopaedics and Traumatology",
+  "urls": [
+   "https://www.efort.org"
+  ],
+  "expect": [
+   "EFORT Congress"
+  ]
+ },
+ {
+  "domain": "esska.org",
+  "rows": 1,
+  "provider": "European Society of Sports Traumatology, Knee Surgery and Arthroscopy",
+  "urls": [
+   "https://www.esska.org"
+  ],
+  "expect": [
+   "ESSKA Congress"
+  ]
+ },
+ {
+  "domain": "ors.org",
+  "rows": 1,
+  "provider": "Orthopaedic Research Society",
+  "urls": [
+   "https://www.ors.org"
+  ],
+  "expect": [
+   "ORS Annual Meeting"
+  ]
+ },
+ {
+  "domain": "uroweb.org",
+  "rows": 1,
+  "provider": "European Association of Urology",
+  "urls": [
+   "https://uroweb.org"
+  ],
+  "expect": [
+   "EAU Congress"
+  ]
+ },
+ {
+  "domain": "auanet.org",
+  "rows": 1,
+  "provider": "American Urological Association",
+  "urls": [
+   "https://www.auanet.org"
+  ],
+  "expect": [
+   "AUA Annual Meeting"
+  ]
+ },
+ {
+  "domain": "siu-urology.org",
+  "rows": 1,
+  "provider": "Soci\u00e9t\u00e9 Internationale d'Urologie",
+  "urls": [
+   "https://www.siu-urology.org"
+  ],
+  "expect": [
+   "SIU Congress"
+  ]
+ },
+ {
+  "domain": "aao.org",
+  "rows": 1,
+  "provider": "American Academy of Ophthalmology",
+  "urls": [
+   "https://www.aao.org"
+  ],
+  "expect": [
+   "AAO Annual Meeting"
+  ]
+ },
+ {
+  "domain": "escrs.org",
+  "rows": 1,
+  "provider": "European Society of Cataract and Refractive Surgeons",
+  "urls": [
+   "https://www.escrs.org"
+  ],
+  "expect": [
+   "ESCRS Congress"
+  ]
+ },
+ {
+  "domain": "arvo.org",
+  "rows": 1,
+  "provider": "Association for Research in Vision and Ophthalmology",
+  "urls": [
+   "https://www.arvo.org"
+  ],
+  "expect": [
+   "ARVO Annual Meeting"
+  ]
+ },
+ {
+  "domain": "euretina.org",
+  "rows": 1,
+  "provider": "European Society of Retina Specialists",
+  "urls": [
+   "https://www.euretina.org"
+  ],
+  "expect": [
+   "EURETINA Congress"
+  ]
+ },
+ {
+  "domain": "entnet.org",
+  "rows": 1,
+  "provider": "American Academy of Otolaryngology - Head and Neck Surgery",
+  "urls": [
+   "https://www.entnet.org"
+  ],
+  "expect": [
+   "AAO-HNSF Annual Meeting & OTO EXPO"
+  ]
+ },
+ {
+  "domain": "ifosworld.org",
+  "rows": 1,
+  "provider": "International Federation of Oto-Rhino-Laryngological Societies",
+  "urls": [
+   "https://www.ifosworld.org"
+  ],
+  "expect": [
+   "IFOS World Congress"
+  ]
+ },
+ {
+  "domain": "aap.org",
+  "rows": 1,
+  "provider": "American Academy of Pediatrics",
+  "urls": [
+   "https://www.aap.org"
+  ],
+  "expect": [
+   "AAP National Conference & Exhibition"
+  ]
+ },
+ {
+  "domain": "eaps.kenes.com",
+  "rows": 1,
+  "provider": "European Academy of Paediatric Societies",
+  "urls": [
+   "https://eaps.kenes.com"
+  ],
+  "expect": [
+   "EAPS Congress"
+  ]
+ },
+ {
+  "domain": "espidmeeting.org",
+  "rows": 1,
+  "provider": "European Society for Paediatric Infectious Diseases",
+  "urls": [
+   "https://espidmeeting.org"
+  ],
+  "expect": [
+   "ESPID Annual Meeting"
+  ]
+ },
+ {
+  "domain": "espnic-online.org",
+  "rows": 1,
+  "provider": "European Society of Paediatric and Neonatal Intensive Care",
+  "urls": [
+   "https://espnic-online.org"
+  ],
+  "expect": [
+   "ESPNIC Congress"
+  ]
+ },
+ {
+  "domain": "pas-meeting.org",
+  "rows": 1,
+  "provider": "Pediatric Academic Societies",
+  "urls": [
+   "https://www.pas-meeting.org"
+  ],
+  "expect": [
+   "PAS Meeting"
+  ]
+ },
+ {
+  "domain": "acog.org",
+  "rows": 1,
+  "provider": "American College of Obstetricians and Gynecologists",
+  "urls": [
+   "https://www.acog.org"
+  ],
+  "expect": [
+   "ACOG Annual Clinical & Scientific Meeting"
+  ]
+ },
+ {
+  "domain": "isuog.org",
+  "rows": 1,
+  "provider": "International Society of Ultrasound in Obstetrics and Gynecology",
+  "urls": [
+   "https://www.isuog.org"
+  ],
+  "expect": [
+   "ISUOG World Congress"
+  ]
+ },
+ {
+  "domain": "eshre.eu",
+  "rows": 1,
+  "provider": "European Society of Human Reproduction and Embryology",
+  "urls": [
+   "https://www.eshre.eu"
+  ],
+  "expect": [
+   "ESHRE Annual Meeting"
+  ]
+ },
+ {
+  "domain": "aagl.org",
+  "rows": 1,
+  "provider": "American Association of Gynecologic Laparoscopists",
+  "urls": [
+   "https://www.aagl.org"
+  ],
+  "expect": [
+   "AAGL Global Congress"
+  ]
+ },
+ {
+  "domain": "endocrine.org",
+  "rows": 1,
+  "provider": "Endocrine Society",
+  "urls": [
+   "https://www.endocrine.org"
+  ],
+  "expect": [
+   "ENDO"
+  ]
+ },
+ {
+  "domain": "ese-hormones.org",
+  "rows": 1,
+  "provider": "European Society of Endocrinology",
+  "urls": [
+   "https://www.ese-hormones.org"
+  ],
+  "expect": [
+   "European Congress of Endocrinology"
+  ]
+ },
+ {
+  "domain": "diabetes.org",
+  "rows": 1,
+  "provider": "American Diabetes Association",
+  "urls": [
+   "https://diabetes.org"
+  ],
+  "expect": [
+   "ADA Scientific Sessions"
+  ]
+ },
+ {
+  "domain": "easd.org",
+  "rows": 1,
+  "provider": "European Association for the Study of Diabetes",
+  "urls": [
+   "https://www.easd.org"
+  ],
+  "expect": [
+   "EASD Annual Meeting"
+  ]
+ },
+ {
+  "domain": "escmid.org",
+  "rows": 1,
+  "provider": "European Society of Clinical Microbiology and Infectious Diseases",
+  "urls": [
+   "https://www.escmid.org"
+  ],
+  "expect": [
+   "ESCMID Global"
+  ]
+ },
+ {
+  "domain": "idweek.org",
+  "rows": 1,
+  "provider": "IDSA / SHEA / HIVMA / PIDS / SIDP",
+  "urls": [
+   "https://www.idweek.org"
+  ],
+  "expect": [
+   "IDWeek"
+  ]
+ },
+ {
+  "domain": "croiconference.org",
+  "rows": 1,
+  "provider": "Conference on Retroviruses and Opportunistic Infections",
+  "urls": [
+   "https://www.croiconference.org"
+  ],
+  "expect": [
+   "CROI"
+  ]
+ },
+ {
+  "domain": "iasociety.org",
+  "rows": 1,
+  "provider": "International AIDS Society",
+  "urls": [
+   "https://www.iasociety.org"
+  ],
+  "expect": [
+   "International AIDS Conference"
+  ]
+ },
+ {
+  "domain": "eular.org",
+  "rows": 1,
+  "provider": "European Alliance of Associations for Rheumatology",
+  "urls": [
+   "https://eular.org"
+  ],
+  "expect": [
+   "EULAR Congress"
+  ]
+ },
+ {
+  "domain": "rheumatology.org",
+  "rows": 1,
+  "provider": "American College of Rheumatology",
+  "urls": [
+   "https://rheumatology.org"
+  ],
+  "expect": [
+   "ACR Convergence"
+  ]
+ },
+ {
+  "domain": "aad.org",
+  "rows": 1,
+  "provider": "American Academy of Dermatology",
+  "urls": [
+   "https://www.aad.org"
+  ],
+  "expect": [
+   "AAD Annual Meeting"
+  ]
+ },
+ {
+  "domain": "eadv.org",
+  "rows": 1,
+  "provider": "European Academy of Dermatology and Venereology",
+  "urls": [
+   "https://www.eadv.org"
+  ],
+  "expect": [
+   "EADV Congress"
+  ]
+ },
+ {
+  "domain": "asn-online.org",
+  "rows": 1,
+  "provider": "American Society of Nephrology",
+  "urls": [
+   "https://www.asn-online.org"
+  ],
+  "expect": [
+   "ASN Kidney Week"
+  ]
+ },
+ {
+  "domain": "era-online.org",
+  "rows": 1,
+  "provider": "European Renal Association",
+  "urls": [
+   "https://www.era-online.org"
+  ],
+  "expect": [
+   "ERA Congress"
+  ]
+ },
+ {
+  "domain": "rsna.org",
+  "rows": 1,
+  "provider": "Radiological Society of North America",
+  "urls": [
+   "https://www.rsna.org"
+  ],
+  "expect": [
+   "RSNA Annual Meeting"
+  ]
+ },
+ {
+  "domain": "myesr.org",
+  "rows": 1,
+  "provider": "European Society of Radiology",
+  "urls": [
+   "https://www.myesr.org"
+  ],
+  "expect": [
+   "European Congress of Radiology (ECR)"
+  ]
+ },
+ {
+  "domain": "arrs.org",
+  "rows": 1,
+  "provider": "American Roentgen Ray Society",
+  "urls": [
+   "https://www.arrs.org"
+  ],
+  "expect": [
+   "ARRS Annual Meeting"
+  ]
+ },
+ {
+  "domain": "snmmi.org",
+  "rows": 1,
+  "provider": "Society of Nuclear Medicine and Molecular Imaging",
+  "urls": [
+   "https://www.snmmi.org"
+  ],
+  "expect": [
+   "SNMMI Annual Meeting"
+  ]
+ },
+ {
+  "domain": "eanm.org",
+  "rows": 1,
+  "provider": "European Association of Nuclear Medicine",
+  "urls": [
+   "https://www.eanm.org"
+  ],
+  "expect": [
+   "EANM Congress"
+  ]
+ },
+ {
+  "domain": "uscap.org",
+  "rows": 1,
+  "provider": "United States and Canadian Academy of Pathology",
+  "urls": [
+   "https://www.uscap.org"
+  ],
+  "expect": [
+   "USCAP Annual Meeting"
+  ]
+ },
+ {
+  "domain": "esp-pathology.org",
+  "rows": 1,
+  "provider": "European Society of Pathology",
+  "urls": [
+   "https://www.esp-pathology.org"
+  ],
+  "expect": [
+   "ESP Congress"
+  ]
+ },
+ {
+  "domain": "asahq.org",
+  "rows": 1,
+  "provider": "American Society of Anesthesiologists",
+  "urls": [
+   "https://www.asahq.org"
+  ],
+  "expect": [
+   "ASA Annual Meeting"
+  ]
+ },
+ {
+  "domain": "esaic.org",
+  "rows": 1,
+  "provider": "European Society of Anaesthesiology and Intensive Care",
+  "urls": [
+   "https://www.esaic.org"
+  ],
+  "expect": [
+   "Euroanaesthesia"
+  ]
+ },
+ {
+  "domain": "acep.org",
+  "rows": 1,
+  "provider": "American College of Emergency Physicians",
+  "urls": [
+   "https://www.acep.org"
+  ],
+  "expect": [
+   "ACEP Scientific Assembly"
+  ]
+ },
+ {
+  "domain": "eusem.org",
+  "rows": 1,
+  "provider": "European Society for Emergency Medicine",
+  "urls": [
+   "https://eusem.org"
+  ],
+  "expect": [
+   "EUSEM Congress"
+  ]
+ },
+ {
+  "domain": "fdiworlddental.org",
+  "rows": 1,
+  "provider": "FDI World Dental Federation",
+  "urls": [
+   "https://www.fdiworlddental.org"
+  ],
+  "expect": [
+   "FDI World Dental Congress"
+  ]
+ },
+ {
+  "domain": "imcas.com",
+  "rows": 1,
+  "provider": "IMCAS",
+  "urls": [
+   "https://www.imcas.com"
+  ],
+  "expect": [
+   "IMCAS World Congress"
+  ]
+ },
+ {
+  "domain": "amwc-conference.com",
+  "rows": 1,
+  "provider": "Aesthetic & Anti-Aging Medicine World Congress",
+  "urls": [
+   "https://www.amwc-conference.com"
+  ],
+  "expect": [
+   "AMWC"
+  ]
+ },
+ {
+  "domain": "aceconference.co.uk",
+  "rows": 1,
+  "provider": "ACE",
+  "urls": [
+   "https://aceconference.co.uk"
+  ],
+  "expect": [
+   "ACE Conference"
+  ]
+ },
+ {
+  "domain": "ccrlondon.com",
+  "rows": 1,
+  "provider": "CCR",
+  "urls": [
+   "https://www.ccrlondon.com"
+  ],
+  "expect": [
+   "CCR London"
+  ]
+ },
+ {
+  "domain": "faceconference.com",
+  "rows": 1,
+  "provider": "FACE",
+  "urls": [
+   "https://www.faceconference.com"
+  ],
+  "expect": [
+   "FACE Conference"
+  ]
+ },
+ {
+  "domain": "himss.org",
+  "rows": 1,
+  "provider": "HIMSS",
+  "urls": [
+   "https://www.himss.org"
+  ],
+  "expect": [
+   "HIMSS Global Health Conference"
+  ]
+ },
+ {
+  "domain": "digitalhealthrewired.com",
+  "rows": 1,
+  "provider": "Digital Health",
+  "urls": [
+   "https://digitalhealthrewired.com"
+  ],
+  "expect": [
+   "Digital Health Rewired"
+  ]
+ },
+ {
+  "domain": "nhsconfedexpo.org",
+  "rows": 1,
+  "provider": "NHS Confederation",
+  "urls": [
+   "https://www.nhsconfedexpo.org"
+  ],
+  "expect": [
+   "NHS ConfedExpo"
+  ]
+ },
+ {
+  "domain": "hlth.com",
+  "rows": 1,
+  "provider": "HLTH",
+  "urls": [
+   "https://www.hlth.com"
+  ],
+  "expect": [
+   "HLTH"
+  ]
+ },
+ {
+  "domain": "viveevent.com",
+  "rows": 1,
+  "provider": "CHIME / HLTH",
+  "urls": [
+   "https://www.viveevent.com"
+  ],
+  "expect": [
+   "ViVE"
+  ]
+ },
+ {
+  "domain": "jpmorgan.com",
+  "rows": 1,
+  "provider": "J.P. Morgan",
+  "urls": [
+   "https://www.jpmorgan.com/solutions/cib/insights/health-care-conference"
+  ],
+  "expect": [
+   "JP Morgan Healthcare Conference"
+  ]
+ },
+ {
+  "domain": "learning.bmj.com",
+  "rows": 1,
+  "provider": "BMJ Learning",
+  "urls": [
+   "https://learning.bmj.com"
+  ],
+  "expect": [
+   "CPD modules and medical education"
+  ]
+ },
+ {
+  "domain": "mimslearning.co.uk",
+  "rows": 1,
+  "provider": "MIMS Learning",
+  "urls": [
+   "https://www.mimslearning.co.uk"
+  ],
+  "expect": [
+   "CPD modules"
+  ]
+ },
+ {
+  "domain": "medscape.org",
+  "rows": 1,
+  "provider": "Medscape Education",
+  "urls": [
+   "https://www.medscape.org"
+  ],
+  "expect": [
+   "CPD/CME modules"
+  ]
+ },
+ {
+  "domain": "uptodate.com",
+  "rows": 1,
+  "provider": "UpToDate CME",
+  "urls": [
+   "https://www.uptodate.com"
+  ],
+  "expect": [
+   "Clinical CME"
+  ]
+ },
+ {
+  "domain": "learn.nihr.ac.uk",
+  "rows": 1,
+  "provider": "NIHR Learn",
+  "urls": [
+   "https://learn.nihr.ac.uk"
+  ],
+  "expect": [
+   "Research training"
+  ]
+ },
+ {
+  "domain": "nihr.ac.uk",
+  "rows": 1,
+  "provider": "Good Clinical Practice (GCP) Training",
+  "urls": [
+   "https://www.nihr.ac.uk/health-and-care-professionals/learning-and-support/good-clinical-practice.htm"
+  ],
+  "expect": [
+   "Clinical research training"
+  ]
+ },
+ {
+  "domain": "medical-interviews.co.uk",
+  "rows": 1,
+  "provider": "Oxford Medical Training",
+  "urls": [
+   "https://www.medical-interviews.co.uk"
+  ],
+  "expect": [
+   "Leadership and communication courses"
+  ]
+ },
+ {
+  "domain": "iscmedical.co.uk",
+  "rows": 1,
+  "provider": "ISC Medical",
+  "urls": [
+   "https://www.iscmedical.co.uk"
+  ],
+  "expect": [
+   "Medical interview and communication courses"
+  ]
+ },
+ {
+  "domain": "pastest.com",
+  "rows": 1,
+  "provider": "Pastest",
+  "urls": [
+   "https://www.pastest.com"
+  ],
+  "expect": [
+   "MRCP/MRCS exam prep"
+  ]
+ },
+ {
+  "domain": "passmedicine.com",
+  "rows": 1,
+  "provider": "PassMedicine",
+  "urls": [
+   "https://passmedicine.com"
+  ],
+  "expect": [
+   "Medical exam question bank"
+  ]
+ },
+ {
+  "domain": "doctorsacademy.org",
+  "rows": 1,
+  "provider": "Doctors Academy",
+  "urls": [
+   "https://doctorsacademy.org"
+  ],
+  "expect": [
+   "MRCS and surgical courses"
+  ]
+ },
+ {
+  "domain": "schoolofsurgery.org",
+  "rows": 1,
+  "provider": "School of Surgery",
+  "urls": [
+   "https://www.schoolofsurgery.org"
+  ],
+  "expect": [
+   "Surgical training resources"
+  ]
+ },
+ {
+  "domain": "radiopaedia.org",
+  "rows": 1,
+  "provider": "Radiopaedia Courses",
+  "urls": [
+   "https://radiopaedia.org/courses"
+  ],
+  "expect": [
+   "Radiology courses"
+  ]
+ },
+ {
+  "domain": "reviseradiology.com",
+  "rows": 1,
+  "provider": "Revise Radiology",
+  "urls": [
+   "https://www.reviseradiology.com"
+  ],
+  "expect": [
+   "FRCR radiology revision"
+  ]
+ },
+ {
+  "domain": "frcrphysicsnotes.com",
+  "rows": 1,
+  "provider": "FRCR Physics Notes / Courses",
+  "urls": [
+   "https://www.frcrphysicsnotes.com"
+  ],
+  "expect": [
+   "FRCR physics resources"
+  ]
+ },
+ {
+  "domain": "harleyacademy.com",
+  "rows": 1,
+  "provider": "Harley Academy",
+  "urls": [
+   "https://www.harleyacademy.com"
+  ],
+  "expect": [
+   "Aesthetic medicine training"
+  ]
+ },
+ {
+  "domain": "dermamedical.co.uk",
+  "rows": 1,
+  "provider": "Derma Medical",
+  "urls": [
+   "https://dermamedical.co.uk"
+  ],
+  "expect": [
+   "Aesthetic medicine training"
+  ]
+ },
+ {
+  "domain": "matacourses.com",
+  "rows": 1,
+  "provider": "MATA Courses",
+  "urls": [
+   "https://matacourses.com"
+  ],
+  "expect": [
+   "Aesthetic medicine courses"
+  ]
+ },
+ {
+  "domain": "skinvivatraining.com",
+  "rows": 1,
+  "provider": "SkinViva Training",
+  "urls": [
+   "https://www.skinvivatraining.com"
+  ],
+  "expect": [
+   "Aesthetic training"
+  ]
+ },
+ {
+  "domain": "interfaceaesthetics.co.uk",
+  "rows": 1,
+  "provider": "Interface Aesthetics",
+  "urls": [
+   "https://interfaceaesthetics.co.uk"
+  ],
+  "expect": [
+   "Aesthetics courses"
+  ]
+ },
+ {
+  "domain": "theultrasoundsite.co.uk",
+  "rows": 1,
+  "provider": "The Ultrasound Site",
+  "urls": [
+   "https://theultrasoundsite.co.uk"
+  ],
+  "expect": [
+   "POCUS and ultrasound courses"
+  ]
+ },
+ {
+  "domain": "pocus101.com",
+  "rows": 1,
+  "provider": "POCUS 101",
+  "urls": [
+   "https://www.pocus101.com"
+  ],
+  "expect": [
+   "Ultrasound education"
+  ]
+ },
+ {
+  "domain": "ataccgroup.com",
+  "rows": 1,
+  "provider": "ATACC",
+  "urls": [
+   "https://www.ataccgroup.com"
+  ],
+  "expect": [
+   "Anaesthesia Trauma and Critical Care course"
+  ]
+ },
+ {
+  "domain": "phemcast.co.uk",
+  "rows": 1,
+  "provider": "PHEMCAST / Pre-hospital courses",
+  "urls": [
+   "https://www.phemcast.co.uk"
+  ],
+  "expect": [
+   "Pre-hospital education"
+  ]
+ },
+ {
+  "domain": "fmlm.ac.uk",
+  "rows": 1,
+  "provider": "Faculty of Medical Leadership and Management",
+  "urls": [
+   "https://www.fmlm.ac.uk"
+  ],
+  "expect": [
+   "Medical leadership courses"
+  ]
+ },
+ {
+  "domain": "advance-he.ac.uk",
+  "rows": 1,
+  "provider": "Advance HE",
+  "urls": [
+   "https://www.advance-he.ac.uk"
+  ],
+  "expect": [
+   "Teaching and education fellowships"
+  ]
+ },
+ {
+  "domain": "mddus.com",
+  "rows": 1,
+  "provider": "MDDUS Training",
+  "urls": [
+   "https://www.mddus.com/training-and-cpd"
+  ],
+  "expect": [
+   "Medical defence / risk training"
+  ]
+ },
+ {
+  "domain": "themdu.com",
+  "rows": 1,
+  "provider": "MDU CPD",
+  "urls": [
+   "https://www.themdu.com/learn-and-develop"
+  ],
+  "expect": [
+   "Medical defence / risk training"
+  ]
+ },
+ {
+  "domain": "medicalprotection.org",
+  "rows": 1,
+  "provider": "Medical Protection CPD",
+  "urls": [
+   "https://www.medicalprotection.org"
+  ],
+  "expect": [
+   "Medical defence / risk training"
+  ]
+ },
+ {
+  "domain": "ihi.org",
+  "rows": 1,
+  "provider": "IHI Open School",
+  "urls": [
+   "https://www.ihi.org/education/ihi-open-school"
+  ],
+  "expect": [
+   "Quality improvement and patient safety"
+  ]
+ },
+ {
+  "domain": "england.nhs.uk",
+  "rows": 1,
+  "provider": "Health Education England / NHS England",
+  "urls": [
+   "https://www.england.nhs.uk/long-read/nhs-england-workforce-training-and-education/"
+  ],
+  "expect": [
+   "Workforce education"
+  ]
+ },
+ {
+  "domain": "digital-transformation.hee.nhs.uk",
+  "rows": 1,
+  "provider": "NHS Digital Academy",
+  "urls": [
+   "https://digital-transformation.hee.nhs.uk"
+  ],
+  "expect": [
+   "Digital health leadership"
+  ]
+ },
+ {
+  "domain": "facultyofclinicalinformatics.org.uk",
+  "rows": 1,
+  "provider": "Faculty of Clinical Informatics",
+  "urls": [
+   "https://facultyofclinicalinformatics.org.uk"
+  ],
+  "expect": [
+   "Clinical informatics training/events"
+  ]
+ }
+]

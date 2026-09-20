@@ -1,0 +1,568 @@
+{
+  "source_id": 24,
+  "source_name": "Advanced Life Support Group (Courses)",
+  "society": "ALSG",
+  "run_at": "2026-08-16T00:47:16.443225+00:00",
+  "events_scraped": 14,
+  "events_with_gaps_at_first": 14,
+  "events_fixed": 9,
+  "events_still_incomplete": 14,
+  "patches_applied": [
+    {
+      "conference_id": 1163,
+      "conference_name": "APEx Course",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Musculoskeletal & Trauma",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1174,
+      "conference_name": "NAPSTaR Course",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Musculoskeletal & Trauma",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1167,
+      "conference_name": "CPRR Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Southampton",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1167,
+      "conference_name": "CPRR Course",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Musculoskeletal & Trauma",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1164,
+      "conference_name": "Advanced Paediatric Life Support (APLS) \u2014 2 Day Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Birmingham",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1165,
+      "conference_name": "Advanced Paediatric Life Support (APLS) Recertification",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Birmingham",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1173,
+      "conference_name": "Managing Obstetric Emergencies and Trauma (mMOET)",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Oxford",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1176,
+      "conference_name": "POET Course",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Musculoskeletal & Trauma",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1169,
+      "conference_name": "Hospital Major Incident Medical Management and Support (HMIM",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1171,
+      "conference_name": "Major Incident Medical Management and Support (MIMMS) \u2014 2 Da",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1163,
+      "conference_name": "APEx Course",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 3018
+          },
+          "llm_reasoning": "The page has sections for course dates, venues, and course type, but no section or information is provided about registration fees, member rates, non-member rates, day passes, or any other pricing details. The page does provide a link to a factsheet and a VLE site for booking, but no fee information",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees: matched=['apex'] verdict='no' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/pages/fees: matched=['apex'] verdict='no' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book: matched=['apex'] verdict='no' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/tickets: matched=['apex'] verdict='no' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration: matched=['apex'] verdict='no' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration-and-fees: matched=['apex'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1166,
+      "conference_name": "Advanced Trauma Life Support (ATLS)",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 2569
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees: matched=['atls'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/pages/fees: matched=['atls'] verdict='no' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book: matched=['atls'] verdict='no' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/tickets: matched=['atls'] verdict='no' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration: matched=['atls'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration-and-fees: matched=['atls'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1174,
+      "conference_name": "NAPSTaR Course",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 2835
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees: matched=['napstar'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/pages/fees: matched=['napstar'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book: matched=['napstar'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/tickets: matched=['napstar'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration: matched=['napstar'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration-and-fees: matched=['napstar'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1167,
+      "conference_name": "CPRR Course",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 3225
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees: matched=['cprr'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/pages/fees: matched=['cprr'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book: matched=['cprr'] verdict='no' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/tickets: matched=['cprr'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration: matched=['cprr'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration-and-fees: matched=['cprr'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1175,
+      "conference_name": "Paediatric Life Support (PLS)",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 2939
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "skipped_unrelated_zero_tokens: https://www.alsg.org/coursedates/courseview.php/fees",
+            "skipped_unrelated_zero_tokens: https://www.alsg.org/coursedates/courseview.php/pages/fees",
+            "skipped_unrelated_zero_tokens: https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+            "skipped_unrelated_zero_tokens: https://www.alsg.org/coursedates/courseview.php/tickets",
+            "skipped_unrelated_zero_tokens: https://www.alsg.org/coursedates/courseview.php/registration",
+            "skipped_unrelated_zero_tokens: https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1164,
+      "conference_name": "Advanced Paediatric Life Support (APLS) \u2014 2 Day Course",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1165,
+      "conference_name": "Advanced Paediatric Life Support (APLS) Recertification",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 4846
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees: matched=['recertification', 'apls'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/pages/fees: matched=['recertification', 'apls'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book: matched=['recertification', 'apls'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/tickets: matched=['recertification', 'apls'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration: matched=['recertification', 'apls'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration-and-fees: matched=['recertification', 'apls'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1173,
+      "conference_name": "Managing Obstetric Emergencies and Trauma (mMOET)",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 4248
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees: matched=['mmoet'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/pages/fees: matched=['mmoet'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book: matched=['mmoet'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/tickets: matched=['mmoet'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration: matched=['mmoet'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration-and-fees: matched=['mmoet'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1168,
+      "conference_name": "Children and Young People (CYP) APEx Course",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 2306
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees: matched=['apex'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/pages/fees: matched=['apex'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book: matched=['apex'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/tickets: matched=['apex'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration: matched=['apex'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration-and-fees: matched=['apex'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1176,
+      "conference_name": "POET Course",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 2970
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees: matched=['poet'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/pages/fees: matched=['poet'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book: matched=['poet'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/tickets: matched=['poet'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration: matched=['poet'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration-and-fees: matched=['poet'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1169,
+      "conference_name": "Hospital Major Incident Medical Management and Support (HMIM",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 4153
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees: matched=['hmimms'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/pages/fees: matched=['hmimms'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book: matched=['hmimms'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/tickets: matched=['hmimms'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration: matched=['hmimms'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration-and-fees: matched=['hmimms'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1170,
+      "conference_name": "Hospital Major Incident Medical Management and Support (HMIM",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 2242
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1171,
+      "conference_name": "Major Incident Medical Management and Support (MIMMS) \u2014 2 Da",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 3696
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees: matched=['mimms'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/pages/fees: matched=['mimms'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book: matched=['mimms'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/tickets: matched=['mimms'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration: matched=['mimms'] verdict='' ok=False",
+            "llm_event_match https://www.alsg.org/coursedates/courseview.php/registration-and-fees: matched=['mimms'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1172,
+      "conference_name": "Major Incident Medical Management and Support (MIMMS) \u2014 Team",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.alsg.org/coursedates/courseview.php/fees",
+              "https://www.alsg.org/coursedates/courseview.php/pages/fees",
+              "https://www.alsg.org/coursedates/courseview.php/fees-and-how-to-book",
+              "https://www.alsg.org/coursedates/courseview.php/tickets",
+              "https://www.alsg.org/coursedates/courseview.php/registration",
+              "https://www.alsg.org/coursedates/courseview.php/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 2218
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 13,
+  "explorer_successes": 0,
+  "duration_sec": 247.8
+}

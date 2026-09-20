@@ -1,5 +1,21 @@
 {
   "patterns": {
+    "rcpsg.ac.uk|abstract_status|no_abstract_anywhere": {
+      "domain": "rcpsg.ac.uk",
+      "field": "abstract_status",
+      "hits": 3,
+      "method": "no_abstract_anywhere",
+      "promoted": true,
+      "subpage_path": null
+    },
+    "rcpsg.ac.uk|pricing|subpage_text:/education/podiatric-medicine-annual-conference|https://rcpsg.ac.uk/education/podiatric-medicine-annual-conference": {
+      "domain": "rcpsg.ac.uk",
+      "field": "pricing",
+      "hits": 1,
+      "method": "subpage_text:/education/podiatric-medicine-annual-conference",
+      "promoted": false,
+      "subpage_path": "https://rcpsg.ac.uk/education/podiatric-medicine-annual-conference"
+    },
     "www.bopa.org.uk|abstract_status|subpage:/abstract-submission-the-29th-annual-bopa-conference-in-2026/|https://www.bopa.org.uk/abstract-submission-the-29th-annual-bopa-conference-in-2026/": {
       "domain": "www.bopa.org.uk",
       "field": "abstract_status",
@@ -31,6 +47,94 @@
       "method": "vision_subpage:/latest-conference-2026/",
       "promoted": true,
       "subpage_path": null
+    },
+    "www.rcpath.org|abstract_status|no_abstract_anywhere": {
+      "domain": "www.rcpath.org",
+      "field": "abstract_status",
+      "hits": 8,
+      "method": "no_abstract_anywhere",
+      "promoted": true,
+      "subpage_path": null
+    },
+    "www.rcpath.org|pricing|external_text:bsac.org.uk": {
+      "domain": "www.rcpath.org",
+      "field": "pricing",
+      "hits": 2,
+      "method": "external_text:bsac.org.uk",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.rcpath.org|pricing|external_text:collaborativeconferences.co.uk": {
+      "domain": "www.rcpath.org",
+      "field": "pricing",
+      "hits": 1,
+      "method": "external_text:collaborativeconferences.co.uk",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.rcpath.org|pricing|external_text:hartleytaylor.co.uk": {
+      "domain": "www.rcpath.org",
+      "field": "pricing",
+      "hits": 3,
+      "method": "external_text:hartleytaylor.co.uk",
+      "promoted": true,
+      "subpage_path": null
+    },
+    "www.rcpath.org|pricing|external_text:labmed.org.uk": {
+      "domain": "www.rcpath.org",
+      "field": "pricing",
+      "hits": 1,
+      "method": "external_text:labmed.org.uk",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.rcpath.org|pricing|external_text:lymphoma-action.org.uk": {
+      "domain": "www.rcpath.org",
+      "field": "pricing",
+      "hits": 1,
+      "method": "external_text:lymphoma-action.org.uk",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.rcpath.org|pricing|external_text:microbiologysociety.org": {
+      "domain": "www.rcpath.org",
+      "field": "pricing",
+      "hits": 1,
+      "method": "external_text:microbiologysociety.org",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.rcpath.org|pricing|external_text:www.eventbrite.co.uk": {
+      "domain": "www.rcpath.org",
+      "field": "pricing",
+      "hits": 1,
+      "method": "external_text:www.eventbrite.co.uk",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.rcpath.org|pricing|external_text:www.thebagp.org": {
+      "domain": "www.rcpath.org",
+      "field": "pricing",
+      "hits": 1,
+      "method": "external_text:www.thebagp.org",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.rcpsych.ac.uk|abstract_status|no_abstract_anywhere": {
+      "domain": "www.rcpsych.ac.uk",
+      "field": "abstract_status",
+      "hits": 14,
+      "method": "no_abstract_anywhere",
+      "promoted": true,
+      "subpage_path": null
+    },
+    "www.rcpsych.ac.uk|pricing|subpage_text:/events/conferences/detail/2026/12/11/default-calendar/faculty-of-old-age-psychiatry-winter-conference-2026|https://www.rcpsych.ac.uk/events/conferences/detail/2026/12/11/default-calendar/faculty-of-old-age-psychiatry-winter-conference-2026": {
+      "domain": "www.rcpsych.ac.uk",
+      "field": "pricing",
+      "hits": 1,
+      "method": "subpage_text:/events/conferences/detail/2026/12/11/default-calendar/faculty-of-old-age-psychiatry-winter-conference-2026",
+      "promoted": false,
+      "subpage_path": "https://www.rcpsych.ac.uk/events/conferences/detail/2026/12/11/default-calendar/faculty-of-old-age-psychiatry-winter-conference-2026"
     }
   },
   "version": 1

@@ -1,0 +1,353 @@
+{
+ "batch": "top-20",
+ "generated": "2026-08-15",
+ "records": [
+  {
+   "domain": "rcpe.ac.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.rcpe.ac.uk/events",
+   "api_url": "",
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "mixed",
+   "volume_estimate": 30,
+   "expected_found": [
+    "RCPE Evening Medical Updates",
+    "RCPE Symposia"
+   ],
+   "notes": "Drupal site (server-rendered, no WP/JS framework \u2014 platform enum has no 'drupal', closest is static_html). Listing at /events with pagination ?page=0..2 (~12 event teasers per page, dates Sept 2026\u2013Jan 2027 visible). Detail pages carry dates, \u00a3 fees (e.g. \u00a30 members / \u00a320), venue and register links directly. Evening Medical Updates are hybrid (in-person Edinburgh + online + catch-up viewing) \u2014 watch for the on-demand/catch-up wording. PACES prep, Acute Medicine Updates and Online Education not seen on page 1; may appear on later pages or a separate education section."
+  },
+  {
+   "domain": "rcpath.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.rcpath.org/profession/conferences/events.html",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 100,
+   "expected_found": [],
+   "notes": "CMS is Preside (ColdFusion-based), fully server-rendered. The single listing page contains ~506 unique /event/*.html links (past + upcoming mixed; ~186 refs to 2026, 18 to 2027) with dated cards (day badge + month) and CPD credits inline; sample event page shows dates, CPD credits, description and Book Now on the page itself. The worklist 'expect' names are training programmes (Histopathology/Chemical Pathology/etc.), which live under /profession/training.html as curricula, not dated events \u2014 none appeared on the events listing; the events are symposia, webinars and CPD-approved courses instead."
+  },
+  {
+   "domain": "rcpch.ac.uk",
+   "status": "resolved",
+   "listing_url": "https://www.rcpch.ac.uk/events",
+   "platform": "static_html",
+   "js_required": false,
+   "api_url": "",
+   "pagination": "query_param",
+   "volume_estimate": 30,
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "Advisory Appointments Committee Training Day",
+    "Trainee Research Network (Education Seminars TREES)",
+    "Child Protection Study Day 2026 (Scotland)",
+    "Statement and report writing Level 3 (Safeguarding Level 3 family)"
+   ],
+   "notes": "Drupal 10 server-rendered search listing at /events combining events (/news-events/events/*) and courses/webinars (/education-careers/courses/rcpch-course|rcpch-webinar/*); paginated ?page=0..2, dated cards (e.g. 07 October 2026). Detail pages carry the date on-page but the sample event showed no GBP fees inline (some events are free/virtual; fees may need per-course checking). RSS feed exists at /rss/events.xml which could serve as a cheap change-detection source."
+  },
+  {
+   "domain": "rcophth.ac.uk",
+   "status": "resolved",
+   "listing_url": "https://www.rcophth.ac.uk/events-courses/all-events-courses/",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "pagination": "none",
+   "event_type_mix": "mixed",
+   "detail_topology": "external",
+   "volume_estimate": 15,
+   "api_url": "",
+   "expected_found": [
+    "Introduction to Ophthalmic Surgery",
+    "Ocular Trauma",
+    "Cataract Surgery Complications (as CATS / cataract surgery skills incl. posterior capsule management)"
+   ],
+   "notes": "WordPress listing is a single accordion page: each course block gives title, location, description and multiple dated sessions in D/M/YY format (e.g. 5/10/26), each linking to a booking page on the iMIS registrar at ihub.rcophth.ac.uk (Event_Display.aspx?EventKey=...). iHub detail pages are server-rendered ASP.NET (VIEWSTATE) and carry the full date and fees (\u00a3498/\u00a3595 seen) without JS; ~15 EventKey links visible. Basic Phaco / Microsurgical Skills not on this page \u2014 simulation skills courses live under /training/simulation/skills-courses/. Also links an iHub Event_Search.aspx portal and an annual-congress subpage."
+  },
+  {
+   "domain": "resus.org.uk",
+   "status": "resolved",
+   "listing_url": "https://www.resus.org.uk/training-courses",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "api_url": "",
+   "event_type_mix": "course",
+   "detail_topology": "standard_subpages",
+   "pagination": "query_param",
+   "volume_estimate": 75,
+   "expected_found": [
+    "Advanced Life Support (ALS)",
+    "Immediate Life Support (ILS)",
+    "ALS Recertification",
+    "Out-of-Hospital Advanced Life Support (OH-ALS)",
+    "Newborn Life Support (NLS)"
+   ],
+   "notes": "Platform is Drupal 10 + Commerce (not WordPress \u2014 closest enum used). /training-courses is a hub linking ~25 course-type pages (e.g. /training-courses/adult-life-support/als-2-day-course-advanced-life-support); each course page server-renders a Drupal Views 'course_availability' table with dated upcoming sessions (Start date, Course centre, town, organiser contact, availability), paginated via ?page=0..N (~15 pages x 5 rows for ALS). Fees are set locally by each Course Centre \u2014 no per-session price on site (RCUK charges centre \u00a331.57/candidate); booking is by contacting the organiser directly, not online.",
+   "parked_reason": ""
+  },
+  {
+   "domain": "rcsed.ac.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://services.rcsed.ac.uk/events-courses/rcsed-courses-and-events",
+   "api_url": "",
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "mixed",
+   "volume_estimate": 70,
+   "expected_found": [
+    "Edinburgh MRCS OSCE Preparation Course",
+    "Non-Technical Skills for Surgeons (NOTSS)",
+    "Training the Trainers"
+   ],
+   "notes": "Marketing site www.rcsed.ac.uk/events-courses is a landing page; the real catalogue lives on the services.rcsed.ac.uk subdomain (custom CMS, server-rendered, no wp-content) paginated via ?page=1..5 (~15 items/page). Detail pages (/events-courses/<slug>/) carry dated sessions, fees (multiple GBP tiers) and booking on the page itself; mix of conferences/symposia and repeated skills courses with multiple sessions per course page."
+  },
+  {
+   "domain": "rcpsg.ac.uk",
+   "status": "resolved",
+   "listing_url": "https://rcpsg.ac.uk/education",
+   "platform": "static_html",
+   "js_required": false,
+   "pagination": "query_param",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 110,
+   "expected_found": [
+    "MRCS Part B Preparation",
+    "Travel Medicine Courses",
+    "Clinical Skills Courses"
+   ],
+   "api_url": "",
+   "notes": "Drupal 11 server-rendered site; listing paginates via /education?&page=N (pages 1..11, ~10 cards/page, dated cards). Detail pages at /education/{slug} carry fees (member/non-member GBP), venue, and multiple session dates selectable via ?selected_date=YYYY-MM-DD \u2014 good fit for course_sessions model. Booking redirects to community.rcpsg.ac.uk/event/book/... (external registrar for booking only, not needed for scraping)."
+  },
+  {
+   "domain": "rcpsych.ac.uk",
+   "status": "resolved",
+   "listing_url": "https://www.rcpsych.ac.uk/events/conferences",
+   "platform": "static_html",
+   "js_required": false,
+   "api_url": "",
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "mixed",
+   "volume_estimate": 73,
+   "expected_found": [
+    "Leadership and Management Skills Course",
+    "Faculty of General Adult Psychiatry Annual Conference",
+    "Quality Improvement Conference",
+    "Old Age Psychiatry Conference",
+    "Child and Adolescent Psychiatry Conference"
+   ],
+   "notes": "Server-rendered CMS (Sitecore-style calendar): ~73 upcoming dated events all on one page at /events/conferences, detail URLs encode the date (/events/conferences/detail/YYYY/MM/DD/default-calendar/slug). Fees (\u00a3), venue and dates are on the detail page; booking redirects to member.rcpsych.ac.uk Salesforce event-booking (event IDs a3D...). Mix of conferences, courses and webinars; some entries marked [CANCELLED] \u2014 filter those. EventsAir is only referenced for FAQs, not the listing."
+  },
+  {
+   "domain": "fph.org.uk",
+   "status": "resolved",
+   "listing_url": "https://www.fph.org.uk/events-courses-exams/",
+   "platform": "static_html",
+   "js_required": false,
+   "api_url": "",
+   "pagination": "query_param",
+   "volume_estimate": 12,
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "Public Health Conference",
+    "CPD Events"
+   ],
+   "notes": "Server-rendered listing at /events-courses-exams/ with dated cards (e.g. \"3rd Sep 2026\") and query-param pagination ?pageSize=12&pageIndex=N (2 pages currently, ~12 upcoming events incl. Scottish Public Health Conference 2026 and Public Mental Health Conference 2026). Detail pages carry date, fee and register links directly. Not WordPress (no wp-content); custom CMS. Past events archived at /past-events-courses-exams/. Diplomate exam prep and specialty training live under /training-careers/ as static info pages, not dated events."
+  },
+  {
+   "domain": "rcemlearning.co.uk",
+   "status": "out_of_scope",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "",
+   "api_url": "",
+   "event_type_mix": "none",
+   "detail_topology": "unknown",
+   "pagination": "none",
+   "volume_estimate": 0,
+   "expected_found": [
+    "Major Incident Training (as on-demand module 'major-incident-management')",
+    "Safe Sedation (as module 'ketamine-kids-procedural-sedation')",
+    "Paediatric Emergency Medicine (as on-demand modules)",
+    "Ultrasound (as on-demand modules)"
+   ],
+   "parked_reason": "E-learning platform only (WordPress + LearnDash): ~1013 on-demand CPD modules under /modules/, no dated events or bookable course sessions. /events and /courses return 404; no Tribe API. RCEM dated events are on rcem.ac.uk (already sources 6/7/8).",
+   "notes": "Pure on-demand e-learning catalogue behind optional login; expected names exist only as undated modules. Do not onboard; dated RCEM events already covered via rcem.ac.uk sources 6/7/8."
+  },
+  {
+   "domain": "fom.ac.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.fom.ac.uk/media-events/conferences-and-events",
+   "api_url": "",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "event_type_mix": "mixed",
+   "expected_found": [],
+   "notes": "WordPress site with custom /event/ post type (Tribe API 404s). Listing has a date-range filter form and currently shows only one upcoming event (MRO workshops, 04/02/2026-08/10/2026, CPD 5.5/6); detail page carries dates + CPD points server-rendered, registration via external \"View Event Website\" link. Very low volume; many listed items are externally-approved CPD events, and there is also an \"External events\" section. None of the expected course names (MFOM exam prep, OM training etc.) appear as dated events \u2014 those live under static /education pages."
+  },
+  {
+   "domain": "alsg.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.alsg.org/coursedates/courseview.php?coursetype=APLS%202%20day",
+   "api_url": "",
+   "event_type_mix": "course",
+   "detail_topology": "on_event_page",
+   "pagination": "query_param",
+   "volume_estimate": 200,
+   "expected_found": [
+    "Advanced Paediatric Life Support (APLS)",
+    "Major Incident Medical Management and Support (MIMMS)",
+    "Hospital Major Incident Medical Management and Support (HMIMMS)",
+    "Paediatric Life Support Courses"
+   ],
+   "notes": "Main site is a Moodle VLE, but course dates live on a plain server-rendered PHP page at /coursedates/courseview.php?coursetype=<TYPE> with 14 types (APEx, APLS 2 Day, APLS Recertification, ATLS, CPRR, CYP APEx, HMIMMS, HMIMMS Team Provider, MIMMS 2 Day, MIMMS Team Provider, mMOET, NAPSTaR, PLS, POET \u2014 enumerate all in a loop; no PHTLS, ATLS instead). Each table row carries start/end dates (DD-MM-YYYY), venue, fee (e.g. \"Course Fee \u00a3715.00\") and booking note inline; APLS 2 Day alone shows ~60 upcoming sessions. Optional location/startdate POST filters exist but GET with coursetype suffices."
+  },
+  {
+   "domain": "fsem.ac.uk",
+   "status": "parked",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.fsem.ac.uk/news-and-events/events/",
+   "api_url": "",
+   "detail_topology": "mixed",
+   "event_type_mix": "none",
+   "pagination": "none",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "parked_reason": "FSEM is a CPD-accrediting faculty, not an event organiser. Events page (WordPress static blocks, no Tribe API \u2014 /wp-json/tribe/... 404s) shows only a past webinar recording, exam entries linking to exam-info pages, and one already-past external event (Therapy Expo Nov 2025 on therapyexpo.co.uk). No upcoming dated FSEM events or bookable courses; none of the expected course names (SEM Training, MSK Ultrasound, Exercise Medicine, Sports Injury courses) appear \u2014 those are run by third parties that FSEM merely accredits.",
+   "notes": "If ever revisited, the only structured dated content is the Exams Calendar at /careers-and-training/exams/exams-calendar/ (exam sittings, not conferences/courses). External SEM events would come from BASEM (basem.co.uk), which FSEM links to \u2014 consider that as the actual source for the expected course names."
+  },
+  {
+   "domain": "escardio.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.escardio.org/events/congresses/",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "standard_subpages",
+   "pagination": "none",
+   "volume_estimate": 15,
+   "expected_found": [
+    "ESC Congress",
+    "Heart Failure Congress"
+   ],
+   "notes": "Server-rendered corporate CMS (Optimizely-like, not WordPress). /events/congresses/ lists ~11 congresses (ESC Congress 2026, Heart Failure 2027, EHRA 2026/2027, EAPCI 2027, EACVI 2026, ACNAP 2027, etc.) with dated cards; also /events/specialised-events/ and /education/live-events/courses/ exist for extra volume. Each congress is a microsite with subpages for registration/fees/programme, so detail extraction needs to follow subpages under the congress path. Given HFA start URL was a community page; the real listing is site-wide /events/."
+  },
+  {
+   "domain": "fpm.org.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.fpm.org.uk/events/",
+   "api_url": "",
+   "pagination": "query_param",
+   "volume_estimate": 10,
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "MFPM Exam Preparation",
+    "Clinical Trials Courses"
+   ],
+   "notes": "Custom WordPress theme (not Tribe \u2014 /wp-json/tribe/... 404s). Listing at /events/ renders static server-side <article class=\"post-... events\"> cards with title, date (e.g. \"Thursday 20 August 2026\"), time and Online/venue category badge; card links go to /event/<slug>/ detail pages which carry a \"Booking Information\" section with GBP fees on-page (\u00a3350/\u00a3375/\u00a3450 member tiers). Pagination via /events/page/2/ (6 cards p1, 4 p2). Mix of the FPM Annual Conference 2026 (24 Nov 2026, featured), DPM Training Programme exam-revision course modules (MCQ/SAQ/CAP), and free webinars (Women in Clinical Trials, ABPI Code Case Notes). Skip non-event cards like \"FPM Sponsorship Opportunities\" and \"FPM On Demand\" under /events/ slugs."
+  },
+  {
+   "domain": "cosrh.org",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": true,
+   "listing_url": "https://www.cosrh.org/Public/Events",
+   "api_url": "",
+   "detail_topology": "standard_subpages",
+   "event_type_mix": "mixed",
+   "pagination": "unknown",
+   "volume_estimate": 10,
+   "expected_found": [
+    "CoSRH Conference",
+    "Postpartum Contraception Training"
+   ],
+   "notes": "Platform is iMIS Cloud (ASI/Telerik .aspx, tenant COSRH \u2014 this org is the rebranded FSRH). The /Public/Events list is rendered client-side by an iMIS iPart, so Playwright is required; raw curl returns only header/footer. 10 upcoming dated events visible (Sep\u2013Dec 2026), mix of conferences (CoSRH Conference 2026 Manchester, Trainer Conference, Scotland women's health) and courses/webinars (Menopause Care course, DCSRH assessments, Postpartum Contraception Training). Details live on per-event pages at /Public/Event_Display.aspx?EventKey=XXXX. The REST endpoint /api/Event exists but returns 401 anonymously (iMIS token auth would be needed). Diploma/Letters of Competence (IUT/SDI) are qualifications, not listed as dated events. Type filter dropdown exists; no pagination observed with 10 items."
+  },
+  {
+   "domain": "acpgbi.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.acpgbi.org.uk/events",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 20,
+   "expected_found": [
+    "ACPGBI Annual Meetings (category filter /events?type=1103; no upcoming 2026 instance visible on year listing)"
+   ],
+   "notes": "Custom ASP.NET CMS (generator \"lmsitestarterduke\", moduleevents) \u2014 not WordPress despite .org.uk look; /wp-json redirects to .aspx. Server-rendered year-grouped listing at /events with month rows and dated links (/events/{id}/{slug}); navigate years via /events/date/2027 and filter Annual Meetings via /events?type=1103. Listing is an aggregator-style community calendar: many third-party/predatory-looking nursing congresses mixed in with genuine ACPGBI/coloproctology courses and chapter meetings \u2014 filter by type or title. Detail pages carry fees/booking info on-page (e.g. \"No registration fee\")."
+  },
+  {
+   "domain": "asgbi.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.asgbi.org.uk/event-type/asgbi-congress",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "external",
+   "pagination": "none",
+   "volume_estimate": 2,
+   "expected_found": [
+    "ASGBI International Surgical Congress"
+   ],
+   "notes": "Main site is a static Webflow build; /event-type/asgbi-congress cards carry name, date range and venue in HTML server-side (e.g. Congress 2026, 12-14 May 2026, DoubleTree Brighton; Congress 2027, 21-23 May 2027, Manchester Central). A sibling listing /event-type/egs-symposium exists (EGS Symposium events). Detail/registration (\"Learn More\") links go to events.asgbi.org.uk, an Angular SPA event portal (noindex, empty-body, JS-required, module URLs like /asgbievents/modules/263011/html) \u2014 scrape core fields from the Webflow listing and treat the portal only as the outbound registration URL; fees would need JS rendering of the portal."
+  },
+  {
+   "domain": "rcoa.ac.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": true,
+   "listing_url": "https://www.rcoa.ac.uk/events",
+   "api_url": "",
+   "pagination": "query_param",
+   "event_type_mix": "mixed",
+   "detail_topology": "tabs",
+   "volume_estimate": 38,
+   "expected_found": [
+    "Anaesthesia Updates (as 'Anaesthetic Updates')",
+    "Airway (category filter only)"
+   ],
+   "notes": "Drupal (not WordPress \u2014 'wordpress_other' used as closest enum; platform is Drupal) behind a Cloudflare managed challenge: curl and WebFetch get 403/challenge, but headless Playwright loads fine, so js_required is really 'browser required'. Listing at /events with ?page=0..3 (~10 cards/page, dates + city + CPD credits on cards); the worklist URL /events-professional-development 404s. Detail pages have Overview/Programme/Pricing tabs \u2014 fees live on the Pricing tab, not the overview. Mix of conferences, revision courses, webinars, study days; 'Anaesthetic Updates' (Sep + Oct 2026) confirmed, Airway is a filter category (category_id param, e.g. category_id=1791)."
+  },
+  {
+   "domain": "ficm.ac.uk",
+   "status": "resolved",
+   "listing_url": "https://www.ficm.ac.uk/events",
+   "platform": "static_html",
+   "js_required": true,
+   "api_url": "",
+   "pagination": "query_param",
+   "volume_estimate": 15,
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "FFICM Exam Preparation",
+    "Critical Care Ultrasound Courses"
+   ],
+   "notes": "Drupal site fully behind an aggressive Cloudflare interactive challenge: curl, WebFetch and even headless Chromium all get 'Just a moment' 403; only HEADED Chromium (headless=False, --disable-blink-features=AutomationControlled, ~10-30s wait) passed, so GitHub Actions scraping will need a stealth/solver approach. Real listing is /events (NOT /eventslisting, which renders nav only) \u2014 server-rendered dated cards (e.g. '17 August 2026 | 8:00am-17:00pm'), 9 events on page 0 with ?page=1 pager, filters for Date/Location/Category (many items flagged 'External Event'), detail pages at /events/[slug]. Saw FFICM/FCICM exam-prep courses and ultrasound (FAMUS/FUSIC, echo) events; no ICM Annual Meeting visible on page 1."
+  }
+ ]
+}

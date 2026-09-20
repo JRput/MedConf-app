@@ -1,0 +1,843 @@
+{
+  "source_id": 29,
+  "source_name": "Resuscitation Council UK (Courses)",
+  "society": "Resus Council UK",
+  "run_at": "2026-08-16T00:56:14.338792+00:00",
+  "events_scraped": 22,
+  "events_with_gaps_at_first": 22,
+  "events_fixed": 21,
+  "events_still_incomplete": 22,
+  "patches_applied": [
+    {
+      "conference_id": 1538,
+      "conference_name": "ALS: Recertification Short Course (Advanced Life Support)",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Birmingham",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1544,
+      "conference_name": "OH-ALS: 2 Day Course (Out-of-Hospital Advanced Life Support)",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Manchester",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1552,
+      "conference_name": "OH-NLS (Out-of-Hospital Newborn Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1552,
+      "conference_name": "OH-NLS (Out-of-Hospital Newborn Life Support) Course",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1535,
+      "conference_name": "ALS: 2 Day Course (Advanced Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Manchester",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1536,
+      "conference_name": "ALS: Modular (Advanced Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1536,
+      "conference_name": "ALS: Modular (Advanced Life Support) Course",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "hybrid",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1537,
+      "conference_name": "ALS: Recertification (Advanced Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1539,
+      "conference_name": "e-ALS (Advanced Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Manchester",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1541,
+      "conference_name": "FEEL (Focused Echocardiography in Emergency Life Support) Co",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1542,
+      "conference_name": "ILS (Immediate Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1543,
+      "conference_name": "ILS Recertification (Immediate Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1545,
+      "conference_name": "Anaphylaxis essentials",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Belfast",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1546,
+      "conference_name": "BLSi (Basic Life Support Instructor Course)",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1550,
+      "conference_name": "NLS (Newborn Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1554,
+      "conference_name": "ePILS (Paediatric Immediate Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Belfast",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1554,
+      "conference_name": "ePILS (Paediatric Immediate Life Support) Course",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1547,
+      "conference_name": "GIC (Generic Instructor Course)",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1547,
+      "conference_name": "GIC (Generic Instructor Course)",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1547,
+      "conference_name": "GIC (Generic Instructor Course)",
+      "field": "cpd_points",
+      "value_before": "None",
+      "value_after": "15",
+      "method": "heuristic_regex"
+    },
+    {
+      "conference_id": 1555,
+      "conference_name": "PILS (Paediatric Immediate Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Belfast",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1548,
+      "conference_name": "ILSi (Immediate Life Support Instructor Course)",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Birmingham",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1548,
+      "conference_name": "ILSi (Immediate Life Support Instructor Course)",
+      "field": "cpd_points",
+      "value_before": "None",
+      "value_after": "15",
+      "method": "heuristic_regex"
+    },
+    {
+      "conference_id": 1556,
+      "conference_name": "PILS Recertification (Paediatric Immediate Life Support) Cou",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Belfast",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1549,
+      "conference_name": "ARNI (Advanced Resuscitation of the Newborn Infant) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Portsmouth",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1551,
+      "conference_name": "NLS: Recertification (Newborn Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1551,
+      "conference_name": "NLS: Recertification (Newborn Life Support) Course",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1553,
+      "conference_name": "EPALS (European Paediatric Advanced Life Support) Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Norwich",
+      "method": "heuristic_known_city"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1538,
+      "conference_name": "ALS: Recertification Short Course (Advanced Life Support)",
+      "fields": [
+        "venue_name",
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-05/ALS%20Recert%20Course%20programme%20Nov%2025%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 103397
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-05/ALS%20Recert%20Course%20programme%20Nov%2025%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1544,
+      "conference_name": "OH-ALS: 2 Day Course (Out-of-Hospital Advanced Life Support)",
+      "fields": [
+        "venue_name",
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-05/2%20day%20OHALS%20programme%2020%20candidates%20May%2026%20%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 112905
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-05/2%20day%20OHALS%20programme%2020%20candidates%20May%2026%20%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1552,
+      "conference_name": "OH-NLS (Out-of-Hospital Newborn Life Support) Course",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-04/OH%20NLS%20Programme%20Dec%202025%20V2.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 87413
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "skipped_unrelated_zero_tokens: https://www.resus.org.uk/sites/default/files/2026-04/OH%20NLS%20Programme%20Dec%202025%20V2.pdf"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1535,
+      "conference_name": "ALS: 2 Day Course (Advanced Life Support) Course",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/2%20day%20ALS%20programme%2024%20candidates%20IO%20ARS%20Nov%2025%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 117207
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-01/2%20day%20ALS%20programme%2024%20candidates%20IO%20ARS%20Nov%2025%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1536,
+      "conference_name": "ALS: Modular (Advanced Life Support) Course",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/Modular%20ALS%20programme%2024%20candidates%20IO%20ARS%20Nov%2025%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 123224
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-01/Modular%20ALS%20programme%2024%20candidates%20IO%20ARS%20Nov%2025%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1537,
+      "conference_name": "ALS: Recertification (Advanced Life Support) Course",
+      "fields": [
+        "venue_name",
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/ALS%20recert%20programme%20IO%20ARS%20Nov%202025%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 114718
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-01/ALS%20recert%20programme%20IO%20ARS%20Nov%202025%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1539,
+      "conference_name": "e-ALS (Advanced Life Support) Course",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/e-ALS%20programme%20IO%20ARS%20Nov%202025%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 121426
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-01/e-ALS%20programme%20IO%20ARS%20Nov%202025%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1540,
+      "conference_name": "e-ILS (Immediate Life Support e-learning) Course",
+      "fields": [
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/eILS%20Programme%20NOV%202025%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 89236
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-01/eILS%20Programme%20NOV%202025%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1541,
+      "conference_name": "FEEL (Focused Echocardiography in Emergency Life Support) Co",
+      "fields": [
+        "venue_name",
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/FEEL%20Programme%20final%20Jan%2014.pdf",
+              "https://www.resus.org.uk/sites/default/files/2020-05/FEEL-course-regulations.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 266364
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.resus.org.uk/sites/default/files/2026-01/FEEL%20Programme%20final%20Jan%2014.pdf",
+            "skipped_unrelated_zero_tokens: https://www.resus.org.uk/sites/default/files/2020-05/FEEL-course-regulations.pdf"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1542,
+      "conference_name": "ILS (Immediate Life Support) Course",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/ILS%20-%201%20day%20programme%20Nov%202025%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 89901
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-01/ILS%20-%201%20day%20programme%20Nov%202025%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1543,
+      "conference_name": "ILS Recertification (Immediate Life Support) Course",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/ILS%20Recert%20programme%20NOV%202025%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 101091
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-01/ILS%20Recert%20programme%20NOV%202025%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1545,
+      "conference_name": "Anaphylaxis essentials",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 20804
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1546,
+      "conference_name": "BLSi (Basic Life Support Instructor Course)",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 20105
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1550,
+      "conference_name": "NLS (Newborn Life Support) Course",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/NLS%20Programme%2024%20candidates%20%20OCT%202025%20V1.0.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 88067
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "skipped_unrelated_zero_tokens: https://www.resus.org.uk/sites/default/files/2026-01/NLS%20Programme%2024%20candidates%20%20OCT%202025%20V1.0.pdf"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1554,
+      "conference_name": "ePILS (Paediatric Immediate Life Support) Course",
+      "fields": [
+        "venue_name",
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/ePILS%20programme%20Nov%202025%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 107260
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-01/ePILS%20programme%20Nov%202025%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1547,
+      "conference_name": "GIC (Generic Instructor Course)",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2024-12/GIC%204e%20Programme%20candidate%20groups%20of%20four%20NOV24_V1%20.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 88940
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "skipped_unrelated_zero_tokens: https://www.resus.org.uk/sites/default/files/2024-12/GIC%204e%20Programme%20candidate%20groups%20of%20four%20NOV24_V1%20.pdf"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1555,
+      "conference_name": "PILS (Paediatric Immediate Life Support) Course",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/PILS%20programme%20Nov%202025%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 101591
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-01/PILS%20programme%20Nov%202025%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1548,
+      "conference_name": "ILSi (Immediate Life Support Instructor Course)",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2021-11/ILSi%20Programme%20APR%202021.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 107572
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2021-11/ILSi%20Programme%20APR%202021.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1556,
+      "conference_name": "PILS Recertification (Paediatric Immediate Life Support) Cou",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/PILS%20Recertification%20programme%20Nov%202025%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 103685
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.resus.org.uk/sites/default/files/2026-01/PILS%20Recertification%20programme%20Nov%202025%20V1.pdf: matched=['life'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1549,
+      "conference_name": "ARNI (Advanced Resuscitation of the Newborn Infant) Course",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2021-08/ARNI%20Programme%20Final%20for%20Candidates%20APR%202021%20V1.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 103370
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "skipped_unrelated_zero_tokens: https://www.resus.org.uk/sites/default/files/2021-08/ARNI%20Programme%20Final%20for%20Candidates%20APR%202021%20V1.pdf"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1551,
+      "conference_name": "NLS: Recertification (Newborn Life Support) Course",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 26537
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1553,
+      "conference_name": "EPALS (European Paediatric Advanced Life Support) Course",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.resus.org.uk/sites/default/files/2026-01/EPALS%20Programme%20Nov%2025%20V2.pdf"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 136059
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "skipped_unrelated_zero_tokens: https://www.resus.org.uk/sites/default/files/2026-01/EPALS%20Programme%20Nov%2025%20V2.pdf"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 22,
+  "explorer_successes": 0,
+  "duration_sec": 229.1
+}

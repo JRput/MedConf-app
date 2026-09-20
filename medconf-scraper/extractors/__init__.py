@@ -40,6 +40,12 @@ from .estro import ESTROExtractor
 from .sabcs import SABCSExtractor
 from .esgo import ESGOCongressExtractor, ESGOCoursesExtractor
 from .sitc import SITCExtractor
+from .alsg import ALSGExtractor
+from .rcpsg import RCPSGExtractor
+from .rcpath import RCPathExtractor
+from .rcpsych import RCPsychExtractor
+from .rcsed import RCSEdExtractor
+from .resus import ResusExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -67,6 +73,12 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     21: ESGOCongressExtractor,          # ESGO Annual Congress (congress.esgo.org, EUR HTML tables)
     22: ESGOCoursesExtractor,           # ESGO courses listing (esgo.org/esgo-courses, BEM cards)
     23: SITCExtractor,                  # SITC 41st Annual Meeting 2026 (Wix flagship; 2026 pricing behind JS role picker → deferred to remediator)
+    24: ALSGExtractor,                  # Advanced Life Support Group — 14 course-type PHP tables (course/sessions, httpx)
+    25: RCPSGExtractor,                 # RCPSG Glasgow — Drupal /education catalogue (mixed, multi-session courses)
+    26: RCPathExtractor,                # Royal College of Pathologists — Preside CMS single listing (mixed, upcoming/past div split)
+    27: RCPsychExtractor,               # Royal College of Psychiatrists — one-page calendar (mixed, httpx UA workaround for CloudFront WAF)
+    28: RCSEdExtractor,                 # RCSEd — services.rcsed.ac.uk catalogue ?page=1..5 (mixed)
+    29: ResusExtractor,                 # Resuscitation Council UK — course hub + availability tables (course/sessions, no public fees)
 }
 
 

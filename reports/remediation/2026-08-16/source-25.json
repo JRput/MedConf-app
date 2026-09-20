@@ -1,0 +1,1141 @@
+{
+  "source_id": 25,
+  "source_name": "Royal College of Physicians and Surgeons of Glasgow",
+  "society": "RCPSG",
+  "run_at": "2026-08-16T00:52:06.570768+00:00",
+  "events_scraped": 72,
+  "events_with_gaps_at_first": 46,
+  "events_fixed": 45,
+  "events_still_incomplete": 27,
+  "patches_applied": [
+    {
+      "conference_id": 1364,
+      "conference_name": "Surgical Approaches to the Upper Limb for Trauma",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1368,
+      "conference_name": "Practical Advice for New Consultants",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1401,
+      "conference_name": "Vertigo Made Simpler",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1422,
+      "conference_name": "Livingstone Fellowship: Paediatric Surgery in Resource-Limit",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1422,
+      "conference_name": "Livingstone Fellowship: Paediatric Surgery in Resource-Limit",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1462,
+      "conference_name": "MRCS Part A Exam Preparation",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1462,
+      "conference_name": "MRCS Part A Exam Preparation",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1197,
+      "conference_name": "Faculty of Travel Medicine Annual Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1223,
+      "conference_name": "Robotics Conference 2025 Recording",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1223,
+      "conference_name": "Robotics Conference 2025 Recording",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1404,
+      "conference_name": "Shaping the Future: NHS Leadership for an AI-Empowered Workf",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1424,
+      "conference_name": "Livingstone Fellowship: Minimal Access Surgery in Resource-L",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1424,
+      "conference_name": "Livingstone Fellowship: Minimal Access Surgery in Resource-L",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1405,
+      "conference_name": "Surgical Skills for the Emergency Department Resuscitation R",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1406,
+      "conference_name": "Performance Support for Doctors in Training",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1382,
+      "conference_name": "Introduction to Mentoring",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1387,
+      "conference_name": "The College Leadership Lectures: Sir Tom Hunter",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1216,
+      "conference_name": "Frailty Conference Recording",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1216,
+      "conference_name": "Frailty Conference Recording",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1446,
+      "conference_name": "MFDS Part 1 Revision Savings Package",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1446,
+      "conference_name": "MFDS Part 1 Revision Savings Package",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1449,
+      "conference_name": "MRCP(UK) PACES: Consultation",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1449,
+      "conference_name": "MRCP(UK) PACES: Consultation",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1360,
+      "conference_name": "Professional Development Certificate (PDC) in Travel Medicin",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1358,
+      "conference_name": "Let's Talk Travel Health Webinars",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1375,
+      "conference_name": "IMPACT",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1185,
+      "conference_name": "Glasgow Gastro Conference",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1397,
+      "conference_name": "Cancer Conference 2025 Recording",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1397,
+      "conference_name": "Cancer Conference 2025 Recording",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1428,
+      "conference_name": "Essentials of Local Anaesthesia in Podiatry",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1440,
+      "conference_name": "The Lower Limb and Foot in Diabetes: Module 1",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1440,
+      "conference_name": "The Lower Limb and Foot in Diabetes: Module 1",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1443,
+      "conference_name": "The Lower Limb and Foot in Diabetes: Module 2",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1443,
+      "conference_name": "The Lower Limb and Foot in Diabetes: Module 2",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1445,
+      "conference_name": "The Lower Limb and Foot in Diabetes: Module 3",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1445,
+      "conference_name": "The Lower Limb and Foot in Diabetes: Module 3",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1246,
+      "conference_name": "12th Podiatric Sports Medicine Conference 2025 \u2013 Recording",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1246,
+      "conference_name": "12th Podiatric Sports Medicine Conference 2025 \u2013 Recording",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1448,
+      "conference_name": "MRCP(UK) PACES: Communication",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1448,
+      "conference_name": "MRCP(UK) PACES: Communication",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1451,
+      "conference_name": "MRCP(UK) PACES: Cardiology and Neurology",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1451,
+      "conference_name": "MRCP(UK) PACES: Cardiology and Neurology",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1453,
+      "conference_name": "MRCP(UK) PACES: Respiratory and Abdominal",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1453,
+      "conference_name": "MRCP(UK) PACES: Respiratory and Abdominal",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1455,
+      "conference_name": "MRCS PART B OSCE Exam Preparation",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1455,
+      "conference_name": "MRCS PART B OSCE Exam Preparation",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1456,
+      "conference_name": "Palliative Care: Care 24",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1456,
+      "conference_name": "Palliative Care: Care 24",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1458,
+      "conference_name": "Livingstone Fellowship: Rheumatology in Resource-Limited Set",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Glasgow",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1458,
+      "conference_name": "Livingstone Fellowship: Rheumatology in Resource-Limited Set",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1461,
+      "conference_name": "Green Podiatry: Learning module",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Glasgow",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1461,
+      "conference_name": "Green Podiatry: Learning module",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Paediatrics",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1461,
+      "conference_name": "Green Podiatry: Learning module",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1467,
+      "conference_name": "Glasgow Oral Surgery Symposium",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Paediatrics",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1467,
+      "conference_name": "Glasgow Oral Surgery Symposium",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1464,
+      "conference_name": "Difficult Discussions at 3am",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Glasgow",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1464,
+      "conference_name": "Difficult Discussions at 3am",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Paediatrics",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1464,
+      "conference_name": "Difficult Discussions at 3am",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1466,
+      "conference_name": "RCPSG Postgraduate Diploma in Travel Medicine",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1399,
+      "conference_name": "Postgraduate Diploma in International Expedition and Wildern",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Bristol",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1399,
+      "conference_name": "Postgraduate Diploma in International Expedition and Wildern",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1354,
+      "conference_name": "Focus on Neurology for PACES Candidates",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1439,
+      "conference_name": "MRCP(UK) PACES: Online Preparation",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1351,
+      "conference_name": "Training the Clinical Trainer",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1442,
+      "conference_name": "MFDS Part 1: Revision Modules",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1442,
+      "conference_name": "MFDS Part 1: Revision Modules",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1363,
+      "conference_name": "The Emerging Leader",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1355,
+      "conference_name": "Focus on Cardiology for PACES Candidates",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1356,
+      "conference_name": "Core Endoscopic Urology and Peno-Scrotal Surgery",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1459,
+      "conference_name": "Green Podiatry: Teaching Module",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1459,
+      "conference_name": "Green Podiatry: Teaching Module",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1422,
+      "conference_name": "Livingstone Fellowship: Paediatric Surgery in Resource-Limit",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 125835
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1462,
+      "conference_name": "MRCS Part A Exam Preparation",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 125564
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1223,
+      "conference_name": "Robotics Conference 2025 Recording",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 125925
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1424,
+      "conference_name": "Livingstone Fellowship: Minimal Access Surgery in Resource-L",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 124883
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1387,
+      "conference_name": "The College Leadership Lectures: Sir Tom Hunter",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 136728
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1216,
+      "conference_name": "Frailty Conference Recording",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 123560
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1446,
+      "conference_name": "MFDS Part 1 Revision Savings Package",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 126717
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1449,
+      "conference_name": "MRCP(UK) PACES: Consultation",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 127046
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1361,
+      "conference_name": "Active Bystander Training for Tackling Sexual Misconduct in ",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://rcpsg.ac.uk/education/mentorship-training-programme"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 283667
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://rcpsg.ac.uk/education/mentorship-training-programme: matched=['active'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1375,
+      "conference_name": "IMPACT",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1397,
+      "conference_name": "Cancer Conference 2025 Recording",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 123681
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1440,
+      "conference_name": "The Lower Limb and Foot in Diabetes: Module 1",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1443,
+      "conference_name": "The Lower Limb and Foot in Diabetes: Module 2",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1445,
+      "conference_name": "The Lower Limb and Foot in Diabetes: Module 3",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1246,
+      "conference_name": "12th Podiatric Sports Medicine Conference 2025 \u2013 Recording",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1448,
+      "conference_name": "MRCP(UK) PACES: Communication",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 127022
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1451,
+      "conference_name": "MRCP(UK) PACES: Cardiology and Neurology",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 127281
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1453,
+      "conference_name": "MRCP(UK) PACES: Respiratory and Abdominal",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 127120
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1455,
+      "conference_name": "MRCS PART B OSCE Exam Preparation",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 125564
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1456,
+      "conference_name": "Palliative Care: Care 24",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 127787
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1458,
+      "conference_name": "Livingstone Fellowship: Rheumatology in Resource-Limited Set",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 126258
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1461,
+      "conference_name": "Green Podiatry: Learning module",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 125542
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1464,
+      "conference_name": "Difficult Discussions at 3am",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 128492
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1439,
+      "conference_name": "MRCP(UK) PACES: Online Preparation",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 129921
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1351,
+      "conference_name": "Training the Clinical Trainer",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1442,
+      "conference_name": "MFDS Part 1: Revision Modules",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 129295
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1459,
+      "conference_name": "Green Podiatry: Teaching Module",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 125541
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 23,
+  "explorer_successes": 2,
+  "duration_sec": 130.9
+}

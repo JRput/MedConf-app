@@ -1,0 +1,5604 @@
+{
+  "generated_from": "Medical_Courses_Conferences_Master_Comprehensive_v1(Master list).csv",
+  "total_rows": 396,
+  "domains_total": 202,
+  "domains_covered": 16,
+  "domains_new": 184,
+  "domains_likely_out_of_scope": 2,
+  "new": [
+    {
+      "domain": "rcpath.org",
+      "row_count": 14,
+      "providers": [
+        "Royal College of Pathologists"
+      ],
+      "specialties": [
+        "Pathology"
+      ],
+      "urls": [
+        "https://www.rcpath.org/profession/training.html"
+      ],
+      "deep_urls": [
+        "https://www.rcpath.org/profession/training.html"
+      ],
+      "event_hint_urls": [
+        "https://www.rcpath.org/profession/training.html"
+      ],
+      "expected_items": [
+        {
+          "name": "Histopathology Training",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Chemical Pathology Training",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Medical Microbiology Training",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Medical Virology Training",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Haematology Training",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Forensic Histopathology Training",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Diagnostic Neuropathology Training",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Paediatric and Perinatal Pathology Training",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Molecular Pathology Training",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Transfusion Science Training",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Clinical Biochemistry HSST",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Genetics HSST",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "Cytopathology Courses",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        },
+        {
+          "name": "RCPath Annual Conference",
+          "category": "Course",
+          "type": "Training/Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "rcsed.ac.uk",
+      "row_count": 12,
+      "providers": [
+        "Royal College of Surgeons of Edinburgh"
+      ],
+      "specialties": [
+        "Surgery"
+      ],
+      "urls": [
+        "https://www.rcsed.ac.uk/events-courses"
+      ],
+      "deep_urls": [
+        "https://www.rcsed.ac.uk/events-courses"
+      ],
+      "event_hint_urls": [
+        "https://www.rcsed.ac.uk/events-courses"
+      ],
+      "expected_items": [
+        {
+          "name": "Edinburgh MRCS OSCE Preparation Course",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Non-Technical Skills for Surgeons (NOTSS)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Training the Trainers",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Future Surgeons Key Skills",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Future Leaders Programme for Surgeons",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Core Surgical Anatomy Course",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Basic Surgical Skills",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "MRCS Part B Preparation Course",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Surgical Skills for Students",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Human Factors in Surgery",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Surgical Leadership Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Dental Sedation and Medical Emergencies Courses",
+          "category": "Course",
+          "type": "Course"
+        }
+      ]
+    },
+    {
+      "domain": "resus.org.uk",
+      "row_count": 12,
+      "providers": [
+        "Resuscitation Council UK"
+      ],
+      "specialties": [
+        "Resuscitation / Acute Care"
+      ],
+      "urls": [
+        "https://www.resus.org.uk/training-courses"
+      ],
+      "deep_urls": [
+        "https://www.resus.org.uk/training-courses"
+      ],
+      "event_hint_urls": [
+        "https://www.resus.org.uk/training-courses"
+      ],
+      "expected_items": [
+        {
+          "name": "Advanced Life Support (ALS)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Immediate Life Support (ILS)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "ALS Recertification",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Out-of-Hospital Advanced Life Support (OH-ALS)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Newborn Life Support (NLS)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Advanced Resuscitation of the Newborn Infant (ARNI)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "NLS Recertification",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Paediatric Immediate Life Support (PILS)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "European Paediatric Advanced Life Support (EPALS)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Generic Instructor Course (GIC)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Anaphylaxis Essentials",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "ReSPECT Courses",
+          "category": "Course",
+          "type": "Course"
+        }
+      ]
+    },
+    {
+      "domain": "rcpe.ac.uk",
+      "row_count": 10,
+      "providers": [
+        "Royal College of Physicians of Edinburgh"
+      ],
+      "specialties": [
+        "Medicine"
+      ],
+      "urls": [
+        "https://www.rcpe.ac.uk/events"
+      ],
+      "deep_urls": [
+        "https://www.rcpe.ac.uk/events"
+      ],
+      "event_hint_urls": [
+        "https://www.rcpe.ac.uk/events"
+      ],
+      "expected_items": [
+        {
+          "name": "RCPE Evening Medical Updates",
+          "category": "Course",
+          "type": "Course/Event"
+        },
+        {
+          "name": "RCPE Symposia",
+          "category": "Course",
+          "type": "Course/Event"
+        },
+        {
+          "name": "RCPE Online Education",
+          "category": "Course",
+          "type": "Course/Event"
+        },
+        {
+          "name": "MRCP PACES Preparation",
+          "category": "Course",
+          "type": "Course/Event"
+        },
+        {
+          "name": "Acute Medicine Updates",
+          "category": "Course",
+          "type": "Course/Event"
+        },
+        {
+          "name": "Geriatric Medicine Updates",
+          "category": "Course",
+          "type": "Course/Event"
+        },
+        {
+          "name": "Respiratory Medicine Updates",
+          "category": "Course",
+          "type": "Course/Event"
+        },
+        {
+          "name": "Cardiology Updates",
+          "category": "Course",
+          "type": "Course/Event"
+        },
+        {
+          "name": "Neurology Updates",
+          "category": "Course",
+          "type": "Course/Event"
+        },
+        {
+          "name": "Gastroenterology Updates",
+          "category": "Course",
+          "type": "Course/Event"
+        }
+      ]
+    },
+    {
+      "domain": "rcophth.ac.uk",
+      "row_count": 10,
+      "providers": [
+        "Royal College of Ophthalmologists"
+      ],
+      "specialties": [
+        "Ophthalmology"
+      ],
+      "urls": [
+        "https://www.rcophth.ac.uk/events-courses/"
+      ],
+      "deep_urls": [
+        "https://www.rcophth.ac.uk/events-courses/"
+      ],
+      "event_hint_urls": [
+        "https://www.rcophth.ac.uk/events-courses/"
+      ],
+      "expected_items": [
+        {
+          "name": "Introduction to Ophthalmic Surgery",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Basic Phacoemulsification",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Ocular Trauma",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Cataract Surgery Complications",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Microsurgical Skills Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Retina Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Glaucoma Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Oculoplastics Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "FRCOphth Exam Preparation",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "RCOphth Annual Congress",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "rcpch.ac.uk",
+      "row_count": 10,
+      "providers": [
+        "Royal College of Paediatrics and Child Health"
+      ],
+      "specialties": [
+        "Paediatrics"
+      ],
+      "urls": [
+        "https://www.rcpch.ac.uk/events"
+      ],
+      "deep_urls": [
+        "https://www.rcpch.ac.uk/events"
+      ],
+      "event_hint_urls": [
+        "https://www.rcpch.ac.uk/events"
+      ],
+      "expected_items": [
+        {
+          "name": "Safeguarding Level 3",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Child Protection Portal Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Paediatric Sub-specialty Careers Event",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Advisory Appointments Committee Training Day",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Trainee Research Network National Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "How to Manage: When a Child Dies",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "How to Manage: Children and Young People Seeking Asylum",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Supporting Level 4/5 Doctors",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "RCPCH Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Paediatric Leadership Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "rcpsych.ac.uk",
+      "row_count": 10,
+      "providers": [
+        "Royal College of Psychiatrists"
+      ],
+      "specialties": [
+        "Psychiatry"
+      ],
+      "urls": [
+        "https://www.rcpsych.ac.uk/events"
+      ],
+      "deep_urls": [
+        "https://www.rcpsych.ac.uk/events"
+      ],
+      "event_hint_urls": [
+        "https://www.rcpsych.ac.uk/events"
+      ],
+      "expected_items": [
+        {
+          "name": "Leadership and Management Skills Course",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Faculty of General Adult Psychiatry Annual Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Quality Improvement Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Old Age Psychiatry Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Child and Adolescent Psychiatry Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Forensic Psychiatry Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Medical Psychotherapy Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Liaison Psychiatry Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Psychopharmacology Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "MRCPsych CASC Preparation",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "rcpsg.ac.uk",
+      "row_count": 8,
+      "providers": [
+        "Royal College of Physicians and Surgeons of Glasgow"
+      ],
+      "specialties": [
+        "Surgery / Medicine / Travel Medicine"
+      ],
+      "urls": [
+        "https://rcpsg.ac.uk/education"
+      ],
+      "deep_urls": [
+        "https://rcpsg.ac.uk/education"
+      ],
+      "event_hint_urls": [
+        "https://rcpsg.ac.uk/education"
+      ],
+      "expected_items": [
+        {
+          "name": "Basic Surgical Skills",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "MRCS Part B Preparation",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Clinical Skills Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Faculty of Travel Medicine Annual Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Travel Medicine Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "PACES Preparation Course",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Medical Education Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Dentistry and Oral Surgery Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "alsg.org",
+      "row_count": 8,
+      "providers": [
+        "Advanced Life Support Group"
+      ],
+      "specialties": [
+        "Emergency / Paediatrics / Major Incident"
+      ],
+      "urls": [
+        "https://www.alsg.org/"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Advanced Paediatric Life Support (APLS)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Major Incident Medical Management and Support (MIMMS)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Hospital Major Incident Medical Management and Support (HMIMMS)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Pre-Hospital Trauma Life Support (PHTLS)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Paediatric Life Support Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "MedicALS",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Safe Transfer and Retrieval Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Emergency Triage Courses",
+          "category": "Course",
+          "type": "Course"
+        }
+      ]
+    },
+    {
+      "domain": "rcemlearning.co.uk",
+      "row_count": 7,
+      "providers": [
+        "Royal College of Emergency Medicine"
+      ],
+      "specialties": [
+        "Emergency Medicine"
+      ],
+      "urls": [
+        "https://www.rcemlearning.co.uk/"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Beyond the Forgotten Tribe",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Safe Sedation Procedures in Adults",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Emergency Medicine Ultrasound Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Major Incident Training",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Paediatric Emergency Medicine Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Trauma Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Simulation Training for Emergency Medicine",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ficm.ac.uk",
+      "row_count": 5,
+      "providers": [
+        "Faculty of Intensive Care Medicine"
+      ],
+      "specialties": [
+        "Intensive Care Medicine"
+      ],
+      "urls": [
+        "https://www.ficm.ac.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ICM Curriculum Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "ICM Teaching Days",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "FFICM Exam Preparation",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Critical Care Ultrasound Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "ICM Annual Meeting",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "fph.org.uk",
+      "row_count": 5,
+      "providers": [
+        "Faculty of Public Health"
+      ],
+      "specialties": [
+        "Public Health"
+      ],
+      "urls": [
+        "https://www.fph.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Public Health Training",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Diplomate Exam Preparation",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "CPD Events",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Public Health Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Health Protection Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "cosrh.org",
+      "row_count": 5,
+      "providers": [
+        "College of Sexual and Reproductive Healthcare"
+      ],
+      "specialties": [
+        "Sexual & Reproductive Health"
+      ],
+      "urls": [
+        "https://www.cosrh.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Diploma in Sexual and Reproductive Healthcare",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Letter of Competence IUT",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Letter of Competence SDI",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Postpartum Contraception Training",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "CoSRH Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "fom.ac.uk",
+      "row_count": 4,
+      "providers": [
+        "Faculty of Occupational Medicine"
+      ],
+      "specialties": [
+        "Occupational Medicine"
+      ],
+      "urls": [
+        "https://www.fom.ac.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Occupational Medicine Training",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "MFOM Exam Preparation",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Occupational Health Updates",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Ethics in Occupational Medicine",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "fsem.ac.uk",
+      "row_count": 4,
+      "providers": [
+        "Faculty of Sport and Exercise Medicine"
+      ],
+      "specialties": [
+        "Sport & Exercise Medicine"
+      ],
+      "urls": [
+        "https://www.fsem.ac.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "SEM Training",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Musculoskeletal Ultrasound Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Exercise Medicine Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Sports Injury Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "fpm.org.uk",
+      "row_count": 4,
+      "providers": [
+        "Faculty of Pharmaceutical Medicine"
+      ],
+      "specialties": [
+        "Pharmaceutical Medicine"
+      ],
+      "urls": [
+        "https://www.fpm.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Pharmaceutical Medicine Training",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "MFPM Exam Preparation",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Clinical Trials Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Medicines Development Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ]
+    },
+    {
+      "domain": "rcoa.ac.uk",
+      "row_count": 3,
+      "providers": [
+        "Royal College of Anaesthetists / e-Learning for Healthcare"
+      ],
+      "specialties": [
+        "Anaesthesia / Pain / Airway"
+      ],
+      "urls": [
+        "https://www.rcoa.ac.uk/events-professional-development"
+      ],
+      "deep_urls": [
+        "https://www.rcoa.ac.uk/events-professional-development"
+      ],
+      "event_hint_urls": [
+        "https://www.rcoa.ac.uk/events-professional-development"
+      ],
+      "expected_items": [
+        {
+          "name": "Neonatal Airway Course",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Anaesthesia Updates",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Airway Management Courses",
+          "category": "Course",
+          "type": "Course"
+        }
+      ]
+    },
+    {
+      "domain": "escardio.org",
+      "row_count": 2,
+      "providers": [
+        "European Society of Cardiology",
+        "Heart Failure Association of the ESC"
+      ],
+      "specialties": [
+        "Cardiology",
+        "Heart Failure"
+      ],
+      "urls": [
+        "https://www.escardio.org",
+        "https://www.escardio.org/Sub-specialty-communities/Heart-Failure-Association-of-the-ESC-HFA"
+      ],
+      "deep_urls": [
+        "https://www.escardio.org/Sub-specialty-communities/Heart-Failure-Association-of-the-ESC-HFA"
+      ],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESC Congress",
+          "category": "Conference",
+          "type": "Conference"
+        },
+        {
+          "name": "Heart Failure Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "asgbi.org.uk",
+      "row_count": 1,
+      "providers": [
+        "Association of Surgeons of Great Britain and Ireland (ASGBI)"
+      ],
+      "specialties": [
+        "Surgery"
+      ],
+      "urls": [
+        "https://www.asgbi.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ASGBI International Surgical Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "acpgbi.org.uk",
+      "row_count": 1,
+      "providers": [
+        "Association of Coloproctology of Great Britain and Ireland (ACPGBI)"
+      ],
+      "specialties": [
+        "Colorectal Surgery"
+      ],
+      "urls": [
+        "https://www.acpgbi.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ACPGBI Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "augis.org",
+      "row_count": 1,
+      "providers": [
+        "Association of Upper Gastrointestinal Surgery (AUGIS)"
+      ],
+      "specialties": [
+        "Upper GI Surgery"
+      ],
+      "urls": [
+        "https://www.augis.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AUGIS Annual Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "associationofbreastsurgery.org.uk",
+      "row_count": 1,
+      "providers": [
+        "Association of Breast Surgery (ABS)"
+      ],
+      "specialties": [
+        "Breast Surgery"
+      ],
+      "urls": [
+        "https://associationofbreastsurgery.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ABS Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "baets.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Association of Endocrine and Thyroid Surgeons (BAETS)"
+      ],
+      "specialties": [
+        "Endocrine Surgery"
+      ],
+      "urls": [
+        "https://www.baets.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BAETS Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "vascularsociety.org.uk",
+      "row_count": 1,
+      "providers": [
+        "Vascular Society of Great Britain and Ireland"
+      ],
+      "specialties": [
+        "Vascular Surgery"
+      ],
+      "urls": [
+        "https://www.vascularsociety.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Vascular Societies Annual Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "baus.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Association of Urological Surgeons (BAUS)"
+      ],
+      "specialties": [
+        "Urology"
+      ],
+      "urls": [
+        "https://www.baus.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BAUS Annual Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bapras.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Association of Plastic, Reconstructive and Aesthetic Surgeons (BAPRAS)"
+      ],
+      "specialties": [
+        "Plastic Surgery"
+      ],
+      "urls": [
+        "https://www.bapras.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BAPRAS Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "baaps.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Association of Aesthetic Plastic Surgeons (BAAPS)"
+      ],
+      "specialties": [
+        "Plastic Surgery"
+      ],
+      "urls": [
+        "https://baaps.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BAAPS Annual Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "sbns.org.uk",
+      "row_count": 1,
+      "providers": [
+        "Society of British Neurological Surgeons (SBNS)"
+      ],
+      "specialties": [
+        "Neurosurgery"
+      ],
+      "urls": [
+        "https://www.sbns.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "SBNS Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "entuk.org",
+      "row_count": 1,
+      "providers": [
+        "ENT UK"
+      ],
+      "specialties": [
+        "ENT"
+      ],
+      "urls": [
+        "https://www.entuk.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ENT UK Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "boa.ac.uk",
+      "row_count": 1,
+      "providers": [
+        "British Orthopaedic Association (BOA)"
+      ],
+      "specialties": [
+        "Trauma & Orthopaedics"
+      ],
+      "urls": [
+        "https://www.boa.ac.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BOA Annual Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "baskonline.com",
+      "row_count": 1,
+      "providers": [
+        "British Association for Surgery of the Knee (BASK)"
+      ],
+      "specialties": [
+        "Trauma & Orthopaedics"
+      ],
+      "urls": [
+        "https://baskonline.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BASK Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "britishhipsociety.com",
+      "row_count": 1,
+      "providers": [
+        "British Hip Society (BHS)"
+      ],
+      "specialties": [
+        "Trauma & Orthopaedics"
+      ],
+      "urls": [
+        "https://britishhipsociety.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "British Hip Society Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bess.ac.uk",
+      "row_count": 1,
+      "providers": [
+        "British Elbow and Shoulder Society (BESS)"
+      ],
+      "specialties": [
+        "Trauma & Orthopaedics"
+      ],
+      "urls": [
+        "https://bess.ac.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BESS Annual Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bofas.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Orthopaedic Foot & Ankle Society (BOFAS)"
+      ],
+      "specialties": [
+        "Trauma & Orthopaedics"
+      ],
+      "urls": [
+        "https://www.bofas.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BOFAS Annual Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bssh.ac.uk",
+      "row_count": 1,
+      "providers": [
+        "British Society for Surgery of the Hand (BSSH)"
+      ],
+      "specialties": [
+        "Trauma & Orthopaedics"
+      ],
+      "urls": [
+        "https://www.bssh.ac.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BSSH Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bsir.org",
+      "row_count": 1,
+      "providers": [
+        "British Society of Interventional Radiology (BSIR)"
+      ],
+      "specialties": [
+        "Radiology"
+      ],
+      "urls": [
+        "https://www.bsir.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BSIR Annual Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bsbr.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Society of Breast Radiology (BSBR)"
+      ],
+      "specialties": [
+        "Radiology"
+      ],
+      "urls": [
+        "https://www.bsbr.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BSBR Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ukio.org.uk",
+      "row_count": 1,
+      "providers": [
+        "UK Imaging and Oncology Congress (UKIO)"
+      ],
+      "specialties": [
+        "Oncology"
+      ],
+      "urls": [
+        "https://www.ukio.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "UKIO Annual Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ncri.org.uk",
+      "row_count": 1,
+      "providers": [
+        "National Cancer Research Institute (NCRI)"
+      ],
+      "specialties": [
+        "Oncology"
+      ],
+      "urls": [
+        "https://www.ncri.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "NCRI Cancer Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bsg.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Society of Gastroenterology (BSG)"
+      ],
+      "specialties": [
+        "Gastroenterology"
+      ],
+      "urls": [
+        "https://www.bsg.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BSG LIVE",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "basl.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Association for the Study of the Liver (BASL)"
+      ],
+      "specialties": [
+        "Hepatology"
+      ],
+      "urls": [
+        "https://www.basl.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BASL Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "brit-thoracic.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Thoracic Society (BTS)"
+      ],
+      "specialties": [
+        "Respiratory"
+      ],
+      "urls": [
+        "https://www.brit-thoracic.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BTS Winter Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "britishcardiovascularsociety.org",
+      "row_count": 1,
+      "providers": [
+        "British Cardiovascular Society (BCS)"
+      ],
+      "specialties": [
+        "Cardiology"
+      ],
+      "urls": [
+        "https://britishcardiovascularsociety.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BCS Annual Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bcis.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Cardiovascular Intervention Society (BCIS)"
+      ],
+      "specialties": [
+        "Cardiology"
+      ],
+      "urls": [
+        "https://www.bcis.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BCIS Annual Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "theabn.org",
+      "row_count": 1,
+      "providers": [
+        "Association of British Neurologists (ABN)"
+      ],
+      "specialties": [
+        "Neurology"
+      ],
+      "urls": [
+        "https://www.theabn.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ABN Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "biasp.org",
+      "row_count": 1,
+      "providers": [
+        "British and Irish Association of Stroke Physicians (BIASP)"
+      ],
+      "specialties": [
+        "Stroke"
+      ],
+      "urls": [
+        "https://biasp.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "UK Stroke Forum",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "endocrinology.org",
+      "row_count": 1,
+      "providers": [
+        "Society for Endocrinology"
+      ],
+      "specialties": [
+        "Endocrinology"
+      ],
+      "urls": [
+        "https://www.endocrinology.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "SfE BES Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "diabetes.org.uk",
+      "row_count": 1,
+      "providers": [
+        "Diabetes UK"
+      ],
+      "specialties": [
+        "Diabetes"
+      ],
+      "urls": [
+        "https://www.diabetes.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Diabetes UK Professional Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "rheumatology.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Society for Rheumatology (BSR)"
+      ],
+      "specialties": [
+        "Rheumatology"
+      ],
+      "urls": [
+        "https://www.rheumatology.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BSR Annual Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bad.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Association of Dermatologists (BAD)"
+      ],
+      "specialties": [
+        "Dermatology"
+      ],
+      "urls": [
+        "https://www.bad.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BAD Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "britishinfection.org",
+      "row_count": 1,
+      "providers": [
+        "British Infection Association (BIA)"
+      ],
+      "specialties": [
+        "Infectious Diseases"
+      ],
+      "urls": [
+        "https://www.britishinfection.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BIA Spring Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "his.org.uk",
+      "row_count": 1,
+      "providers": [
+        "Healthcare Infection Society (HIS)"
+      ],
+      "specialties": [
+        "Infectious Diseases"
+      ],
+      "urls": [
+        "https://www.his.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "HIS Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "fisconference.com",
+      "row_count": 1,
+      "providers": [
+        "Federation of Infection Societies (FIS)"
+      ],
+      "specialties": [
+        "Infectious Diseases"
+      ],
+      "urls": [
+        "https://fisconference.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [
+        "https://fisconference.com"
+      ],
+      "expected_items": [
+        {
+          "name": "FIS Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bapm.org",
+      "row_count": 1,
+      "providers": [
+        "British Association of Perinatal Medicine (BAPM)"
+      ],
+      "specialties": [
+        "Paediatrics"
+      ],
+      "urls": [
+        "https://www.bapm.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BAPM Annual Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bsped.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Society for Paediatric Endocrinology and Diabetes (BSPED)"
+      ],
+      "specialties": [
+        "Paediatrics"
+      ],
+      "urls": [
+        "https://www.bsped.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BSPED Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bpna.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Paediatric Neurology Association (BPNA)"
+      ],
+      "specialties": [
+        "Paediatrics"
+      ],
+      "urls": [
+        "https://bpna.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BPNA Annual Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bsge.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Society for Gynaecological Endoscopy (BSGE)"
+      ],
+      "specialties": [
+        "O&G"
+      ],
+      "urls": [
+        "https://www.bsge.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BSGE Annual Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bmfms.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Maternal & Fetal Medicine Society (BMFMS)"
+      ],
+      "specialties": [
+        "O&G"
+      ],
+      "urls": [
+        "https://www.bmfms.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BMFMS Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bsccp.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Society for Colposcopy and Cervical Pathology (BSCCP)"
+      ],
+      "specialties": [
+        "O&G"
+      ],
+      "urls": [
+        "https://www.bsccp.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BSCCP Annual Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bdiap.org",
+      "row_count": 1,
+      "providers": [
+        "British Division of the International Academy of Pathology (BDIAP)"
+      ],
+      "specialties": [
+        "Pathology"
+      ],
+      "urls": [
+        "https://bdiap.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BDIAP Symposium",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "b-s-h.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Society for Haematology (BSH)"
+      ],
+      "specialties": [
+        "Haematology"
+      ],
+      "urls": [
+        "https://b-s-h.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BSH Annual Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "bbts.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Blood Transfusion Society (BBTS)"
+      ],
+      "specialties": [
+        "Transfusion"
+      ],
+      "urls": [
+        "https://www.bbts.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BBTS Annual Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ics.ac.uk",
+      "row_count": 1,
+      "providers": [
+        "Intensive Care Society (ICS)"
+      ],
+      "specialties": [
+        "Intensive Care"
+      ],
+      "urls": [
+        "https://ics.ac.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "State of the Art Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "acutemedicine.org.uk",
+      "row_count": 1,
+      "providers": [
+        "Society for Acute Medicine (SAM)"
+      ],
+      "specialties": [
+        "Acute Medicine"
+      ],
+      "urls": [
+        "https://www.acutemedicine.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "SAM Annual Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "apmonline.org",
+      "row_count": 1,
+      "providers": [
+        "Association for Palliative Medicine (APM)"
+      ],
+      "specialties": [
+        "Palliative Medicine"
+      ],
+      "urls": [
+        "https://apmonline.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "APM Supportive & Palliative Care Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "astro.org",
+      "row_count": 1,
+      "providers": [
+        "American Society for Radiation Oncology"
+      ],
+      "specialties": [
+        "Radiation Oncology"
+      ],
+      "urls": [
+        "https://www.astro.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ASTRO Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "hematology.org",
+      "row_count": 1,
+      "providers": [
+        "American Society of Hematology"
+      ],
+      "specialties": [
+        "Haematology / Oncology"
+      ],
+      "urls": [
+        "https://www.hematology.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ASH Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ehaweb.org",
+      "row_count": 1,
+      "providers": [
+        "European Hematology Association"
+      ],
+      "specialties": [
+        "Haematology / Oncology"
+      ],
+      "urls": [
+        "https://ehaweb.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EHA Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ddw.org",
+      "row_count": 1,
+      "providers": [
+        "DDW"
+      ],
+      "specialties": [
+        "Gastroenterology"
+      ],
+      "urls": [
+        "https://ddw.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Digestive Disease Week (DDW)",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ueg.eu",
+      "row_count": 1,
+      "providers": [
+        "United European Gastroenterology"
+      ],
+      "specialties": [
+        "Gastroenterology"
+      ],
+      "urls": [
+        "https://ueg.eu"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "UEG Week",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ecco-ibd.eu",
+      "row_count": 1,
+      "providers": [
+        "European Crohn's and Colitis Organisation"
+      ],
+      "specialties": [
+        "Gastroenterology / IBD"
+      ],
+      "urls": [
+        "https://www.ecco-ibd.eu"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ECCO Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "easl.eu",
+      "row_count": 1,
+      "providers": [
+        "European Association for the Study of the Liver"
+      ],
+      "specialties": [
+        "Hepatology"
+      ],
+      "urls": [
+        "https://easl.eu"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EASL Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "aasld.org",
+      "row_count": 1,
+      "providers": [
+        "American Association for the Study of Liver Diseases"
+      ],
+      "specialties": [
+        "Hepatology"
+      ],
+      "urls": [
+        "https://www.aasld.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AASLD The Liver Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "esge.com",
+      "row_count": 1,
+      "providers": [
+        "European Society of Gastrointestinal Endoscopy"
+      ],
+      "specialties": [
+        "GI Endoscopy"
+      ],
+      "urls": [
+        "https://www.esge.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESGE Days",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "acc.org",
+      "row_count": 1,
+      "providers": [
+        "American College of Cardiology"
+      ],
+      "specialties": [
+        "Cardiology"
+      ],
+      "urls": [
+        "https://www.acc.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ACC Annual Scientific Session",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "heart.org",
+      "row_count": 1,
+      "providers": [
+        "American Heart Association"
+      ],
+      "specialties": [
+        "Cardiology"
+      ],
+      "urls": [
+        "https://www.heart.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AHA Scientific Sessions",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "pcronline.com",
+      "row_count": 1,
+      "providers": [
+        "PCR Online"
+      ],
+      "specialties": [
+        "Cardiology"
+      ],
+      "urls": [
+        "https://www.pcronline.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EuroPCR",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "crf.org",
+      "row_count": 1,
+      "providers": [
+        "Cardiovascular Research Foundation"
+      ],
+      "specialties": [
+        "Cardiology"
+      ],
+      "urls": [
+        "https://www.crf.org/tct"
+      ],
+      "deep_urls": [
+        "https://www.crf.org/tct"
+      ],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "TCT Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ersnet.org",
+      "row_count": 1,
+      "providers": [
+        "European Respiratory Society"
+      ],
+      "specialties": [
+        "Respiratory"
+      ],
+      "urls": [
+        "https://www.ersnet.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ERS Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "thoracic.org",
+      "row_count": 1,
+      "providers": [
+        "American Thoracic Society"
+      ],
+      "specialties": [
+        "Respiratory"
+      ],
+      "urls": [
+        "https://www.thoracic.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ATS International Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "chestnet.org",
+      "row_count": 1,
+      "providers": [
+        "American College of Chest Physicians"
+      ],
+      "specialties": [
+        "Respiratory"
+      ],
+      "urls": [
+        "https://www.chestnet.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "CHEST Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "sccm.org",
+      "row_count": 1,
+      "providers": [
+        "Society of Critical Care Medicine"
+      ],
+      "specialties": [
+        "Critical Care"
+      ],
+      "urls": [
+        "https://www.sccm.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "SCCM Critical Care Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "esicm.org",
+      "row_count": 1,
+      "providers": [
+        "European Society of Intensive Care Medicine"
+      ],
+      "specialties": [
+        "Critical Care"
+      ],
+      "urls": [
+        "https://www.esicm.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESICM LIVES",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "aan.com",
+      "row_count": 1,
+      "providers": [
+        "American Academy of Neurology"
+      ],
+      "specialties": [
+        "Neurology"
+      ],
+      "urls": [
+        "https://www.aan.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AAN Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ean.org",
+      "row_count": 1,
+      "providers": [
+        "European Academy of Neurology"
+      ],
+      "specialties": [
+        "Neurology"
+      ],
+      "urls": [
+        "https://www.ean.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EAN Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "professional.heart.org",
+      "row_count": 1,
+      "providers": [
+        "American Heart Association / ASA"
+      ],
+      "specialties": [
+        "Neurology"
+      ],
+      "urls": [
+        "https://professional.heart.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "International Stroke Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ectrims.eu",
+      "row_count": 1,
+      "providers": [
+        "European Committee for Treatment and Research in Multiple Sclerosis"
+      ],
+      "specialties": [
+        "Multiple Sclerosis"
+      ],
+      "urls": [
+        "https://ectrims.eu"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ECTRIMS Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "aaic.alz.org",
+      "row_count": 1,
+      "providers": [
+        "Alzheimer's Association International Conference"
+      ],
+      "specialties": [
+        "Alzheimer's"
+      ],
+      "urls": [
+        "https://aaic.alz.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AAIC",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "aans.org",
+      "row_count": 1,
+      "providers": [
+        "American Association of Neurological Surgeons"
+      ],
+      "specialties": [
+        "Neurosurgery"
+      ],
+      "urls": [
+        "https://www.aans.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AANS Annual Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "cns.org",
+      "row_count": 1,
+      "providers": [
+        "Congress of Neurological Surgeons"
+      ],
+      "specialties": [
+        "Neurosurgery"
+      ],
+      "urls": [
+        "https://www.cns.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "CNS Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "eans.org",
+      "row_count": 1,
+      "providers": [
+        "European Association of Neurosurgical Societies"
+      ],
+      "specialties": [
+        "Neurosurgery"
+      ],
+      "urls": [
+        "https://www.eans.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EANS Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "wfns.info",
+      "row_count": 1,
+      "providers": [
+        "World Federation of Neurosurgical Societies"
+      ],
+      "specialties": [
+        "Neurosurgery"
+      ],
+      "urls": [
+        "https://wfns.info"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "WFNS World Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "aaos.org",
+      "row_count": 1,
+      "providers": [
+        "American Academy of Orthopaedic Surgeons"
+      ],
+      "specialties": [
+        "Orthopaedics"
+      ],
+      "urls": [
+        "https://www.aaos.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AAOS Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "efort.org",
+      "row_count": 1,
+      "providers": [
+        "European Federation of National Associations of Orthopaedics and Traumatology"
+      ],
+      "specialties": [
+        "Orthopaedics"
+      ],
+      "urls": [
+        "https://www.efort.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EFORT Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "esska.org",
+      "row_count": 1,
+      "providers": [
+        "European Society of Sports Traumatology, Knee Surgery and Arthroscopy"
+      ],
+      "specialties": [
+        "Orthopaedics"
+      ],
+      "urls": [
+        "https://www.esska.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESSKA Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ors.org",
+      "row_count": 1,
+      "providers": [
+        "Orthopaedic Research Society"
+      ],
+      "specialties": [
+        "Orthopaedics"
+      ],
+      "urls": [
+        "https://www.ors.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ORS Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "uroweb.org",
+      "row_count": 1,
+      "providers": [
+        "European Association of Urology"
+      ],
+      "specialties": [
+        "Urology"
+      ],
+      "urls": [
+        "https://uroweb.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EAU Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "auanet.org",
+      "row_count": 1,
+      "providers": [
+        "American Urological Association"
+      ],
+      "specialties": [
+        "Urology"
+      ],
+      "urls": [
+        "https://www.auanet.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AUA Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "siu-urology.org",
+      "row_count": 1,
+      "providers": [
+        "Soci\u00e9t\u00e9 Internationale d'Urologie"
+      ],
+      "specialties": [
+        "Urology"
+      ],
+      "urls": [
+        "https://www.siu-urology.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "SIU Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "aao.org",
+      "row_count": 1,
+      "providers": [
+        "American Academy of Ophthalmology"
+      ],
+      "specialties": [
+        "Ophthalmology"
+      ],
+      "urls": [
+        "https://www.aao.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AAO Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "escrs.org",
+      "row_count": 1,
+      "providers": [
+        "European Society of Cataract and Refractive Surgeons"
+      ],
+      "specialties": [
+        "Ophthalmology"
+      ],
+      "urls": [
+        "https://www.escrs.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESCRS Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "arvo.org",
+      "row_count": 1,
+      "providers": [
+        "Association for Research in Vision and Ophthalmology"
+      ],
+      "specialties": [
+        "Ophthalmology"
+      ],
+      "urls": [
+        "https://www.arvo.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ARVO Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "euretina.org",
+      "row_count": 1,
+      "providers": [
+        "European Society of Retina Specialists"
+      ],
+      "specialties": [
+        "Ophthalmology"
+      ],
+      "urls": [
+        "https://www.euretina.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EURETINA Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "entnet.org",
+      "row_count": 1,
+      "providers": [
+        "American Academy of Otolaryngology - Head and Neck Surgery"
+      ],
+      "specialties": [
+        "ENT"
+      ],
+      "urls": [
+        "https://www.entnet.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AAO-HNSF Annual Meeting & OTO EXPO",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ifosworld.org",
+      "row_count": 1,
+      "providers": [
+        "International Federation of Oto-Rhino-Laryngological Societies"
+      ],
+      "specialties": [
+        "ENT"
+      ],
+      "urls": [
+        "https://www.ifosworld.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "IFOS World Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "aap.org",
+      "row_count": 1,
+      "providers": [
+        "American Academy of Pediatrics"
+      ],
+      "specialties": [
+        "Paediatrics"
+      ],
+      "urls": [
+        "https://www.aap.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AAP National Conference & Exhibition",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "eaps.kenes.com",
+      "row_count": 1,
+      "providers": [
+        "European Academy of Paediatric Societies"
+      ],
+      "specialties": [
+        "Paediatrics"
+      ],
+      "urls": [
+        "https://eaps.kenes.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EAPS Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "espidmeeting.org",
+      "row_count": 1,
+      "providers": [
+        "European Society for Paediatric Infectious Diseases"
+      ],
+      "specialties": [
+        "Paediatric Infectious Diseases"
+      ],
+      "urls": [
+        "https://espidmeeting.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [
+        "https://espidmeeting.org"
+      ],
+      "expected_items": [
+        {
+          "name": "ESPID Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "espnic-online.org",
+      "row_count": 1,
+      "providers": [
+        "European Society of Paediatric and Neonatal Intensive Care"
+      ],
+      "specialties": [
+        "Paediatric Intensive Care"
+      ],
+      "urls": [
+        "https://espnic-online.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESPNIC Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "pas-meeting.org",
+      "row_count": 1,
+      "providers": [
+        "Pediatric Academic Societies"
+      ],
+      "specialties": [
+        "Paediatrics"
+      ],
+      "urls": [
+        "https://www.pas-meeting.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [
+        "https://www.pas-meeting.org"
+      ],
+      "expected_items": [
+        {
+          "name": "PAS Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "acog.org",
+      "row_count": 1,
+      "providers": [
+        "American College of Obstetricians and Gynecologists"
+      ],
+      "specialties": [
+        "Obstetrics & Gynaecology"
+      ],
+      "urls": [
+        "https://www.acog.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ACOG Annual Clinical & Scientific Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "isuog.org",
+      "row_count": 1,
+      "providers": [
+        "International Society of Ultrasound in Obstetrics and Gynecology"
+      ],
+      "specialties": [
+        "Obstetrics & Gynaecology"
+      ],
+      "urls": [
+        "https://www.isuog.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ISUOG World Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "eshre.eu",
+      "row_count": 1,
+      "providers": [
+        "European Society of Human Reproduction and Embryology"
+      ],
+      "specialties": [
+        "Reproductive Medicine"
+      ],
+      "urls": [
+        "https://www.eshre.eu"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESHRE Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "aagl.org",
+      "row_count": 1,
+      "providers": [
+        "American Association of Gynecologic Laparoscopists"
+      ],
+      "specialties": [
+        "Gynaecology"
+      ],
+      "urls": [
+        "https://www.aagl.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AAGL Global Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "endocrine.org",
+      "row_count": 1,
+      "providers": [
+        "Endocrine Society"
+      ],
+      "specialties": [
+        "Endocrinology"
+      ],
+      "urls": [
+        "https://www.endocrine.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ENDO",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ese-hormones.org",
+      "row_count": 1,
+      "providers": [
+        "European Society of Endocrinology"
+      ],
+      "specialties": [
+        "Endocrinology"
+      ],
+      "urls": [
+        "https://www.ese-hormones.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "European Congress of Endocrinology",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "diabetes.org",
+      "row_count": 1,
+      "providers": [
+        "American Diabetes Association"
+      ],
+      "specialties": [
+        "Diabetes"
+      ],
+      "urls": [
+        "https://diabetes.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ADA Scientific Sessions",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "easd.org",
+      "row_count": 1,
+      "providers": [
+        "European Association for the Study of Diabetes"
+      ],
+      "specialties": [
+        "Diabetes"
+      ],
+      "urls": [
+        "https://www.easd.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EASD Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "escmid.org",
+      "row_count": 1,
+      "providers": [
+        "European Society of Clinical Microbiology and Infectious Diseases"
+      ],
+      "specialties": [
+        "Infectious Diseases"
+      ],
+      "urls": [
+        "https://www.escmid.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESCMID Global",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "idweek.org",
+      "row_count": 1,
+      "providers": [
+        "IDSA / SHEA / HIVMA / PIDS / SIDP"
+      ],
+      "specialties": [
+        "Infectious Diseases"
+      ],
+      "urls": [
+        "https://www.idweek.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "IDWeek",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "croiconference.org",
+      "row_count": 1,
+      "providers": [
+        "Conference on Retroviruses and Opportunistic Infections"
+      ],
+      "specialties": [
+        "HIV"
+      ],
+      "urls": [
+        "https://www.croiconference.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [
+        "https://www.croiconference.org"
+      ],
+      "expected_items": [
+        {
+          "name": "CROI",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "iasociety.org",
+      "row_count": 1,
+      "providers": [
+        "International AIDS Society"
+      ],
+      "specialties": [
+        "HIV"
+      ],
+      "urls": [
+        "https://www.iasociety.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "International AIDS Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "eular.org",
+      "row_count": 1,
+      "providers": [
+        "European Alliance of Associations for Rheumatology"
+      ],
+      "specialties": [
+        "Rheumatology"
+      ],
+      "urls": [
+        "https://eular.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EULAR Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "rheumatology.org",
+      "row_count": 1,
+      "providers": [
+        "American College of Rheumatology"
+      ],
+      "specialties": [
+        "Rheumatology"
+      ],
+      "urls": [
+        "https://rheumatology.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ACR Convergence",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "aad.org",
+      "row_count": 1,
+      "providers": [
+        "American Academy of Dermatology"
+      ],
+      "specialties": [
+        "Dermatology"
+      ],
+      "urls": [
+        "https://www.aad.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AAD Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "eadv.org",
+      "row_count": 1,
+      "providers": [
+        "European Academy of Dermatology and Venereology"
+      ],
+      "specialties": [
+        "Dermatology"
+      ],
+      "urls": [
+        "https://www.eadv.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EADV Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "asn-online.org",
+      "row_count": 1,
+      "providers": [
+        "American Society of Nephrology"
+      ],
+      "specialties": [
+        "Nephrology"
+      ],
+      "urls": [
+        "https://www.asn-online.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ASN Kidney Week",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "era-online.org",
+      "row_count": 1,
+      "providers": [
+        "European Renal Association"
+      ],
+      "specialties": [
+        "Nephrology"
+      ],
+      "urls": [
+        "https://www.era-online.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ERA Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "rsna.org",
+      "row_count": 1,
+      "providers": [
+        "Radiological Society of North America"
+      ],
+      "specialties": [
+        "Radiology"
+      ],
+      "urls": [
+        "https://www.rsna.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "RSNA Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "myesr.org",
+      "row_count": 1,
+      "providers": [
+        "European Society of Radiology"
+      ],
+      "specialties": [
+        "Radiology"
+      ],
+      "urls": [
+        "https://www.myesr.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "European Congress of Radiology (ECR)",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "arrs.org",
+      "row_count": 1,
+      "providers": [
+        "American Roentgen Ray Society"
+      ],
+      "specialties": [
+        "Radiology"
+      ],
+      "urls": [
+        "https://www.arrs.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ARRS Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "snmmi.org",
+      "row_count": 1,
+      "providers": [
+        "Society of Nuclear Medicine and Molecular Imaging"
+      ],
+      "specialties": [
+        "Nuclear Medicine"
+      ],
+      "urls": [
+        "https://www.snmmi.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "SNMMI Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "eanm.org",
+      "row_count": 1,
+      "providers": [
+        "European Association of Nuclear Medicine"
+      ],
+      "specialties": [
+        "Nuclear Medicine"
+      ],
+      "urls": [
+        "https://www.eanm.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EANM Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "uscap.org",
+      "row_count": 1,
+      "providers": [
+        "United States and Canadian Academy of Pathology"
+      ],
+      "specialties": [
+        "Pathology"
+      ],
+      "urls": [
+        "https://www.uscap.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "USCAP Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "esp-pathology.org",
+      "row_count": 1,
+      "providers": [
+        "European Society of Pathology"
+      ],
+      "specialties": [
+        "Pathology"
+      ],
+      "urls": [
+        "https://www.esp-pathology.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESP Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "asahq.org",
+      "row_count": 1,
+      "providers": [
+        "American Society of Anesthesiologists"
+      ],
+      "specialties": [
+        "Anaesthesia"
+      ],
+      "urls": [
+        "https://www.asahq.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ASA Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "esaic.org",
+      "row_count": 1,
+      "providers": [
+        "European Society of Anaesthesiology and Intensive Care"
+      ],
+      "specialties": [
+        "Anaesthesia"
+      ],
+      "urls": [
+        "https://www.esaic.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Euroanaesthesia",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "acep.org",
+      "row_count": 1,
+      "providers": [
+        "American College of Emergency Physicians"
+      ],
+      "specialties": [
+        "Emergency Medicine"
+      ],
+      "urls": [
+        "https://www.acep.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ACEP Scientific Assembly",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "eusem.org",
+      "row_count": 1,
+      "providers": [
+        "European Society for Emergency Medicine"
+      ],
+      "specialties": [
+        "Emergency Medicine"
+      ],
+      "urls": [
+        "https://eusem.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "EUSEM Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "fdiworlddental.org",
+      "row_count": 1,
+      "providers": [
+        "FDI World Dental Federation"
+      ],
+      "specialties": [
+        "Dentistry"
+      ],
+      "urls": [
+        "https://www.fdiworlddental.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "FDI World Dental Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "imcas.com",
+      "row_count": 1,
+      "providers": [
+        "IMCAS"
+      ],
+      "specialties": [
+        "Aesthetics"
+      ],
+      "urls": [
+        "https://www.imcas.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "IMCAS World Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "amwc-conference.com",
+      "row_count": 1,
+      "providers": [
+        "Aesthetic & Anti-Aging Medicine World Congress"
+      ],
+      "specialties": [
+        "Aesthetics"
+      ],
+      "urls": [
+        "https://www.amwc-conference.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [
+        "https://www.amwc-conference.com"
+      ],
+      "expected_items": [
+        {
+          "name": "AMWC",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "aceconference.co.uk",
+      "row_count": 1,
+      "providers": [
+        "ACE"
+      ],
+      "specialties": [
+        "Aesthetics"
+      ],
+      "urls": [
+        "https://aceconference.co.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [
+        "https://aceconference.co.uk"
+      ],
+      "expected_items": [
+        {
+          "name": "ACE Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "ccrlondon.com",
+      "row_count": 1,
+      "providers": [
+        "CCR"
+      ],
+      "specialties": [
+        "Aesthetics"
+      ],
+      "urls": [
+        "https://www.ccrlondon.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "CCR London",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "faceconference.com",
+      "row_count": 1,
+      "providers": [
+        "FACE"
+      ],
+      "specialties": [
+        "Aesthetics"
+      ],
+      "urls": [
+        "https://www.faceconference.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [
+        "https://www.faceconference.com"
+      ],
+      "expected_items": [
+        {
+          "name": "FACE Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "himss.org",
+      "row_count": 1,
+      "providers": [
+        "HIMSS"
+      ],
+      "specialties": [
+        "Digital Health"
+      ],
+      "urls": [
+        "https://www.himss.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "HIMSS Global Health Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "digitalhealthrewired.com",
+      "row_count": 1,
+      "providers": [
+        "Digital Health"
+      ],
+      "specialties": [
+        "Digital Health"
+      ],
+      "urls": [
+        "https://digitalhealthrewired.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Digital Health Rewired",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "nhsconfedexpo.org",
+      "row_count": 1,
+      "providers": [
+        "NHS Confederation"
+      ],
+      "specialties": [
+        "Digital Health"
+      ],
+      "urls": [
+        "https://www.nhsconfedexpo.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "NHS ConfedExpo",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "hlth.com",
+      "row_count": 1,
+      "providers": [
+        "HLTH"
+      ],
+      "specialties": [
+        "Digital Health"
+      ],
+      "urls": [
+        "https://www.hlth.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "HLTH",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "viveevent.com",
+      "row_count": 1,
+      "providers": [
+        "CHIME / HLTH"
+      ],
+      "specialties": [
+        "Digital Health"
+      ],
+      "urls": [
+        "https://www.viveevent.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [
+        "https://www.viveevent.com"
+      ],
+      "expected_items": [
+        {
+          "name": "ViVE",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "jpmorgan.com",
+      "row_count": 1,
+      "providers": [
+        "J.P. Morgan"
+      ],
+      "specialties": [
+        "Healthcare Business"
+      ],
+      "urls": [
+        "https://www.jpmorgan.com/solutions/cib/insights/health-care-conference"
+      ],
+      "deep_urls": [
+        "https://www.jpmorgan.com/solutions/cib/insights/health-care-conference"
+      ],
+      "event_hint_urls": [
+        "https://www.jpmorgan.com/solutions/cib/insights/health-care-conference"
+      ],
+      "expected_items": [
+        {
+          "name": "JP Morgan Healthcare Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ]
+    },
+    {
+      "domain": "learning.bmj.com",
+      "row_count": 1,
+      "providers": [
+        "BMJ Learning"
+      ],
+      "specialties": [
+        "Medical Education"
+      ],
+      "urls": [
+        "https://learning.bmj.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "CPD modules and medical education",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "mimslearning.co.uk",
+      "row_count": 1,
+      "providers": [
+        "MIMS Learning"
+      ],
+      "specialties": [
+        "Medical Education"
+      ],
+      "urls": [
+        "https://www.mimslearning.co.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "CPD modules",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "medscape.org",
+      "row_count": 1,
+      "providers": [
+        "Medscape Education"
+      ],
+      "specialties": [
+        "Medical Education"
+      ],
+      "urls": [
+        "https://www.medscape.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "CPD/CME modules",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "uptodate.com",
+      "row_count": 1,
+      "providers": [
+        "UpToDate CME"
+      ],
+      "specialties": [
+        "Medical Education"
+      ],
+      "urls": [
+        "https://www.uptodate.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Clinical CME",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "learn.nihr.ac.uk",
+      "row_count": 1,
+      "providers": [
+        "NIHR Learn"
+      ],
+      "specialties": [
+        "Research"
+      ],
+      "urls": [
+        "https://learn.nihr.ac.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Research training",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "nihr.ac.uk",
+      "row_count": 1,
+      "providers": [
+        "Good Clinical Practice (GCP) Training"
+      ],
+      "specialties": [
+        "Research"
+      ],
+      "urls": [
+        "https://www.nihr.ac.uk/health-and-care-professionals/learning-and-support/good-clinical-practice.htm"
+      ],
+      "deep_urls": [
+        "https://www.nihr.ac.uk/health-and-care-professionals/learning-and-support/good-clinical-practice.htm"
+      ],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Clinical research training",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "medical-interviews.co.uk",
+      "row_count": 1,
+      "providers": [
+        "Oxford Medical Training"
+      ],
+      "specialties": [
+        "Medical Education"
+      ],
+      "urls": [
+        "https://www.medical-interviews.co.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Leadership and communication courses",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "iscmedical.co.uk",
+      "row_count": 1,
+      "providers": [
+        "ISC Medical"
+      ],
+      "specialties": [
+        "Medical Education"
+      ],
+      "urls": [
+        "https://www.iscmedical.co.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Medical interview and communication courses",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "pastest.com",
+      "row_count": 1,
+      "providers": [
+        "Pastest"
+      ],
+      "specialties": [
+        "Exam Prep"
+      ],
+      "urls": [
+        "https://www.pastest.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "MRCP/MRCS exam prep",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "passmedicine.com",
+      "row_count": 1,
+      "providers": [
+        "PassMedicine"
+      ],
+      "specialties": [
+        "Exam Prep"
+      ],
+      "urls": [
+        "https://passmedicine.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Medical exam question bank",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "doctorsacademy.org",
+      "row_count": 1,
+      "providers": [
+        "Doctors Academy"
+      ],
+      "specialties": [
+        "Surgery Exam Prep"
+      ],
+      "urls": [
+        "https://doctorsacademy.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "MRCS and surgical courses",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "schoolofsurgery.org",
+      "row_count": 1,
+      "providers": [
+        "School of Surgery"
+      ],
+      "specialties": [
+        "Surgery Exam Prep"
+      ],
+      "urls": [
+        "https://www.schoolofsurgery.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Surgical training resources",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "radiopaedia.org",
+      "row_count": 1,
+      "providers": [
+        "Radiopaedia Courses"
+      ],
+      "specialties": [
+        "Radiology Exam Prep"
+      ],
+      "urls": [
+        "https://radiopaedia.org/courses"
+      ],
+      "deep_urls": [
+        "https://radiopaedia.org/courses"
+      ],
+      "event_hint_urls": [
+        "https://radiopaedia.org/courses"
+      ],
+      "expected_items": [
+        {
+          "name": "Radiology courses",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "reviseradiology.com",
+      "row_count": 1,
+      "providers": [
+        "Revise Radiology"
+      ],
+      "specialties": [
+        "Radiology Exam Prep"
+      ],
+      "urls": [
+        "https://www.reviseradiology.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "FRCR radiology revision",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "frcrphysicsnotes.com",
+      "row_count": 1,
+      "providers": [
+        "FRCR Physics Notes / Courses"
+      ],
+      "specialties": [
+        "Radiology Exam Prep"
+      ],
+      "urls": [
+        "https://www.frcrphysicsnotes.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "FRCR physics resources",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "harleyacademy.com",
+      "row_count": 1,
+      "providers": [
+        "Harley Academy"
+      ],
+      "specialties": [
+        "Aesthetics"
+      ],
+      "urls": [
+        "https://www.harleyacademy.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Aesthetic medicine training",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "dermamedical.co.uk",
+      "row_count": 1,
+      "providers": [
+        "Derma Medical"
+      ],
+      "specialties": [
+        "Aesthetics"
+      ],
+      "urls": [
+        "https://dermamedical.co.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Aesthetic medicine training",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "matacourses.com",
+      "row_count": 1,
+      "providers": [
+        "MATA Courses"
+      ],
+      "specialties": [
+        "Aesthetics"
+      ],
+      "urls": [
+        "https://matacourses.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [
+        "https://matacourses.com"
+      ],
+      "expected_items": [
+        {
+          "name": "Aesthetic medicine courses",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "skinvivatraining.com",
+      "row_count": 1,
+      "providers": [
+        "SkinViva Training"
+      ],
+      "specialties": [
+        "Aesthetics"
+      ],
+      "urls": [
+        "https://www.skinvivatraining.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [
+        "https://www.skinvivatraining.com"
+      ],
+      "expected_items": [
+        {
+          "name": "Aesthetic training",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "interfaceaesthetics.co.uk",
+      "row_count": 1,
+      "providers": [
+        "Interface Aesthetics"
+      ],
+      "specialties": [
+        "Aesthetics"
+      ],
+      "urls": [
+        "https://interfaceaesthetics.co.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Aesthetics courses",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "theultrasoundsite.co.uk",
+      "row_count": 1,
+      "providers": [
+        "The Ultrasound Site"
+      ],
+      "specialties": [
+        "Emergency / POCUS"
+      ],
+      "urls": [
+        "https://theultrasoundsite.co.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "POCUS and ultrasound courses",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "pocus101.com",
+      "row_count": 1,
+      "providers": [
+        "POCUS 101"
+      ],
+      "specialties": [
+        "Emergency / POCUS"
+      ],
+      "urls": [
+        "https://www.pocus101.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Ultrasound education",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "ataccgroup.com",
+      "row_count": 1,
+      "providers": [
+        "ATACC"
+      ],
+      "specialties": [
+        "Emergency / Trauma"
+      ],
+      "urls": [
+        "https://www.ataccgroup.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Anaesthesia Trauma and Critical Care course",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "phemcast.co.uk",
+      "row_count": 1,
+      "providers": [
+        "PHEMCAST / Pre-hospital courses"
+      ],
+      "specialties": [
+        "Emergency / Trauma"
+      ],
+      "urls": [
+        "https://www.phemcast.co.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Pre-hospital education",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "fmlm.ac.uk",
+      "row_count": 1,
+      "providers": [
+        "Faculty of Medical Leadership and Management"
+      ],
+      "specialties": [
+        "Leadership"
+      ],
+      "urls": [
+        "https://www.fmlm.ac.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Medical leadership courses",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "advance-he.ac.uk",
+      "row_count": 1,
+      "providers": [
+        "Advance HE"
+      ],
+      "specialties": [
+        "Teaching"
+      ],
+      "urls": [
+        "https://www.advance-he.ac.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Teaching and education fellowships",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "mddus.com",
+      "row_count": 1,
+      "providers": [
+        "MDDUS Training"
+      ],
+      "specialties": [
+        "General CPD"
+      ],
+      "urls": [
+        "https://www.mddus.com/training-and-cpd"
+      ],
+      "deep_urls": [
+        "https://www.mddus.com/training-and-cpd"
+      ],
+      "event_hint_urls": [
+        "https://www.mddus.com/training-and-cpd"
+      ],
+      "expected_items": [
+        {
+          "name": "Medical defence / risk training",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "themdu.com",
+      "row_count": 1,
+      "providers": [
+        "MDU CPD"
+      ],
+      "specialties": [
+        "General CPD"
+      ],
+      "urls": [
+        "https://www.themdu.com/learn-and-develop"
+      ],
+      "deep_urls": [
+        "https://www.themdu.com/learn-and-develop"
+      ],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Medical defence / risk training",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "medicalprotection.org",
+      "row_count": 1,
+      "providers": [
+        "Medical Protection CPD"
+      ],
+      "specialties": [
+        "General CPD"
+      ],
+      "urls": [
+        "https://www.medicalprotection.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Medical defence / risk training",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "ihi.org",
+      "row_count": 1,
+      "providers": [
+        "IHI Open School"
+      ],
+      "specialties": [
+        "Quality Improvement"
+      ],
+      "urls": [
+        "https://www.ihi.org/education/ihi-open-school"
+      ],
+      "deep_urls": [
+        "https://www.ihi.org/education/ihi-open-school"
+      ],
+      "event_hint_urls": [
+        "https://www.ihi.org/education/ihi-open-school"
+      ],
+      "expected_items": [
+        {
+          "name": "Quality improvement and patient safety",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "england.nhs.uk",
+      "row_count": 1,
+      "providers": [
+        "Health Education England / NHS England"
+      ],
+      "specialties": [
+        "Quality Improvement"
+      ],
+      "urls": [
+        "https://www.england.nhs.uk/long-read/nhs-england-workforce-training-and-education/"
+      ],
+      "deep_urls": [
+        "https://www.england.nhs.uk/long-read/nhs-england-workforce-training-and-education/"
+      ],
+      "event_hint_urls": [
+        "https://www.england.nhs.uk/long-read/nhs-england-workforce-training-and-education/"
+      ],
+      "expected_items": [
+        {
+          "name": "Workforce education",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "digital-transformation.hee.nhs.uk",
+      "row_count": 1,
+      "providers": [
+        "NHS Digital Academy"
+      ],
+      "specialties": [
+        "Digital Health"
+      ],
+      "urls": [
+        "https://digital-transformation.hee.nhs.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Digital health leadership",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    },
+    {
+      "domain": "facultyofclinicalinformatics.org.uk",
+      "row_count": 1,
+      "providers": [
+        "Faculty of Clinical Informatics"
+      ],
+      "specialties": [
+        "Digital Health"
+      ],
+      "urls": [
+        "https://facultyofclinicalinformatics.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Clinical informatics training/events",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ]
+    }
+  ],
+  "covered": [
+    {
+      "domain": "rcr.ac.uk",
+      "row_count": 18,
+      "providers": [
+        "FRCR Clinical Oncology Courses",
+        "Royal College of Radiologists / e-Learning for Healthcare"
+      ],
+      "specialties": [
+        "Oncology Exam Prep",
+        "Radiology / Clinical Oncology"
+      ],
+      "urls": [
+        "https://www.rcr.ac.uk",
+        "https://www.rcr.ac.uk/clinical-radiology/careers-and-recruitment/specialty-training/e-learning/"
+      ],
+      "deep_urls": [
+        "https://www.rcr.ac.uk/clinical-radiology/careers-and-recruitment/specialty-training/e-learning/"
+      ],
+      "event_hint_urls": [
+        "https://www.rcr.ac.uk/clinical-radiology/careers-and-recruitment/specialty-training/e-learning/"
+      ],
+      "expected_items": [
+        {
+          "name": "Advanced Radiotherapy",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Clinical Medical Imaging",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Clinical Oncology",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "e-RADS: Radiation Safety for Staff",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Focused Acute Medicine Ultrasound",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Guidance for Overseas Radiographers",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "ICU/Echo Ultrasound",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "IRMER Ionising Radiation Regulations Course",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "MRI Safety Course",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "National Breast Imaging Academy",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Proton Beam Therapy",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Radiation Protection for Cardiology",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Radiation Protection for Vascular Surgeons",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "R-ITI Online Radiology Course",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "FRCR Exam Preparation Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "RCR Learning Live",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "UK Imaging and Oncology Congress (UKIO)",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Clinical oncology revision",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ],
+      "active_source_ids": [
+        11,
+        12
+      ]
+    },
+    {
+      "domain": "rcp.ac.uk",
+      "row_count": 15,
+      "providers": [
+        "Royal College of Physicians"
+      ],
+      "specialties": [
+        "Medicine / Leadership"
+      ],
+      "urls": [
+        "https://www.rcp.ac.uk/education-practice/courses/"
+      ],
+      "deep_urls": [
+        "https://www.rcp.ac.uk/education-practice/courses/"
+      ],
+      "event_hint_urls": [
+        "https://www.rcp.ac.uk/education-practice/courses/"
+      ],
+      "expected_items": [
+        {
+          "name": "Chief Registrar Programme",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "SAS Leadership Programme",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Emerging Women Leaders Programme",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Aspiring Medical Director Programme",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "The Role of a Clinical Director",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Developing Yourself as a Senior Medical Leader",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Fundamentals of Quality Improvement",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Aspiring Women Leaders",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Starting Strong as a New Consultant",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Fundamentals of Leading Others",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Educational Supervisor Workshop and Accreditation",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Teach the Teacher",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "PACES Preparation Course",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Medical Registrar Training",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Consultant Development Programme",
+          "category": "Course",
+          "type": "Course"
+        }
+      ],
+      "active_source_ids": [
+        4
+      ]
+    },
+    {
+      "domain": "rcgp.org.uk",
+      "row_count": 15,
+      "providers": [
+        "Royal College of General Practitioners"
+      ],
+      "specialties": [
+        "General Practice"
+      ],
+      "urls": [
+        "https://www.rcgp.org.uk/learning"
+      ],
+      "deep_urls": [
+        "https://www.rcgp.org.uk/learning"
+      ],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "One Day Essentials",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "MRCGP AKT Preparation",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "MRCGP SCA Preparation",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Minor Surgery Skills",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Consulting Skills Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Essentials Webinar Series",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Learn and Connect",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Dermatology for Primary Care",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Women's Health in Primary Care",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Child Health in Primary Care",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Lifestyle Medicine Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Safeguarding Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "GP Leadership Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Urgent and Unscheduled Care Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Musculoskeletal Medicine for GPs",
+          "category": "Course",
+          "type": "Course"
+        }
+      ],
+      "active_source_ids": [
+        1
+      ]
+    },
+    {
+      "domain": "rcseng.ac.uk",
+      "row_count": 12,
+      "providers": [
+        "Royal College of Surgeons of England"
+      ],
+      "specialties": [
+        "Surgery"
+      ],
+      "urls": [
+        "https://www.rcseng.ac.uk/education-and-exams/courses/"
+      ],
+      "deep_urls": [
+        "https://www.rcseng.ac.uk/education-and-exams/courses/"
+      ],
+      "event_hint_urls": [
+        "https://www.rcseng.ac.uk/education-and-exams/courses/"
+      ],
+      "expected_items": [
+        {
+          "name": "Basic Surgical Skills",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Advanced Trauma Life Support (ATLS) Provider",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Advanced Trauma Life Support (ATLS) Instructor",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Care of the Critically Ill Surgical Patient (CCrISP)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Systematic Training in Acute Illness Recognition and Treatment (START)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Core Skills in Laparoscopic Surgery",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Emergency Surgery Course",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Basic Surgical Skills in Cardiothoracic Surgery",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Surgical Anatomy Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Train the Trainers",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Educational Supervisor Training",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Clinical Leadership Courses",
+          "category": "Course",
+          "type": "Course"
+        }
+      ],
+      "active_source_ids": [
+        2,
+        5
+      ]
+    },
+    {
+      "domain": "rcog.org.uk",
+      "row_count": 12,
+      "providers": [
+        "Royal College of Obstetricians and Gynaecologists"
+      ],
+      "specialties": [
+        "Obstetrics & Gynaecology"
+      ],
+      "urls": [
+        "https://www.rcog.org.uk/careers-and-training/courses-events-and-exams/"
+      ],
+      "deep_urls": [
+        "https://www.rcog.org.uk/careers-and-training/courses-events-and-exams/"
+      ],
+      "event_hint_urls": [
+        "https://www.rcog.org.uk/careers-and-training/courses-events-and-exams/"
+      ],
+      "expected_items": [
+        {
+          "name": "Basic Practical Skills in Obstetrics and Gynaecology",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "ROBuST: Assisted Birth Simulation Training",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Annual Professional Development Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "National Trainees Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Labour Ward Leadership",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Basic Ultrasound Training",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Colposcopy Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Fetal Medicine Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Urogynaecology Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "Advanced Labour Ward Practice",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "MRCOG Part 2 Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "MRCOG Part 3 Courses",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ],
+      "active_source_ids": [
+        9,
+        10
+      ]
+    },
+    {
+      "domain": "rcem.ac.uk",
+      "row_count": 3,
+      "providers": [
+        "Royal College of Emergency Medicine"
+      ],
+      "specialties": [
+        "Emergency Medicine"
+      ],
+      "urls": [
+        "https://rcem.ac.uk/events/"
+      ],
+      "deep_urls": [
+        "https://rcem.ac.uk/events/"
+      ],
+      "event_hint_urls": [
+        "https://rcem.ac.uk/events/"
+      ],
+      "expected_items": [
+        {
+          "name": "Cadaver Airway Course",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "RCEM Annual Scientific Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        },
+        {
+          "name": "RCEM CPD Conference",
+          "category": "Course",
+          "type": "Course/Conference"
+        }
+      ],
+      "active_source_ids": [
+        6,
+        7
+      ]
+    },
+    {
+      "domain": "bopa.org.uk",
+      "row_count": 1,
+      "providers": [
+        "British Oncology Pharmacy Association (BOPA)"
+      ],
+      "specialties": [
+        "Oncology"
+      ],
+      "urls": [
+        "https://www.bopa.org.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BOPA Symposium",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ],
+      "active_source_ids": [
+        13
+      ]
+    },
+    {
+      "domain": "btog.org",
+      "row_count": 1,
+      "providers": [
+        "British Thoracic Oncology Group (BTOG)"
+      ],
+      "specialties": [
+        "Oncology"
+      ],
+      "urls": [
+        "https://www.btog.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "BTOG Annual Conference",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ],
+      "active_source_ids": [
+        14
+      ]
+    },
+    {
+      "domain": "asco.org",
+      "row_count": 1,
+      "providers": [
+        "American Society of Clinical Oncology"
+      ],
+      "specialties": [
+        "Oncology"
+      ],
+      "urls": [
+        "https://www.asco.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ASCO Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ],
+      "active_source_ids": [
+        15,
+        16
+      ]
+    },
+    {
+      "domain": "esmo.org",
+      "row_count": 1,
+      "providers": [
+        "European Society for Medical Oncology"
+      ],
+      "specialties": [
+        "Oncology"
+      ],
+      "urls": [
+        "https://www.esmo.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESMO Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ],
+      "active_source_ids": [
+        17
+      ]
+    },
+    {
+      "domain": "estro.org",
+      "row_count": 1,
+      "providers": [
+        "European Society for Radiotherapy and Oncology"
+      ],
+      "specialties": [
+        "Radiation Oncology"
+      ],
+      "urls": [
+        "https://www.estro.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESTRO Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ],
+      "active_source_ids": [
+        19
+      ]
+    },
+    {
+      "domain": "aacr.org",
+      "row_count": 1,
+      "providers": [
+        "American Association for Cancer Research"
+      ],
+      "specialties": [
+        "Oncology"
+      ],
+      "urls": [
+        "https://www.aacr.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "AACR Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ],
+      "active_source_ids": [
+        18
+      ]
+    },
+    {
+      "domain": "sitcancer.org",
+      "row_count": 1,
+      "providers": [
+        "Society for Immunotherapy of Cancer"
+      ],
+      "specialties": [
+        "Oncology"
+      ],
+      "urls": [
+        "https://www.sitcancer.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "SITC Annual Meeting",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ],
+      "active_source_ids": [
+        23
+      ]
+    },
+    {
+      "domain": "esgo.org",
+      "row_count": 1,
+      "providers": [
+        "European Society of Gynaecological Oncology"
+      ],
+      "specialties": [
+        "Oncology"
+      ],
+      "urls": [
+        "https://www.esgo.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "ESGO Congress",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ],
+      "active_source_ids": [
+        21,
+        22
+      ]
+    },
+    {
+      "domain": "sabcs.org",
+      "row_count": 1,
+      "providers": [
+        "San Antonio Breast Cancer Symposium"
+      ],
+      "specialties": [
+        "Oncology"
+      ],
+      "urls": [
+        "https://www.sabcs.org"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "SABCS",
+          "category": "Conference",
+          "type": "Conference"
+        }
+      ],
+      "active_source_ids": [
+        20
+      ]
+    },
+    {
+      "domain": "rsm.ac.uk",
+      "row_count": 1,
+      "providers": [
+        "Royal Society of Medicine"
+      ],
+      "specialties": [
+        "Teaching"
+      ],
+      "urls": [
+        "https://www.rsm.ac.uk"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Medical education events",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ],
+      "active_source_ids": [
+        3
+      ]
+    }
+  ],
+  "likely_out_of_scope": [
+    {
+      "domain": "e-lfh.org.uk",
+      "row_count": 10,
+      "providers": [
+        "Royal College of Anaesthetists / e-Learning for Healthcare",
+        "e-Learning for Healthcare"
+      ],
+      "specialties": [
+        "Anaesthesia / Pain / Airway",
+        "Medical Education"
+      ],
+      "urls": [
+        "https://www.e-lfh.org.uk",
+        "https://www.e-lfh.org.uk/programmes/"
+      ],
+      "deep_urls": [
+        "https://www.e-lfh.org.uk/programmes/"
+      ],
+      "event_hint_urls": [],
+      "expected_items": [
+        {
+          "name": "Core Anaesthesia Training",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Pain Management Course (e-PAIN)",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Management of Procedure-Induced Anxiety in Children",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Tracheostomy Safety Course",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Regional Anaesthesia Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Obstetric Anaesthesia Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Paediatric Anaesthesia Courses",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Anaesthetic Crisis Resource Management",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "Simulation Instructor Training",
+          "category": "Course",
+          "type": "Course"
+        },
+        {
+          "name": "NHS e-learning programmes",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ],
+      "reason": "e-learning module platform, not dated events"
+    },
+    {
+      "domain": "onexamination.com",
+      "row_count": 2,
+      "providers": [
+        "BMJ OnExamination",
+        "OnExamination"
+      ],
+      "specialties": [
+        "Exam Prep"
+      ],
+      "urls": [
+        "https://www.onexamination.com"
+      ],
+      "deep_urls": [],
+      "event_hint_urls": [
+        "https://www.onexamination.com"
+      ],
+      "expected_items": [
+        {
+          "name": "Exam preparation",
+          "category": "Provider",
+          "type": "Course provider"
+        },
+        {
+          "name": "Medical exam question banks",
+          "category": "Provider",
+          "type": "Course provider"
+        }
+      ],
+      "reason": "exam revision product, not events"
+    }
+  ]
+}

@@ -1,0 +1,791 @@
+{
+  "source_id": 27,
+  "source_name": "Royal College of Psychiatrists",
+  "society": "RCPsych",
+  "run_at": "2026-08-16T01:07:35.427817+00:00",
+  "events_scraped": 69,
+  "events_with_gaps_at_first": 59,
+  "events_fixed": 57,
+  "events_still_incomplete": 12,
+  "patches_applied": [
+    {
+      "conference_id": 1341,
+      "conference_name": "CBT-I Insomnia for Psychiatrists",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1425,
+      "conference_name": "Midlands Joint Winter Conference",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1343,
+      "conference_name": "15 minute CBT for use in clinical teams",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1339,
+      "conference_name": "Medico Legal and Capacity Assessments",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1342,
+      "conference_name": "RCPsych Wales SAS and LED Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1345,
+      "conference_name": "QNWA Annual Forum 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1347,
+      "conference_name": "Faculty of General Adult Psychiatry: Transforming Adult Ment",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1348,
+      "conference_name": "EIPN Annual Forum 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1350,
+      "conference_name": "Management of Clozapine",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1391,
+      "conference_name": "RCPsych in Scotland Liaison Faculty Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1359,
+      "conference_name": "Neurodevelopmental Psychiatry SIG Autumn Conference",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1392,
+      "conference_name": "Annual ECT and Neuromodulation Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1398,
+      "conference_name": "Working with long-term physical illness and unexplained symp",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1379,
+      "conference_name": "RCPsych in Wales Faculty of Old Age Psychiatry Conference 20",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1386,
+      "conference_name": "National ACT Collaboration Day 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1389,
+      "conference_name": "PLAN Special Interest Day: Improving Flow in the Emergency D",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1390,
+      "conference_name": "8th International Evolutionary Psychiatry SIG Symposium",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1352,
+      "conference_name": "Oral and physical health with mental health",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1417,
+      "conference_name": "Perinatal Quality Network (PQN) Annual Forum 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1362,
+      "conference_name": "Quality Improvement Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1413,
+      "conference_name": "Traumatic brain injury - what every psychiatrist needs to kn",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1414,
+      "conference_name": "The Coroners Court 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1393,
+      "conference_name": "Planning well for later stages of careers - Retired and Rest",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1395,
+      "conference_name": "QNWA Annual Forum 2025",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1370,
+      "conference_name": "RCPsych in Northern Ireland Winter Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1372,
+      "conference_name": "Foundation Doctor Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1373,
+      "conference_name": "The Art of Mindful Beeing",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1374,
+      "conference_name": "Human Rights: Friend or Foe to Psychiatrist",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1423,
+      "conference_name": "Rehabilitation 10th Annual Forum 2026",
+      "field": "description",
+      "value_before": "None",
+      "value_after": "College News and features International Logout MY CONTENT Login DONATE Search Search Search Become a psychiatrist Become a psychiatrist Choose Psychiatry Choose Psychiatry What is psychiatry? How to b",
+      "method": "heuristic_overview"
+    },
+    {
+      "conference_id": 1423,
+      "conference_name": "Rehabilitation 10th Annual Forum 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1381,
+      "conference_name": "Interdisciplinary conference on careers and clinical practic",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1396,
+      "conference_name": "Revisiting our foundations and exploring new frontiers in Ps",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': True, 'abstract_deadline': '2026-09-30'}",
+      "method": "future_deadline"
+    },
+    {
+      "conference_id": 1400,
+      "conference_name": "Navigating formulation and optimising prescribing",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': True, 'abstract_deadline': '2026-10-16'}",
+      "method": "future_deadline"
+    },
+    {
+      "conference_id": 1411,
+      "conference_name": "Faculty of Eating Disorders Annual Conference 2026 | Working",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1415,
+      "conference_name": "The adolescent mind on trial: neurodivergence, adversity and",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1420,
+      "conference_name": "RCPsych in Scotland Child and Adolescent and Medical Psychot",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1421,
+      "conference_name": "Understanding and managing Personality Disorder in clinical ",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1430,
+      "conference_name": "Connected care: old age liaison psychiatry across the system",
+      "field": "description",
+      "value_before": "Programme launching in late summer for connected care",
+      "value_after": "The programme will be launched in late summer. How will the online event work? This event will be hosted online via a platform called EventsAir. You can watch live, or on-demand later.",
+      "method": "heuristic_overview"
+    },
+    {
+      "conference_id": 1430,
+      "conference_name": "Connected care: old age liaison psychiatry across the system",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1427,
+      "conference_name": "Joint RCPsychiNI CAP Faculty and RCPCH Meeting",
+      "field": "description",
+      "value_before": "The programme will be published in due course.",
+      "value_after": "College News and features International Logout MY CONTENT Login DONATE Search Search Search Become a psychiatrist Become a psychiatrist Choose Psychiatry Choose Psychiatry What is psychiatry? How to b",
+      "method": "heuristic_overview"
+    },
+    {
+      "conference_id": 1427,
+      "conference_name": "Joint RCPsychiNI CAP Faculty and RCPCH Meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1431,
+      "conference_name": "Faculty of Neuropsychiatry Education Day",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1432,
+      "conference_name": "Faculty of Forensic Psychiatry Conference 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1434,
+      "conference_name": "CBT In Practice: A primer for clinicians",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1436,
+      "conference_name": "Faculty of Old Age Psychiatry Annual Conference 2027",
+      "field": "description",
+      "value_before": "Conference programme to be released in Autumn 2026",
+      "value_after": "| Programme The conference programme will be released in Autumn 2026. Call for posters The Faculty of Old Age Psychiatry is inviting poster submissions for our conference in March 2027 in Edinburgh. A",
+      "method": "heuristic_overview"
+    },
+    {
+      "conference_id": 1436,
+      "conference_name": "Faculty of Old Age Psychiatry Annual Conference 2027",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'peer approval Consultant', 'price_gbp': 90.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "explorer:subpage_text:/events/conferences/detail/2026/12/11/default-calendar/faculty-of-old-age-psychiatry-winter-conference-2026"
+    },
+    {
+      "conference_id": 1436,
+      "conference_name": "Faculty of Old Age Psychiatry Annual Conference 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1438,
+      "conference_name": "CBT In Practice: managing depression",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1441,
+      "conference_name": "Faculty of Liaison Psychiatry Annual Conference 2027",
+      "field": "description",
+      "value_before": "The programme will be available closer to the conference.",
+      "value_after": "The Faculty of Liaison Psychiatry Annual Conference is scheduled for 2027, with details about the event not provided in the given text.",
+      "method": "llm_overview"
+    },
+    {
+      "conference_id": 1441,
+      "conference_name": "Faculty of Liaison Psychiatry Annual Conference 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1444,
+      "conference_name": "CBT In Practice: managing anxiety",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1326,
+      "conference_name": "Faculty of Medical Psychotherapy Annual Conference 2026 - Bo",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1327,
+      "conference_name": "RCPsych in Scotland Forensic Faculty Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1328,
+      "conference_name": "Faculty of Neuropsychiatry Annual Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1329,
+      "conference_name": "Dean's Grand Rounds - The Impact of Lifestyle Factors on Men",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1330,
+      "conference_name": "Supporting neurodivergent resident doctors: An overview",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1331,
+      "conference_name": "Faculty of Child and Adolescent Psychiatry Annual Conference",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1332,
+      "conference_name": "Digital Psychiatry SIG Annual Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1333,
+      "conference_name": "Integrating Trauma, \u00a0Personality Disorders and Psychosis",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1334,
+      "conference_name": "Psychotherapeutic Inpatient Psychiatry for Relational Comple",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1335,
+      "conference_name": "SW CRD1 Welcome Event 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1336,
+      "conference_name": "Everything you need to know about hoarding 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1337,
+      "conference_name": "Key principles of leadership in psychiatry",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1359,
+      "conference_name": "Neurodevelopmental Psychiatry SIG Autumn Conference",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1392,
+      "conference_name": "Annual ECT and Neuromodulation Conference 2026",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1412,
+      "conference_name": "Public Mental Health Conference 2026",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpsych.ac.uk/training/your-training/routes-to-registration",
+              "https://www.rcpsych.ac.uk/training/your-training/cost-of-training",
+              "https://www.rcpsych.ac.uk/training/cpd-elearning",
+              "https://www.rcpsych.ac.uk/members/submitting-your-cpd",
+              "https://www.rcpsych.ac.uk/members/special-interest-groups/annual-sig-newsletters",
+              "https://www.rcpsych.ac.uk/events/congress/registration",
+              "https://www.rcpsych.ac.uk/events/congress/programme",
+              "https://www.rcpsych.ac.uk/improving-care/ccqi/multi-source-feedback",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/quality-improvement-programmes",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/culture-of-care-programme",
+              "https://www.rcpsych.ac.uk/mental-health/mental-illnesses-and-mental-health-problems/feeling-overwhelmed",
+              "https://www.rcpsych.ac.uk/mental-health/treatments-and-wellbeing/lithium-in-pregnancy-and-breastfeeding",
+              "https://forms.office.com/e/hQUrhM4JgA"
+            ],
+            "images_ocred": 32,
+            "total_text_chars": 714611
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "external_followed: https://forms.office.com/e/hQUrhM4JgA (link text: 'Register your interest to receive programme and booking updates')",
+            "skipped_unrelated_zero_tokens: https://forms.office.com/e/hQUrhM4JgA"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1386,
+      "conference_name": "National ACT Collaboration Day 2026",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1423,
+      "conference_name": "Rehabilitation 10th Annual Forum 2026",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpsych.ac.uk/training/your-training/routes-to-registration",
+              "https://www.rcpsych.ac.uk/training/your-training/cost-of-training",
+              "https://www.rcpsych.ac.uk/training/cpd-elearning",
+              "https://www.rcpsych.ac.uk/members/submitting-your-cpd",
+              "https://www.rcpsych.ac.uk/members/special-interest-groups/annual-sig-newsletters",
+              "https://www.rcpsych.ac.uk/events/congress/registration",
+              "https://www.rcpsych.ac.uk/events/congress/programme",
+              "https://www.rcpsych.ac.uk/improving-care/ccqi/multi-source-feedback",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/quality-improvement-programmes",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/culture-of-care-programme",
+              "https://www.rcpsych.ac.uk/mental-health/mental-illnesses-and-mental-health-problems/feeling-overwhelmed",
+              "https://www.rcpsych.ac.uk/mental-health/treatments-and-wellbeing/lithium-in-pregnancy-and-breastfeeding"
+            ],
+            "images_ocred": 32,
+            "total_text_chars": 647537
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": []
+        }
+      ]
+    },
+    {
+      "conference_id": 1420,
+      "conference_name": "RCPsych in Scotland Child and Adolescent and Medical Psychot",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpsych.ac.uk/training/your-training/routes-to-registration",
+              "https://www.rcpsych.ac.uk/training/your-training/cost-of-training",
+              "https://www.rcpsych.ac.uk/training/cpd-elearning",
+              "https://www.rcpsych.ac.uk/members/submitting-your-cpd",
+              "https://www.rcpsych.ac.uk/members/special-interest-groups/annual-sig-newsletters",
+              "https://www.rcpsych.ac.uk/events/congress/registration",
+              "https://www.rcpsych.ac.uk/events/congress/programme",
+              "https://www.rcpsych.ac.uk/improving-care/ccqi/multi-source-feedback",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/quality-improvement-programmes",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/culture-of-care-programme",
+              "https://www.rcpsych.ac.uk/mental-health/mental-illnesses-and-mental-health-problems/feeling-overwhelmed",
+              "https://www.rcpsych.ac.uk/mental-health/treatments-and-wellbeing/lithium-in-pregnancy-and-breastfeeding",
+              "https://www.rcpsych.ac.uk/docs/default-source/events/2026-events/devolved-nations/scotland/rcpsychis-cap-mp-abstract-form-2026.docx",
+              "https://events.rcpsych.ac.uk/rcpsychis-cap-and-psychotherapy-joint-faculty-conference"
+            ],
+            "images_ocred": 32,
+            "total_text_chars": 690504
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpsych.ac.uk/docs/default-source/events/2026-events/devolved-nations/scotland/rcpsychis-cap-mp-abstract-form-2026.docx",
+            "external_followed: https://events.rcpsych.ac.uk/rcpsychis-cap-and-psychotherapy-joint-faculty-conference (link text: 'Book Now')",
+            "llm_event_match https://events.rcpsych.ac.uk/rcpsychis-cap-and-psychotherapy-joint-faculty-conference: matched=['scotland', 'rcpsych'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1441,
+      "conference_name": "Faculty of Liaison Psychiatry Annual Conference 2027",
+      "fields": [
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpsych.ac.uk/training/your-training/routes-to-registration",
+              "https://www.rcpsych.ac.uk/training/your-training/cost-of-training",
+              "https://www.rcpsych.ac.uk/training/cpd-elearning",
+              "https://www.rcpsych.ac.uk/members/submitting-your-cpd",
+              "https://www.rcpsych.ac.uk/members/special-interest-groups/annual-sig-newsletters",
+              "https://www.rcpsych.ac.uk/events/congress/registration",
+              "https://www.rcpsych.ac.uk/events/congress/programme",
+              "https://www.rcpsych.ac.uk/improving-care/ccqi/multi-source-feedback",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/quality-improvement-programmes",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/culture-of-care-programme",
+              "https://www.rcpsych.ac.uk/mental-health/mental-illnesses-and-mental-health-problems/feeling-overwhelmed",
+              "https://www.rcpsych.ac.uk/mental-health/treatments-and-wellbeing/lithium-in-pregnancy-and-breastfeeding",
+              "https://forms.cloud.microsoft/e/2y7GhEj2Ai"
+            ],
+            "images_ocred": 32,
+            "total_text_chars": 709255
+          },
+          "llm_reasoning": "The page has 'About the College', 'News and features', 'International', 'Logout', 'MY CONTENT', 'Login', 'DONATE', 'Search', 'Become a psychiatrist', 'Choose Psychiatry', and other sections, but no 'Fees' or 'Registration Fees' section. The text appears to be related to the Royal College of Psychiat",
+          "notes": [
+            "external_followed: https://forms.cloud.microsoft/e/2y7GhEj2Ai (link text: 'Register your interest')",
+            "skipped_unrelated_zero_tokens: https://forms.cloud.microsoft/e/2y7GhEj2Ai"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1328,
+      "conference_name": "Faculty of Neuropsychiatry Annual Conference 2026",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1329,
+      "conference_name": "Dean's Grand Rounds - The Impact of Lifestyle Factors on Men",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpsych.ac.uk/training/your-training/routes-to-registration",
+              "https://www.rcpsych.ac.uk/training/your-training/cost-of-training",
+              "https://www.rcpsych.ac.uk/training/cpd-elearning",
+              "https://www.rcpsych.ac.uk/members/submitting-your-cpd",
+              "https://www.rcpsych.ac.uk/members/special-interest-groups/annual-sig-newsletters",
+              "https://www.rcpsych.ac.uk/events/congress/registration",
+              "https://www.rcpsych.ac.uk/events/congress/programme",
+              "https://www.rcpsych.ac.uk/improving-care/ccqi/multi-source-feedback",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/quality-improvement-programmes",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/culture-of-care-programme",
+              "https://www.rcpsych.ac.uk/mental-health/mental-illnesses-and-mental-health-problems/feeling-overwhelmed",
+              "https://www.rcpsych.ac.uk/mental-health/treatments-and-wellbeing/lithium-in-pregnancy-and-breastfeeding"
+            ],
+            "images_ocred": 30,
+            "total_text_chars": 651561
+          },
+          "llm_reasoning": "The page has 'About the College', 'News and features', 'International', 'Logout', 'MY CONTENT', 'Login', 'DONATE', 'Search', 'Become a psychiatrist', 'Choose Psychiatry', 'What is psychiatry?', 'How to become a psychiatrist', 'Why choose psychiatry?', 'What next?', 'On a break from training?', 'Choo",
+          "notes": [
+            "llm_event_match https://www.rcpsych.ac.uk/training/cpd-elearning: matched=['practice', 'mental'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1331,
+      "conference_name": "Faculty of Child and Adolescent Psychiatry Annual Conference",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1336,
+      "conference_name": "Everything you need to know about hoarding 2026",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1338,
+      "conference_name": "RCPsych in Scotland Leadership and Management Skills Course ",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpsych.ac.uk/training/your-training/routes-to-registration",
+              "https://www.rcpsych.ac.uk/training/your-training/cost-of-training",
+              "https://www.rcpsych.ac.uk/training/cpd-elearning",
+              "https://www.rcpsych.ac.uk/members/submitting-your-cpd",
+              "https://www.rcpsych.ac.uk/members/special-interest-groups/annual-sig-newsletters",
+              "https://www.rcpsych.ac.uk/events/congress/registration",
+              "https://www.rcpsych.ac.uk/events/congress/programme",
+              "https://www.rcpsych.ac.uk/improving-care/ccqi/multi-source-feedback",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/quality-improvement-programmes",
+              "https://www.rcpsych.ac.uk/improving-care/nccmh/culture-of-care-programme",
+              "https://www.rcpsych.ac.uk/mental-health/mental-illnesses-and-mental-health-problems/feeling-overwhelmed",
+              "https://www.rcpsych.ac.uk/mental-health/treatments-and-wellbeing/lithium-in-pregnancy-and-breastfeeding"
+            ],
+            "images_ocred": 32,
+            "total_text_chars": 648556
+          },
+          "llm_reasoning": "The page has 'About the College', 'News and features', 'International', 'Logout', 'MY CONTENT', 'Login', 'DONATE', 'Search', 'Become a psychiatrist', 'Choose Psychiatry', 'What is psychiatry?', 'How to become a psychiatrist', 'Why choose psychiatry?', 'What next?', 'On a break from training?', 'Choo",
+          "notes": []
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 16,
+  "explorer_successes": 10,
+  "duration_sec": 928.5
+}

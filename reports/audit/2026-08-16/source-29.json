@@ -1,0 +1,2180 @@
+{
+  "source_id": 29,
+  "source_name": "Resuscitation Council UK (Courses)",
+  "rows": 22,
+  "passing_rows": 0,
+  "failing_rows": 22,
+  "total_missing_fields": 52,
+  "total_suspect_fields": 7,
+  "avg_completeness": 73.9,
+  "verdict": "FAIL",
+  "pagination": {
+    "has_pagination": false,
+    "page_buttons": 0,
+    "next_button": false,
+    "show_more": false,
+    "load_more": false,
+    "total_hint": null,
+    "db_rows": 22
+  },
+  "pagination_warning": null,
+  "audits": [
+    {
+      "conference_id": 1538,
+      "conference_name": "ALS: Recertification Short Course (Advanced Life Support)",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/adult-life-support/als-recertification-short-course-advanced-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "SUSPECT",
+          "db_value": "ALS has been developed using our evidence-based Guidelines and decades of experience in delivering e",
+          "page_evidence": null,
+          "reason": "Description shares no distinctive token with event title (tokens sought: ['advanced', 'life', 'recertification', 'short'])"
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-08-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-08-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "CPD mentioned but no number to extract"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 72.7,
+      "total_checked": 11,
+      "total_ok": 6,
+      "total_missing": 2,
+      "total_suspect": 1,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1544,
+      "conference_name": "OH-ALS: 2 Day Course (Out-of-Hospital Advanced Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/adult-life-support/oh-als-2-day-course-out-hospital-advanced-life-support-course",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "OH-ALS has evolved from our established ALS programme, redesigned to address the",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "CPD mentioned but no number to extract"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 81.8,
+      "total_checked": 11,
+      "total_ok": 7,
+      "total_missing": 2,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1552,
+      "conference_name": "OH-NLS (Out-of-Hospital Newborn Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/newborn-life-support/oh-nls-out-hospital-newborn-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Each year, thousands of babies are born outside the hospital setting, sometimes ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 70.0,
+      "total_checked": 10,
+      "total_ok": 5,
+      "total_missing": 3,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1535,
+      "conference_name": "ALS: 2 Day Course (Advanced Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/adult-life-support/als-2-day-course-advanced-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "SUSPECT",
+          "db_value": "ALS is Resuscitation Council UK\u2019s longest running course and has been used to train healthcare profe",
+          "page_evidence": null,
+          "reason": "Description shares no distinctive token with event title (tokens sought: ['advanced', 'life', 'support'])"
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-08-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-08-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 10,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 72.7,
+      "total_checked": 11,
+      "total_ok": 7,
+      "total_missing": 2,
+      "total_suspect": 1,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 1536,
+      "conference_name": "ALS: Modular (Advanced Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/adult-life-support/als-modular-advanced-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "SUSPECT",
+          "db_value": "ALS is Resuscitation Council UK\u2019s longest running course and has been used to train healthcare profe",
+          "page_evidence": null,
+          "reason": "Description shares no distinctive token with event title (tokens sought: ['advanced', 'life', 'modular', 'support'])"
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 10,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 60.0,
+      "total_checked": 10,
+      "total_ok": 4,
+      "total_missing": 3,
+      "total_suspect": 1,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1537,
+      "conference_name": "ALS: Recertification (Advanced Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/adult-life-support/als-recertification-advanced-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "SUSPECT",
+          "db_value": "ALS has been developed using our evidence-based Guidelines and decades of experience in delivering e",
+          "page_evidence": null,
+          "reason": "Description shares no distinctive token with event title (tokens sought: ['advanced', 'life', 'recertification', 'support'])"
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-08-21",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-08-21",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "CPD mentioned but no number to extract"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 72.7,
+      "total_checked": 11,
+      "total_ok": 6,
+      "total_missing": 2,
+      "total_suspect": 1,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1539,
+      "conference_name": "e-ALS (Advanced Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/adult-life-support/e-als-advanced-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "SUSPECT",
+          "db_value": "e-ALS launched in 2012 and covers the same course content as ALS. It involves one day of e-learning,",
+          "page_evidence": null,
+          "reason": "Description shares no distinctive token with event title (tokens sought: ['advanced', 'life', 'support'])"
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-08-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-08-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 72.7,
+      "total_checked": 11,
+      "total_ok": 7,
+      "total_missing": 2,
+      "total_suspect": 1,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 1540,
+      "conference_name": "e-ILS (Immediate Life Support e-learning) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/adult-life-support/e-ils-immediate-life-support-e-learning",
+      "fields": [
+        {
+          "field": "description",
+          "status": "SUSPECT",
+          "db_value": "e-ILS was launched in 2019 and uses the same core curriculum as ILS, which was launched in 2002 and ",
+          "page_evidence": null,
+          "reason": "Description shares no distinctive token with event title (tokens sought: ['immediate', 'learning', 'life', 'support'])"
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "CPD mentioned but no number to extract"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "GBP 10 (How much does the course cost? \u00b7 ALS (tw), GBP 5 (How much does the course cost? \u00b7 e-ALS (), GBP 5 (How much does the course cost? \u00b7 ALS rec)",
+          "reason": "Plain-number pricing table detected in raw HTML \u2014 8+ tiers under a fee-related heading, but extractor emitted 0 tiers"
+        }
+      ],
+      "completeness_score": 75.0,
+      "total_checked": 8,
+      "total_ok": 4,
+      "total_missing": 1,
+      "total_suspect": 1,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1541,
+      "conference_name": "FEEL (Focused Echocardiography in Emergency Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/adult-life-support/feel-focused-echocardiography-emergency-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Resuscitation Council UK\u2019s FEEL course reflects teaching from similar internatio",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "CPD mentioned but no number to extract"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 90.9,
+      "total_checked": 11,
+      "total_ok": 7,
+      "total_missing": 1,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 1542,
+      "conference_name": "ILS (Immediate Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/adult-life-support/ils-immediate-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "SUSPECT",
+          "db_value": "ILS was launched in 2002 as there was a demand from healthcare professionals to know the skills need",
+          "page_evidence": null,
+          "reason": "Description shares no distinctive token with event title (tokens sought: ['immediate', 'life', 'support'])"
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "GBP 10 (How much does the course cost? \u00b7 ALS (tw), GBP 5 (How much does the course cost? \u00b7 e-ALS (), GBP 5 (How much does the course cost? \u00b7 ALS rec)",
+          "reason": "Plain-number pricing table detected in raw HTML \u2014 8+ tiers under a fee-related heading, but extractor emitted 0 tiers"
+        }
+      ],
+      "completeness_score": 60.0,
+      "total_checked": 10,
+      "total_ok": 4,
+      "total_missing": 3,
+      "total_suspect": 1,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1543,
+      "conference_name": "ILS Recertification (Immediate Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/adult-life-support/ils-recertification-immediate-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "You can only take an ILS recertification course if you have already taken an ILS",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "CPD mentioned but no number to extract"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 80.0,
+      "total_checked": 10,
+      "total_ok": 4,
+      "total_missing": 2,
+      "total_suspect": 0,
+      "total_absent": 4
+    },
+    {
+      "conference_id": 1545,
+      "conference_name": "Anaphylaxis essentials",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/anaphylaxis-essentials",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Anaphylaxis is a potentially life-threatening allergic reaction. The overall cas",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Allergy & Immunology",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "CPD mentioned but no number to extract"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 70.0,
+      "total_checked": 10,
+      "total_ok": 4,
+      "total_missing": 3,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 1546,
+      "conference_name": "BLSi (Basic Life Support Instructor Course)",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/instructor-courses/basic-life-support-instructor-course",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This innovative BLS Instructor course will set the standard for teaching BLS to ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "CPD mentioned but no number to extract"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 70.0,
+      "total_checked": 10,
+      "total_ok": 4,
+      "total_missing": 3,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 1550,
+      "conference_name": "NLS (Newborn Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/newborn-life-support/nls-newborn-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Launched in 1999, Resuscitation Council UK\u2019s Newborn Life Support course teaches",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-08-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-08-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 81.8,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 2,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 1554,
+      "conference_name": "ePILS (Paediatric Immediate Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/paediatric-life-support/epils-paediatric-immediate-life-support-course",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "PILS was launched in 2007. Around 17,000 professionals are trained in PILS every",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "CPD mentioned but no number to extract"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "GBP 10 (How much does the course cost? \u00b7 ALS (tw), GBP 5 (How much does the course cost? \u00b7 e-ALS (), GBP 5 (How much does the course cost? \u00b7 ALS rec)",
+          "reason": "Plain-number pricing table detected in raw HTML \u2014 8+ tiers under a fee-related heading, but extractor emitted 0 tiers"
+        }
+      ],
+      "completeness_score": 70.0,
+      "total_checked": 10,
+      "total_ok": 4,
+      "total_missing": 3,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 1547,
+      "conference_name": "GIC (Generic Instructor Course)",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/instructor-courses/gic-generic-instructor-course",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The GIC is not open to applicants in the same way other RCUK courses are. Candid",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": "1 January 2025",
+          "reason": "Page contains a UK-format date not captured"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": "15 CPD points",
+          "reason": "Page mentions '15 CPD points' but cpd_points null"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 60.0,
+      "total_checked": 10,
+      "total_ok": 4,
+      "total_missing": 4,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1555,
+      "conference_name": "PILS (Paediatric Immediate Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/paediatric-life-support/pils-paediatric-immediate-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "PILS was launched in 2007. Around 17,000 professionals are trained in PILS every",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "GBP 10 (How much does the course cost? \u00b7 ALS (tw), GBP 5 (How much does the course cost? \u00b7 e-ALS (), GBP 5 (How much does the course cost? \u00b7 ALS rec)",
+          "reason": "Plain-number pricing table detected in raw HTML \u2014 8+ tiers under a fee-related heading, but extractor emitted 0 tiers"
+        }
+      ],
+      "completeness_score": 70.0,
+      "total_checked": 10,
+      "total_ok": 5,
+      "total_missing": 3,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1548,
+      "conference_name": "ILSi (Immediate Life Support Instructor Course)",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/instructor-courses/ilsi-immediate-life-support-instructor-course",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ILSi is not open to applications in the same way our other courses are.",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-08-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-08-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": "15 CPD points",
+          "reason": "Page mentions '15 CPD points' but cpd_points null"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 81.8,
+      "total_checked": 11,
+      "total_ok": 7,
+      "total_missing": 2,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1556,
+      "conference_name": "PILS Recertification (Paediatric Immediate Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/paediatric-life-support/pils-recertification-paediatric-immediate-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "You can only take a PILS recertification course if you have already taken a PILS",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "CPD mentioned but no number to extract"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 80.0,
+      "total_checked": 10,
+      "total_ok": 4,
+      "total_missing": 2,
+      "total_suspect": 0,
+      "total_absent": 4
+    },
+    {
+      "conference_id": 1549,
+      "conference_name": "ARNI (Advanced Resuscitation of the Newborn Infant) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/newborn-life-support/arni-advanced-resuscitation-newborn-infant",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "ARNI launched in 2014 and trains around 100 healthcare professionals a year in h",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 10,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 81.8,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 2,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 1551,
+      "conference_name": "NLS: Recertification (Newborn Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/newborn-life-support/nls-recertification-newborn-life-support-course",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The NLS recertification course has been developed using our evidence-based Guide",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Page contains no obvious date"
+        },
+        {
+          "field": "end_date",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No start_date so end_date irrelevant"
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 70.0,
+      "total_checked": 10,
+      "total_ok": 5,
+      "total_missing": 3,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1553,
+      "conference_name": "EPALS (European Paediatric Advanced Life Support) Course",
+      "event_type": "course",
+      "source_url": "https://www.resus.org.uk/training-courses/paediatric-life-support/epals-european-paediatric-advanced-life-support",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "EPALS launched in 2003. Around 3,500 candidates a year train in EPALS, which use",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-08-20",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-08-20",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Paediatrics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 10,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "MISSING",
+          "db_value": "0 tiers",
+          "page_evidence": "Page has \u00a3 amounts",
+          "reason": "Prices on page but no tiers in DB"
+        }
+      ],
+      "completeness_score": 81.8,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 2,
+      "total_suspect": 0,
+      "total_absent": 1
+    }
+  ],
+  "audited_at": "2026-08-16T00:17:39.012376+00:00"
+}

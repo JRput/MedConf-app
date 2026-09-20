@@ -1,0 +1,2937 @@
+{
+  "source_id": 26,
+  "source_name": "Royal College of Pathologists",
+  "society": "RCPath",
+  "run_at": "2026-08-16T03:58:19.750047+00:00",
+  "events_scraped": 78,
+  "events_with_gaps_at_first": 68,
+  "events_fixed": 58,
+  "events_still_incomplete": 52,
+  "patches_applied": [
+    {
+      "conference_id": 1248,
+      "conference_name": "Computational Pathology Fundamentals",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1253,
+      "conference_name": "Liver Pathology Bitesize Webinars - Cholangiocarcinoma",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1258,
+      "conference_name": "RCPath Wales Symposium 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1323,
+      "conference_name": "13th Digital Pathology & AI Congress: Europe",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1249,
+      "conference_name": "The Fifth Diagnexia Histopathology Symposium 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1272,
+      "conference_name": "Beyond the Microscope: Skills that Strengthen Practice",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1278,
+      "conference_name": "Medical Examiner Training - Virtual",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1279,
+      "conference_name": "XLV Symposium of the International Society of Dermatopatholo",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Royal College of Physicians , 11 St Andrews Place, London, NW1 4LE, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 202",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1279,
+      "conference_name": "XLV Symposium of the International Society of Dermatopatholo",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1279,
+      "conference_name": "XLV Symposium of the International Society of Dermatopatholo",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1280,
+      "conference_name": "7th Cardiac Marker Dialogues meeting",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Technology & Innovation Centre, Univ of Strathclyde, 99 George Street, Glasgow, G1 1RD, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopat",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1280,
+      "conference_name": "7th Cardiac Marker Dialogues meeting",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Glasgow",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1280,
+      "conference_name": "7th Cardiac Marker Dialogues meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1281,
+      "conference_name": "Nottingham and Singapore Breast Pathology Masterclass - Part",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Virtual event, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 2026 Beyond the Microscope: Skills that S",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1281,
+      "conference_name": "Nottingham and Singapore Breast Pathology Masterclass - Part",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1282,
+      "conference_name": "7th Experts in Haematology Faculty Meeting",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Virtual event, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 2026 Beyond the Microscope: Skills that S",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1282,
+      "conference_name": "7th Experts in Haematology Faculty Meeting",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Sheffield",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1282,
+      "conference_name": "7th Experts in Haematology Faculty Meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1283,
+      "conference_name": "The Wessex and Gloucestershire Gastrointestinal Pathology Vi",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Virtual event, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 2026 Beyond the Microscope: Skills that S",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1283,
+      "conference_name": "The Wessex and Gloucestershire Gastrointestinal Pathology Vi",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Bristol",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1283,
+      "conference_name": "The Wessex and Gloucestershire Gastrointestinal Pathology Vi",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1285,
+      "conference_name": "HSCT: the specialist role of the H&I laboratory",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1289,
+      "conference_name": "Current Thinking in Haematological Malignancies - Nottingham",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Albert Hall Conference Centre, North Circus Street , Nottingham, NG1 5AA, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposi",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1289,
+      "conference_name": "Current Thinking in Haematological Malignancies - Nottingham",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Sheffield",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1289,
+      "conference_name": "Current Thinking in Haematological Malignancies - Nottingham",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1286,
+      "conference_name": "RCPath/BDIAP Foundation and Undergraduate Taster Event 2026 ",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1288,
+      "conference_name": "Medical Examiners Officer (Virtual training)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1287,
+      "conference_name": "9th South West Stem Cell Transplant Day",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "The Rougement Hotel, Queen Street, Exeter, EX4 3SP, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 2026",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1287,
+      "conference_name": "9th South West Stem Cell Transplant Day",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Exeter",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1287,
+      "conference_name": "9th South West Stem Cell Transplant Day",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1255,
+      "conference_name": "British Society for Antimicrobial Chemotherapy (BSAC) Outpat",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1290,
+      "conference_name": "Enabling Patient-Centred Sampling: Total Laboratory Automati",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "The Spine, 2 Paddington Village, Liverpool, L7 3 FA, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 202",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1290,
+      "conference_name": "Enabling Patient-Centred Sampling: Total Laboratory Automati",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Liverpool",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1290,
+      "conference_name": "Enabling Patient-Centred Sampling: Total Laboratory Automati",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Booking Book now Members', 'price_gbp': 165.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}, {'tier_label': 'Non-members', 'price_gbp': 245.0, 'currency': '",
+      "method": "explorer:external_text:labmed.org.uk"
+    },
+    {
+      "conference_id": 1290,
+      "conference_name": "Enabling Patient-Centred Sampling: Total Laboratory Automati",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1295,
+      "conference_name": "Irish Society of Surgical Pathologists (ISSP) 2026",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Salthill Hotel, Salthill, Galway, H91 DD4V, Ireland Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 2026 Beyond the Mic",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1295,
+      "conference_name": "Irish Society of Surgical Pathologists (ISSP) 2026",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1295,
+      "conference_name": "Irish Society of Surgical Pathologists (ISSP) 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1257,
+      "conference_name": "Lymphoma Management",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1257,
+      "conference_name": "Lymphoma Management",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1292,
+      "conference_name": "British Society for Antimicrobial Chemotherapy's (BSAC) Anti",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Standard registration', 'price_gbp': 80.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "explorer:external_text:bsac.org.uk"
+    },
+    {
+      "conference_id": 1294,
+      "conference_name": "UK Complete Chronic Lymphocytic Leukemia (CLL) Forum Clinica",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Cavendish Conference Centre, 22 Duchess Mews, London, W1G 9DT, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1294,
+      "conference_name": "UK Complete Chronic Lymphocytic Leukemia (CLL) Forum Clinica",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1294,
+      "conference_name": "UK Complete Chronic Lymphocytic Leukemia (CLL) Forum Clinica",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1296,
+      "conference_name": "National Acute Lymphoblastic Leukemia (ALL) Update Day",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Cavendish Conference Centre, 22 Duchess Mews, London, W1G 9DT, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1296,
+      "conference_name": "National Acute Lymphoblastic Leukemia (ALL) Update Day",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1296,
+      "conference_name": "National Acute Lymphoblastic Leukemia (ALL) Update Day",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1303,
+      "conference_name": "Northern Ireland Symposium 2026 - From Diagnosis to Recovery",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1300,
+      "conference_name": "Annual Breast Screening  Pathology  Meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1297,
+      "conference_name": "St Mark's Gastrointestinal Histopathology Workshop",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Virtual event, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 2026 Beyond the Microscope: Skills that S",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1297,
+      "conference_name": "St Mark's Gastrointestinal Histopathology Workshop",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1299,
+      "conference_name": "Current Thinking in Haematological Malignancies (Manchester)",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Manchester Conference Centre, The Pendulum, Sackville Street, Manchester , M1 3BB, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopatholog",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1299,
+      "conference_name": "Current Thinking in Haematological Malignancies (Manchester)",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Manchester",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1299,
+      "conference_name": "Current Thinking in Haematological Malignancies (Manchester)",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'within the NHS Consultant', 'price_gbp': 40.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "explorer:external_text:hartleytaylor.co.uk"
+    },
+    {
+      "conference_id": 1299,
+      "conference_name": "Current Thinking in Haematological Malignancies (Manchester)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1301,
+      "conference_name": "New Consultants Day 2026 - Virtual",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1302,
+      "conference_name": "UK European Blood and Marrow Transplantation (EBMT) Nurses a",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Manchester Conference Centre, The Pendulum, Sackville Street, Manchester , M1 3BB, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopatholog",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1302,
+      "conference_name": "UK European Blood and Marrow Transplantation (EBMT) Nurses a",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Manchester",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1302,
+      "conference_name": "UK European Blood and Marrow Transplantation (EBMT) Nurses a",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1304,
+      "conference_name": "Current Thinking in Haematological Malignancies (Glasgow)",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "1599 at the Royal College, 232-242 St Vincent Street, Glasgow , G2 5RJ, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1304,
+      "conference_name": "Current Thinking in Haematological Malignancies (Glasgow)",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Glasgow",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1304,
+      "conference_name": "Current Thinking in Haematological Malignancies (Glasgow)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1261,
+      "conference_name": "Infection Prevention and Control (IPC)  Training Day - Aspec",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1305,
+      "conference_name": "2nd Immunodeficiency faculty meeting: Immune Failure - Cases",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Virtual event, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 2026 Beyond the Microscope: Skills that S",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1305,
+      "conference_name": "2nd Immunodeficiency faculty meeting: Immune Failure - Cases",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Glasgow",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1305,
+      "conference_name": "2nd Immunodeficiency faculty meeting: Immune Failure - Cases",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1321,
+      "conference_name": "International Congress of  Antimicrobial Chemotherapy (ICC)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1306,
+      "conference_name": "Liver Pathology Bitesize Webinars - Hepatic cysts",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1308,
+      "conference_name": "Healthcare Infection Society (HIS) Outbreaks Training Course",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Healthcare Infection Society, Montagu House, 7E Wakefield Street, London, WC1N 1PG, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopatholo",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1308,
+      "conference_name": "Healthcare Infection Society (HIS) Outbreaks Training Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1263,
+      "conference_name": "South West Lymphoma Group",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1263,
+      "conference_name": "South West Lymphoma Group",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1309,
+      "conference_name": "Birmingham Breast Pathology Update Course 2026",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Virtual event, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 2026 Beyond the Microscope: Skills that S",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1309,
+      "conference_name": "Birmingham Breast Pathology Update Course 2026",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Leeds",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1310,
+      "conference_name": "UK Lymphoma Research Group",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Cavendish Conference Centre, 22 Duchess Mews, London, W1G 9DT, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1310,
+      "conference_name": "UK Lymphoma Research Group",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1310,
+      "conference_name": "UK Lymphoma Research Group",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'September Consultant', 'price_gbp': 70.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}, {'tier_label': 'September Consultant', 'price_gbp': 90.0, 'currency'",
+      "method": "explorer:external_text:hartleytaylor.co.uk"
+    },
+    {
+      "conference_id": 1310,
+      "conference_name": "UK Lymphoma Research Group",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1312,
+      "conference_name": "International Pathology Day 2026 \u2013 virtual meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1264,
+      "conference_name": "British Society for Antimicrobial Chemotherapy (BSAC) Outpat",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1311,
+      "conference_name": "Leeds Lymphoma Course",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Virtual event Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 2026 Beyond the Microscope: Skills that Strengthen Practi",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1311,
+      "conference_name": "Leeds Lymphoma Course",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Leeds",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1313,
+      "conference_name": "UK Myeloma Society Autumn Day",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Cavendish Conference Centre, 22 Duchess Mews, London, W1G 9DT, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1313,
+      "conference_name": "UK Myeloma Society Autumn Day",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1313,
+      "conference_name": "UK Myeloma Society Autumn Day",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1314,
+      "conference_name": "UK Forum on Haemoglobin Disorders (UKFHD) 62nd Academic Meet",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Cavendish Conference Centre, 22 Duchess Mews, London, W1G 9DT, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1314,
+      "conference_name": "UK Forum on Haemoglobin Disorders (UKFHD) 62nd Academic Meet",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1314,
+      "conference_name": "UK Forum on Haemoglobin Disorders (UKFHD) 62nd Academic Meet",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Charge Non-Members', 'price_gbp': 15.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "explorer:external_text:collaborativeconferences.co.uk"
+    },
+    {
+      "conference_id": 1314,
+      "conference_name": "UK Forum on Haemoglobin Disorders (UKFHD) 62nd Academic Meet",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1316,
+      "conference_name": "British Lymphoma Pathology Group (BLPG) Autumn Meeting 2026",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Friends House , 173 Euston Road , London, NW1 2BJ , United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 2026",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1316,
+      "conference_name": "British Lymphoma Pathology Group (BLPG) Autumn Meeting 2026",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Sheffield",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1316,
+      "conference_name": "British Lymphoma Pathology Group (BLPG) Autumn Meeting 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1266,
+      "conference_name": "33rd London Lymphoma Forum",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1266,
+      "conference_name": "33rd London Lymphoma Forum",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1317,
+      "conference_name": "Myeloproliferative Neoplasms Advances Day 2026",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "1 Basinghall Avenue, London, EV2V 5DD, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 2026 Beyond the M",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1317,
+      "conference_name": "Myeloproliferative Neoplasms Advances Day 2026",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1317,
+      "conference_name": "Myeloproliferative Neoplasms Advances Day 2026",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Consultant', 'price_gbp': 50.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "explorer:external_text:hartleytaylor.co.uk"
+    },
+    {
+      "conference_id": 1317,
+      "conference_name": "Myeloproliferative Neoplasms Advances Day 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1318,
+      "conference_name": "BAUP Annual Meeting with Uropathology EQA Circulation",
+      "field": "description",
+      "value_before": "A multidisciplinary theme with clinical and pathology talks",
+      "value_after": "The BAUP Annual Meeting with Uropathology EQA Circulation will be held in London on 20 November 2026, featuring clinical and pathology talks and discussions on genitourinary pathology diagnostics.",
+      "method": "llm_overview"
+    },
+    {
+      "conference_id": 1318,
+      "conference_name": "BAUP Annual Meeting with Uropathology EQA Circulation",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "Royal College of Pathologists, 6 Alie Street , London, E1 8QT, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1318,
+      "conference_name": "BAUP Annual Meeting with Uropathology EQA Circulation",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1318,
+      "conference_name": "BAUP Annual Meeting with Uropathology EQA Circulation",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1319,
+      "conference_name": "Advances in Transfusion Medicine Symposium 2026 - Organised ",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1319,
+      "conference_name": "Advances in Transfusion Medicine Symposium 2026 - Organised ",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1320,
+      "conference_name": "The British Society for Immunology (BSI) Congress 2026",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "SEC Glasgow, Scottish Event Campus, Glasgow, G3 8YW, United Kingdom Also of Interest Computational Pathology Fundamentals 18 August 2026 The Fifth Diagnexia Histopathology Symposium 2026 20 August 202",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1320,
+      "conference_name": "The British Society for Immunology (BSI) Congress 2026",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Glasgow",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1320,
+      "conference_name": "The British Society for Immunology (BSI) Congress 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1268,
+      "conference_name": "Pathology Grand Round Lecture",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1268,
+      "conference_name": "Pathology Grand Round Lecture",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1269,
+      "conference_name": "Rapid Diagnostics in Infectious Disease \u2013 From Detection to ",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1269,
+      "conference_name": "Rapid Diagnostics in Infectious Disease \u2013 From Detection to ",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1273,
+      "conference_name": "Paediatric Pathology Society (PPS) Meeting",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1273,
+      "conference_name": "Paediatric Pathology Society (PPS) Meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1250,
+      "conference_name": "Beyond the Microscope: Skills that Strengthen Practice",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1274,
+      "conference_name": "European Hematology Association (EHA) Progress Test Workshop",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1276,
+      "conference_name": "The recognition, assessment, and management of appendiceal m",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1251,
+      "conference_name": "IMAV: International meeting on arboviruses and their vectors",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1277,
+      "conference_name": "Post International Society of Thrombosis and Haemostasis (IS",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "in_person",
+      "method": "heuristic_venue_implies"
+    },
+    {
+      "conference_id": 1277,
+      "conference_name": "Post International Society of Thrombosis and Haemostasis (IS",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    }
+  ],
+  "patches_rejected_by_validator": [
+    {
+      "conference_id": 1300,
+      "field": "description",
+      "rejected_value": "College Document library UK regions International regions Venue hire Log in to MyRCPath Annual Breast Screening Pathology Meeting 14 October 2026 + iCal 3 CPD Credits Annual Breast Screening Pathology",
+      "method": "heuristic_overview"
+    }
+  ],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1324,
+      "conference_name": "Dry surface biofilms: implication for Infection Prevention a",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://events.teams.microsoft.com/event/68c9bd4a-a008-4b83-b602-e3c42a018e3f@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 121584
+          },
+          "llm_reasoning": "The page has sections such as 'Discover PATHOLOGY', 'Membership', 'News', 'Blogs', 'Public affairs', 'Videos', 'For Trainees', 'For the Profession', 'Conferences', 'Continuing Professional Development (CPD)', but no 'Fees' or 'Registration' section. The text appears to be related to the Royal Colleg",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['infection', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['infection', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['insight', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['infection', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['control'] verdict='no' ok=False",
+            "external_followed: https://events.teams.microsoft.com/event/68c9bd4a-a008-4b83-b602-e3c42a018e3f@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration (link text: 'Book Now')",
+            "skipped_unrelated_zero_tokens: https://events.teams.microsoft.com/event/68c9bd4a-a008-4b83-b602-e3c42a018e3f@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1248,
+      "conference_name": "Computational Pathology Fundamentals",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://www.diagnexia.com/computational-pathology-course"
+            ],
+            "images_ocred": 10,
+            "total_text_chars": 142607
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['pathology'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['pathology'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['pathology'] verdict='no' ok=False",
+            "external_followed: https://www.diagnexia.com/computational-pathology-course (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1254,
+      "conference_name": "Federation of Infection Societies (FIS)  Webinar: Beyond Tra",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://us02web.zoom.us/webinar/register/WN_6ztndkzkQHeeBAb1KmyWRA?_ics=1785427866516&irclickid=~38c4W0V25~1YZ30RVW390QRVY0XYROKAprqgh9~8542XVRJDywsj&"
+            ],
+            "images_ocred": 20,
+            "total_text_chars": 147356
+          },
+          "llm_reasoning": "The provided text appears to be a mix of JavaScript code, cookie policy configurations, and HTML elements, but it does not contain any information about registration fees for the Federation of Infection Societies (FIS) Webinar. The page has sections such as 'Discover PATHOLOGY', 'Membership', 'News'",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['your', 'career', 'through'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['your', 'career', 'through'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['your', 'career', 'through'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['your', 'career', 'through'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['your', 'career', 'through'] verdict='no' ok=False",
+            "external_followed: https://us02web.zoom.us/webinar/register/WN_6ztndkzkQHeeBAb1KmyWRA?_ics=1785427866516&irclickid=~38c4W0V25~1YZ30RVW390QRVY0XYROKAprqgh9~8542XVRJDywsj& (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1323,
+      "conference_name": "13th Digital Pathology & AI Congress: Europe",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html"
+            ],
+            "images_ocred": 42,
+            "total_text_chars": 121630
+          },
+          "llm_reasoning": "The page has Overview, Programme, Speakers tabs but no Fees section, and the provided text appears to be related to cookie policies, Google analytics, and website configuration, with no mention of registration fees or pricing information for the 13th Digital Pathology & AI Congress: Europe event.",
+          "notes": [
+            "external_fetch_failed: https://global-engage.com/product/digital-pathology-and-ai-congress-europe/"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1259,
+      "conference_name": "WPSD 2026: Advancing paediatric and maternal health in the U",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/latest-evidence-on-diagnostics-for-infection-management-in-the-adult-emergency-department-from-data-into-clinical-practice.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/event/advances-in-transfusion-medicine-symposium-2026-organised-by-rcpath-and-shot.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://us02web.zoom.us/webinar/register/WN_dLS0lgRGT3yesygPFROQSQ"
+            ],
+            "images_ocred": 24,
+            "total_text_chars": 174518
+          },
+          "llm_reasoning": "The page has sections such as 'Discover PATHOLOGY', 'For Trainees', 'For the Profession', 'Conferences', but no 'Fees' or 'Registration' section. The text appears to be related to cookie policies, Google analytics, and general information about the Royal College of Pathologists, but does not contain",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['paediatric'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['paediatric'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['paediatric'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['paediatric'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['paediatric'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html: matched=['paediatric'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['paediatric'] verdict='no' ok=False",
+            "external_followed: https://us02web.zoom.us/webinar/register/WN_dLS0lgRGT3yesygPFROQSQ (link text: 'Register for the WPSD 2026 paediatric and maternal health webinar - Tuesday 8 Se')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1325,
+      "conference_name": "Pathology Study Day",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://Christie-Pathology-Study-Day.eventbrite.co.uk"
+            ],
+            "images_ocred": 2,
+            "total_text_chars": 180589
+          },
+          "llm_reasoning": "The provided text appears to be a mix of JavaScript code, cookie policy configurations, and HTML elements, but it does not contain any information about registration fees for the Pathology Study Day event. The text includes sections on cookies, Google analytics, and marketing, as well as links to ex",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['pathology'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['pathology'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['pathology'] verdict='no' ok=False",
+            "external_followed: https://Christie-Pathology-Study-Day.eventbrite.co.uk (link text: 'Book Now')",
+            "llm_event_match https://Christie-Pathology-Study-Day.eventbrite.co.uk: matched=['pathology'] verdict='yes' ok=True"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1262,
+      "conference_name": "Infection Prevention and Control (IPC)  Partners  - Managing",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://events.teams.microsoft.com/event/f45fd16b-5134-4c03-a552-40d1def6e146@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 121500
+          },
+          "llm_reasoning": "The provided text appears to be a mix of JavaScript code, cookie policy configurations, and HTML elements, but it does not contain any information about registration fees for the Infection Prevention and Control (IPC) Partners event. The page has sections such as 'Discover PATHOLOGY', 'Membership', ",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['managing', 'infection', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['managing', 'infection', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['insight', 'partners', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['infection', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['partners', 'control'] verdict='no' ok=False",
+            "external_followed: https://events.teams.microsoft.com/event/f45fd16b-5134-4c03-a552-40d1def6e146@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration (link text: 'Book Now')",
+            "skipped_unrelated_zero_tokens: https://events.teams.microsoft.com/event/f45fd16b-5134-4c03-a552-40d1def6e146@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1272,
+      "conference_name": "Beyond the Microscope: Skills that Strengthen Practice",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://us02web.zoom.us/webinar/register/WN_z_Lu9qJvRa--Y72_DleETA"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 147594
+          },
+          "llm_reasoning": "The provided text appears to be a mix of JavaScript code, cookie policy configurations, and HTML elements, but it does not contain any information about registration fees for the 'Beyond the Microscope: Skills that Strengthen Practice' event. The text includes sections on cookies, Google analytics, ",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['practice'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['skills'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['practice'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['practice'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['strengthen'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://us02web.zoom.us/webinar/register/WN_z_Lu9qJvRa--Y72_DleETA (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1252,
+      "conference_name": "WPSD 2026: Improving patient safety through Point of Care Te",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/latest-evidence-on-diagnostics-for-infection-management-in-the-adult-emergency-department-from-data-into-clinical-practice.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/event/advances-in-transfusion-medicine-symposium-2026-organised-by-rcpath-and-shot.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://us02web.zoom.us/webinar/register/WN_2oDN2vTwQr2QnNAg3xyDUA"
+            ],
+            "images_ocred": 54,
+            "total_text_chars": 174722
+          },
+          "llm_reasoning": "The provided page text does not contain any information about registration fees for the WPSD 2026 event. The text appears to be related to cookie policies, Google analytics, and other technical aspects of the website, as well as general information about the Royal College of Pathologists and patholo",
+          "notes": [
+            "external_followed: https://us02web.zoom.us/webinar/register/WN_2oDN2vTwQr2QnNAg3xyDUA (link text: 'Register for the WPSD 2026 POCT webinar - Tuesday 1 September, 1-2pm GMT')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1279,
+      "conference_name": "XLV Symposium of the International Society of Dermatopatholo",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://www.isdplondon2026.com/registration"
+            ],
+            "images_ocred": 18,
+            "total_text_chars": 183792
+          },
+          "llm_reasoning": "The page has Overview, Programme, Speakers tabs but no Fees section, and the provided text appears to be related to cookie policies, Google analytics, and website configuration, with no mention of registration fees for the XLV Symposium of the International Society of Dermatopathology.",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['international'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['international'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['international'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['international'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['international'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['international'] verdict='no' ok=False",
+            "external_followed: https://www.isdplondon2026.com/registration (link text: 'Book Now')",
+            "skipped_unrelated_zero_tokens: https://www.isdplondon2026.com/registration"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1280,
+      "conference_name": "7th Cardiac Marker Dialogues meeting",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://www.cmdmeeting.org.uk/"
+            ],
+            "images_ocred": 10,
+            "total_text_chars": 178728
+          },
+          "llm_reasoning": "The page has sections such as 'Discover PATHOLOGY', 'Membership', 'News', 'Public affairs', 'Videos', 'For Trainees', 'For the Profession', 'Conferences', 'Continuing Professional Development (CPD)', 'Appraisal and revalidation', 'Guidelines', 'Publications', 'Digital pathology', 'Committees', and '",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['meeting'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['meeting'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://www.cmdmeeting.org.uk/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1281,
+      "conference_name": "Nottingham and Singapore Breast Pathology Masterclass - Part",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://nottinghambreastpathologymasterclass.co.uk/"
+            ],
+            "images_ocred": 10,
+            "total_text_chars": 318018
+          },
+          "llm_reasoning": "The page has Overview, Programme, Speakers tabs but no Fees section, and the provided text appears to be related to cookie policies, Google analytics, and other technical configurations, with no mention of registration fees or pricing information for the Nottingham and Singapore Breast Pathology Mas",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['part', 'pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['part', 'pathology'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['part', 'pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['part', 'pathology'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['part', 'pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['part', 'pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['part', 'pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['part', 'pathology'] verdict='no' ok=False",
+            "external_followed: https://nottinghambreastpathologymasterclass.co.uk/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1282,
+      "conference_name": "7th Experts in Haematology Faculty Meeting",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html"
+            ],
+            "images_ocred": 18,
+            "total_text_chars": 121949
+          },
+          "llm_reasoning": "The page has sections such as 'Discover PATHOLOGY', 'Membership', 'News', 'Public affairs', 'Videos', 'For Trainees', 'For the Profession', 'Conferences', 'Continuing Professional Development (CPD)', 'Appraisal and revalidation', 'Guidelines', 'Publications', 'Digital pathology', 'Committees', and '",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['haematology'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1283,
+      "conference_name": "The Wessex and Gloucestershire Gastrointestinal Pathology Vi",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://wggipathologycourse.eventbrite.co.uk"
+            ],
+            "images_ocred": 20,
+            "total_text_chars": 184710
+          },
+          "llm_reasoning": "The provided page text does not contain any information about registration fees for the event. The text appears to be related to cookie policies, Google analytics, and other technical aspects of the website, as well as general information about the Royal College of Pathologists and pathology in gene",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['pathology'] verdict='no' ok=False",
+            "external_followed: https://wggipathologycourse.eventbrite.co.uk (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1289,
+      "conference_name": "Current Thinking in Haematological Malignancies - Nottingham",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://hartleytaylor.co.uk/7hms-registration/"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 218486
+          },
+          "llm_reasoning": "The page has sections such as 'Discover PATHOLOGY', 'For Trainees', 'For the Profession', 'Conferences', and 'Public affairs', but no 'Fees' or 'Registration' section is present. The text appears to be related to the Royal College of Pathologists' website, including information on cookies, Google an",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['current'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['current'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://hartleytaylor.co.uk/7hms-registration/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1287,
+      "conference_name": "9th South West Stem Cell Transplant Day",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://hartleytaylor.co.uk/swb6-registration/"
+            ],
+            "images_ocred": 14,
+            "total_text_chars": 218334
+          },
+          "llm_reasoning": "The provided text appears to be a mix of JavaScript code, cookie policy configurations, and HTML elements, but it does not contain any information about registration fees for the 9th South West Stem Cell Transplant Day event. The text includes sections on cookies, Google Analytics, and website confi",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['cell'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['cell'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['cell'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['cell'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['cell'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['cell'] verdict='no' ok=False",
+            "external_followed: https://hartleytaylor.co.uk/swb6-registration/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1290,
+      "conference_name": "Enabling Patient-Centred Sampling: Total Laboratory Automati",
+      "fields": [
+        "event_format"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1295,
+      "conference_name": "Irish Society of Surgical Pathologists (ISSP) 2026",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://www.theissp.org"
+            ],
+            "images_ocred": 4,
+            "total_text_chars": 192076
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['pathologists'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['pathologists'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['pathologists'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html: matched=['pathologists'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['pathologists'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['pathologists'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['pathologists'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['pathologists'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['pathologists'] verdict='' ok=False",
+            "external_followed: https://www.theissp.org (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1291,
+      "conference_name": "Federation of Infection Societies (FIS) Webinar: Supporting ",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://us02web.zoom.us/webinar/register/WN__YODij_sT3edBo8EzgLbig?_ics=1785427866516&irclickid=~38c4W0V25~1YZ30RVW390QRVY0XYROKAprqgh9~8542XVRJDywsj&"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 146858
+          },
+          "llm_reasoning": "The provided text appears to be a mix of JavaScript code, cookie policy information, and general website content. It does not contain any information about registration fees for the Federation of Infection Societies (FIS) Webinar. The page has sections such as 'Discover PATHOLOGY', 'Membership', 'Ne",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['supporting', 'workforce'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['workforce'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['workforce'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['infection', 'workforce', 'wellbeing'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['infection', 'workforce'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['workforce'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['infection', 'workforce'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['workforce'] verdict='no' ok=False",
+            "external_followed: https://us02web.zoom.us/webinar/register/WN__YODij_sT3edBo8EzgLbig?_ics=1785427866516&irclickid=~38c4W0V25~1YZ30RVW390QRVY0XYROKAprqgh9~8542XVRJDywsj& (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1293,
+      "conference_name": "Infection Prevention and Control (IPC) Partners  - Surface d",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://events.teams.microsoft.com/event/9eee9ed9-6eeb-439e-af17-2b8806411f1a@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration"
+            ],
+            "images_ocred": 9,
+            "total_text_chars": 121605
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['state', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['state', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['state', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['state', 'infection', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['state', 'infection', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['state', 'infection', 'control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['state', 'partners', 'control'] verdict='no' ok=False",
+            "external_followed: https://events.teams.microsoft.com/event/9eee9ed9-6eeb-439e-af17-2b8806411f1a@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration (link text: 'Book Now')",
+            "skipped_unrelated_zero_tokens: https://events.teams.microsoft.com/event/9eee9ed9-6eeb-439e-af17-2b8806411f1a@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1294,
+      "conference_name": "UK Complete Chronic Lymphocytic Leukemia (CLL) Forum Clinica",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://collaborativeconferences.co.uk/cllj-registration/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 235017
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "llm_event_match https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html: matched=['forum'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['sciences'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['forum'] verdict='' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://collaborativeconferences.co.uk/cllj-registration/ (link text: 'Book Now')",
+            "llm_event_match https://collaborativeconferences.co.uk/cllj-registration/: matched=['forum', 'sciences'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1296,
+      "conference_name": "National Acute Lymphoblastic Leukemia (ALL) Update Day",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://hartleytaylor.co.uk/all4-registration/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 218714
+          },
+          "llm_reasoning": "The page has sections such as 'Discover PATHOLOGY', 'What is pathology?', 'Careers in pathology', 'Public engagement events', 'Resources', 'Competitions', 'Membership', 'Corporate membership', 'Undergraduates and Foundation doctors', 'News', 'Blogs', 'Public affairs', 'Videos', 'Pathologists in Prof",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://hartleytaylor.co.uk/all4-registration/ (link text: 'Book Now')",
+            "skipped_unrelated_zero_tokens: https://hartleytaylor.co.uk/all4-registration/"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1300,
+      "conference_name": "Annual Breast Screening  Pathology  Meeting",
+      "fields": [
+        "description",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://us06web.zoom.us/webinar/register/WN_Qwrc7WjmQ-W-ZUE_9e1PPQ"
+            ],
+            "images_ocred": 28,
+            "total_text_chars": 146374
+          },
+          "llm_reasoning": "The page has sections such as 'Discover PATHOLOGY', 'For Trainees', 'For the Profession', 'Conferences', and 'Committees', but no 'Fees' or 'Registration' section is present. The text appears to be related to the Royal College of Pathologists and its activities, but does not mention registration fee",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['pathology'] verdict='no' ok=False",
+            "external_followed: https://us06web.zoom.us/webinar/register/WN_Qwrc7WjmQ-W-ZUE_9e1PPQ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1297,
+      "conference_name": "St Mark's Gastrointestinal Histopathology Workshop",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://stmarksacademicinstitute.org.uk/courses/gastrointestinal-histopathology-workshop-2026/"
+            ],
+            "images_ocred": 11,
+            "total_text_chars": 192693
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['mark'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['mark'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['mark'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['mark'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['mark'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['mark'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['mark'] verdict='no' ok=False",
+            "external_followed: https://stmarksacademicinstitute.org.uk/courses/gastrointestinal-histopathology-workshop-2026/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1299,
+      "conference_name": "Current Thinking in Haematological Malignancies (Manchester)",
+      "fields": [
+        "event_format"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1302,
+      "conference_name": "UK European Blood and Marrow Transplantation (EBMT) Nurses a",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://hartleytaylor.co.uk/ebm9-registration/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 218396
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "llm_event_match https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html: matched=['european'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['blood'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://hartleytaylor.co.uk/ebm9-registration/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1304,
+      "conference_name": "Current Thinking in Haematological Malignancies (Glasgow)",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://hartleytaylor.co.uk/8hms-registration/"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 218383
+          },
+          "llm_reasoning": "The page has sections such as 'Discover PATHOLOGY', 'Membership', 'News', 'Blogs', 'Public affairs', 'Videos', 'For Trainees', 'For the Profession', 'Conferences', 'Continuing Professional Development (CPD)', 'Appraisal and revalidation', 'Guidelines', 'Publications', 'Digital pathology' but no 'Fee",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['current'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['current'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://hartleytaylor.co.uk/8hms-registration/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1261,
+      "conference_name": "Infection Prevention and Control (IPC)  Training Day - Aspec",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://portal.his.org.uk/event/book?id=TD2609&_gl=1*1ny7axt*_up*MQ..*_ga*MTYxOTE2OTIzOS4xNzg1ODUxNDI5*_ga_CYTMZ7W2LW*czE3ODU4NTE0MjkkbzEkZzAkdDE3ODU4"
+            ],
+            "images_ocred": 21,
+            "total_text_chars": 146413
+          },
+          "llm_reasoning": "The provided text appears to be a mix of JavaScript code, cookie policy configurations, and HTML elements, but it does not contain any information about registration fees for the Infection Prevention and Control (IPC) Training Day event. The text includes sections on cookies, Google Analytics, and w",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['control'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['control'] verdict='no' ok=False",
+            "external_followed: https://portal.his.org.uk/event/book?id=TD2609&_gl=1*1ny7axt*_up*MQ..*_ga*MTYxOTE2OTIzOS4xNzg1ODUxNDI5*_ga_CYTMZ7W2LW*czE3ODU4NTE0MjkkbzEkZzAkdDE3ODU4 (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1305,
+      "conference_name": "2nd Immunodeficiency faculty meeting: Immune Failure - Cases",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html"
+            ],
+            "images_ocred": 12,
+            "total_text_chars": 121636
+          },
+          "llm_reasoning": "The page has sections such as 'Discover PATHOLOGY', 'What is pathology?', 'Careers in pathology', 'Public engagement events', 'Resources', 'Competitions', 'Membership', 'Corporate membership', 'Undergraduates and Foundation doctors', 'News', 'Blogs', 'Public affairs', 'Videos', 'Pathologists in Prof",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['failure'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['diagnosis'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['edge'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html: matched=['meeting'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1321,
+      "conference_name": "International Congress of  Antimicrobial Chemotherapy (ICC)",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://icc2026ph.org/registration"
+            ],
+            "images_ocred": 24,
+            "total_text_chars": 122250
+          },
+          "llm_reasoning": "The provided page text does not contain any information about registration fees for the International Congress of Antimicrobial Chemotherapy (ICC). The text appears to be related to cookie policies, Google analytics, and other technical aspects of the website, as well as general information about th",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['international'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['international'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['international'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['international'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['international'] verdict='no' ok=False",
+            "external_followed: https://icc2026ph.org/registration (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1308,
+      "conference_name": "Healthcare Infection Society (HIS) Outbreaks Training Course",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://portal.his.org.uk/event/book?id=OC2611&_gl=1*1bs1gm0*_up*MQ..*_ga*MTg3MjgwMzI2MS4xNzg1OTE3ODM3*_ga_CYTMZ7W2LW*czE3ODU5MzY0MjgkbzQkZzEkdDE3ODU5"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 146513
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "llm_event_match https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html: matched=['infection'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['infection'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['infection'] verdict='' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['infection'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://portal.his.org.uk/event/book?id=OC2611&_gl=1*1bs1gm0*_up*MQ..*_ga*MTg3MjgwMzI2MS4xNzg1OTE3ODM3*_ga_CYTMZ7W2LW*czE3ODU5MzY0MjgkbzQkZzEkdDE3ODU5 (link text: 'Book Now')",
+            "llm_event_match https://portal.his.org.uk/event/book?id=OC2611&_gl=1*1bs1gm0*_up*MQ..*_ga*MTg3MjgwMzI2MS4xNzg1OTE3ODM3*_ga_CYTMZ7W2LW*czE3ODU5MzY0MjgkbzQkZzEkdDE3ODU5: matched=['infection'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1263,
+      "conference_name": "South West Lymphoma Group",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://hartleytaylor.co.uk/swlk-registration/"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 218089
+          },
+          "llm_reasoning": "The provided page text does not contain any information about registration fees for the South West Lymphoma Group event. The text appears to be related to cookie policies, Google analytics, and other technical aspects of the website, as well as general information about the Royal College of Patholog",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['south'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://hartleytaylor.co.uk/swlk-registration/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1307,
+      "conference_name": "Behaviour change and Infection Prevention and Control (IPC) ",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://events.teams.microsoft.com/event/3e72069c-fc4f-44d7-9e64-e070392db918@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration"
+            ],
+            "images_ocred": 42,
+            "total_text_chars": 121801
+          },
+          "llm_reasoning": "The page has Overview, Programme, Speakers, and other tabs but no Fees section, and the provided text appears to be related to cookie policies, Google analytics, and website configuration, with no mention of registration fees or pricing information for the Behaviour change and Infection Prevention a",
+          "notes": [
+            "external_followed: https://events.teams.microsoft.com/event/3e72069c-fc4f-44d7-9e64-e070392db918@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration (link text: 'Book Now')",
+            "skipped_unrelated_zero_tokens: https://events.teams.microsoft.com/event/3e72069c-fc4f-44d7-9e64-e070392db918@880e1cf6-0e66-4ce3-9534-eadf2d5ded15/registration"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1309,
+      "conference_name": "Birmingham Breast Pathology Update Course 2026",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://birminghambreastpathology.co.uk/bbpuc-register/"
+            ],
+            "images_ocred": 10,
+            "total_text_chars": 321847
+          },
+          "llm_reasoning": "The page has Overview, Programme, Speakers, and other tabs but no Fees section, and the provided text appears to be related to cookie policies, Google analytics, and other technical configurations, with no mention of registration fees or pricing information for the Birmingham Breast Pathology Update",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['pathology'] verdict='' ok=False",
+            "external_followed: https://birminghambreastpathology.co.uk/bbpuc-register/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1310,
+      "conference_name": "UK Lymphoma Research Group",
+      "fields": [
+        "event_format"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1312,
+      "conference_name": "International Pathology Day 2026 \u2013 virtual meeting",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/latest-evidence-on-diagnostics-for-infection-management-in-the-adult-emergency-department-from-data-into-clinical-practice.html",
+              "https://www.rcpath.org/profession/conferences/events/event-booking-page.international-pathology-day-2026-virtual-conference.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html"
+            ],
+            "images_ocred": 49,
+            "total_text_chars": 148797
+          },
+          "llm_reasoning": "The page has tabs for Overview, Programme, Speakers, and other sections, but there is no Fees or Registration section. The text provided appears to be related to cookie policies, Google analytics, and other technical configurations, with no mention of registration fees or tiers.",
+          "notes": []
+        }
+      ]
+    },
+    {
+      "conference_id": 1311,
+      "conference_name": "Leeds Lymphoma Course",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://bookwhen.com/leeds-lymphoma-course-2026"
+            ],
+            "images_ocred": 1,
+            "total_text_chars": 140333
+          },
+          "llm_reasoning": "The page has Overview, Programme, Speakers, and other tabs but no Fees section, and the provided text appears to be related to cookie policies, Google analytics, and other technical configurations, with no mention of registration fees for the Leeds Lymphoma Course.",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "llm_event_match https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html: matched=['lymphoma'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://bookwhen.com/leeds-lymphoma-course-2026 (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1313,
+      "conference_name": "UK Myeloma Society Autumn Day",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://collaborativeconferences.co.uk/ukmj-registration/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 235160
+          },
+          "llm_reasoning": "The provided page text does not contain any information about registration fees for the UK Myeloma Society Autumn Day event. The text appears to be related to cookie policies, Google analytics, and other technical aspects of the website, but does not mention event registration or fees. The page has ",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://collaborativeconferences.co.uk/ukmj-registration/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1265,
+      "conference_name": "WPSD 2026: Joined-up healthcare: designing error out of diag",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/latest-evidence-on-diagnostics-for-infection-management-in-the-adult-emergency-department-from-data-into-clinical-practice.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/event/advances-in-transfusion-medicine-symposium-2026-organised-by-rcpath-and-shot.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://us02web.zoom.us/webinar/register/WN_sNHLlujST-GIzWiSlGx_0A"
+            ],
+            "images_ocred": 24,
+            "total_text_chars": 174789
+          },
+          "llm_reasoning": "The provided page text does not contain any information about registration fees for the WPSD 2026 event. The text appears to be related to cookie policies, Google analytics, and other technical aspects of the website, as well as general information about the Royal College of Pathologists. There is n",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['diagnostic'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "llm_event_match https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html: matched=['diagnostic'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://us02web.zoom.us/webinar/register/WN_sNHLlujST-GIzWiSlGx_0A (link text: 'Register for the WPSD 2026 Joined-up healthcare webinar - Monday 14 September, 1')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1314,
+      "conference_name": "UK Forum on Haemoglobin Disorders (UKFHD) 62nd Academic Meet",
+      "fields": [
+        "event_format"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1316,
+      "conference_name": "British Lymphoma Pathology Group (BLPG) Autumn Meeting 2026",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://britishlymphomapathology.group/"
+            ],
+            "images_ocred": 22,
+            "total_text_chars": 321764
+          },
+          "llm_reasoning": "The provided text appears to be a mix of JavaScript code, cookie policy configurations, and HTML elements, but it does not contain any information about registration fees for the British Lymphoma Pathology Group (BLPG) Autumn Meeting 2026. The page has sections such as 'Discover PATHOLOGY', 'Members",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['pathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['pathology'] verdict='no' ok=False",
+            "external_followed: https://britishlymphomapathology.group/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1266,
+      "conference_name": "33rd London Lymphoma Forum",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://collaborativeconferences.co.uk/llff-registration/"
+            ],
+            "images_ocred": 7,
+            "total_text_chars": 234686
+          },
+          "llm_reasoning": "The provided page text does not contain any information about registration fees for the 33rd London Lymphoma Forum. The text appears to be related to cookie policies, Google analytics, and other technical aspects of the website, as well as general information about the Royal College of Pathologists.",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['forum'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://collaborativeconferences.co.uk/llff-registration/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1317,
+      "conference_name": "Myeloproliferative Neoplasms Advances Day 2026",
+      "fields": [
+        "event_format"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1318,
+      "conference_name": "BAUP Annual Meeting with Uropathology EQA Circulation",
+      "fields": [
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://www.baup.org.uk/events-calendar"
+            ],
+            "images_ocred": 28,
+            "total_text_chars": 124262
+          },
+          "llm_reasoning": "The provided page text does not contain any information about registration fees for the BAUP Annual Meeting with Uropathology EQA Circulation. The text appears to be related to cookie policies, Google analytics, and other technical aspects of the website, but does not mention fees or pricing for the",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['uropathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['uropathology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['uropathology'] verdict='no' ok=False",
+            "external_followed: https://www.baup.org.uk/events-calendar (link text: 'Book Now')",
+            "llm_event_match https://www.baup.org.uk/events-calendar: matched=['baup'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1319,
+      "conference_name": "Advances in Transfusion Medicine Symposium 2026 - Organised ",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/resourceLibrary/advances-in-transfusion-medicine-symposium-2026-programme.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/latest-evidence-on-diagnostics-for-infection-management-in-the-adult-emergency-department-from-data-into-clinical-practice.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html"
+            ],
+            "images_ocred": 24,
+            "total_text_chars": 171583
+          },
+          "llm_reasoning": "The provided text appears to be a mix of JavaScript code, cookie policy information, and general website content. It does not contain any information about registration fees for the Advances in Transfusion Medicine Symposium 2026. The page has sections such as 'Discover PATHOLOGY', 'Membership', 'Ne",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['rcpath', 'transfusion'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['rcpath', 'transfusion'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['rcpath', 'transfusion'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/resourceLibrary/advances-in-transfusion-medicine-symposium-2026-programme.html: matched=['rcpath'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['rcpath', 'transfusion'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['rcpath', 'transfusion'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['rcpath', 'transfusion'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1320,
+      "conference_name": "The British Society for Immunology (BSI) Congress 2026",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://www.bsicongress.com"
+            ],
+            "images_ocred": 1,
+            "total_text_chars": 322288
+          },
+          "llm_reasoning": "The provided page text does not contain any information about registration fees for the British Society for Immunology (BSI) Congress 2026. The text appears to be related to cookie policies, Google analytics, and other technical aspects of the website, as well as general information about the Royal ",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['immunology'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['immunology'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['immunology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html: matched=['immunology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['immunology'] verdict='' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['immunology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['immunology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['immunology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['immunology'] verdict='no' ok=False",
+            "external_followed: https://www.bsicongress.com (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1268,
+      "conference_name": "Pathology Grand Round Lecture",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://www.pathsoc.org/grants_lectures_awards/pathology_grand_round_lectures.aspx"
+            ],
+            "images_ocred": 42,
+            "total_text_chars": 147546
+          },
+          "llm_reasoning": "The provided text appears to be a mix of JavaScript code, cookie policy configurations, and HTML elements, but it does not contain any information about registration fees for the Pathology Grand Round Lecture event. The text includes sections on cookies, Google analytics, and website configuration, ",
+          "notes": [
+            "external_followed: https://www.pathsoc.org/grants_lectures_awards/pathology_grand_round_lectures.aspx (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1269,
+      "conference_name": "Rapid Diagnostics in Infectious Disease \u2013 From Detection to ",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 121836
+          },
+          "llm_reasoning": "The page has Overview, Programme, Speakers tabs but no Fees section, and the provided text appears to be related to cookie policies, Google analytics, and website configuration, with no mention of registration fees or pricing information.",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/trainees/cost-of-training1.html",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['diagnostics'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['decision', 'diagnostics'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['decision', 'diagnostics'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['decision'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1273,
+      "conference_name": "Paediatric Pathology Society (PPS) Meeting",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://www.paedpath.org/"
+            ],
+            "images_ocred": 46,
+            "total_text_chars": 129905
+          },
+          "llm_reasoning": "The provided text appears to be related to cookie policies, Google Analytics, and website configuration, but does not contain any information about registration fees for the Paediatric Pathology Society (PPS) Meeting. The text includes sections on cookies, marketing, statistics, and other topics unr",
+          "notes": [
+            "external_followed: https://www.paedpath.org/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1250,
+      "conference_name": "Beyond the Microscope: Skills that Strengthen Practice",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://us02web.zoom.us/webinar/register/WN_z_Lu9qJvRa--Y72_DleETA"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 147650
+          },
+          "llm_reasoning": "The provided text appears to be a mix of JavaScript code, cookie policy configurations, and HTML elements, but it does not contain any information about registration fees for the 'Beyond the Microscope: Skills that Strengthen Practice' event. The text includes sections on cookies, Google analytics, ",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['practice'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/on-the-agenda.html",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['skills'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['practice'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['practice'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['strengthen'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+            "skipped_unrelated_zero_tokens: https://www.rcpath.org/profession/publications/annual-reports.html",
+            "external_followed: https://us02web.zoom.us/webinar/register/WN_z_Lu9qJvRa--Y72_DleETA (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1274,
+      "conference_name": "European Hematology Association (EHA) Progress Test Workshop",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://myeha.ehaweb.org/event-registration/?eventId=EV-42321a05e9e9463aaf89f8692d7caf0e"
+            ],
+            "images_ocred": 42,
+            "total_text_chars": 169118
+          },
+          "llm_reasoning": "The provided page text does not contain any information about registration fees for the European Hematology Association (EHA) Progress Test Workshop. The text appears to be related to cookie policies, Google analytics, and other technical aspects of the website, as well as general information about ",
+          "notes": [
+            "external_followed: https://myeha.ehaweb.org/event-registration/?eventId=EV-42321a05e9e9463aaf89f8692d7caf0e (link text: 'Book Now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1277,
+      "conference_name": "Post International Society of Thrombosis and Haemostasis (IS",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpath.org/trainees/cost-of-training1.html",
+              "https://www.rcpath.org/profession/on-the-agenda.html",
+              "https://www.rcpath.org/profession/continuing-professional-development-cpd.html",
+              "https://www.rcpath.org/event/the-fifth-diagnexia-histopathology-symposium-2026.html",
+              "https://www.rcpath.org/event/rcpath-wales-symposium-2026.html",
+              "https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html",
+              "https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html",
+              "https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html",
+              "https://www.rcpath.org/profession/publications/annual-reports.html",
+              "https://hartleytaylor.co.uk/ist5-home/"
+            ],
+            "images_ocred": 10,
+            "total_text_chars": 204559
+          },
+          "llm_reasoning": "The provided page text does not contain any information about registration fees for the Post International Society of Thrombosis and Haemostasis (ISTH) & American Society of Haematology (ASH) Headlines 2026 event. The text appears to be related to cookie policies, Google analytics, and other technic",
+          "notes": [
+            "llm_event_match https://www.rcpath.org/trainees/cost-of-training1.html: matched=['international', 'haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/on-the-agenda.html: matched=['post', 'international', 'haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/continuing-professional-development-cpd.html: matched=['international', 'haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/rcpath-wales-symposium-2026.html: matched=['post', 'international', 'haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/event/northern-ireland-symposium-2026-from-diagnosis-to-recovery-pathology-improving-every-step-of-the-patient-journey.html: matched=['post', 'international', 'haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports/annual-report-2024-2025.html: matched=['international', 'haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/discover-pathology/news/resident-and-locally-employed-doctors-in-england-fee-reimbursements.html: matched=['international', 'haematology'] verdict='no' ok=False",
+            "llm_event_match https://www.rcpath.org/profession/publications/annual-reports.html: matched=['international', 'haematology'] verdict='no' ok=False",
+            "external_followed: https://hartleytaylor.co.uk/ist5-home/ (link text: 'Book Now')"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 59,
+  "explorer_successes": 12,
+  "duration_sec": 6544.4
+}

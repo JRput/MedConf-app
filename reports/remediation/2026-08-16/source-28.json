@@ -1,0 +1,514 @@
+{
+  "source_id": 28,
+  "source_name": "Royal College of Surgeons of Edinburgh",
+  "society": "RCSEd",
+  "run_at": "2026-08-16T00:52:24.980589+00:00",
+  "events_scraped": 73,
+  "events_with_gaps_at_first": 42,
+  "events_fixed": 32,
+  "events_still_incomplete": 20,
+  "patches_applied": [
+    {
+      "conference_id": 1512,
+      "conference_name": "RCSEd Mentor Development Programme",
+      "field": "cpd_points",
+      "value_before": "None",
+      "value_after": "14",
+      "method": "heuristic_regex"
+    },
+    {
+      "conference_id": 1476,
+      "conference_name": "Core Skills in Vascular Surgery",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1447,
+      "conference_name": "10th Surgical Approaches to the Spine",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1447,
+      "conference_name": "10th Surgical Approaches to the Spine",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1450,
+      "conference_name": "Event Details - 25th QI & Audit Symposium 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': True, 'abstract_deadline_note': 'see event page for details'}",
+      "method": "open_no_date"
+    },
+    {
+      "conference_id": 1452,
+      "conference_name": "36th Advanced Otology Course",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "the Surgical Skills and Simulation Centre at the Royal College of Surgeons, Edinburgh, a state of the art skills centre specifically designed with this type of course in mind. The focus of the course",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1452,
+      "conference_name": "36th Advanced Otology Course",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1469,
+      "conference_name": "Basic Skills in Paediatric Surgery",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1470,
+      "conference_name": "Basic Surgical Skills",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1473,
+      "conference_name": "Core Skills in Orthopaedic Surgery",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1479,
+      "conference_name": "Definitive Surgical Skills for Vascular Trauma",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1484,
+      "conference_name": "Foundations in Surgical Leadership (FSL)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1485,
+      "conference_name": "Foundations of Fracture Fixation",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1489,
+      "conference_name": "Future Surgeons: Key Skills",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1491,
+      "conference_name": "Informed Consent: Sharing the Decision (ICONS)",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1491,
+      "conference_name": "Informed Consent: Sharing the Decision (ICONS)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1494,
+      "conference_name": "Laparoscopic Skills in Emergency Surgery",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1495,
+      "conference_name": "Event Details - Membership in Implant Dentistry - Exam Infor",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1514,
+      "conference_name": "Recognition And Prevention of Injury and Deterioration (RAPI",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1515,
+      "conference_name": "SAS/LED Surgeons/Dentists\u2019 Conference",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1523,
+      "conference_name": "The Annual Faculty of Surgical Trainers Conference 2026: Tra",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': True, 'abstract_deadline_note': 'see event page for details'}",
+      "method": "open_no_date"
+    },
+    {
+      "conference_id": 1530,
+      "conference_name": "The Perioperative Care Practitioners Intraoperative Non-Tech",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1531,
+      "conference_name": "Training the Trainers: Trainer Development Course",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Dentistry",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1532,
+      "conference_name": "True Cut: How to Flourish as a Surgeon after Adverse Events",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1534,
+      "conference_name": "Vikings Surgeons Association \u2013 Annual Meeting: \u2018The Next Voy",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "RAVIC Inverness Target Audience Medical Students, Foundation Years, LED/SAS, Core Trainees, Specialty Trainees, Consultant Learning Style Mixed format of lectures, skills sessions & Surgical Trainee P",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1534,
+      "conference_name": "Vikings Surgeons Association \u2013 Annual Meeting: \u2018The Next Voy",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1478,
+      "conference_name": "COSMOS (Consultation Skills that Matter for Surgeons) \u2013 Modu",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1483,
+      "conference_name": "Foundations in Dental Leadership (FDL)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1490,
+      "conference_name": "Hostile Environment Surgical Training, United Kingdom (HEST-",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1522,
+      "conference_name": "Teams Based Quality Review for Clinical Practice (TBQR)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1457,
+      "conference_name": "Advanced Trauma Life Support (ATLS)",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1482,
+      "conference_name": "Foundation of Clinical Surgery",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1477,
+      "conference_name": "COSMOS (Consultation Skills that Matter for Surgeons) \u2013 Modu",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1516,
+      "conference_name": "So You Want to be a Vascular Surgeon?",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1521,
+      "conference_name": "Surgical Anatomy Revision Day (Anatomy for MRCS OSCEs) - Int",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Standard', 'price_gbp': 0.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "free_event"
+    },
+    {
+      "conference_id": 1521,
+      "conference_name": "Surgical Anatomy Revision Day (Anatomy for MRCS OSCEs) - Int",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1488,
+      "conference_name": "Future Surgeons: Critical Care",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1512,
+      "conference_name": "RCSEd Mentor Development Programme",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://auth.rcsed.ac.uk/core/localregistration"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 26302
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "external_followed: https://auth.rcsed.ac.uk/core/localregistration (link text: 'Register')",
+            "llm_event_match https://auth.rcsed.ac.uk/core/localregistration: matched=['rcsed'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1447,
+      "conference_name": "10th Surgical Approaches to the Spine",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1463,
+      "conference_name": "BAETS Parathyroid Masterclass",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1491,
+      "conference_name": "Informed Consent: Sharing the Decision (ICONS)",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1487,
+      "conference_name": "Future Leaders Programme for Surgeons (FLP)",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1495,
+      "conference_name": "Event Details - Membership in Implant Dentistry - Exam Infor",
+      "fields": [
+        "venue_name",
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1506,
+      "conference_name": "Primary Trauma Care \u2013 Instructor Course",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1508,
+      "conference_name": "Primary Trauma Care - Provider Course",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1523,
+      "conference_name": "The Annual Faculty of Surgical Trainers Conference 2026: Tra",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1529,
+      "conference_name": "The International Edinburgh MRCS OSCE Preparation Course",
+      "fields": [
+        "venue_name",
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1532,
+      "conference_name": "True Cut: How to Flourish as a Surgeon after Adverse Events",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1472,
+      "conference_name": "Course Details - Clinical Research Methodology in a Nutshell",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1478,
+      "conference_name": "COSMOS (Consultation Skills that Matter for Surgeons) \u2013 Modu",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1486,
+      "conference_name": "FPHC Crowd Doctor and Practitioner Course",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1477,
+      "conference_name": "COSMOS (Consultation Skills that Matter for Surgeons) \u2013 Modu",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1480,
+      "conference_name": "Dental Non-Technical Skills (DeNTS) Masterclass. Increasing ",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1507,
+      "conference_name": "Primary Trauma Care \u2013 Intensive Course",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1521,
+      "conference_name": "Surgical Anatomy Revision Day (Anatomy for MRCS OSCEs) - Int",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1524,
+      "conference_name": "The Edinburgh Hand Course",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://auth.rcsed.ac.uk/core/localregistration"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 25742
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "external_followed: https://auth.rcsed.ac.uk/core/localregistration (link text: 'Register')",
+            "skipped_unrelated_zero_tokens: https://auth.rcsed.ac.uk/core/localregistration"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1488,
+      "conference_name": "Future Surgeons: Critical Care",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    }
+  ],
+  "explorer_runs": 2,
+  "explorer_successes": 0,
+  "duration_sec": 145.1
+}
