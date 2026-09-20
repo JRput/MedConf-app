@@ -50,9 +50,12 @@ jobs:
         env:
           KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
           KIMI_BASE_URL: https://integrate.api.nvidia.com/v1
-          # Rotated from kimi-k2.6 on 2026-07-31 after NVIDIA revoked
-          # the account's grant. See vision.py for vision-model choice.
-          KIMI_MODEL: meta/llama-3.3-70b-instruct
+          # Model fallback chain (2026-09-20): NVIDIA killed
+          # meta/llama-3.3-70b-instruct + its backup on 2026-08-26 with no
+          # warning. llm_client.py now walks this chain and advances past
+          # any model the API reports as gone. See config.py / vision.py.
+          KIMI_MODEL_CHAIN: "nvidia/nemotron-3-super-120b-a12b,meta/muse-glimmer-30b,openai/gpt-oss-20b"
+          KIMI_VISION_MODEL_CHAIN: "meta/muse-glimmer-30b,meta/llama-3.2-11b-vision-instruct"
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python -m remediator --all

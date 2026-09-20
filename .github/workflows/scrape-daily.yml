@@ -12,8 +12,43 @@ on:
   workflow_dispatch:       # manual trigger from GitHub UI
 
 jobs:
+  probe-models:
+    name: Probe LLM model chains
+    runs-on: ubuntu-latest
+    # Fails the run red BEFORE the 29-way scrape matrix starts if NVIDIA
+    # has retired every model in a chain (see probe_models.py, added
+    # 2026-09-20 after a silent EOL on 2026-08-26 killed every text call
+    # for 3+ weeks with CI staying green — heuristics backstopped the
+    # soft fields so nothing looked broken).
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install probe dependencies
+        working-directory: medconf-scraper
+        # Only what probe_models.py imports — same version constraints as
+        # requirements.txt, no Playwright/Supabase needed for a probe.
+        run: pip install "openai>=1.0.0" "python-dotenv>=1.0.0"
+
+      - name: Probe model chains
+        working-directory: medconf-scraper
+        env:
+          KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+          KIMI_BASE_URL: https://integrate.api.nvidia.com/v1
+        run: python probe_models.py
+
   scrape:
     name: Source ${{ matrix.source_id }}
+    needs: probe-models
+    # Still scrape when the probe fails: hard fields (dates, fees, venues)
+    # are deterministic and heuristics backstop the soft ones. The failed
+    # probe job keeps the overall run red, which is the alert.
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false   # one source failing should NOT cancel the others
@@ -104,9 +139,13 @@ jobs:
         env:
           KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
           KIMI_BASE_URL: https://integrate.api.nvidia.com/v1
-          # Rotated from kimi-k2.6 on 2026-07-31 after NVIDIA retired the
-          # entire Moonshot family (all kimi-k2.* variants → 404/410).
-          KIMI_MODEL: meta/llama-3.3-70b-instruct
+          # Model fallback chain (2026-09-20): NVIDIA killed
+          # meta/llama-3.3-70b-instruct + its backup on 2026-08-26 with no
+          # warning. llm_client.py now walks this chain and advances past
+          # any model the API reports as gone, so one more silent EOL
+          # doesn't take every LLM call down again. See config.py.
+          KIMI_MODEL_CHAIN: "nvidia/nemotron-3-super-120b-a12b,meta/muse-glimmer-30b,openai/gpt-oss-20b"
+          KIMI_VISION_MODEL_CHAIN: "meta/muse-glimmer-30b,meta/llama-3.2-11b-vision-instruct"
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
           SCRAPER_MAX_STEPS: '30'

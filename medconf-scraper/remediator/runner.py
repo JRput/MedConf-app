@@ -34,13 +34,15 @@ def _get_supabase():
 def _llm_call_factory():
     """Mint a tight llm_call closure using the existing scraper LLM client."""
     from openai import OpenAI
-    from config import KIMI_API_KEY, KIMI_BASE_URL, KIMI_MODEL
+    from config import KIMI_API_KEY, KIMI_BASE_URL
+    from llm_client import chat_completion
     client = OpenAI(api_key=KIMI_API_KEY, base_url=KIMI_BASE_URL)
 
     def call(prompt: str, *, max_tokens: int = 800) -> Optional[str]:
         try:
-            resp = client.chat.completions.create(
-                model=KIMI_MODEL,
+            resp = chat_completion(
+                client,
+                chain="text",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.0,
                 max_tokens=max_tokens,

@@ -12,15 +12,53 @@ LESSON #4 (cloud LLM rate limits): every call returns None on failure
 rather than raising. Caller must handle None — typical fallback is to
 leave pricing empty and link out to the source's fees page.
 
-LESSON #6 (model EOLs): vision model name lives in KIMI_VISION_MODEL env
-var. To rotate, edit `.env` only — no code change.
+LESSON #6 (model EOLs): vision model rotates via KIMI_VISION_MODEL_CHAIN
+in config.py (comma-separated, KIMI_VISION_MODEL env goes first if set).
+llm_client.chat_completion(chain="vision") walks the chain and advances
+past any model NVIDIA has retired — no code change needed to rotate.
+
+ROTATION LOG:
+- 2026-07-31: nvidia/nemotron-nano-12b-v2-vl correctly extracted row x
+  column into separate tiers (ESTRO Meets Asia FEE-EmA.jpg).
+  meta/llama-3.2-90b-vision-instruct returned wordy prose on complex fee
+  tables (JSON parse failures). meta/llama-3.2-11b-vision-instruct
+  collapsed multi-column pricing to one price per row.
+- 2026-08-26: NVIDIA killed nemotron-nano-12b-v2-vl (410) along with the
+  rest of the fleet. llama-3.2-11b-vision-instruct became the only known
+  live vision model.
+- 2026-09-20: re-evaluated the live fleet for image support. Neither
+  RCR's AI Conference fees page (rcraiconference.com/2026 — event over,
+  microsite now 404s) nor ESTRO's current congress page expose a live
+  fee-table image to test against, and every other active source's fees
+  are plain HTML tables. Tested against a synthetic multi-column fee
+  table (7 attendee-type rows x 3 timeframe columns = 21 cells,
+  rendered from HTML via Playwright so the pixels are realistic) instead
+  of a real production image — this is a real gap, flagged below.
+  Of the models that accept image input at all on NVIDIA's current
+  fleet (nemotron-3-super-120b-a12b 400s on multimodal input; gpt-oss-20b
+  and diffusiongemma-26b-a4b-it accept the call but return empty/
+  non-visual answers, i.e. they don't actually look at the image):
+    - meta/muse-glimmer-30b: extracted all 21/21 tiers correctly
+      (right price per row x column cell) in ~6s.
+    - meta/llama-3.2-11b-vision-instruct: also extracted all 21/21
+      tiers correctly, in ~34s (5x slower).
+  On this synthetic table BOTH models handled multi-column correctly —
+  the previously-observed 11b "collapses to one price per row" defect
+  did not reproduce, but the synthetic image is a clean render and may
+  be easier than a real photographed/exported fee JPG. Chain ordered
+  muse-glimmer-30b first (equally correct here, much faster, and not
+  the model with the known historical defect); 11b kept as a fallback.
+  UNVERIFIED: neither model has been checked against a real complex
+  multi-section idloom/Cvent fee export since no live one could be
+  found today — re-verify the next time a source publishes an
+  image-based fee table (RCR/ESTRO's next cycle, or a remediator run
+  that logs a real fee-image URL) and update this log.
 """
 
 from __future__ import annotations
 import base64
 import json
 import logging
-import os
 import re
 from typing import List, Optional
 
@@ -28,15 +66,9 @@ import httpx
 from openai import OpenAI
 
 from config import KIMI_API_KEY, KIMI_BASE_URL
+from llm_client import chat_completion, current_model
 
 logger = logging.getLogger(__name__)
-
-# Rotated 2026-07-31: meta/llama-3.2-90b-vision-instruct returns wordy
-# prose on complex fee tables (fails JSON parse), and Llama-3.2-11b-vision
-# collapses multi-column pricing to a single price per row.
-# nvidia/nemotron-nano-12b-v2-vl correctly extracts row × column into
-# separate tiers (verified 2026-07-31 on ESTRO Meets Asia FEE-EmA.jpg).
-VISION_MODEL = os.environ.get("KIMI_VISION_MODEL", "nvidia/nemotron-nano-12b-v2-vl")
 
 _client: Optional[OpenAI] = None
 
@@ -100,8 +132,9 @@ def extract_json(
         return None
 
     try:
-        resp = _client_get().chat.completions.create(
-            model=VISION_MODEL,
+        resp = chat_completion(
+            _client_get(),
+            chain="vision",
             messages=[{"role": "user", "content": content}],
             temperature=0.0,
             max_tokens=max_tokens,
@@ -109,7 +142,7 @@ def extract_json(
         )
         raw = (resp.choices[0].message.content or "").strip()
     except Exception as e:
-        logger.warning(f"vision: API call failed: {type(e).__name__}: {e}")
+        logger.warning(f"vision: API call failed on '{current_model('vision')}': {type(e).__name__}: {e}")
         return None
 
     # Strip code fences + find the first JSON object

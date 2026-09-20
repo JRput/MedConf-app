@@ -5,7 +5,8 @@ import json
 import hashlib
 import re
 from openai import OpenAI
-from config import KIMI_API_KEY, KIMI_BASE_URL, KIMI_MODEL, SCRAPER_MAX_STEPS
+from config import KIMI_API_KEY, KIMI_BASE_URL, SCRAPER_MAX_STEPS
+from llm_client import chat_completion
 from browser import BrowserController
 from extractors import get_extractor
 from typing import Dict, Any, List, Optional
@@ -458,8 +459,9 @@ class AgentLoop:
             # the model hold the connection long enough to trip NVIDIA's ~300s
             # gateway timeout (the 504s). A tight cap finishes generation in
             # seconds and makes 504s rare.
-            response = self.client.chat.completions.create(
-                model=KIMI_MODEL,
+            response = chat_completion(
+                self.client,
+                chain="text",
                 max_tokens=512,
                 temperature=0.3,
                 messages=[{"role": "user", "content": prompt}],
@@ -564,8 +566,9 @@ Conference object structure (apply DATA FIDELITY RULES — use null / [] when a 
 }}"""
 
         # Call Kimi K2.5 API - disable thinking mode for direct JSON output
-        response = self.client.chat.completions.create(
-            model=KIMI_MODEL,
+        response = chat_completion(
+            self.client,
+            chain="text",
             max_tokens=16384,
             temperature=0.7,
             messages=[{"role": "user", "content": prompt}],
