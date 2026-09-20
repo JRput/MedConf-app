@@ -37,17 +37,21 @@ number; there isn't one.
 
 Session pages are fetched with httpx (server-rendered HTML, no JS
 needed) so we never navigate the Playwright page away from the detail
-URL (PLAYBOOK mistake #10).
+URL (PLAYBOOK mistake #10). GitHub Actions runners get a 403 from
+resus.org.uk on datacenter IPs, so both the hub fetch and the session
+walk go through extractors.http_fetch.fetch_html(), which falls back
+to a throwaway browser page (opened fresh from the same context, never
+the caller's page) when httpx is blocked.
 """
 
 import html
 import re
-import httpx
 from datetime import date
 from typing import Dict, Any, Optional, Callable, List, Tuple
 from playwright.sync_api import Page
 
 from .base import BaseExtractor
+from .http_fetch import fetch_html
 from .specialty_classifier import classify_specialty
 from logger import logger
 
@@ -100,14 +104,10 @@ class ResusExtractor(BaseExtractor):
     # Listing override — hub page instead of DOM walker
     # ------------------------------------------------------------------ #
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
-        try:
-            with httpx.Client(timeout=30.0, follow_redirects=True,
-                              headers=HTTP_HEADERS) as c:
-                resp = c.get(HUB_URL)
-                resp.raise_for_status()
-                html = resp.text
-        except Exception as e:
-            logger.warning(f"Resus: hub fetch failed ({e}); falling back to DOM")
+        html = fetch_html(HUB_URL, browser=getattr(self, "browser", None),
+                           headers=HTTP_HEADERS, timeout=30.0)
+        if html is None:
+            logger.warning("Resus: hub fetch failed (httpx + browser fallback); falling back to DOM")
             return None
 
         paths = sorted(set(re.findall(r'href="(/training-courses/[^"#?]+)"', html)))
@@ -219,34 +219,30 @@ class ResusExtractor(BaseExtractor):
             return []
         sessions: List[Dict[str, Any]] = []
         seen: set = set()
+        browser = getattr(self, "browser", None)
         try:
-            with httpx.Client(timeout=30.0, follow_redirects=True,
-                              headers=HTTP_HEADERS) as c:
-                last_page = 0
-                page_no = 0
-                while page_no <= min(last_page, MAX_SESSION_PAGES - 1):
-                    url = f"{detail_url}?page={page_no}"
-                    try:
-                        resp = c.get(url)
-                        resp.raise_for_status()
-                    except Exception as e:
-                        logger.warning(f"Resus: session page fetch failed {url}: {e}")
-                        break
-                    html = resp.text
-                    if page_no == 0:
-                        m = _LAST_PAGE_RE.search(html)
-                        if m:
-                            last_page = int(m.group(1))
-                    rows = self._parse_rows(html)
-                    if not rows and page_no > 0:
-                        break  # walked past the end
-                    for s in rows:
-                        key = (s["start_date"], s.get("venue_name"), s.get("city"))
-                        if key in seen:
-                            continue
-                        seen.add(key)
-                        sessions.append(s)
-                    page_no += 1
+            last_page = 0
+            page_no = 0
+            while page_no <= min(last_page, MAX_SESSION_PAGES - 1):
+                url = f"{detail_url}?page={page_no}"
+                html = fetch_html(url, browser=browser, headers=HTTP_HEADERS, timeout=30.0)
+                if html is None:
+                    logger.warning(f"Resus: session page fetch failed {url}")
+                    break
+                if page_no == 0:
+                    m = _LAST_PAGE_RE.search(html)
+                    if m:
+                        last_page = int(m.group(1))
+                rows = self._parse_rows(html)
+                if not rows and page_no > 0:
+                    break  # walked past the end
+                for s in rows:
+                    key = (s["start_date"], s.get("venue_name"), s.get("city"))
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    sessions.append(s)
+                page_no += 1
         except Exception as e:
             logger.warning(f"Resus: session walk failed for {detail_url}: {e}")
         return sessions

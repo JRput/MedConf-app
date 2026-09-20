@@ -2,9 +2,9 @@
 
 > Auto-loaded by Claude Code at session start. This file is the single source of truth for project context, conventions, and how-to-run. Keep it short and current — link out to deeper docs rather than duplicate them here.
 
-> **Production state (2026-08-14):** **23 active sources** — RCGP (1), RCSEng events (2), RSM (3), RCP (4), RCSEng courses (5), RCEM × 3 (6/7/8), RCOG × 2 (9/10), RCR × 2 (11/12), BOPA (13), BTOG (14), ASCO × 2 (15/16), ESMO (17), AACR (18), ESTRO (19), SABCS (20), ESGO × 2 (21/22), SITC (23). Product has expanded from a UK CPD directory into a global oncology-heavy directory. Four daily crons on GitHub Actions: **02:00 UTC** scrape matrix (23 parallel workers), **03:00 UTC** specialty alerts (in-app), **04:00 UTC** remediator (all sources), **08:00 UTC** saved-event reminders. Multi-currency in production (USD/EUR/HKD/SGD alongside GBP). Repo: https://github.com/JRput/MedConf-app · **Active Supabase project:** `zcpszfbmvfylicpxgsfc` (eu-west-1, hotmail org). **For next-session handoff** see [memory/project_pending_work.md](file:///Users/Sushil/.claude/projects/-Users-Sushil-Documents-Documents-IMT2-Side-hustle-myTalk-conference-app/memory/project_pending_work.md).
+> **Production state (2026-09-20):** **29 active sources** — RCGP (1), RCSEng events (2), RSM (3), RCP (4), RCSEng courses (5), RCEM × 3 (6/7/8), RCOG × 2 (9/10), RCR × 2 (11/12), BOPA (13), BTOG (14), ASCO × 2 (15/16), ESMO (17), AACR (18), ESTRO (19), SABCS (20), ESGO × 2 (21/22), SITC (23), plus masterlist wave 1a: ALSG (24), RCPSG (25), RCPath (26), RCPsych (27), RCSEd (28), Resus Council UK (29) — scale-up plan in [MISSION_BOARD.md](MISSION_BOARD.md). Product has expanded from a UK CPD directory into a global oncology-heavy directory. Four daily crons on GitHub Actions: **02:00 UTC** scrape matrix (model probe job + 29 parallel workers), **03:00 UTC** specialty alerts (in-app), **04:00 UTC** remediator (all sources), **08:00 UTC** saved-event reminders. Multi-currency in production (USD/EUR/HKD/SGD alongside GBP). Repo: https://github.com/JRput/MedConf-app · **Active Supabase project:** `zcpszfbmvfylicpxgsfc` (eu-west-1, hotmail org). **For next-session handoff** see [memory/project_pending_work.md](file:///Users/Sushil/.claude/projects/-Users-Sushil-Documents-Documents-IMT2-Side-hustle-myTalk-conference-app/memory/project_pending_work.md).
 >
-> **LLM models** (rotated 2026-07-31 after NVIDIA revoked our Moonshot grant): text = `meta/llama-3.3-70b-instruct`, vision = `nvidia/nemotron-nano-12b-v2-vl`. Defaults in `config.py` / `vision.py` are set to these — `.env` overrides for local. Backup text model: `nvidia/llama-3.3-nemotron-super-49b-v1`.
+> **LLM models — fallback chains** (2026-09-20, after NVIDIA retired every configured model on 2026-08-26 and calls failed silently for 25 days): text chain = `nvidia/nemotron-3-super-120b-a12b` → `meta/muse-glimmer-30b` → `openai/gpt-oss-20b`; vision chain = `meta/muse-glimmer-30b` → `meta/llama-3.2-11b-vision-instruct`. `llm_client.chat_completion()` advances past any model that 404s/410s. `probe_models.py` runs as the first job of the daily scrape — whole chain dead = red run. Defaults live in `config.py`; override with `KIMI_MODEL_CHAIN` / `KIMI_VISION_MODEL_CHAIN`.
 >
 > **Not yet deployed.** Frontend runs on localhost only (`PORT=3001 npm run dev`). No Vercel/production URL.
 
@@ -61,15 +61,16 @@ Authoritative documents:
 | [scraper.py](medconf-scraper/scraper.py) | `scrape_source()` — incremental hash decision: fast-skip unchanged events, slow-path for new/changed |
 | [llm_agent.py](medconf-scraper/llm_agent.py) | `list_shells()` (Phase A — DOM walk) + `extract_detail_for_shell()` (Phase B — per-source extractor) |
 | [browser.py](medconf-scraper/browser.py) | `get_event_cards_paginated()` — walks `?page=1..N` with auto-detection, dedup |
-| [extractors/](medconf-scraper/extractors/) | 20 per-source modules (rcgp/rcseng/rsm/rcp/rcem/rcog/rcr/bopa/btog/asco/esmo/aacr/estro/sabcs/esgo/sitc/…). Shared helpers: `specialty_classifier.py` (~40 title→specialty rules), `abstract_classifier.py`, `pricing_tables.py` (universal plain-number fee-table parser — try first before rolling a bespoke one), `vision.py` for image-based fees. `fallback.py` is LLM-only for unflagged sources |
+| [extractors/](medconf-scraper/extractors/) | 26 per-source modules (rcgp/rcseng/rsm/rcp/rcem/rcog/rcr/bopa/btog/asco/esmo/aacr/estro/sabcs/esgo/sitc/alsg/rcpsg/rcpath/rcpsych/rcsed/resus/…). Shared helpers: `specialty_classifier.py` (~40 title→specialty rules), `abstract_classifier.py`, `pricing_tables.py` (universal plain-number fee-table parser — try first before rolling a bespoke one), `vision.py` for image-based fees. `fallback.py` is LLM-only for unflagged sources |
 | [extractors/PLAYBOOK.md](medconf-scraper/extractors/PLAYBOOK.md) | Four-step onboarding protocol for a new source |
 | [validator.py](medconf-scraper/validator.py) | Schema/sanity checks + junk-label filter + footnote stripping |
 | [remediator/](medconf-scraper/remediator/) | Post-scrape fixer + audit gate. Runs after every scrape. 7 fixers, audit gate with hydrated-pricing second-look, vision LLM for image fees |
 | [database.py](medconf-scraper/database.py) | Supabase ops. `archive_stale_conferences` has a **source-health guard** — won't archive if source hasn't had a successful scrape in the window |
 
-**Current LLM models** (rotated 2026-07-31 after NVIDIA revoked our Moonshot grant):
-- Text: `meta/llama-3.3-70b-instruct`. Backup: `nvidia/llama-3.3-nemotron-super-49b-v1`.
-- Vision: `nvidia/nemotron-nano-12b-v2-vl` (Llama-3.2-90B-Vision returns wordy prose on complex tables → JSON parse fails).
+**Current LLM models** (fallback chains, 2026-09-20):
+- Text chain: `nvidia/nemotron-3-super-120b-a12b` → `meta/muse-glimmer-30b` → `openai/gpt-oss-20b` (see [llm_client.py](medconf-scraper/llm_client.py)).
+- Vision chain: `meta/muse-glimmer-30b` → `meta/llama-3.2-11b-vision-instruct`. ⚠ Only verified on a synthetic fee table — re-check on the next real image-based fee page (rotation log in `vision.py`).
+- Check what's alive: `./.venv/bin/python probe_models.py`. `/v1/models` lists dead models — only a real completion proves liveness.
 - Rotation runbook: [memory/project_kimi_eol.md](file:///Users/Sushil/.claude/projects/-Users-Sushil-Documents-Documents-IMT2-Side-hustle-myTalk-conference-app/memory/project_kimi_eol.md).
 
 ⚠ **APScheduler caveat (HQ LESSONS #1):** APScheduler `BlockingScheduler` is unreliable on macOS. **Production uses GitHub Actions cron, not APScheduler.** The local APScheduler path stays for dev convenience only.
@@ -106,19 +107,19 @@ PORT=3001 npm run dev      # 3000 may be in use locally
 ### Scraper — local dev paths
 ```bash
 cd medconf-scraper
-./.venv/bin/python main.py --run-now                     # all 23 sources
+./.venv/bin/python main.py --run-now                     # all 29 sources
 ./.venv/bin/python main.py --run-now --source 18         # just AACR
 python -m remediator --source 22                         # fix ESGO gaps post-scrape
 python -m remediator.audit --source 20                   # gate check for SABCS
 ```
 
 ### Required environment
-- **Scraper**: copy [.env.example](medconf-scraper/.env.example) → `.env`. Vars: `KIMI_API_KEY`, `KIMI_BASE_URL` (default OK), `KIMI_MODEL` (default `meta/llama-3.3-70b-instruct`), `KIMI_VISION_MODEL` (default `nvidia/nemotron-nano-12b-v2-vl`), `SUPABASE_URL`, `SUPABASE_KEY` (service-role), optional `SCRAPER_TIMEOUT_MS` (default 30000).
-- **GitHub Actions secrets** ([repo settings](https://github.com/JRput/MedConf-app/settings/secrets/actions)): `KIMI_API_KEY`, `SUPABASE_URL`, `SUPABASE_KEY`. `KIMI_MODEL` is set inline in workflow YAML for now.
+- **Scraper**: copy [.env.example](medconf-scraper/.env.example) → `.env`. Vars: `KIMI_API_KEY`, `KIMI_BASE_URL` (default OK), optional `KIMI_MODEL_CHAIN` / `KIMI_VISION_MODEL_CHAIN` (comma-separated; defaults in `config.py`; legacy `KIMI_MODEL` / `KIMI_VISION_MODEL` go first in the chain if set), `SUPABASE_URL`, `SUPABASE_KEY` (service-role), optional `SCRAPER_TIMEOUT_MS` (default 30000).
+- **GitHub Actions secrets** ([repo settings](https://github.com/JRput/MedConf-app/settings/secrets/actions)): `KIMI_API_KEY`, `SUPABASE_URL`, `SUPABASE_KEY`. Model chains are set inline in the workflow YAML.
 - **Website**: copy [.env.example](medconf-website/.env.example) → `.env.local`. Vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (publishable/anon key, NOT the service-role).
 
 ### Daily cron schedule (`.github/workflows/`)
-- `scrape-daily.yml` — **02:00 UTC** — matrix of 23 source jobs, `fail-fast: false`.
+- `scrape-daily.yml` — **02:00 UTC** — `probe-models` job, then matrix of 29 source jobs, `fail-fast: false`.
 - `fire-specialty-alerts.yml` — **03:00 UTC** — batched in-app "N new Cardiology events" per user.
 - `remediator-daily.yml` — **04:00 UTC** — runs `python -m remediator --all`. Uploads JSON reports as artifacts.
 - `fire-reminders.yml` — **08:00 UTC** — fires saved-event reminders users scheduled from the detail page.

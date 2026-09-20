@@ -23,13 +23,14 @@ Type classification:
 
 import re
 import html as _html
+import time
 from datetime import date
 from typing import Dict, Any, Optional, Callable, List
 
-import httpx
 from playwright.sync_api import Page
 
 from .base import BaseExtractor
+from .http_fetch import fetch_html
 from .specialty_classifier import classify_specialty
 from logger import logger
 
@@ -256,27 +257,22 @@ class BTOGExtractor(BaseExtractor):
         # BTOG's WordPress host was intermittently slow (30-60s to
         # respond) during 2026-08-10 and 2026-08-14 scrape windows,
         # causing back-to-back failures. Widened timeout + added a
-        # single httpx retry before falling through to the browser.
-        import time
+        # retry before giving up. Separately, on GitHub Actions runners
+        # (datacenter IPs) the site answers with a 202 bot-challenge
+        # interstitial instead of the real page — fetch_html() detects
+        # that and falls back to a real browser page automatically.
         html: Optional[str] = None
-        last_err: Optional[Exception] = None
+        browser = getattr(self, "browser", None)
         for attempt in range(3):
-            try:
-                with httpx.Client(timeout=60.0, follow_redirects=True,
-                                  headers={"User-Agent": USER_AGENT}) as c:
-                    r = c.get(LISTING_URL)
-                    r.raise_for_status()
-                    html = r.text
-                    break
-            except Exception as e:
-                last_err = e
-                logger.warning(
-                    f"BTOG listing fetch attempt {attempt + 1}/3 failed: {e}"
-                )
-                if attempt < 2:
-                    time.sleep(5 * (attempt + 1))
+            html = fetch_html(LISTING_URL, browser=browser,
+                               headers={"User-Agent": USER_AGENT}, timeout=60.0)
+            if html is not None:
+                break
+            logger.warning(f"BTOG listing fetch attempt {attempt + 1}/3 failed")
+            if attempt < 2:
+                time.sleep(5 * (attempt + 1))
         if html is None:
-            logger.warning(f"BTOG listing fetch failed after 3 attempts: {last_err}")
+            logger.warning("BTOG listing fetch failed after 3 attempts")
             return None
 
         # Slice future section between #future anchor and #past
@@ -328,14 +324,10 @@ class BTOGExtractor(BaseExtractor):
         title = shell.get("title") or ""
         url = shell.get("source_url") or shell.get("booking_url") or ""
 
-        try:
-            with httpx.Client(timeout=30, follow_redirects=True,
-                              headers={"User-Agent": USER_AGENT}) as c:
-                r = c.get(url)
-                r.raise_for_status()
-                html = r.text
-        except Exception as e:
-            logger.warning(f"BTOG detail fetch failed for {url}: {e}")
+        html = fetch_html(url, browser=getattr(self, "browser", None),
+                           headers={"User-Agent": USER_AGENT}, timeout=30.0)
+        if html is None:
+            logger.warning(f"BTOG detail fetch failed for {url}")
             return out
 
         # H1 override title
