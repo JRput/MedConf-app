@@ -1,0 +1,908 @@
+[
+ {
+  "id": 1642,
+  "source_id": 4,
+  "listing_hash": "8b96c10476dde82f3fd0512c1d1ac6e2490ef58e760e9347580b9958b1211877",
+  "last_detail_at": "2026-09-05T06:47:33.324222+00:00"
+ },
+ {
+  "id": 1041,
+  "source_id": 1,
+  "listing_hash": "672ace4a3d02b70d3312ff9668fcbda2ec58ec977275ed9b8a594c6c89cb888a",
+  "last_detail_at": "2026-09-03T07:04:02.483549+00:00"
+ },
+ {
+  "id": 1661,
+  "source_id": 1,
+  "listing_hash": "67f4bd380498317dab43c582b0d6963b71b4b6222a9fc648ee39b3361a06f1b7",
+  "last_detail_at": "2026-09-17T07:23:04.817171+00:00"
+ },
+ {
+  "id": 1698,
+  "source_id": 12,
+  "listing_hash": "02b62ef7512f19b5a7ac1f87c5170373534ad6cbe08a754a04622f84442d8173",
+  "last_detail_at": "2026-09-19T07:09:53.451178+00:00"
+ },
+ {
+  "id": 1690,
+  "source_id": 1,
+  "listing_hash": "046ad680de99e65e61ff8e2ab6da49a32270c737ddde327e17fdbe487f323fce",
+  "last_detail_at": "2026-09-19T07:13:29.559249+00:00"
+ },
+ {
+  "id": 969,
+  "source_id": 9,
+  "listing_hash": "160b625ed109fe7c55de9fe8cddae79b7bd484ac5e289552af1a7bd51ed32c12",
+  "last_detail_at": "2026-08-27T12:28:03.332646+00:00"
+ },
+ {
+  "id": 1632,
+  "source_id": 1,
+  "listing_hash": "709874f04325909de86611bb8e08603379edd6f79a83b88205f5a1a1e1fc72a9",
+  "last_detail_at": "2026-09-03T07:04:36.178635+00:00"
+ },
+ {
+  "id": 1646,
+  "source_id": 12,
+  "listing_hash": "44bd2478ac53e5648e88cebcd4f62dd5ec24eb409af28d11f7745c302ad71946",
+  "last_detail_at": "2026-09-08T07:02:25.407052+00:00"
+ },
+ {
+  "id": 1691,
+  "source_id": 9,
+  "listing_hash": "8a90f3e4c03f4bec582b121c73b81fe15710beacd0396632d97f74048aaa4e3d",
+  "last_detail_at": "2026-09-19T07:08:37.941846+00:00"
+ },
+ {
+  "id": 1639,
+  "source_id": 1,
+  "listing_hash": "ee38910375cf4788031e4f57db8b6add0b540fdabd5aabb127d062797b764aad",
+  "last_detail_at": "2026-09-04T07:07:33.254462+00:00"
+ },
+ {
+  "id": 1592,
+  "source_id": 1,
+  "listing_hash": "e80c3bfba78f07470d8f61aba7d8fb2b441e33e213fc984201661a30c0a417cd",
+  "last_detail_at": "2026-09-03T07:05:19.831211+00:00"
+ },
+ {
+  "id": 1684,
+  "source_id": 3,
+  "listing_hash": "9b9be9dd8f41748a8e1da8f76ff082f0ed2f16fef19b7bff45acacbf83fa018c",
+  "last_detail_at": "2026-09-18T07:12:04.794387+00:00"
+ },
+ {
+  "id": 1692,
+  "source_id": 4,
+  "listing_hash": "ad2276a48790233be7a5cf498157f888aa781fc5dd20ada28e9110e398abb308",
+  "last_detail_at": "2026-09-19T07:09:10.422405+00:00"
+ },
+ {
+  "id": 1693,
+  "source_id": 4,
+  "listing_hash": "1b368d397b8ddebb3cd036b864d7515f647064e84d99443f25db09b685c05c2b",
+  "last_detail_at": "2026-09-19T07:09:13.427234+00:00"
+ },
+ {
+  "id": 1654,
+  "source_id": 1,
+  "listing_hash": "63087c7fc27ae49a1bdc0bbf8e39f9ae5e5187c2a6e007a21b8eae1f117399a7",
+  "last_detail_at": "2026-09-10T07:12:14.098238+00:00"
+ },
+ {
+  "id": 1623,
+  "source_id": 1,
+  "listing_hash": "f9ae375be433504b48b17539bf09512ecd4477b06a1f45b984fd8c345f4b921c",
+  "last_detail_at": "2026-09-02T07:00:40.020301+00:00"
+ },
+ {
+  "id": 1627,
+  "source_id": 14,
+  "listing_hash": "fdd27836fd45d7747afb1fde190aff1a8bb2376b26f1c3a50ff8c0274241fb60",
+  "last_detail_at": "2026-09-03T06:58:52.746055+00:00"
+ },
+ {
+  "id": 1631,
+  "source_id": 9,
+  "listing_hash": "2a4ab154a456907b184c6d2d6d109857d1f88e641774b3d15d1d6c9551a2a2dc",
+  "last_detail_at": "2026-09-04T07:03:27.321125+00:00"
+ },
+ {
+  "id": 1688,
+  "source_id": 1,
+  "listing_hash": "8bb0205c6f1e522e7c3ae38964f7bca4376d450f8d02cd828008d69dd240a150",
+  "last_detail_at": "2026-09-18T07:14:47.342259+00:00"
+ },
+ {
+  "id": 1625,
+  "source_id": 14,
+  "listing_hash": "806c20e32af2ae6471cbb2a4e450d96c6f5588c1f715acd4b9ee78c1cfa23423",
+  "last_detail_at": "2026-09-03T06:58:43.527643+00:00"
+ },
+ {
+  "id": 1626,
+  "source_id": 14,
+  "listing_hash": "6f573407b28295732eb027d4d635f435889c2eb7cd32b6f152a9add662bf3c5e",
+  "last_detail_at": "2026-09-03T06:58:48.425181+00:00"
+ },
+ {
+  "id": 1141,
+  "source_id": 1,
+  "listing_hash": "3621959dc6efe3c18e0ac506fc1b8e2b7401f01e9d008d57e0fa317438ebac37",
+  "last_detail_at": "2026-09-03T07:03:39.561632+00:00"
+ },
+ {
+  "id": 1628,
+  "source_id": 14,
+  "listing_hash": "b5d56f29e51d3ffcc57e4be2cd4702f408b3ff574964c1ae61bf08601fc9253f",
+  "last_detail_at": "2026-09-03T06:58:57.945324+00:00"
+ },
+ {
+  "id": 1617,
+  "source_id": 1,
+  "listing_hash": "8fbe36e49b6ab53f3296b6947057d0874501655204b43db0a9eed5e5df94e0dd",
+  "last_detail_at": "2026-08-28T14:04:39.695751+00:00"
+ },
+ {
+  "id": 313,
+  "source_id": 1,
+  "listing_hash": "2e5e2a365d633bee8d0d11e64e0135d22a2960d12c7716068323fbd50ee60a44",
+  "last_detail_at": "2026-09-09T07:14:36.398992+00:00"
+ },
+ {
+  "id": 1695,
+  "source_id": 4,
+  "listing_hash": "9e2b41f992e08b455b50417008e7c725401a1de94357594e59b7fefe50dbcf5a",
+  "last_detail_at": "2026-09-19T07:09:19.080542+00:00"
+ },
+ {
+  "id": 140,
+  "source_id": 3,
+  "listing_hash": "cc8a54af8ec71c18a43d4b6b188ab15ba0ae8360518b24f03bc464aadf8a2057",
+  "last_detail_at": "2026-09-12T07:01:12.372419+00:00"
+ },
+ {
+  "id": 604,
+  "source_id": 3,
+  "listing_hash": "d4f00748ecbf57077415baa114336b02b7914ec745d302bf86f3b4968d13dc63",
+  "last_detail_at": "2026-08-29T08:45:49.450812+00:00"
+ },
+ {
+  "id": 1650,
+  "source_id": 2,
+  "listing_hash": "895ed4632adda899b18bc29de5999d10397abe1d5539017ece60b264143dfa99",
+  "last_detail_at": "2026-09-10T07:07:41.226186+00:00"
+ },
+ {
+  "id": 1666,
+  "source_id": 7,
+  "listing_hash": "daab7a1ce75b0269b10a5993a3535644f54b74e1f5c9170a4dd48ceafc7e514c",
+  "last_detail_at": "2026-09-12T06:59:07.395463+00:00"
+ },
+ {
+  "id": 1608,
+  "source_id": 1,
+  "listing_hash": "4188caca6c291746267d900b819bac2e8a73d89232bfda9be951eeec24ceb633",
+  "last_detail_at": "2026-09-11T07:10:51.545879+00:00"
+ },
+ {
+  "id": 1635,
+  "source_id": 2,
+  "listing_hash": "57c31d8aa7b12a76a3318c42e0c7ea011401b1b4b75546de3b315ce50f617963",
+  "last_detail_at": "2026-09-12T06:58:58.936456+00:00"
+ },
+ {
+  "id": 1636,
+  "source_id": 2,
+  "listing_hash": "c76ac4d31dc969759b77bd8b5b9fba6f549f5eb16f8c835f109b9598c8effb34",
+  "last_detail_at": "2026-09-04T07:02:52.385255+00:00"
+ },
+ {
+  "id": 1633,
+  "source_id": 1,
+  "listing_hash": "42e6d08b6d6c8803e3c621c812426db5a27a06982f84ded8920738b686ba9f52",
+  "last_detail_at": "2026-09-12T07:04:08.466294+00:00"
+ },
+ {
+  "id": 487,
+  "source_id": 1,
+  "listing_hash": "3467b317d07779e4fecd62b11b39e59e83c424893a703ba0e5c8db8e4d847376",
+  "last_detail_at": "2026-09-04T07:08:05.204028+00:00"
+ },
+ {
+  "id": 1680,
+  "source_id": 1,
+  "listing_hash": "280f845f7661f38c5785e15c144dfceb0859cc05d4a8498a7e820ac711a0b8e3",
+  "last_detail_at": "2026-09-17T07:23:33.16715+00:00"
+ },
+ {
+  "id": 1648,
+  "source_id": 1,
+  "listing_hash": "bf33acfbd59db166f76e4038db4075b8b7725361425b5226da175ecb7071c10c",
+  "last_detail_at": "2026-09-09T07:15:10.288294+00:00"
+ },
+ {
+  "id": 1644,
+  "source_id": 3,
+  "listing_hash": "b4339e074fb0aa7776705a9d238389fb5968d5631b25167b42ee65edda5c4761",
+  "last_detail_at": "2026-09-05T06:47:57.022403+00:00"
+ },
+ {
+  "id": 1699,
+  "source_id": 12,
+  "listing_hash": "67d252c6bd2d2f168f04fb933b87effbaf76eb4c608273c1ba7a7ad5c0610f7b",
+  "last_detail_at": "2026-09-19T07:10:10.065752+00:00"
+ },
+ {
+  "id": 1713,
+  "source_id": 12,
+  "listing_hash": "a23c5c47f71e479088b375c5261ef0115ff614380163eabe8be1a784f610a78f",
+  "last_detail_at": "2026-09-19T07:13:42.097555+00:00"
+ },
+ {
+  "id": 1593,
+  "source_id": 1,
+  "listing_hash": "7f5463fe3f176dd63afe4809c5042ffd84c13486b05655fa2405a183eb25ed68",
+  "last_detail_at": "2026-08-27T12:35:14.297757+00:00"
+ },
+ {
+  "id": 1714,
+  "source_id": 12,
+  "listing_hash": "f7097e226ff640c78665e4e8666de3b5b38615fe522adda6dbb109d93f01ee18",
+  "last_detail_at": "2026-09-19T07:13:58.370537+00:00"
+ },
+ {
+  "id": 1657,
+  "source_id": 1,
+  "listing_hash": "a66566d927118e14197ff90310114f18fb548cf4e3ee70499fd8622f671620bb",
+  "last_detail_at": "2026-09-10T07:12:38.856158+00:00"
+ },
+ {
+  "id": 1162,
+  "source_id": 1,
+  "listing_hash": "a75670cf57d994673407dd42dc248a15f2feed40f20797362acdf6def74f8e23",
+  "last_detail_at": "2026-09-12T07:03:32.100631+00:00"
+ },
+ {
+  "id": 1606,
+  "source_id": 1,
+  "listing_hash": "fd32fdcbe2372826ff3cf419bca258f1aebc4c0feb92ee6bf825de6058193644",
+  "last_detail_at": "2026-08-27T12:32:50.763261+00:00"
+ },
+ {
+  "id": 1686,
+  "source_id": 3,
+  "listing_hash": "737ed3474be24d25c446f4572a4f44c0474fc4015d0497f98d773d6280c44094",
+  "last_detail_at": "2026-09-18T07:12:24.119342+00:00"
+ },
+ {
+  "id": 1618,
+  "source_id": 1,
+  "listing_hash": "6c2ce26482b52eabc0c71ad5e2e84b6870713ca16e38ea23672dc95c1553bd28",
+  "last_detail_at": "2026-08-28T14:04:48.071265+00:00"
+ },
+ {
+  "id": 1649,
+  "source_id": 1,
+  "listing_hash": "0927677ff0c23cbe2a5e4c0b0a66fbea7fa383e2366ce181d0534c526d94b7e2",
+  "last_detail_at": "2026-09-09T07:15:13.569346+00:00"
+ },
+ {
+  "id": 626,
+  "source_id": 1,
+  "listing_hash": "4b72390334e095c91a03bbf798ca50622217d49bd466430e04095cd09b71e239",
+  "last_detail_at": "2026-09-18T07:14:32.969341+00:00"
+ },
+ {
+  "id": 441,
+  "source_id": 4,
+  "listing_hash": "e3d02ec4ce9448fa6e4751b1e47cdf44b8c2a75c487ce8a8e75d75493877bd61",
+  "last_detail_at": "2026-08-27T12:29:03.867687+00:00"
+ },
+ {
+  "id": 1076,
+  "source_id": 4,
+  "listing_hash": "e702701350f825bd5165d98fe0e87d68507a2641d9649a26e7ccbadd4ecb2e73",
+  "last_detail_at": "2026-09-16T07:24:01.654761+00:00"
+ },
+ {
+  "id": 1675,
+  "source_id": 1,
+  "listing_hash": "5f1be4b80118f8e6de96eda4d83106fe6a386d4491d40c7a249f35d73eaa05f6",
+  "last_detail_at": "2026-09-16T07:30:26.062582+00:00"
+ },
+ {
+  "id": 1147,
+  "source_id": 6,
+  "listing_hash": "79dc00bb22dabffbf9ed555981e0691761a20343d20835778d175ffa288c2d84",
+  "last_detail_at": "2026-08-27T12:27:26.837571+00:00"
+ },
+ {
+  "id": 1656,
+  "source_id": 1,
+  "listing_hash": "6b8067251be040c7885eca85de72825c6b4935e96a77a8b34909329e5ad27b66",
+  "last_detail_at": "2026-09-10T07:12:34.849015+00:00"
+ },
+ {
+  "id": 516,
+  "source_id": 5,
+  "listing_hash": "65e35aa5fb63b91648459f7dfa32a78040cd41aa23b4d6f92923efc34c90d9fb",
+  "last_detail_at": "2026-08-27T12:27:34.582193+00:00"
+ },
+ {
+  "id": 1120,
+  "source_id": 1,
+  "listing_hash": "693616916a06786ba969523a1144202d93a3e4e59743a1a5d4d21e741835c3de",
+  "last_detail_at": "2026-09-16T07:28:26.68974+00:00"
+ },
+ {
+  "id": 1651,
+  "source_id": 1,
+  "listing_hash": "d9cc506dde08f92794f7cf729bdc02ba28312cd532d8be08b9afeef8423a2072",
+  "last_detail_at": "2026-09-10T07:11:34.019512+00:00"
+ },
+ {
+  "id": 1701,
+  "source_id": 12,
+  "listing_hash": "6a5928378c210bf4c080ef2176bcad2442da07cd6cc9f8a847c099b5d15a4c5c",
+  "last_detail_at": "2026-09-19T07:10:42.989521+00:00"
+ },
+ {
+  "id": 810,
+  "source_id": 3,
+  "listing_hash": "46a94b4266d68ecf803e118627cecd1d615cd5431f4986a7f27312e2f71fedb2",
+  "last_detail_at": "2026-09-20T07:34:34.086262+00:00"
+ },
+ {
+  "id": 1613,
+  "source_id": 3,
+  "listing_hash": "198fe2bb7c9f7e80a1d9ce265c27fc8e96e0824a5a6fcfd5c333a968a8beb1a3",
+  "last_detail_at": "2026-08-28T13:58:53.794848+00:00"
+ },
+ {
+  "id": 1051,
+  "source_id": 1,
+  "listing_hash": "9b9638d79dc1a8759b5aa9bdc679dc536af084b810da55f72e7de1f52d086798",
+  "last_detail_at": "2026-09-04T07:06:28.740425+00:00"
+ },
+ {
+  "id": 1678,
+  "source_id": 3,
+  "listing_hash": "92baf946ba29809722b767768098a717c9c69d7833a4d3908d7dec2a23888d88",
+  "last_detail_at": "2026-09-17T07:20:50.291107+00:00"
+ },
+ {
+  "id": 291,
+  "source_id": 1,
+  "listing_hash": "5706a1ce456e8a2021b5208fd5d14e56b5c4fdfd08c2f32885e66dc4c245492e",
+  "last_detail_at": "2026-09-18T07:13:22.664414+00:00"
+ },
+ {
+  "id": 1069,
+  "source_id": 4,
+  "listing_hash": "9e20f90d32e7e5565b88c89f0668159a3e327480ef598b6415d962d04feec8a7",
+  "last_detail_at": "2026-09-16T07:24:04.824033+00:00"
+ },
+ {
+  "id": 1584,
+  "source_id": 4,
+  "listing_hash": "0485fcb4b948c91ac60d3e6b4192bdddddc5142bd600a49153174b49d08d036f",
+  "last_detail_at": "2026-08-27T12:29:27.505432+00:00"
+ },
+ {
+  "id": 618,
+  "source_id": 4,
+  "listing_hash": "8b0c0c08acdbfd933842bf7cb8222daf1134d58f25235daae130de804314a36c",
+  "last_detail_at": "2026-09-10T07:07:40.198488+00:00"
+ },
+ {
+  "id": 1579,
+  "source_id": 1,
+  "listing_hash": "756fc51e09a3fe6ec42d58414bc2e4a3b4938bc4250ee3e439579433333bc63b",
+  "last_detail_at": "2026-09-11T07:10:30.950052+00:00"
+ },
+ {
+  "id": 1110,
+  "source_id": 4,
+  "listing_hash": "f15aaa517dbb7ac737a42001e13054669cf9ba05e325a96e52e4af1142eddcf8",
+  "last_detail_at": "2026-09-10T07:07:52.847967+00:00"
+ },
+ {
+  "id": 1611,
+  "source_id": 1,
+  "listing_hash": "61c55e45d96911e4c8dc41e463080dab78bdf85106156f5ee9f97b53b70cf454",
+  "last_detail_at": "2026-08-27T12:34:36.228725+00:00"
+ },
+ {
+  "id": 1694,
+  "source_id": 4,
+  "listing_hash": "7674bfa18111e0abd5462b42278caec0ca3ec2e312367d0fe158e9981ec1a4aa",
+  "last_detail_at": "2026-09-19T07:09:16.254772+00:00"
+ },
+ {
+  "id": 1670,
+  "source_id": 3,
+  "listing_hash": "14a3c27212a2bdbafedcd7eff8b332bec4b90034a6665044d4d7f501dda939e8",
+  "last_detail_at": "2026-09-17T07:21:05.942598+00:00"
+ },
+ {
+  "id": 1703,
+  "source_id": 12,
+  "listing_hash": "d49a45f9a10ac7bb9c9e0e713466e75ef601c0d71d89fe76ee1395419ee24436",
+  "last_detail_at": "2026-09-19T07:11:15.465896+00:00"
+ },
+ {
+  "id": 1696,
+  "source_id": 12,
+  "listing_hash": "ef02b2aacb797409a797cb9453c1dc231c31ac529d0f98e289a82846dd305211",
+  "last_detail_at": "2026-09-19T07:09:36.60838+00:00"
+ },
+ {
+  "id": 1621,
+  "source_id": 1,
+  "listing_hash": "13ae80c7fba2b168206b8232e3f73da5c88f471b836f68b55e21564c0fdc8c38",
+  "last_detail_at": "2026-08-30T08:06:57.642996+00:00"
+ },
+ {
+  "id": 1700,
+  "source_id": 12,
+  "listing_hash": "114a0b00a4fe384530126b5b0f5ab9dfc281f482e535311237c941793b57afdb",
+  "last_detail_at": "2026-09-19T07:10:26.578187+00:00"
+ },
+ {
+  "id": 1665,
+  "source_id": 1,
+  "listing_hash": "a7337345ed736f56b9b574eee42f93a75c437cd741a9d541f139a16c7064068f",
+  "last_detail_at": "2026-09-11T07:12:25.31368+00:00"
+ },
+ {
+  "id": 1702,
+  "source_id": 12,
+  "listing_hash": "c4bf404ee304c92bd5adc5a322dc53017cadc4389107256b2cbe3e17b0b43e36",
+  "last_detail_at": "2026-09-19T07:10:58.660074+00:00"
+ },
+ {
+  "id": 1704,
+  "source_id": 12,
+  "listing_hash": "8753b889fac081e1f22e41677b0eb4b24023df33bd9c2a73728a5e82737b22ab",
+  "last_detail_at": "2026-09-19T07:11:31.197624+00:00"
+ },
+ {
+  "id": 1578,
+  "source_id": 1,
+  "listing_hash": "fcfca267b647d96bcdee416960523b4e6a76de0cb448a1c6a44c4a2acbaa5634",
+  "last_detail_at": "2026-09-17T07:22:37.622877+00:00"
+ },
+ {
+  "id": 812,
+  "source_id": 3,
+  "listing_hash": "5da5aa450183ebf0fd999d2ba4d57c3f64ad435d410296504ed788397ecd6fab",
+  "last_detail_at": "2026-08-27T12:29:03.921434+00:00"
+ },
+ {
+  "id": 721,
+  "source_id": 1,
+  "listing_hash": "ac03468452154150f73d4fab0bf9815a777cc7e150baa2759dc5115f26095858",
+  "last_detail_at": "2026-09-10T07:10:28.753796+00:00"
+ },
+ {
+  "id": 1083,
+  "source_id": 3,
+  "listing_hash": "bed90de75ed9971dda39a5ba4660f4638fac5d2399038e5511a0e502cb1a7a6b",
+  "last_detail_at": "2026-09-18T07:11:50.899973+00:00"
+ },
+ {
+  "id": 1647,
+  "source_id": 6,
+  "listing_hash": "bb9bb4b089b2f882502ac2bab6ed4f1a2c07004cb7a775c334117b5975ee75bf",
+  "last_detail_at": "2026-09-09T07:10:28.247879+00:00"
+ },
+ {
+  "id": 288,
+  "source_id": 1,
+  "listing_hash": "b64eb31b1ce7dde2c10671ec1035cbbff51c736a6ace41727b7cee9a9b7ced24",
+  "last_detail_at": "2026-09-05T06:50:06.484534+00:00"
+ },
+ {
+  "id": 1614,
+  "source_id": 3,
+  "listing_hash": "3bbe0afc2b317509564e1d0870eb86800cdcf2d6e77fd989bcffe5d992b85ed6",
+  "last_detail_at": "2026-08-28T13:59:02.765248+00:00"
+ },
+ {
+  "id": 1645,
+  "source_id": 2,
+  "listing_hash": "0cd4384289cf9efcab85c8dc3854f16fe0e7e15a6e82609616e81b62ba96477a",
+  "last_detail_at": "2026-09-08T07:01:27.533155+00:00"
+ },
+ {
+  "id": 1705,
+  "source_id": 12,
+  "listing_hash": "e2905a94a7930604fc0d1460d0f69df60049c9fb80bc25bfac2c4f4d2e8a2aad",
+  "last_detail_at": "2026-09-19T07:11:47.671906+00:00"
+ },
+ {
+  "id": 1706,
+  "source_id": 12,
+  "listing_hash": "0e31240e48543781930936c7f9c382b7eff3b4ed7f2910bd053b83b25f416dbb",
+  "last_detail_at": "2026-09-19T07:12:03.842504+00:00"
+ },
+ {
+  "id": 783,
+  "source_id": 9,
+  "listing_hash": "d8cbe99897feafeb643c1fceb5a29f5c7901057e61f91feeef8411f440277142",
+  "last_detail_at": "2026-08-27T12:27:55.275349+00:00"
+ },
+ {
+  "id": 1679,
+  "source_id": 3,
+  "listing_hash": "d4d5686c1de41e355fe414c55f0fc88da9c5215392e837b9c570d2c5e59d424f",
+  "last_detail_at": "2026-09-17T07:20:55.207634+00:00"
+ },
+ {
+  "id": 1659,
+  "source_id": 1,
+  "listing_hash": "8da6ef62b56780e399444b7651257f694526bbb0921646ad1d05f7d6cd2d2b8e",
+  "last_detail_at": "2026-09-11T07:09:49.85095+00:00"
+ },
+ {
+  "id": 1029,
+  "source_id": 3,
+  "listing_hash": "676fb3f0cec6cb097a0d0b410023cfc9b255e9a27958fd0a23f58db57bdf5408",
+  "last_detail_at": "2026-09-07T07:09:31.834111+00:00"
+ },
+ {
+  "id": 446,
+  "source_id": 4,
+  "listing_hash": "7f1fa937ce45effb9d13c903473979137e817c688d3c86b7a80348066526b88f",
+  "last_detail_at": "2026-08-27T12:29:12.746459+00:00"
+ },
+ {
+  "id": 299,
+  "source_id": 1,
+  "listing_hash": "ef23167fdb8c074263b308becb60f0ae646473ac96eb74891fff8609381c0bcf",
+  "last_detail_at": "2026-09-01T07:31:04.07114+00:00"
+ },
+ {
+  "id": 1653,
+  "source_id": 1,
+  "listing_hash": "3a3a88f95b3d3b0ee7d8dae7103208d6da20850579be133af4471542e391183d",
+  "last_detail_at": "2026-09-10T07:11:40.548457+00:00"
+ },
+ {
+  "id": 614,
+  "source_id": 3,
+  "listing_hash": "b70a8e1c237e50183ef8a1e16aa6ecc8ab7c9435f1eaf90f8840ae0a5503b1e7",
+  "last_detail_at": "2026-09-18T07:12:14.134154+00:00"
+ },
+ {
+  "id": 1697,
+  "source_id": 3,
+  "listing_hash": "f00a1d2e75b1dcbde4758766cfc27d7af30aa9ef539a810b402c09237a9aa5d5",
+  "last_detail_at": "2026-09-19T07:09:39.034944+00:00"
+ },
+ {
+  "id": 1707,
+  "source_id": 12,
+  "listing_hash": "e0b7991f37bd183c412bf4a5b9bcbbc4b69ccaff92fec4b8330fc09dc20c18ed",
+  "last_detail_at": "2026-09-19T07:12:20.523787+00:00"
+ },
+ {
+  "id": 1587,
+  "source_id": 3,
+  "listing_hash": "ad9dc2e0e6d3d6a52f23bbfae05d585ccbc95797eb77d7730a024cdda45fd750",
+  "last_detail_at": "2026-09-15T07:25:01.732554+00:00"
+ },
+ {
+  "id": 1652,
+  "source_id": 1,
+  "listing_hash": "9ed813ca477165359eb6c96df04def59a4230e075b169d3e07a410f1c53b81f5",
+  "last_detail_at": "2026-09-10T07:11:37.316282+00:00"
+ },
+ {
+  "id": 461,
+  "source_id": 4,
+  "listing_hash": "4ca665edf9e371ac40dbeb7c90ee1763f0735cbed21597bae040dac63803dd7e",
+  "last_detail_at": "2026-08-27T12:29:24.679627+00:00"
+ },
+ {
+  "id": 1672,
+  "source_id": 1,
+  "listing_hash": "639a75724cedd29904e476098cc8ac6eddcd99ae9a797d0158bf91d0f8c566fd",
+  "last_detail_at": "2026-09-15T07:28:11.528375+00:00"
+ },
+ {
+  "id": 717,
+  "source_id": 4,
+  "listing_hash": "7a773aa0e4bd935c46fbd539d88fda48f64d64cde300f9da87999d1e24507b7d",
+  "last_detail_at": "2026-08-27T12:29:31.61707+00:00"
+ },
+ {
+  "id": 1685,
+  "source_id": 3,
+  "listing_hash": "e3b114de331199d1f0b8bb50169c7b3bb90f7c5bb657a27c36b77a3799a363cf",
+  "last_detail_at": "2026-09-18T07:12:19.2866+00:00"
+ },
+ {
+  "id": 617,
+  "source_id": 4,
+  "listing_hash": "8b437c5b813bd6973eade851132ba9d2c0ee73af7cf5a6af7cff383bb65e6101",
+  "last_detail_at": "2026-08-27T12:28:53.073316+00:00"
+ },
+ {
+  "id": 1622,
+  "source_id": 1,
+  "listing_hash": "15a45f0dbd4c3927109b8d6631b71cd6342388e0cea017783338b1177d833a06",
+  "last_detail_at": "2026-09-02T07:00:19.781871+00:00"
+ },
+ {
+  "id": 348,
+  "source_id": 1,
+  "listing_hash": "1dd2795c0559fd79dc8cb9cdea9b5c7390aa844ab2e1c5114c321ed8a60b7ad2",
+  "last_detail_at": "2026-09-01T07:32:31.112165+00:00"
+ },
+ {
+  "id": 1577,
+  "source_id": 9,
+  "listing_hash": "5a8b18a22d164fbc38d6721fdd3ea3bbd79d21a601c6d32af2b286086d3a9dad",
+  "last_detail_at": "2026-08-27T12:28:29.478747+00:00"
+ },
+ {
+  "id": 206,
+  "source_id": 1,
+  "listing_hash": "bb0c2232d81ba24d5186a27e90805de7263e3948196d2ba1478a23b33752f80e",
+  "last_detail_at": "2026-09-12T07:05:06.110245+00:00"
+ },
+ {
+  "id": 349,
+  "source_id": 1,
+  "listing_hash": "e5fe5c3077b3efd35ceff4cf7ca6b862375842a36c934068b51c5303a4470671",
+  "last_detail_at": "2026-08-30T08:07:58.001716+00:00"
+ },
+ {
+  "id": 1669,
+  "source_id": 12,
+  "listing_hash": "424b077393368fef3657f56d53d2e94e71d9b47eb9b0bb90f2b7b82a3fc3f395",
+  "last_detail_at": "2026-09-15T07:23:54.080321+00:00"
+ },
+ {
+  "id": 1708,
+  "source_id": 12,
+  "listing_hash": "5536a659fef08cf241568f48b1fe5221b6ab7a0be4c0b0cdf16755b2ae27480f",
+  "last_detail_at": "2026-09-19T07:12:37.093511+00:00"
+ },
+ {
+  "id": 1637,
+  "source_id": 12,
+  "listing_hash": "e71406dc14b05509a3a85e3332d0ce63eb76de9a573f04cc4e33aec8a60e3e1d",
+  "last_detail_at": "2026-09-04T07:04:10.626043+00:00"
+ },
+ {
+  "id": 1676,
+  "source_id": 3,
+  "listing_hash": "1ab78070d0634d7d44da75910fcdceef6150c546b53de3824f3fd0a5cfeefc83",
+  "last_detail_at": "2026-09-17T07:20:39.178166+00:00"
+ },
+ {
+  "id": 1677,
+  "source_id": 3,
+  "listing_hash": "3dbd2847bcc62572169cff747906eac94275834ed300efc00dac7f53f22a5e58",
+  "last_detail_at": "2026-09-17T07:20:44.061493+00:00"
+ },
+ {
+  "id": 619,
+  "source_id": 4,
+  "listing_hash": "4dd820d9600bb3fe07670f37fb077c013a120a27134ba616c2d5f9c295bba7b8",
+  "last_detail_at": "2026-08-27T12:29:20.089645+00:00"
+ },
+ {
+  "id": 1597,
+  "source_id": 1,
+  "listing_hash": "71d6c4d5befa87297cc49914b1f3b7a516dd96508bb591e8634b454f83f0744d",
+  "last_detail_at": "2026-09-19T07:11:15.785425+00:00"
+ },
+ {
+  "id": 603,
+  "source_id": 3,
+  "listing_hash": "52a6694ebd5a1e8bf43de09544585842ce20a504694ba68d5ac49afd6081459f",
+  "last_detail_at": "2026-09-15T07:24:44.285458+00:00"
+ },
+ {
+  "id": 1604,
+  "source_id": 9,
+  "listing_hash": "0565da1a04678ea2361a3a1c6b5aef0c75079156c3233ea5c27e61e136d834c1",
+  "last_detail_at": "2026-08-27T12:28:10.959123+00:00"
+ },
+ {
+  "id": 1687,
+  "source_id": 1,
+  "listing_hash": "c19999bbb14f3b2a774f72d6e0576057a9c403d4c14a91617bbae7a5f56eb280",
+  "last_detail_at": "2026-09-18T07:14:19.13551+00:00"
+ },
+ {
+  "id": 1658,
+  "source_id": 4,
+  "listing_hash": "34d5a18cef01962fc16ece07de3ee38a7bb228f0690692ba6b780cc13711307b",
+  "last_detail_at": "2026-09-11T07:06:53.655237+00:00"
+ },
+ {
+  "id": 1612,
+  "source_id": 6,
+  "listing_hash": "871677858d7d4c68d24a5fa5d8aab96963e4efc2836a9189b343cab5d4ddeeb8",
+  "last_detail_at": "2026-08-28T13:57:21.945149+00:00"
+ },
+ {
+  "id": 1660,
+  "source_id": 1,
+  "listing_hash": "b29c314a5b237a6628374395ccf6f0bcf2b430f9a877664decfa71e7033cc170",
+  "last_detail_at": "2026-09-12T07:02:53.064276+00:00"
+ },
+ {
+  "id": 1616,
+  "source_id": 1,
+  "listing_hash": "0e27dfb977b7f49964158beb1982ef523ad475d1c1908ba9b23d92c2cb401bf0",
+  "last_detail_at": "2026-08-28T14:03:39.12102+00:00"
+ },
+ {
+  "id": 1630,
+  "source_id": 12,
+  "listing_hash": "485b2a8d2f720c494bec74dae186ae24baa84d42441fa28355db0eaec8887132",
+  "last_detail_at": "2026-09-03T06:59:19.417647+00:00"
+ },
+ {
+  "id": 985,
+  "source_id": 1,
+  "listing_hash": "bbbbe3914fbc6a26262d81ae30997fee3bb27a8bf21d373cb72a1581304d34ea",
+  "last_detail_at": "2026-09-11T07:10:08.093725+00:00"
+ },
+ {
+  "id": 1709,
+  "source_id": 12,
+  "listing_hash": "3f1c9475c17cbe603429badd4d7dccbdcd985eefa7c132c849822e3a9835b8d8",
+  "last_detail_at": "2026-09-19T07:12:53.310151+00:00"
+ },
+ {
+  "id": 1711,
+  "source_id": 12,
+  "listing_hash": "05af4390266368368cc69552d4834dd926cbdf4b351188a914dcdb6079fd8d1a",
+  "last_detail_at": "2026-09-19T07:13:09.06999+00:00"
+ },
+ {
+  "id": 1689,
+  "source_id": 1,
+  "listing_hash": "311ab8398d09148bbaede083837198047c4368a267a55e545e8c80baf107086d",
+  "last_detail_at": "2026-09-18T07:15:17.269669+00:00"
+ },
+ {
+  "id": 1641,
+  "source_id": 1,
+  "listing_hash": "af2c01b1f07742b8071527a20131b4d36574eb9177278aeb58de6c84a3dec328",
+  "last_detail_at": "2026-09-04T07:08:30.529635+00:00"
+ },
+ {
+  "id": 1664,
+  "source_id": 1,
+  "listing_hash": "72de3692305be74aacf5cb50724705316e7a89daca92279b3f261bdf05fbef6f",
+  "last_detail_at": "2026-09-11T07:12:05.866016+00:00"
+ },
+ {
+  "id": 1563,
+  "source_id": 9,
+  "listing_hash": "66d3d140b63648f5fcb24798b3da5263791cab904341ab7476272c7868788fa4",
+  "last_detail_at": "2026-08-27T12:28:46.957961+00:00"
+ },
+ {
+  "id": 378,
+  "source_id": 1,
+  "listing_hash": "ce19240ef54f0df87d2c5f4ef8f4a7c9dec24dab1ed024fbb5a7e6f0a8252ae0",
+  "last_detail_at": "2026-08-30T08:06:25.412828+00:00"
+ },
+ {
+  "id": 274,
+  "source_id": 1,
+  "listing_hash": "b5b3ddc2d6283e3dc96cc7e630f7f2123b7b8f1780b814aafddcc85c28b35319",
+  "last_detail_at": "2026-09-16T07:30:17.88622+00:00"
+ },
+ {
+  "id": 524,
+  "source_id": 5,
+  "listing_hash": "44f51a8f15c3e4253ea7c1950e024b3e2b5271d7d3660e4b3f0a3b1580b1f0c4",
+  "last_detail_at": "2026-08-27T12:27:47.643625+00:00"
+ },
+ {
+  "id": 1682,
+  "source_id": 1,
+  "listing_hash": "5288a3ebdb231f5953c0feb837032714a4169b15a7a532547e0eff75708e83b7",
+  "last_detail_at": "2026-09-17T07:24:40.218627+00:00"
+ },
+ {
+  "id": 314,
+  "source_id": 1,
+  "listing_hash": "a89ff7346dfe1f3ce59536be4f4856a5bcb3bb063a32dd082157611b8c33dcdb",
+  "last_detail_at": "2026-09-04T07:07:41.504012+00:00"
+ },
+ {
+  "id": 1712,
+  "source_id": 12,
+  "listing_hash": "709582ca5bc6e613d26c90484e39a7faa2330187f4759d4848734a8158b2dda8",
+  "last_detail_at": "2026-09-19T07:13:25.564512+00:00"
+ },
+ {
+  "id": 1671,
+  "source_id": 1,
+  "listing_hash": "f8a52ce4ad950153dd4d9e75ba3d8a36218910a9bcfbd5efa4c773fae7608cc5",
+  "last_detail_at": "2026-09-15T07:27:32.886697+00:00"
+ },
+ {
+  "id": 309,
+  "source_id": 1,
+  "listing_hash": "38d7e1f95abaa0191bebf6eb2c99e0c0abe99fa8790110d15eb6a5d655e93d9a",
+  "last_detail_at": "2026-09-18T07:14:24.862011+00:00"
+ },
+ {
+  "id": 310,
+  "source_id": 1,
+  "listing_hash": "f65176be52ab7c30866824f3fc9fbaae548900b10e9ef0e8eec38fc1b9a22b07",
+  "last_detail_at": "2026-09-13T07:20:55.647061+00:00"
+ },
+ {
+  "id": 1640,
+  "source_id": 1,
+  "listing_hash": "ebefde7de88519ab34e069d275d7c2ec070bb0cd8dd7b05be0392dc01ca76123",
+  "last_detail_at": "2026-09-04T07:08:15.934232+00:00"
+ },
+ {
+  "id": 1091,
+  "source_id": 1,
+  "listing_hash": "49a7b7735bbfb95de9ba14a33d88063b229d947aa1fdb74da17f069552da0193",
+  "last_detail_at": "2026-09-20T07:35:54.179594+00:00"
+ },
+ {
+  "id": 1111,
+  "source_id": 1,
+  "listing_hash": "ba694a2c879f8b8baca81c9e03ccf24c7682df30d5d6be088f5e305cf1b1d3f3",
+  "last_detail_at": "2026-08-29T08:47:39.091805+00:00"
+ },
+ {
+  "id": 1039,
+  "source_id": 1,
+  "listing_hash": "e1145392b07cfe85ab6b379b201f8f07083f6479878eaed97ae418993ec446fd",
+  "last_detail_at": "2026-08-27T12:32:05.947183+00:00"
+ },
+ {
+  "id": 1662,
+  "source_id": 1,
+  "listing_hash": "5d289613c518df789adafb818d2b04e116b379aa116af806d5e7bfcadccbfef1",
+  "last_detail_at": "2026-09-11T07:11:08.495579+00:00"
+ },
+ {
+  "id": 1715,
+  "source_id": 12,
+  "listing_hash": "a70f6699da73025a14c067200473fe146d771e6ece06c9ac14b6ea2dc78a033d",
+  "last_detail_at": "2026-09-19T07:14:14.461102+00:00"
+ },
+ {
+  "id": 897,
+  "source_id": 17,
+  "listing_hash": "78c173111a8271650e98ff75f221b3fea132aeac479f446bc9435beaccccc4d4",
+  "last_detail_at": "2026-09-17T07:29:31.819105+00:00"
+ },
+ {
+  "id": 1629,
+  "source_id": 9,
+  "listing_hash": "4065f80cf420d454599b97d87a285b1e845c93903347b9578defbd6e1c39493f",
+  "last_detail_at": "2026-09-03T06:59:14.050733+00:00"
+ },
+ {
+  "id": 1674,
+  "source_id": 12,
+  "listing_hash": "347868b8a357f80548c8ef37feb8f2d970ccb00eadaafbdba442fa7e68ceba6b",
+  "last_detail_at": "2026-09-16T07:24:11.032875+00:00"
+ },
+ {
+  "id": 1121,
+  "source_id": 1,
+  "listing_hash": "102b0241d34ad8580863682f2cf1c49bbde37c4f87e0666c92cc615883f8924c",
+  "last_detail_at": "2026-09-08T07:05:04.899789+00:00"
+ }
+]

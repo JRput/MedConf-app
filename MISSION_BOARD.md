@@ -118,6 +118,9 @@ Architecture rule: **platform-family extractors, not 186 bespoke modules.**
 | P1 Recon (batch 1: top-20) | ✅ 2026-08-15 — 20/20 returned: **18 resolved · 1 parked (fsem) · 1 out-of-scope (rcemlearning)** → `recon.json`. Remaining 164 domains deferred (resume `wf_62a1042e-bd3` with higher N). |
 | P2 Wave plan (batch 1) | ✅ see recon summary below — 15 easy server-rendered + 3 needing Playwright/stealth (cosrh, rcoa, ficm) |
 | P3 Wave 1a (ALSG 24 · RCPSG 25 · RCPath 26 · RCPsych 27 · RCSEd 28 · Resus 29) | ✅ 2026-08-16 — **GATE PASSED.** 328 active events/courses live. Soft-field nulls 0–3% (LESSON #4 gate <10%). All feeless rows live-£-screened (RCSEd 3 TBC, RCPath 47 free/external — verified). Fixes shipped: RCPSG browser-reuse + fail-honest override; RCSEd 6 fee layouts + competition skip; shared abstract-classifier keyword guard (HEST/Expedition false positives). User decisions: rcemlearning=out, fsem=parked. |
+| P3 Wave 1b — easy, server-rendered (9): rcpe · rcpch · rcophth · fph · fom · fpm · escardio · acpgbi · asgbi → sources 30–38 | ⬜ next. All fetches via `extractors/http_fetch.fetch_html()`; gate includes one CI run (runner IPs get blocked where home IPs don't — Mission R) |
+| P3 Wave 1c — JS / anti-bot (3): cosrh · rcoa · ficm (Cloudflare) → sources 39–41 | ⬜ after 1b · `opus` where genuinely hard |
+| P1 Recon batch 2 (remaining 164 domains, `haiku`) | ⬜ can run in parallel with 1b |
 | P3 Wave 2 (platform families) | ⬜ |
 | P3 Wave 3+ (long tail) | ⬜ |
 | P4 CI scale-up | ⬜ |
@@ -138,7 +141,7 @@ for 25 days while CI stayed green. 4th EOL in 5 months (LESSONS #6) → architec
 | R3 | Fail loud: `probe_models.py` as first job of `scrape-daily.yml`; dead chain → red run, scrape still runs | coding agent · `sonnet` | ✅ passed in CI |
 | R4 | Verify in CI (LESSONS #4): full 29-source runs + SQL null-audit | direct | ✅ run 35542582495: 124 LLM calls OK / 1 rate-limited; null description 0.2 %, null specialty 3.1 % (gate <10 %) |
 | R4b | **Found by R4:** Resus (403) + BTOG (202 challenge) blocked from runner IPs only → `extractors/http_fetch.py` browser fallback; hung BTOG job burned 6 h → `timeout-minutes: 60` | coding agent · `sonnet` + direct | ✅ Resus 22/22 via fallback in CI. BTOG 4/4 in final run 35566370240 (30/30 green) — but httpx was not challenged on that run, so BTOG's own-page fallback is proven locally (forced) only; watch the next challenged day |
-| R5 | Backfill ~266 rows extracted while the LLM was dead (clear `listing_hash`) | direct | ⛔ bulk prod write blocked by permission classifier — **needs user approval** |
+| R5 | Backfill rows extracted while the LLM was dead (clear `listing_hash`) | direct | ✅ user-approved 2026-09-21 — 151 rows reset (other ~115 of the 266 had already re-extracted); backup in `reports/backfill/` |
 | R6 | Docs: CLAUDE.md, project memory, HQ LESSONS #9 | direct | ✅ |
 
 Cost: £0 external. GitHub Actions: 4 manual full runs (~30 jobs each) + one hung 6 h job.

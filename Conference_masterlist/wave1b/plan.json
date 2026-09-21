@@ -1,0 +1,257 @@
+[
+ {
+  "source_id": 30,
+  "slug": "rcpe",
+  "class_name": "RCPEExtractor",
+  "recon": {
+   "domain": "rcpe.ac.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.rcpe.ac.uk/events",
+   "api_url": "",
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "mixed",
+   "volume_estimate": 30,
+   "expected_found": [
+    "RCPE Evening Medical Updates",
+    "RCPE Symposia"
+   ],
+   "notes": "Drupal site (server-rendered, no WP/JS framework \u2014 platform enum has no 'drupal', closest is static_html). Listing at /events with pagination ?page=0..2 (~12 event teasers per page, dates Sept 2026\u2013Jan 2027 visible). Detail pages carry dates, \u00a3 fees (e.g. \u00a30 members / \u00a320), venue and register links directly. Evening Medical Updates are hybrid (in-person Edinburgh + online + catch-up viewing) \u2014 watch for the on-demand/catch-up wording. PACES prep, Acute Medicine Updates and Online Education not seen on page 1; may appear on later pages or a separate education section."
+  },
+  "expect": [
+   "RCPE Evening Medical Updates",
+   "RCPE Symposia",
+   "RCPE Online Education",
+   "MRCP PACES Preparation",
+   "Acute Medicine Updates"
+  ],
+  "provider": "Royal College of Physicians of Edinburgh"
+ },
+ {
+  "source_id": 31,
+  "slug": "rcpch",
+  "class_name": "RCPCHExtractor",
+  "recon": {
+   "domain": "rcpch.ac.uk",
+   "status": "resolved",
+   "listing_url": "https://www.rcpch.ac.uk/events",
+   "platform": "static_html",
+   "js_required": false,
+   "api_url": "",
+   "pagination": "query_param",
+   "volume_estimate": 30,
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "Advisory Appointments Committee Training Day",
+    "Trainee Research Network (Education Seminars TREES)",
+    "Child Protection Study Day 2026 (Scotland)",
+    "Statement and report writing Level 3 (Safeguarding Level 3 family)"
+   ],
+   "notes": "Drupal 10 server-rendered search listing at /events combining events (/news-events/events/*) and courses/webinars (/education-careers/courses/rcpch-course|rcpch-webinar/*); paginated ?page=0..2, dated cards (e.g. 07 October 2026). Detail pages carry the date on-page but the sample event showed no GBP fees inline (some events are free/virtual; fees may need per-course checking). RSS feed exists at /rss/events.xml which could serve as a cheap change-detection source."
+  },
+  "expect": [
+   "Safeguarding Level 3",
+   "Child Protection Portal Courses",
+   "Paediatric Sub-specialty Careers Event",
+   "Advisory Appointments Committee Training Day",
+   "Trainee Research Network National Conference"
+  ],
+  "provider": "Royal College of Paediatrics and Child Health"
+ },
+ {
+  "source_id": 32,
+  "slug": "rcophth",
+  "class_name": "RCOphthExtractor",
+  "recon": {
+   "domain": "rcophth.ac.uk",
+   "status": "resolved",
+   "listing_url": "https://www.rcophth.ac.uk/events-courses/all-events-courses/",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "pagination": "none",
+   "event_type_mix": "mixed",
+   "detail_topology": "external",
+   "volume_estimate": 15,
+   "api_url": "",
+   "expected_found": [
+    "Introduction to Ophthalmic Surgery",
+    "Ocular Trauma",
+    "Cataract Surgery Complications (as CATS / cataract surgery skills incl. posterior capsule management)"
+   ],
+   "notes": "WordPress listing is a single accordion page: each course block gives title, location, description and multiple dated sessions in D/M/YY format (e.g. 5/10/26), each linking to a booking page on the iMIS registrar at ihub.rcophth.ac.uk (Event_Display.aspx?EventKey=...). iHub detail pages are server-rendered ASP.NET (VIEWSTATE) and carry the full date and fees (\u00a3498/\u00a3595 seen) without JS; ~15 EventKey links visible. Basic Phaco / Microsurgical Skills not on this page \u2014 simulation skills courses live under /training/simulation/skills-courses/. Also links an iHub Event_Search.aspx portal and an annual-congress subpage."
+  },
+  "expect": [
+   "Introduction to Ophthalmic Surgery",
+   "Basic Phacoemulsification",
+   "Ocular Trauma",
+   "Cataract Surgery Complications",
+   "Microsurgical Skills Courses"
+  ],
+  "provider": "Royal College of Ophthalmologists"
+ },
+ {
+  "source_id": 33,
+  "slug": "fph",
+  "class_name": "FPHExtractor",
+  "recon": {
+   "domain": "fph.org.uk",
+   "status": "resolved",
+   "listing_url": "https://www.fph.org.uk/events-courses-exams/",
+   "platform": "static_html",
+   "js_required": false,
+   "api_url": "",
+   "pagination": "query_param",
+   "volume_estimate": 12,
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "Public Health Conference",
+    "CPD Events"
+   ],
+   "notes": "Server-rendered listing at /events-courses-exams/ with dated cards (e.g. \"3rd Sep 2026\") and query-param pagination ?pageSize=12&pageIndex=N (2 pages currently, ~12 upcoming events incl. Scottish Public Health Conference 2026 and Public Mental Health Conference 2026). Detail pages carry date, fee and register links directly. Not WordPress (no wp-content); custom CMS. Past events archived at /past-events-courses-exams/. Diplomate exam prep and specialty training live under /training-careers/ as static info pages, not dated events."
+  },
+  "expect": [
+   "Public Health Training",
+   "Diplomate Exam Preparation",
+   "CPD Events",
+   "Public Health Conference",
+   "Health Protection Courses"
+  ],
+  "provider": "Faculty of Public Health"
+ },
+ {
+  "source_id": 34,
+  "slug": "fom",
+  "class_name": "FOMExtractor",
+  "recon": {
+   "domain": "fom.ac.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.fom.ac.uk/media-events/conferences-and-events",
+   "api_url": "",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "event_type_mix": "mixed",
+   "expected_found": [],
+   "notes": "WordPress site with custom /event/ post type (Tribe API 404s). Listing has a date-range filter form and currently shows only one upcoming event (MRO workshops, 04/02/2026-08/10/2026, CPD 5.5/6); detail page carries dates + CPD points server-rendered, registration via external \"View Event Website\" link. Very low volume; many listed items are externally-approved CPD events, and there is also an \"External events\" section. None of the expected course names (MFOM exam prep, OM training etc.) appear as dated events \u2014 those live under static /education pages."
+  },
+  "expect": [
+   "Occupational Medicine Training",
+   "MFOM Exam Preparation",
+   "Occupational Health Updates",
+   "Ethics in Occupational Medicine"
+  ],
+  "provider": "Faculty of Occupational Medicine"
+ },
+ {
+  "source_id": 35,
+  "slug": "fpm",
+  "class_name": "FPMExtractor",
+  "recon": {
+   "domain": "fpm.org.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.fpm.org.uk/events/",
+   "api_url": "",
+   "pagination": "query_param",
+   "volume_estimate": 10,
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "MFPM Exam Preparation",
+    "Clinical Trials Courses"
+   ],
+   "notes": "Custom WordPress theme (not Tribe \u2014 /wp-json/tribe/... 404s). Listing at /events/ renders static server-side <article class=\"post-... events\"> cards with title, date (e.g. \"Thursday 20 August 2026\"), time and Online/venue category badge; card links go to /event/<slug>/ detail pages which carry a \"Booking Information\" section with GBP fees on-page (\u00a3350/\u00a3375/\u00a3450 member tiers). Pagination via /events/page/2/ (6 cards p1, 4 p2). Mix of the FPM Annual Conference 2026 (24 Nov 2026, featured), DPM Training Programme exam-revision course modules (MCQ/SAQ/CAP), and free webinars (Women in Clinical Trials, ABPI Code Case Notes). Skip non-event cards like \"FPM Sponsorship Opportunities\" and \"FPM On Demand\" under /events/ slugs."
+  },
+  "expect": [
+   "Pharmaceutical Medicine Training",
+   "MFPM Exam Preparation",
+   "Clinical Trials Courses",
+   "Medicines Development Courses"
+  ],
+  "provider": "Faculty of Pharmaceutical Medicine"
+ },
+ {
+  "source_id": 36,
+  "slug": "escardio",
+  "class_name": "ESCExtractor",
+  "recon": {
+   "domain": "escardio.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.escardio.org/events/congresses/",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "standard_subpages",
+   "pagination": "none",
+   "volume_estimate": 15,
+   "expected_found": [
+    "ESC Congress",
+    "Heart Failure Congress"
+   ],
+   "notes": "Server-rendered corporate CMS (Optimizely-like, not WordPress). /events/congresses/ lists ~11 congresses (ESC Congress 2026, Heart Failure 2027, EHRA 2026/2027, EAPCI 2027, EACVI 2026, ACNAP 2027, etc.) with dated cards; also /events/specialised-events/ and /education/live-events/courses/ exist for extra volume. Each congress is a microsite with subpages for registration/fees/programme, so detail extraction needs to follow subpages under the congress path. Given HFA start URL was a community page; the real listing is site-wide /events/."
+  },
+  "expect": [
+   "ESC Congress",
+   "Heart Failure Congress"
+  ],
+  "provider": "European Society of Cardiology"
+ },
+ {
+  "source_id": 37,
+  "slug": "acpgbi",
+  "class_name": "ACPGBIExtractor",
+  "recon": {
+   "domain": "acpgbi.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.acpgbi.org.uk/events",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 20,
+   "expected_found": [
+    "ACPGBI Annual Meetings (category filter /events?type=1103; no upcoming 2026 instance visible on year listing)"
+   ],
+   "notes": "Custom ASP.NET CMS (generator \"lmsitestarterduke\", moduleevents) \u2014 not WordPress despite .org.uk look; /wp-json redirects to .aspx. Server-rendered year-grouped listing at /events with month rows and dated links (/events/{id}/{slug}); navigate years via /events/date/2027 and filter Annual Meetings via /events?type=1103. Listing is an aggregator-style community calendar: many third-party/predatory-looking nursing congresses mixed in with genuine ACPGBI/coloproctology courses and chapter meetings \u2014 filter by type or title. Detail pages carry fees/booking info on-page (e.g. \"No registration fee\")."
+  },
+  "expect": [
+   "ACPGBI Annual Meeting"
+  ],
+  "provider": "Association of Coloproctology of Great Britain and Ireland (ACPGBI)"
+ },
+ {
+  "source_id": 38,
+  "slug": "asgbi",
+  "class_name": "ASGBIExtractor",
+  "recon": {
+   "domain": "asgbi.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.asgbi.org.uk/event-type/asgbi-congress",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "external",
+   "pagination": "none",
+   "volume_estimate": 2,
+   "expected_found": [
+    "ASGBI International Surgical Congress"
+   ],
+   "notes": "Main site is a static Webflow build; /event-type/asgbi-congress cards carry name, date range and venue in HTML server-side (e.g. Congress 2026, 12-14 May 2026, DoubleTree Brighton; Congress 2027, 21-23 May 2027, Manchester Central). A sibling listing /event-type/egs-symposium exists (EGS Symposium events). Detail/registration (\"Learn More\") links go to events.asgbi.org.uk, an Angular SPA event portal (noindex, empty-body, JS-required, module URLs like /asgbievents/modules/263011/html) \u2014 scrape core fields from the Webflow listing and treat the portal only as the outbound registration URL; fees would need JS rendering of the portal."
+  },
+  "expect": [
+   "ASGBI International Surgical Congress"
+  ],
+  "provider": "Association of Surgeons of Great Britain and Ireland (ASGBI)"
+ }
+]
