@@ -125,20 +125,21 @@ Architecture rule: **platform-family extractors, not 186 bespoke modules.**
 
 ---
 
-# MISSION R — LLM resilience (opened 2026-09-20, status: APPROVED 2026-09-20 — executing)
+# MISSION R — LLM resilience (opened 2026-09-20 · approved · delivered 2026-09-21)
 
 **Brief:** scrape must run reliably without silent failure. Trigger: all 4 configured
-NVIDIA models (text, 2 backups, vision) EOL'd 2026-08-26 → every LLM call has 410'd
+NVIDIA models (text, 2 backups, vision) EOL'd 2026-08-26 → every LLM call 410'd
 for 25 days while CI stayed green. 4th EOL in 5 months (LESSONS #6) → architecture fix, not another swap (LESSONS #3).
 
 | # | Task | Executor / model | Status |
 |---|---|---|---|
-| R1 | Rotate: text `nvidia/nemotron-3-super-120b-a12b`, vision `meta/llama-3.2-11b-vision-instruct` (config.py, vision.py, .env, 2 workflows) | direct | ⬜ |
-| R2 | Model fallback chain: `KIMI_MODEL_CHAIN` env, on 410/404 advance to next model and remember it for the run | coding agent · `sonnet` | ⬜ |
-| R3 | Fail loud: `probe_models.py` + daily pre-scrape workflow step; whole chain dead → job fails red (GitHub emails owner) | coding agent · `sonnet` | ⬜ |
-| R4 | Verify: local run source 2 (RCSEng) + source 11 (vision fees) → push → manual CI run → SQL null-audit on soft fields (LESSONS #4) | direct + `haiku` verifier | ⬜ |
-| R5 | Backfill: clear `listing_hash` on rows created/changed since 2026-08-26 with NULL soft fields so they re-extract (LESSONS #5) | direct (SQL, user-approved) | ⬜ |
-| R6 | Docs: CLAUDE.md banner (29 sources, new models), memory, LESSONS #6 addendum | direct | ⬜ |
+| R1 | Rotate models: text `nvidia/nemotron-3-super-120b-a12b`, vision `meta/muse-glimmer-30b` | coding agent · `sonnet` | ✅ `a6330aa` |
+| R2 | Fallback chain `llm_client.py` — advance on 404/410 only, sticky per process, per-model max_tokens floors; 4 call sites wired | coding agent · `sonnet` | ✅ 9 offline tests; live failover from a dead model proven |
+| R3 | Fail loud: `probe_models.py` as first job of `scrape-daily.yml`; dead chain → red run, scrape still runs | coding agent · `sonnet` | ✅ passed in CI |
+| R4 | Verify in CI (LESSONS #4): full 29-source runs + SQL null-audit | direct | ✅ run 35542582495: 124 LLM calls OK / 1 rate-limited; null description 0.2 %, null specialty 3.1 % (gate <10 %) |
+| R4b | **Found by R4:** Resus (403) + BTOG (202 challenge) blocked from runner IPs only → `extractors/http_fetch.py` browser fallback; hung BTOG job burned 6 h → `timeout-minutes: 60` | coding agent · `sonnet` + direct | ✅ Resus 22/22 via fallback in CI. BTOG 4/4 in final run 35566370240 (30/30 green) — but httpx was not challenged on that run, so BTOG's own-page fallback is proven locally (forced) only; watch the next challenged day |
+| R5 | Backfill ~266 rows extracted while the LLM was dead (clear `listing_hash`) | direct | ⛔ bulk prod write blocked by permission classifier — **needs user approval** |
+| R6 | Docs: CLAUDE.md, project memory, HQ LESSONS #9 | direct | ✅ |
 
-Cost: £0 — stays on NVIDIA free tier. No new credentials. Optional later: second free provider as last link in the chain (needs one new key).
-Risk: 11B vision model may be weaker on complex fee tables than the retired one → R4 tests it on the RCR fee image before trusting it.
+Cost: £0 external. GitHub Actions: 4 manual full runs (~30 jobs each) + one hung 6 h job.
+Open risks: vision chain verified on a synthetic fee table only; NVIDIA can still retire a whole chain at once — the probe makes that loud, not impossible.
