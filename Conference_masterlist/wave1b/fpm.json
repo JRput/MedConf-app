@@ -1,0 +1,49 @@
+{
+ "source_id": 35,
+ "slug": "fpm",
+ "class_name": "FPMExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/fpm.py",
+ "source_row": {
+  "source_name": "FPM Events",
+  "society": "Faculty of Pharmaceutical Medicine",
+  "base_url": "https://www.fpm.org.uk/events/",
+  "default_event_type": "mixed",
+  "pagination_type": "page_query",
+  "pagination_template": "https://www.fpm.org.uk/events/page/{n}/",
+  "max_pages_hint": 2,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Listing at /events/ is server-rendered <article class=\"post-... events events_cats-...\"> cards (6 p1, 3 p2, no p3); event_format/members-only/free flags come from the events_cats-* classes / post-category badges, not prose. Detail pages share one WordPress theme with a <p style=\"margin-bottom:0;\"><b>DayName D Month YYYY<br> HH:MM-HH:MM</p> header giving canonical date/time, except the flagship FPM Annual Conference which uses a different hero-block template with the date/venue in a bold prose paragraph instead. Pricing is either a proper <table> under a 'Ticket Prices' heading (Location | Ticket Type | Pricing columns) or plain-prose 'Label: £NNN'/'Label: Free' lines under a 'Price Options' heading -- several pages (DPM exam-revision modules with bookings closed, member-portal-gated pricing) publish no price at all, which is correctly []."
+ },
+ "registry_comment": "FPM (Faculty of Pharmaceutical Medicine) events -- WordPress listing at /events/, mixed conference/course/workshop catalogue, 9 upcoming events at onboarding",
+ "probe_results": {
+  "shells": 9,
+  "shells_forced_fallback": 9,
+  "details_tested": 9,
+  "with_date": 9,
+  "with_pricing": 5,
+  "with_venue": 2,
+  "with_description": 9,
+  "with_specialty": 9
+ },
+ "test_urls": [
+  "https://www.fpm.org.uk/event/fpm-annual-conference-2026/",
+  "https://www.fpm.org.uk/event/agm-2026/",
+  "https://www.fpm.org.uk/event/understanding-real-world-studies-and-evidence/"
+ ],
+ "spot_check": [
+  {"url": "https://www.fpm.org.uk/event/fpm-annual-conference-2026/", "field": "pricing_tiers", "site_says": "In-person: FPM member £360 / Non-member £450 / Reduced £235; Online: FPM member £265 / Non-member £310 / Reduced £185", "extractor_says": "6 tiers: 'In-person · FPM member' 360.0, 'In-person · Non-member' 450.0, 'In-person · Reduced rate*' 235.0, 'Online · FPM member' 265.0, 'Online · Non-member' 310.0, 'Online · Reduced rate*' 185.0", "match": true},
+  {"url": "https://www.fpm.org.uk/event/fpm-annual-conference-2026/", "field": "start_date / venue / event_format", "site_says": "Tuesday 24 November 2026; 10 Union Street, London or Online (hybrid)", "extractor_says": "start_date 2026-11-24, venue_name '10 Union Street', city 'London', event_format 'hybrid'", "match": true},
+  {"url": "https://www.fpm.org.uk/event/agm-2026/", "field": "venue / event_format / start_date+time", "site_says": "hybrid event, online and at 5-11 Theobalds Road, London WC1X 8SH, Thursday 8 October 2026, 16:30-18:30", "extractor_says": "event_format 'hybrid', venue_name '5-11 Theobalds Road', city 'London', region 'London', start_date 2026-10-08, start_time 16:30:00", "match": true},
+  {"url": "https://www.fpm.org.uk/event/understanding-real-world-studies-and-evidence/", "field": "sessions / pricing", "site_says": "online course, Wed 7 Oct (10:00-14:00) & Wed 14 Oct (10:00-14:00); FPM member fee £100, Non-member fee £180", "extractor_says": "event_type 'course', sessions=[2026-10-07 10:00, 2026-10-14 10:00]; pricing_tiers 'FPM member' 100.0, 'Non-member' 180.0", "match": true},
+  {"url": "https://www.fpm.org.uk/event/women-in-clinical-trials-webinar-part-2-a-patients-viewpoint/", "field": "pricing / dates / format", "site_says": "Tue 29 Sep 2026, 12:00-13:30, Online; FPM Members Free, Non-Members £40", "extractor_says": "start_date 2026-09-29, start_time 12:00:00, event_format 'online'; tiers 'FPM Members' 0.0, 'Non-Members' 40.0", "match": true}
+ ],
+ "concerns": [
+  "Only exercised the httpx-success path against a live home-IP fetch during dev, plus the harness's monkeypatched --force-fallback run (which forces the Playwright branch and confirmed identical shell counts, 9=9). No real 403/challenge response from fpm.org.uk was observed to prove the genuine CI/GitHub-runner path end-to-end -- flag for a post-deploy log check on the first cloud run.",
+  "AGM 2026 and Festive FPM Gathering 2026 are member-facing internal events with thin public detail (registration/pricing gated behind My FPM login) -- pricing_tiers correctly stays [] for both and description is generic/short. They are real, correctly-dated events per the PLAYBOOK's don't-skip guidance, but are borderline material for a CPD directory (an AGM and a social gathering, not conference/CPD content) -- flagging for a product-side call rather than silently dropping them.",
+  "DPM Training Programme exam-revision modules (SAQ/CAP, e.g. Module 8/9) show 'Bookings ... now closed' with no visible price on the public page (member-portal-gated) -- is_sold_out=True and pricing_tiers=[] is correct per source, but this means these rows will look permanently sold-out/unpriced until FPM's next intake opens; no fix available without portal auth. The FPM/ABHI CVD webinar and Festive Gathering likewise have no CPD-Credits section on-page, so cpd_accredited=False for those (deterministic from page text, not a gap).",
+  "_extract_venue's ADDRESS_RE was built and word-count-tuned against the two known in-person/hybrid addresses on this site (10 Union Street; 5-11 Theobalds Road) -- a future FPM venue using a street-type suffix outside the regex's alternation (e.g. 'Terrace', 'Gardens', 'Crescent', 'Close') would fall through to venue_name=None (event_format stays correct, sourced independently from the listing's events_cats-* badges) rather than mis-parse. Region is likewise hardcoded to 'London' when the city token contains 'london' with no other UK region mapped -- both known FPM venues are London, but a future non-London physical event would get region=None until this extractor is revisited.",
+  "The LLM soft-field call in _extract_soft_fields is description-only (specialty is always the deterministic 'Pharmaceutical Medicine' -- FPM has no other kind of event) and parses the model's JSON with a bare `re.search(r'\\{.*\\}', raw, re.S)` inside a broad try/except; confirmed working end-to-end for all 9 test events during this build (LLM descriptions came through cleanly each time), but if the model ever wraps JSON in markdown fences or adds prose, it silently falls back to the deterministic first-paragraph description rather than raising -- safe, but worth knowing LLM enrichment could rarely go unused."
+ ]
+}

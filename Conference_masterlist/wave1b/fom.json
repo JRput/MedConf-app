@@ -1,0 +1,80 @@
+{
+  "source_id": 34,
+  "slug": "fom",
+  "class_name": "FOMExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/fom.py",
+  "source_row": {
+    "source_name": "FOM Conferences & Events",
+    "society": "Faculty of Occupational Medicine",
+    "base_url": "https://www.fom.ac.uk/media-events/conferences-and-events",
+    "default_event_type": "course",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Listing is a single unpaginated WordPress page with plain <h2><a> cards followed by a 'Start Date: ... | End Date: ... | CPD Points: ...' strip (no card CSS class to hook the generic DOM walker to, so list_shells_override regex-parses it). Only 1-2 upcoming FOM-run events exist at a time; a large External Events section on the same page is deliberately not scraped (curated third-party bulletin board, not primary-source data). Detail pages carry no pricing or venue at all (both known events route booking to an external provider) and dates for one of the two events only exist as an overall season window on the listing, not per-run dates on FOM's own site."
+  },
+  "registry_comment": "FOM (Faculty of Occupational Medicine) — tiny 1-2 event listing, both externally-run, no pricing/venue on-site",
+  "probe_results": {
+    "shells": 2,
+    "shells_forced_fallback": 2,
+    "details_tested": 2,
+    "with_date": 2,
+    "with_pricing": 0,
+    "with_venue": 0,
+    "with_description": 2,
+    "with_specialty": 2
+  },
+  "test_urls": [
+    "https://www.fom.ac.uk/event/medical-review-officer-mro-workshops",
+    "https://www.fom.ac.uk/event/mro-training-by-mros-for-mros"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.fom.ac.uk/event/medical-review-officer-mro-workshops",
+      "field": "start_date/end_date",
+      "site_says": "Start Date: 04/02/2026 | End Date: 08/10/2026 (a season window, not a single run)",
+      "extractor_says": "2026-02-04 / 2026-10-08",
+      "match": true
+    },
+    {
+      "url": "https://www.fom.ac.uk/event/medical-review-officer-mro-workshops",
+      "field": "pricing_tiers",
+      "site_says": "no fee/price mentioned anywhere on the FOM page",
+      "extractor_says": "[]",
+      "match": true
+    },
+    {
+      "url": "https://www.fom.ac.uk/event/mro-training-by-mros-for-mros",
+      "field": "sessions",
+      "site_says": "Thursday 15th October 2026 / Tuesday 10th November 2026 / Thursday 3rd December 2026",
+      "extractor_says": "2026-10-15, 2026-11-10, 2026-12-03",
+      "match": true
+    },
+    {
+      "url": "https://www.fom.ac.uk/event/mro-training-by-mros-for-mros",
+      "field": "cpd_points",
+      "site_says": "The day has a value of 4 CPD points.",
+      "extractor_says": "4 (cpd_accredited=true)",
+      "match": true
+    },
+    {
+      "url": "https://www.fom.ac.uk/event/medical-review-officer-mro-workshops",
+      "field": "cpd_points",
+      "site_says": "Part 1 = 6 CPD points, Part 2 = 5.5 CPD points (two separate values, no single total stated)",
+      "extractor_says": "null (cpd_accredited=true) — deliberately not summed/guessed",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Very low volume: recon found exactly 2 upcoming FOM-run events, matching the recon estimate of ~1. None of the expected course names (MFOM Exam Preparation, Occupational Health Updates, Ethics in Occupational Medicine) appear as dated events on this listing — they live under static /education pages with no dates/booking, i.e. not scrapable event data. Worth keeping active (near-zero maintenance cost, correctly returns 0-2 rows), but this source will almost never contribute new rows and should not be expected to grow the directory materially.",
+    "'Medical Review Officer (MRO) workshops' is a two-part, runs-throughout-the-year programme. FOM's own listing states only an overall season window (04/02/2026-08/10/2026), not per-run dates; the actual schedule lives behind an external Mailchimp click-tracking link on the detail page, which was deliberately not followed (out of scope per the brief's request-politeness rule and because click-tracking redirect targets are not stable primary-source URLs). The extractor surfaces the FOM-stated window as start_date/end_date and leaves sessions empty for this event — this is an honest-but-low-precision row; if this matters, a future pass could resolve the Mailchimp redirect once to get the real target domain and build a small session scraper against it, but that's a separate source, not a fom.py change.",
+    "cpd_points is left null (with cpd_accredited=true) for the MRO workshops event because the page states two separate part-values (6 and 5.5) with no stated combined total — summing or picking one would be a guess, not a read fact.",
+    "No venue/city/region ever populate for either event (both are run by external providers with no location stated on FOM's own pages) — event_format is left null rather than guessed as 'online', since neither page actually says so.",
+    "Did not build anything for the 'External Events' / 'External training courses' sections on the same listing page — those are FOM curating OTHER organisations' CPD-approved courses, not FOM's own primary-source event data, and mixing them in would misattribute organiser/source_url ownership.",
+    "Harness details_tested=2 covers both known events (the entire population) — there's no room to probe a third differently-shaped event because none exists yet.",
+    "force-fallback run (Playwright path) reproduced the same 2 shells and same field values as the httpx path — no discrepancy observed."
+  ]
+}

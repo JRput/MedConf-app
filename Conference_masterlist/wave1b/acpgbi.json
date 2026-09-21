@@ -1,0 +1,65 @@
+{
+  "source_id": 37,
+  "slug": "acpgbi",
+  "class_name": "ACPGBIExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/acpgbi.py",
+  "source_row": {
+    "source_name": "ACPGBI Events",
+    "society": "Association of Coloproctology of Great Britain and Ireland (ACPGBI)",
+    "base_url": "https://www.acpgbi.org.uk/events",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Custom ASP.NET CMS, server-rendered, no JS needed for listing or detail. Listing is year-scoped at /events/date/<YYYY> with no in-year pagination; list_shells_override() walks forward year by year (current year onward) until an empty year is hit (the 2027 ACPGBI Annual Meeting only appears via the 2027 year page, not the default /events). Detail pages repeat date/location in two <p class=\"module_article_metadata\"> tags and carry free-text fee/CPD mentions ('No registration fee', 'awarded N CPD points by RCSEd') instead of markup fee tables -- pricing_tiers is empty for almost every event by design, not a bug. This is a community aggregator calendar mixed with third-party conference-mill listings (titles like '25th Global Summit on Nursing Education...' or 'World Congress on Nursing and Health Care'), filtered out by a title-pattern heuristic ((ordinal)? International/Global/World ... Conference/Congress/Summit)."
+  },
+  "registry_comment": "Coloproctology events aggregator calendar (ACPGBI); year-paginated (2026, 2027, ...), free-text fees/CPD (no markup tables), title-filtered to drop third-party conference-mill spam mixed into the same calendar.",
+  "probe_results": {
+    "shells": 20,
+    "shells_forced_fallback": 20,
+    "details_tested": 20,
+    "with_date": 20,
+    "with_pricing": 2,
+    "with_venue": 15,
+    "with_description": 20,
+    "with_specialty": 20
+  },
+  "test_urls": [
+    "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+    "https://www.acpgbi.org.uk/events/1803/midlands_proctology_day",
+    "https://www.acpgbi.org.uk/events/1758/rectal_prolapse_surgical_management_cadaveric_course"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+      "field": "start_date/start_time/venue_name/city/region/pricing_tiers",
+      "site_says": "2 Oct 2026 8:30AM – 4:00PM; INGLEWOOD HOUSE HOTEL Alloa, Stirling; body text says 'Free to all'",
+      "extractor_says": "2026-10-02 / 08:30 / venue='INGLEWOOD HOUSE HOTEL Alloa' / city='Stirling' / region='Scotland' / pricing_tiers=[{£0 Registration}]",
+      "match": true
+    },
+    {
+      "url": "https://www.acpgbi.org.uk/events/1803/midlands_proctology_day",
+      "field": "start_date/start_time/venue_name/city/cpd_points",
+      "site_says": "2 Dec 2026 9:30AM – 4:20PM; 'Innovation Point, Central Boulevard, Blythe Valley Business Park,Solihull, B90 8AG'; body mentions 6 CPD points",
+      "extractor_says": "2026-12-02 / 09:30 / venue='Innovation Point' / city='Solihull' / cpd_points=6",
+      "match": true
+    },
+    {
+      "url": "https://www.acpgbi.org.uk/events/1758/rectal_prolapse_surgical_management_cadaveric_course",
+      "field": "start_date/end_date/venue_name/city/region/cpd_points",
+      "site_says": "28 – 29 Oct 2026; 'Surgical Skills Centre, Ninewells Hopsital,Dundee, Scotland'; 'awarded 16 CPD points by RCSEd'",
+      "extractor_says": "2026-10-28 / 2026-10-29 / venue='Surgical Skills Centre' / city='Dundee' / region='Scotland' / cpd_points=16",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Junk-title filter is a heuristic ('(ordinal)? International/Global/World ... Conference/Congress/Summit'), not a whitelist -- it catches every conference-mill pattern observed across the 2026 and 2027 listings (5 of 25 raw events filtered), but a future submission with a different naming style could slip through, or (less likely) a genuine event could coincidentally match. Worth a periodic manual glance at what /events/date/<year> lists vs. what the extractor keeps.",
+    "Venue/city splitting is best-effort free-text parsing (no consistent separator on this CMS) -- verified correct on all 3 hand spot-checks plus several more eyeballed during dev (Cairns/Australia, Prague Congress Centre, King's College London -> London), but addresses with an unusual shape could still mis-split (e.g. a venue name that itself contains a comma).",
+    "pricing_tiers will be [] for the large majority of events -- confirmed by inspecting ~10 detail pages by hand that there are NO markup fee tables anywhere on this site, only occasional free-text 'No registration fee'/'Free to all' (-> one £0 tier) or genuinely no fee information at all (most events point to an external/partner registration site for pricing, e.g. King's Live, BASO, ESCP). This is a data-availability limit of the source, not a parsing gap.",
+    "event_format defaults to 'in_person' when the detail page has no second module_article_metadata (location) paragraph and the body text doesn't say 'webinar' -- true for the majority of ACPGBI's own physical events, but could misfire on a rare online event that never uses the word 'webinar'. Only 2 explicit 'Online'/webinar cases seen in the 20 upcoming events tested.",
+    "cpd_points/cpd_accredited only ever appear as free-text ('awarded N CPD points by <body>') on this site -- most events simply don't publish a CPD number on the ACPGBI page itself (there's a separate site-wide 'Course Accreditation and CPD Approval' page that isn't scraped), so most rows will have cpd_points=None even for accredited events. Consider this a known undercount, not a bug."
+  ]
+}

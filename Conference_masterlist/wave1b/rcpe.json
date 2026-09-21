@@ -1,0 +1,50 @@
+{
+  "source_id": 30,
+  "slug": "rcpe",
+  "class_name": "RCPEExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/rcpe.py",
+  "source_row": {
+    "source_name": "RCPE Events",
+    "society": "Royal College of Physicians of Edinburgh",
+    "base_url": "https://www.rcpe.ac.uk/events",
+    "default_event_type": "conference",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.rcpe.ac.uk/events?page={n}",
+    "max_pages_hint": 3,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Drupal listing at /events paginated ?page=0..2 (~12/page, 33 events total across exactly 3 pages, no further pages seen). Each card and each detail page carries repeated 'icon-detail-item' chips (calendar/clock/monitor=online/map-pin=venue/CPD lozenge image) giving date, time, format and CPD deterministically; hybrid events fold 'Hybrid: Online and <venue>' or '<venue> & Online' into the map-pin text alone with no separate monitor icon, so venue text must also be scanned for the word 'online'. Detail pages are tabbed (#overview/#programme/#fees/#further-information, sometimes #live-links); fees are plain label|£X tables inside #fees with no preceding <h2-4> heading (the 'Fees' label is a tab link), so the shared pricing_tables.py heading-detector misses them entirely — this extractor parses the #fees tab's own tables directly. Sold-out events show 'Fully Booked' text in place of the Book-now button (event-notification-text class)."
+  },
+  "registry_comment": "RCPE — Drupal /events listing, page_query pagination, deterministic icon-chip dates/venue/CPD + #fees tab pricing (bypasses pricing_tables.py's heading requirement)",
+  "probe_results": {
+    "shells": 33,
+    "shells_forced_fallback": 33,
+    "details_tested": 12,
+    "with_date": 12,
+    "with_pricing": 11,
+    "with_venue": 4,
+    "with_description": 12,
+    "with_specialty": 11
+  },
+  "test_urls": [
+    "https://www.rcpe.ac.uk/events/infectious-diseases",
+    "https://www.rcpe.ac.uk/events/scottish-cardiac-society-35th-annual-general-meeting-2026",
+    "https://www.rcpe.ac.uk/events/modern-medicine-parasites"
+  ],
+  "spot_check": [
+    {"url": "https://www.rcpe.ac.uk/events/infectious-diseases", "field": "start_date/start_time", "site_says": "Fri 25 Sep 2026, 09:25 - 17:00", "extractor_says": "2026-09-25 / 09:25", "match": true},
+    {"url": "https://www.rcpe.ac.uk/events/infectious-diseases", "field": "pricing_tiers", "site_says": "Standard £275 / Fellow-Collegiate-Associate £175 / Allied Health £175 / Retired-Foundation £80 / LMIC Fellow £0 / Student £0", "extractor_says": "6 tiers, same labels and prices", "match": true},
+    {"url": "https://www.rcpe.ac.uk/events/infectious-diseases", "field": "event_format/cpd_points", "site_says": "Online, +6 CPD lozenge", "extractor_says": "online, 6", "match": true},
+    {"url": "https://www.rcpe.ac.uk/events/scottish-cardiac-society-35th-annual-general-meeting-2026", "field": "dates/venue", "site_says": "Thu 1 - Fri 2 Oct 2026, Dunblane Hydro Hotel, Dunblane", "extractor_says": "start=2026-10-01 end=2026-10-02, venue='Dunblane Hydro Hotel, Dunblane', city='Dunblane', region='Scotland'", "match": true},
+    {"url": "https://www.rcpe.ac.uk/events/modern-medicine-parasites", "field": "event_format/venue", "site_says": "'Hybrid: Online and Royal College of Physicians, 11 Queen Street, Edinburgh, EH2 1JQ' (single map-pin chip, no separate online icon)", "extractor_says": "event_format='hybrid', venue_name='Royal College of Physicians, 11 Queen Street, Edinburgh, EH2 1JQ', city='Edinburgh', region='Scotland'", "match": true}
+  ],
+  "concerns": [
+    "Listing includes 'College Meetings & Ceremonies' category events (MRCP(UK) Diploma Ceremonies) — real dated/venued/bookable events but not CPD content. Kept them (not clearly junk per the brief's skip criteria) but the team may want a category-level filter if these don't belong in a CPD directory.",
+    "'External Events' category (e.g. Scottish Cardiac Society AGM, Scottish Thoracic Society Symposium) are third-party society events booked via Eventbrite widgets on an RCPE-branded page, not RCPE's own events — included as-is since they appear in RCPE's own /events listing.",
+    "Recon's expected_found list included 'RCPE Online Education', 'MRCP PACES Preparation' and 'Acute Medicine Updates' — none appeared across all 3 listing pages (33 events, confirmed no page 3 exists). They may simply have no scheduled upcoming instance right now; nothing to fix in the extractor.",
+    "venue coverage in the 12-event detail sample is low (4/12) because most of RCPE's near-term events are the online Evening Medical Updates series — expected given the site's current programme mix, not an extraction gap (verified by hand against several online-only detail pages).",
+    "pricing_tiers missing on only 1/12 sampled events ('Modern Medicine: Parasites') — verified by hand: no #fees div and no £ anywhere on the page, so [] is correct (genuinely free/no fee info published), not a miss. Diploma Ceremony's fee is plain prose ('free of charge' + 'a charge of £35 per guest') rather than a table — a small regex fallback handles that pattern specifically; it won't generalise to other prose phrasings if RCPE varies the wording later.",
+    "Minor cosmetic artefact: a few fee labels on the site wrap a single trailing letter in its own inline <a> tag (e.g. 'low or lower-middle income countr<a>y</a>'); the shared regex-based tag-stripper (same approach as rcsed.py/rcpsych.py) turns that into 'countr y' with a stray space. Price and the rest of the label are correct — cosmetic only, not worth a source-specific patch."
+  ]
+}

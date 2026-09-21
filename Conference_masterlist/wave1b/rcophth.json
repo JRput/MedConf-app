@@ -1,0 +1,54 @@
+{
+  "source_id": 32,
+  "slug": "rcophth",
+  "class_name": "RCOphthExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/rcophth.py",
+  "source_row": {
+    "source_name": "RCOphth Courses & Events",
+    "society": "Royal College of Ophthalmologists",
+    "base_url": "https://www.rcophth.ac.uk/training-careers/courses-events-calendar/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Listing is a single server-rendered WordPress page (redirects from events-courses/all-events-courses/ to training-careers/courses-events-calendar/) with all upcoming cards as .js-card blocks giving title, a human date chip (.tag__date), 0-2 .card__location-time-text spans and a one-line .card__copy description -- generic DOM walker finds 0 cards, hence list_shells_override(). Detail pages are plain WordPress under /courses-and-events/<slug>/: title in h1, location/time in .article-page-banner__event-item spans, fees in .article-page-banner__member-item ('Member fee: GBP60' / 'Non-member fee: GBP90', the latter often CSS-hidden but present via textContent), and the ONE clean description paragraph in .article-page-banner__copy. No CPD points published on any probed page and no schema.org Event JSON-LD -- the listing date chip is the only date source; a title regex recovers a second day for spans like '7 & 8 December 2026'. Register CTAs point at the iHub ASP.NET registrar (ihub.rcophth.ac.uk) but our own page stays the stable source_url."
+  },
+  "registry_comment": "RCOphth (32) — WordPress listing override (generic walker finds 0 cards) + plain WordPress detail pages, no anti-bot",
+  "probe_results": {
+    "shells": 12,
+    "shells_forced_fallback": 12,
+    "details_tested": 10,
+    "with_date": 10,
+    "with_pricing": 9,
+    "with_venue": 9,
+    "with_description": 10,
+    "with_specialty": 10
+  },
+  "test_urls": [
+    "https://www.rcophth.ac.uk/courses-and-events/introduction-to-ophthalmic-surgery-course-6-october-2026/",
+    "https://www.rcophth.ac.uk/courses-and-events/back-to-basics-byte-sized-topics-for-all/",
+    "https://www.rcophth.ac.uk/courses-and-events/sas-17th-national-eye-day/",
+    "https://www.rcophth.ac.uk/courses-and-events/rcophth-winter-meeting-7-8-december-2026/",
+    "https://www.rcophth.ac.uk/courses-and-events/student-foundation-doctors-ophthalmology-review-day-sord-ford-glasgow/",
+    "https://www.rcophth.ac.uk/courses-and-events/ttt-for-supervisors-supervision-of-training-in-practice/",
+    "https://www.rcophth.ac.uk/courses-and-events/expanding-medical-retina-capacity-through-community-ophthalmology-services-in-leicestershire/",
+    "https://www.rcophth.ac.uk/courses-and-events/specialist-registration-via-the-portfolio-pathway/"
+  ],
+  "spot_check": [
+    {"url": "https://www.rcophth.ac.uk/courses-and-events/introduction-to-ophthalmic-surgery-course-6-october-2026/", "field": "pricing_tiers", "site_says": "Non-member fee: £495.83", "extractor_says": "Non-member 495.83", "match": true},
+    {"url": "https://www.rcophth.ac.uk/courses-and-events/back-to-basics-byte-sized-topics-for-all/", "field": "pricing_tiers + venue", "site_says": "Member fee: £60 / Non-member fee: £90, Birmingham", "extractor_says": "Member 60.0 / Non-member 90.0, city=Birmingham region=West Midlands", "match": true},
+    {"url": "https://www.rcophth.ac.uk/courses-and-events/rcophth-winter-meeting-7-8-december-2026/", "field": "start_date/end_date", "site_says": "title '7 & 8 December 2026', listing chip '7 December 2026', Edinburgh", "extractor_says": "start_date=2026-12-07 end_date=2026-12-08 city=Edinburgh", "match": true},
+    {"url": "https://www.rcophth.ac.uk/courses-and-events/sas-17th-national-eye-day/", "field": "pricing_tiers", "site_says": "Member fee: £85 / Non-member fee: £85", "extractor_says": "Member 85.0 / Non-member 85.0", "match": true},
+    {"url": "https://www.rcophth.ac.uk/courses-and-events/specialist-registration-via-the-portfolio-pathway/", "field": "pricing_tiers", "site_says": "Member fee: £205 / Non-member fee: £205", "extractor_says": "Member 205.0 / Non-member 205.0", "match": true}
+  ],
+  "concerns": [
+    "Annual Congress (linked from nav as /training-careers/courses-events-calendar/annual-congress/) is a separate flagship subsite, NOT a card on the listing page walked here -- it needs its own handling (likely detail_is_multipage) if it should be onboarded; out of scope for this build.",
+    "iHub Event_Search.aspx portal (ihub.rcophth.ac.uk) mentioned in recon as a secondary listing surface was not walked -- the 12 cards on the WordPress calendar page appear to be the complete upcoming set (each Register CTA does point into iHub per-event), but if iHub ever lists events not mirrored on the WP page they'd be missed.",
+    "No CPD point figures were observed on any of the 12 live cards/detail pages (only a generic 'Approval of CPD points' nav link exists site-wide) -- cpd_points will be None across this entire source; this is real absence of data, not an extraction gap, but worth knowing since RCOphth is a Royal College source where CPD accreditation is usually expected.",
+    "'Introduction to Ophthalmic Surgery course' reruns on 4 separate dates as 4 fully independent URLs/rows (each with its own iHub EventKey), not a single course+sessions parent -- intentional, since the source itself treats them as distinct bookable pages, but flagging in case the product later wants them grouped.",
+    "event_format='online' detection and city/region inference were only exercised on the 12 live cards (1 Zoom webinar, ~9 in-person with a plain city name banner, 1 location-less workshop backstopped via title). No multi-word street-address venue was seen in the live feed to test the 'strip to city' logic against; if RCOphth later publishes a full postal address in the banner, the current code takes the whole string as city/venue verbatim."
+  ]
+}

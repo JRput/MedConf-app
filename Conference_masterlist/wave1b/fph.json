@@ -1,0 +1,51 @@
+{
+  "source_id": 33,
+  "slug": "fph",
+  "class_name": "FPHExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/fph.py",
+  "source_row": {
+    "source_name": "Faculty of Public Health",
+    "society": "FPH",
+    "base_url": "https://www.fph.org.uk/events-courses-exams/",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "?pageSize=12&pageIndex={page}",
+    "max_pages_hint": 2,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Custom CMS, not WordPress. Listing at /events-courses-exams/?pageSize=12&pageIndex=N (N starts at 1; pageIndex=0 and any page past the last redirect 302). 2 pages currently, 16 raw card links, one item repeated across the page boundary -> 16 unique upcoming shells (list_shells_override dedupes by URL). Cards and the detail-page header share one markup shape: a date span ('28th Sep 2026'), a time span ('- 12:00pm,'), and a venue span ('Online' or a full UK address, sometimes with a UK postcode to strip before picking the city). No probed page (listing or 8 detail pages) ever publishes a fee amount -- booking always routes through either header '.article-options .btn-tertiary' member/non-member buttons (a members.fph.org.uk login-gated portal) or an off-site organiser link named in the article prose (RCPsych's own calendar, an Eventscase page, a Teams meeting link) -- pricing_tiers is correctly always []. CPD points/accreditation are never mentioned on any probed page outside site-wide nav chrome ('Regional CPD Resources' link), so cpd_points/cpd_accredited stay null/False rather than being scraped from nav junk. One event (Specialty Registrars, invite-only) has no public booking link at all -- booking_url falls back to the FPH page itself."
+  },
+  "registry_comment": "FPH: custom CMS, page-query pagination (?pageSize=12&pageIndex=N), no fees ever published on-site (booking via members-portal login or off-site organiser link)",
+  "probe_results": {
+    "shells": 16,
+    "shells_forced_fallback": 16,
+    "details_tested": 6,
+    "with_date": 6,
+    "with_pricing": 0,
+    "with_venue": 2,
+    "with_description": 6,
+    "with_specialty": 6
+  },
+  "test_urls": [
+    "https://www.fph.org.uk/events-courses-exams/public-mental-health-conference-2026/",
+    "https://www.fph.org.uk/events-courses-exams/scottish-public-health-conference-2026/",
+    "https://www.fph.org.uk/events-courses-exams/healthy-transport-cars-as-commercial-determinants-of-health/"
+  ],
+  "spot_check": [
+    {"url": "https://www.fph.org.uk/events-courses-exams/public-mental-health-conference-2026/", "field": "start_date/start_time", "site_says": "20th November 2026, 9:00am - 5:00pm", "extractor_says": "2026-11-20 / 09:00", "match": true},
+    {"url": "https://www.fph.org.uk/events-courses-exams/public-mental-health-conference-2026/", "field": "venue_name/city/region", "site_says": "Royal College of Psychiatrists, 21 Prescot Street, London E1 8BB", "extractor_says": "venue='Royal College of Psychiatrists, 21 Prescot Street' city='London' region='London'", "match": true},
+    {"url": "https://www.fph.org.uk/events-courses-exams/public-mental-health-conference-2026/", "field": "booking_url", "site_says": "article text: 'Please register your interest ... via the conference website' -> href to RCPsych calendar detail page", "extractor_says": "https://www.rcpsych.ac.uk/events/conferences/detail/2026/11/20/default-calendar/public-mental-health-conference-2026", "match": true},
+    {"url": "https://www.fph.org.uk/events-courses-exams/scottish-public-health-conference-2026/", "field": "venue_name/city/region/booking_url", "site_says": "Technology and Innovation Centre, University of Strathclyde, Glasgow.; 'Register via the conference website here' -> Eventscase link", "extractor_says": "venue='Technology and Innovation Centre, University of Strathclyde' city='Glasgow' region='Scotland'; booking_url=https://clearwaterevents.eventscase.com/EN/scottishpublichealthconference", "match": true},
+    {"url": "https://www.fph.org.uk/events-courses-exams/healthy-transport-cars-as-commercial-determinants-of-health/", "field": "event_format/booking_url/pricing_tiers", "site_says": "'Online' venue span; header CTA row has 'Book event as an FPH member' + 'Book event as a non-member' buttons to members.fph.org.uk; no fee text anywhere on page", "extractor_says": "event_format='online'; booking_url=https://members.fph.org.uk/?page=0&tab=5 (non-member link preferred); pricing_tiers=[]", "match": true},
+    {"url": "https://www.fph.org.uk/events-courses-exams/building-connectivity-in-public-health-a-specialty-registrars-event/", "field": "booking_url (no public link case)", "site_says": "'This event is open to Specialty Registrars by invitation only' -- no member-portal buttons, no off-site register link anywhere on the page", "extractor_says": "booking_url=None (falls back to shell URL, the FPH page itself, in the merge layer)", "match": true}
+  ],
+  "concerns": [
+    "This source never publishes a fee amount on its own pages -- registration always goes through a members.fph.org.uk login gate or an off-site organiser site. pricing_tiers will be [] for essentially every FPH row; this is a source characteristic, not an extraction gap.",
+    "cpd_points/cpd_accredited are likewise never published anywhere I could find on this source (checked 8 detail pages of different shapes: webinar, in-person conference x2, invite-only session). Left null/False rather than guessed.",
+    "Booking-URL heuristic for the off-site-link case (no member-portal buttons) keys off nearby text containing register/book/sign up/rsvp/'please visit'/'conference website'. Verified correct on 3 different off-site link shapes (RCPsych calendar, Eventscase, Teams meeting) plus the one page with neither buttons nor a matching link (correctly returns None). Could still miss an register-link phrasing we haven't seen if a future event uses different wording -- falls back safely to the FPH page URL, never silently wrong data.",
+    "'Building Connectivity...Specialty Registrars Event' is invite-only (no public booking route) but not an application/CV-submission scheme, so I kept it per the PLAYBOOK's skip-rule scope (that rule targets job-track programmes, not single dated invite-only sessions) -- flagging in case the team prefers to exclude invite-only events from this source.",
+    "Listing pagination: pageIndex=1..2 currently return cards, pageIndex=3 302-redirects with 0 cards (confirmed) -- override loop caps at 6 pages as a safety margin, will naturally stop early via the 0-new-cards check if the site adds/removes pages.",
+    "Did not find event_type differentiation (conference/course/workshop) published anywhere as a badge/category on this source -- left event_type unset so the shared title-heuristic + 'conference' default in llm_agent._merge_shell_and_detail handles it (worked correctly on the sample: 'Webinar' titles vs 'Conference 2026' titles)."
+  ]
+}

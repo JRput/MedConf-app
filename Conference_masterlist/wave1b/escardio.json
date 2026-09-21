@@ -1,0 +1,49 @@
+{
+  "source_id": 36,
+  "slug": "escardio",
+  "class_name": "ESCExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/escardio.py",
+  "source_row": {
+    "source_name": "ESC Congress Calendar",
+    "society": "European Society of Cardiology",
+    "base_url": "https://www.escardio.org/events/congresses/",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Listing (/events/congresses/) is one static page with every congress (past AND future) as .event-card blocks - no ?page= pagination; the extractor filters to upcoming itself by parsing each card's date range and dropping /past-congresses/ URLs plus any card whose end date has passed (the plain /esc-congress/ URL keeps its finished-edition content until ESC publishes the next one, so date filtering matters more than URL shape). Detail pages carry a rich set of <meta name=\"esc-*\"> tags (esc-title, esc-description, esc-start-time/esc-end-time, esc-locations, esc-communities, esc-topics) giving deterministic title/dates/city/country/society/specialty with no prose parsing, plus a Onsite/Hybrid/Virtual badge for format. Pricing lives on a same-slug /registration/ sub-page as a genuinely structured pricing-table-content table (head-row=timeframe columns, group-row=category, fee-row=line item x N prices) - fetched per event. Venue building name (not on the main or registration page) is best-effort from a /helpful-information/ sub-page under a 'The Congress Venue' heading; far-out congresses haven't published one yet, which correctly leaves venue_name null for later self-heal."
+  },
+  "registry_comment": "European Society of Cardiology congress calendar - meta-tag driven detail pages + structured registration fee tables, EUR pricing.",
+  "probe_results": {
+    "shells": 9,
+    "shells_forced_fallback": 9,
+    "details_tested": 9,
+    "with_date": 9,
+    "with_pricing": 9,
+    "with_venue": 3,
+    "with_description": 9,
+    "with_specialty": 9
+  },
+  "test_urls": [
+    "https://www.escardio.org/events/congresses/eacvi-congress/",
+    "https://www.escardio.org/events/congresses/ehra-congress/",
+    "https://www.escardio.org/events/congresses/heart-failure/"
+  ],
+  "spot_check": [
+    {"url": "https://www.escardio.org/events/congresses/eacvi-congress/", "field": "start_date/end_date", "site_says": "esc-start-time meta 2026-12-03 08:00 / esc-end-time meta 2026-12-05 18:00", "extractor_says": "2026-12-03 / 2026-12-05", "match": true},
+    {"url": "https://www.escardio.org/events/congresses/eacvi-congress/registration/", "field": "pricing_tiers (Non Members Standard + EACVI Members)", "site_says": "€920/€1,110/€1,300 (Non Members) and €785/€970/€1,170 (EACVI Members)", "extractor_says": "same 6 values, currency EUR", "match": true},
+    {"url": "https://www.escardio.org/events/congresses/ehra-congress/", "field": "event_format", "site_says": "badge reads 'Congress' / 'Hybrid'", "extractor_says": "hybrid", "match": true}
+  ],
+  "concerns": [
+    "Only the /events/congresses/ listing is covered (9 upcoming shells matches recon's expectation of ESC Congress + Heart Failure Congress among ~11 congresses). /events/specialised-events/ and /education/live-events/courses/ (mentioned in recon notes) use a different page layout with no .event-card markup - not onboarded here; would need a second list_shells_override pass or a separate extractor if the team wants that volume.",
+    "'ESC Congress 2026' (the main flagship, world's foremost cardiology meeting) is currently past (28-31 Aug 2026, before today 2026-09-21) and correctly excluded by the date filter; ESC has not yet published a dedicated URL for the 2027 Milan edition mentioned in the 2026 page's closing copy, so it can't be captured until that page exists. Next nightly scrape will pick it up once ESC publishes it.",
+    "is_flagship was NOT set on any row - none of the title-heuristic patterns (annual conference/world congress/etc.) match ESC's naming ('EACVI 2026', 'Heart Failure 2027'...). Recommend the team decide explicitly: at minimum 'ESC Congress' itself should probably be flagged is_flagship=True once its 2027 page exists (33,800+ attendees, described on-site as the world's foremost cardiology meeting); the other 8 are large international society congresses too but I didn't want to unilaterally flag all of them without a product decision, unlike ESMO's extractor which flags ~13 events by an explicit list.",
+    "venue_name is only populated for 3/9 events (Digital & AI Summit, EACVI, EHRA) because the address text on /helpful-information/ runs the venue name straight into the street address with no punctuation boundary; the extractor cuts at the first standalone digit and gives up (returns null) if that leaves an implausibly long string, rather than guessing. This is a genuine gap for events far enough out that ESC hasn't finalised a venue - correctly null, not a bug - but for events that DO have a published venue, the cut is occasionally slightly wrong (e.g. 'Allianz MiCO - Gate' drops the trailing '4', 'Congress Center Basel Messepl' drops the closing period/number). Acceptable given the self-healing null semantics, but a human eyeball on real venue values before going live would be prudent.",
+    "region field carries ESC's own full ISO country name text (e.g. 'United Kingdom of Great Britain and Northern Ireland') rather than a short form - this is the literal esc-locations meta value, not fabricated, but may want normalising in the frontend/DB layer if other sources use short country/region names.",
+    "cpd_points/cpd_accredited are null for all 9 current shells - ESC only publishes CME-credit counts after EACCME accreditation is confirmed, which for these congresses (all 2026-11 through 2027-06) hasn't happened yet. Verified the regex works correctly against the already-finished ESC Congress 2026 page (which reports '29 European CME Credits') - this will self-heal via null-triggered re-fetch once each congress is accredited.",
+    "No LLM call used anywhere in this extractor - esc-description meta and the About-section paragraph fallback proved reliably present and well-formed on every tested page, so description is fully deterministic; specialty likewise comes from the esc-topics meta with specialty_classifier as the backstop only when that meta is absent (seen once, on the flagship ESC Congress page itself)."
+  ]
+}

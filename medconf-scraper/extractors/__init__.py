@@ -46,6 +46,15 @@ from .rcpath import RCPathExtractor
 from .rcpsych import RCPsychExtractor
 from .rcsed import RCSEdExtractor
 from .resus import ResusExtractor
+from .rcpe import RCPEExtractor
+from .rcpch import RCPCHExtractor
+from .rcophth import RCOphthExtractor
+from .fph import FPHExtractor
+from .fom import FOMExtractor
+from .fpm import FPMExtractor
+from .escardio import ESCExtractor
+from .acpgbi import ACPGBIExtractor
+from .asgbi import ASGBIExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -79,6 +88,15 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     27: RCPsychExtractor,               # Royal College of Psychiatrists — one-page calendar (mixed, httpx UA workaround for CloudFront WAF)
     28: RCSEdExtractor,                 # RCSEd — services.rcsed.ac.uk catalogue ?page=1..5 (mixed)
     29: ResusExtractor,                 # Resuscitation Council UK — course hub + availability tables (course/sessions, no public fees)
+    30: RCPEExtractor,                      # RCPE — Drupal /events listing, page_query pagination, deterministic icon-chip dates/venue/CPD + #fees tab pricing (bypasses pricing_tables.py's headin
+    31: RCPCHExtractor,                     # RCPCH (Royal College of Paediatrics and Child Health) — events + courses/webinars, paginated static HTML, cs-/ev- shared field shape
+    32: RCOphthExtractor,                   # RCOphth (32) — WordPress listing override (generic walker finds 0 cards) + plain WordPress detail pages, no anti-bot
+    33: FPHExtractor,                       # FPH: custom CMS, page-query pagination (?pageSize=12&pageIndex=N), no fees ever published on-site (booking via members-portal login or off-site organi
+    34: FOMExtractor,                       # FOM (Faculty of Occupational Medicine) — tiny 1-2 event listing, both externally-run, no pricing/venue on-site
+    35: FPMExtractor,                       # FPM (Faculty of Pharmaceutical Medicine) events -- WordPress listing at /events/, mixed conference/course/workshop catalogue, 9 upcoming events at onb
+    36: ESCExtractor,                       # European Society of Cardiology congress calendar - meta-tag driven detail pages + structured registration fee tables, EUR pricing.
+    37: ACPGBIExtractor,                    # Coloproctology events aggregator calendar (ACPGBI); year-paginated (2026, 2027, ...), free-text fees/CPD (no markup tables), title-filtered to drop th
+    38: ASGBIExtractor,                     # ASGBI — Webflow static cards: International Surgical Congress + EGS Symposium listings (fees behind JS portal, not scraped)
 }
 
 

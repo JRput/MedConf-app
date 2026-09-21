@@ -1,0 +1,86 @@
+{
+  "source_id": 31,
+  "slug": "rcpch",
+  "class_name": "RCPCHExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/rcpch.py",
+  "source_row": {
+    "source_name": "RCPCH Events & Courses",
+    "society": "Royal College of Paediatrics and Child Health",
+    "base_url": "https://www.rcpch.ac.uk/events",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.rcpch.ac.uk/events?page={n}",
+    "max_pages_hint": 4,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Listing at /events (301s to /news-events/events), paginated ?page=0..3 (0-indexed, page 0 = no query param), ~34 upcoming cards mixing 'Event' badge (news-events/events/<slug>) and 'Course' badge (education-careers/courses/rcpch-course|rcpch-webinar/<slug>). Detail pages share one DOM shape gated by a cs-/ev- field prefix: Views EVA date/time blocks with <time datetime> tags (1 = single-day, 2 = start/end), a Drupal address field for location (absent field = online-only or unpublished venue, not free text), a fee field rendered as either <ul><li>Label - £NNN</li></ul> or a <p> with <br>-separated 'Label: £NNN' lines under a 'Section:' header line, or free-form 'this is a free event' prose, or absent entirely (no fee published, must stay []). .field--name-field-sh-body is the one clean content div for description/CPD text (no nav leakage). .tags a[href^='/topic/'] gives a deterministic specialty backstop, more reliable than the shared keyword classifier for this source."
+  },
+  "registry_comment": "RCPCH (Royal College of Paediatrics and Child Health) — events + courses/webinars, paginated static HTML, cs-/ev- shared field shape",
+  "probe_results": {
+    "shells": 34,
+    "shells_forced_fallback": 34,
+    "details_tested": 8,
+    "with_date": 8,
+    "with_pricing": 6,
+    "with_venue": 3,
+    "with_description": 8,
+    "with_specialty": 8
+  },
+  "test_urls": [
+    "https://www.rcpch.ac.uk/education-careers/courses/rcpch-course/child-protection-study-day-2026-scotland",
+    "https://www.rcpch.ac.uk/education-careers/courses/rcpch-course/effective-educational-supervision-liverpool-october",
+    "https://www.rcpch.ac.uk/news-events/events/rcpchnihr-paediatrics-child-health-technology-conference"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.rcpch.ac.uk/education-careers/courses/rcpch-course/child-protection-study-day-2026-scotland",
+      "field": "pricing_tiers",
+      "site_says": "Members: Consultant paediatricians - £120; Members: SAS doctors, trainees, staff grades and allied health professionals - £95; Non-members - £145",
+      "extractor_says": "3 tiers: 120.0 / 95.0 / 145.0 with matching labels",
+      "match": true
+    },
+    {
+      "url": "https://www.rcpch.ac.uk/education-careers/courses/rcpch-course/child-protection-study-day-2026-scotland",
+      "field": "venue_name / city / region",
+      "site_says": "Stirling Court Hotel, University Of Stirling Campus, Stirling, FK9 4LA",
+      "extractor_says": "venue_name='Stirling Court Hotel University Of Stirling Campus', city='Stirling', region='Scotland'",
+      "match": true
+    },
+    {
+      "url": "https://www.rcpch.ac.uk/education-careers/courses/rcpch-course/effective-educational-supervision-liverpool-october",
+      "field": "pricing_tiers (br-separated <p> layout)",
+      "site_says": "Members: Consultant - £220, Trainees/SAS/Nurse & AHPs - £165; Non-Members: Trainees/SAS/Nurses & AHPs - £165, All other non-members - £280",
+      "extractor_says": "4 tiers: 220.0 / 165.0 / 165.0 / 280.0 with matching section-grouped labels",
+      "match": true
+    },
+    {
+      "url": "https://www.rcpch.ac.uk/education-careers/courses/rcpch-course/effective-educational-supervision-liverpool-october",
+      "field": "venue_name / city / region / start_date",
+      "site_says": "Alder Hey Children's Hospital, Eaton Road, Liverpool, L12 2AP; date 12 October 2026",
+      "extractor_says": "venue_name=\"Alder Hey Children's Hospital Eaton Road\", city='Liverpool', region='North West England', start_date='2026-10-12'",
+      "match": true
+    },
+    {
+      "url": "https://www.rcpch.ac.uk/news-events/events/rcpchnihr-paediatrics-child-health-technology-conference",
+      "field": "pricing_tiers (no fee field present)",
+      "site_says": "No fee/booking-cost field on the page at all (external NIHR registration link only)",
+      "extractor_says": "pricing_tiers = [] (not fabricated as free)",
+      "match": true
+    },
+    {
+      "url": "https://www.rcpch.ac.uk/news-events/events/rcpchnihr-paediatrics-child-health-technology-conference",
+      "field": "start_date / end_date / venue_name / city / region",
+      "site_says": "2-3 December 2026, National Centre for Child Health Technology, Sheffield Children's NHS Foundation Trust, Sheffield, S9 3TU",
+      "extractor_says": "start_date='2026-12-02', end_date='2026-12-03', venue_name=\"National Centre for Child Health Technology Sheffield Children's NHS Foundation Trust\", city='Sheffield', region='Yorkshire and the Humber'",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "RCPCH never publishes a numeric CPD-points count on any of the ~10 detail pages probed (unlike RCP/RCEM). cpd_points stays None for every row; cpd_accredited is only True when the body-box content itself mentions 'CPD' — this will legitimately be False for most rows. Not a bug, just a source characteristic.",
+    "pricing_tiers is [] for a real subset of rows (e.g. the flagship RCPCH/NIHR Technology Conference, TREES, some webinars) because the source genuinely publishes no fee field on those pages, not because extraction failed — confirmed by hand for the Technology Conference.",
+    "event_type is intentionally left unset by the extractor for most rows; shell['category'] is set to 'course'/'workshop' only for Course-badged / webinar-URL cards, and Event-badged cards are left for the shared title-keyword heuristic + 'conference' default (verified this correctly turns '... Training Day' into workshop and '... Conference' into conference without a source-specific rule).",
+    "Some detail pages route booking through third-party platforms (eventsforce.net, forms.office.com, forms.cloud.microsoft, events.teams.microsoft.com, hrc-children.nihr.ac.uk) rather than staying on rcpch.ac.uk — booking_url correctly follows the on-page link, but these are out of scope to crawl further for pricing/venue (per the multipage-detail playbook, subpage-walking only applies to same-domain marketing subsites, not third-party registration forms).",
+    "Did not find any genuine multi-session 'one course, many dates' listing on RCPCH — recurring courses (Statement and report writing, Effective Educational Supervision) each publish a SEPARATE listing card + detail URL per dated run, so this extractor deliberately does NOT use the sessions[]/course_sessions pattern. If a future RCPCH offering does bundle multiple dates into one detail page, this extractor will need updating."
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "source_id": 38,
+  "slug": "asgbi",
+  "class_name": "ASGBIExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/asgbi.py",
+  "source_row": {
+    "source_name": "ASGBI",
+    "society": "Association of Surgeons of Great Britain and Ireland (ASGBI)",
+    "base_url": "https://www.asgbi.org.uk",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Two static Webflow listing pages carry the real content server-side: /event-type/asgbi-congress (flagship ASGBI International Surgical Congress) and /event-type/egs-symposium (Emergency General Surgery Symposium, a real dated series recon didn't surface). Cards are in .grid-of-2 .w-dyn-item .event-wrapper (ignore the several w-condition-invisible CMS-collection tables also present on the page). h2.name-2 = title, .first-date/.second-date = date range, two plain .details-text divs in .flex-down = [venue, city]. Registration links go to events.asgbi.org.uk, a JS-only Angular SPA portal with nothing further to scrape, so all fields are captured in list_shells_override() and extract_detail() just reads them back off the shell. A future edition whose registration isn't live yet (seen on the 2028 Congress) has its Learn More button wrapped in w-condition-invisible with a generic homepage href instead of a real module URL — kept as a valid event with that fallback link."
+  },
+  "registry_comment": "38: ASGBIExtractor,                # Association of Surgeons of Great Britain and Ireland (Congress + EGS Symposium listings)",
+  "probe_results": {
+    "shells": 4,
+    "shells_forced_fallback": 4,
+    "details_tested": 4,
+    "with_date": 4,
+    "with_pricing": 0,
+    "with_venue": 3,
+    "with_description": 4,
+    "with_specialty": 4
+  },
+  "test_urls": [
+    "https://events.asgbi.org.uk/asgbievents/modules/263011/html",
+    "https://events.asgbi.org.uk",
+    "https://events.asgbi.org.uk/asgbievents/modules/175324/html"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.asgbi.org.uk/event-type/asgbi-congress",
+      "field": "ASGBI International Surgical Congress 2027 dates/venue",
+      "site_says": "21-23 May 2027, Manchester Central, Manchester",
+      "extractor_says": "start_date=2027-05-21, end_date=2027-05-23, venue_name='Manchester Central', city='Manchester'",
+      "match": true
+    },
+    {
+      "url": "https://www.asgbi.org.uk/event-type/asgbi-congress",
+      "field": "ASGBI International Surgical Congress 2028 dates/venue + hidden registration",
+      "site_says": "10-12 May 2028, ICC Wales, Newport; Learn More button is Webflow-hidden (registration not live)",
+      "extractor_says": "start_date=2028-05-10, end_date=2028-05-12, venue_name='ICC Wales', city='Newport', registration_live=False, organiser_url falls back to https://www.asgbi.org.uk",
+      "match": true
+    },
+    {
+      "url": "https://www.asgbi.org.uk/event-type/egs-symposium",
+      "field": "EGS Symposium 2026 dates/venue",
+      "site_says": "12 Nov 2026, Royal College of Surgeons of England, London",
+      "extractor_says": "start_date=2026-11-12, end_date=2026-11-12, venue_name='Royal College of Surgeons of England', city='London'",
+      "match": true
+    },
+    {
+      "url": "https://www.asgbi.org.uk/event-type/egs-symposium",
+      "field": "EGS Symposium 2027 dates/venue (venue TBC)",
+      "site_says": "18 Nov 2027, venue 'tbc', Leeds",
+      "extractor_says": "start_date=2027-11-18, end_date=2027-11-18, venue_name=None, city='Leeds'",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "No fee data anywhere on either listing page or the SPA portal homepage — pricing_tiers is always []. The Angular portal (events.asgbi.org.uk) presumably has real registration fees behind JS rendering, but per the brief's recon note the portal is JS-required/noindex/empty-body and treated only as the outbound registration URL, so fees are out of scope for this extractor.",
+    "cpd_points/cpd_accredited always null — not published on either listing page; would need the JS portal to confirm.",
+    "abstract_open/abstract_deadline left False/None even though the Congress 'About' block says 'Abstracts are invited for the 2027 Congress from October 2026' — that sentence is tied to one specific edition's about-copy (same rich-text block is reused for every future Congress year), so applying it generically to all editions (e.g. the 2028 Congress) would misattribute an abstract-open status that isn't actually confirmed for that edition. Left null rather than guess.",
+    "The 2028 Congress edition's registration button is Webflow-hidden (w-condition-invisible) with a generic https://events.asgbi.org.uk href instead of a real per-event module URL. Kept the row (per brief: cope with editions where registration isn't live) with organiser_url falling back to the ASGBI homepage; booking_url/source_url on that row is the generic portal homepage until ASGBI publishes the real module link, which is a self-healing situation (next scrape picks up the real link when it appears since it's a live page fetch, not a one-time synth).",
+    "EGS Symposium 2026 and 2027 currently share the SAME booking_url (both route to portal module 175324) — this is what the site publishes today (only one active portal module for both future EGS editions), not an extractor bug. If ASGBI ever gives them distinct URLs this resolves itself; until then the dedupe-by-source_url key still works because the two rows differ in conference_name/start_date used elsewhere in the pipeline, but flagging in case scraper.py's upsert assumes unique source_url per row (it should, since 175324 module content presumably differs by which year is 'next').",
+    "Region inference table is a small local lookup covering only the 4 cities actually seen (Manchester, Newport, London, Leeds) — not the full shared RSM-style UK region table, since this source only needed those.",
+    "Did not test --force-fallback's Playwright-navigate-to-portal path for extract_detail beyond confirming it doesn't throw; the portal is a JS SPA so b.navigate() to it takes a few seconds to settle, but extract_detail never reads `page` content so this has no functional effect either way."
+  ]
+}
