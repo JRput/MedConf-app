@@ -1,0 +1,71 @@
+{
+  "source_id": 34,
+  "source_name": "FOM Conferences & Events",
+  "society": "FOM",
+  "run_at": "2026-09-21T22:00:34.131686+00:00",
+  "events_scraped": 1,
+  "events_with_gaps_at_first": 1,
+  "events_fixed": 1,
+  "events_still_incomplete": 1,
+  "patches_applied": [
+    {
+      "conference_id": 1777,
+      "conference_name": "MRO Training by MROs, for MROs",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1777,
+      "conference_name": "MRO Training by MROs, for MROs",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fom.ac.uk/revalidation-cpd-2",
+              "https://www.fom.ac.uk/revalidation-cpd-2/introduction-to-revalidation",
+              "https://www.fom.ac.uk/revalidation-cpd-2/preparing-for-revalidation",
+              "https://www.fom.ac.uk/revalidation-cpd-2/prep-foms-revalidation-e-portfolio",
+              "https://www.fom.ac.uk/revalidation-cpd-2/cpd",
+              "https://www.fom.ac.uk/revalidation-cpd-2/clinical-governance",
+              "https://www.fom.ac.uk/revalidation-cpd-2/frequently-asked-questions-faqs",
+              "https://www.fom.ac.uk/revalidation-cpd-2/resources",
+              "https://www.fom.ac.uk/media-events/cpd-course-approval",
+              "https://www.fom.ac.uk/homepage/feed"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 307239
+          },
+          "llm_reasoning": "The provided text consists solely of CSS and JavaScript code (e.g., slider initialization, emoji styles, WP block presets). There is no visible event overview, programme, speakers, or any registration\u2011fee information such as member/non\u2011member rates, day passes, or early\u2011bird pricing.",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.fom.ac.uk/revalidation-cpd-2",
+            "skipped_unrelated_zero_tokens: https://www.fom.ac.uk/revalidation-cpd-2/introduction-to-revalidation",
+            "skipped_unrelated_zero_tokens: https://www.fom.ac.uk/revalidation-cpd-2/preparing-for-revalidation",
+            "skipped_unrelated_zero_tokens: https://www.fom.ac.uk/revalidation-cpd-2/prep-foms-revalidation-e-portfolio",
+            "skipped_unrelated_zero_tokens: https://www.fom.ac.uk/revalidation-cpd-2/cpd",
+            "skipped_unrelated_zero_tokens: https://www.fom.ac.uk/revalidation-cpd-2/clinical-governance",
+            "skipped_unrelated_zero_tokens: https://www.fom.ac.uk/revalidation-cpd-2/frequently-asked-questions-faqs",
+            "skipped_unrelated_zero_tokens: https://www.fom.ac.uk/revalidation-cpd-2/resources",
+            "skipped_unrelated_zero_tokens: https://www.fom.ac.uk/media-events/cpd-course-approval",
+            "skipped_unrelated_zero_tokens: https://www.fom.ac.uk/homepage/feed"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 1,
+  "explorer_successes": 0,
+  "duration_sec": 22.9
+}

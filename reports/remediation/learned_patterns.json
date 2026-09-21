@@ -120,6 +120,30 @@
       "promoted": false,
       "subpage_path": null
     },
+    "www.rcpch.ac.uk|abstract_status|no_abstract_anywhere": {
+      "domain": "www.rcpch.ac.uk",
+      "field": "abstract_status",
+      "hits": 1,
+      "method": "no_abstract_anywhere",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.rcpe.ac.uk|abstract_status|llm_no_programme": {
+      "domain": "www.rcpe.ac.uk",
+      "field": "abstract_status",
+      "hits": 1,
+      "method": "llm_no_programme",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.rcpe.ac.uk|abstract_status|llm_open": {
+      "domain": "www.rcpe.ac.uk",
+      "field": "abstract_status",
+      "hits": 1,
+      "method": "llm_open",
+      "promoted": false,
+      "subpage_path": null
+    },
     "www.rcpsych.ac.uk|abstract_status|no_abstract_anywhere": {
       "domain": "www.rcpsych.ac.uk",
       "field": "abstract_status",

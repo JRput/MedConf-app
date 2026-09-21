@@ -1,0 +1,77 @@
+{
+  "source_id": 32,
+  "source_name": "RCOphth Courses & Events",
+  "society": "RCOphth",
+  "run_at": "2026-09-21T21:24:11.058213+00:00",
+  "events_scraped": 12,
+  "events_with_gaps_at_first": 4,
+  "events_fixed": 4,
+  "events_still_incomplete": 1,
+  "patches_applied": [
+    {
+      "conference_id": 1779,
+      "conference_name": "Expanding medical retina capacity through community ophthalm",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1808,
+      "conference_name": "Back to Basics \u2013 Byte sized topics for all",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1842,
+      "conference_name": "Specialist Registration via the Portfolio pathway",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1851,
+      "conference_name": "RCOphth Winter meeting 7 & 8 December 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1851,
+      "conference_name": "RCOphth Winter meeting 7 & 8 December 2026",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcophth.ac.uk/get-involved/approval-of-cpd-points/",
+              "https://www.rcophth.ac.uk/training-careers/courses-events-calendar/annual-congress/",
+              "https://www.rcophth.ac.uk/news-insights/latest-news-blogs/"
+            ],
+            "images_ocred": 5,
+            "total_text_chars": 511659
+          },
+          "llm_reasoning": "The provided text consists mainly of the event title 'RCOphth Winter meeting 7 & 8 December 2026' followed by extensive CSS and font-face definitions. There is no visible content such as tabs (Overview, Programme, Speakers, etc.), sections describing the event, or any mention of registration fees, m",
+          "notes": [
+            "llm_event_match https://www.rcophth.ac.uk/get-involved/approval-of-cpd-points/: matched=['rcophth'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 1,
+  "explorer_successes": 0,
+  "duration_sec": 46.2
+}

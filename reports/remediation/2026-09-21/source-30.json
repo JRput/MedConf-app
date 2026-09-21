@@ -1,0 +1,511 @@
+{
+  "source_id": 30,
+  "source_name": "RCPE Events",
+  "society": "RCPE",
+  "run_at": "2026-09-21T21:07:00.338212+00:00",
+  "events_scraped": 33,
+  "events_with_gaps_at_first": 32,
+  "events_fixed": 29,
+  "events_still_incomplete": 15,
+  "patches_applied": [
+    {
+      "conference_id": 1772,
+      "conference_name": "Infectious Diseases",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1784,
+      "conference_name": "Sept 2026 \u2013 Jan 2027 Evening Medical Updates",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1791,
+      "conference_name": "Fits and Funny Turns",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1798,
+      "conference_name": "Scottish Cardiac Society 35th Annual General Meeting 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:llm_no_programme"
+    },
+    {
+      "conference_id": 1811,
+      "conference_name": "Clinical Pharmacology",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1823,
+      "conference_name": "Modern Medicine: Parasites",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1828,
+      "conference_name": "Cardiology",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1837,
+      "conference_name": "Gastroenterology & Hepatology",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1839,
+      "conference_name": "Professionalism in Medicine Series: Creating Value Through P",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1843,
+      "conference_name": "Northeast England & Yorkshire 2026",
+      "field": "cpd_points",
+      "value_before": "None",
+      "value_after": "5",
+      "method": "heuristic_regex"
+    },
+    {
+      "conference_id": 1848,
+      "conference_name": "Frailty",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1854,
+      "conference_name": "Acute Medicine: Sharper Skills, Smarter Systems - St Andrew'",
+      "field": "cpd_points",
+      "value_before": "None",
+      "value_after": "12",
+      "method": "heuristic_regex"
+    },
+    {
+      "conference_id": 1854,
+      "conference_name": "Acute Medicine: Sharper Skills, Smarter Systems - St Andrew'",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1859,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Oncology",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1859,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1863,
+      "conference_name": "Joint Pain and Swelling",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1873,
+      "conference_name": "Confusion",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1874,
+      "conference_name": "Public Health: Health and Obesity",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1877,
+      "conference_name": "Red Results: When the Full Blood Count is Off",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1880,
+      "conference_name": "Feb 2027 \u2013 June 2027 Evening Medical Updates",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1895,
+      "conference_name": "Skin Lesions Across the Specialties",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1883,
+      "conference_name": "Medical Trainees Conference 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': True, 'abstract_deadline_note': 'see event page for details'}",
+      "method": "explorer:llm_open"
+    },
+    {
+      "conference_id": 1889,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Oncology",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1889,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1891,
+      "conference_name": "Weight Loss",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1894,
+      "conference_name": "Modern Medicine: AI",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Oncology",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1894,
+      "conference_name": "Modern Medicine: AI",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1897,
+      "conference_name": "Palpitations",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1899,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Oncology",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1899,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1901,
+      "conference_name": "Modern Medicine: Dementia",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1903,
+      "conference_name": "Rehabilitation Medicine",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1905,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Oncology",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1905,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1907,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Oncology",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1907,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1805,
+      "conference_name": "Psychiatry for Medics",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1798,
+      "conference_name": "Scottish Cardiac Society 35th Annual General Meeting 2026",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1817,
+      "conference_name": "Scottish Thoracic Society National Trainee Symposium 2026",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1823,
+      "conference_name": "Modern Medicine: Parasites",
+      "fields": [
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpe.ac.uk/education/msc-programmes",
+              "https://www.rcpe.ac.uk/education/continuing-professional-development-cpd",
+              "https://www.rcpe.ac.uk/college/keep-date-latest-educational-events",
+              "https://www.rcpe.ac.uk/college/deputy-dean-education-cpd",
+              "https://www.rcpe.ac.uk/news/college-statement-medical-training-prioritisation-specialty-training-programmes-regulations",
+              "https://www.eventbrite.co.uk/e/modern-medicine-parasites-tickets-1995981590668"
+            ],
+            "images_ocred": 2,
+            "total_text_chars": 119194
+          },
+          "llm_reasoning": "The event overview states: 'Free for students (student card required), under 18s (ID card required) and RCPE Fellows or Members. Please email library@rcpe.ac.uk if you are a student, under 18, RCPE Fellow or Member and would like to be added to the attendee list.' No other fee information (e.g., non",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/education/msc-programmes",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/education/continuing-professional-development-cpd",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/college/keep-date-latest-educational-events",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/college/deputy-dean-education-cpd",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/news/college-statement-medical-training-prioritisation-specialty-training-programmes-regulations",
+            "external_followed: https://www.eventbrite.co.uk/e/modern-medicine-parasites-tickets-1995981590668 (link text: 'Book now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1830,
+      "conference_name": "Precision Care for Dementia: An Update for Physicians",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1839,
+      "conference_name": "Professionalism in Medicine Series: Creating Value Through P",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1859,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1874,
+      "conference_name": "Public Health: Health and Obesity",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1883,
+      "conference_name": "Medical Trainees Conference 2027",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1889,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1894,
+      "conference_name": "Modern Medicine: AI",
+      "fields": [
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpe.ac.uk/education/msc-programmes",
+              "https://www.rcpe.ac.uk/education/continuing-professional-development-cpd",
+              "https://www.rcpe.ac.uk/college/keep-date-latest-educational-events",
+              "https://www.rcpe.ac.uk/college/deputy-dean-education-cpd",
+              "https://www.rcpe.ac.uk/news/college-statement-medical-training-prioritisation-specialty-training-programmes-regulations",
+              "https://www.eventbrite.co.uk/e/modern-medicine-ai-tickets-1999198563721"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 117582
+          },
+          "llm_reasoning": "Found in the Overview section of the event page: 'Free for students (student card required), under 18s (ID card required) and RCPE Fellows or Members. Please email library@rcpe.ac.uk if you are a student, under 18, RCPE Fellow or Member and would like to be added to the attendee list.' No other fee ",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/education/msc-programmes",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/education/continuing-professional-development-cpd",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/college/keep-date-latest-educational-events",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/college/deputy-dean-education-cpd",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/news/college-statement-medical-training-prioritisation-specialty-training-programmes-regulations",
+            "external_followed: https://www.eventbrite.co.uk/e/modern-medicine-ai-tickets-1999198563721 (link text: 'Book now')",
+            "llm_event_match https://www.eventbrite.co.uk/e/modern-medicine-ai-tickets-1999198563721: matched=['modern'] verdict='' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1899,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1901,
+      "conference_name": "Modern Medicine: Dementia",
+      "fields": [
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpe.ac.uk/education/msc-programmes",
+              "https://www.rcpe.ac.uk/education/continuing-professional-development-cpd",
+              "https://www.rcpe.ac.uk/college/keep-date-latest-educational-events",
+              "https://www.rcpe.ac.uk/college/deputy-dean-education-cpd",
+              "https://www.rcpe.ac.uk/news/college-statement-medical-training-prioritisation-specialty-training-programmes-regulations",
+              "https://www.eventbrite.co.uk/e/modern-medicine-dementia-tickets-1999198751282"
+            ],
+            "images_ocred": 2,
+            "total_text_chars": 117258
+          },
+          "llm_reasoning": "The page includes an Overview section stating the event is 'Free for students (student card required), under 18s (ID card required) and RCPE Fellows or Members.' It also prompts Fellows/Members to 'Sign in to get member prices' and provides a 'Book now' button, but no specific pricing tiers, member ",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/education/msc-programmes",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/education/continuing-professional-development-cpd",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/college/keep-date-latest-educational-events",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/college/deputy-dean-education-cpd",
+            "skipped_unrelated_zero_tokens: https://www.rcpe.ac.uk/news/college-statement-medical-training-prioritisation-specialty-training-programmes-regulations",
+            "external_followed: https://www.eventbrite.co.uk/e/modern-medicine-dementia-tickets-1999198751282 (link text: 'Book now')"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1905,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1907,
+      "conference_name": "MRCP(UK) Diploma Ceremony",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    }
+  ],
+  "explorer_runs": 5,
+  "explorer_successes": 2,
+  "duration_sec": 83.1
+}
