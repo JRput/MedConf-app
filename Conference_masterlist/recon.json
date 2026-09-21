@@ -1,6 +1,6 @@
 {
- "batch": "top-20",
- "generated": "2026-08-15",
+ "batch": "1+2",
+ "generated": "2026-09-21",
  "records": [
   {
    "domain": "rcpe.ac.uk",
@@ -348,6 +348,2896 @@
     "Critical Care Ultrasound Courses"
    ],
    "notes": "Drupal site fully behind an aggressive Cloudflare interactive challenge: curl, WebFetch and even headless Chromium all get 'Just a moment' 403; only HEADED Chromium (headless=False, --disable-blink-features=AutomationControlled, ~10-30s wait) passed, so GitHub Actions scraping will need a stealth/solver approach. Real listing is /events (NOT /eventslisting, which renders nav only) \u2014 server-rendered dated cards (e.g. '17 August 2026 | 8:00am-17:00pm'), 9 events on page 0 with ?page=1 pager, filters for Date/Location/Category (many items flagged 'External Event'), detail pages at /events/[slug]. Saw FFICM/FCICM exam-prep courses and ultrasound (FAMUS/FUSIC, echo) events; no ICM Annual Meeting visible on page 1."
+  },
+  {
+   "domain": "baets.org.uk",
+   "status": "resolved",
+   "platform": "tribe_events",
+   "listing_url": "https://www.baets.org.uk/events/",
+   "api_url": "https://www.baets.org.uk/wp-json/tribe/events/v1/events",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "volume_estimate": 2,
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "BAETS 2026 Annual Scientific Meeting"
+   ],
+   "notes": "Tribe Events (WordPress Events Calendar plugin v6.17.5) returns clean JSON API. Two upcoming conferences: BAETS 2026 Annual Scientific Meeting (2026-10-08) and International Association of Endocrine Surgeons 2026 Meeting (2026-11-06). Event details (dates, venue) displayed on event page; registration and pricing handled via external website links (e.g., sympomed.pl for BAETS meeting). No pagination needed (both events fit on single page).",
+   "batch": 2
+  },
+  {
+   "domain": "vascularsociety.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.vascularsociety.org.uk/events/",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "query_param",
+   "volume_estimate": 25,
+   "bot_protection": "none",
+   "expected_found": [
+    "Vascular Societies Annual Scientific Meeting"
+   ],
+   "notes": "Vascular Society events page at /events/ lists 20+ upcoming conferences and courses. Expected Annual Scientific Meeting confirmed at /annual-meeting/ (25 November 2026, Liverpool). Custom ASP.NET CMS (lmsitestarterduke). Event detail pages display full dates, venue, and registration info inline. Filters by category (Leadership, Training, Research, etc.) and region using query params (?type=, ?region=). No JavaScript required for listing or detail pages.",
+   "batch": 2
+  },
+  {
+   "domain": "augis.org",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": false,
+   "listing_url": "https://www.augis.org/Events",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "load_more",
+   "volume_estimate": 1,
+   "bot_protection": "none",
+   "api_url": "",
+   "expected_found": [
+    "AUGIS Annual Scientific Meeting"
+   ],
+   "notes": "DNN (DotNetNuke) ASP.NET platform. Single flagship conference: Annual Scientific Meeting Harrogate 2026 (23-25 Sep 2026) visible on /Events calendar and dedicated pages. Regional Meetings mentioned in nav but no dated events currently listed. Event details (venue, pricing, registration) on dedicated event detail pages. Calendar UI shows Sep 2026 - Feb 2027 range with navigation controls.",
+   "batch": 2
+  },
+  {
+   "domain": "associationofbreastsurgery.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "notes": "ABS Conference 2027 (10-11 May, Wales) + 10+ dated courses on static calendar. All event info appears on main page with linked subpages for fees/programme/sponsors. No API or bot protection.",
+   "listing_url": "https://associationofbreastsurgery.org.uk/courses-events/abs-courses-events-calendar/",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 15,
+   "pagination": "none",
+   "bot_protection": "none",
+   "api_url": "",
+   "expected_found": [
+    "ABS Conference"
+   ],
+   "batch": 2
+  },
+  {
+   "domain": "bapras.org.uk",
+   "status": "resolved",
+   "listing_url": "https://www.bapras.org.uk/professionals/training-and-education/courses-meetings-and-events",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "bot_protection": "none",
+   "volume_estimate": 20,
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "mixed",
+   "expected_found": [
+    "BAPRAS Congress"
+   ],
+   "notes": "Sitefinity CMS (ASP.NET; version 13.3.7644.0 SE), server-side rendered. Listing page at /professionals/training-and-education/courses-meetings-and-events has 3 paginated pages (~8 items/page). BAPRAS Congress 2026 (2\u20134 December 2026) confirmed on page 2. Event details (dates, venue) appear on individual event pages. No API endpoint detected; filterable interface with date and category filters.",
+   "batch": 2
+  },
+  {
+   "domain": "baus.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "listing_url": "https://www.baus.org.uk/professionals/events/",
+   "js_required": false,
+   "volume_estimate": 25,
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "event_type_mix": "mixed",
+   "expected_found": [
+    "BAUS Annual Scientific Meeting"
+   ],
+   "notes": "Listing page shows calendar-based event browser with month filtering. Events categorized by type (Conferences, Courses in Andrology, Laparoscopy, Laser Surgery, etc.). Detail pages embed structured date/time and location via add-to-calendar-button HTML components. 2026 Annual Meeting was June; future 2027 meeting not yet visible.",
+   "batch": 2
+  },
+  {
+   "domain": "baskonline.com",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": true,
+   "bot_protection": "cloudflare",
+   "listing_url": "",
+   "api_url": "",
+   "notes": "Cloudflare bot protection blocks all curl access. JavaScript rendering required to verify whether any dated event listings exist. Cannot determine platform or event details without bypassing the challenge.",
+   "parked_reason": "Cloudflare bot protection prevents verification of event listing existence and dates; curl-based discovery insufficient",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "pagination": "unknown",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "batch": 2
+  },
+  {
+   "domain": "boa.ac.uk",
+   "status": "resolved",
+   "platform": "unknown",
+   "listing_url": "https://www.boa.ac.uk/learning-and-events/ems-event-calendar.html",
+   "js_required": true,
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "unknown",
+   "volume_estimate": 10,
+   "bot_protection": "none",
+   "expected_found": [
+    "BOA Annual Congress"
+   ],
+   "notes": "Preside CMS with EventFolio event management. Event calendar listing requires JS; individual event detail pages are static HTML. Verified events include BOA Annual Congress 2026 (22-25 Sept) and BOA Ortho Update Course (9 Jan 2027).",
+   "batch": 2
+  },
+  {
+   "domain": "baaps.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://baaps.org.uk/about/events/",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "unknown",
+   "volume_estimate": 1,
+   "expected_found": [
+    "BAAPS Annual Conference"
+   ],
+   "notes": "Custom ASP.NET CMS (lmsitestarterduke). Event structure: static individual pages at /about/events/<id>/<slug>/. BAAPS & ESAPS 2026 confirmed 1-3 Oct 2026, London. Events appear to have dedicated detail pages with dates, venue, booking links on-page.",
+   "batch": 2
+  },
+  {
+   "domain": "sbns.org.uk",
+   "status": "resolved",
+   "platform": "unknown",
+   "listing_url": "https://www.sbns.org.uk/event-calendar.html",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "detail_topology": "tabs",
+   "pagination": "none",
+   "volume_estimate": 8,
+   "api_url": "",
+   "bot_protection": "none",
+   "expected_found": [
+    "SBNS 100",
+    "SBNS Meeting"
+   ],
+   "notes": "SBNS operates an events calendar with annual regional meetings (SBNS 100 in London Oct 2026, Glasgow 2027, Harrogate 2026, Bristol 2025). Events have detailed sub-pages for registration, venue, programme, and abstract submission. Platform uses Preside CMS with Eventfolio event system based on CSS paths.",
+   "batch": 2
+  },
+  {
+   "domain": "britishhipsociety.com",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://britishhipsociety.com/meetings/events",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "volume_estimate": 4,
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "bot_protection": "none",
+   "expected_found": [
+    "British Hip Society Annual Meeting"
+   ],
+   "notes": "DotNetNuke CMS with EasyDNNnews events module. Events listing page at /meetings/events displays 4 upcoming dated events (Sept 2026\u2013March 2027). Main flagship event is BHS Annual Meeting 2027 (10/03/2027\u201312/03/2027) at Manchester Central Convention Centre. Details (dates, location, abstracts info) appear on event detail pages. Some events link to external registrar sites (BOA, ORUK, Clockwork Medical).",
+   "batch": 2
+  },
+  {
+   "domain": "entuk.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.entuk.org/events/",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 3,
+   "pagination": "query_param",
+   "expected_found": [
+    "ENT UK National ENT Trauma Course 2026",
+    "SAS Conference 2026"
+   ],
+   "parked_reason": "",
+   "notes": "Live events directory with month-based calendar pagination. Upcoming events visible on listing page with dates/times (e.g., 30 Sep\u20132 Oct 2026). Filters by event type (BACO, ENT UK Events, Third Party) and specialty (Otology, Rhinology, Laryngology, etc.); detail pages exist per event.",
+   "batch": 2
+  },
+  {
+   "domain": "bofas.org.uk",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": false,
+   "listing_url": "https://www.bofas.org.uk/annual-meeting",
+   "api_url": "",
+   "pagination": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 1,
+   "expected_found": [
+    "BOFAS Annual Scientific Meeting"
+   ],
+   "bot_protection": "none",
+   "notes": "Single flagship annual congress (BOFAS 2026: 4\u20136 Nov 2026 at ICC Wales). Platform is DNN/DotNetNuke. All event details (dates, venue, guest speakers, registration) are on the main event page. Multi-year future dates also visible (2027/2028). No JSON API endpoint; no pagination needed.",
+   "batch": 2
+  },
+  {
+   "domain": "bsir.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.bsir.org/events/",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "volume_estimate": 5,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "BSIR Annual Scientific Meeting"
+   ],
+   "notes": "BSIR maintains a dedicated /events/ hub linking to individual event pages. Expected event (BSIR Annual Scientific Meeting, 4th-6th Nov 2026) confirmed on homepage and event detail page. At least 5 upcoming dated events visible including VITALS 2027 (11-12 Mar), NIRS 26, and others. No pagination; site links event groupings directly. Static HTML with minimal JavaScript, no bot protection detected. Registration via external portal (bsirmeeting.org).",
+   "batch": 2
+  },
+  {
+   "domain": "bsbr.org.uk",
+   "status": "out_of_scope",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "notes": "Domain resolves to Browns Short Break Respite Ltd (disability support service), not British Society of Breast Radiology. /events/ page exists but contains only a downloadable PDF newsletter with no dated event listings.",
+   "parked_reason": "wrong-organization - worklist domain maps to disability support provider instead of medical society; no dated events found despite /events/ page existing",
+   "listing_url": "",
+   "api_url": "",
+   "volume_estimate": 0,
+   "pagination": "none",
+   "event_type_mix": "none",
+   "detail_topology": "unknown",
+   "bot_protection": "none",
+   "expected_found": [],
+   "batch": 2
+  },
+  {
+   "domain": "bssh.ac.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "listing_url": "https://www.bssh.ac.uk/about/events",
+   "js_required": false,
+   "bot_protection": "none",
+   "api_url": "",
+   "volume_estimate": 38,
+   "pagination": "none",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "BSSH Scientific Meeting"
+   ],
+   "notes": "BSSH events are managed through lmsitestarterduke CMS. Listing page shows ~38 upcoming events (2026-2027) with individual detail pages at /about/events/[id]/[slug]. Mixed event types include scientific meetings, instructional courses, and symposiums. All event details appear on individual event pages; no pagination or tab-based substructure detected.",
+   "batch": 2
+  },
+  {
+   "domain": "bess.ac.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": true,
+   "listing_url": "https://bess.ac.uk/courses-and-events/",
+   "notes": "British Elbow and Shoulder Society (BESS) hosts events on a WordPress.com site. One upcoming dated event found: \"International Congress on Shoulder and Elbow Surgery (ICSES)\" scheduled 22-24 September 2026, matching the expected \"BESS Annual Scientific Meeting.\" The /courses-and-events/ page uses CoBlocks event carousel (requires JS), but individual event posts are accessible via archive URLs (e.g., /2026/01/25/international-congress-on-shoulder-and-elbow-surgery-icses/). Root domain has Cloudflare challenge; subdirectories and API accessible.",
+   "api_url": "https://bess.ac.uk/wp-json/wp/v2/posts",
+   "bot_protection": "cloudflare",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "conference",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "expected_found": [
+    "BESS Annual Scientific Meeting"
+   ],
+   "batch": 2
+  },
+  {
+   "domain": "bsg.org.uk",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": true,
+   "listing_url": "https://www.bsg.org.uk/events",
+   "api_url": "",
+   "volume_estimate": 25,
+   "pagination": "query_param",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "BSG LIVE"
+   ],
+   "notes": "Events listing resolved at /events with 25 upcoming dated entries (Sep-Oct 2026 range visible today 2026-09-21). Blazor .NET framework for client-side rendering. Event detail pages on individual URLs (e.g. /events/advancing-endoscopy-research-2026-2) show pricing tiers (\u00a350 BSG member, \u00a3100 non-member), full venue, and date. BSG LIVE referenced in nav dropdown (https://live.bsg.org.uk/) and \"Hepatology Highlights from BSG LIVE'26\" webinar event found on listing. Event types include webinars, conferences, training courses, symposia.",
+   "batch": 2
+  },
+  {
+   "domain": "ncri.org.uk",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "parked_reason": "dead; SSL certificate expired (Sept 26 2024); domain redirects to www but www has handshake failure; site infrastructure broken and inaccessible",
+   "notes": "NCRI domain infrastructure exists (nginx serving 301 redirects from ncri.org.uk to www.ncri.org.uk) but www subdomain has expired/broken SSL certificate preventing access. No dated events discoverable; site is dead.",
+   "listing_url": "",
+   "api_url": "",
+   "bot_protection": "none (SSL handshake failure prevents HTTP response)",
+   "event_type_mix": "none",
+   "detail_topology": "unknown",
+   "pagination": "unknown",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "batch": 2
+  },
+  {
+   "domain": "basl.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.basl.org.uk/index.cfm/events/list/cid/16",
+   "api_url": "",
+   "bot_protection": "none",
+   "volume_estimate": 12,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "conference",
+   "expected_found": [
+    "BASL Annual Meeting"
+   ],
+   "notes": "BASL hosts multiple annual/recurring conferences, meetings, webinars, and retreats. Flagship event (BASL Annual Meeting 2026) occurs 6-9 October 2026 at ICC Wales. All event details (date, time, venue) shown on listing page; external registrations via EventsAir platform. No JSON API or pagination detected.",
+   "batch": 2
+  },
+  {
+   "domain": "brit-thoracic.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "listing_url": "https://www.brit-thoracic.org.uk/education-and-events/",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "detail_topology": "standard_subpages",
+   "api_url": "",
+   "bot_protection": "none",
+   "volume_estimate": 4,
+   "pagination": "none",
+   "expected_found": [
+    "BTS Winter Meeting"
+   ],
+   "notes": "Static HTML site with navigation-driven event access. Winter Meeting 2026 (25-27 Nov) is the flagship; pricing tiers on subpage. Also offers Summer Meeting, short courses, and webinars. No API integration needed; content loads server-side.",
+   "batch": 2
+  },
+  {
+   "domain": "britishcardiovascularsociety.org",
+   "status": "resolved",
+   "platform": "external_registrar",
+   "js_required": false,
+   "listing_url": "https://britishcardiovascularsociety.org.uk/courses/",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "detail_topology": "external",
+   "pagination": "none",
+   "volume_estimate": 5,
+   "bot_protection": "none",
+   "expected_found": [
+    "BCS Annual Conference"
+   ],
+   "notes": "BCS hosts its flagship 2027 Annual Conference internally and manages training courses through EventsAir registrar (eventsair.site). Main /courses/ listing page at /courses/ shows multiple upcoming dated courses (e.g. National Training Day 2026-09-23, Year in Cardiology 2026-12-11) with venue info inline; clicking events links to external EventsAir registration pages. Annual conference information on dedicated /annual-conference/ page referencing Manchester Central 2027 event. WordPress-based main site with content-rich navigation.",
+   "batch": 2
+  },
+  {
+   "domain": "theabn.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "parked_reason": "Aggressive Cloudflare bot protection blocks all discovery attempts; cannot verify events listing or dated event existence",
+   "listing_url": "",
+   "bot_protection": "cloudflare",
+   "notes": "Association of British Neurologists (theabn.org) is protected by Cloudflare; all paths return \"Just a moment\" challenge. No external registrars host ABN events. Expected \"ABN Annual Meeting\" not found via discovery.",
+   "expected_found": [],
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "ukio.org.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.ukio.org.uk/ukio-2025/",
+   "event_type_mix": "conference",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "UKIO Annual Congress"
+   ],
+   "notes": "Single-flagship-congress site. UKIO 2026 held 8-10 June in Liverpool. WordPress + Elementor. External registration via EventsAir. All event details (dates, venue, CPD, pricing tiers, programme) on main congress page. No separate events listing; one annual congress per year.",
+   "batch": 2
+  },
+  {
+   "domain": "bcis.org.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.bcis.org.uk/event/",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "volume_estimate": 25,
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "BCIS Research Day",
+    "BCIS Structural Trainees Course",
+    "BCIS Cardiac Physiologists Catheter Lab Course"
+   ],
+   "notes": "WordPress site with static HTML event archive. Events show dates and locations on individual pages; registration/booking redirects to external ticketing platforms. No dated annual flagship found by that exact name, but multiple BCIS-led conferences and courses visible with future dates (Dec 2026, April 2027).",
+   "batch": 2
+  },
+  {
+   "domain": "biasp.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://biasp.org/events/",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 10,
+   "expected_found": [
+    "UK Stroke Forum"
+   ],
+   "notes": "BIASP events page displays upcoming conferences and courses with parseable dates. Primary event (UKSF 2026 / UK Stroke Forum, 2-4 Dec 2026, Liverpool) confirmed with active registration. Static HTML, no API. Registration routed to external providers (eventsair, Fitwise). Yoast SEO + Elementor stack.",
+   "batch": 2
+  },
+  {
+   "domain": "rheumatology.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "listing_url": "https://www.rheumatology.org.uk/events-learning/conferences",
+   "js_required": false,
+   "bot_protection": "none",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "event_type_mix": "conference",
+   "volume_estimate": 2,
+   "expected_found": [
+    "BSR Annual Conference"
+   ],
+   "notes": "DNN-powered medical society site. Verified listing shows 2 dated upcoming conferences (Annual Conference April 2027, Case-based Conference November 2026). Event data embedded in page HTML via JavaScript but no client-side rendering required for listing access.",
+   "batch": 2
+  },
+  {
+   "domain": "diabetes.org.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.diabetes.org.uk/for-professionals/get-involved/conferences-and-events/events",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "standard_subpages",
+   "pagination": "none",
+   "volume_estimate": 3,
+   "expected_found": [
+    "Diabetes UK Professional Conference"
+   ],
+   "notes": "Drupal 11 site hosting professional medical conferences. Diabetes UK Professional Conference 2027 (successor to 2026 Liverpool April 22-24 event) and Diabetes in Pregnancy Conference (10 Nov 2026) are documented with dates. Events listing page includes featured conferences. Professionals section clearly organized with conference details on dedicated subsites (dukpc.diabetes.org.uk).",
+   "batch": 2
+  },
+  {
+   "domain": "endocrinology.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "listing_url": "https://www.endocrinology.org/events/",
+   "js_required": false,
+   "notes": "Static Bootstrap site with nested event architecture. Main listing at /events/ shows ~11 dated conferences 2025-2027 with individual detail pages (e.g., SfE BES 2027 on 8-10 March 2027 in Harrogate). No pagination; uses client-side filtering by year/type. Details topology: primary info on event page + subpages (/registration/, /schedule/, /accommodation/, etc.). Bioscientifica handles registration (Cvent redirects). No bot protection detected.",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "api_url": "",
+   "pagination": "none",
+   "volume_estimate": 11,
+   "bot_protection": "none",
+   "expected_found": [
+    "SfE BES Conference"
+   ],
+   "batch": 2
+  },
+  {
+   "domain": "fisconference.com",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "parked_reason": "dead \u2014 domain does not resolve (NXDOMAIN). DNS lookup failed; domain appears to be unregistered or expired.",
+   "notes": "The Federation of Infection Societies domain fisconference.com is unreachable. DNS resolution fails completely. No hosted content found.",
+   "listing_url": "",
+   "bot_protection": "none",
+   "expected_found": [],
+   "volume_estimate": 0,
+   "event_type_mix": "none",
+   "pagination": "none",
+   "detail_topology": "unknown",
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "bad.org.uk",
+   "status": "resolved",
+   "platform": "spa",
+   "listing_url": "https://badannualmeeting.co.uk/",
+   "js_required": true,
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "BAD Annual Meeting"
+   ],
+   "notes": "BAD Annual Meeting 2027 hosted at separate domain badannualmeeting.co.uk (WordPress). Main bad.org.uk site has /events-content page but it's a Next.js SPA with no server-rendered event content. One confirmed upcoming conference: BAD 2027 Liverpool, 29 June - 1 July 2027.",
+   "batch": 2
+  },
+  {
+   "domain": "britishinfection.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.britishinfection.org/education-events/infection-events",
+   "js_required": false,
+   "api_url": "https://fitwise.eventsair.com (external registrar)",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "load_more",
+   "volume_estimate": 8,
+   "expected_found": [
+    "BIA Autumn Trainees Meeting 2026",
+    "BIA Dilemmas Day 2027"
+   ],
+   "notes": "Concrete5-based site with EventsAir external registrar. Event listing page shows 8+ dated conferences with venue/date details. \"BIA Spring Meeting\" not found in current listings; instead found Autumn Trainees Meeting and Dilemmas Day events. Details appear on individual event pages accessed via occurrence ID links.",
+   "batch": 2
+  },
+  {
+   "domain": "bapm.org",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": false,
+   "listing_url": "https://www.bapm.org/pages/190-meetings-and-events",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "volume_estimate": 20,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "BAPM Annual Conference"
+   ],
+   "notes": "BAPM events listing is fully resolved with 20+ dated events (Sep 2026\u2013Mar 2027) visible in card grid. Details (dates, location, venue, booking link to EventsAir) on individual event pages. Rails/Hubble CMS platform, no bot protection.",
+   "batch": 2
+  },
+  {
+   "domain": "his.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.his.org.uk/training-events/events-diary/",
+   "pagination": "query_param",
+   "detail_topology": "tabs",
+   "event_type_mix": "conference",
+   "volume_estimate": 25,
+   "bot_protection": "none",
+   "api_url": "",
+   "expected_found": [
+    "HIS Conference"
+   ],
+   "notes": "Umbraco CMS site with organized event directory. HIS Annual Conference 2027 (8-9 June 2027 at RCP London) is the flagship annual conference. FIS 2026 (24-26 Nov Glasgow) and Building Safer Hospitals 2026 (9 Nov) are major conferences. Event details split across tabs (Venue, Registration Fees subpages). All fees in GBP visible on registration pages.",
+   "batch": 2
+  },
+  {
+   "domain": "bsped.org.uk",
+   "status": "resolved",
+   "platform": "external_registrar",
+   "listing_url": "https://www.bsped.org.uk/meetings/forthcoming-meetings/",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "detail_topology": "tabs",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "BSPED Annual Meeting"
+   ],
+   "bot_protection": "none",
+   "notes": "Homepage navigation links to /meetings/forthcoming-meetings/ which displays the 53rd Annual Meeting (8-10 December 2026) with full event details in a multi-tab EventsForce portal (tabs: Welcome, Important Dates, Programme, Registration, Abstracts, Social Events, Exhibitors/Sponsors, Industry Programme, Venue, Travel, Accommodation, FAQs). Static Bootstrap HTML site with no JavaScript requirement or bot protection encountered.",
+   "batch": 2
+  },
+  {
+   "domain": "bpna.org.uk",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": false,
+   "listing_url": "https://bpna.org.uk/conference/2027/",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "BPNA Annual Conference"
+   ],
+   "notes": "BPNA 2027 Annual Conference resolved at main listing URL with dated event (6-8 Jan 2027, hybrid in Birmingham). Custom PHP platform. Pricing/booking details on subpages via contentid parameter; conference details on event page itself. Single flagship annual conference structure.",
+   "batch": 2
+  },
+  {
+   "domain": "bmfms.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "listing_url": "https://www.bmfms.org.uk/professionals/events",
+   "js_required": false,
+   "bot_protection": "none",
+   "api_url": "",
+   "pagination": "query_param",
+   "event_type_mix": "conference",
+   "volume_estimate": 5,
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "BMFMS Conference"
+   ],
+   "notes": "BMFMS site hosts a calendar-based events listing at /professionals/events with filters by year/month/region/type. Primary event: BMFMS Conference 2027 scheduled 6-7 May 2027 in Edinburgh (confirmed dated future event). Platform is ASP.NET-based static HTML using lmsitestarterduke CMS. No JavaScript required to view listing.",
+   "batch": 2
+  },
+  {
+   "domain": "bbts.org.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.bbts.org.uk/events/",
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "conference",
+   "bot_protection": "none",
+   "volume_estimate": 20,
+   "expected_found": [
+    "BBTS Annual Conference"
+   ],
+   "notes": "BBTS Annual Conference 2026 (15-17 Sept, Glasgow SEC) is the flagship; events page shows diverse mix of 20+ conferences/webinars across 2026 with full date details on event cards and individual pages. No registration paywall; Eventbrite integration for ticketing.",
+   "batch": 2
+  },
+  {
+   "domain": "bdiap.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://bdiap.org/events/future_bdiap_meetings.aspx",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 5,
+   "bot_protection": "none",
+   "expected_found": [
+    "BDIAP Symposium"
+   ],
+   "notes": "Convio-based CMS (lmsitestarterduke generator). Primary listing at /events/future_bdiap_meetings.aspx shows dated future events (2026 symposium & IAP Congress) with direct links to detail pages. No JS required; HTML server-rendered. Found expected \"BDIAP Symposium\" as \"Symposium on Gynaecological Pathology\" (4-5 Dec 2026).",
+   "batch": 2
+  },
+  {
+   "domain": "bsge.org.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.bsge.org.uk/event/",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "query_param",
+   "bot_protection": "none",
+   "volume_estimate": 40,
+   "expected_found": [],
+   "notes": "WordPress site using GeoDirectory for events (not Tribe Events). Dates, venue, and pricing info on individual event pages. BSGE Annual Scientific Meeting not currently listed; other BSGE events (courses, webinars, meetings) active. September-October 2026 events visible.",
+   "batch": 2
+  },
+  {
+   "domain": "bsccp.org.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.bsccp.org.uk/events",
+   "js_required": false,
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "query_param",
+   "volume_estimate": 7,
+   "bot_protection": "none",
+   "expected_found": [
+    "BSCCP Annual Scientific Meeting"
+   ],
+   "notes": "Craft CMS platform (not WordPress; confirmed via X-Powered-By header). Events listing shows dated conferences, courses, study days, and training workshops. BSCCP 2027 Annual Scientific Meeting (19-21 April 2027, London) found and matches expected name. Event details (dates, descriptions, registration info) appear on individual event pages. Pagination uses URL path (/events/p2 pattern).",
+   "batch": 2
+  },
+  {
+   "domain": "b-s-h.org.uk",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": true,
+   "listing_url": "https://b-s-h.org.uk/education/conference-and-events/events",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "volume_estimate": 50,
+   "pagination": "unknown",
+   "detail_topology": "standard_subpages",
+   "bot_protection": "cloudflare",
+   "expected_found": [
+    "BSH Annual Scientific Meeting"
+   ],
+   "notes": "Umbraco-based site with React client-side rendering. 147 event pages found in sitemap including future-dated events (2025-2027). Main listing URL confirmed; individual event detail pages exist but load content via React. Cloudflare protection present. Some pages return 403 when curl-accessed (likely bot protection).",
+   "batch": 2
+  },
+  {
+   "domain": "ics.ac.uk",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": true,
+   "listing_url": "https://ics.ac.uk/events/calendar.html",
+   "api_url": "",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "volume_estimate": 2,
+   "expected_found": [
+    "State of the Art Congress"
+   ],
+   "notes": "Intensive Care Society flagship annual congress. Site uses custom EventFolio-based CMS. Primary event: SOA27 (State of the Art Congress 2027, 29 June - 1 July 2027). Calendar page requires JavaScript to display events. Individual event pages (soa27.html, soa26.html) contain embedded event data with dates, venue (ICC Birmingham), and other details. No external registrar detected.",
+   "batch": 2
+  },
+  {
+   "domain": "astro.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": true,
+   "bot_protection": "cloudflare",
+   "listing_url": "",
+   "api_url": "",
+   "pagination": "unknown",
+   "event_type_mix": "unknown",
+   "detail_topology": "unknown",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "parked_reason": "Cloudflare bot-protection blocks automated discovery. All paths (/, /events, /annual-meeting, /sitemap.xml) return Cloudflare \"Just a moment\" verification challenge instead of content. Site requires JavaScript execution and challenge completion to access actual pages. Cannot verify event listings without bypassing bot protection.",
+   "notes": "astro.org (American Society for Radiation Oncology) is aggressively protected by Cloudflare. Attempted 4 paths; all returned bot-protection challenge pages. A browser-based tool or JavaScript-capable HTTP client would be needed to access the site and locate the events listing.",
+   "batch": 2
+  },
+  {
+   "domain": "acutemedicine.org.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.acutemedicine.org.uk/sam-events/",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 8,
+   "pagination": "none",
+   "bot_protection": "none",
+   "expected_found": [
+    "SAM Annual Scientific Meeting"
+   ],
+   "notes": "Events Manager plugin (v7.4.5) powers a curated list of 8+ upcoming dated events. SAMGlasgow 8-9 Oct 2026 is described as \"20th annual International conference.\" Details (fees, venue, CPD points, registration) appear on individual event pages. No API restriction for public listing observed.",
+   "batch": 2
+  },
+  {
+   "domain": "ueg.eu",
+   "status": "resolved",
+   "listing_url": "https://ueg.eu/week",
+   "platform": "static_html",
+   "js_required": false,
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 5,
+   "expected_found": [
+    "UEG Week"
+   ],
+   "notes": "UEG Week is the flagship annual conference held Oct 17-20, 2026 in Barcelona. Site also hosts educational events (Masterclass, Summer School) under /education section. Custom-built platform with server-side rendering, no bot protection. Event details and dates appear directly on event pages.",
+   "batch": 2
+  },
+  {
+   "domain": "hematology.org",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": false,
+   "listing_url": "https://www.hematology.org/meetings",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "volume_estimate": 4,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "ASH Annual Meeting"
+   ],
+   "notes": "Sitecore Experience Platform site. Main event: 68th ASH Annual Meeting (Dec 12-15, 2026, New Orleans + online). Also lists regional Highlights events (North America Jan 2027, Asia-Pacific, etc.). All events are statically rendered in HTML with dated pages. No external event registrar found.",
+   "batch": 2
+  },
+  {
+   "domain": "ehaweb.org",
+   "status": "parked",
+   "platform": "external_registrar",
+   "js_required": true,
+   "bot_protection": "403",
+   "parked_reason": "login-wall",
+   "listing_url": "congress.ehaweb.org",
+   "event_type_mix": "conference",
+   "detail_topology": "unknown",
+   "pagination": "unknown",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "notes": "Main domain blocked with 403 Forbidden. Events hosted on congress.ehaweb.org using M|Events (m-anage.com) external platform. Site is JavaScript SPA requiring authentication to view any event listings. No dated events visible in publicly accessible HTML.",
+   "batch": 2
+  },
+  {
+   "domain": "apmonline.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://apmonline.org/events/",
+   "notes": "WordPress site using Modern Events Calendar plugin (v7.12.0). Events listing page has 9+ upcoming dated events with pricing visible. Expected event \"APM Supportive & Palliative Care Conference\" matches APMJ Conference listed for 27 Sep 2026.",
+   "event_type_mix": "conference",
+   "volume_estimate": 12,
+   "pagination": "load_more",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "APMJ Conference"
+   ],
+   "api_url": "https://apmonline.org/wp-json/mec/v1/events",
+   "batch": 2
+  },
+  {
+   "domain": "ddw.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": true,
+   "listing_url": "https://ddw.org",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "api_url": "",
+   "expected_found": [
+    "Digestive Disease Week (DDW)"
+   ],
+   "notes": "Single-flagship-conference site for annual Digestive Disease Week. Homepage carries complete event details: Digestive Disease Week 2027, May 15-18, 2027, Washington D.C. & Online. Registration via external registrar (Experient). Built on WordPress + Elementor.",
+   "batch": 2
+  },
+  {
+   "domain": "ecco-ibd.eu",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.ecco-ibd.eu/congress-events/event-calendar",
+   "js_required": false,
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 40,
+   "expected_found": [
+    "ECCO Congress"
+   ],
+   "api_url": "",
+   "notes": "Joomla CMS with YooTheme template. Event Calendar listing page displays major events (22nd Congress of ECCO 2027, UEG Week, educational workshops) with pagination via ?page parameter. Individual event pages at /ecco27/our-congress/overview contain detailed information including dates (March 3-6, 2027), venue (Bella Center, Copenhagen), pricing tiers (EUR 250-400 member savings), and registration links. No APIs or JavaScript required; all content is static HTML.",
+   "batch": 2
+  },
+  {
+   "domain": "aasld.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.aasld.org/events-and-webinars",
+   "js_required": true,
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "load_more",
+   "volume_estimate": 5,
+   "expected_found": [
+    "AASLD The Liver Meeting"
+   ],
+   "notes": "Drupal 10 site with flagship annual conference (The Liver Meeting 2026: Nov 5-9) plus regular webinars. Events listed on /events-and-webinars page (JS-rendered) with details on individual event pages. Verified future events with proper ISO dates.",
+   "batch": 2
+  },
+  {
+   "domain": "esge.com",
+   "status": "parked",
+   "platform": "spa",
+   "js_required": true,
+   "parked_reason": "JavaScript-required AngularJS SPA prevents static HTML/API verification of event listings. All routes return SPA template with empty body. No JSON API endpoints accessible. Requires browser automation to render and verify dated events (ESGE Days expected). Cannot confirm upcoming events without JavaScript execution.",
+   "notes": "www.esge.com is an AngularJS SPA maintained by European Society of Gastrointestinal Endoscopy. HTTP 200 responses on all paths suggest active site, but content rendering requires JS. No accessible API, robots.txt, or sitemap. No external event platform integration detected. Needs browser-based discovery (Playwright/Selenium) to proceed.",
+   "listing_url": "",
+   "api_url": "",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "event_type_mix": "unknown",
+   "bot_protection": "none",
+   "expected_found": [],
+   "batch": 2
+  },
+  {
+   "domain": "easl.eu",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://easl.eu/what-we-do/events/",
+   "event_type_mix": "conference",
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 24,
+   "expected_found": [
+    "EASL Congress"
+   ],
+   "bot_protection": "none",
+   "notes": "WordPress + Elementor + Search Filter Pro. EASL Congress 2027 found with full dates (16-19 June 2027). Events paginated across 3 pages, all upcoming events have ISO dates. Detail topology confirmed by verifying EASL Congress event page carries all event info including dates.",
+   "batch": 2
+  },
+  {
+   "domain": "acc.org",
+   "status": "resolved",
+   "listing_url": "https://accscientificsession.acc.org/",
+   "platform": "unknown",
+   "js_required": false,
+   "expected_found": [
+    "ACC Annual Scientific Session"
+   ],
+   "event_type_mix": "conference",
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "volume_estimate": 1,
+   "api_url": "",
+   "notes": "ACC Annual Scientific Session 2027 (ACC.27-WCC) confirmed: April 10\u201312, 2027, Houston, TX. Subdomain accscientificsession.acc.org is a dedicated ASP.NET/Sitecore event site, server-rendered with no JS requirement for basic content access. Single flagship annual conference (not a multi-event listing). Main Education-and-Meetings hub at acc.org/Education-and-Meetings links to this and references other ACC events (Valentin Fuster Symposium, Quality Summit) but those are not listed on the primary site\u2014would require separate investigation.",
+   "batch": 2
+  },
+  {
+   "domain": "pcronline.com",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.pcronline.com/Courses",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "course",
+   "volume_estimate": 20,
+   "pagination": "none",
+   "detail_topology": "tabs",
+   "expected_found": [
+    "EuroPCR"
+   ],
+   "notes": "PCRonline is a static HTML site (eZ CMS backend) serving medical conferences/courses for interventional cardiology. EuroPCR (18-21 May 2027) is the flagship annual course. /Courses page lists 20+ dated courses spanning Sept 2026-Oct 2027. Course detail pages have navigation tabs (/about, /Related-events, /Press). No login wall for viewing listings; pricing/registration details appear to be on course detail pages and/or external links.",
+   "batch": 2
+  },
+  {
+   "domain": "hematology.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.hematology.org/meetings",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 4,
+   "pagination": "none",
+   "api_url": "",
+   "bot_protection": "none",
+   "expected_found": [
+    "ASH Annual Meeting"
+   ],
+   "notes": "ASH hosts curated annual meeting and regional \"Highlights\" conferences. Main listing shows upcoming events with dates (December 2026 - February 2027 confirmed). Each meeting has its own dedicated page with registration, pricing, and CME info. No paginated event catalog; curated list model.",
+   "batch": 2
+  },
+  {
+   "domain": "crf.org",
+   "status": "resolved",
+   "listing_url": "https://www.crf.org/crf/news-and-events/events-calendar",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 6,
+   "expected_found": [
+    "TCT Conference"
+   ],
+   "bot_protection": "none",
+   "api_url": "",
+   "notes": "CRF Events Calendar lists major conferences including TCT series (flagship annual meeting with variants for Middle East/Africa). Events show dates, locations, and link to external registrar pages for registration. No login wall; publicly accessible listing.",
+   "batch": 2
+  },
+  {
+   "domain": "thoracic.org",
+   "status": "resolved",
+   "listing_url": "https://site.thoracic.org/conference",
+   "platform": "spa",
+   "js_required": true,
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 2,
+   "pagination": "none",
+   "bot_protection": "none",
+   "expected_found": [
+    "ATS International Conference"
+   ],
+   "api_url": "",
+   "notes": "Flagship annual medical conference. Site is SPA-based requiring JS. ATS 2026 (abstract deadline Nov 4, 2026) and ATS 2027 (New Orleans, proposal deadline Oct 14, 2026) confirmed with dated content visible.",
+   "batch": 2
+  },
+  {
+   "domain": "ersnet.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.ersnet.org/events/",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "api_url": "https://www.ersnet.org/wp-json/wp/v2/posts",
+   "volume_estimate": 48,
+   "expected_found": [
+    "ERS Congress"
+   ],
+   "bot_protection": "none",
+   "notes": "ERS (European Respiratory Society) hosts 853 events in their sitemap (mix of past/current). The /events/ page shows 48 pages of paginated events with query parameters (?page=N). Verified upcoming 2026/2027 dated events: ERS Congress 2026 (Barcelona, passed Sept 2026), Cough Conference 2026, Respiratory Failure Conference 2026, Early Detection Conference 2027, Lung Science Conference 2027. Events appear on detail pages in static HTML with dates in visible text and schema markup.",
+   "batch": 2
+  },
+  {
+   "domain": "chestnet.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": true,
+   "listing_url": "https://www.chestnet.org/learning-and-events/events/chest-annual-meeting",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "expected_found": [
+    "CHEST Annual Meeting"
+   ],
+   "api_url": "",
+   "notes": "CHEST Annual Meeting 2026 (Oct 18-21 in Phoenix) has a dedicated landing page with pricing/registration info on-site. Session details hosted on external rdmobile platform (requires JS). Single flagship annual conference model; no listing pagination needed.",
+   "batch": 2
+  },
+  {
+   "domain": "sccm.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.sccm.org/education-center/conference-calendar",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 244,
+   "bot_protection": "none",
+   "expected_found": [
+    "2027 Critical Care Congress"
+   ],
+   "notes": "SCCM operates a comprehensive events calendar hosting 244+ critical care education events including their flagship annual Critical Care Congress (2027: March 14-16, San Diego). Events are pre-rendered in static HTML with details (dates, location, event type, description) visible on the listing page. ASP.NET backend, no pagination needed.",
+   "batch": 2
+  },
+  {
+   "domain": "professional.heart.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "bot_protection": "cloudflare",
+   "parked_reason": "Cloudflare bot protection blocks all HTTP requests; curl-based discovery not feasible without browser/JavaScript bypass",
+   "listing_url": "",
+   "notes": "Professional.heart.org (American Heart Association / ASA) hosts the International Stroke Conference but is protected by Cloudflare and completely inaccessible to curl-based discovery. All attempted paths return Cloudflare block pages.",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "event_type_mix": "none",
+   "detail_topology": "unknown",
+   "expected_found": [],
+   "batch": 2
+  },
+  {
+   "domain": "aan.com",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.aan.com/events/upcoming-events",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "api_url": "",
+   "bot_protection": "none",
+   "volume_estimate": 4,
+   "expected_found": [
+    "AAN Annual Meeting"
+   ],
+   "notes": "AAN (American Academy of Neurology) operates a clean events directory at /events/upcoming-events with multiple upcoming conferences. Verified events include: Fall Conference (Oct 9-11, 2026), Annual Meeting (May 1-5, 2027), Autoimmune Neurology Conference (Aug 7-8, 2026), and APP Conference (Oct 8, 2026). All have published future dates. Event details (location, registration, important dates) appear on individual event pages, not sub-tabs or PDFs.",
+   "batch": 2
+  },
+  {
+   "domain": "ean.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.ean.org/congress2027",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "EAN Congress"
+   ],
+   "notes": "Single-flagship-conference site (annual EAN Congress). Congress 2027 scheduled for 12-15 June 2027 in Gothenburg, Sweden. Details (speakers, programme, sessions) live on congress2027 page and subpages. Platform is TYPO3 CMS (not Tribe Events). Site also lists educational events (Spring School, Autumn School) but these are secondary; main event is the annual congress.",
+   "batch": 2
+  },
+  {
+   "domain": "esicm.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "notes": "WordPress site with custom events post type. Listing page at /congresses-events/ displays upcoming dated conferences and congresses including the flagship ESICM LIVES annual congress. Event details (venue, registration, fees) appear on individual event pages.",
+   "listing_url": "https://www.esicm.org/congresses-events/",
+   "api_url": "",
+   "bot_protection": "none",
+   "volume_estimate": 18,
+   "pagination": "infinite_scroll",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "ESICM LIVES"
+   ],
+   "batch": 2
+  },
+  {
+   "domain": "ectrims.eu",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://ectrims.eu/events/",
+   "js_required": true,
+   "event_type_mix": "conference",
+   "pagination": "load_more",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 1,
+   "expected_found": [
+    "ECTRIMS Congress"
+   ],
+   "bot_protection": "none",
+   "notes": "WordPress 7.1 site with custom Tribe Events post type. Primary upcoming event is MSToronto2026 (21-23 October 2026) \u2014 the 10th Joint ACTRIMS-ECTRIMS Global Meeting in Toronto. Events load via Ajax Load More plugin. Details link to external registrar domains per conference.",
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "eans.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "parked_reason": "bot-protection",
+   "notes": "Site uses Cloudflare bot-protection (challenge pages block all curl access). Unable to access root, common event paths (/events, /congress, /meetings, /education), sitemap, or robots.txt. Cannot verify presence of dated event listings or determine platform. Expected EANS Congress not found.",
+   "bot_protection": "cloudflare",
+   "expected_found": [],
+   "listing_url": "",
+   "api_url": "",
+   "event_type_mix": "none",
+   "detail_topology": "unknown",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "batch": 2
+  },
+  {
+   "domain": "aaic.alz.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://aaic.alz.org/overview.asp",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "AAIC"
+   ],
+   "notes": "Single-conference dedicated microsite for AAIC 2027 (July 18-21, Chicago + Online). Custom ASP.NET backend. Accessible without bot protection. Expected event AAIC confirmed with future dates.",
+   "batch": 2
+  },
+  {
+   "domain": "aans.org",
+   "status": "resolved",
+   "platform": "tribe_events",
+   "api_url": "https://www.aans.org/wp-json/tribe/events/v1/events",
+   "listing_url": "https://www.aans.org/events/",
+   "js_required": false,
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "conference",
+   "bot_protection": "none",
+   "volume_estimate": 8,
+   "expected_found": [
+    "American Association of Neurological Surgeons (AANS) Annual Meeting"
+   ],
+   "notes": "Tribe Events WordPress plugin with REST API. 8 upcoming events in catalog; key matches include AANS Annual Meeting 2027 (April 9) and 2028 (April 21), plus section-specific annual meetings. Pricing details reside on individual event pages; API returns empty cost fields.",
+   "batch": 2
+  },
+  {
+   "domain": "cns.org",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": false,
+   "listing_url": "https://www.cns.org/meetings/calendar",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "pagination": "unknown",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "volume_estimate": 5,
+   "expected_found": [
+    "CNS Annual Meeting"
+   ],
+   "notes": "Gosuite-based CMS platform. Navigation menus expose /meetings section with four event listing paths (calendar, courses, joint-section, other-meetings). Schema.org JSON-LD on /meetings/meetings-overview confirms dated events. 2026 Annual Meeting found (Oct 31-Nov 4, DC) plus courses. Event detail pages accessible at /meetings-detail/[slug] pattern.",
+   "batch": 2
+  },
+  {
+   "domain": "aaos.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.aaos.org/annual/",
+   "js_required": false,
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "tabs",
+   "pagination": "query_param",
+   "volume_estimate": 35,
+   "expected_found": [
+    "AAOS Annual Meeting"
+   ],
+   "notes": "AAOS 2027 Annual Meeting confirmed March 3-6, 2027 on schedule page. Optimizely CMS platform. Education courses also available at /education/courses/ but Annual Meeting is primary flagship event. Registration via xpressreg.net external partner.",
+   "batch": 2
+  },
+  {
+   "domain": "esska.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": true,
+   "bot_protection": "cloudflare",
+   "parked_reason": "Cloudflare bot protection blocks all discovery; no JSON API or alternative paths bypass the challenge. JavaScript execution (browser automation) required to proceed.",
+   "listing_url": "",
+   "api_url": "",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "expected_found": [],
+   "notes": "ESSKA (European Society of Sports Traumatology, Knee Surgery and Arthroscopy) is a legitimate organization, but their website esska.org implements aggressive Cloudflare protection blocking all HTTP-level access. No events verified as existing or accessible.",
+   "batch": 2
+  },
+  {
+   "domain": "efort.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": true,
+   "listing_url": "https://congress.efort.org/",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "EFORT Congress"
+   ],
+   "notes": "EFORT is the largest pan-European orthopaedic & trauma platform. Primary listing is congress.efort.org (28th EFORT Annual Congress, May 19-21, 2027 in Athens). Secondary resources: orthopaedic event calendar at /events-calendar/orthopaedic-event-calendar/ and EFORT events directory. WordPress Events Manager plugin enables event listings and submissions.",
+   "batch": 2
+  },
+  {
+   "domain": "ors.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.ors.org/events/",
+   "js_required": true,
+   "bot_protection": "none",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 12,
+   "expected_found": [
+    "ORS Annual Meeting"
+   ],
+   "notes": "ORS maintains a Tockify-embedded calendar at /events/ (requires JS to render) alongside individual event pages for flagship conferences. Confirmed 2027 Annual Meeting (Feb 19-23, 2027) and multiple symposia with future dates. WordPress site with static event pages + dynamic calendar.",
+   "batch": 2
+  },
+  {
+   "domain": "uroweb.org",
+   "status": "resolved",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "https://uroweb.org/education-events/events",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "bot_protection": "none",
+   "volume_estimate": 700,
+   "pagination": "unknown",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "EAU Congress"
+   ],
+   "notes": "European Association of Urology events calendar. 42nd Annual EAU Congress is flagship event (hosted at eaucongress.uroweb.org subdomain). Sitemap shows 704 education events with individual detail pages. Verified upcoming dated event: 2026-11-21. SPA requires client-side rendering to see event listings.",
+   "batch": 2
+  },
+  {
+   "domain": "auanet.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.auanet.org/AUA2027",
+   "notes": "American Urological Association operates a single flagship annual meeting (AUA Annual Meeting) with dedicated pages per year. AUA2027 (May 21-24, San Diego) is the next scheduled event with full date, location, registration and pricing details on the event page itself.",
+   "api_url": "",
+   "bot_protection": "none",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "conference",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "expected_found": [
+    "AUA Annual Meeting"
+   ],
+   "batch": 2
+  },
+  {
+   "domain": "siu-urology.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.siu-urology.org/events",
+   "event_type_mix": "conference",
+   "detail_topology": "standard_subpages",
+   "pagination": "none",
+   "volume_estimate": 8,
+   "bot_protection": "none",
+   "api_url": "",
+   "expected_found": [
+    "SIU Congress"
+   ],
+   "notes": "Soci\u00e9t\u00e9 Internationale d'Urologie operates a custom PHP/HTML site with events listing at /events. Congress 2026 is the flagship annual meeting. EventScribe (siu2026.eventscribe.net) hosts the detailed agenda. Site shows multiple 2026 events including eGrand Rounds, Regional Meeting for Residents, and Urotrainer courses. Events are server-rendered with no JS requirement for discovery.",
+   "batch": 2
+  },
+  {
+   "domain": "arvo.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": true,
+   "bot_protection": "cloudflare",
+   "parked_reason": "Cloudflare bot-protection challenge blocks all page access. Site requires JavaScript/challenge completion. robots.txt accessible but all HTML pages return Cloudflare \"Just a moment...\" interstitial.",
+   "notes": "ARVO (Association for Research in Vision and Ophthalmology) operates https://www.arvo.org but entire domain is behind Cloudflare managed protection. robots.txt hints at /annual-meeting/ subdirectory, suggesting annual conference exists, but event listing page cannot be verified without JS rendering or Cloudflare bypass.",
+   "batch": 2
+  },
+  {
+   "domain": "wfns.info",
+   "status": "parked",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "",
+   "parked_reason": "Site is a blog/content portal about WFNS, not an events management platform. Only outdated event info found (Dec 2025 congress, now past). Real events are at wfns.org. Spam content (kamagra.sale) suggests possible compromise. Explicitly links users to wfns.org for event details.",
+   "api_url": "",
+   "bot_protection": "none",
+   "pagination": "none",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "volume_estimate": 0,
+   "expected_found": [
+    "WFNS World Congress"
+   ],
+   "notes": "wfns.info is a WordPress blog with outdated 2025 event reference; real events management at wfns.org/events with proper listings and 2026-2027 conferences visible. wfns.info appears to be promotional/informational content site, not suitable for scraping.",
+   "batch": 2
+  },
+  {
+   "domain": "aao.org",
+   "status": "resolved",
+   "listing_url": "https://www.aao.org/annual-meeting",
+   "platform": "static_html",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "AAO Annual Meeting"
+   ],
+   "bot_protection": "none",
+   "api_url": "",
+   "notes": "Single flagship annual conference. AAO 2026: Oct 9-12, 2026 in New Orleans. Built on GoSuite (ASP.NET). Event details and dates on main /annual-meeting page; past/future meetings listed at /annual-meeting/past-and-future-meetings.",
+   "batch": 2
+  },
+  {
+   "domain": "escrs.org",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": true,
+   "listing_url": "https://www.escrs.org/meetings-and-events/event-search",
+   "bot_protection": "none",
+   "volume_estimate": 6,
+   "pagination": "load_more",
+   "detail_topology": "standard_subpages",
+   "event_type_mix": "conference",
+   "api_url": "",
+   "expected_found": [
+    "ESCRS Congress"
+   ],
+   "notes": "Main site (escrs.org) is Umbraco CMS with event listings at /meetings-and-events/event-search. Events include 45th Congress of ESCRS (15-19 Oct 2027, Madrid) and related congress events. Dedicated Congress sub-sites on WordPress: congress.escrs.org (2027) and congress.2026.escrs.org (2026). Winter Meeting at separate WordPress subdomain (wintermeeting.escrs.org). Event details appear on subpages; page uses LoadNext function for pagination/infinite scroll.",
+   "batch": 2
+  },
+  {
+   "domain": "entnet.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.entnet.org/events/",
+   "api_url": "",
+   "bot_protection": "cloudflare",
+   "event_type_mix": "mixed",
+   "detail_topology": "standard_subpages",
+   "pagination": "none",
+   "volume_estimate": 5,
+   "expected_found": [
+    "AAO-HNSF Annual Meeting & OTO EXPO"
+   ],
+   "notes": "WordPress site with Cloudflare protection. AAO-HNSF Annual Meeting (Oct 17-20, 2026) is upcoming flagship conference. Event calendar at /events/calendar/ lists all upcoming events. Registration pricing available on subpages. Mixed event types: conferences, courses, simulation events.",
+   "batch": 2
+  },
+  {
+   "domain": "eaps.kenes.com",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://eaps.kenes.com",
+   "event_type_mix": "conference",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "EAPS Congress"
+   ],
+   "bot_protection": "none",
+   "api_url": "",
+   "notes": "Single flagship annual conference site: EAPS 2026 (24-27 September 2026, Athens & Online). WordPress with Kenes conference management platform. No multiple event listings; all event details on homepage.",
+   "batch": 2
+  },
+  {
+   "domain": "aap.org",
+   "status": "resolved",
+   "listing_url": "https://aapexperience.org/future-dates/",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "detail_topology": "mixed",
+   "pagination": "none",
+   "volume_estimate": 4,
+   "expected_found": [
+    "AAP National Conference & Exhibition"
+   ],
+   "api_url": "https://aapexperience26.eventscribe.net/",
+   "bot_protection": "cloudflare",
+   "notes": "AAP National Conference & Exhibition is a single annual flagship conference with multiple future instances (2026-2029). Main listing page (aapexperience.org/future-dates/) shows upcoming conference dates/venues; detailed session schedules hosted on EventScribe platform (aapexperience26.eventscribe.net) behind Cloudflare protection. WordPress-based main portal.",
+   "batch": 2
+  },
+  {
+   "domain": "espidmeeting.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://espidmeeting.org/welcome-to-espid-2027/",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "bot_protection": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "ESPID 2027"
+   ],
+   "notes": "Single flagship annual conference site. ESPID 2027 (45th Annual Meeting) is the primary dated event on 31 May-4 June 2027. WordPress with Kenes backend for registration. Event details shown directly on homepage/welcome page. Additional supporting pages for previous meetings, hotels, prospectus, and 2026 summer school. No separate events listing page needed \u2014 site is dedicated to the annual meeting.",
+   "batch": 2
+  },
+  {
+   "domain": "espnic-online.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "listing_url": "",
+   "bot_protection": "none",
+   "parked_reason": "Dead site \u2014 domain resolves to Azure infrastructure (Envoy proxy) but all HTTP paths return 404; HTTPS TLS handshake fails with connection reset. No content found at root, /events, /congress, /meetings, /conferences, /education, /sitemap.xml, or /robots.txt. DNS shows only Outlook/Microsoft 365 email records (SPF/MS validation), no web hosting configuration.",
+   "expected_found": [],
+   "notes": "espnic-online.org appears to be a parked domain name-squatting or registration for the European Society of Paediatric and Neonatal Intensive Care, but no actual website content is deployed. The real ESPNIC organization may have events on a different domain or external registrar not yet discovered.",
+   "volume_estimate": 0,
+   "pagination": "none",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "ifosworld.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.ifosworld.org/events",
+   "api_url": "https://www.ifosworld.org/wp-json/tribe/events/v1/events",
+   "js_required": false,
+   "bot_protection": "none",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "query_param",
+   "volume_estimate": 160,
+   "expected_found": [],
+   "notes": "WordPress with Tribe Events Calendar plugin (v6.17.4). Listing at /events shows upcoming dated events Oct 2026-Mar 2027. API endpoint returns JSON with paginated events (16 pages total, ~10 per page). Event details on individual /event/[slug]/ pages. Expected event \"IFOS World Congress\" not found in listing\u2014site hosts diverse ORL conferences, congresses, and webinars including AAO-HNSF 2026 Annual Meeting, various World Congresses on Otology/Rhinology/Laryngology, and training courses.",
+   "batch": 2
+  },
+  {
+   "domain": "euretina.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://euretina.org/future-meetings/",
+   "js_required": true,
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "event_type_mix": "conference",
+   "volume_estimate": 6,
+   "expected_found": [
+    "EURETINA Congress"
+   ],
+   "bot_protection": "none",
+   "notes": "WordPress + Elementor + MemberPress. EURETINA is the flagship annual congress for retinal specialists. Multiple upcoming events published: Vienna 2026 Congress, Innovation Spotlight 2026, Special Focus Meetings 2026-2027. Event details available on dedicated subpages.",
+   "batch": 2
+  },
+  {
+   "domain": "pas-meeting.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.pas-meeting.org/pediatric-meetings/",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "tabs",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "PAS Meeting"
+   ],
+   "notes": "PAS Meeting (Pediatric Academic Societies) is a single flagship annual conference. Primary event: PAS 2027 on April 30 - May 3, 2027. The site is WordPress-based (Enfold theme) and structures content around yearly meetings with dedicated subpages for program details, abstracts, workshops, and ancillary events. Main listing page shows related pediatric meetings from other organizations. No Tribe Events API detected.",
+   "batch": 2
+  },
+  {
+   "domain": "acog.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://annualmeeting.acog.org/",
+   "api_url": "",
+   "bot_protection": "none",
+   "volume_estimate": 1,
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "event_type_mix": "conference",
+   "expected_found": [
+    "ACOG Annual Clinical & Scientific Meeting"
+   ],
+   "notes": "Single flagship annual conference (ACOG Annual Clinical & Scientific Meeting) on dedicated WordPress subdomain. Upcoming event: May 21-23, 2027 in Los Angeles, CA. Registration and all event details hosted on annualmeeting.acog.org.",
+   "batch": 2
+  },
+  {
+   "domain": "isuog.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "listing_url": "https://www.isuog.org/events/events-calendar.html",
+   "js_required": false,
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 76,
+   "bot_protection": "none",
+   "expected_found": [
+    "ISUOG World Congress"
+   ],
+   "notes": "ISUOG operates an events calendar with 76+ upcoming dated events spanning webinars and advanced courses. World Congress 2027 (13-16 Sep, Lisbon) is the flagship conference; 2026 has concluded. Detail pages show venue/date/description; no pagination needed.",
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "eshre.eu",
+   "status": "resolved",
+   "platform": "unknown",
+   "listing_url": "https://www.eshre.eu/en/Education/Calendar-Campus-events",
+   "js_required": false,
+   "api_url": "",
+   "bot_protection": "none",
+   "volume_estimate": 12,
+   "pagination": "none",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "ESHRE Annual Meeting"
+   ],
+   "notes": "ESHRE (European Society of Human Reproduction and Embryology) runs a flagship 42nd Annual Meeting 5-8 July 2026 in London, plus year-round ESHRE Campus training workshops at multiple locations (e.g., Lisbon 1-3 October 2026). Sitecore CMS backend; event dates appear inline on individual event pages. No API, no bot protection, no pagination needed (all campus events visible on single page). ESHRE Annual Meeting page at /en/Annual-Meeting/ESHRE-2026 also confirms 2026 date and is dedicated flagship-event page.",
+   "batch": 2
+  },
+  {
+   "domain": "endocrine.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.endocrine.org/meetings-and-events",
+   "js_required": false,
+   "volume_estimate": 8,
+   "pagination": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "bot_protection": "cloudflare",
+   "expected_found": [
+    "ENDO"
+   ],
+   "notes": "Endocrine Society flagship ENDO annual meeting (June dates) and Clinical Endocrinology Update (CEU) courses visible on main meetings page. External registration via EventScribe. Main page is WordPress; bot protection only hits event-specific registrar subdomains.",
+   "batch": 2
+  },
+  {
+   "domain": "diabetes.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://professional.diabetes.org/meetings",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 3,
+   "expected_found": [
+    "ADA Scientific Sessions"
+   ],
+   "notes": "ADA maintains dual sites: public diabetes.org for community events (Tour de Cure, Step Out), and professional.diabetes.org for scientific conferences. The flagship \"ADA Scientific Sessions\" (2027, June 18-21 in Washington D.C.) is the primary conference. Drupal 10 CMS, server-side rendered, clean HTTP 200 response, no bot protection encountered.",
+   "batch": 2
+  },
+  {
+   "domain": "ihi.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "listing_url": "https://www.ihi.org/connect/events",
+   "js_required": true,
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "volume_estimate": 4,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "Quality improvement and patient safety"
+   ],
+   "notes": "Events listing at /connect/events shows 4 upcoming dated events with JSON data embedded in Drupal page: IHI Forum 2026 (Dec 6-9, Phoenix), Healthcare Improvement Forum (Apr 20-22, Lisbon), and 2 online informational calls. Details pages link to external event sites (events.ihi.org subdomain and zoom).",
+   "batch": 2
+  },
+  {
+   "domain": "escmid.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.escmid.org/congress-events/escmid-global/",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "ESCMID Global"
+   ],
+   "notes": "TYPO3-powered medical society site showing flagship ESCMID Global 2027 conference (09-13 April, Stockholm) with dated content in static HTML. Also offers courses and educational programs via separate listing pages.",
+   "batch": 2
+  },
+  {
+   "domain": "ese-hormones.org",
+   "status": "parked",
+   "platform": "static_html",
+   "js_required": true,
+   "listing_url": "",
+   "parked_reason": "Events are not hosted directly on ese-hormones.org. Main site has an /education-and-training/events-key-dates/ page claiming to list events, but it requires JavaScript rendering (Vue.js) and contains no dated events in static HTML. Actual event (European Congress of Endocrinology) is hosted on external domain espe-ese-congress2025.org, which is WordPress-based and hosted the past 2025 congress. Future congress sites (2026+) were not accessible during recon.</anked_reason>\n<parameter name=\"expected_found\">[\"European Congress of Endocrinology\"]",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "api_url": "",
+   "bot_protection": "none",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "notes": "Organization site serves as informational hub only. Events are delegated to external registrars/subdomains. The /education-and-training/events-key-dates/ page requires JS rendering, making it unsuitable for deterministic web scraping without a browser.",
+   "batch": 2
+  },
+  {
+   "domain": "aagl.org",
+   "status": "resolved",
+   "platform": "tribe_events",
+   "listing_url": "https://aagl.org/events-calender/",
+   "api_url": "https://aagl.org/wp-json/tribe/events/v1/",
+   "js_required": true,
+   "bot_protection": "cloudflare",
+   "volume_estimate": 6,
+   "pagination": "unknown",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "mixed",
+   "expected_found": [
+    "55th Global Congress on MIGS",
+    "56th Global Congress on MIGS",
+    "22nd AAGL International Congress",
+    "23rd AAGL International Congress"
+   ],
+   "notes": "Tribe Events (The Events Calendar WordPress plugin). Events listing at /events-calender/ with dynamic JS rendering. 6 upcoming dated events visible (2026-09 to 2027-11). Detail pages include dates (start/end), venue, location, price, and categories. Supports conferences, courses, webinars, and workshops. Expected name \"AAGL Global Congress\" found as multiple Global Congress and International Congress editions. AWS WAF blocks direct API access but schema.org markup pre-rendered in HTML for all events.",
+   "batch": 2
+  },
+  {
+   "domain": "idweek.org",
+   "status": "resolved",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "https://www.idweek.org/program/",
+   "event_type_mix": "conference",
+   "volume_estimate": 100,
+   "pagination": "none",
+   "detail_topology": "mixed",
+   "api_url": "https://idweek2026.eventscribe.net/",
+   "bot_protection": "cloudflare",
+   "expected_found": [
+    "IDWeek"
+   ],
+   "notes": "Single flagship annual conference for infectious disease professionals. IDWeek 2026 program hosted on main site with overview; detailed sessions on EventScribe platform (Cloudflare-protected). Homepage indicates 100+ sessions and workshops.",
+   "batch": 2
+  },
+  {
+   "domain": "croiconference.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.croiconference.org/preliminary-agenda-2027/",
+   "notes": "Single flagship annual medical conference (CROI). Next event is CROI 2027 (March 21-24, 2027 in San Diego). Full program and registration deadlines published. WordPress site with Yoast SEO.",
+   "event_type_mix": "conference",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "CROI"
+   ],
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "eular.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://eular.org/event",
+   "pagination": "query_param",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "volume_estimate": 12,
+   "expected_found": [
+    "EULAR Congress"
+   ],
+   "notes": "eular.org hosts a rheumatology events directory (Odoo-based) listing conferences, congresses, and courses from EULAR and partner organizations. The flagship EULAR Annual Congress has its own dedicated site at congress.eular.org (currently EULAR 2027, June 9-12, Berlin). Main listing page uses pagination (?page=2, ?page=3, etc.) and date filters (?date=upcoming, ?date=all). Event details (date, time, location) appear on individual event pages.",
+   "batch": 2
+  },
+  {
+   "domain": "rheumatology.org",
+   "status": "resolved",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "https://rheumatology.org/meetings/acr-convergence/",
+   "api_url": "",
+   "bot_protection": "none",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "conference",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "ACR Convergence"
+   ],
+   "notes": "ACR Convergence is a single flagship annual conference with its own dedicated detail page. The site is a Next.js SPA requiring client-side rendering. Upcoming event dates (2026-2027) found in page content.",
+   "batch": 2
+  },
+  {
+   "domain": "iasociety.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": true,
+   "bot_protection": "cloudflare",
+   "listing_url": "",
+   "notes": "Site confirmed to exist (robots.txt accessible) but comprehensive Cloudflare bot protection blocks all content retrieval. Unable to verify event listings or discover events listing URL. Drupal-based site (per robots.txt structure). All common event paths (/events, /conferences, /meeting, /iac, /conference, /event, /activities, /programs) return HTTP 403 Cloudflare block.",
+   "parked_reason": "cloudflare bot protection prevents access; cannot verify event listings exist",
+   "pagination": "unknown",
+   "event_type_mix": "unknown",
+   "detail_topology": "unknown",
+   "api_url": "",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "batch": 2
+  },
+  {
+   "domain": "aad.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.aad.org/member/meetings/events/locations",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "standard_subpages",
+   "pagination": "none",
+   "volume_estimate": 4,
+   "bot_protection": "none",
+   "expected_found": [
+    "AAD Annual Meeting"
+   ],
+   "parked_reason": "",
+   "notes": "Listing page shows upcoming Annual and Summer meetings with dates/locations. 2027 Annual Meeting (March 19-23, San Francisco) has detailed subpages at /am27 with education, faculty, and events sections. All event details load server-side, no JS required. Members-only section but publicly accessible from main site.",
+   "batch": 2
+  },
+  {
+   "domain": "asn-online.org",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": false,
+   "listing_url": "https://www.asn-online.org/education/kidneyweek/",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "volume_estimate": 1,
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "expected_found": [
+    "ASN Kidney Week"
+   ],
+   "bot_protection": "none",
+   "notes": "Kidney Week 2026 (Oct 21\u201325, Denver, CO) is ASN's flagship annual conference. Single event per year, with event details fully visible on the landing page. Site uses custom ASP.NET platform with EventPilot integration; not WordPress, Tribe, or Salesforce LWC. No API endpoint found. Schema.org event markup present.",
+   "batch": 2
+  },
+  {
+   "domain": "eadv.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.eadv.org/events/calendar/",
+   "js_required": false,
+   "api_url": "",
+   "event_type_mix": "conference",
+   "pagination": "none",
+   "bot_protection": "none",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 6,
+   "expected_found": [
+    "EADV Congress"
+   ],
+   "notes": "EADV operates a two-tiered event model: two major annual events (Congress in autumn, Spring Symposium) with dedicated pages (/congress/, /symposium/) plus a calendar listing at /events/calendar/. EADV Congress 2026 (Vienna, Sept 30-Oct 3) is the primary upcoming event. Static WordPress site with Elementor builder; no JS required to view event dates and descriptions.",
+   "batch": 2
+  },
+  {
+   "domain": "myesr.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.myesr.org/congress/",
+   "event_type_mix": "conference",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "European Congress of Radiology (ECR)"
+   ],
+   "bot_protection": "none",
+   "notes": "ESR hosts a single flagship annual congress, ECR 2027 (March 3-7 in Vienna). The /congress/ landing page contains full event details, timeline (abstract deadlines, registration), and keynote speakers. WordPress 7.1 with EventON v4.9.10 plugin; no Tribe Events API.",
+   "batch": 2
+  },
+  {
+   "domain": "rsna.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "listing_url": "https://www.rsna.org/annual-meeting",
+   "api_url": "",
+   "js_required": false,
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "RSNA Annual Meeting"
+   ],
+   "notes": "RSNA is a flagship single-annual-meeting site. The annual-meeting page shows RSNA 2026 Scientific Assembly & Annual Meeting (Nov 29 - Dec 4, 2026, McCormick Place Chicago). Registration is open. Pricing details on dedicated subpage /attendee-resources/pricing-and-registration. Built on .NET/Sitecore CMS; no WordPress/Tribe Events/Salesforce markers.",
+   "batch": 2
+  },
+  {
+   "domain": "era-online.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.era-online.org/events/other-events/",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 12,
+   "bot_protection": "none",
+   "expected_found": [
+    "ERA Congress"
+   ],
+   "notes": "WordPress site with main flagship ERA Congress events (Glasgow 2026, Rotterdam 2027, Berlin 2028) plus endorsed external conferences and CME courses. /events/other-events/ is the consolidated listing of approved upcoming events. Individual event pages have full details, venue, and external registration links.",
+   "batch": 2
+  },
+  {
+   "domain": "arrs.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.arrs.org/ARRSLIVE/ARRSLIVE/Education/upcoming_events.aspx",
+   "bot_protection": "none",
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "conference",
+   "volume_estimate": 8,
+   "api_url": "",
+   "expected_found": [
+    "ARRS Annual Meeting"
+   ],
+   "notes": "American Roentgen Ray Society (ARRS) events listing page. ARRS 2027 Annual Meeting (May 2\u20135, Denver), 2028 (April 30\u2013May 3, Austin), 2029 (April 30\u2013May 3, Honolulu) all visible with full dates and venues. Additional upcoming webinars and longitudinal courses in September-October 2026 also listed. Server-side rendered ASP.NET application.",
+   "batch": 2
+  },
+  {
+   "domain": "snmmi.org",
+   "status": "out_of_scope",
+   "platform": "unknown",
+   "js_required": false,
+   "parked_reason": "Single annual flagship meeting; upcoming dates not published publicly. Site is Sitefinity-based corporate/organizational site (not an events directory). The 2026 Annual Meeting is archived on Cvent; no 2027 meeting dates visible on snmmi.org. Organization uses external registrar (Cvent) for meetings, not a self-hosted events listing.",
+   "notes": "SNMMI is a professional society promoting nuclear medicine and molecular imaging. Their website only references the annual SNMMI Annual Meeting as a single event, managed through Cvent. No public events calendar or listing directory exists on the main site. The Cvent short link (cvent.me/M4EQZa) shows the 2026 meeting as archived (no longer accepting registrations). No upcoming 2027 meeting registration page is visible on snmmi.org.",
+   "batch": 2
+  },
+  {
+   "domain": "asahq.org",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": false,
+   "listing_url": "https://www.asahq.org/annualmeeting",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "ASA Annual Meeting"
+   ],
+   "bot_protection": "none",
+   "notes": "Single-flagship-conference site. ANESTHESIOLOGY 2026 is the primary event (Oct 16-20, 2026, San Diego). Full pricing and registration details on-page; registration external to Experience Event platform. Sitecore CMS backend; listing pages are static HTML (not SPA).",
+   "batch": 2
+  },
+  {
+   "domain": "esp-pathology.org",
+   "status": "resolved",
+   "platform": "tribe_events",
+   "listing_url": "https://www.esp-pathology.org/events/",
+   "api_url": "https://www.esp-pathology.org/wp-json/tribe/events/v1/events",
+   "js_required": false,
+   "bot_protection": "none",
+   "volume_estimate": 7,
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "mixed",
+   "expected_found": [
+    "Pathology Visions 2026"
+   ],
+   "notes": "Tribe Events platform with working JSON API. 7 upcoming dated events currently listed (ESP Workshop on Digital/Computational Pathology Sept 28-29, Pathology Visions 2026 Oct 16-18, EScoP courses Nov-Dec). Expected \"ESP Congress\" not found in current listing. HTML pagination shows 3 pages but includes past events; API returns only upcoming events.",
+   "batch": 2
+  },
+  {
+   "domain": "eanm.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": true,
+   "listing_url": "https://eanm.org/the-eanm-community/opportunities/calendar-of-events/",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "volume_estimate": 499,
+   "pagination": "load_more",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "EANM Congress"
+   ],
+   "notes": "WordPress site using Stache Themes Event Calendar plugin. Calendar page requires JavaScript to render events. Verified ~499 event URLs in wp-sitemap-posts-stec_event-1.xml. Individual event pages (e.g., /stec_event/eanm26-annual-congress/) contain full details. Expected event \"EANM Congress\" found as \"EANM26 Annual Congress\". Calendar supports multiple layout views (agenda, month, grid) with navigation and filtering.",
+   "batch": 2
+  },
+  {
+   "domain": "uscap.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "notes": "Bot protection (HTTP 403) blocks all automated access to www.uscap.org and event pages. Membership portal (my.uscap.org) exists but event listings not publicly accessible. No alternative event URLs or external registrar found.",
+   "parked_reason": "bot_protection",
+   "listing_url": "",
+   "api_url": "",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "expected_found": [],
+   "bot_protection": "403_to_curl",
+   "batch": 2
+  },
+  {
+   "domain": "fdiworlddental.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.fdiworlddental.org/all-events",
+   "api_url": "",
+   "pagination": "query_param",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 30,
+   "expected_found": [
+    "FDI World Dental Congress"
+   ],
+   "notes": "Drupal 10 CMS with /all-events listing page. Pagination via query param (?page=0,1,2...). Events display 10 per page with detail pages showing dates, venue, location. Confirmed: FDI World Dental Congress 2027 (21-24 Oct, Mumbai, India) and FDI Regional Congress 2026 (21-23 Oct, Kenya). No API detected.",
+   "batch": 2
+  },
+  {
+   "domain": "eusem.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://eusem.org/events",
+   "js_required": false,
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "query_param",
+   "bot_protection": "none",
+   "api_url": "",
+   "volume_estimate": 12,
+   "expected_found": [
+    "EUSEM Congress"
+   ],
+   "notes": "Main organization site (eusem.org) runs Joomla K2 and lists events/courses at /events. The flagship EUSEM Congress 2026 (Sept 23-27, Paris) is hosted on separate WordPress subdomain eusemcongress.org but linked from main site. Mixed event types: annual flagship congress + educational courses + endorsed events. Details appear inline on event pages.",
+   "batch": 2
+  },
+  {
+   "domain": "esaic.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": true,
+   "listing_url": "https://esaic.org/events/",
+   "api_url": "https://esaic.org/wp-json/wp/v2/event",
+   "volume_estimate": 25,
+   "pagination": "query_param",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "Euroanaesthesia"
+   ],
+   "notes": "ESAIC maintains a WordPress event directory at /events/ with 25 total events accessible via WP-JSON API at /wp-json/wp/v2/event. Expected event Euroanaesthesia found (3 versions: 2027, 2028, 2029 with dates May 29-31, hosted on external euroanaesthesia.org subdomain). Mixed event type mix includes conferences and course-type sessions. Individual event pages display dates/location; JavaScript required for frontend listing.",
+   "batch": 2
+  },
+  {
+   "domain": "acep.org",
+   "status": "resolved",
+   "platform": "spa",
+   "listing_url": "https://www.acep.org/master-calendar",
+   "js_required": true,
+   "detail_topology": "on_event_page",
+   "event_type_mix": "conference",
+   "pagination": "unknown",
+   "volume_estimate": 50,
+   "bot_protection": "none",
+   "api_url": "",
+   "expected_found": [
+    "ACEP Scientific Assembly"
+   ],
+   "notes": "AngularJS SPA at /master-calendar displays upcoming events via ng-repeat (list requires JS rendering). Individual event pages (e.g. /master-calendar/acep31-scientific-assembly) show full details: dates, location, fees on-page. ACEP31 runs 9/22-10/7/2026. Sitemap reveals 7+ annual Scientific Assembly editions (ACEP26-32) plus courses and regional conferences. No API access observed; content loaded client-side. No login wall.",
+   "batch": 2
+  },
+  {
+   "domain": "faceconference.com",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "bot_protection": "cloudflare",
+   "parked_reason": "Cloudflare bot protection (\"Attention Required\") blocks all HTTP/HTTPS requests. Cannot access homepage, /events, /courses, /sitemap.xml, or /robots.txt. HTTP 403 response on all paths. Discovery impossible without browser with JavaScript challenge solver.",
+   "listing_url": "",
+   "notes": "Site exists (DNS resolves, SSL cert valid) but Cloudflare shields prevent any curl-based recon. Would require Playwright or similar browser automation to bypass the challenge and verify event listings exist.",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "expected_found": [],
+   "batch": 2
+  },
+  {
+   "domain": "imcas.com",
+   "status": "resolved",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "https://www.imcas.com/en/worldwide-events",
+   "event_type_mix": "conference",
+   "volume_estimate": 5,
+   "pagination": "infinite_scroll",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "IMCAS World Congress"
+   ],
+   "api_url": "https://www.imcas.com/en/worldwide-events",
+   "notes": "Custom SPA with Algolia search. Events (IMCAS China 2026 27-29 Aug, IMCAS World 2027 28-30 Jan, IMCAS Americas 2027 20-22 May, IMCAS Asia 2027 4-6 Jun, INVEST by IMCAS 2027) rendered server-side in HTML with module-based JS client. Individual congress pages carry details and side-events. No auth wall. Status 200, clean fetch.",
+   "batch": 2
+  },
+  {
+   "domain": "aceconference.co.uk",
+   "status": "parked",
+   "parked_reason": "dead \u2014 domain not registered, DNS resolution fails (NXDOMAIN)",
+   "platform": "none",
+   "js_required": false,
+   "listing_url": "",
+   "api_url": "",
+   "volume_estimate": 0,
+   "pagination": "none",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "expected_found": [],
+   "bot_protection": "none",
+   "notes": "Domain does not resolve (NXDOMAIN). No web presence. Cannot discover any event/conference listings or dated events.",
+   "batch": 2
+  },
+  {
+   "domain": "ccrlondon.com",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.ccrlondon.com",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "api_url": "",
+   "bot_protection": "none",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "expected_found": [
+    "CCR London"
+   ],
+   "notes": "Single flagship conference (CCR London, 2026-10-01 to 2026-10-02) hosted on Easyfairs' WordPress infrastructure. Event details visible in homepage schema. No additional upcoming events listed; site focused entirely on this one annual conference.",
+   "batch": 2
+  },
+  {
+   "domain": "amwc-conference.com",
+   "status": "resolved",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "https://www.amwc-conference.com",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "bot_protection": "none",
+   "expected_found": [
+    "AMWC"
+   ],
+   "notes": "Single flagship conference: Aesthetic & Anti-Aging Medicine World Congress 2027 in Cannes. Built with Next.js (SPA requiring client-side rendering). Informa-owned property. Metadata confirms 2027 event date via og:image.",
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "himss.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": true,
+   "bot_protection": "cloudflare",
+   "listing_url": "",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "unknown",
+   "pagination": "unknown",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "parked_reason": "Cloudflare bot protection blocks all curl requests; cannot access homepage, common paths (/events, /conferences, /congress, etc.), subdomains (events.himss.org, my.himss.org), or sitemaps. Site requires JavaScript/browser rendering to bypass challenge. Cannot verify a dated event listing or confirm HIMSS Global Health Conference details.",
+   "notes": "himss.org uses Astro framework and aggressive Cloudflare protection. All paths return \"Just a moment...\" challenge page. Discovery requires browser/headless Chromium, not curl. Site is accessible via browser but not to automated tools without anti-bot bypass.",
+   "batch": 2
+  },
+  {
+   "domain": "nhsconfedexpo.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": true,
+   "listing_url": "https://www.nhsconfedexpo.org",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "NHS ConfedExpo"
+   ],
+   "notes": "Single flagship conference site (NHS ConfedExpo 2027, June 16-17). Marketing hub at main domain, detailed agenda/sessions at subdomain (agenda.nhsconfedexpo.org) via React SPA. ASP.events platform (SHOWOFF). No multiple events listing; conference-centric with exhibitors, speakers, sponsors, on-demand content.",
+   "batch": 2
+  },
+  {
+   "domain": "learning.bmj.com",
+   "status": "out_of_scope",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "",
+   "api_url": "",
+   "bot_protection": "cloudflare",
+   "event_type_mix": "none",
+   "detail_topology": "unknown",
+   "pagination": "unknown",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "parked_reason": "e-learning platform with no dated events. learning.bmj.com (301 redirects to new-learning.bmj.com) is a React SPA serving CPD modules/courses entirely client-side. Cannot verify event listing via curl. Title: \"BMJ Learning: Online Courses for Healthcare Professionals\". All paths return React shell HTML. Likely on-demand educational content, not dated conferences/events suitable for MedConf's directory.",
+   "notes": "Original domain learning.bmj.com redirects (HTTP 301) to new-learning.bmj.com, both serve identical React SPA from S3/CloudFront. Page is fully client-rendered; static paths (robots.txt, sitemap.xml, /api/courses) all return React shell. No JSON API accessible to curl. Platform appears to be on-demand medical education modules rather than scheduled events.",
+   "batch": 2
+  },
+  {
+   "domain": "digitalhealthrewired.com",
+   "status": "resolved",
+   "platform": "external_registrar",
+   "listing_url": "https://digitalhealthrewired.com",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "volume_estimate": 1,
+   "pagination": "none",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "Digital Health Rewired"
+   ],
+   "notes": "Single-flagship-conference site (Digital Health Rewired 2027, 16-17 March 2027, Birmingham NEC). Powered by ASP.events SHOWOFF platform. Homepage has structured event data with dates. A /programme page exists for session details but content is JS-rendered.",
+   "batch": 2
+  },
+  {
+   "domain": "hlth.com",
+   "status": "resolved",
+   "platform": "spa",
+   "listing_url": "https://hlth.com/member-events",
+   "api_url": "",
+   "js_required": true,
+   "bot_protection": "none",
+   "event_type_mix": "mixed",
+   "volume_estimate": 50,
+   "pagination": "load_more",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "HLTH"
+   ],
+   "notes": "HLTH is a Global Health Innovation community platform with three event channels: in-person member-exclusive events, virtual webinars, and masterclass series. Angular SPA with Ant Design. All dated events verified as future dates (min date 2026-09-24, well after today 2026-09-21). Primary conference listing at /member-events with individual event detail pages showing dates, times, and registration links.",
+   "batch": 2
+  },
+  {
+   "domain": "viveevent.com",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://hlth.com/events/vive/",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "api_url": "",
+   "bot_protection": "none",
+   "pagination": "none",
+   "volume_estimate": 1,
+   "expected_found": [
+    "ViVE"
+   ],
+   "notes": "viveevent.com redirects to hlth.com/events/vive/. Single flagship conference: ViVE 2027 (Mar 14-17, Nashville). Co-hosted by HLTH and CHIME. WordPress + Elementor. Event details and registration links on event page; no separate listing directory.",
+   "batch": 2
+  },
+  {
+   "domain": "medscape.org",
+   "status": "out_of_scope",
+   "platform": "unknown",
+   "js_required": false,
+   "bot_protection": "cloudflare",
+   "listing_url": "",
+   "parked_reason": "e-learning platform with on-demand CME modules only; no dated conference/events listing found. All discovery paths blocked by Cloudflare. Platform structure indicates self-paced learning activities rather than upcoming dated events.",
+   "event_type_mix": "none",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "expected_found": [],
+   "notes": "Medscape Education operates as an on-demand CME/CPD platform with individual learning activities and articles, not a conference events directory. Cloudflare protection blocks normal crawling; robots.txt hints at /viewarticle/* pages but these are activities, not dated events. Out of scope for MedConf event sourcing.",
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "jpmorgan.com",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.jpmorgan.com/about-us/events-conferences",
+   "volume_estimate": 54,
+   "pagination": "none",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "api_url": "",
+   "expected_found": [
+    "JP Morgan Healthcare Conference"
+   ],
+   "notes": "54 dated J.P. Morgan conferences (2026-2027) listed on hub page with individual event pages. AEM-rendered, no JS requirement. Healthcare Conference flagship on January 11-14, 2027.",
+   "batch": 2
+  },
+  {
+   "domain": "nihr.ac.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.nihr.ac.uk/events",
+   "api_url": "",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 6,
+   "bot_protection": "none",
+   "expected_found": [],
+   "notes": "Drupal 10 site hosting NIHR events with dated conferences/workshops/webinars. At least 6 upcoming events visible with parseable dates (Sept-Oct 2026). Event details including venue, time, and location appear on individual event pages. No pagination or API endpoint detected \u2014 events served as server-rendered static HTML on /events listing page.",
+   "batch": 2
+  },
+  {
+   "domain": "mimslearning.co.uk",
+   "status": "out_of_scope",
+   "platform": "spa",
+   "js_required": true,
+   "parked_reason": "on-demand-cpd-only: site offers self-paced CPD modules with no visible dated sessions or upcoming events. Platform uses JavaScript rendering; no dated event listings accessible via static curl.",
+   "notes": "ThoughtIndustries platform for clinical education. CPD modules found (matches 'expect' list), but all appear to be on-demand content without scheduled session dates visible in static HTML.",
+   "event_type_mix": "none",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "bot_protection": "none",
+   "expected_found": [
+    "CPD modules"
+   ],
+   "listing_url": "",
+   "detail_topology": "unknown",
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "pocus101.com",
+   "status": "out_of_scope",
+   "platform": "unknown",
+   "js_required": true,
+   "listing_url": "",
+   "api_url": "https://courses.pocus101.com/wp-json/wp/v2/sfwd-courses",
+   "event_type_mix": "none",
+   "detail_topology": "unknown",
+   "pagination": "unknown",
+   "volume_estimate": 0,
+   "bot_protection": "none",
+   "expected_found": [],
+   "parked_reason": "on-demand e-learning only \u2014 no dated events. POCUS 101 is a LearnDash LMS hosting 18+ self-paced ultrasound courses (Thyroid, Cardiac, Lung, etc.). No scheduled sessions, start dates, or event-type dated content exists. Verified via REST API: all courses have empty start/end date fields and expire_access_days=0.",
+   "notes": "POCUS 101 is an on-demand ultrasound education platform. Courses are self-paced LearnDash modules without dated availability. Main site (www) is WordPress blog; learning platform (courses subdomain) is LearnDash LMS. WordPress REST API confirmed all courses lack date fields. Out of scope: e-learning module provider, not a conference or dated-event directory.",
+   "batch": 2
+  },
+  {
+   "domain": "learn.nihr.ac.uk",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "parked_reason": "login-wall: NIHR Learn is an authentication portal (WSO2 Identity Server LMS). The root domain redirects to a login page with no public event/course listing accessible. All common discovery paths (/courses, /events, /training, etc.) return 404. Courses exist behind authentication only.",
+   "notes": "learn.nihr.ac.uk is a learning management system for National Institute for Health Research research training. No publicly listed events/courses discoverable. Would require account credentials to access training catalog.",
+   "bot_protection": "none",
+   "listing_url": "",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "expected_found": [],
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "schoolofsurgery.org",
+   "status": "parked",
+   "platform": "none",
+   "js_required": false,
+   "listing_url": "",
+   "bot_protection": "none",
+   "notes": "Domain does not resolve (NXDOMAIN). DNS lookup shows domain is unregistered or parked. Site is inaccessible.",
+   "parked_reason": "dead",
+   "event_type_mix": "none",
+   "volume_estimate": 0,
+   "pagination": "none",
+   "detail_topology": "unknown",
+   "expected_found": [],
+   "batch": 2
+  },
+  {
+   "domain": "medical-interviews.co.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.medical-interviews.co.uk/category/professional-development",
+   "event_type_mix": "course",
+   "detail_topology": "standard_subpages",
+   "volume_estimate": 15,
+   "pagination": "none",
+   "bot_protection": "none",
+   "expected_found": [
+    "Leadership and communication courses"
+   ],
+   "notes": "ISC Medical course catalog. Professional development category (https://www.medical-interviews.co.uk/category/professional-development) lists 15+ courses including expected \"leadership-and-management-course-for-doctors\". Individual course pages show CPD accreditation and course format (live two-day/online/webinar). Session dates and booking accessible via per-course pages; not visible in static HTML listing. No login wall or bot protection encountered.",
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "pastest.com",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": true,
+   "listing_url": "https://www.pastest.com/products/paces-in-person",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "course",
+   "volume_estimate": 1,
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "expected_found": [
+    "MRCP/MRCS exam prep"
+   ],
+   "notes": "Pastest is a Shopify-based e-learning platform selling exam prep materials (MRCP, MRCS, dentistry, etc.). Found ONE dated course: PACES In-Person Course on 3rd October 2026 (\u00a3499.99). Site is primarily on-demand video courses, but does offer live in-person PACES preparation in Manchester. Dates/session info embedded in product variants; no separate events directory.",
+   "batch": 2
+  },
+  {
+   "domain": "passmedicine.com",
+   "status": "out_of_scope",
+   "platform": "unknown",
+   "js_required": false,
+   "bot_protection": "none",
+   "parked_reason": "Site sells on-demand exam question banks with NO dated events. Purely e-learning/test-prep platform for medical exam revision. No conferences, webinars, or scheduled educational events. All content is self-paced.",
+   "listing_url": "",
+   "event_type_mix": "none",
+   "expected_found": [
+    "Medical exam question bank"
+   ],
+   "volume_estimate": 0,
+   "pagination": "none",
+   "detail_topology": "unknown",
+   "api_url": "",
+   "notes": "PassMedicine is an on-demand medical exam revision platform offering question banks for MRCP, MRCGP, PLAB, DRCOG, USMLE, and other medical exams. No live events, conferences, webinars, or dated CPD activities found. All content is self-paced with no scheduling component. Out of scope for medical conference directory.",
+   "batch": 2
+  },
+  {
+   "domain": "iscmedical.co.uk",
+   "status": "resolved",
+   "platform": "unknown",
+   "listing_url": "https://www.iscmedical.co.uk/category/professional-development",
+   "detail_topology": "standard_subpages",
+   "event_type_mix": "course",
+   "js_required": false,
+   "pagination": "none",
+   "bot_protection": "none",
+   "api_url": "",
+   "volume_estimate": 28,
+   "expected_found": [
+    "Medical interview and communication courses"
+   ],
+   "notes": "ISC Medical is a UK medical training provider with ~60 products (courses, books, coaching). Courses are organized by professional category and hosted individually on product pages. Each course displays an interactive calendar with upcoming dated sessions (e.g., IMT course: Nov/Dec 2026, Jan 2027 slots). Custom e-commerce platform; no external registrar or API.",
+   "batch": 2
+  },
+  {
+   "domain": "frcrphysicsnotes.com",
+   "status": "parked",
+   "platform": "none",
+   "js_required": false,
+   "parked_reason": "dead \u2014 domain does not resolve; DNS NXDOMAIN; no A records present",
+   "listing_url": "",
+   "notes": "The assigned domain frcrphysicsnotes.com is not registered or has no active DNS configuration. Both www and non-www variants fail to resolve. FRCR (UK radiology) does not host physics course listings here.",
+   "volume_estimate": 0,
+   "pagination": "none",
+   "detail_topology": "unknown",
+   "bot_protection": "none",
+   "event_type_mix": "none",
+   "expected_found": [],
+   "api_url": "",
+   "batch": 2
+  },
+  {
+   "domain": "doctorsacademy.org",
+   "status": "resolved",
+   "platform": "spa",
+   "js_required": false,
+   "listing_url": "https://courses.doctorsacademy.org.uk/cavail.aspx",
+   "api_url": "",
+   "event_type_mix": "course",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 9,
+   "pagination": "none",
+   "bot_protection": "none",
+   "expected_found": [
+    "MRCS Part B OSCE Programme",
+    "FRCS (General Surgery) courses",
+    "MRCS surgical courses",
+    "Basic Surgical Skills"
+   ],
+   "notes": "ASP.NET (IIS 10.0) course listing portal. Availability page (cavail.aspx) shows dated surgical/medical courses with dates ranging from Sept 2026 to March 2027. Course details (fees, venue, curriculum) live on individual course pages. No pagination, no API, no JS required. Matches expected \"MRCS and surgical courses\" content.",
+   "batch": 2
+  },
+  {
+   "domain": "matacourses.com",
+   "status": "parked",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "parked_reason": "dead - WordPress installation with critical configuration error. All paths (root, /courses, /events, /education, /cpd, /whats-on, /meetings, /robots.txt, /sitemap.xml) return HTTP 500 \"Critical error\" pages. Site is non-functional.",
+   "bot_protection": "none",
+   "listing_url": "",
+   "api_url": "",
+   "notes": "WordPress error pages indicate a broken installation or database connectivity issue preventing any page rendering. No accessible event/course listings found. Discovery terminated due to site unavailability.",
+   "event_type_mix": "none",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "expected_found": [],
+   "batch": 2
+  },
+  {
+   "domain": "harleyacademy.com",
+   "status": "resolved",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "https://www.harleyacademy.com/browse-all-aesthetics-courses/",
+   "event_type_mix": "course",
+   "detail_topology": "subpages",
+   "pagination": "unknown",
+   "bot_protection": "none",
+   "volume_estimate": 20,
+   "expected_found": [
+    "Aesthetic medicine training"
+   ],
+   "notes": "Harley Academy is a Next.js/Prismic CMS platform offering aesthetic medicine (cosmetic dermatology, injectables, Profhilo) training courses for healthcare professionals (doctors, dentists, nurses, pharmacists). The browse-all-aesthetics-courses listing page aggregates courses by specialization. Individual course pages (e.g., /training-courses-for-doctors/, /cosmetic-dermatology-courses/) provide per-course details. JS rendering required to see dynamic session data; platform structure confirmed via sitemap and working course category pages.",
+   "batch": 2
+  },
+  {
+   "domain": "reviseradiology.com",
+   "status": "parked",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "https://www.reviseradiology.com/courses",
+   "bot_protection": "none",
+   "api_url": "",
+   "event_type_mix": "course",
+   "detail_topology": "unknown",
+   "pagination": "unknown",
+   "volume_estimate": 0,
+   "expected_found": [
+    "FRCR radiology revision"
+   ],
+   "parked_reason": "JavaScript-required SPA (Livewire/Laravel). Static HTTP fetch cannot render course listings. Site offers FRCR exam revision courses but listing content is client-side rendered; cannot verify dated/scheduled sessions without browser automation. Appears to be subscription-based on-demand learning platform rather than event/conference listing site.",
+   "notes": "Found /courses (title=\"Courses\", meta=\"Available Courses\") and /events nav links. Platform uses Livewire SPA (laravel), Alpine.js, no client-side event dates visible in static HTML. Provider is \"Revise Radiology Ltd\" (UK company 09134299). Site structure suggests course functionality but actual session scheduling/dates not verifiable via static fetch.",
+   "batch": 2
+  },
+  {
+   "domain": "dermamedical.co.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://dermamedical.co.uk/all-courses/",
+   "js_required": false,
+   "event_type_mix": "course",
+   "detail_topology": "on_event_page",
+   "pagination": "query_param",
+   "volume_estimate": 12,
+   "bot_protection": "cloudflare",
+   "api_url": "",
+   "expected_found": [
+    "Aesthetic medicine training"
+   ],
+   "notes": "Derma Medical UK (EducationalOrganization) offers Botox, filler, and aesthetic medicine training courses. Root domain blocked with 403, but individual product pages load with proper User-Agent. WooCommerce-based course shop with dated sessions. Foundation course shows multiple June-July 2026 dates at GBP 1106 per session. All courses CPD-accredited. Matches expected offering perfectly.",
+   "batch": 2
+  },
+  {
+   "domain": "radiopaedia.org",
+   "status": "out_of_scope",
+   "platform": "spa",
+   "js_required": true,
+   "parked_reason": "on-demand e-learning only, no dated events. Radiopaedia.org is a radiology reference and education platform offering self-paced courses and learning modules. While /courses listing exists, it contains on-demand educational content without scheduled dates or conference sessions. Individual course pages are dynamically rendered SPAs; static discovery cannot verify dated event data. Site enforces bot protection (Cloudflare + HTTP 406 challenges).",
+   "notes": "Radiopaedia courses are self-paced educational modules (e.g., \"Symptomatic Anatomic Variants\"), not CPD-accredited conferences. MedConf targets dated events; this platform is fundamentally misaligned with that scope. Bot protection prevents further verification.",
+   "listing_url": "",
+   "event_type_mix": "none",
+   "api_url": "",
+   "detail_topology": "unknown",
+   "pagination": "unknown",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "bot_protection": "cloudflare",
+   "batch": 2
+  },
+  {
+   "domain": "phemcast.co.uk",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": true,
+   "bot_protection": "cloudflare",
+   "notes": "Discovery failed. Entire domain (including /, /courses, /events, /wp-json/tribe/events/v1/events, /sitemap.xml, /robots.txt, and subdomains) protected by Cloudflare JavaScript Challenge. Cannot verify event/course listings or platform without solving client-side bot challenge.",
+   "listing_url": "",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "expected_found": [],
+   "api_url": "",
+   "parked_reason": "bot_protection: Cloudflare challenge prevents all discovery attempts via standard HTTP. Would require browser automation to bypass.",
+   "batch": 2
+  },
+  {
+   "domain": "skinvivatraining.com",
+   "status": "resolved",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "https://harleyacademy.com/browse-all-aesthetics-courses/",
+   "event_type_mix": "course",
+   "detail_topology": "external",
+   "pagination": "unknown",
+   "volume_estimate": 70,
+   "bot_protection": "none",
+   "expected_found": [
+    "Aesthetic training"
+   ],
+   "notes": "Domain redirects (301) to harleyacademy.com. Next.js SPA with Prismic CMS backend for ~70 aesthetic training courses. Confirmed via Prismic API. Learning platform behind auth at learning.harleyacademy.com.",
+   "batch": 2
+  },
+  {
+   "domain": "theultrasoundsite.co.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://theultrasoundsite.co.uk/shop/",
+   "js_required": false,
+   "bot_protection": "none",
+   "event_type_mix": "course",
+   "detail_topology": "on_event_page",
+   "pagination": "query_param",
+   "volume_estimate": 31,
+   "expected_found": [
+    "POCUS and ultrasound courses"
+   ],
+   "api_url": "",
+   "notes": "The Ultrasound Site is a WordPress+WooCommerce MSK (musculoskeletal) ultrasound course provider. Shop listing at /shop/ displays individual course products with dates in titles (e.g., \"27th February 2027 - Advanced MSK Ultrasound course - Day 1 Upper limb\"). 31 course products found via sitemap, all with 2027 dates (future sessions). Details, pricing, and booking via individual WooCommerce product pages. Matches expectation for ultrasound courses.",
+   "batch": 2
+  },
+  {
+   "domain": "pocus101.com",
+   "status": "out_of_scope",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "",
+   "volume_estimate": 0,
+   "pagination": "none",
+   "event_type_mix": "none",
+   "detail_topology": "unknown",
+   "api_url": "",
+   "bot_protection": "none",
+   "parked_reason": "on-demand e-learning platform only; no dated events/conferences/CPD sessions. Main domain (pocus101.com) is educational blog. Courses subdomain (courses.pocus101.com) hosts LearnDash LMS with self-paced ultrasound modules (Thyroid Ultrasound, Ultrasound Guided Central Line, etc.) \u2014 enrollable anytime with no session dates.",
+   "expected_found": [],
+   "notes": "Site provides ultrasound education as expected, but via on-demand courses only. No dated events, workshops, conferences, or CPD event listings. Not a fit for MedConf's dated-event directory.",
+   "batch": 2
+  },
+  {
+   "domain": "ataccgroup.com",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://www.ataccgroup.com/product-category/atacc-course/",
+   "bot_protection": "cloudflare",
+   "event_type_mix": "course",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 6,
+   "pagination": "none",
+   "expected_found": [
+    "Anaesthesia Trauma and Critical Care course"
+   ],
+   "notes": "WordPress + WooCommerce site with ATACC (Advanced Trauma and Critical Care) courses listed as products. Main events page at /eventsconferences/ is marked \"Coming Soon\" but courses are accessible via product category. ~6 upcoming courses in 2027 (March, June, July, September). Cloudflare protection on root domain. All dates in HTML; JavaScript not required for listing visibility.",
+   "batch": 2
+  },
+  {
+   "domain": "interfaceaesthetics.co.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "listing_url": "https://interfaceaesthetics.co.uk/courses/",
+   "event_type_mix": "course",
+   "detail_topology": "on_event_page",
+   "pagination": "unknown",
+   "bot_protection": "none",
+   "volume_estimate": 6,
+   "expected_found": [
+    "Aesthetics courses"
+   ],
+   "api_url": "",
+   "notes": "WordPress site with Yoast SEO and Gravity Forms. Level 7 Diploma in Injectables has upcoming sessions: 10/10/2026, 07/11/2026, 05/12/2026, 12/12/2026. Course pages display session schedules in tables with location and date.",
+   "batch": 2
+  },
+  {
+   "domain": "fmlm.ac.uk",
+   "status": "parked",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "bot_protection": "none",
+   "listing_url": "",
+   "parked_reason": "aggregator/curator of partner programs; organization does not host its own dated events/conferences. All curated programs are ongoing courses without specific dates (e.g., Management in Medicine, Mentoring Skills for Doctors, Advanced Team Communication Skills). Located at /services-programmes/partner-events-and-courses.",
+   "expected_found": [
+    "Medical leadership courses"
+   ],
+   "notes": "FMLM (Faculty of Medical Leadership and Management) is a curating body that aggregates partner educational programs from external organizations. They list partner courses and events at /services-programmes/partner-events-and-courses but do not host their own dated conferences. Platform: Drupal 10. No upcoming dated events found.",
+   "batch": 2
+  },
+  {
+   "domain": "mddus.com",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "bot_protection": "cloudflare",
+   "listing_url": "",
+   "api_url": "",
+   "event_type_mix": "none",
+   "detail_topology": "unknown",
+   "pagination": "unknown",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "parked_reason": "Cloudflare protection blocks all HTML page access; cannot verify presence of dated events. Starting URL https://www.mddus.com/training-and-cpd exists per worklist but returns Cloudflare block. Common paths (/events, /courses, /training, /cpd, /education) and sitemap.xml similarly blocked. Site is Sitecore-based (per robots.txt) but actual event/course content inaccessible.",
+   "notes": "MDDUS (Medical Defence Union) site uses Cloudflare to block all bot access. While robots.txt is accessible, indicating a Sitecore site exists, no event listing content could be verified. Training/CPD section likely exists but is unreachable.",
+   "batch": 2
+  },
+  {
+   "domain": "themdu.com",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "bot_protection": "cloudflare",
+   "parked_reason": "bot_protection",
+   "listing_url": "",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "api_url": "",
+   "expected_found": [],
+   "notes": "Site protected by Incapsula bot protection on all paths. Discovery ladder exhausted: root domain, /learn-and-develop URL, and 7 common event/course path variants all return Incapsula challenge pages with empty content body. Cannot verify event listings or dates. Manual browser access may work but automated discovery is blocked.",
+   "batch": 2
+  },
+  {
+   "domain": "advance-he.ac.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.advance-he.ac.uk/events",
+   "js_required": false,
+   "pagination": "query_param",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 210,
+   "expected_found": [
+    "Teaching and education fellowships"
+   ],
+   "bot_protection": "none",
+   "api_url": "",
+   "notes": "WordPress site with FacetWP filtering. Fellowship programmes, workshops, and CPD events. All expected content (teaching/education fellowships) verified on both /fellowship landing page and in active events listing. 200+ dated events across 21 pages.",
+   "batch": 2
+  },
+  {
+   "domain": "england.nhs.uk",
+   "status": "resolved",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "https://www.events.england.nhs.uk/events",
+   "event_type_mix": "conference",
+   "detail_topology": "on_event_page",
+   "pagination": "query_param",
+   "bot_protection": "none",
+   "expected_found": [
+    "Workforce education"
+   ],
+   "volume_estimate": 50,
+   "api_url": "",
+   "notes": "NHS England events portal (events.england.nhs.uk subdomain) with integrated ticketing system. Events show full details on event page: date, time, location, organizer info. Workforce education events confirmed including NHS College of Leadership and Management workshops. Pagination via query params (?page=2). Built by Sigma Technology, uses Materialize CSS framework.",
+   "batch": 2
+  },
+  {
+   "domain": "digital-transformation.hee.nhs.uk",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://digital-transformation.hee.nhs.uk/programmes",
+   "api_url": "",
+   "event_type_mix": "course",
+   "volume_estimate": 2,
+   "pagination": "none",
+   "detail_topology": "subpages",
+   "bot_protection": "none",
+   "expected_found": [
+    "Digital Health Leadership Programme"
+   ],
+   "notes": "Primary course is a postgraduate diploma in digital health leadership with annual application cycle. Applications currently closed but course pages contain guidance, webinar registration, and application process flow. Static HTML site using NHS UK styling framework. No technical barriers; straightforward course catalogue without pagination.",
+   "batch": 2
+  },
+  {
+   "domain": "medicalprotection.org",
+   "status": "resolved",
+   "platform": "external_registrar",
+   "js_required": false,
+   "bot_protection": "none",
+   "listing_url": "https://www.medicalprotection.org/uk/professional-development-courses",
+   "api_url": "",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "event_type_mix": "course",
+   "volume_estimate": 12,
+   "expected_found": [
+    "Webinars",
+    "Online Courses",
+    "Masterclasses",
+    "Professional development"
+   ],
+   "notes": "Medical Protection has public informational hub at /uk/professional-development-courses listing course categories (webinars, online courses, masterclasses, podcasts). Actual event/course listings with dates and sessions reside on Totara LMS at prism.medicalprotection.org but require login. Medical defence/risk training confirmed.",
+   "batch": 2
+  },
+  {
+   "domain": "facultyofclinicalinformatics.org.uk",
+   "status": "parked",
+   "platform": "wordpress_other",
+   "js_required": false,
+   "bot_protection": "cloudflare",
+   "listing_url": "",
+   "parked_reason": "Site protected by Cloudflare + WAF returning 403 Forbidden on all content paths. Homepage returns Cloudflare challenge; all event-related paths (/events, /courses, /cpd, /education, /training) blocked. Sitemap references event pages (annual-scientific-conference, agm) but these are inaccessible. WordPress JSON API accessible but no custom event post type exists; pages accessible via API show spam/casino content (site likely defaced). No evidence of active dated event listings.",
+   "volume_estimate": 0,
+   "event_type_mix": "none",
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "expected_found": [],
+   "api_url": "",
+   "notes": "Faculty of Clinical Informatics domain is inaccessible to bots due to aggressive Cloudflare + WAF protection. Attempted: homepage (Cloudflare challenge), 7 common event paths (all 403), subdomains (blocked), sitemap discovery (event pages exist but blocked), WordPress JSON API (accessible but empty). No upcoming events visible. Site integrity unclear (spam content suggests compromise or defacement).",
+   "batch": 2
+  },
+  {
+   "domain": "ihi.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.ihi.org/learn/courses",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "detail_topology": "tabs",
+   "pagination": "load_more",
+   "volume_estimate": 75,
+   "bot_protection": "none",
+   "expected_found": [
+    "Quality improvement and patient safety"
+   ],
+   "notes": "Drupal 11 site with dual listing structure: /learn/courses for 70+ courses (many with 2026\u20132027 start dates) and /connect/events for conferences. IHI Forum 2026 (Dec 6\u20139) and 2027 flagship events confirmed with future dates. Details (fees, location) on event subpages. AJAX pagination available.",
+   "batch": 2
   }
  ]
 }
