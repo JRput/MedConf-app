@@ -76,7 +76,7 @@ def _fetch_httpx(url: str, headers: dict, timeout: float):
         return None, None
 
 
-def _fetch_via_browser(url: str, page: Any, wait_s: float = 10.0) -> Optional[str]:
+def _fetch_via_browser(url: str, page: Any, wait_s: float = 20.0) -> Optional[str]:
     """Fetch `url` in a brand-new context+page on `page`'s Browser, waiting
     briefly for a challenge interstitial to auto-resolve. Never touches
     `page` itself.
@@ -92,12 +92,28 @@ def _fetch_via_browser(url: str, page: Any, wait_s: float = 10.0) -> Optional[st
     try:
         new_context = page.context.browser.new_context()
         new_page = new_context.new_page()
+        new_page.set_default_timeout(30000)
         new_page.goto(url, wait_until="load", timeout=30000)
-        body = new_page.content()
+        # A challenge interstitial (BTOG's SiteGround 202, seen on CI
+        # 2026-09-20) resolves by JS-redirecting to the real page, so
+        # content() can throw "page is navigating" mid-redirect. Poll until
+        # we get a stable, challenge-free body or run out of time.
+        body = None
         deadline = time.time() + wait_s
-        while time.time() < deadline and _CHALLENGE_MARKERS.search(body or ""):
+        while True:
+            try:
+                new_page.wait_for_load_state("load", timeout=5000)
+                body = new_page.content()
+            except Exception:
+                body = None
+            if body and not _CHALLENGE_MARKERS.search(body):
+                return body
+            if time.time() >= deadline:
+                break
             new_page.wait_for_timeout(1000)
-            body = new_page.content()
+        if body and _CHALLENGE_MARKERS.search(body):
+            logger.warning(f"http_fetch: {url} still showing a challenge page after {wait_s:.0f}s")
+            return None
         return body
     except Exception as e:
         logger.warning(f"http_fetch: Playwright fetch of {url} failed: {e}")

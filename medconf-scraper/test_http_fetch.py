@@ -62,6 +62,12 @@ class FakePage:
     def goto(self, url, wait_until="load", timeout=30000):
         self.goto_calls.append(url)
 
+    def set_default_timeout(self, ms):
+        pass
+
+    def wait_for_load_state(self, state="load", timeout=5000):
+        pass
+
     def content(self):
         if len(self._content_sequence) > 1:
             return self._content_sequence.pop(0)

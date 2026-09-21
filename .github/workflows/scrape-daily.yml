@@ -50,6 +50,9 @@ jobs:
     # probe job keeps the overall run red, which is the alert.
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
+    # Hard cap: on 2026-09-20 a hung Playwright call kept the BTOG job
+    # alive for GitHub's full 6 h limit. Slowest healthy source is ~10 min.
+    timeout-minutes: 60
     strategy:
       fail-fast: false   # one source failing should NOT cancel the others
       matrix:
