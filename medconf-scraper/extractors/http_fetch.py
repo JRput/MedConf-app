@@ -76,6 +76,45 @@ def _fetch_httpx(url: str, headers: dict, timeout: float):
         return None, None
 
 
+def _poll_stable_body(page: Any, url: str, wait_s: float) -> Optional[str]:
+    """Poll `page` until it shows a stable, challenge-free body.
+
+    A challenge interstitial (BTOG's SiteGround 202, seen on CI 2026-09-20)
+    resolves by JS-redirecting to the real page, so content() can throw
+    "page is navigating" mid-redirect — swallow that and keep polling.
+    """
+    body = None
+    deadline = time.time() + wait_s
+    while True:
+        try:
+            page.wait_for_load_state("load", timeout=5000)
+            body = page.content()
+        except Exception:
+            body = None
+        if body and not _CHALLENGE_MARKERS.search(body):
+            return body
+        if time.time() >= deadline:
+            break
+        page.wait_for_timeout(1000)
+    if body and _CHALLENGE_MARKERS.search(body):
+        logger.warning(f"http_fetch: {url} still showing a challenge page after {wait_s:.0f}s")
+        return None
+    return body
+
+
+def _fetch_via_own_page(url: str, page: Any, wait_s: float = 20.0) -> Optional[str]:
+    """Navigate the caller's OWN page to `url` and return its HTML. Only for
+    callers that own the page outright (listing phase). On CI 2026-09-21 the
+    scraper's long-lived main page cleared BTOG's challenge while a fresh
+    context did not, so BTOG's listing uses this path."""
+    try:
+        page.goto(url, wait_until="load", timeout=30000)
+        return _poll_stable_body(page, url, wait_s)
+    except Exception as e:
+        logger.warning(f"http_fetch: own-page fetch of {url} failed: {e}")
+        return None
+
+
 def _fetch_via_browser(url: str, page: Any, wait_s: float = 20.0) -> Optional[str]:
     """Fetch `url` in a brand-new context+page on `page`'s Browser, waiting
     briefly for a challenge interstitial to auto-resolve. Never touches
@@ -94,27 +133,7 @@ def _fetch_via_browser(url: str, page: Any, wait_s: float = 20.0) -> Optional[st
         new_page = new_context.new_page()
         new_page.set_default_timeout(30000)
         new_page.goto(url, wait_until="load", timeout=30000)
-        # A challenge interstitial (BTOG's SiteGround 202, seen on CI
-        # 2026-09-20) resolves by JS-redirecting to the real page, so
-        # content() can throw "page is navigating" mid-redirect. Poll until
-        # we get a stable, challenge-free body or run out of time.
-        body = None
-        deadline = time.time() + wait_s
-        while True:
-            try:
-                new_page.wait_for_load_state("load", timeout=5000)
-                body = new_page.content()
-            except Exception:
-                body = None
-            if body and not _CHALLENGE_MARKERS.search(body):
-                return body
-            if time.time() >= deadline:
-                break
-            new_page.wait_for_timeout(1000)
-        if body and _CHALLENGE_MARKERS.search(body):
-            logger.warning(f"http_fetch: {url} still showing a challenge page after {wait_s:.0f}s")
-            return None
-        return body
+        return _poll_stable_body(new_page, url, wait_s)
     except Exception as e:
         logger.warning(f"http_fetch: Playwright fetch of {url} failed: {e}")
         return None
@@ -137,6 +156,8 @@ def fetch_html(
     browser: Any = None,
     headers: Optional[dict] = None,
     timeout: float = 30.0,
+    reuse_page: bool = False,
+    loaded_page: Any = None,
 ) -> Optional[str]:
     """Fetch a URL's HTML, trying httpx first and falling back to a real
     browser when the response looks bot-blocked.
@@ -146,6 +167,13 @@ def fetch_html(
       - a Playwright Page directly, or
       - None — no fallback is attempted; a blocked/failed httpx response
         just returns None.
+
+    Fallback flavour when httpx looks blocked:
+      - `loaded_page`: a Page ALREADY showing `url` (extract_detail's `page`)
+        — just read its HTML, no navigation.
+      - `reuse_page=True`: navigate the browser's own page (listing phase
+        only — the caller must own the page).
+      - default: a fresh context+page, leaving the caller's page untouched.
 
     Never raises. Returns None if both paths fail (or if httpx succeeds
     with what looks like a real page, in which case the browser is never
@@ -167,7 +195,14 @@ def fetch_html(
     else:
         logger.warning(f"http_fetch: {url} httpx transport failure; trying browser fallback")
 
+    if loaded_page is not None:
+        logger.warning(f"http_fetch: reading already-loaded browser page for {url}")
+        return _poll_stable_body(loaded_page, url, 20.0)
+
     page = getattr(browser, "page", browser) if browser is not None else None
+    if page is not None and reuse_page:
+        logger.warning(f"http_fetch: falling back to Playwright (own page) for {url}")
+        return _fetch_via_own_page(url, page)
     if page is None:
         logger.warning(f"http_fetch: no browser available for {url}; giving up")
         return None

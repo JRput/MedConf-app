@@ -264,7 +264,7 @@ class BTOGExtractor(BaseExtractor):
         html: Optional[str] = None
         browser = getattr(self, "browser", None)
         for attempt in range(3):
-            html = fetch_html(LISTING_URL, browser=browser,
+            html = fetch_html(LISTING_URL, browser=browser, reuse_page=True,
                                headers={"User-Agent": USER_AGENT}, timeout=60.0)
             if html is not None:
                 break
@@ -324,7 +324,9 @@ class BTOGExtractor(BaseExtractor):
         title = shell.get("title") or ""
         url = shell.get("source_url") or shell.get("booking_url") or ""
 
-        html = fetch_html(url, browser=getattr(self, "browser", None),
+        # `page` is already on this URL (navigated by the main browser, which
+        # clears BTOG's CI-only challenge) — read it if httpx is blocked.
+        html = fetch_html(url, loaded_page=page,
                            headers={"User-Agent": USER_AGENT}, timeout=30.0)
         if html is None:
             logger.warning(f"BTOG detail fetch failed for {url}")
