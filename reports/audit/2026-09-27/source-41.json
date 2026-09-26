@@ -1,0 +1,1102 @@
+{
+  "source_id": 41,
+  "source_name": "FICM Events",
+  "rows": 11,
+  "passing_rows": 10,
+  "failing_rows": 1,
+  "total_missing_fields": 1,
+  "total_suspect_fields": 0,
+  "avg_completeness": 99.2,
+  "verdict": "FAIL",
+  "pagination": {
+    "has_pagination": false,
+    "page_buttons": 0,
+    "next_button": false,
+    "show_more": false,
+    "load_more": false,
+    "total_hint": null,
+    "db_rows": 11
+  },
+  "pagination_warning": null,
+  "audits": [
+    {
+      "conference_id": 1981,
+      "conference_name": "FAMUS/FUSIC",
+      "event_type": "conference",
+      "source_url": "https://www.ficm.ac.uk/events/famusfusic",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "FAMUS/FUSIC and FUSIC Heart/Lung sessions held on various dates in March, April,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-03-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-26",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "In-person event with no city set"
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Intensive Care Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 91.7,
+      "total_checked": 12,
+      "total_ok": 7,
+      "total_missing": 1,
+      "total_suspect": 0,
+      "total_absent": 4
+    },
+    {
+      "conference_id": 1982,
+      "conference_name": "FFICM Exam Online Course Autumn 2026",
+      "event_type": "course",
+      "source_url": "https://www.ficm.ac.uk/events/fficm-oscesoe-exam-online-course-autumn-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The FFICM Online Course offers 22 pre-recorded lectures covering topics such as ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-06-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-01",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Intensive Care Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 10,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1983,
+      "conference_name": "Perioperative and Intensive Care Ultrasound Course",
+      "event_type": "course",
+      "source_url": "https://www.ficm.ac.uk/events/perioperative-and-intensive-care-ultrasound-course",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Perioperative and Intensive Care Ultrasound Course on 28 September 2026, registr",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-28",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-28",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Coventry",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Intensive Care Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 6,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "1 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 1985,
+      "conference_name": "Consultant Intensivist Transition Course",
+      "event_type": "course",
+      "source_url": "https://www.ficm.ac.uk/events/consultant-intensivist-transition-course-manchester-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The UK Consultant in Transition (CiT) Course will be held in Manchester on 3-4 N",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Malmaison",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Manchester",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Intensive Care Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 1986,
+      "conference_name": "Getting Ready for the Applied Clinical Reasoning Exam",
+      "event_type": "course",
+      "source_url": "https://www.ficm.ac.uk/events/getting-ready-for-the-applied-clinical-reasoning-examination-acre-0",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This webinar supports candidates and trainers preparing for the new FCICM Applie",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Intensive Care Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 10,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    },
+    {
+      "conference_id": 1987,
+      "conference_name": "ICM ST3 Application Engagement Webinar",
+      "event_type": "course",
+      "source_url": "https://www.ficm.ac.uk/events/icm-st3-application-engagement-webinar-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Drs Andy Martin and Robert Docking are hosting a free webinar for doctors applyi",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Intensive Care Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "1 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 10,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 1988,
+      "conference_name": "Leeds FUSIC (Focussed Ultrasound in Intensive Care)",
+      "event_type": "course",
+      "source_url": "https://www.ficm.ac.uk/events/leeds-fusic-focussed-ultrasound-in-intensive-care-course",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Leeds FUSIC course on 16-17 November 2026 offers ICS-approved training in ultras",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-17",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Bridge Community Church",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Leeds",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Intensive Care Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 10,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 11,
+      "total_ok": 11,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 1989,
+      "conference_name": "Intensivists in Training Conference 2026",
+      "event_type": "conference",
+      "source_url": "https://www.ficm.ac.uk/events/intensivists-in-training-conference-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The Intensivists in Training Conference 2026 at Mercure Manchester offers clinic",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-27",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-27",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "The Marriott",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Manchester",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "hybrid",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Intensive Care Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 6,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "11 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 11,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 1
+    },
+    {
+      "conference_id": 1990,
+      "conference_name": "UK SHOCK 2026",
+      "event_type": "conference",
+      "source_url": "https://www.ficm.ac.uk/events/uk-shock-2026",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "UK SHOCK 2026 is a two-day, in-person national meeting on the contemporary manag",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Royal College of Physicians",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Intensive Care Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 1991,
+      "conference_name": "EEG in the ICU",
+      "event_type": "conference",
+      "source_url": "https://www.ficm.ac.uk/events/eeg-in-the-icu-0",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "EEG in the ICU meeting on 11 March 2027 discusses EEG as a prognostic indicator ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Birmingham",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Intensive Care Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "1 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 3
+    },
+    {
+      "conference_id": 1984,
+      "conference_name": "Belfast Critical Care Research Symposium",
+      "event_type": "conference",
+      "source_url": "https://www.ficm.ac.uk/events/belfast-critical-care-research-symposium",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Belfast Critical Care Research Symposium on 16 October 2026 is a free one-day fo",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "OK",
+          "db_value": "Wellcome\u2013Wolfson Institute for Experimental Medicine, Queen's University Belfast",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Belfast",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "in_person",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Intensive Care Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "1 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 10,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 2
+    }
+  ],
+  "audited_at": "2026-09-26T23:22:50.753729+00:00"
+}

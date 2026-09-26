@@ -1,66 +1,57 @@
 """
 Faculty of Intensive Care Medicine (FICM) — events extractor.
 
-ANTI-BOT SITUATION (probed 2026-09-26 — read this before changing anything).
-The whole ficm.ac.uk HTML site sits behind an *interactive* Cloudflare
-challenge ("Just a moment…", cf-chl / challenges.cloudflare.com turnstile):
+Drupal site (same platform/theme as RCoA), listing at /events, details at
+/events/<slug>. Pager is 0-indexed like RCoA's: ?page=0 is page one and
+?page=1 is page two; ?page=2 came back empty on 2026-09-26, so the view is
+two pages / 13 events.
 
-  * httpx / curl / WebFetch on /events            → HTTP 403 challenge page
-  * headless Chromium (BrowserController, prod flags), /events
-    → HTTP 403, title "Just a moment...", 28 635 bytes, and it NEVER
-      clears: polled every 5 s for 60 s, body length frozen after t=5 s.
-  * HEADED Chromium (headless=False) → 200, the real 261 KB page — but only
-    for the FIRST navigation. ?page=1, ?page=2 and a detail page in the same
-    session all fell straight back to 403. So even a headed browser is not a
-    dependable route, and headed is not available on a GitHub runner anyway.
-  * /robots.txt, /sitemap.xml, /jsonapi, /events?_format=json, /events/feed,
-    /node/feed, the apex host — all 403.
+CLOUDFLARE — read this before changing how pages are fetched.
+The whole site is behind a Cloudflare managed challenge. browser.py's
+navigate() handles it by switching the session to ALT_PROFILE the first
+time a page comes back titled "Just a moment…", and that does clear FICM —
+but only for ONE page load. Measured 2026-09-26, repeatedly:
 
-The one route that is NOT challenged is the site-wide Drupal RSS feed:
+    fresh BrowserController → navigate(/events)        → 200, real page
+    same session → navigate(/events?page=1)            → 403 challenge
+    same session → navigate(/events/<any slug>)        → 403 challenge
+    same session → navigate(/events) again             → 403 challenge
 
-    https://www.ficm.ac.uk/rss.xml   → 200, ~104 KB, cf-cache-status DYNAMIC
-                                       (origin-served, not a stale cache),
-                                       works with ANY User-Agent including
-                                       "python-httpx/0.27".
+The alternate context keeps its cf_clearance cookie and still gets
+re-challenged, and the interstitial never resolves (polled 40 s). What DOES
+clear reliably is a BRAND-NEW context per page load — every load then
+succeeds in 0.4-0.8 s:
 
-That feed is what this extractor uses, and it is unusually rich: Drupal
-renders each node's FULL body into <description>, so one feed fetch gives
-us the listing *and* every detail page. No per-event fetch is needed — and
-no per-event fetch is *possible*.
+    browser.new_context(**ALT_PROFILE) → new_page() → goto  → 200
 
-Consequences you must know about:
-  * COVERAGE IS PARTIAL. rss.xml is the 10 most recently *created* nodes
-    site-wide — news posts included — not the /events view. On 2026-09-26 it
-    carried 9 event nodes, of which only 5 were among the 9 upcoming events
-    the real /events page 0 listed; famusfusic, fficm-oscesoe-exam-online-
-    course-autumn-2026, getting-ready-...-acre and leeds-...-lactic were
-    absent, as was everything on ?page=1. The feed can also drift to zero
-    events if FICM publishes ten news items in a row.
-  * `extract_detail()` IGNORES the Playwright `page`. The scraper navigates
-    to booking_url before calling us; that navigation lands on the 403
-    challenge. Everything is parsed from the node body stashed on the shell
-    by `list_shells_override()` under `_ficm_body`.
-  * booking_url is still the FICM event page — a human's real browser passes
-    the challenge fine, so the link works for users.
+So this module fetches every FICM page through `_fetch()`, which opens a
+fresh ALT_PROFILE context, loads the URL, and closes the context. It reuses
+browser.py's own ALT_PROFILE constant rather than inventing a profile, and
+it changes nothing in browser.py.
 
-Node-body shape (consistent across all 9 observed items):
-  * a <span class="field field--name-created"><time>…</time></span> holding
-    the node's CREATION timestamp — must be stripped before date parsing, or
-    it is mistaken for the event date;
-  * then 1-2 bare <time datetime="YYYY-MM-DDT12:00:00Z"> tags = start (and
-    end) date;
-  * then an availability word ("Places available" / "Sold out" /
-    "Available soon"), then the BOOK NOW anchor;
-  * the prose body, sometimes with <table> fee grids whose header row is
-    "<Section> | Price";
-  * a structured tail, read backwards from the literal line "Listing image":
-    [category: "External Event" | "Education" | …], [venue line, sometimes
-    absent], ["In person" | "Online" | "Hybrid"], [CPD points: "10", "6 TBC",
-    "TBC" — sometimes absent].
-  * "Pricing tab title / £300" near the very end is a Drupal *label*
-    placeholder present on every node — never a real fee. It sits after the
-    "Listing image" marker and outside any <table>, so cutting the prose at
-    that marker is what keeps it out of pricing_tiers.
+`extract_detail()` therefore cannot trust the `page` it is handed: the
+scraper navigated it to the detail URL, but that navigation is load #2+ of
+the session and lands on the challenge. It uses `page` when the page really
+is the event (so that if browser.py is later fixed to rotate contexts, no
+second fetch happens) and re-fetches through `_fetch()` otherwise.
+
+Page shapes:
+  * Listing card `.l-listing-grid__item`: link `/events/<slug>`, title,
+    subtitle = format ("In person" / "Online"), `<time>` whose text is a
+    HUMAN date range ("25 March to 26 November 2026", "7 to 16 September
+    2026", "28 September 2026") — the datetime attribute repeats that text
+    rather than an ISO stamp, so it must be parsed — plus a category
+    ("External Event" / "Education") and a short summary.
+  * Detail `.c-details-sidebar__details`: <p> rows keyed by a
+    `.c-details-sidebar__highlight` label — "Date:" (+ optional
+    `.time` "I 9:15am - 18.00pm"), "Location:" ("In person, <venue>"),
+    "Availability:", "CPD credits:". Booking CTA in
+    `.c-details-sidebar__actions`.
+  * Detail tabs are ALL server-rendered (hidden with CSS, not lazy-loaded),
+    so one fetch yields Overview, Programme, Pricing, Workshops and any
+    "Abstract Competition" panel. Tab button -> panel via aria-controls.
+  * Fee tables live in the Pricing panel as plain <table>s whose header row
+    is "<Section> | Price".
 """
 
 from __future__ import annotations
@@ -68,18 +59,33 @@ from __future__ import annotations
 import html as html_lib
 import json
 import re
+import time
 from datetime import date, datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
+from urllib.parse import urljoin
 
 from playwright.sync_api import Page
 
 from .base import BaseExtractor
-from .http_fetch import fetch_html
+from .abstract_classifier import extract_abstract_info
 from .specialty_classifier import classify_specialty
 from logger import logger
 
-FEED_URL = "https://www.ficm.ac.uk/rss.xml"
 BASE_URL = "https://www.ficm.ac.uk"
+LISTING_URL = f"{BASE_URL}/events"
+MAX_PAGES = 6
+
+_CHALLENGE_TITLE = re.compile(r"just a moment|attention required", re.I)
+
+_MONTHS = {
+    m.lower(): i
+    for i, m in enumerate(
+        ["January", "February", "March", "April", "May", "June", "July",
+         "August", "September", "October", "November", "December"],
+        start=1,
+    )
+}
+_MONTH_RE = "|".join(_MONTHS)
 
 _FORMAT_TOKENS = {
     "in person": "in_person",
@@ -88,7 +94,6 @@ _FORMAT_TOKENS = {
     "hybrid": "hybrid",
 }
 
-# Availability words FICM renders under the date block.
 _SOLD_OUT = re.compile(r"(?i)\b(sold\s*out|fully\s*booked|waiting\s*list\s*only)\b")
 
 _UK_NATION_HINTS = [
@@ -96,15 +101,6 @@ _UK_NATION_HINTS = [
     (re.compile(r"(?i)\b(edinburgh|glasgow|aberdeen|dundee|scotland|stirling)\b"), "Scotland"),
     (re.compile(r"(?i)\b(cardiff|swansea|wales|newport|bangor)\b"), "Wales"),
 ]
-_ENGLAND_HINT = re.compile(
-    r"(?i)\b(london|manchester|birmingham|leeds|liverpool|bristol|sheffield|"
-    r"newcastle|nottingham|leicester|coventry|oxford|cambridge|southampton|"
-    r"brighton|york|exeter|plymouth|norwich|reading|derby|hull|preston)\b"
-)
-
-# Used to recover a city when the comma-separated tail of a venue line is
-# another institution rather than a place ("…Institute, Queen's University
-# Belfast" → city Belfast, not "Queen's University Belfast").
 _CITY_TOKEN = re.compile(
     r"(?i)\b(london|manchester|birmingham|leeds|liverpool|bristol|sheffield|"
     r"newcastle|nottingham|leicester|coventry|oxford|cambridge|southampton|"
@@ -112,8 +108,7 @@ _CITY_TOKEN = re.compile(
     r"belfast|edinburgh|glasgow|aberdeen|dundee|stirling|cardiff|swansea|"
     r"newport|bangor|derry|londonderry)\b"
 )
-
-# A comma-tail that names an organisation, not a town.
+# A comma-tail naming an organisation rather than a town.
 _ORG_TAIL = re.compile(
     r"(?i)\b(university|hospital|institute|college|centre|center|school|"
     r"faculty|trust|nhs|campus|academy|foundation)\b"
@@ -121,116 +116,221 @@ _ORG_TAIL = re.compile(
 
 
 def _strip_tags(fragment: str) -> str:
-    """HTML fragment → newline-separated text, entities decoded."""
     text = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", fragment)
+    text = re.sub(r"(?i)<br\s*/?>", "\n", text)
     text = re.sub(r"<[^>]+>", "\n", text)
-    text = html_lib.unescape(text)
-    return text.replace("\xa0", " ")
-
-
-def _text_lines(fragment: str) -> List[str]:
-    return [ln.strip() for ln in _strip_tags(fragment).split("\n") if ln.strip()]
+    return html_lib.unescape(text).replace("\xa0", " ")
 
 
 def _flatten(fragment: str) -> str:
     return re.sub(r"\s+", " ", _strip_tags(fragment)).strip()
 
 
-def _normalise_feed(raw: str) -> str:
-    """Return the raw RSS, whichever way it arrived.
-
-    httpx hands us the feed verbatim. The Playwright fallback (what a
-    GitHub runner takes when httpx is blocked) hands us Chromium's XML
-    *viewer*: the whole feed entity-escaped inside <html><body><pre>. One
-    unescape of that <pre> reproduces the original bytes exactly — the node
-    bodies are double-escaped there, so they land back at single-escaped.
-    """
-    if "<item>" in raw:
-        return raw
-    if "&lt;item&gt;" in raw:
-        m = re.search(r"(?is)<pre[^>]*>(.*?)</pre>", raw)
-        return html_lib.unescape(m.group(1) if m else raw)
-    return raw
+def _lines(fragment: str) -> List[str]:
+    return [ln.strip() for ln in _strip_tags(fragment).split("\n") if ln.strip()]
 
 
-def _drop_created_field(body: str) -> str:
-    """Remove the node-created <time>, which would otherwise be read as the
-    event date (it always sorts first in the body)."""
-    return re.sub(
-        r'(?is)<span class="field field--name-created[^"]*"[^>]*>.*?</span>', "", body
-    )
+def _div_block(html: str, start_at: int) -> str:
+    """Return the inner HTML of the <div> whose opening tag ends at start_at,
+    balancing nested <div>s."""
+    depth = 1
+    for m in re.finditer(r"<div\b|</div>", html[start_at:]):
+        depth += 1 if m.group(0) != "</div>" else -1
+        if depth == 0:
+            return html[start_at : start_at + m.start()]
+    return html[start_at:]
 
 
 class FICMExtractor(BaseExtractor):
-    """Feed-driven extractor — see the module docstring for why."""
+    """Browser-first extractor; see the module docstring for the Cloudflare note."""
 
     # ------------------------------------------------------------------ #
-    # Phase A — listing, from rss.xml
+    # Fetching — a fresh ALT_PROFILE context per page load
+    # ------------------------------------------------------------------ #
+    def _fetch(self, url: str, wait_s: float = 12.0) -> Optional[str]:
+        browser = getattr(self, "browser", None)
+        if browser is None or getattr(browser, "browser", None) is None:
+            logger.warning("FICM: no launched browser available")
+            return None
+
+        # Import here so the module still imports if browser.py predates
+        # ALT_PROFILE; fall back to the same desktop-Chrome shape.
+        try:
+            from browser import ALT_PROFILE as profile
+        except ImportError:  # pragma: no cover - defensive
+            profile = {
+                "user_agent": ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                               "AppleWebKit/537.36 (KHTML, like Gecko) "
+                               "Chrome/124.0.0.0 Safari/537.36"),
+                "viewport": {"width": 1366, "height": 850},
+                "locale": "en-GB",
+            }
+
+        context = None
+        try:
+            context = browser.browser.new_context(**profile)
+            page = context.new_page()
+            page.set_default_timeout(30000)
+            page.goto(url, wait_until="load", timeout=40000)
+            deadline = time.time() + wait_s
+            while time.time() < deadline:
+                if not _CHALLENGE_TITLE.search(page.title() or ""):
+                    break
+                page.wait_for_timeout(1000)
+            if _CHALLENGE_TITLE.search(page.title() or ""):
+                logger.warning(f"FICM: Cloudflare challenge did not clear for {url}")
+                return None
+            return page.content()
+        except Exception as e:
+            logger.warning(f"FICM: fetch of {url} failed: {e}")
+            return None
+        finally:
+            if context is not None:
+                try:
+                    context.close()
+                except Exception:
+                    pass
+
+    # ------------------------------------------------------------------ #
+    # Phase A — listing
     # ------------------------------------------------------------------ #
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
-        xml = fetch_html(FEED_URL, browser=getattr(self, "browser", None))
-        if not xml:
-            logger.warning("FICM: rss.xml fetch returned nothing")
-            return []
-        xml = _normalise_feed(xml)
-
         today = date.today()
         shells: List[Dict[str, Any]] = []
-        for item in re.findall(r"(?s)<item>(.*?)</item>", xml):
-            link_m = re.search(r"(?s)<link>(.*?)</link>", item)
-            title_m = re.search(r"(?s)<title>(.*?)</title>", item)
-            desc_m = re.search(r"(?s)<description>(.*?)</description>", item)
-            if not (link_m and title_m and desc_m):
-                continue
+        seen: set = set()
 
-            url = html_lib.unescape(link_m.group(1).strip())
-            # The feed is site-wide: news, committee calls, job posts. Only
-            # /events/ nodes are events.
-            if "/events/" not in url:
-                continue
+        for page_no in range(MAX_PAGES):
+            url = LISTING_URL if page_no == 0 else f"{LISTING_URL}?page={page_no}"
+            html = self._fetch(url)
+            if not html:
+                logger.warning(f"FICM: listing page {page_no} unavailable — stopping")
+                break
 
-            title = re.sub(r"\s+", " ", html_lib.unescape(title_m.group(1))).strip()
-            body = html_lib.unescape(desc_m.group(1))
-            start, end = self._parse_dates(body)
-            if not start:
-                logger.info(f"FICM: no event date on '{title[:60]}' — skipping")
-                continue
-            # Only upcoming: a multi-day event is live until its last day.
-            if (end or start) < today:
-                continue
+            cards = self._parse_cards(html)
+            if not cards:
+                break
 
-            shells.append(
-                {
-                    "title": title,
-                    "booking_url": url,
-                    "start_date": start.isoformat(),
-                    "end_date": end.isoformat() if end else None,
-                    "is_sold_out": bool(_SOLD_OUT.search(_flatten(body))),
-                    "_ficm_body": body,
-                }
-            )
+            new_on_page = 0
+            for card in cards:
+                if card["booking_url"] in seen:
+                    continue
+                seen.add(card["booking_url"])
+                new_on_page += 1
+                start, end = card.pop("_dates")
+                if not start:
+                    logger.info(f"FICM: unparsable date on '{card['title'][:50]}' — skipping")
+                    continue
+                # Keep an event until its LAST day has passed; the FICM view
+                # itself still lists events that finished a day or two ago.
+                if (end or start) < today:
+                    continue
+                card["start_date"] = start.isoformat()
+                card["end_date"] = end.isoformat() if end else None
+                shells.append(card)
 
-        logger.info(f"FICM: {len(shells)} upcoming event shells from rss.xml")
+            if new_on_page == 0:
+                break
+
+        logger.info(f"FICM: {len(shells)} upcoming shells")
         return shells
 
-    @staticmethod
-    def _parse_dates(body: str) -> tuple[Optional[date], Optional[date]]:
-        """First/last bare <time datetime> in the node body, created-field removed."""
-        stamps: List[date] = []
-        for raw in re.findall(
-            r'<time[^>]+datetime="([^"]+)"', _drop_created_field(body)
-        ):
-            try:
-                stamps.append(datetime.fromisoformat(raw.replace("Z", "+00:00")).date())
-            except ValueError:
+    def _parse_cards(self, html: str) -> List[Dict[str, Any]]:
+        out: List[Dict[str, Any]] = []
+        for chunk in html.split('<div class="l-listing-grid__item">')[1:]:
+            card = chunk[:6000]
+            link = re.search(r'href="(/events/[^"#?]+)"', card)
+            if not link:
                 continue
-        if not stamps:
+            title_m = re.search(
+                r'(?s)l-listing__section-title.*?<a[^>]*>(.*?)</a>', card
+            )
+            title = _flatten(title_m.group(1)) if title_m else None
+            if not title:
+                continue
+            date_m = re.search(r"(?s)l-listing__section__date.*?<time[^>]*>(.*?)</time>", card)
+            subtitle_m = re.search(
+                r"(?s)l-listing__section-subtitle.*?<span[^>]*>(.*?)</span>", card
+            )
+            summary_m = re.search(r'(?s)l-listing__section-summary">(.*?)</div>', card)
+            category_m = re.search(
+                r'(?s)o-category_list__list-item"><a[^>]*>(.*?)</a>', card
+            )
+            subtitle = _flatten(subtitle_m.group(1)) if subtitle_m else ""
+
+            out.append(
+                {
+                    "title": title,
+                    "booking_url": urljoin(BASE_URL, link.group(1)),
+                    "event_format": _FORMAT_TOKENS.get(subtitle.lower()),
+                    "description_hint": _flatten(summary_m.group(1))[:300] if summary_m else None,
+                    "category": _flatten(category_m.group(1)) if category_m else None,
+                    "_dates": self._parse_card_dates(
+                        _flatten(date_m.group(1)) if date_m else ""
+                    ),
+                }
+            )
+        return out
+
+    @staticmethod
+    def _parse_card_dates(text: str) -> Tuple[Optional[date], Optional[date]]:
+        """Parse FICM's human date strings.
+
+        "28 September 2026"            → (2026-09-28, None)
+        "7 to 16 September 2026"       → (2026-09-07, 2026-09-16)
+        "3 to 4 November 2026"         → (2026-11-03, 2026-11-04)
+        "25 March to 26 November 2026" → (2026-03-25, 2026-11-26)
+        """
+        if not text:
             return None, None
-        stamps.sort()
-        return stamps[0], (stamps[-1] if stamps[-1] != stamps[0] else None)
+        # Normalise the separator to " to ". \b matters: an unanchored "to"
+        # also matches inside "Oc-to-ber".
+        text = re.sub(r"\s*[-–—]\s*", " to ", text)
+        text = re.sub(r"(?i)\s+\b(?:to|until)\b\s+", " to ", text)
+
+        tail = re.search(
+            rf"(?i)(\d{{1,2}})\s+({_MONTH_RE})\s+(\d{{4}})\s*$", text.strip()
+        )
+        if not tail:
+            return None, None
+        end_day, end_month, year = int(tail.group(1)), _MONTHS[tail.group(2).lower()], int(tail.group(3))
+        try:
+            last = date(year, end_month, end_day)
+        except ValueError:
+            return None, None
+
+        head = re.sub(r"(?i)\s*\bto\s*$", "", text[: tail.start()].strip()).strip()
+        if not head:
+            return last, None
+        # "1 December 2026" (own month AND year), "25 March" (own month), or
+        # a bare "7" that borrows the end month.
+        start_year = year
+        m = re.search(rf"(?i)(\d{{1,2}})\s+({_MONTH_RE})\s+(\d{{4}})\s*$", head)
+        if m:
+            day, month, start_year = (
+                int(m.group(1)), _MONTHS[m.group(2).lower()], int(m.group(3))
+            )
+        else:
+            m = re.search(rf"(?i)(\d{{1,2}})\s+({_MONTH_RE})\s*$", head)
+            if m:
+                day, month = int(m.group(1)), _MONTHS[m.group(2).lower()]
+            else:
+                m = re.search(r"(\d{1,2})\s*$", head)
+                if not m:
+                    return last, None
+                day, month = int(m.group(1)), end_month
+        try:
+            first = date(start_year, month, day)
+        except ValueError:
+            return last, None
+        if first > last:  # range spanning a new year, e.g. Dec → Jan
+            try:
+                first = date(start_year - 1, month, day)
+            except ValueError:
+                return last, None
+        return first, (last if last != first else None)
 
     # ------------------------------------------------------------------ #
-    # Phase B — detail, from the stashed node body
+    # Phase B — detail
     # ------------------------------------------------------------------ #
     def extract_detail(
         self,
@@ -238,189 +338,257 @@ class FICMExtractor(BaseExtractor):
         shell: Dict[str, Any],
         llm_call: Callable[[str], Optional[str]],
     ) -> Dict[str, Any]:
-        # `page` is deliberately unused: the scraper has already navigated it
-        # to the Cloudflare challenge. Everything comes from the feed body.
-        body: str = shell.get("_ficm_body") or ""
-        if not body:
-            logger.warning(f"FICM: no stashed body for {shell.get('booking_url')}")
+        url = shell.get("booking_url")
+        html = self._page_html_if_usable(page)
+        if html is None:
+            # Expected today: the scraper's navigate() was load #2+ of the
+            # session and hit the challenge. Fetch it ourselves.
+            html = self._fetch(url)
+        if not html:
+            logger.warning(f"FICM: no usable detail HTML for {url}")
             return {}
 
-        title = shell.get("title")
-        tail = self._parse_tail(body)
-        prose = self._prose(body)
+        panels = self._panels(html)
+        sidebar = self._sidebar(html)
+        overview = panels.get("overview", "")
+        body_text = self._overview_text(overview) or _flatten(overview)
 
         result: Dict[str, Any] = {
-            "event_type": self._event_type(title),
-            "event_format": tail.get("event_format"),
-            "venue_name": tail.get("venue_name"),
-            "city": tail.get("city"),
-            "region": tail.get("region"),
-            "cpd_points": tail.get("cpd_points"),
-            "cpd_accredited": tail.get("cpd_points") is not None,
-            "pricing_tiers": self._pricing(body, prose),
-            "start_time": self._start_time(prose),
+            "event_type": self._event_type(shell.get("title"), url, body_text),
+            "start_time": self._start_time(sidebar.get("date_time")),
+            "cpd_points": self._cpd(sidebar.get("cpd")),
+            "is_sold_out": bool(_SOLD_OUT.search(sidebar.get("availability") or "")),
+            "pricing_tiers": self._pricing(panels, body_text),
         }
-        result.update(self._soft_fields(title, prose, llm_call))
+        result["cpd_accredited"] = result["cpd_points"] is not None
+        result.update(self._location(sidebar.get("location"), shell.get("event_format")))
+
+        # Refine the dates from the detail sidebar when it is more precise
+        # than the card (same human format, but authoritative for the node).
+        start, end = self._parse_card_dates(sidebar.get("date") or "")
+        if start:
+            result["start_date"] = start.isoformat()
+            result["end_date"] = end.isoformat() if end else shell.get("end_date")
+
+        abstract_text = " ".join(
+            _flatten(v) for k, v in panels.items() if "abstract" in k
+        )
+        if abstract_text:
+            is_open, deadline = extract_abstract_info(abstract_text)
+            result["abstract_open"] = is_open
+            result["abstract_deadline"] = deadline.isoformat() if deadline else None
+
+        result.update(self._soft_fields(shell.get("title"), body_text, shell, llm_call))
         return {k: v for k, v in result.items() if v is not None}
 
-    # ------------------------------------------------------------------ #
-    # Structured tail: CPD · format · venue · category
-    # ------------------------------------------------------------------ #
-    def _parse_tail(self, body: str) -> Dict[str, Any]:
-        lines = _text_lines(body)
+    def _page_html_if_usable(self, page: Optional[Page]) -> Optional[str]:
+        """The handed-in page, but only if it really is a FICM event page."""
+        if page is None:
+            return None
         try:
-            stop = lines.index("Listing image")
-        except ValueError:
-            stop = len(lines)
-        # The category line ("External Event" / "Education") is the last
-        # entry before "Listing image"; the format token sits just above it.
-        seg = lines[:stop]
-        fmt_idx = None
-        for i in range(len(seg) - 1, max(-1, len(seg) - 8), -1):
-            if seg[i].strip().lower() in _FORMAT_TOKENS:
-                fmt_idx = i
-                break
-        out: Dict[str, Any] = {
-            "event_format": None,
-            "venue_name": None,
-            "city": None,
-            "region": None,
-            "cpd_points": None,
-        }
-        if fmt_idx is None:
-            return out
+            if _CHALLENGE_TITLE.search(page.title() or ""):
+                return None
+            html = page.content()
+        except Exception:
+            return None
+        return html if "c-details-sidebar__details" in html else None
 
-        out["event_format"] = _FORMAT_TOKENS[seg[fmt_idx].strip().lower()]
-
-        # CPD points: the line directly above the format token, when it is a
-        # bare number ("10") or a number with a TBC qualifier ("6 TBC").
-        if fmt_idx > 0:
-            m = re.fullmatch(r"(\d{1,2})(?:\s*TBC)?", seg[fmt_idx - 1].strip(), re.I)
+    # ------------------------------------------------------------------ #
+    # Tab panels — every one is server-rendered, keyed by its button text
+    # ------------------------------------------------------------------ #
+    @staticmethod
+    def _panels(html: str) -> Dict[str, str]:
+        panels: Dict[str, str] = {}
+        for panel_id, label_html in re.findall(
+            r'(?s)aria-controls="([^"]+)"[^>]*>(.*?)</button>', html
+        ):
+            label = _flatten(label_html).lower()
+            if not label:
+                continue
+            m = re.search(
+                r'<div class="c-tabs__panels-panel[^"]*"[^>]*id="%s"[^>]*>'
+                % re.escape(panel_id),
+                html,
+            )
             if m:
-                out["cpd_points"] = int(m.group(1))
-
-        # Venue: the line between the format token and the category line.
-        # Absent on some online-only nodes, where format is last before it.
-        if fmt_idx + 1 < len(seg) - 1:
-            venue = re.sub(r"^at\s+", "", seg[fmt_idx + 1].strip(), flags=re.I).strip(" ,")
-            if venue and len(venue) < 160:
-                out.update(self._place(venue, out["event_format"]))
-        if out["event_format"] == "online" and not out["venue_name"]:
-            out["city"] = out["city"] or "Online"
-        return out
+                panels[label] = _div_block(html, m.end())
+        return panels
 
     @staticmethod
-    def _place(venue: str, event_format: Optional[str]) -> Dict[str, Any]:
-        """Split a FICM venue line into venue_name / city / region."""
-        # "The Marriott, Manchester Piccadilly and Online" → hybrid signal.
-        if event_format == "in_person" and re.search(r"(?i)\band online\b", venue):
-            event_format = "hybrid"
-        if re.fullmatch(r"(?i)(zoom|online|ms teams|teams|webinar)", venue.strip()):
-            return {"venue_name": None, "city": "Online", "region": None,
-                    "event_format": "online"}
-
-        parts = [p.strip() for p in venue.split(",") if p.strip()]
-        venue_name = venue
-        city = None
-        if len(parts) >= 2:
-            tail = re.sub(r"(?i)\s+and online$", "", parts[-1]).strip()
-            if _ORG_TAIL.search(tail):
-                # "…Institute for Experimental Medicine, Queen's University
-                # Belfast" — the tail is a second institution, so the whole
-                # line is the venue and the town comes from a city token.
-                venue_name = re.sub(r"(?i)\s+and online$", "", venue).strip()
-                m = _CITY_TOKEN.search(venue)
-                city = m.group(1).title() if m else None
-            else:
-                venue_name = ", ".join(parts[:-1])
-                # "Manchester Piccadilly" → "Manchester": keep the town, not
-                # the district/station the venue happens to sit by.
-                m = _CITY_TOKEN.search(tail)
-                city = m.group(1).title() if m else tail
-        elif parts and _CITY_TOKEN.fullmatch(parts[0]):
-            # A bare "Coventry" is a city, not a venue.
-            venue_name, city = None, parts[0]
-
-        haystack = venue
-        region = None
-        for pattern, nation in _UK_NATION_HINTS:
-            if pattern.search(haystack):
-                region = nation
-                break
-        if region is None and _ENGLAND_HINT.search(haystack):
-            region = "England"
-
-        out = {"venue_name": venue_name, "city": city, "region": region}
-        if event_format == "hybrid":
-            out["event_format"] = "hybrid"
+    def _sidebar(html: str) -> Dict[str, Optional[str]]:
+        """Read the "Key details" sidebar into {date, date_time, location,
+        availability, cpd, booking_cta}."""
+        out: Dict[str, Optional[str]] = {}
+        m = re.search(r'<div class="c-details-sidebar__details">', html)
+        if not m:
+            return out
+        block = _div_block(html, m.end())
+        for para in re.findall(r"(?s)<p>(.*?)</p>", block):
+            label_m = re.search(
+                r'(?s)<span class="c-details-sidebar__highlight">(.*?)</span>', para
+            )
+            if not label_m:
+                continue
+            label = _flatten(label_m.group(1)).rstrip(":").lower()
+            rest = para[label_m.end():]
+            if label == "date":
+                d = re.search(r'(?s)<span class="date">(.*?)</span>', rest)
+                t = re.search(r'(?s)<span class="time">(.*?)</span>', rest)
+                out["date"] = _flatten(d.group(1)) if d else _flatten(rest)
+                out["date_time"] = _flatten(t.group(1)) if t else None
+            elif label == "location":
+                out["location"] = _flatten(rest)
+            elif label == "availability":
+                out["availability"] = _flatten(rest)
+            elif label.startswith("cpd"):
+                out["cpd"] = _flatten(rest)
         return out
 
     # ------------------------------------------------------------------ #
-    # Prose body (everything after the BOOK NOW / availability block,
-    # before the structured tail) — used for description + inline fees.
+    # Field parsers
     # ------------------------------------------------------------------ #
     @staticmethod
-    def _prose(body: str) -> str:
-        stripped = _drop_created_field(body)
-        cut = stripped.rfind("</time>")
-        tail_html = stripped[cut:] if cut != -1 else stripped
-        lines = _text_lines(tail_html)
-        try:
-            stop = lines.index("Listing image")
-            lines = lines[:stop]
-        except ValueError:
-            pass
-        # Drop the availability / CTA chrome that always leads the block.
-        drop = re.compile(
-            r"(?i)^(book now|register now|registration open|bookings? open(ing)?( soon)?|"
-            r"places available|available soon|sold out|waiting list|more info(rmation)?|"
-            r"external event|education|in person|online|hybrid|tbc|register:|contact:)[:.]?$"
-        )
-        keep = [ln for ln in lines if not drop.fullmatch(ln.strip()) and len(ln) > 2]
-        return "\n".join(keep)
-
-    @staticmethod
-    def _start_time(prose: str) -> Optional[str]:
-        """FICM programmes open with a "8:30 - 09:00 Registration" row."""
-        m = re.search(
-            r"(?m)^(\d{1,2})[:.](\d{2})\s*(?:am|pm)?\s*[-–]\s*\d{1,2}[:.]\d{2}",
-            prose[:1500],
-            re.I,
-        )
+    def _start_time(time_text: Optional[str]) -> Optional[str]:
+        """"I 9:15am - 18.00pm" → "09:15". The leading "I" is the theme's
+        separator glyph, not a character of the time."""
+        if not time_text:
+            return None
+        m = re.search(r"(\d{1,2})[:.](\d{2})\s*(am|pm)?", time_text, re.I)
         if not m:
             return None
         hour, minute = int(m.group(1)), int(m.group(2))
+        meridiem = (m.group(3) or "").lower()
+        if meridiem == "pm" and hour < 12:
+            hour += 12
+        elif meridiem == "am" and hour == 12:
+            hour = 0
         if not (0 <= hour <= 23 and 0 <= minute <= 59):
             return None
         return f"{hour:02d}:{minute:02d}"
 
+    @staticmethod
+    def _cpd(cpd_text: Optional[str]) -> Optional[int]:
+        """"6 TBC" → 6; "TBC" → None."""
+        if not cpd_text:
+            return None
+        m = re.search(r"\b(\d{1,2})\b", cpd_text)
+        return int(m.group(1)) if m else None
+
+    def _location(
+        self, location: Optional[str], card_format: Optional[str]
+    ) -> Dict[str, Any]:
+        """"In person, The Marriott, Manchester Piccadilly and Online" →
+        format + venue + city + region."""
+        out: Dict[str, Any] = {
+            "event_format": card_format,
+            "venue_name": None,
+            "city": None,
+            "region": None,
+        }
+        if not location:
+            return out
+
+        parts = [p.strip() for p in location.split(",") if p.strip()]
+        if parts and parts[0].lower() in _FORMAT_TOKENS:
+            out["event_format"] = _FORMAT_TOKENS[parts[0].lower()]
+            parts = parts[1:]
+        venue = ", ".join(parts).strip(" ,")
+        if not venue:
+            if out["event_format"] == "online":
+                out["city"] = "Online"
+            return out
+
+        if re.search(r"(?i)\band online\b", venue):
+            # "…Manchester Piccadilly and Online" — both modes.
+            if out["event_format"] == "in_person":
+                out["event_format"] = "hybrid"
+            venue = re.sub(r"(?i)\s+and online$", "", venue).strip(" ,")
+        if re.fullmatch(r"(?i)(zoom|online|ms teams|teams|webinar|virtual)", venue):
+            out["event_format"] = "online"
+            out["city"] = "Online"
+            return out
+
+        # FICM editors often write "At Bridge Community Church, Leeds".
+        venue = re.sub(r"^at\s+", "", venue, flags=re.I).strip(" ,")
+        parts = [p.strip() for p in venue.split(",") if p.strip()]
+        if len(parts) >= 2 and not _ORG_TAIL.search(parts[-1]):
+            out["venue_name"] = ", ".join(parts[:-1])
+            m = _CITY_TOKEN.search(parts[-1])
+            # "Manchester Piccadilly" → "Manchester": keep the town.
+            out["city"] = m.group(1).title() if m else parts[-1]
+        elif len(parts) == 1 and _CITY_TOKEN.fullmatch(parts[0]):
+            out["city"] = parts[0]
+        else:
+            # Whole line is one or more institutions — keep it as the venue
+            # and recover the town from a city token inside it.
+            out["venue_name"] = venue
+            m = _CITY_TOKEN.search(venue)
+            out["city"] = m.group(1).title() if m else None
+
+        for pattern, nation in _UK_NATION_HINTS:
+            if pattern.search(venue):
+                out["region"] = nation
+                break
+        if out["region"] is None and _CITY_TOKEN.search(venue):
+            out["region"] = "England"
+        if out["event_format"] == "online" and not out["city"]:
+            out["city"] = "Online"
+        return out
+
+    @staticmethod
+    def _event_type(title: Optional[str], url: Optional[str], body_text: str) -> str:
+        t = (title or "").lower()
+        # Checked first: "Intensivists in Training Conference" is a
+        # conference despite the word "training".
+        if re.search(r"\b(conference|congress|symposium|summit|meeting|forum)\b", t):
+            return "conference"
+        if re.search(r"\bworkshop\b", t):
+            return "workshop"
+        if re.search(r"\b(course|training|masterclass|webinar|study day|teaching day|exam)\b", t):
+            return "course"
+        # The listing truncates long titles ("Leeds FUSIC (Focussed
+        # Ultrasound in Intensive Care)" loses its trailing "course"), so
+        # fall back to the slug, which keeps the full node title.
+        slug = (url or "").rsplit("/", 1)[-1].replace("-", " ").lower()
+        if re.search(r"\b(course|masterclass|webinar|training day|study day|exam)\b", slug):
+            return "course"
+        if re.search(r"\b(conference|congress|symposium|summit)\b", slug):
+            return "conference"
+        if re.search(r"\bcourses?\b", (body_text or "")[:600], re.I):
+            return "course"
+        return "conference"
+
     # ------------------------------------------------------------------ #
-    # Pricing — fee <table>s first, then an inline "Registration fee:" line
+    # Pricing — the Pricing tab's tables, then an inline fee line
     # ------------------------------------------------------------------ #
-    def _pricing(self, body: str, prose: str) -> List[Dict[str, Any]]:
-        tiers = self._table_tiers(body)
+    def _pricing(self, panels: Dict[str, str], body_text: str) -> List[Dict[str, Any]]:
+        pricing_html = " ".join(
+            html for label, html in panels.items()
+            if "pricing" in label or "fee" in label or "cost" in label
+        )
+        tiers = self._table_tiers(pricing_html) if pricing_html else []
         if tiers:
             return tiers
 
-        # "Registration fee: Free" → a real £0 tier. "Registration fee: £160".
-        m = re.search(r"(?i)registration fee\s*:?\s*(free|£\s*[\d,]+(?:\.\d\d)?)", prose)
+        # Fees sometimes appear only as prose in the Overview tab.
+        m = re.search(
+            r"(?i)registration fee\s*:?\s*(free|£\s*[\d,]+(?:\.\d\d)?)", body_text
+        )
         if m:
             token = m.group(1)
             price = 0.0 if token.lower() == "free" else self.parse_gbp(token)
             if price is not None:
                 return [self._tier("Registration fee", price)]
-        if re.search(r"(?i)\bthis is a free (webinar|event|course|meeting)\b", prose):
+        if re.search(r"(?i)\bthis is a free (webinar|event|course|meeting)\b", body_text):
             return [self._tier("Registration fee", 0.0)]
 
-        # Price-led lines: "£250 for 1 day (Day 1 echo…)" / "£450 for 2 days".
-        # Only whole short lines that START with the amount — never a £ found
-        # mid-paragraph, which is usually narrative, not a tier.
+        # Price-led fragments: "£250 for 1 day", "£450 for 2 days".
         led: List[Dict[str, Any]] = []
-        for line in prose.split("\n"):
-            line = line.strip()
-            if len(line) > 110:
+        for frag in re.split(r"[\n;]", body_text):
+            frag = frag.strip()
+            if len(frag) > 110:
                 continue
-            m = re.fullmatch(r"(£\s*[\d,]+(?:\.\d\d)?)\s+(\S.{2,90})", line)
+            m = re.fullmatch(r"(£\s*[\d,]+(?:\.\d\d)?)\s+(\S.{2,90})", frag)
             if not m:
                 continue
             price = self.parse_gbp(m.group(1))
@@ -431,9 +599,8 @@ class FICMExtractor(BaseExtractor):
         if led:
             return led
 
-        # Last resort: "Fee: £400, £470" — a bare list with no labels. Emit
-        # them as unlabelled tiers rather than guessing who pays what.
-        m = re.search(r"(?i)\bfees?\s*:\s*((?:£\s*[\d,]+(?:\.\d\d)?\s*,?\s*){1,6})", prose)
+        # "Fee: £400, £470" — amounts with no labels at all.
+        m = re.search(r"(?i)\bfees?\s*:\s*((?:£\s*[\d,]+(?:\.\d\d)?\s*,?\s*){1,6})", body_text)
         if m:
             out = []
             for raw in re.findall(r"£\s*[\d,]+(?:\.\d\d)?", m.group(1)):
@@ -444,27 +611,25 @@ class FICMExtractor(BaseExtractor):
                 return out
         return []
 
-    def _table_tiers(self, body: str) -> List[Dict[str, Any]]:
+    def _table_tiers(self, html: str) -> List[Dict[str, Any]]:
         """FICM fee grids are plain <table>s whose header row reads
-        "<Section> | Price". Programme tables (time | session | speaker)
-        carry no £ and are skipped.
+        "<Section> | Price". Scoped to the Pricing panel, so programme and
+        workshop tables are never seen.
 
         The shared pricing_tables.parse_pricing_tables() does not fire here:
         it needs a fee-ish <h2>/<h3> above the table or a "Registration
         Fees"-style header row, and FICM has neither.
         """
         tiers: List[Dict[str, Any]] = []
-        for tbl in re.findall(r"(?is)<table[^>]*>(.*?)</table>", body):
+        for tbl in re.findall(r"(?is)<table[^>]*>(.*?)</table>", html):
             rows = re.findall(r"(?is)<tr[^>]*>(.*?)</tr>", tbl)
-            priced = [r for r in rows if re.search(r"£\s*[\d,]", r)]
-            if len(priced) < 1:
+            if not rows or not any(re.search(r"£\s*[\d,]", r) for r in rows):
                 continue
 
             section = None
-            first_cells = re.findall(r"(?is)<t[dh][^>]*>(.*?)</t[dh]>", rows[0]) if rows else []
-            if len(first_cells) >= 2 and not re.search(r"£", rows[0]):
-                head_label = _flatten(first_cells[0])
-                head_value = _flatten(first_cells[-1])
+            head_cells = re.findall(r"(?is)<t[dh][^>]*>(.*?)</t[dh]>", rows[0])
+            if len(head_cells) >= 2 and "£" not in rows[0]:
+                head_label, head_value = _flatten(head_cells[0]), _flatten(head_cells[-1])
                 if re.fullmatch(r"(?i)price|fee|cost|rate|amount", head_value) and head_label:
                     section = head_label
 
@@ -473,7 +638,9 @@ class FICMExtractor(BaseExtractor):
                 if len(cells) < 2:
                     continue
                 label = _flatten(cells[0])
-                if not label or re.fullmatch(r"(?i)price|fee|cost|rate|amount|category|type", label):
+                if not label or re.fullmatch(
+                    r"(?i)price|fee|cost|rate|amount|category|type", label
+                ):
                     continue
                 price = None
                 for cell in reversed(cells[1:]):
@@ -482,19 +649,17 @@ class FICMExtractor(BaseExtractor):
                         break
                 if price is None:
                     continue
-                tiers.append(self._tier(f"{section} · {label}" if section else label, price))
+                tiers.append(
+                    self._tier(f"{section} · {label}" if section else label, price)
+                )
 
-        # Dedupe. The Drupal "Pricing tab title / £300" placeholder that every
-        # node carries never reaches here: it lives after the "Listing image"
-        # marker (so _prose() has cut it) and is not inside a <table>.
-        seen = set()
-        out = []
+        seen: set = set()
+        out: List[Dict[str, Any]] = []
         for t in tiers:
             key = (t["tier_label"], t["price_gbp"])
-            if key in seen:
-                continue
-            seen.add(key)
-            out.append(t)
+            if key not in seen:
+                seen.add(key)
+                out.append(t)
         return out
 
     @staticmethod
@@ -508,31 +673,26 @@ class FICMExtractor(BaseExtractor):
         }
 
     # ------------------------------------------------------------------ #
-    # event_type
+    # Description + specialty
     # ------------------------------------------------------------------ #
     @staticmethod
-    def _event_type(title: Optional[str]) -> str:
-        t = (title or "").lower()
-        # Checked first: "Intensivists in Training Conference" is a
-        # conference, not a course, despite the word "training".
-        if re.search(r"\b(conference|congress|symposium|summit|meeting|forum)\b", t):
-            return "conference"
-        if re.search(r"\bworkshop\b", t):
-            return "workshop"
-        if re.search(r"\b(course|training|masterclass|webinar|study day|teaching day)\b", t):
-            return "course"
-        return "conference"
+    def _overview_text(overview_html: str) -> str:
+        """The Overview tab's prose body, without the Key-details sidebar."""
+        if not overview_html:
+            return ""
+        m = re.search(r'<div class="c-event-pane-overview__body">', overview_html)
+        if not m:
+            return ""
+        return re.sub(r"\s*\n\s*", "\n", _strip_tags(_div_block(overview_html, m.end()))).strip()
 
-    # ------------------------------------------------------------------ #
-    # Soft fields — one small LLM call, deterministic backstops
-    # ------------------------------------------------------------------ #
     def _soft_fields(
         self,
         title: Optional[str],
-        prose: str,
+        body_text: str,
+        shell: Dict[str, Any],
         llm_call: Callable[[str], Optional[str]],
     ) -> Dict[str, Any]:
-        text = re.sub(r"\s*\n\s*", " ", prose)[:3000]
+        text = re.sub(r"\s*\n\s*", " ", body_text)[:3000]
         result: Dict[str, Any] = {}
 
         if text:
@@ -572,14 +732,15 @@ Respond with valid JSON only, no markdown, no extra text:
                 classify_specialty(title, text) or "Intensive Care Medicine"
             )
         if not result.get("description"):
-            result["description"] = self._first_paragraph(prose)
+            result["description"] = (
+                self._first_paragraph(body_text) or shell.get("description_hint")
+            )
         return result
 
     @staticmethod
-    def _first_paragraph(prose: str) -> Optional[str]:
-        for line in prose.split("\n"):
+    def _first_paragraph(body_text: str) -> Optional[str]:
+        for line in body_text.split("\n"):
             line = line.strip()
-            # A real sentence, not a URL, a fee line or a programme row.
             if len(line) < 60 or line.startswith("http") or "£" in line:
                 continue
             if re.match(r"^\d{1,2}[:.]\d{2}", line):

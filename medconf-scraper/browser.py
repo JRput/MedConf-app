@@ -65,9 +65,14 @@ class BrowserController:
                 logger = logging.getLogger("medconf-scraper")
                 logger.warning(f"Navigation timeout for {url}, attempting to get page content anyway: {str(e2)}")
         
-        if self._is_challenged():
-            self._wait_out_challenge()
         if self._is_challenged() and not self._on_alt_profile:
+            self._wait_out_challenge()   # first time only: some clear on their own
+        if self._is_challenged():
+            # First challenge: move to the alternate profile. Later
+            # challenges: the alt context's clearance only lasts ONE load on
+            # some sites (FICM, RCoA — measured 2026-09-27: page 2 of the
+            # same site is re-challenged and never resolves), whereas a
+            # brand-new alt context clears in <1 s every time. So rotate.
             self._switch_to_alt_profile(url)
 
         time.sleep(SCRAPER_DELAY_SECS)  # Respectful delay
@@ -87,27 +92,42 @@ class BrowserController:
             self.page.wait_for_timeout(1000)
 
     def _switch_to_alt_profile(self, url: str) -> None:
-        """Re-open the page in the alternate profile and stay there. If the
-        alternate is challenged too, we fall back to the original page so
+        """Re-open the page in a FRESH alternate-profile context and stay on
+        it. If that is challenged too, fall back to the previous page so
         callers see the same (challenged) content they would have anyway."""
         import logging
         logger = logging.getLogger("medconf-scraper")
         try:
-            if self._alt_context is None:
-                self._alt_context = self.browser.new_context(**ALT_PROFILE)
-            alt_page = self._alt_context.new_page()
-            alt_page.set_default_timeout(SCRAPER_TIMEOUT_MS)
-            alt_page.goto(url, wait_until="load", timeout=SCRAPER_TIMEOUT_MS)
-            old_page, self.page = self.page, alt_page
-            self._wait_out_challenge()
-            if self._is_challenged():
+            prev_context = self._alt_context
+            old_page = self.page
+            # Fresh alt-profile context first; if that is challenged too, a
+            # fresh DEFAULT-profile context (sites like RSM reject the alt
+            # profile but accept the default — only matters if one session
+            # ever spans both kinds of site).
+            for profile in (ALT_PROFILE, {}):
+                self._alt_context = self.browser.new_context(**profile)
+                alt_page = self._alt_context.new_page()
+                alt_page.set_default_timeout(SCRAPER_TIMEOUT_MS)
+                alt_page.goto(url, wait_until="load", timeout=SCRAPER_TIMEOUT_MS)
+                self.page = alt_page
+                self._wait_out_challenge(4.0)
+                if not self._is_challenged():
+                    break
+                self._alt_context.close()
+            else:
                 self.page = old_page
-                alt_page.close()
+                self._alt_context = prev_context
                 logger.warning(f"Cloudflare challenge on {url} not cleared by either browser profile")
                 return
+            if not self._on_alt_profile:
+                logger.warning(f"Cloudflare challenge on {url}: switched to alternate browser profile for this session")
             self._on_alt_profile = True
             old_page.close()
-            logger.warning(f"Cloudflare challenge on {url}: switched to alternate browser profile for this session")
+            if prev_context is not None:
+                try:
+                    prev_context.close()
+                except Exception:
+                    pass
         except Exception as e:
             logger.warning(f"Alternate browser profile failed for {url}: {e}")
 

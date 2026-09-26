@@ -104,6 +104,14 @@
       "promoted": false,
       "subpage_path": "https://www.escardio.org/events/congresses/esc-preventive-cardiology/call-for-science/abstracts/"
     },
+    "www.ficm.ac.uk|abstract_status|no_abstract_anywhere": {
+      "domain": "www.ficm.ac.uk",
+      "field": "abstract_status",
+      "hits": 4,
+      "method": "no_abstract_anywhere",
+      "promoted": true,
+      "subpage_path": null
+    },
     "www.rcpath.org|abstract_status|no_abstract_anywhere": {
       "domain": "www.rcpath.org",
       "field": "abstract_status",
