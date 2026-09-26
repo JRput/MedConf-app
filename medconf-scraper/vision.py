@@ -93,7 +93,7 @@ def fetch_image_as_data_url(url: str, *, timeout: float = 30.0) -> Optional[str]
             b64 = base64.b64encode(resp.content).decode()
             return f"data:{content_type};base64,{b64}"
     except Exception as e:
-        logger.warning(f"vision: image fetch failed for {url}: {e}")
+        logger.warning(f"vision: image fetch failed for {url[:120]}: {e}")
         return None
 
 
@@ -218,7 +218,7 @@ def extract_pricing_from_images(image_urls: List[str]) -> list[dict]:
     for url in image_urls:
         result = extract_json([url], PRICING_PROMPT, max_tokens=3000)
         if not result or "tiers" not in result:
-            logger.warning(f"vision: no tiers extracted from {url}")
+            logger.warning(f"vision: no tiers extracted from {url[:120]}")  # url may be a multi-MB data: URL
             continue
         all_tier_dicts.extend(result["tiers"])
     tiers: list[dict] = []

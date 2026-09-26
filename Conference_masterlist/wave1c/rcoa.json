@@ -2,53 +2,23 @@
   "source_id": 40,
   "slug": "rcoa",
   "class_name": "RCoAExtractor",
-  "status": "blocked",
-  "file_written": null,
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/rcoa.py",
   "source_row": {
     "source_name": "Royal College of Anaesthetists",
     "society": "RCoA",
     "base_url": "https://www.rcoa.ac.uk/events",
     "default_event_type": "mixed",
-    "pagination_type": "page_query",
-    "pagination_template": "?page={n}",
-    "max_pages_hint": 4,
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
     "detail_is_multipage": false,
-    "active": false,
-    "extraction_instructions": "NOT YET SCRAPABLE — www.rcoa.ac.uk sits behind a Cloudflare managed challenge (interstitial 'Just a moment…' / chl_page orchestrate) that headless Chromium never clears; leave active=false until a non-headless or allowlisted fetch path exists. Structure recorded from a one-off headed browser session for whoever revisits: Drupal 'view-events' listing, 9 cards per page, zero-indexed pager ?page=0..3 (~36-40 upcoming events); cards carry title, date, city and CPD credits. Detail URLs are /events/<slug>. Detail pages use Overview/Programme/Pricing tabs — fees live on the Pricing tab, not the overview, so pricing needs the tab-aware fetch pattern (cf. rcr.py). Mix of conferences, revision courses, webinars and study days.",
-    "notes_blocked": "Do not wire into the daily matrix. Also note the pager is 0-indexed, so the standard page_query walker (starts at n=1) would silently skip the first 9 events even once access is solved."
+    "active": true,
+    "extraction_instructions": "TESTING IN PROGRESS"
   },
-  "registry_comment": "RCoA (40) — NOT REGISTERED: Cloudflare managed challenge blocks headless Chromium (403 on every path). See Conference_masterlist/wave1c/rcoa.json.",
-  "probe_results": {
-    "shells": 0,
-    "shells_forced_fallback": 0,
-    "details_tested": 0,
-    "with_date": 0,
-    "with_pricing": 0,
-    "with_venue": 0,
-    "with_description": 0,
-    "with_specialty": 0
-  },
-  "test_urls": [
-    "https://www.rcoa.ac.uk/events",
-    "https://www.rcoa.ac.uk/events/anaesthesia-2027",
-    "https://www.rcoa.ac.uk/events/anaesthetic-updates-october-2026"
-  ],
+  "registry_comment": "RCoA (40) — pending",
+  "probe_results": {},
+  "test_urls": [],
   "spot_check": [],
-  "blocking_evidence": {
-    "challenge_type": "Cloudflare managed challenge — non-interactive JS interstitial, title 'Just a moment...', body 'Performing security verification', script /cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=...",
-    "headless_playwright": "BLOCKED. Project BrowserController (browser.py, chromium.launch(headless=True), launch flags unchanged) → page.goto('https://www.rcoa.ac.uk/events', wait_until='load') returns HTTP 403. Body is the 28.6 KB interstitial.",
-    "longer_wait_helps": "No. Polled page.content() every 5 s for 60 s: HTML length settled at 28,613 chars after the first second and never changed; title stayed 'Just a moment...' for the entire 60 s. A second headless run polling 8 s per URL gave the same result.",
-    "scope_of_block_headless": "Whole domain, not just the listing. Headless 403 + interstitial on https://www.rcoa.ac.uk/events, https://www.rcoa.ac.uk/, https://www.rcoa.ac.uk/robots.txt, and on two detail pages (/events/anaesthesia-2027, /events/anaesthetists-educators-programme).",
-    "curl": "403 both with default curl UA and with the project's spoofed Chrome 124 desktop UA — matches recon.",
-    "non_headless_one_off": "CLEARS IMMEDIATELY (informational only, run once locally on a home IP). chromium.launch(headless=False) → /events returned HTTP 200, real title '| The Royal College of Anaesthetists', 287,623 chars, 9 event cards and pager links page=0..3 present on first paint with no visible challenge step. So the discriminator is the headless flag / headless browser fingerprint, not the IP address and not a login wall. Curiously the same headed session still got 403 on / and /robots.txt, so the edge rule is not uniform across paths.",
-    "not_attempted": "No stealth plugins, no patched-Chromium/undetected driver, no third-party CAPTCHA/bypass service, no launch-flag changes to browser.py — per brief."
-  },
-  "concerns": [
-    "Recon record for this domain is WRONG on the decisive point: it claims 'headless Playwright loads fine'. It does not — headless gets a 403 interstitial on every path tested. Any other wave-1c source whose recon says 'js_required, browser works' on a Cloudflare domain should be re-verified the same way before a build agent is spent on it.",
-    "No extractor file was written. medconf-scraper/extractors/rcoa.py does NOT exist — building it would mean shipping code that cannot be tested by the harness or run in CI. All structural findings needed to write it later are captured in source_row.extraction_instructions above.",
-    "An alternative non-browser surface is unlikely to help: the Cloudflare rule fires at the edge for the whole host (robots.txt itself 403s), so a Drupal JSON:API / views-REST / RSS endpoint on www.rcoa.ac.uk would be challenged identically. Not probed further, to stay inside the polite request budget.",
-    "If this source is wanted later, the realistic options are (a) ask RCoA to allowlist the scraper's CI egress or provide a feed, (b) a headful browser in CI (xvfb + headless=False), or (c) a residential-IP/headful runner. (b) is the cheapest to test but is a browser.py / workflow change, which this agent is not permitted to make and which would affect all 39 other sources — it should be a deliberate, separately-owned decision.",
-    "Pager is 0-indexed (?page=0 is page one). The shared page_query walker starts at n=1, so even after access is solved this source needs either a pagination_template offset or a list_shells_override.",
-    "Total requests to rcoa.ac.uk during this investigation: ~15 page loads. No database, git, or shared-file changes were made."
-  ]
+  "concerns": []
 }
