@@ -1,0 +1,114 @@
+{
+  "source_id": 35,
+  "source_name": "FPM Events",
+  "society": "FPM",
+  "run_at": "2026-09-21T22:03:03.906131+00:00",
+  "events_scraped": 9,
+  "events_with_gaps_at_first": 9,
+  "events_fixed": 6,
+  "events_still_incomplete": 5,
+  "patches_applied": [
+    {
+      "conference_id": 1782,
+      "conference_name": "DPM Training Programme 2026 | Module 8: SAQ Exam Revision Co",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Annual PMST fee', 'price_gbp': 1365.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "text_regex_fees_page"
+    },
+    {
+      "conference_id": 1788,
+      "conference_name": "DPM Training Programme 2026 | Module 9: CAP Exam Revision Co",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Annual PMST fee', 'price_gbp': 1365.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "text_regex_fees_page"
+    },
+    {
+      "conference_id": 1804,
+      "conference_name": "AGM 2026",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Annual PMST fee', 'price_gbp': 1365.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "text_regex_fees_page"
+    },
+    {
+      "conference_id": 1810,
+      "conference_name": "FPM/ABHI Webinar: CVD & Women\u2019s Health \u2013 What Can We Practic",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Annual PMST fee', 'price_gbp': 1365.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "text_regex_fees_page"
+    },
+    {
+      "conference_id": 1819,
+      "conference_name": "FPM Annual Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1827,
+      "conference_name": "Festive FPM Gathering 2026",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1827,
+      "conference_name": "Festive FPM Gathering 2026",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Standard', 'price_gbp': 0.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "free_event"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1774,
+      "conference_name": "Women in Clinical Trials Webinar Part 2: A Patient\u2019s Perspec",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1796,
+      "conference_name": "Understanding Real-World Studies and Evidence",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1819,
+      "conference_name": "FPM Annual Conference 2026",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1825,
+      "conference_name": "Case Notes: The ABPI Code in Practice",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1827,
+      "conference_name": "Festive FPM Gathering 2026",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    }
+  ],
+  "explorer_runs": 0,
+  "explorer_successes": 0,
+  "duration_sec": 13.3
+}

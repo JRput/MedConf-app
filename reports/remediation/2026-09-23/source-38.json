@@ -1,0 +1,195 @@
+{
+  "source_id": 38,
+  "source_name": "ASGBI",
+  "society": "ASGBI",
+  "run_at": "2026-09-23T01:39:43.903531+00:00",
+  "events_scraped": 4,
+  "events_with_gaps_at_first": 4,
+  "events_fixed": 4,
+  "events_still_incomplete": 4,
+  "patches_applied": [
+    {
+      "conference_id": 1773,
+      "conference_name": "ASGBI International Surgical Congress 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1780,
+      "conference_name": "ASGBI International Surgical Congress 2028",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1790,
+      "conference_name": "EGS Symposium 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1787,
+      "conference_name": "EGS Symposium 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1773,
+      "conference_name": "ASGBI International Surgical Congress 2027",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/fees",
+              "https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/pages/fees",
+              "https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/fees-and-how-to-book",
+              "https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/tickets",
+              "https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/registration",
+              "https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 126140
+          },
+          "llm_reasoning": "The provided page text consists exclusively of CSS @font-face declarations for the Roboto font family. There is no visible event content such as Overview, Programme, Speakers, or any registration/fees section. Consequently, no registration\u2011fee information (member rates, non\u2011member rates, day passes,",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/fees",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/pages/fees",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/fees-and-how-to-book",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/tickets",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/registration",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/263011/html#asgbi-international-surgical-congress-2027/registration-and-fees"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1780,
+      "conference_name": "ASGBI International Surgical Congress 2028",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/fees",
+              "https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/pages/fees",
+              "https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/fees-and-how-to-book",
+              "https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/tickets",
+              "https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/registration",
+              "https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 126140
+          },
+          "llm_reasoning": "The provided text consists solely of CSS @font-face rules for the Roboto font; there is no visible event content such as Overview, Programme, Speakers, or any registration fee information.",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/fees",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/pages/fees",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/fees-and-how-to-book",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/tickets",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/registration",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk#asgbi-international-surgical-congress-2028/registration-and-fees"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1790,
+      "conference_name": "EGS Symposium 2027",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/fees",
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/pages/fees",
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/fees-and-how-to-book",
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/tickets",
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/registration",
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 126140
+          },
+          "llm_reasoning": "The provided text consists solely of CSS @font-face rules for the Roboto font; there is no event overview, programme, speakers, or any registration-fee information present.",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/fees",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/pages/fees",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/fees-and-how-to-book",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/tickets",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/registration",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2027/registration-and-fees"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1787,
+      "conference_name": "EGS Symposium 2026",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/fees",
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/pages/fees",
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/fees-and-how-to-book",
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/tickets",
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/registration",
+              "https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 126140
+          },
+          "llm_reasoning": "The provided text consists solely of @font-face CSS rules for the Roboto font; there is no visible event content such as Overview, Programme, Speakers, or any registration fee information.",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/fees",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/pages/fees",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/fees-and-how-to-book",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/tickets",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/registration",
+            "skipped_unrelated_zero_tokens: https://events.asgbi.org.uk/asgbievents/modules/175324/html#egs-symposium-2026/registration-and-fees"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 4,
+  "explorer_successes": 0,
+  "duration_sec": 18.3
+}

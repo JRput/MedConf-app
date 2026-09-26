@@ -1,0 +1,138 @@
+{
+  "source_id": 36,
+  "source_name": "ESC Congress Calendar",
+  "society": "ESC",
+  "run_at": "2026-09-21T22:03:50.289331+00:00",
+  "events_scraped": 9,
+  "events_with_gaps_at_first": 9,
+  "events_fixed": 9,
+  "events_still_incomplete": 5,
+  "patches_applied": [
+    {
+      "conference_id": 1786,
+      "conference_name": "EAPCI 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': True, 'abstract_deadline_note': 'see event page for details'}",
+      "method": "open_no_date"
+    },
+    {
+      "conference_id": 1775,
+      "conference_name": "ESC Digital & AI Summit 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1789,
+      "conference_name": "ESC Acute CardioVascular Care 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': True, 'abstract_deadline': '2026-10-29'}",
+      "method": "explorer:subpage:/events/congresses/acute-cardiovascular-care/call-for-science/abstracts/"
+    },
+    {
+      "conference_id": 1781,
+      "conference_name": "EACVI 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': True, 'abstract_deadline_note': 'see event page for details'}",
+      "method": "open_no_date"
+    },
+    {
+      "conference_id": 1792,
+      "conference_name": "EHRA 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': True, 'abstract_deadline': '2026-11-05'}",
+      "method": "explorer:subpage:/events/congresses/ehra-congress/call-for-science/abstracts/"
+    },
+    {
+      "conference_id": 1809,
+      "conference_name": "ESC Cardio-Oncology 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1797,
+      "conference_name": "ESC Preventive Cardiology 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': True, 'abstract_deadline': '2026-11-19'}",
+      "method": "explorer:subpage:/events/congresses/esc-preventive-cardiology/call-for-science/abstracts/"
+    },
+    {
+      "conference_id": 1803,
+      "conference_name": "Heart Failure 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 1812,
+      "conference_name": "ACNAP 2027",
+      "field": "venue_name",
+      "value_before": "None",
+      "value_after": "the European Heart House in Sophia Antipolis, France, ACNAP 2027 brings together nurses and allied professionals to drive progress in cardiovascular care. The programme supports professional growth",
+      "method": "heuristic_prefix"
+    },
+    {
+      "conference_id": 1812,
+      "conference_name": "ACNAP 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1786,
+      "conference_name": "EAPCI 2027",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1789,
+      "conference_name": "ESC Acute CardioVascular Care 2027",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1809,
+      "conference_name": "ESC Cardio-Oncology 2027",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1797,
+      "conference_name": "ESC Preventive Cardiology 2027",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1803,
+      "conference_name": "Heart Failure 2027",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    }
+  ],
+  "explorer_runs": 6,
+  "explorer_successes": 6,
+  "duration_sec": 22.0
+}

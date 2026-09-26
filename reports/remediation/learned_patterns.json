@@ -16,6 +16,30 @@
       "promoted": false,
       "subpage_path": "https://rcpsg.ac.uk/education/podiatric-medicine-annual-conference"
     },
+    "www.acpgbi.org.uk|abstract_status|llm_open": {
+      "domain": "www.acpgbi.org.uk",
+      "field": "abstract_status",
+      "hits": 1,
+      "method": "llm_open",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.acpgbi.org.uk|pricing|vision_subpage:/events/": {
+      "domain": "www.acpgbi.org.uk",
+      "field": "pricing",
+      "hits": 1,
+      "method": "vision_subpage:/events/",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.acpgbi.org.uk|pricing|vision_subpage:/events/1829/acpgbi_2027_annual_meeting_brighton/fees": {
+      "domain": "www.acpgbi.org.uk",
+      "field": "pricing",
+      "hits": 1,
+      "method": "vision_subpage:/events/1829/acpgbi_2027_annual_meeting_brighton/fees",
+      "promoted": false,
+      "subpage_path": null
+    },
     "www.bopa.org.uk|abstract_status|subpage:/abstract-submission-the-29th-annual-bopa-conference-in-2026/|https://www.bopa.org.uk/abstract-submission-the-29th-annual-bopa-conference-in-2026/": {
       "domain": "www.bopa.org.uk",
       "field": "abstract_status",
@@ -47,6 +71,38 @@
       "method": "vision_subpage:/latest-conference-2026/",
       "promoted": true,
       "subpage_path": null
+    },
+    "www.escardio.org|abstract_status|no_abstract_anywhere": {
+      "domain": "www.escardio.org",
+      "field": "abstract_status",
+      "hits": 6,
+      "method": "no_abstract_anywhere",
+      "promoted": true,
+      "subpage_path": null
+    },
+    "www.escardio.org|abstract_status|subpage:/events/congresses/acute-cardiovascular-care/call-for-science/abstracts/|https://www.escardio.org/events/congresses/acute-cardiovascular-care/call-for-science/abstracts/": {
+      "domain": "www.escardio.org",
+      "field": "abstract_status",
+      "hits": 2,
+      "method": "subpage:/events/congresses/acute-cardiovascular-care/call-for-science/abstracts/",
+      "promoted": false,
+      "subpage_path": "https://www.escardio.org/events/congresses/acute-cardiovascular-care/call-for-science/abstracts/"
+    },
+    "www.escardio.org|abstract_status|subpage:/events/congresses/ehra-congress/call-for-science/abstracts/|https://www.escardio.org/events/congresses/ehra-congress/call-for-science/abstracts/": {
+      "domain": "www.escardio.org",
+      "field": "abstract_status",
+      "hits": 2,
+      "method": "subpage:/events/congresses/ehra-congress/call-for-science/abstracts/",
+      "promoted": false,
+      "subpage_path": "https://www.escardio.org/events/congresses/ehra-congress/call-for-science/abstracts/"
+    },
+    "www.escardio.org|abstract_status|subpage:/events/congresses/esc-preventive-cardiology/call-for-science/abstracts/|https://www.escardio.org/events/congresses/esc-preventive-cardiology/call-for-science/abstracts/": {
+      "domain": "www.escardio.org",
+      "field": "abstract_status",
+      "hits": 2,
+      "method": "subpage:/events/congresses/esc-preventive-cardiology/call-for-science/abstracts/",
+      "promoted": false,
+      "subpage_path": "https://www.escardio.org/events/congresses/esc-preventive-cardiology/call-for-science/abstracts/"
     },
     "www.rcpath.org|abstract_status|no_abstract_anywhere": {
       "domain": "www.rcpath.org",
@@ -125,6 +181,14 @@
       "field": "abstract_status",
       "hits": 1,
       "method": "no_abstract_anywhere",
+      "promoted": false,
+      "subpage_path": null
+    },
+    "www.rcpe.ac.uk|abstract_status|llm_closed": {
+      "domain": "www.rcpe.ac.uk",
+      "field": "abstract_status",
+      "hits": 1,
+      "method": "llm_closed",
       "promoted": false,
       "subpage_path": null
     },

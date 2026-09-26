@@ -198,6 +198,39 @@ def _parse_time_text(text: Optional[str]) -> Optional[str]:
     return m.group(1) if m else None
 
 
+# Every individual Evening Medical Update page (Fits and Funny Turns,
+# Frailty, Confusion, ...) opens its Overview with a verbatim block-booking
+# promo for the WHOLE block, not this session, and closes with an equally
+# generic "programme" paragraph — neither describes this specific event.
+# The per-event content sits between them, introduced by "Learning outcomes
+# for this Evening Medical Update include: ...".
+_EMU_BOILERPLATE_LEAD_RES = [
+    re.compile(r"block-book to view our[^.]*evening medical updates online from home via this link\s*\.?\s*", re.I),
+    re.compile(r"free for rcpe members\.?\s*", re.I),
+    re.compile(r"for non-rcpe members,[^.]*discount for booking all (?:five|\d+) emus\.?\s*", re.I),
+    re.compile(r"block-booking open until[^.]*\.\s*", re.I),
+]
+_EMU_BOILERPLATE_TAIL_RE = re.compile(r"the evening medical updates programme\s*:", re.I)
+
+
+def _strip_emu_boilerplate(text: str) -> str:
+    """Removes the shared block-booking intro + generic programme tail from
+    an Evening Medical Update page's Overview text, leaving only the
+    per-event "Learning outcomes for this Evening Medical Update include:
+    ..." content. A no-op on every other event type (none of these phrases
+    appear outside the EMU series)."""
+    if not text:
+        return text
+    cleaned = text
+    for rx in _EMU_BOILERPLATE_LEAD_RES:
+        cleaned = rx.sub("", cleaned)
+    cleaned = _EMU_BOILERPLATE_TAIL_RE.split(cleaned)[0]
+    # Defensive: drop any stray leading punctuation left behind when a
+    # boilerplate sentence's own trailing period didn't get swept up with it.
+    cleaned = re.sub(r"^[\s.,;:]+", "", cleaned)
+    return cleaned.strip()
+
+
 class RCPEExtractor(BaseExtractor):
 
     # ------------------------------------------------------------------ #
@@ -314,8 +347,20 @@ class RCPEExtractor(BaseExtractor):
 
         # Abstracts — only bother parsing if the page actually mentions one
         # (RCPE's "College Meetings & Ceremonies" / EMU pages never do).
-        plain_text = _clean(html)
-        if re.search(r"abstract", plain_text, re.I):
+        # Strip <script>/<style> first so JS/JSON-LD noise never leaks into
+        # the text the classifier scans.
+        noise_stripped = re.sub(r"<script.*?</script>|<style.*?</style>", " ", html, flags=re.DOTALL | re.I)
+        plain_text = _clean(noise_stripped)
+        # RCPE phrases some conference abstract-call deadlines as "The
+        # deadline for ALL submissions is <date>" (e.g. Medical Trainees
+        # Conference's Clinical Lesson / QIP case-report submissions) —
+        # the shared abstract_classifier's capture regex only recognises
+        # "deadline for submissions is", so without this normalisation a
+        # genuine, dated call falls through to its conservative "no
+        # parseable deadline -> False" default and the real open window
+        # (with its real deadline) is lost entirely.
+        plain_text = re.sub(r"deadline for all submissions is", "deadline for submissions is", plain_text, flags=re.I)
+        if re.search(r"abstract|poster|call for papers", plain_text, re.I):
             is_open, deadline = extract_abstract_info(plain_text)
             result["abstract_open"] = is_open
             result["abstract_deadline"] = deadline.isoformat() if deadline else None
@@ -484,7 +529,7 @@ class RCPEExtractor(BaseExtractor):
     ) -> Dict[str, Any]:
         overview_m = re.search(r'<div id="overview"[^>]*>(.*?)<div id="', html, re.DOTALL)
         overview_html = overview_m.group(1) if overview_m else ""
-        text = _clean(overview_html)[:3000]
+        text = _strip_emu_boilerplate(_clean(overview_html))[:3000]
 
         title = shell.get("title") or ""
         prompt = f"""You are summarising a single medical conference/event detail page. Extract ONLY two fields.

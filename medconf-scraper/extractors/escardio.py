@@ -194,27 +194,30 @@ def _extract_description(html_doc: str) -> Optional[str]:
 
 
 def _extract_venue_from_helpful_info(html_doc: str) -> Optional[str]:
-    """"The Congress Venue Allianz MiCO - Gate 4 Viale Lodovico Scarampo
-    20148 Milano, Italy" -> "Allianz MiCO - Gate". Street addresses run
-    straight into the venue name with no punctuation to split on, so we
-    cut at the first standalone number (street number / postcode) and
-    accept losing a trailing house-style number (e.g. "Gate 4") as the
-    safer failure mode over swallowing the whole address. If that leaves
-    something implausibly long, the address didn't have an early number
-    to anchor on — bail out to None (null self-heals; a wrong guess doesn't)."""
+    """After the "(The) Congress Venue" heading, ESC either runs straight
+    into the address with no punctuation ("Allianz MiCO - Gate 4 Viale
+    Lodovico Scarampo 20148 Milano, Italy" -> want "Allianz MiCO - Gate")
+    or leads with a sentence naming the venue partway through ("The
+    congress is taking place at the headquarters of the ESC: European
+    Heart House Les Templiers ..." / "Held at the European Heart House in
+    Sophia Antipolis, France, ACNAP 2027 brings together..."). We don't
+    try to parse the sentence semantically — we just take whatever comes
+    right after the heading up to the FIRST clause boundary (comma,
+    period, or a standalone digit — a street number/postcode). A venue
+    name is short, so if that boundary is missing, at position 0, or
+    what's left is still long/many-worded, this isn't a clean name and we
+    bail to None rather than hand back a run-on sentence (null self-heals
+    via the scraper's re-fetch-when-missing logic; a wrong guess doesn't)."""
     txt = _clean(html_doc)
-    m = re.search(
-        r"(?:The\s+)?Congress\s+Venue\s+(.+?)(?=\s+(?:Plan\s+[Aa]head|"
-        r"See\s+on\s+the\s+map|Transport\s*:))",
-        txt,
-    )
-    if not m:
+    heading_m = re.search(r"[Cc]ongress\s+[Vv]enue\b", txt)
+    if not heading_m:
         return None
-    raw = m.group(1)
-    digit_m = re.search(r"\s\d", raw)
-    candidate = raw[:digit_m.start()] if digit_m else raw
-    candidate = candidate.strip().rstrip(",.-;:")
-    if candidate and 3 < len(candidate) <= 90:
+    raw = txt[heading_m.end(): heading_m.end() + 300]
+    boundary_m = re.search(r"[.,]|\s\d", raw)
+    if not boundary_m or boundary_m.start() == 0:
+        return None
+    candidate = raw[:boundary_m.start()].strip().rstrip(",.-;:")
+    if candidate and 3 < len(candidate) <= 80 and len(candidate.split()) <= 8:
         return candidate
     return None
 

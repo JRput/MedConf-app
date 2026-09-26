@@ -1,0 +1,376 @@
+{
+  "source_id": 31,
+  "source_name": "RCPCH Events & Courses",
+  "society": "RCPCH",
+  "run_at": "2026-09-26T17:23:42.620235+00:00",
+  "events_scraped": 34,
+  "events_with_gaps_at_first": 14,
+  "events_fixed": 13,
+  "events_still_incomplete": 13,
+  "patches_applied": [
+    {
+      "conference_id": 1961,
+      "conference_name": "Celebrating 30 years of RCPCH: Annual event for Senior Membe",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1962,
+      "conference_name": "St David's Day Conference 2027",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Fees Medical Student', 'price_gbp': 57.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}, {'tier_label': 'Non RCPCH members', 'price_gbp': 185.0, 'currency': ",
+      "method": "text_regex"
+    },
+    {
+      "conference_id": 1962,
+      "conference_name": "St David's Day Conference 2027",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1909,
+      "conference_name": "Statement and Report Writing: Level 3, England/Wales (online",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1909,
+      "conference_name": "Statement and Report Writing: Level 3, England/Wales (online",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1887,
+      "conference_name": "Statement and Report Writing: Level 3, England/Wales (online",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1887,
+      "conference_name": "Statement and Report Writing: Level 3, England/Wales (online",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1900,
+      "conference_name": "Statement and Report Writing: Level 3, Scotland (online) - M",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1900,
+      "conference_name": "Statement and Report Writing: Level 3, Scotland (online) - M",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1906,
+      "conference_name": "Statement and Report Writing: Level 3, England/Wales (online",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1906,
+      "conference_name": "Statement and Report Writing: Level 3, England/Wales (online",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1800,
+      "conference_name": "Statement and report writing - England/Wales (Level 3) - onl",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1800,
+      "conference_name": "Statement and report writing - England/Wales (Level 3) - onl",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1820,
+      "conference_name": "Trainee Research Network Education Seminars (TREES)",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1831,
+      "conference_name": "Advisory Appointments Committee (AAC) Training Day (online)",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1831,
+      "conference_name": "Advisory Appointments Committee (AAC) Training Day (online)",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1846,
+      "conference_name": "National Neonatal Audit Programme summary report and data we",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1846,
+      "conference_name": "National Neonatal Audit Programme summary report and data we",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1866,
+      "conference_name": "Statement and report writing - England/Wales (Level 3) - onl",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1866,
+      "conference_name": "Statement and report writing - England/Wales (Level 3) - onl",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1869,
+      "conference_name": "Academic Trainees Day 2026",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "London",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1869,
+      "conference_name": "Academic Trainees Day 2026",
+      "field": "event_format",
+      "value_before": "None",
+      "value_after": "online",
+      "method": "heuristic_keywords"
+    },
+    {
+      "conference_id": 1869,
+      "conference_name": "Academic Trainees Day 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1881,
+      "conference_name": "RCPCH/NIHR Paediatrics and Child Health Technology Conferenc",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1962,
+      "conference_name": "St David's Day Conference 2027",
+      "fields": [
+        "cpd_points"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1909,
+      "conference_name": "Statement and Report Writing: Level 3, England/Wales (online",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1793,
+      "conference_name": "Grand Round webinars 2026-27",
+      "fields": [
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpch.ac.uk/education-careers/courses/cpd-approved-course",
+              "https://www.rcpch.ac.uk/rss-feeds",
+              "https://www.rcpch.ac.uk/resources/annual-impact-review-2024",
+              "https://www.rcpch.ac.uk/news-events/events/national-neonatal-audit-programme-summary-report-data-webinar"
+            ],
+            "images_ocred": 2,
+            "total_text_chars": 136648
+          },
+          "llm_reasoning": "The page repeatedly states that the Grand Round webinars 2026-27 are a 'fortnightly series of free webinars' and describes the event as free. No sections mentioning registration fees, member rates, non-member rates, day passes, or any pricing information were found in the main event page or its sub-",
+          "notes": []
+        }
+      ]
+    },
+    {
+      "conference_id": 1887,
+      "conference_name": "Statement and Report Writing: Level 3, England/Wales (online",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1900,
+      "conference_name": "Statement and Report Writing: Level 3, Scotland (online) - M",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1906,
+      "conference_name": "Statement and Report Writing: Level 3, England/Wales (online",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1800,
+      "conference_name": "Statement and report writing - England/Wales (Level 3) - onl",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1820,
+      "conference_name": "Trainee Research Network Education Seminars (TREES)",
+      "fields": [
+        "venue_name",
+        "event_format",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpch.ac.uk/education-careers/courses/cpd-approved-course",
+              "https://www.rcpch.ac.uk/news-events/news/latest-trn-activities-what-have-trn-been-so-far-2025",
+              "https://www.rcpch.ac.uk/rss-feeds",
+              "https://www.rcpch.ac.uk/resources/annual-impact-review-2024",
+              "https://www.rcpch.ac.uk/news-events/events/national-neonatal-audit-programme-summary-report-data-webinar"
+            ],
+            "images_ocred": 7,
+            "total_text_chars": 165918
+          },
+          "llm_reasoning": "The page description explicitly states the seminar series is 'free' and no registration\u2011fee information, pricing tiers, member/non\u2011member rates, or day passes are mentioned anywhere in the provided text.",
+          "notes": []
+        }
+      ]
+    },
+    {
+      "conference_id": 1831,
+      "conference_name": "Advisory Appointments Committee (AAC) Training Day (online)",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1846,
+      "conference_name": "National Neonatal Audit Programme summary report and data we",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1866,
+      "conference_name": "Statement and report writing - England/Wales (Level 3) - onl",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1869,
+      "conference_name": "Academic Trainees Day 2026",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1881,
+      "conference_name": "RCPCH/NIHR Paediatrics and Child Health Technology Conferenc",
+      "fields": [
+        "cpd_points",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.rcpch.ac.uk/education-careers/courses/cpd-approved-course",
+              "https://www.rcpch.ac.uk/rss-feeds",
+              "https://www.rcpch.ac.uk/resources/annual-impact-review-2024",
+              "https://www.rcpch.ac.uk/news-events/events/national-neonatal-audit-programme-summary-report-data-webinar",
+              "https://hrc-children.nihr.ac.uk/pcht-conference/"
+            ],
+            "images_ocred": 6,
+            "total_text_chars": 166638
+          },
+          "llm_reasoning": "The provided text consists of JSON\u2011LD structured data for the event (including name, description, dates, location, organizer) followed by JavaScript snippets for analytics, cookie consent, and page configuration. No section mentioning registration fees, pricing, member/non\u2011member rates, day passes, ",
+          "notes": [
+            "external_followed: https://hrc-children.nihr.ac.uk/pcht-conference/ (link text: 'Paediatrics and Child Health Technology Conference website')"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 3,
+  "explorer_successes": 0,
+  "duration_sec": 138.3
+}

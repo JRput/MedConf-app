@@ -277,9 +277,26 @@ class RCPCHExtractor(BaseExtractor):
             # Page is still parked on the real URL from the scraper's
             # navigate() — evaluate() below still works against the live DOM.
 
+        # The real event/course title is always the Drupal page-header h1
+        # (`<h1 class="page-header">`), confirmed identical on both
+        # /news-events/events/* and /education-careers/courses/* pages. A
+        # bare `document.querySelector('h1')` is NOT safe: when http_fetch
+        # falls back to reading the already-navigated live Playwright page
+        # (loaded_page, taken on CI when httpx gets blocked), the page's own
+        # CivicCookieControl consent banner has by then injected its OWN
+        # `<h1>` ("This site uses cookies to store information on your
+        # computer.") earlier in the DOM than the real content — that text
+        # only exists as a JSON config string in the static HTML, never a
+        # real element, so it doesn't show up when httpx succeeds directly.
+        # Target `.page-header` specifically, and belt-and-braces reject any
+        # h1 whose text mentions cookies.
         h1 = (page.evaluate(r"""() => {
-            const h = document.querySelector('h1');
-            return h ? h.textContent.trim() : '';
+            const candidates = Array.from(document.querySelectorAll('h1.page-header, h1'));
+            for (const h of candidates) {
+                const t = (h.textContent || '').trim();
+                if (t && !/cookies?/i.test(t)) return t;
+            }
+            return '';
         }""") or "").strip()
         if h1:
             result["conference_name"] = h1

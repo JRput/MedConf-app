@@ -1,0 +1,782 @@
+{
+  "source_id": 37,
+  "source_name": "ACPGBI Events",
+  "society": "ACPGBI",
+  "run_at": "2026-09-23T00:18:52.933891+00:00",
+  "events_scraped": 20,
+  "events_with_gaps_at_first": 20,
+  "events_fixed": 17,
+  "events_still_incomplete": 18,
+  "patches_applied": [
+    {
+      "conference_id": 1806,
+      "conference_name": "ESCP\u2019s 21st Scientific Meeting",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Oxford",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1806,
+      "conference_name": "ESCP\u2019s 21st Scientific Meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1799,
+      "conference_name": "GIRFT follow-up report\u00a0shows\u00a0progress\u00a0on national recommenda",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1815,
+      "conference_name": "The Royal Marsden GI Updates in Oesophagogastric Cancers",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1835,
+      "conference_name": "Building a Robotic Emergency General Surgery Programme",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1841,
+      "conference_name": "ACPGBI Annual Scottish Chapter Meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1845,
+      "conference_name": "Scalpel to Software: An Evolution' \u2014 the 88th BASO Scientifi",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1850,
+      "conference_name": "AI in Practice: The Opportunities, the Weaknesses and the Im",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Oxford",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1850,
+      "conference_name": "AI in Practice: The Opportunities, the Weaknesses and the Im",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Mental Health",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1850,
+      "conference_name": "AI in Practice: The Opportunities, the Weaknesses and the Im",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1856,
+      "conference_name": "Cambridge Advanced Colorectal Simulation & Robotics course 2",
+      "field": "city",
+      "value_before": "None",
+      "value_after": "Cambridge",
+      "method": "heuristic_known_city"
+    },
+    {
+      "conference_id": 1865,
+      "conference_name": "ACPGBI Oxford Chapter Meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1860,
+      "conference_name": "CRSM 2026 | CSSANZ & GSA Combined Scientific Meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1871,
+      "conference_name": "Early-onset colorectal cancer symposium",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': True, 'abstract_deadline_note': 'see event page for details'}",
+      "method": "explorer:llm_open"
+    },
+    {
+      "conference_id": 1875,
+      "conference_name": "The Pelvic Floor Society 2026 Annual Meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1878,
+      "conference_name": "King\u2019s Live 2026",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'All Day Registration \u00b7 Consultant \u00b7 Early Rate', 'price_gbp': 200.0, 'currency': 'GBP', 'is_early_bird': True, 'early_bird_deadline': '2023-02-28'}, {'tier_label': 'All Day Registrati",
+      "method": "vision_llm"
+    },
+    {
+      "conference_id": 1878,
+      "conference_name": "King\u2019s Live 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1886,
+      "conference_name": "Colorectal THRIVE 2027 - Congress Where Surgeons THRIVE",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'One Day Registration \u00b7 Trainee \u00b7 Late Rate', 'price_gbp': 100.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}, {'tier_label': 'Full Congress \u00b7 Emerging Coun",
+      "method": "explorer:vision_subpage:/events/"
+    },
+    {
+      "conference_id": 1886,
+      "conference_name": "Colorectal THRIVE 2027 - Congress Where Surgeons THRIVE",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1882,
+      "conference_name": "Midlands Proctology Day",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1885,
+      "conference_name": "2026 ALRSGBI Annual Scientific Meeting",
+      "field": "specialty",
+      "value_before": "None",
+      "value_after": "Mental Health",
+      "method": "title_classifier"
+    },
+    {
+      "conference_id": 1885,
+      "conference_name": "2026 ALRSGBI Annual Scientific Meeting",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1888,
+      "conference_name": "ACPGBI 2027 Annual Meeting, Brighton",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'All Day Registration \u00b7 Consultant \u00b7 Early Rate', 'price_gbp': 200.0, 'currency': 'GBP', 'is_early_bird': True, 'early_bird_deadline': None}, {'tier_label': 'All Day Registration \u00b7 Con",
+      "method": "explorer:vision_subpage:/events/1829/acpgbi_2027_annual_meeting_brighton/fees"
+    },
+    {
+      "conference_id": 1888,
+      "conference_name": "ACPGBI 2027 Annual Meeting, Brighton",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1806,
+      "conference_name": "ESCP\u2019s 21st Scientific Meeting",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/",
+              "https://www.acpgbi.org.uk/events",
+              "https://www.acpgbi.org.uk/events/1629/escps_21st_scientific_meeting/fees",
+              "https://www.acpgbi.org.uk/events/1629/escps_21st_scientific_meeting/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1629/escps_21st_scientific_meeting/tickets",
+              "https://www.acpgbi.org.uk/events/1629/escps_21st_scientific_meeting/registration",
+              "https://www.acpgbi.org.uk/events/1629/escps_21st_scientific_meeting/registration-and-fees"
+            ],
+            "images_ocred": 40,
+            "total_text_chars": 68683
+          },
+          "llm_reasoning": "The page contains the event overview, dates (23\u201325 Sep 2026), venue description (Prague Congress Centre), and general information about the meeting, but there is no section labeled Fees, Registration, Pricing, or any mention of member/non-member rates, day passes, or early\u2011bird pricing. Consequently",
+          "notes": [
+            "llm_classified_anchors: 2",
+            "llm_event_match https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting: matched=['meeting'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1799,
+      "conference_name": "GIRFT follow-up report\u00a0shows\u00a0progress\u00a0on national recommenda",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/",
+              "https://www.acpgbi.org.uk/events",
+              "https://www.acpgbi.org.uk/events/1823/girft_followup_reportshowsprogresson_national_recommendations_for_general_surgery/fees",
+              "https://www.acpgbi.org.uk/events/1823/girft_followup_reportshowsprogresson_national_recommendations_for_general_surgery/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1823/girft_followup_reportshowsprogresson_national_recommendations_for_general_surgery/tickets",
+              "https://www.acpgbi.org.uk/events/1823/girft_followup_reportshowsprogresson_national_recommendations_for_general_surgery/registration"
+            ],
+            "images_ocred": 34,
+            "total_text_chars": 64097
+          },
+          "llm_reasoning": "The page contains an event overview, description, date/time, a 'Join our webinar' call\u2011to\u2011action with a registration link, and standard site navigation (menu, footer, etc.). No section detailing registration fees, member/non\u2011member rates, day passes, or any pricing information is present.",
+          "notes": [
+            "llm_classified_anchors: 2",
+            "llm_event_match https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting: matched=['surgery', 'general'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1815,
+      "conference_name": "The Royal Marsden GI Updates in Oesophagogastric Cancers",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/",
+              "https://www.acpgbi.org.uk/events",
+              "https://www.acpgbi.org.uk/contact.aspx",
+              "https://www.acpgbi.org.uk/help.aspx",
+              "https://www.acpgbi.org.uk/members/default.aspx",
+              "https://www.acpgbi.org.uk/default.aspx",
+              "https://www.acpgbi.org.uk/events/1676/the_royal_marsden_gi_updates_in_oesophagogastric_cancers/fees",
+              "https://www.acpgbi.org.uk/events/1676/the_royal_marsden_gi_updates_in_oesophagogastric_cancers/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1676/the_royal_marsden_gi_updates_in_oesophagogastric_cancers/tickets",
+              "https://www.acpgbi.org.uk/events/1676/the_royal_marsden_gi_updates_in_oesophagogastric_cancers/registration",
+              "https://www.acpgbi.org.uk/events/1676/the_royal_marsden_gi_updates_in_oesophagogastric_cancers/registration-and-fees"
+            ],
+            "images_ocred": 35,
+            "total_text_chars": 96570
+          },
+          "llm_reasoning": "The page provides an event overview, booking instructions, and mentions 'FREE SPONSORED PLACES ON OFFER' with a contact email, but there is no section detailing registration fees, member rates, non-member rates, day passes, or any pricing information.",
+          "notes": [
+            "llm_classified_anchors: 6",
+            "llm_event_match https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting: matched=['updates'] verdict='' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.acpgbi.org.uk/contact.aspx",
+            "skipped_unrelated_zero_tokens: https://www.acpgbi.org.uk/help.aspx",
+            "skipped_unrelated_zero_tokens: https://www.acpgbi.org.uk/members/default.aspx",
+            "skipped_unrelated_zero_tokens: https://www.acpgbi.org.uk/default.aspx"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1822,
+      "conference_name": "Comprehensive Proctology Study Day",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/",
+              "https://www.acpgbi.org.uk/events",
+              "https://www.acpgbi.org.uk/contact.aspx",
+              "https://www.acpgbi.org.uk/help.aspx",
+              "https://www.acpgbi.org.uk/members/default.aspx",
+              "https://www.acpgbi.org.uk/events/1742/comprehensive_proctology_study_day/fees",
+              "https://www.acpgbi.org.uk/events/1742/comprehensive_proctology_study_day/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1742/comprehensive_proctology_study_day/tickets",
+              "https://www.acpgbi.org.uk/events/1742/comprehensive_proctology_study_day/registration",
+              "https://www.acpgbi.org.uk/events/1742/comprehensive_proctology_study_day/registration-and-fees"
+            ],
+            "images_ocred": 35,
+            "total_text_chars": 84416
+          },
+          "llm_reasoning": "The event page explicitly states 'No registration fee' under the event details, indicating that attendance is free of charge.",
+          "notes": [
+            "llm_classified_anchors: 5",
+            "llm_event_match https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting: matched=['proctology'] verdict='no' ok=False",
+            "llm_event_match https://www.acpgbi.org.uk/contact.aspx: matched=['proctology'] verdict='no' ok=False",
+            "llm_event_match https://www.acpgbi.org.uk/help.aspx: matched=['proctology'] verdict='no' ok=False",
+            "llm_event_match https://www.acpgbi.org.uk/members/default.aspx: matched=['proctology'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1832,
+      "conference_name": "Train the Trainer Course- Live Online",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/1816/train_the_trainer_course_live_online/fees",
+              "https://www.acpgbi.org.uk/events/1816/train_the_trainer_course_live_online/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1816/train_the_trainer_course_live_online/tickets",
+              "https://www.acpgbi.org.uk/events/1816/train_the_trainer_course_live_online/registration",
+              "https://www.acpgbi.org.uk/events/1816/train_the_trainer_course_live_online/registration-and-fees"
+            ],
+            "images_ocred": 35,
+            "total_text_chars": 44907
+          },
+          "llm_reasoning": "The page contains the event title, a descriptive overview, a 'Book online for this event' call\u2011to\u2011action, and standard site navigation (Home, Membership, Events, etc.). No section labelled Fees, Pricing, Registration, Costs, or any visible mention of member/non\u2011member rates, day passes, early\u2011bird d",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1835,
+      "conference_name": "Building a Robotic Emergency General Surgery Programme",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1851/building_a_robotic_emergency_general_surgery_programme/",
+              "https://www.acpgbi.org.uk/events/1851/building_a_robotic_emergency_general_surgery_programme/add",
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/1851/building_a_robotic_emergency_general_surgery_programme/fees",
+              "https://www.acpgbi.org.uk/events/1851/building_a_robotic_emergency_general_surgery_programme/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1851/building_a_robotic_emergency_general_surgery_programme/tickets",
+              "https://www.acpgbi.org.uk/events/1851/building_a_robotic_emergency_general_surgery_programme/registration",
+              "https://www.acpgbi.org.uk/events/1851/building_a_robotic_emergency_general_surgery_programme/registration-and-fees"
+            ],
+            "images_ocred": 41,
+            "total_text_chars": 60569
+          },
+          "llm_reasoning": "The page contains sections such as event overview, aims, learning objectives, further details, and a 'Book online for this event' prompt, but there is no visible registration-fee information (no member/non-member rates, day passes, early\u2011bird pricing, or fees table) anywhere in the main content or e",
+          "notes": []
+        }
+      ]
+    },
+    {
+      "conference_id": 1841,
+      "conference_name": "ACPGBI Annual Scottish Chapter Meeting",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting/",
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting/book",
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting/add",
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting/fees",
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting/tickets",
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting/registration",
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting/registration-and-fees"
+            ],
+            "images_ocred": 35,
+            "total_text_chars": 51375
+          },
+          "llm_reasoning": "LLM call failed (rate limit or 5xx).",
+          "notes": []
+        }
+      ]
+    },
+    {
+      "conference_id": 1845,
+      "conference_name": "Scalpel to Software: An Evolution' \u2014 the 88th BASO Scientifi",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/",
+              "https://www.acpgbi.org.uk/events",
+              "https://www.acpgbi.org.uk/contact.aspx",
+              "https://www.acpgbi.org.uk/events/1817/scalpel_to_software_an_evolution_the_88th_baso_scientific_conference/fees",
+              "https://www.acpgbi.org.uk/events/1817/scalpel_to_software_an_evolution_the_88th_baso_scientific_conference/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1817/scalpel_to_software_an_evolution_the_88th_baso_scientific_conference/tickets",
+              "https://www.acpgbi.org.uk/events/1817/scalpel_to_software_an_evolution_the_88th_baso_scientific_conference/registration",
+              "https://www.acpgbi.org.uk/events/1817/scalpel_to_software_an_evolution_the_88th_baso_scientific_conference/registration-and-fees"
+            ],
+            "images_ocred": 40,
+            "total_text_chars": 77554
+          },
+          "llm_reasoning": "The extracted text contains the event title, dates (5\u20136 Oct 2026), venue (The Law Society, London), a brief description, a 'Book online for this event' prompt, and various navigation/menu items (e.g., ACPGBI Events home, Courses, Events and Webinars, etc.). No section labelled Fees, Registration, Pr",
+          "notes": [
+            "llm_classified_anchors: 3",
+            "skipped_unrelated_zero_tokens: https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+            "skipped_unrelated_zero_tokens: https://www.acpgbi.org.uk/contact.aspx"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1850,
+      "conference_name": "AI in Practice: The Opportunities, the Weaknesses and the Im",
+      "fields": [
+        "description",
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/",
+              "https://www.acpgbi.org.uk/events/1865/ai_in_practice_the_opportunities_the_weaknesses_and_the_importance_of_ai_governance_to_demonstrate/fees",
+              "https://www.acpgbi.org.uk/events/1865/ai_in_practice_the_opportunities_the_weaknesses_and_the_importance_of_ai_governance_to_demonstrate/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1865/ai_in_practice_the_opportunities_the_weaknesses_and_the_importance_of_ai_governance_to_demonstrate/tickets",
+              "https://www.acpgbi.org.uk/events/1865/ai_in_practice_the_opportunities_the_weaknesses_and_the_importance_of_ai_governance_to_demonstrate/registration",
+              "https://www.acpgbi.org.uk/events/1865/ai_in_practice_the_opportunities_the_weaknesses_and_the_importance_of_ai_governance_to_demonstrate/registration-and-fees"
+            ],
+            "images_ocred": 30,
+            "total_text_chars": 52352
+          },
+          "llm_reasoning": "The page contains the event title, date and time (6 Oct 2026 6:30PM \u2013 7:00PM), 'Book online for this event' links, a login prompt to view registrations, and standard navigation menus (e.g., ACPGBI Events menu, Courses, Events and Webinars, Forthcoming Events, etc.). No section detailing registration",
+          "notes": [
+            "llm_classified_anchors: 1",
+            "llm_event_match https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting: matched=['governance'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1856,
+      "conference_name": "Cambridge Advanced Colorectal Simulation & Robotics course 2",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/",
+              "https://www.acpgbi.org.uk/events",
+              "https://www.acpgbi.org.uk/default.aspx",
+              "https://www.acpgbi.org.uk/contact.aspx",
+              "https://www.acpgbi.org.uk/help.aspx",
+              "https://www.acpgbi.org.uk/members/default.aspx",
+              "https://www.acpgbi.org.uk/events/1845/cambridge_advanced_colorectal_simulation_robotics_course_21st_22nd_october_2026/fees",
+              "https://www.acpgbi.org.uk/events/1845/cambridge_advanced_colorectal_simulation_robotics_course_21st_22nd_october_2026/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1845/cambridge_advanced_colorectal_simulation_robotics_course_21st_22nd_october_2026/tickets",
+              "https://www.acpgbi.org.uk/events/1845/cambridge_advanced_colorectal_simulation_robotics_course_21st_22nd_october_2026/registration",
+              "https://www.acpgbi.org.uk/events/1845/cambridge_advanced_colorectal_simulation_robotics_course_21st_22nd_october_2026/registration-and-fees"
+            ],
+            "images_ocred": 45,
+            "total_text_chars": 98064
+          },
+          "llm_reasoning": "The page includes sections such as Course Highlights, Day 1 schedule, Day 2 schedule, Target Audience, and a refund policy statement ('Please be advised that your course fee is refundable for up to 14 days following your application. Thereafter course fees are non-refundable'), but no specific regis",
+          "notes": [
+            "llm_classified_anchors: 6",
+            "llm_event_match https://www.acpgbi.org.uk/default.aspx: matched=['colorectal', 'advanced'] verdict='no' ok=False",
+            "llm_event_match https://www.acpgbi.org.uk/contact.aspx: matched=['colorectal', 'advanced'] verdict='' ok=False",
+            "llm_event_match https://www.acpgbi.org.uk/help.aspx: matched=['colorectal', 'advanced'] verdict='no' ok=False",
+            "llm_event_match https://www.acpgbi.org.uk/members/default.aspx: matched=['colorectal', 'advanced'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1865,
+      "conference_name": "ACPGBI Oxford Chapter Meeting",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/",
+              "https://www.acpgbi.org.uk/events",
+              "https://www.acpgbi.org.uk/events/1844/acpgbi_oxford_chapter_meeting/fees",
+              "https://www.acpgbi.org.uk/events/1844/acpgbi_oxford_chapter_meeting/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1844/acpgbi_oxford_chapter_meeting/tickets",
+              "https://www.acpgbi.org.uk/events/1844/acpgbi_oxford_chapter_meeting/registration",
+              "https://www.acpgbi.org.uk/events/1844/acpgbi_oxford_chapter_meeting/registration-and-fees"
+            ],
+            "images_ocred": 40,
+            "total_text_chars": 64837
+          },
+          "llm_reasoning": "The page contains event details such as date, venue, programme description, speakers, and a 'Book online for this event' link, but there is no section listing registration fees, member rates, non-member rates, day passes, or any pricing information. No fees tab or fee-related text was found in the m",
+          "notes": [
+            "llm_classified_anchors: 3"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1860,
+      "conference_name": "CRSM 2026 | CSSANZ & GSA Combined Scientific Meeting",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/",
+              "https://www.acpgbi.org.uk/events",
+              "https://www.acpgbi.org.uk/events/1616/crsm_2026_cssanz_gsa_combined_scientific_meeting/fees",
+              "https://www.acpgbi.org.uk/events/1616/crsm_2026_cssanz_gsa_combined_scientific_meeting/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1616/crsm_2026_cssanz_gsa_combined_scientific_meeting/tickets",
+              "https://www.acpgbi.org.uk/events/1616/crsm_2026_cssanz_gsa_combined_scientific_meeting/registration",
+              "https://www.acpgbi.org.uk/events/1616/crsm_2026_cssanz_gsa_combined_scientific_meeting/registration-and-fees"
+            ],
+            "images_ocred": 35,
+            "total_text_chars": 63295
+          },
+          "llm_reasoning": "The page provides an event overview, dates (22\u201324 Oct 2026), location (Cairns, QLD, Australia), and a brief description of the meeting. It includes navigation menus (ACPGBI Events menu, Courses, Events and Webinars, etc.) and a note stating 'Further program details, registration and accommodation in",
+          "notes": [
+            "llm_classified_anchors: 2",
+            "llm_event_match https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting: matched=['meeting'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1868,
+      "conference_name": "Rectal Prolapse Surgical Management Cadaveric Course",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/",
+              "https://www.acpgbi.org.uk/events",
+              "https://www.acpgbi.org.uk/events/1758/rectal_prolapse_surgical_management_cadaveric_course/fees",
+              "https://www.acpgbi.org.uk/events/1758/rectal_prolapse_surgical_management_cadaveric_course/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1758/rectal_prolapse_surgical_management_cadaveric_course/tickets",
+              "https://www.acpgbi.org.uk/events/1758/rectal_prolapse_surgical_management_cadaveric_course/registration",
+              "https://www.acpgbi.org.uk/events/1758/rectal_prolapse_surgical_management_cadaveric_course/registration-and-fees"
+            ],
+            "images_ocred": 45,
+            "total_text_chars": 73663
+          },
+          "llm_reasoning": "The page contains the event title, dates (28\u201329 Oct 2026), location (Surgical Skills Centre, Ninewells Hospital, Dundee, Scotland), CPD accreditation, a detailed day\u2011by\u2011day programme, delegate testimonials, further details (organised by University of Dundee), and standard site navigation/footer elem",
+          "notes": [
+            "llm_classified_anchors: 2"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1871,
+      "conference_name": "Early-onset colorectal cancer symposium",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/",
+              "https://www.acpgbi.org.uk/events/1867/earlyonset_colorectal_cancer_symposium/fees",
+              "https://www.acpgbi.org.uk/events/1867/earlyonset_colorectal_cancer_symposium/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1867/earlyonset_colorectal_cancer_symposium/tickets",
+              "https://www.acpgbi.org.uk/events/1867/earlyonset_colorectal_cancer_symposium/registration",
+              "https://www.acpgbi.org.uk/events/1867/earlyonset_colorectal_cancer_symposium/registration-and-fees"
+            ],
+            "images_ocred": 40,
+            "total_text_chars": 64586
+          },
+          "llm_reasoning": "The page contains the event title, date/time, location, a detailed description of the symposium, a link to view the programme, and a 'Book online for this event' button. It also includes login prompts for viewing registrations. No section mentioning registration fees, member rates, non-member rates,",
+          "notes": [
+            "llm_classified_anchors: 1"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1875,
+      "conference_name": "The Pelvic Floor Society 2026 Annual Meeting",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1646/the_pelvic_floor_society_2026_annual_meeting/",
+              "https://www.acpgbi.org.uk/events/1646/the_pelvic_floor_society_2026_annual_meeting/add",
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/1646/the_pelvic_floor_society_2026_annual_meeting/fees",
+              "https://www.acpgbi.org.uk/events/1646/the_pelvic_floor_society_2026_annual_meeting/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1646/the_pelvic_floor_society_2026_annual_meeting/tickets",
+              "https://www.acpgbi.org.uk/events/1646/the_pelvic_floor_society_2026_annual_meeting/registration",
+              "https://www.acpgbi.org.uk/events/1646/the_pelvic_floor_society_2026_annual_meeting/registration-and-fees"
+            ],
+            "images_ocred": 41,
+            "total_text_chars": 60626
+          },
+          "llm_reasoning": "The page contains event overview, schedule, booking instructions, and navigation menus (Overview, Programme, Speakers, etc.), but no section detailing registration fees, member/non-member rates, day passes, early\u2011bird pricing, or any monetary amounts.",
+          "notes": []
+        }
+      ]
+    },
+    {
+      "conference_id": 1886,
+      "conference_name": "Colorectal THRIVE 2027 - Congress Where Surgeons THRIVE",
+      "fields": [
+        "venue_name"
+      ],
+      "exploration_evidence": []
+    },
+    {
+      "conference_id": 1882,
+      "conference_name": "Midlands Proctology Day",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/1803/midlands_proctology_day/fees",
+              "https://www.acpgbi.org.uk/events/1803/midlands_proctology_day/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1803/midlands_proctology_day/tickets",
+              "https://www.acpgbi.org.uk/events/1803/midlands_proctology_day/registration",
+              "https://www.acpgbi.org.uk/events/1803/midlands_proctology_day/registration-and-fees"
+            ],
+            "images_ocred": 35,
+            "total_text_chars": 56913
+          },
+          "llm_reasoning": "The page contains sections such as event overview, programme highlights, who should attend, why attend, CPD points, detailed timetable with speakers, and organiser information. No section mentioning registration fees, member rates, non-member rates, day passes, early\u2011bird pricing, or any cost detail",
+          "notes": [
+            "llm_classified_anchors: 0"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1885,
+      "conference_name": "2026 ALRSGBI Annual Scientific Meeting",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.acpgbi.org.uk/events/1772/2026_alrsgbi_annual_scientific_meeting/",
+              "https://www.acpgbi.org.uk/events/1772/2026_alrsgbi_annual_scientific_meeting/add",
+              "https://www.acpgbi.org.uk/events/1825/acpgbi_annual_scottish_chapter_meeting",
+              "https://www.acpgbi.org.uk/events/1772/2026_alrsgbi_annual_scientific_meeting/fees",
+              "https://www.acpgbi.org.uk/events/1772/2026_alrsgbi_annual_scientific_meeting/fees-and-how-to-book",
+              "https://www.acpgbi.org.uk/events/1772/2026_alrsgbi_annual_scientific_meeting/tickets",
+              "https://www.acpgbi.org.uk/events/1772/2026_alrsgbi_annual_scientific_meeting/registration",
+              "https://www.acpgbi.org.uk/events/1772/2026_alrsgbi_annual_scientific_meeting/registration-and-fees"
+            ],
+            "images_ocred": 41,
+            "total_text_chars": 79895
+          },
+          "llm_reasoning": "LLM JSON parse failed: Invalid control character at: line 3 column 10 (char 26)",
+          "notes": []
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 20,
+  "explorer_successes": 3,
+  "duration_sec": 94478.6
+}

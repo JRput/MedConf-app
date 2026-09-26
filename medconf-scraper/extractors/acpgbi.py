@@ -343,7 +343,10 @@ def _split_venue_city(location_raw: Optional[str]) -> Tuple[Optional[str], Optio
 
 
 def _is_junk_title(title: str) -> bool:
-    return bool(_JUNK_TITLE_RE.match(title.strip()))
+    # 2026-09-26: filter disabled on user decision — every event the
+    # calendar lists is wanted, third-party ones included. Pattern kept
+    # above in case that decision is revisited.
+    return False
 
 
 def _extract_body(detail_html: str) -> str:
@@ -357,10 +360,20 @@ def _extract_body(detail_html: str) -> str:
     pane, ending right before the `<div class="clearer">` that precedes
     the "Organised by:" block — a stable structural marker regardless of
     whether the event has a venue/Directions link or not."""
-    start = detail_html.find('id="event"')
-    if start < 0:
+    marker_idx = detail_html.find('id="event"')
+    if marker_idx < 0:
         return ""
-    end = detail_html.find('class="clearer"', start)
+    # Skip past the REST of the opening <div ... id="event"> tag itself —
+    # find() only lands on the `id="event"` attribute text, still mid-tag,
+    # not on real content. Slicing from there (a past bug) leaked the tag's
+    # trailing `>` and the next tag's leading `<div ` as literal text into
+    # the "body", because a truncated tag fragment like `<div ` doesn't
+    # match the `<[^>]+>` strip regex in `_clean_text()`.
+    tag_end = detail_html.find(">", marker_idx)
+    if tag_end < 0:
+        return ""
+    start = tag_end + 1
+    end = detail_html.find('<div class="clearer">', start)
     chunk = detail_html[start:end] if end > start else detail_html[start:start + 6000]
     return _clean_text(chunk)
 

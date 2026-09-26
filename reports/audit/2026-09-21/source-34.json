@@ -1,0 +1,122 @@
+{
+  "source_id": 34,
+  "source_name": "FOM Conferences & Events",
+  "rows": 1,
+  "passing_rows": 0,
+  "failing_rows": 1,
+  "total_missing_fields": 1,
+  "total_suspect_fields": 0,
+  "avg_completeness": 90.9,
+  "verdict": "FAIL",
+  "pagination": {
+    "has_pagination": false,
+    "page_buttons": 0,
+    "next_button": false,
+    "show_more": false,
+    "load_more": false,
+    "total_hint": null,
+    "db_rows": 1
+  },
+  "pagination_warning": null,
+  "audits": [
+    {
+      "conference_id": 1777,
+      "conference_name": "MRO Training by MROs, for MROs",
+      "event_type": "course",
+      "source_url": "https://www.fom.ac.uk/event/mro-training-by-mros-for-mros",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "A practical one-day training programme equipping physicians with the knowledge, ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-15",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-15",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "London",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "MISSING",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_format must be online|in_person|hybrid"
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Occupational Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 4,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 90.9,
+      "total_checked": 11,
+      "total_ok": 8,
+      "total_missing": 1,
+      "total_suspect": 0,
+      "total_absent": 2
+    }
+  ],
+  "audited_at": "2026-09-21T22:02:50.381595+00:00"
+}
