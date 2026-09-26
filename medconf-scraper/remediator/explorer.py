@@ -35,6 +35,7 @@ from __future__ import annotations
 import html as _html
 import json
 import logging
+import os
 import re
 from dataclasses import dataclass, asdict, field
 from typing import Any, Callable, Optional
@@ -250,26 +251,60 @@ def llm_classify_anchors(
     return chosen
 
 
+# Per-process budget for vision calls. 2026-09-26: on ACPGBI (no fee tables
+# anywhere) the pricing explorer sent every sponsor logo / photo on every
+# event page to the vision model — 489 calls in one run, 40+ min, and a
+# rate-limit hazard for the nightly --all run. Fee tables are rare images;
+# a source that needs more than this per run is being fed the wrong images.
+VISION_IMAGE_BUDGET = int(os.environ.get("REMEDIATOR_VISION_BUDGET", "40"))
+_vision_images_sent = 0
+
+_MONEY_NEAR_IMG_RE = re.compile(
+    r"(?:£|€|\$|\bfees?\b|\bprices?\b|\bregistration\b|\bdelegate\b|\btariff\b|\brates?\b|\bcost\b)",
+    re.I,
+)
+_IMG_SKIP_RE = re.compile(
+    r"logo|/brand/|icon|favicon|\.svg|sponsor|partner|banner|hero|avatar|profile|"
+    r"headshot|thumb|social|twitter|facebook|linkedin|youtube|instagram|\.gif$|"
+    r"1x1|pixel|spacer|badge|award|accredit",
+    re.I,
+)
+
+
 def find_money_images(html: str, base_url: str, limit: int = 8) -> list[str]:
-    """Find <img> URLs near money/fee text. Returns absolute URLs."""
+    """Find <img> URLs that plausibly show a fee table: raster images with
+    money/fee wording within ~600 chars either side in the HTML. Sponsor
+    logos, photos, icons and social chrome are skipped by name. Returns
+    absolute URLs, capped by `limit` and by the process-wide vision budget."""
+    global _vision_images_sent
     from urllib.parse import urljoin
     urls: list[str] = []
     seen: set = set()
+    remaining = VISION_IMAGE_BUDGET - _vision_images_sent
+    if remaining <= 0:
+        logger.warning(
+            f"vision budget exhausted ({VISION_IMAGE_BUDGET} images this run) — "
+            f"skipping image pricing for {base_url}"
+        )
+        return []
     for m in re.finditer(r'<img[^>]*src=["\']([^"\']+)["\']', html, re.I):
         src = m.group(1).strip()
         if src.startswith("//"):
             src = "https:" + src
         elif not src.lower().startswith("http"):
             src = urljoin(base_url, src)
-        sl = src.lower()
-        if any(k in sl for k in ("logo", "/brand/", "icon", "favicon", ".svg")):
+        if _IMG_SKIP_RE.search(src.lower()) or _IMG_SKIP_RE.search(m.group(0).lower()):
+            continue
+        window = html[max(0, m.start() - 600): m.end() + 600]
+        if not _MONEY_NEAR_IMG_RE.search(re.sub(r"<[^>]+>", " ", window)):
             continue
         if src in seen:
             continue
         seen.add(src)
         urls.append(src)
-        if len(urls) >= limit:
+        if len(urls) >= min(limit, remaining):
             break
+    _vision_images_sent += len(urls)
     return urls
 
 

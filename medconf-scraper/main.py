@@ -60,12 +60,40 @@ def run_single_source(source_id: int) -> int:
     return 0 if summary["status"] in ("success", "partial") else 1
 
 
+def run_source_group(source_ids: list[int]) -> int:
+    """Scrape several sources sequentially in one process (one CI job).
+
+    Added 2026-09-26 for the grouped matrix: at 38+ sources a job-per-source
+    matrix exceeds GitHub's free-tier concurrency (20) and just queues.
+    Each source is isolated — an exception or failure in one never stops
+    the rest — and the exit code is 1 if ANY source failed, so the job
+    still goes red and names the culprits.
+    """
+    failed: list[int] = []
+    for sid in source_ids:
+        try:
+            rc = run_single_source(sid)
+        except Exception as e:  # never let one source kill the group
+            logger.error(f"Source {sid} crashed: {e}")
+            rc = 1
+        if rc != 0:
+            failed.append(sid)
+    if failed:
+        logger.error(f"Group finished with failures in source(s): {failed}")
+        return 1
+    logger.info(f"Group finished: all {len(source_ids)} source(s) succeeded")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="MedConf scraper")
     parser.add_argument("--run-now", action="store_true",
                         help="Run a scrape immediately instead of starting the scheduler")
     parser.add_argument("--source", type=int, metavar="ID",
                         help="When used with --run-now, scrape only the source with this id")
+    parser.add_argument("--sources", type=str, metavar="ID,ID,...",
+                        help="When used with --run-now, scrape these sources sequentially "
+                             "(one CI job per group; exit 1 if any fails)")
     args = parser.parse_args()
 
     try:
@@ -77,6 +105,9 @@ def main() -> int:
     if args.run_now:
         if args.source is not None:
             return run_single_source(args.source)
+        if args.sources:
+            ids = [int(x) for x in args.sources.split(",") if x.strip()]
+            return run_source_group(ids)
         logger.info("Running scraper immediately for ALL active sources")
         run_all_sources()
         return 0

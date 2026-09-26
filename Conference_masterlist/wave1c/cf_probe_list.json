@@ -1,0 +1,202 @@
+[
+ {
+  "domain": "baskonline.com",
+  "urls": [
+   "https://baskonline.com"
+  ],
+  "expect": [
+   "BASK Annual Meeting"
+  ],
+  "recon_note": "Cloudflare bot protection prevents verification of event listing existence and dates; curl-based discovery insufficient"
+ },
+ {
+  "domain": "theabn.org",
+  "urls": [
+   "https://www.theabn.org"
+  ],
+  "expect": [
+   "ABN Annual Meeting"
+  ],
+  "recon_note": "Aggressive Cloudflare bot protection blocks all discovery attempts; cannot verify events listing or dated event existence"
+ },
+ {
+  "domain": "astro.org",
+  "urls": [
+   "https://www.astro.org"
+  ],
+  "expect": [
+   "ASTRO Annual Meeting"
+  ],
+  "recon_note": "Cloudflare bot-protection blocks automated discovery. All paths (/, /events, /annual-meeting, /sitemap.xml) return Cloudflare \"Just a moment\" verification challenge instead of content. Site requires JavaScript execution and challenge completion to access actual pages. Cannot verify event listings without bypassing bot protection."
+ },
+ {
+  "domain": "professional.heart.org",
+  "urls": [
+   "https://professional.heart.org"
+  ],
+  "expect": [
+   "International Stroke Conference"
+  ],
+  "recon_note": "Cloudflare bot protection blocks all HTTP requests; curl-based discovery not feasible without browser/JavaScript bypass"
+ },
+ {
+  "domain": "eans.org",
+  "urls": [
+   "https://www.eans.org"
+  ],
+  "expect": [
+   "EANS Congress"
+  ],
+  "recon_note": "bot-protection"
+ },
+ {
+  "domain": "esska.org",
+  "urls": [
+   "https://www.esska.org"
+  ],
+  "expect": [
+   "ESSKA Congress"
+  ],
+  "recon_note": "Cloudflare bot protection blocks all discovery; no JSON API or alternative paths bypass the challenge. JavaScript execution (browser automation) required to proceed."
+ },
+ {
+  "domain": "arvo.org",
+  "urls": [
+   "https://www.arvo.org"
+  ],
+  "expect": [
+   "ARVO Annual Meeting"
+  ],
+  "recon_note": "Cloudflare bot-protection challenge blocks all page access. Site requires JavaScript/challenge completion. robots.txt accessible but all HTML pages return Cloudflare \"Just a moment...\" interstitial."
+ },
+ {
+  "domain": "espnic-online.org",
+  "urls": [
+   "https://espnic-online.org"
+  ],
+  "expect": [
+   "ESPNIC Congress"
+  ],
+  "recon_note": "Dead site \u2014 domain resolves to Azure infrastructure (Envoy proxy) but all HTTP paths return 404; HTTPS TLS handshake fails with connection reset. No content found at root, /events, /congress, /meetings, /conferences, /education, /sitemap.xml, or /robots.txt. DNS shows only Outlook/Microsoft 365 email records (SPF/MS validation), no web hosting configuration."
+ },
+ {
+  "domain": "iasociety.org",
+  "urls": [
+   "https://www.iasociety.org"
+  ],
+  "expect": [
+   "International AIDS Conference"
+  ],
+  "recon_note": "cloudflare bot protection prevents access; cannot verify event listings exist"
+ },
+ {
+  "domain": "uscap.org",
+  "urls": [
+   "https://www.uscap.org"
+  ],
+  "expect": [
+   "USCAP Annual Meeting"
+  ],
+  "recon_note": "bot_protection"
+ },
+ {
+  "domain": "faceconference.com",
+  "urls": [
+   "https://www.faceconference.com"
+  ],
+  "expect": [
+   "FACE Conference"
+  ],
+  "recon_note": "Cloudflare bot protection (\"Attention Required\") blocks all HTTP/HTTPS requests. Cannot access homepage, /events, /courses, /sitemap.xml, or /robots.txt. HTTP 403 response on all paths. Discovery impossible without browser with JavaScript challenge solver."
+ },
+ {
+  "domain": "himss.org",
+  "urls": [
+   "https://www.himss.org"
+  ],
+  "expect": [
+   "HIMSS Global Health Conference"
+  ],
+  "recon_note": "Cloudflare bot protection blocks all curl requests; cannot access homepage, common paths (/events, /conferences, /congress, etc.), subdomains (events.himss.org, my.himss.org), or sitemaps. Site requires JavaScript/browser rendering to bypass challenge. Cannot verify a dated event listing or confirm HIMSS Global Health Conference details."
+ },
+ {
+  "domain": "matacourses.com",
+  "urls": [
+   "https://matacourses.com"
+  ],
+  "expect": [
+   "Aesthetic medicine courses"
+  ],
+  "recon_note": "dead - WordPress installation with critical configuration error. All paths (root, /courses, /events, /education, /cpd, /whats-on, /meetings, /robots.txt, /sitemap.xml) return HTTP 500 \"Critical error\" pages. Site is non-functional."
+ },
+ {
+  "domain": "phemcast.co.uk",
+  "urls": [
+   "https://www.phemcast.co.uk"
+  ],
+  "expect": [
+   "Pre-hospital education"
+  ],
+  "recon_note": "bot_protection: Cloudflare challenge prevents all discovery attempts via standard HTTP. Would require browser automation to bypass."
+ },
+ {
+  "domain": "mddus.com",
+  "urls": [
+   "https://www.mddus.com/training-and-cpd"
+  ],
+  "expect": [
+   "Medical defence / risk training"
+  ],
+  "recon_note": "Cloudflare protection blocks all HTML page access; cannot verify presence of dated events. Starting URL https://www.mddus.com/training-and-cpd exists per worklist but returns Cloudflare block. Common paths (/events, /courses, /training, /cpd, /education) and sitemap.xml similarly blocked. Site is Sitecore-based (per robots.txt) but actual event/course content inaccessible."
+ },
+ {
+  "domain": "themdu.com",
+  "urls": [
+   "https://www.themdu.com/learn-and-develop"
+  ],
+  "expect": [
+   "Medical defence / risk training"
+  ],
+  "recon_note": "bot_protection"
+ },
+ {
+  "domain": "facultyofclinicalinformatics.org.uk",
+  "urls": [
+   "https://facultyofclinicalinformatics.org.uk"
+  ],
+  "expect": [
+   "Clinical informatics training/events"
+  ],
+  "recon_note": "Site protected by Cloudflare + WAF returning 403 Forbidden on all content paths. Homepage returns Cloudflare challenge; all event-related paths (/events, /courses, /cpd, /education, /training) blocked. Sitemap references event pages (annual-scientific-conference, agm) but these are inaccessible. WordPress JSON API accessible but no custom event post type exists; pages accessible via API show spam/casino content (site likely defaced). No evidence of active dated event listings."
+ },
+ {
+  "domain": "heart.org",
+  "urls": [
+   "https://www.heart.org"
+  ],
+  "expect": [
+   "AHA Scientific Sessions"
+  ],
+  "recon_note": null
+ },
+ {
+  "domain": "easd.org",
+  "urls": [
+   "https://www.easd.org"
+  ],
+  "expect": [
+   "EASD Annual Meeting"
+  ],
+  "recon_note": null
+ },
+ {
+  "domain": "uptodate.com",
+  "urls": [
+   "https://www.uptodate.com"
+  ],
+  "expect": [
+   "Clinical CME"
+  ],
+  "recon_note": null
+ }
+]

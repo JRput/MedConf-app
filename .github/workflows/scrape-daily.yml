@@ -4,8 +4,9 @@ name: Scrape sources
 #   - Every day at 02:00 UTC, automatically
 #   - On manual "Run workflow" button click in the GitHub Actions tab
 #
-# Each source runs as its own parallel cloud worker (matrix strategy). If one
-# source's site is down, the other workers still complete successfully.
+# Sources run in 5 parallel groups (matrix strategy), ~8 sources per job,
+# sequentially within a job. A failing source turns its group red but never
+# stops the other sources in the group or the other groups.
 on:
   schedule:
     - cron: '0 2 * * *'   # 02:00 UTC daily
@@ -43,7 +44,7 @@ jobs:
         run: python probe_models.py
 
   scrape:
-    name: Source ${{ matrix.source_id }}
+    name: Group ${{ matrix.group }}
     needs: probe-models
     # Still scrape when the probe fails: hard fields (dates, fees, venues)
     # are deterministic and heuristics backstop the soft ones. The failed
@@ -51,89 +52,33 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     # Hard cap: on 2026-09-20 a hung Playwright call kept the BTOG job
-    # alive for GitHub's full 6 h limit. Slowest healthy source is ~10 min.
-    timeout-minutes: 60
+    # alive for GitHub's full 6 h limit. A group of ~8 sources runs ~30 min.
+    timeout-minutes: 120
     strategy:
-      fail-fast: false   # one source failing should NOT cancel the others
+      fail-fast: false   # one group failing should NOT cancel the others
+      # Grouped matrix (2026-09-26): one job per source stopped scaling at
+      # 38 sources (GitHub free tier runs 20 jobs concurrently; the rest
+      # queue). Each job runs its group sequentially via `--sources`; a
+      # failing source still turns the job red and is named in the log.
+      # Slow sources (RCGP, ESMO, AACR) are spread across groups. To add a
+      # source: append its id to the lightest group.
       matrix:
-        source_id: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38]
         include:
-          - source_id: 1
-            source_name: RCGP
-          - source_id: 2
-            source_name: RCSEng
-          - source_id: 3
-            source_name: RSM
-          - source_id: 4
-            source_name: RCP
-          - source_id: 5
-            source_name: RCSEng-Courses
-          - source_id: 6
-            source_name: RCEM-Events
-          - source_id: 7
-            source_name: RCEM-OnDemand
-          - source_id: 8
-            source_name: RCEM-AnnualConf2027
-          - source_id: 9
-            source_name: RCOG-Events
-          - source_id: 10
-            source_name: RCOG-WorldCongress2027
-          - source_id: 11
-            source_name: RCR-AIConference2026
-          - source_id: 12
-            source_name: RCR-EventsPortal
-          - source_id: 13
-            source_name: BOPA
-          - source_id: 14
-            source_name: BTOG
-          - source_id: 15
-            source_name: ASCO-AnnualMeeting
-          - source_id: 16
-            source_name: ASCO-MeetingsEducation
-          - source_id: 17
-            source_name: ESMO
-          - source_id: 18
-            source_name: AACR
-          - source_id: 19
-            source_name: ESTRO
-          - source_id: 20
-            source_name: SABCS
-          - source_id: 21
-            source_name: ESGO-Congress
-          - source_id: 22
-            source_name: ESGO-Courses
-          - source_id: 23
-            source_name: SITC
-          - source_id: 24
-            source_name: ALSG-Courses
-          - source_id: 25
-            source_name: RCPSG
-          - source_id: 26
-            source_name: RCPath
-          - source_id: 27
-            source_name: RCPsych
-          - source_id: 28
-            source_name: RCSEd
-          - source_id: 29
-            source_name: Resus-Courses
-          - source_id: 30
-            source_name: RCPE
-          - source_id: 31
-            source_name: RCPCH
-          - source_id: 32
-            source_name: RCOphth
-          - source_id: 33
-            source_name: FPH
-          - source_id: 34
-            source_name: FOM
-          - source_id: 35
-            source_name: FPM
-          - source_id: 36
-            source_name: ESC
-          - source_id: 37
-            source_name: ACPGBI
-          - source_id: 38
-            source_name: ASGBI
+          - group: A
+            source_ids: "1,6,7,8,13,14,19,20"
+            source_names: "RCGP RCEM×3 BOPA BTOG ESTRO SABCS"
+          - group: B
+            source_ids: "17,2,3,9,10,21,22,23"
+            source_names: "ESMO RCSEng RSM RCOG×2 ESGO×2 SITC"
+          - group: C
+            source_ids: "18,4,5,11,12,15,16,24"
+            source_names: "AACR RCP RCSEng-courses RCR×2 ASCO×2 ALSG"
+          - group: D
+            source_ids: "25,26,27,28,29,34,38"
+            source_names: "RCPSG RCPath RCPsych RCSEd Resus FOM ASGBI"
+          - group: E
+            source_ids: "30,31,32,33,35,36,37"
+            source_names: "RCPE RCPCH RCOphth FPH FPM ESC ACPGBI"
 
     steps:
       - name: Check out repository
@@ -155,7 +100,7 @@ jobs:
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
 
-      - name: Scrape source ${{ matrix.source_id }} (${{ matrix.source_name }})
+      - name: Scrape group ${{ matrix.group }} (${{ matrix.source_names }})
         working-directory: medconf-scraper
         env:
           KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
@@ -177,13 +122,13 @@ jobs:
           # 03:00-04:00 UTC scrape window — 3 job failures in the last
           # week were all this.
           SCRAPER_TIMEOUT_MS: '30000'
-        run: python main.py --run-now --source ${{ matrix.source_id }}
+        run: python main.py --run-now --sources "${{ matrix.source_ids }}"
 
       - name: Upload scraper logs as build artifact
         if: always()    # upload even when the scrape step fails
         uses: actions/upload-artifact@v4
         with:
-          name: log-${{ matrix.source_name }}-${{ github.run_id }}
+          name: log-group-${{ matrix.group }}-${{ github.run_id }}
           path: medconf-scraper/*.log
           if-no-files-found: ignore
           retention-days: 14

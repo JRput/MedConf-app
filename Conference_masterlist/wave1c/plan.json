@@ -1,0 +1,90 @@
+[
+ {
+  "source_id": 39,
+  "slug": "cosrh",
+  "class_name": "CoSRHExtractor",
+  "recon": {
+   "domain": "cosrh.org",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": true,
+   "listing_url": "https://www.cosrh.org/Public/Events",
+   "api_url": "",
+   "detail_topology": "standard_subpages",
+   "event_type_mix": "mixed",
+   "pagination": "unknown",
+   "volume_estimate": 10,
+   "expected_found": [
+    "CoSRH Conference",
+    "Postpartum Contraception Training"
+   ],
+   "notes": "Platform is iMIS Cloud (ASI/Telerik .aspx, tenant COSRH \u2014 this org is the rebranded FSRH). The /Public/Events list is rendered client-side by an iMIS iPart, so Playwright is required; raw curl returns only header/footer. 10 upcoming dated events visible (Sep\u2013Dec 2026), mix of conferences (CoSRH Conference 2026 Manchester, Trainer Conference, Scotland women's health) and courses/webinars (Menopause Care course, DCSRH assessments, Postpartum Contraception Training). Details live on per-event pages at /Public/Event_Display.aspx?EventKey=XXXX. The REST endpoint /api/Event exists but returns 401 anonymously (iMIS token auth would be needed). Diploma/Letters of Competence (IUT/SDI) are qualifications, not listed as dated events. Type filter dropdown exists; no pagination observed with 10 items."
+  },
+  "expect": [
+   "Diploma in Sexual and Reproductive Healthcare",
+   "Letter of Competence IUT",
+   "Letter of Competence SDI",
+   "Postpartum Contraception Training",
+   "CoSRH Conference"
+  ],
+  "provider": "College of Sexual and Reproductive Healthcare"
+ },
+ {
+  "source_id": 40,
+  "slug": "rcoa",
+  "class_name": "RCoAExtractor",
+  "recon": {
+   "domain": "rcoa.ac.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": true,
+   "listing_url": "https://www.rcoa.ac.uk/events",
+   "api_url": "",
+   "pagination": "query_param",
+   "event_type_mix": "mixed",
+   "detail_topology": "tabs",
+   "volume_estimate": 38,
+   "expected_found": [
+    "Anaesthesia Updates (as 'Anaesthetic Updates')",
+    "Airway (category filter only)"
+   ],
+   "notes": "Drupal (not WordPress \u2014 'wordpress_other' used as closest enum; platform is Drupal) behind a Cloudflare managed challenge: curl and WebFetch get 403/challenge, but headless Playwright loads fine, so js_required is really 'browser required'. Listing at /events with ?page=0..3 (~10 cards/page, dates + city + CPD credits on cards); the worklist URL /events-professional-development 404s. Detail pages have Overview/Programme/Pricing tabs \u2014 fees live on the Pricing tab, not the overview. Mix of conferences, revision courses, webinars, study days; 'Anaesthetic Updates' (Sep + Oct 2026) confirmed, Airway is a filter category (category_id param, e.g. category_id=1791)."
+  },
+  "expect": [
+   "Neonatal Airway Course",
+   "Anaesthesia Updates",
+   "Airway Management Courses"
+  ],
+  "provider": "Royal College of Anaesthetists / e-Learning for Healthcare"
+ },
+ {
+  "source_id": 41,
+  "slug": "ficm",
+  "class_name": "FICMExtractor",
+  "recon": {
+   "domain": "ficm.ac.uk",
+   "status": "resolved",
+   "listing_url": "https://www.ficm.ac.uk/events",
+   "platform": "static_html",
+   "js_required": true,
+   "api_url": "",
+   "pagination": "query_param",
+   "volume_estimate": 15,
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "FFICM Exam Preparation",
+    "Critical Care Ultrasound Courses"
+   ],
+   "notes": "Drupal site fully behind an aggressive Cloudflare interactive challenge: curl, WebFetch and even headless Chromium all get 'Just a moment' 403; only HEADED Chromium (headless=False, --disable-blink-features=AutomationControlled, ~10-30s wait) passed, so GitHub Actions scraping will need a stealth/solver approach. Real listing is /events (NOT /eventslisting, which renders nav only) \u2014 server-rendered dated cards (e.g. '17 August 2026 | 8:00am-17:00pm'), 9 events on page 0 with ?page=1 pager, filters for Date/Location/Category (many items flagged 'External Event'), detail pages at /events/[slug]. Saw FFICM/FCICM exam-prep courses and ultrasound (FAMUS/FUSIC, echo) events; no ICM Annual Meeting visible on page 1."
+  },
+  "expect": [
+   "ICM Curriculum Courses",
+   "ICM Teaching Days",
+   "FFICM Exam Preparation",
+   "Critical Care Ultrasound Courses",
+   "ICM Annual Meeting"
+  ],
+  "provider": "Faculty of Intensive Care Medicine"
+ }
+]
