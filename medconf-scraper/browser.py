@@ -4,7 +4,28 @@
 from playwright.sync_api import sync_playwright, Page, Browser, Playwright
 from config import SCRAPER_DELAY_SECS, SCRAPER_TIMEOUT_MS
 from typing import List, Dict, Any, Optional
+import re
 import time
+
+
+# Cloudflare's interstitial. Real pages embed Turnstile scripts too, so only
+# the <title> is a safe marker (learned the hard way 2026-09-26).
+_CHALLENGE_TITLE_RE = re.compile(r"<title>\s*(?:just a moment|attention required)", re.I)
+
+# Alternate browser profile — a plain desktop Chrome. Cloudflare's managed
+# challenge is configured per site: RCoA / FICM / ARVO / HIMSS / ABN reject
+# Playwright's default headless profile ("HeadlessChrome" UA, no locale,
+# 1280x720) but accept this one, while RSM does the exact opposite and
+# BTOG's host 403s this UA outright. So neither profile can be THE default:
+# navigate() starts on the default (proven across 39 sources) and switches
+# to this profile for the rest of the session the first time a page comes
+# back challenged. Measured 2026-09-26 with probe_headed.py.
+ALT_PROFILE = {
+    "user_agent": ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+                   "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"),
+    "viewport": {"width": 1366, "height": 850},
+    "locale": "en-GB",
+}
 
 
 class BrowserController:
@@ -14,6 +35,8 @@ class BrowserController:
         self.playwright: Optional[Playwright] = None
         self.browser: Optional[Browser] = None
         self.page: Optional[Page] = None
+        self._alt_context = None   # created lazily on first challenge
+        self._on_alt_profile = False
 
     def launch(self) -> None:
         """Launch a headless Chromium browser and open a blank page."""
@@ -42,8 +65,51 @@ class BrowserController:
                 logger = logging.getLogger("medconf-scraper")
                 logger.warning(f"Navigation timeout for {url}, attempting to get page content anyway: {str(e2)}")
         
+        if self._is_challenged():
+            self._wait_out_challenge()
+        if self._is_challenged() and not self._on_alt_profile:
+            self._switch_to_alt_profile(url)
+
         time.sleep(SCRAPER_DELAY_SECS)  # Respectful delay
         return self.get_page_text()
+
+    # --- Cloudflare challenge handling ---------------------------------
+    def _is_challenged(self) -> bool:
+        try:
+            return bool(_CHALLENGE_TITLE_RE.search(self.page.content()[:2000]))
+        except Exception:
+            return False
+
+    def _wait_out_challenge(self, max_s: float = 8.0) -> None:
+        """Some challenges auto-resolve via JS in a few seconds; give them a chance."""
+        deadline = time.time() + max_s
+        while time.time() < deadline and self._is_challenged():
+            self.page.wait_for_timeout(1000)
+
+    def _switch_to_alt_profile(self, url: str) -> None:
+        """Re-open the page in the alternate profile and stay there. If the
+        alternate is challenged too, we fall back to the original page so
+        callers see the same (challenged) content they would have anyway."""
+        import logging
+        logger = logging.getLogger("medconf-scraper")
+        try:
+            if self._alt_context is None:
+                self._alt_context = self.browser.new_context(**ALT_PROFILE)
+            alt_page = self._alt_context.new_page()
+            alt_page.set_default_timeout(SCRAPER_TIMEOUT_MS)
+            alt_page.goto(url, wait_until="load", timeout=SCRAPER_TIMEOUT_MS)
+            old_page, self.page = self.page, alt_page
+            self._wait_out_challenge()
+            if self._is_challenged():
+                self.page = old_page
+                alt_page.close()
+                logger.warning(f"Cloudflare challenge on {url} not cleared by either browser profile")
+                return
+            self._on_alt_profile = True
+            old_page.close()
+            logger.warning(f"Cloudflare challenge on {url}: switched to alternate browser profile for this session")
+        except Exception as e:
+            logger.warning(f"Alternate browser profile failed for {url}: {e}")
 
     def get_page_text(self) -> str:
         """Extract all visible text from the current page."""
@@ -547,6 +613,11 @@ class BrowserController:
         """Close the browser and clean up."""
         if self.page:
             self.page.close()
+        if self._alt_context:
+            try:
+                self._alt_context.close()
+            except Exception:
+                pass
         if self.browser:
             self.browser.close()
         if self.playwright:

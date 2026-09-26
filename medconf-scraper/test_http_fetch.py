@@ -108,7 +108,7 @@ class FakeBrowser:
         self._new_context_to_return = new_context_to_return
         self.new_context_calls = 0
 
-    def new_context(self):
+    def new_context(self, **kwargs):
         self.new_context_calls += 1
         return self._new_context_to_return
 

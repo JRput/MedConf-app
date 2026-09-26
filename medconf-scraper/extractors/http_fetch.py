@@ -129,7 +129,7 @@ def _fetch_via_browser(url: str, page: Any, wait_s: float = 20.0) -> Optional[st
     new_context = None
     new_page = None
     try:
-        new_context = page.context.browser.new_context()
+        new_context = page.context.browser.new_context(user_agent=DEFAULT_USER_AGENT)
         new_page = new_context.new_page()
         new_page.set_default_timeout(30000)
         new_page.goto(url, wait_until="load", timeout=30000)
