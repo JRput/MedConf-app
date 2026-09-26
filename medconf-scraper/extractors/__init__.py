@@ -55,6 +55,8 @@ from .fpm import FPMExtractor
 from .escardio import ESCExtractor
 from .acpgbi import ACPGBIExtractor
 from .asgbi import ASGBIExtractor
+from .cosrh import CoSRHExtractor
+from .ficm import FICMExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -97,6 +99,8 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     36: ESCExtractor,                       # European Society of Cardiology congress calendar - meta-tag driven detail pages + structured registration fee tables, EUR pricing.
     37: ACPGBIExtractor,                    # Coloproctology events aggregator calendar (ACPGBI); year-paginated (2026, 2027, ...), free-text fees/CPD (no markup tables), title-filtered to drop th
     38: ASGBIExtractor,                     # ASGBI — Webflow static cards: International Surgical Congress + EGS Symposium listings (fees behind JS portal, not scraped)
+    39: CoSRHExtractor,                     # CoSRH (ex-FSRH) — iMIS Cloud SPA, browser-first listing, 4 fee-table shapes
+    41: FICMExtractor,                      # FICM — Cloudflare blocks headless; rss.xml route (10 newest nodes only → INACTIVE until headed-browser CI, see wave1c/ficm.json)
 }
 
 

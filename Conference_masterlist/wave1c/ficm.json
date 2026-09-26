@@ -1,0 +1,128 @@
+{
+  "source_id": 41,
+  "slug": "ficm",
+  "class_name": "FICMExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/ficm.py",
+  "blocked_route": {
+    "url": "https://www.ficm.ac.uk/events",
+    "verdict": "headless Chromium NEVER clears the Cloudflare interactive challenge",
+    "headless_chromium": "BrowserController launched exactly as production does (browser.py unmodified, headless=True). page.goto() returned HTTP 403; title 'Just a moment...'; body 28484 bytes at t=0 then frozen at 28635 bytes. Polled page.content() every 5 s for 60 s (3x the 20 s budget) - identical body every poll, URL never left /events, challenge markers (cf-chl, challenges.cloudflare.com turnstile, /cdn-cgi/challenge-platform) present throughout. A longer wait does NOT help.",
+    "headed_chromium": "Tested ONCE locally for information only (headless=False, no stealth flags, no bypass service). First navigation to /events returned HTTP 200 and the real 261586-byte page (title '| The Faculty of Intensive Care Medicine', 9 event links, ?page=0/?page=1 pager). BUT in the same session the very next navigations - ?page=1, ?page=2 and a detail page /events/uk-shock-2026 - all returned HTTP 403 'Just a moment...'. So even headed Chromium is not a dependable route, and headed is unavailable on a GitHub runner anyway.",
+    "also_403_via_curl_and_httpx": [
+      "https://www.ficm.ac.uk/robots.txt",
+      "https://www.ficm.ac.uk/sitemap.xml",
+      "https://www.ficm.ac.uk/jsonapi",
+      "https://www.ficm.ac.uk/events?_format=json",
+      "https://www.ficm.ac.uk/events/feed",
+      "https://www.ficm.ac.uk/events/rss.xml",
+      "https://www.ficm.ac.uk/node/feed",
+      "https://www.ficm.ac.uk/index.xml",
+      "https://ficm.ac.uk/events (apex host)",
+      "https://www.ficm.ac.uk/events/<any detail slug>"
+    ],
+    "no_bypass_attempted": "No stealth plugin, no UA spoofing beyond the project's existing default header, no third-party solver."
+  },
+  "alternative_route_found": {
+    "url": "https://www.ficm.ac.uk/rss.xml",
+    "why_it_works": "HTTP 200, ~104 KB, content-type application/rss+xml, cf-cache-status DYNAMIC and cache-control no-cache (so it is origin-served, not a stale edge cache). Returns 200 with ANY User-Agent tested, including the default curl UA and 'python-httpx/0.27' - so it is not UA-gated and is very likely to work from a GitHub runner IP, though that is unverified from here.",
+    "why_it_is_rich": "Drupal renders each node's FULL body into <description>, so ONE feed fetch yields the listing AND every detail page: event dates as <time datetime> tags, availability, BOOK NOW url, fee <table>s, CPD points, event format and venue. No per-event fetch is needed - and none is possible.",
+    "why_coverage_is_partial": "rss.xml is the 10 most recently CREATED nodes site-wide, news posts included - NOT the /events view. On 2026-09-26 it held 9 event nodes, of which only 5 were among the 9 upcoming events the real /events page 0 listed. Missing: famusfusic, fficm-oscesoe-exam-online-course-autumn-2026, getting-ready-for-the-applied-clinical-reasoning-examination-acre-0, leeds-acute-intensive-care-conference-lactic, plus everything on ?page=1."
+  },
+  "source_row": {
+    "source_name": "FICM Events",
+    "society": "Faculty of Intensive Care Medicine",
+    "base_url": "https://www.ficm.ac.uk/rss.xml",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": false,
+    "extraction_instructions": "ficm.ac.uk HTML is entirely behind an interactive Cloudflare challenge that headless Chromium never clears, so this source does NOT use the /events page at all. list_shells_override() fetches the site-wide Drupal feed https://www.ficm.ac.uk/rss.xml (not challenged) and keeps only <item>s whose <link> contains /events/. Drupal renders each node's full body into <description>, so the SAME feed fetch supplies every detail field; extract_detail() ignores the Playwright page (the scraper's navigate to booking_url lands on the 403 challenge) and parses the body stashed on the shell as _ficm_body. Gotchas: strip the field--name-created <time> first or the node's creation date is read as the event date; the structured tail is read backwards from the literal line 'Listing image' as [category, venue, format, CPD]; the trailing Drupal label 'Pricing tab title / £300' is never a real fee. COVERAGE IS PARTIAL AND DRIFTS - the feed is the 10 most recent nodes site-wide, so upcoming events fall out of it as news is published; see concerns before activating.",
+    "active_note": "Left active=false deliberately - the archival drift risk in concerns[0] is a product decision for the lead, not mine."
+  },
+  "registry_comment": "FICM - Cloudflare blocks all HTML; events parsed from the unchallenged site-wide rss.xml feed (partial coverage, see extractor docstring)",
+  "probe_results": {
+    "shells": 8,
+    "shells_forced_fallback": 8,
+    "details_tested": 8,
+    "with_date": 8,
+    "with_pricing": 6,
+    "with_venue": 5,
+    "with_description": 8,
+    "with_specialty": 8,
+    "with_city": 8,
+    "with_end_date": 3,
+    "with_cpd_points": 3,
+    "notes": "8 shells = the 9 event nodes in the feed minus essential-radiology-for-icu-and-anaesthesia-1, whose last date (2026-09-16) is past. Three events have city but no venue_name because the feed gives only a town ('Coventry', 'Birmingham') or is online-only. Two events genuinely publish no fee (uk-shock-2026, and the feed's radiology item); 'with_pricing 6' is therefore full coverage of what is published. Ran the harness three times: 8 shells every time, identical field values."
+  },
+  "test_urls": [
+    "https://www.ficm.ac.uk/events/leeds-fusic-focussed-ultrasound-in-intensive-care-course",
+    "https://www.ficm.ac.uk/events/intensivists-in-training-conference-2026",
+    "https://www.ficm.ac.uk/events/belfast-critical-care-research-symposium"
+  ],
+  "test_urls_note": "These detail pages cannot be opened with curl (403). They were verified against the authoritative node body for each, re-fetched independently from rss.xml in a separate curl and parsed with a throwaway script, not with extractor code.",
+  "spot_check": [
+    {
+      "url": "https://www.ficm.ac.uk/events/leeds-fusic-focussed-ultrasound-in-intensive-care-course",
+      "field": "start_date / end_date",
+      "site_says": "bare <time datetime> tags: 2026-11-16T12:00:00Z, 2026-11-17T12:00:00Z",
+      "extractor_says": "start_date 2026-11-16, end_date 2026-11-17",
+      "match": true
+    },
+    {
+      "url": "https://www.ficm.ac.uk/events/leeds-fusic-focussed-ultrasound-in-intensive-care-course",
+      "field": "cpd_points / event_format / venue_name / city",
+      "site_says": "tail lines ['10', 'In person', 'At Bridge Community Church, Leeds', 'External Event']",
+      "extractor_says": "cpd_points 10, event_format in_person, venue_name 'Bridge Community Church', city 'Leeds', region 'England'",
+      "match": true
+    },
+    {
+      "url": "https://www.ficm.ac.uk/events/leeds-fusic-focussed-ultrasound-in-intensive-care-course",
+      "field": "pricing_tiers",
+      "site_says": "no fee table; prose lines '£250 for 1 day (Day 1 echo, day 2 lung/abdo/DVT/VExUS)' and '£450 for 2 days' (plus the '£300' Drupal label, which is not a fee)",
+      "extractor_says": "2 tiers - 'For 1 day (Day 1 echo, day 2 lung/abdo/DVT/VExUS)' £250.00, 'For 2 days' £450.00; the £300 label correctly excluded",
+      "match": true
+    },
+    {
+      "url": "https://www.ficm.ac.uk/events/intensivists-in-training-conference-2026",
+      "field": "pricing_tiers",
+      "site_says": "two fee tables - 'Intensivists in Training | Price' with £195/£220/£195/£250/£150/£100 and 'Online for all members | Price' with £155/£190/£225/£75/£45 (11 priced rows)",
+      "extractor_says": "11 tiers, composite labels e.g. 'Intensivists in Training · Non-member Consultant' £250.00 and 'Online for all members · Senior Fellow' £75.00",
+      "match": true
+    },
+    {
+      "url": "https://www.ficm.ac.uk/events/intensivists-in-training-conference-2026",
+      "field": "cpd_points / event_format / event_type",
+      "site_says": "tail lines ['6 TBC', 'In person', 'The Marriott, Manchester Piccadilly and Online', 'Education']; title contains 'Conference'",
+      "extractor_says": "cpd_points 6, event_format hybrid (in-person venue line ending 'and Online'), venue_name 'The Marriott', city 'Manchester', event_type conference",
+      "match": true
+    },
+    {
+      "url": "https://www.ficm.ac.uk/events/belfast-critical-care-research-symposium",
+      "field": "start_date / pricing_tiers / venue",
+      "site_says": "bare <time datetime> 2026-10-16T12:00:00Z; prose 'Registration fee: Free'; tail ['In person', \"Wellcome–Wolfson Institute for Experimental Medicine, Queen's University Belfast\", 'External Event']",
+      "extractor_says": "start_date 2026-10-16; one tier 'Registration fee' £0.00 GBP; venue_name \"Wellcome–Wolfson Institute for Experimental Medicine, Queen's University Belfast\", city 'Belfast', region 'Northern Ireland'",
+      "match": true
+    },
+    {
+      "url": "https://www.ficm.ac.uk/events/essential-radiology-for-icu-and-anaesthesia-1",
+      "field": "upcoming filter",
+      "site_says": "dates 7 September 2026 and 16 September 2026 - both before today (2026-09-26)",
+      "extractor_says": "dropped from shells",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "ARCHIVAL DRIFT - the biggest risk, and the reason active=false. rss.xml holds only the 10 most recently created nodes site-wide. An event that is still months away will silently fall out of the feed as FICM publishes newer news items, and the scheduler's unseen-14d rule would then archive a live event. database.archive_stale_conferences' source-health guard does NOT cover this: the scrape still succeeds, it just returns fewer shells. Before activating, either exempt source 41 from unseen-based archival or accept that FICM rows may vanish and reappear.",
+    "COVERAGE IS ~55% AND UNMEASURABLE IN CI. Only 5 of the 9 upcoming events on the real /events page 0 were in the feed on 2026-09-26, and nothing from ?page=1 ever appears. We cannot detect what we are missing from inside the scraper, because the page that would tell us is the 403 one.",
+    "NINE WASTED PAGE LOADS PER RUN. llm_agent.extract_detail_for_shell() always navigates the browser to shell['booking_url'] before calling extract_detail(); for FICM every one of those lands on the Cloudflare challenge. It is harmless (BrowserController swallows the failure and extract_detail ignores the page) but it costs ~9 pointless requests to a site that is actively refusing us. A shared-file change would fix it properly: an opt-out flag on BaseExtractor, e.g. `detail_needs_navigation = False`, honoured in llm_agent.extract_detail_for_shell. I did not make it - shared file, other agents in flight.",
+    "start_time is only recovered for events whose feed body includes a programme table (1 of 8, eeg-in-the-icu-0 -> 09:15). The feed carries no dedicated start-time field; the <time> stamps are all normalised to 12:00:00Z and are date-only signals, so start_time is left None rather than guessed.",
+    "abstract_open / abstract_deadline are never populated. No FICM item in the feed mentioned abstracts, so abstract_classifier was not wired in; add it if a future FICM conference advertises a call for abstracts.",
+    "The site's own data is internally inconsistent on one event: intensivists-in-training-conference-2026 has structured venue 'The Marriott, Manchester Piccadilly and Online' while its prose still reads 'Join us at the Mercure, Manchester'. The extractor takes the structured field for venue_name, but the LLM description repeats 'Mercure' from the prose. Not fixable from our side - FICM needs to update the copy.",
+    "The city/venue splitter uses a hard-coded UK city and organisation-keyword list (_CITY_TOKEN / _ORG_TAIL). It handled all 8 events correctly, but an unlisted town in a comma-separated venue line will land in city verbatim (acceptable) and an unlisted town on its own line will land in venue_name instead of city (minor).",
+    "Only 8 events were ever available to test against, and all 8 were used. There is no held-out sample, so novel node layouts are unproven.",
+    "Politeness: ~25 requests total to ficm.ac.uk across all probing and testing, sequential, single browser. Well inside the 60 budget."
+  ]
+}

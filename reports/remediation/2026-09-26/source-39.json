@@ -1,0 +1,158 @@
+{
+  "source_id": 39,
+  "source_name": "College of Sexual and Reproductive Healthcare (CoSRH)",
+  "society": "CoSRH",
+  "run_at": "2026-09-26T21:45:59.983623+00:00",
+  "events_scraped": 9,
+  "events_with_gaps_at_first": 6,
+  "events_fixed": 3,
+  "events_still_incomplete": 3,
+  "patches_applied": [
+    {
+      "conference_id": 1972,
+      "conference_name": "CoSRH Conference 2026: Healthy Futures | Manchester and Onli",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False, 'abstract_deadline': '2026-06-07'}",
+      "method": "explicit_closed"
+    },
+    {
+      "conference_id": 1977,
+      "conference_name": "CoSRH Trainer Conference",
+      "field": "pricing",
+      "value_before": "(complex)",
+      "value_after": "[{'tier_label': 'Standard', 'price_gbp': 0.0, 'currency': 'GBP', 'is_early_bird': False, 'early_bird_deadline': None}]",
+      "method": "free_event"
+    },
+    {
+      "conference_id": 1977,
+      "conference_name": "CoSRH Trainer Conference",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1980,
+      "conference_name": "Shaping the Future of Women\u2019s Health in Scotland 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1973,
+      "conference_name": "CoSRH Annual General Meeting (AGM)",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.cosrh.org/Public/Event_Display.aspx/fees",
+              "https://www.cosrh.org/Public/Event_Display.aspx/pages/fees",
+              "https://www.cosrh.org/Public/Event_Display.aspx/fees-and-how-to-book",
+              "https://www.cosrh.org/Public/Event_Display.aspx/tickets",
+              "https://www.cosrh.org/Public/Event_Display.aspx/registration",
+              "https://www.cosrh.org/Public/Event_Display.aspx/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 93765
+          },
+          "llm_reasoning": "The page text contains event details such as date, time, venue (Online via Zoom), and voting information for eligible members, but there is no section mentioning registration fees, member rates, non-member rates, day passes, or any pricing information.",
+          "notes": [
+            "llm_classified_anchors: 0",
+            "llm_event_match https://www.cosrh.org/Public/Event_Display.aspx/fees: matched=['cosrh'] verdict='no' ok=False",
+            "llm_event_match https://www.cosrh.org/Public/Event_Display.aspx/pages/fees: matched=['cosrh'] verdict='no' ok=False",
+            "llm_event_match https://www.cosrh.org/Public/Event_Display.aspx/fees-and-how-to-book: matched=['cosrh'] verdict='no' ok=False",
+            "llm_event_match https://www.cosrh.org/Public/Event_Display.aspx/tickets: matched=['cosrh'] verdict='no' ok=False",
+            "llm_event_match https://www.cosrh.org/Public/Event_Display.aspx/registration: matched=['cosrh'] verdict='no' ok=False",
+            "llm_event_match https://www.cosrh.org/Public/Event_Display.aspx/registration-and-fees: matched=['cosrh'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1975,
+      "conference_name": "CoSRH Essentials of Menopause Care course",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.cosrh.org/Public/Contact-Us",
+              "https://www.cosrh.org/Public/About-Us-",
+              "https://www.cosrh.org/Public/About-us/collaboration-opportunities-with-cosrh",
+              "https://www.cosrh.org/Sitemap",
+              "https://www.cosrh.org/Public/Policies",
+              "https://www.cosrh.org/Public/Contact_Management/Sign_In.aspx",
+              "https://www.cosrh.org/Public/Event_Display.aspx/fees",
+              "https://www.cosrh.org/Public/Event_Display.aspx/pages/fees",
+              "https://www.cosrh.org/Public/Event_Display.aspx/fees-and-how-to-book",
+              "https://www.cosrh.org/Public/Event_Display.aspx/tickets",
+              "https://www.cosrh.org/Public/Event_Display.aspx/registration",
+              "https://www.cosrh.org/Public/Event_Display.aspx/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 177406
+          },
+          "llm_reasoning": "The page text contains the event title, date/time, a brief description, navigation elements (Log in, Register, Contact us, Basket), sharing options, and various JavaScript/CSS snippets. No section detailing registration fees, member/non-member rates, day passes, or any pricing information is present",
+          "notes": [
+            "llm_classified_anchors: 6"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1976,
+      "conference_name": "CoSRH Essentials of Menopause Care course",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.cosrh.org/Sitemap",
+              "https://www.cosrh.org/Public/Contact-Us",
+              "https://www.cosrh.org/Public/Membership/Recertification.aspx",
+              "https://www.cosrh.org/Public/About-us/collaboration-opportunities-with-cosrh",
+              "https://www.cosrh.org/Public/About-Us-",
+              "https://www.cosrh.org/Public/Policies",
+              "https://www.cosrh.org/Public/Event_Display.aspx/fees",
+              "https://www.cosrh.org/Public/Event_Display.aspx/pages/fees",
+              "https://www.cosrh.org/Public/Event_Display.aspx/fees-and-how-to-book",
+              "https://www.cosrh.org/Public/Event_Display.aspx/tickets",
+              "https://www.cosrh.org/Public/Event_Display.aspx/registration",
+              "https://www.cosrh.org/Public/Event_Display.aspx/registration-and-fees"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 171311
+          },
+          "llm_reasoning": "The page text contains the event title, date, time, and a brief description of the CoSRH Essentials of Menopause Care course, along with extensive JavaScript, CSS, and navigation code. No section mentioning registration fees, costs, pricing, member/non-member rates, day passes, or any financial info",
+          "notes": [
+            "llm_classified_anchors: 6"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 3,
+  "explorer_successes": 0,
+  "duration_sec": 126.6
+}

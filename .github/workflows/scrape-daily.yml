@@ -74,8 +74,8 @@ jobs:
             source_ids: "18,4,5,11,12,15,16,24"
             source_names: "AACR RCP RCSEng-courses RCR×2 ASCO×2 ALSG"
           - group: D
-            source_ids: "25,26,27,28,29,34,38"
-            source_names: "RCPSG RCPath RCPsych RCSEd Resus FOM ASGBI"
+            source_ids: "25,26,27,28,29,34,38,39"
+            source_names: "RCPSG RCPath RCPsych RCSEd Resus FOM ASGBI CoSRH"
           - group: E
             source_ids: "30,31,32,33,35,36,37"
             source_names: "RCPE RCPCH RCOphth FPH FPM ESC ACPGBI"

@@ -1,0 +1,56 @@
+{
+  "source_id": 39,
+  "slug": "cosrh",
+  "class_name": "CoSRHExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/cosrh.py",
+  "source_row": {
+    "source_name": "College of Sexual and Reproductive Healthcare (CoSRH)",
+    "society": "CoSRH",
+    "base_url": "https://www.cosrh.org",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "iMIS Cloud site (client-side iPart) at /Public/Events; requires a real browser for both listing and detail (raw httpx only returns header/footer, and /api/Event returns 401 anonymously). Listing cards give only title + Event_Display.aspx?EventKey=... booking_url; all real fields (dates, venue, pricing, CPD) come from the detail page's standard 'When'/'Where'/'AdditionalInfoHtmlData' block IDs. Pricing appears in 3 shapes (matrix In-Person/Online table with optional colspan group rows, plain 2-col table, or prose 'Label: £NNN' lines) or not at all when booking requires member sign-in. Booking always requires sign-in, so is_sold_out can never be observed anonymously."
+  },
+  "registry_comment": "CoSRH (formerly FSRH) — iMIS Cloud, browser-required listing + detail, 3 pricing table shapes",
+  "probe_results": {
+    "shells": 9,
+    "shells_forced_fallback": null,
+    "details_tested": 9,
+    "with_date": 9,
+    "with_pricing": 5,
+    "with_venue": 3,
+    "with_description": 9,
+    "with_specialty": 9
+  },
+  "test_urls": [
+    "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FACX290926",
+    "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FMSX081226",
+    "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FPPX191126"
+  ],
+  "spot_check": [
+    {"url": "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FACX290926", "field": "start_date/end_date", "site_says": "29 and 30 September 2026", "extractor_says": "2026-09-29 / 2026-09-30", "match": true},
+    {"url": "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FACX290926", "field": "venue_name/city", "site_says": "Mercure Manchester Piccadilly Hotel, Portland St, MANCHESTER, M1 4PH, UNITED KINGDOM", "extractor_says": "Mercure Manchester Piccadilly Hotel / Manchester", "match": true},
+    {"url": "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FACX290926", "field": "pricing_tiers count", "site_says": "matrix table: Members (1-day/2-day) x In-Person/Online + Concessions (1-day/2-day) x In-Person/Online = 8 rows", "extractor_says": "8 tiers, e.g. 'Members · In-Person · 1-day ticket' = 320.0", "match": true},
+    {"url": "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FMSX081226", "field": "venue_name/city/pricing", "site_says": "Augustine United Church, George IV Bridge, Edinburgh EH1 1EL; matrix table CoSRH Members/Non-Members/Concession x In-Person(£72/£93/£72)/Online(£52/£83/£52)", "extractor_says": "venue=Augustine United Church, city=Edinburgh; 6 tiers e.g. 'In-Person · CoSRH Members'=72.0, 'Online · CoSRH Members'=52.0", "match": true},
+    {"url": "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FPPX191126", "field": "pricing_tiers (prose)", "site_says": "CoSRH members: £350 per ticket / Non-CoSRH members: £400 per ticket", "extractor_says": "2 tiers: 'CoSRH members'=350.0, 'Non-CoSRH members'=400.0", "match": true},
+    {"url": "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FTCX101126", "field": "pricing_tiers (free text)", "site_says": "'The event is free of charge'", "extractor_says": "1 tier: 'Standard'=0.0", "match": true},
+    {"url": "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FAHX131026", "field": "pricing_tiers (simple table)", "site_says": "CoSRH members: £343 / Non-members: £343", "extractor_says": "2 tiers: 'CoSRH members'=343.0, 'Non-members'=343.0", "match": true},
+    {"url": "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FTCX101126", "field": "cpd_points", "site_says": "'Gain 3 CPD points'", "extractor_says": "3", "match": true},
+    {"url": "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FAGM081026", "field": "event_format", "site_says": "'Venue: Online via Zoom' (no Where block on page)", "extractor_says": "online", "match": true},
+    {"url": "https://www.cosrh.org/Public/Event_Display.aspx?EventKey=FACX290926", "field": "abstract_open", "site_says": "'Abstract submissions are now closed'", "extractor_says": "False", "match": true}
+  ],
+  "concerns": [
+    "is_sold_out is always False by design: booking on every event requires account sign-in and no anonymous 'sold out' state is ever rendered for this site. If CoSRH later exposes a public sold-out badge, revisit.",
+    "3 of 9 live events (Menopause Care course x2, CoSRH AGM/Trainer Conference in some cases) publish no pricing at all — booking/pricing is only shown after member sign-in. pricing_tiers correctly comes back [] rather than fabricated; the audit gate's generic parse_pricing_tables() would also find 0 tiers here so it should not false-flag these as MISSING.",
+    "CoSRH AGM (event_type classified 'workshop' via the agm keyword) is a members-only administrative/voting meeting with no CPD value — kept as a real dated event per the RCPE 'College Meetings & Ceremonies' precedent in PLAYBOOK.md, but it may be worth excluding from the directory entirely if it looks noisy in production; flagging rather than deciding unilaterally.",
+    "Only 9 upcoming events were live on the listing at test time (recon expected 10); no pagination/load-more control exists so this is treated as the full current list, not a truncation bug.",
+    "event_type is entirely a title-keyword heuristic (_classify_event_type) since the site has no listing badge/category field surfaced on cards; if CoSRH adds titles that don't contain 'conference'/'course'/'assessment'/'agm'/'training' this could default incorrectly to 'conference'.",
+    "Every live event this wave used the standard iMIS ciEventDisplay block IDs (_WhenData/_AddressData/_AdditionalInfoHtmlData); if CoSRH ever runs an event through a different iMIS template (e.g. a third-party Eventbrite-style embed like RCPE's 'External Events'), those selectors would need a fallback — not observed in this source's live inventory.",
+    "Specialty defaults to a hardcoded 'Sexual & Reproductive Health' fallback when neither the LLM nor the shared specialty_classifier keyword list matches (e.g. 'CoSRH Trainer Conference') — reasonable for a single-society source but worth knowing this isn't the generic classifier's own output."
+  ]
+}

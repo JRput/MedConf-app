@@ -1,0 +1,226 @@
+[
+  {
+    "domain": "baskonline.com",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "theabn.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "astro.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "professional.heart.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "eans.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "esska.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "arvo.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "espnic-online.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "iasociety.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "uscap.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "resolved",
+    "listing_url": "https://uscap.org/meetings",
+    "platform": null,
+    "volume_estimate": "unknown (not counted precisely)",
+    "expected_found": [
+      "USCAP Annual Meeting"
+    ],
+    "notes": "No Cloudflare challenge encountered; found dated content directly."
+  },
+  {
+    "domain": "faceconference.com",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "himss.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "matacourses.com",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "phemcast.co.uk",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "mddus.com",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "themdu.com",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "resolved",
+    "listing_url": "https://themdu.com/events",
+    "platform": null,
+    "volume_estimate": "unknown (not counted precisely)",
+    "expected_found": [],
+    "notes": "No Cloudflare challenge encountered; found dated content directly."
+  },
+  {
+    "domain": "facultyofclinicalinformatics.org.uk",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "heart.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "parked",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "No Cloudflare challenge, but no dated (2026/2027) event listing found within 8 page loads."
+  },
+  {
+    "domain": "easd.org",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": 0,
+    "status": "resolved",
+    "listing_url": "https://easd.org/education/meetings-and-courses/",
+    "platform": null,
+    "volume_estimate": "unknown (not counted precisely)",
+    "expected_found": [
+      "EASD Annual Meeting"
+    ],
+    "notes": "No Cloudflare challenge encountered; found dated content directly."
+  },
+  {
+    "domain": "uptodate.com",
+    "browser_result": "no_challenge",
+    "seconds_to_clear": null,
+    "status": "out_of_scope",
+    "listing_url": null,
+    "platform": null,
+    "volume_estimate": null,
+    "expected_found": [],
+    "notes": "UpToDate is a clinical reference/CME product, not an events directory \u2014 no dated conference listing to scrape."
+  }
+]
