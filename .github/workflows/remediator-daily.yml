@@ -40,7 +40,7 @@ jobs:
           - group: D
             source_ids: "25,26,27,28,29,34,38,39"
           - group: E
-            source_ids: "30,31,32,33,35,36,37,40,41"
+            source_ids: "30,31,32,33,35,36,37,41"
 
     steps:
       - name: Check out repository

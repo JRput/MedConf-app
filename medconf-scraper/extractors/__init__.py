@@ -101,7 +101,7 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     37: ACPGBIExtractor,                    # Coloproctology events aggregator calendar (ACPGBI); year-paginated (2026, 2027, ...), free-text fees/CPD (no markup tables), title-filtered to drop th
     38: ASGBIExtractor,                     # ASGBI — Webflow static cards: International Surgical Congress + EGS Symposium listings (fees behind JS portal, not scraped)
     39: CoSRHExtractor,                     # CoSRH (ex-FSRH) — iMIS Cloud SPA, browser-first listing, 4 fee-table shapes
-    40: RCoAExtractor,                      # RCoA — Drupal behind Cloudflare (browser profile rotation), 0-indexed pager, fee JPGs via vision
+    40: RCoAExtractor,                      # RCoA — INACTIVE: Cloudflare also blocks GitHub-runner IPs (works from home). Drupal, 0-indexed pager, fee JPGs
     41: FICMExtractor,                      # FICM — Drupal behind Cloudflare (browser profile rotation), 0-indexed pager, server-rendered tabs
 }
 

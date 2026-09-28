@@ -77,8 +77,8 @@ jobs:
             source_ids: "25,26,27,28,29,34,38,39"
             source_names: "RCPSG RCPath RCPsych RCSEd Resus FOM ASGBI CoSRH"
           - group: E
-            source_ids: "30,31,32,33,35,36,37,40,41"
-            source_names: "RCPE RCPCH RCOphth FPH FPM ESC ACPGBI RCoA FICM"
+            source_ids: "30,31,32,33,35,36,37,41"
+            source_names: "RCPE RCPCH RCOphth FPH FPM ESC ACPGBI FICM"
 
     steps:
       - name: Check out repository

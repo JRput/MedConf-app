@@ -2,7 +2,7 @@
 
 > Auto-loaded by Claude Code at session start. This file is the single source of truth for project context, conventions, and how-to-run. Keep it short and current — link out to deeper docs rather than duplicate them here.
 
-> **Production state (2026-09-26):** **38 active sources** — RCGP (1), RCSEng events (2), RSM (3), RCP (4), RCSEng courses (5), RCEM × 3 (6/7/8), RCOG × 2 (9/10), RCR × 2 (11/12), BOPA (13), BTOG (14), ASCO × 2 (15/16), ESMO (17), AACR (18), ESTRO (19), SABCS (20), ESGO × 2 (21/22), SITC (23), plus masterlist wave 1a: ALSG (24), RCPSG (25), RCPath (26), RCPsych (27), RCSEd (28), Resus Council UK (29), wave 1b: RCPE (30), RCPCH (31), RCOphth (32), FPH (33), FOM (34), FPM (35), ESC (36), ACPGBI (37), ASGBI (38) — scale-up plan in [MISSION_BOARD.md](MISSION_BOARD.md). Product has expanded from a UK CPD directory into a global oncology-heavy directory. Four daily crons on GitHub Actions: **02:00 UTC** scrape matrix (model probe job + 38 parallel workers), **03:00 UTC** specialty alerts (in-app), **04:00 UTC** remediator (all sources), **08:00 UTC** saved-event reminders. Multi-currency in production (USD/EUR/HKD/SGD alongside GBP). Repo: https://github.com/JRput/MedConf-app · **Active Supabase project:** `zcpszfbmvfylicpxgsfc` (eu-west-1, hotmail org). **For next-session handoff** see [memory/project_pending_work.md](file:///Users/Sushil/.claude/projects/-Users-Sushil-Documents-Documents-IMT2-Side-hustle-myTalk-conference-app/memory/project_pending_work.md).
+> **Production state (2026-09-28):** **40 active sources** — RCGP (1), RCSEng events (2), RSM (3), RCP (4), RCSEng courses (5), RCEM × 3 (6/7/8), RCOG × 2 (9/10), RCR × 2 (11/12), BOPA (13), BTOG (14), ASCO × 2 (15/16), ESMO (17), AACR (18), ESTRO (19), SABCS (20), ESGO × 2 (21/22), SITC (23), plus masterlist wave 1a: ALSG (24), RCPSG (25), RCPath (26), RCPsych (27), RCSEd (28), Resus Council UK (29), wave 1b: RCPE (30), RCPCH (31), RCOphth (32), FPH (33), FOM (34), FPM (35), ESC (36), ACPGBI (37), ASGBI (38), CoSRH (39), FICM (41); RCoA (40) registered but inactive (Cloudflare blocks runner IPs) — scale-up plan in [MISSION_BOARD.md](MISSION_BOARD.md). Product has expanded from a UK CPD directory into a global oncology-heavy directory. Four daily crons on GitHub Actions: **02:00 UTC** scrape matrix (model probe job + 5 grouped workers), **03:00 UTC** specialty alerts (in-app), **04:00 UTC** remediator (all sources), **08:00 UTC** saved-event reminders. Multi-currency in production (USD/EUR/HKD/SGD alongside GBP). Repo: https://github.com/JRput/MedConf-app · **Active Supabase project:** `zcpszfbmvfylicpxgsfc` (eu-west-1, hotmail org). **For next-session handoff** see [memory/project_pending_work.md](file:///Users/Sushil/.claude/projects/-Users-Sushil-Documents-Documents-IMT2-Side-hustle-myTalk-conference-app/memory/project_pending_work.md).
 >
 > **LLM models — fallback chains** (2026-09-20, after NVIDIA retired every configured model on 2026-08-26 and calls failed silently for 25 days): text chain = `nvidia/nemotron-3-super-120b-a12b` → `meta/muse-glimmer-30b` → `openai/gpt-oss-20b`; vision chain = `meta/muse-glimmer-30b` → `meta/llama-3.2-11b-vision-instruct`. `llm_client.chat_completion()` advances past any model that 404s/410s. `probe_models.py` runs as the first job of the daily scrape — whole chain dead = red run. Defaults live in `config.py`; override with `KIMI_MODEL_CHAIN` / `KIMI_VISION_MODEL_CHAIN`.
 >
@@ -107,7 +107,7 @@ PORT=3001 npm run dev      # 3000 may be in use locally
 ### Scraper — local dev paths
 ```bash
 cd medconf-scraper
-./.venv/bin/python main.py --run-now                     # all 38 sources
+./.venv/bin/python main.py --run-now                     # all active sources
 ./.venv/bin/python main.py --run-now --source 18         # just AACR
 python -m remediator --source 22                         # fix ESGO gaps post-scrape
 python -m remediator.audit --source 20                   # gate check for SABCS
@@ -119,7 +119,7 @@ python -m remediator.audit --source 20                   # gate check for SABCS
 - **Website**: copy [.env.example](medconf-website/.env.example) → `.env.local`. Vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (publishable/anon key, NOT the service-role).
 
 ### Daily cron schedule (`.github/workflows/`)
-- `scrape-daily.yml` — **02:00 UTC** — `probe-models` job, then matrix of 38 source jobs, `fail-fast: false`.
+- `scrape-daily.yml` — **02:00 UTC** — `probe-models` job, then 5 grouped jobs (`--sources`), `fail-fast: false`.
 - `fire-specialty-alerts.yml` — **03:00 UTC** — batched in-app "N new Cardiology events" per user.
 - `remediator-daily.yml` — **04:00 UTC** — runs `python -m remediator --all`. Uploads JSON reports as artifacts.
 - `fire-reminders.yml` — **08:00 UTC** — fires saved-event reminders users scheduled from the detail page.
