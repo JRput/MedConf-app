@@ -1,0 +1,35 @@
+name: Probe cloud access (wave gate)
+
+# Manual: run the production browser against a candidate list from a GitHub
+# runner and report which domains it can read. Added 2026-09-28 after RCoA
+# cleared Cloudflare from a home IP but not from runner IPs.
+on:
+  workflow_dispatch:
+    inputs:
+      candidates:
+        description: Path to a candidates JSON (domain + candidate_urls)
+        default: Conference_masterlist/wave1d/candidates.json
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Playwright
+        run: |
+          pip install playwright python-dotenv
+          python -m playwright install --with-deps chromium
+      - name: Probe
+        working-directory: medconf-scraper
+        env:
+          CANDIDATES: ${{ github.event.inputs.candidates }}
+        run: python probe_cloud_access.py "../$CANDIDATES" probe_cloud_access_results.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: probe-cloud-access-${{ github.run_id }}
+          path: medconf-scraper/probe_cloud_access_results.json

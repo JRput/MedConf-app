@@ -1,0 +1,203 @@
+[
+ {
+  "domain": "baskonline.com",
+  "candidate_urls": [
+   "https://baskonline.com"
+  ],
+  "expect": [
+   "BASK Annual Meeting"
+  ],
+  "rows": 1,
+  "recon_note": "Cloudflare bot protection prevents verification of event listing existence and dates; curl-based discovery insufficient"
+ },
+ {
+  "domain": "theabn.org",
+  "candidate_urls": [
+   "https://www.theabn.org"
+  ],
+  "expect": [
+   "ABN Annual Meeting"
+  ],
+  "rows": 1,
+  "recon_note": "Aggressive Cloudflare bot protection blocks all discovery attempts; cannot verify events listing or dated event existence"
+ },
+ {
+  "domain": "professional.heart.org",
+  "candidate_urls": [
+   "https://professional.heart.org"
+  ],
+  "expect": [
+   "International Stroke Conference"
+  ],
+  "rows": 1,
+  "recon_note": "Cloudflare bot protection blocks all HTTP requests; curl-based discovery not feasible without browser/JavaScript bypass"
+ },
+ {
+  "domain": "eans.org",
+  "candidate_urls": [
+   "https://www.eans.org"
+  ],
+  "expect": [
+   "EANS Congress"
+  ],
+  "rows": 1,
+  "recon_note": "bot-protection"
+ },
+ {
+  "domain": "esska.org",
+  "candidate_urls": [
+   "https://www.esska.org"
+  ],
+  "expect": [
+   "ESSKA Congress"
+  ],
+  "rows": 1,
+  "recon_note": "Cloudflare bot protection blocks all discovery; no JSON API or alternative paths bypass the challenge. JavaScript execution (browser automation) required to proceed."
+ },
+ {
+  "domain": "arvo.org",
+  "candidate_urls": [
+   "https://www.arvo.org"
+  ],
+  "expect": [
+   "ARVO Annual Meeting"
+  ],
+  "rows": 1,
+  "recon_note": "Cloudflare bot-protection challenge blocks all page access. Site requires JavaScript/challenge completion. robots.txt accessible but all HTML pages return Cloudflare \"Just a moment...\" interstitial."
+ },
+ {
+  "domain": "espnic-online.org",
+  "candidate_urls": [
+   "https://espnic-online.org"
+  ],
+  "expect": [
+   "ESPNIC Congress"
+  ],
+  "rows": 1,
+  "recon_note": "Dead site \u2014 domain resolves to Azure infrastructure (Envoy proxy) but all HTTP paths return 404; HTTPS TLS handshake fails with connection reset. No content found at root, /events, /congress, /meeting"
+ },
+ {
+  "domain": "iasociety.org",
+  "candidate_urls": [
+   "https://www.iasociety.org"
+  ],
+  "expect": [
+   "International AIDS Conference"
+  ],
+  "rows": 1,
+  "recon_note": "cloudflare bot protection prevents access; cannot verify event listings exist"
+ },
+ {
+  "domain": "uscap.org",
+  "candidate_urls": [
+   "https://uscap.org/meetings",
+   "https://www.uscap.org"
+  ],
+  "expect": [
+   "USCAP Annual Meeting"
+  ],
+  "rows": 1,
+  "recon_note": "bot_protection"
+ },
+ {
+  "domain": "faceconference.com",
+  "candidate_urls": [
+   "https://www.faceconference.com"
+  ],
+  "expect": [
+   "FACE Conference"
+  ],
+  "rows": 1,
+  "recon_note": "Cloudflare bot protection (\"Attention Required\") blocks all HTTP/HTTPS requests. Cannot access homepage, /events, /courses, /sitemap.xml, or /robots.txt. HTTP 403 response on all paths. Discovery impo"
+ },
+ {
+  "domain": "himss.org",
+  "candidate_urls": [
+   "https://www.himss.org"
+  ],
+  "expect": [
+   "HIMSS Global Health Conference"
+  ],
+  "rows": 1,
+  "recon_note": "Cloudflare bot protection blocks all curl requests; cannot access homepage, common paths (/events, /conferences, /congress, etc.), subdomains (events.himss.org, my.himss.org), or sitemaps. Site requir"
+ },
+ {
+  "domain": "matacourses.com",
+  "candidate_urls": [
+   "https://matacourses.com"
+  ],
+  "expect": [
+   "Aesthetic medicine courses"
+  ],
+  "rows": 1,
+  "recon_note": "dead - WordPress installation with critical configuration error. All paths (root, /courses, /events, /education, /cpd, /whats-on, /meetings, /robots.txt, /sitemap.xml) return HTTP 500 \"Critical error\""
+ },
+ {
+  "domain": "phemcast.co.uk",
+  "candidate_urls": [
+   "https://www.phemcast.co.uk"
+  ],
+  "expect": [
+   "Pre-hospital education"
+  ],
+  "rows": 1,
+  "recon_note": "bot_protection: Cloudflare challenge prevents all discovery attempts via standard HTTP. Would require browser automation to bypass."
+ },
+ {
+  "domain": "mddus.com",
+  "candidate_urls": [
+   "https://www.mddus.com/training-and-cpd"
+  ],
+  "expect": [
+   "Medical defence / risk training"
+  ],
+  "rows": 1,
+  "recon_note": "Cloudflare protection blocks all HTML page access; cannot verify presence of dated events. Starting URL https://www.mddus.com/training-and-cpd exists per worklist but returns Cloudflare block. Common "
+ },
+ {
+  "domain": "themdu.com",
+  "candidate_urls": [
+   "https://themdu.com/events",
+   "https://www.themdu.com/learn-and-develop"
+  ],
+  "expect": [
+   "Medical defence / risk training"
+  ],
+  "rows": 1,
+  "recon_note": "bot_protection"
+ },
+ {
+  "domain": "facultyofclinicalinformatics.org.uk",
+  "candidate_urls": [
+   "https://facultyofclinicalinformatics.org.uk"
+  ],
+  "expect": [
+   "Clinical informatics training/events"
+  ],
+  "rows": 1,
+  "recon_note": "Site protected by Cloudflare + WAF returning 403 Forbidden on all content paths. Homepage returns Cloudflare challenge; all event-related paths (/events, /courses, /cpd, /education, /training) blocked"
+ },
+ {
+  "domain": "heart.org",
+  "candidate_urls": [
+   "https://www.heart.org"
+  ],
+  "expect": [
+   "AHA Scientific Sessions"
+  ],
+  "rows": 1,
+  "recon_note": ""
+ },
+ {
+  "domain": "easd.org",
+  "candidate_urls": [
+   "https://easd.org/education/meetings-and-courses/",
+   "https://www.easd.org"
+  ],
+  "expect": [
+   "EASD Annual Meeting"
+  ],
+  "rows": 1,
+  "recon_note": ""
+ }
+]
