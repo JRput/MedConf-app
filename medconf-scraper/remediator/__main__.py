@@ -21,13 +21,20 @@ def main() -> int:
     grp.add_argument("--source", type=int, help="Source ID to remediate")
     grp.add_argument("--all", action="store_true",
                      help="Run on every active source")
+    grp.add_argument("--sources", type=str, metavar="ID,ID,...",
+                     help="Run on these sources in order (one CI job per group)")
     args = p.parse_args()
 
-    if args.all:
+    if args.all or args.sources:
         from database import supabase
         active = supabase.table("scraper_sources").select("id").eq(
             "active", True
         ).order("id").execute().data or []
+        if args.sources:
+            # Grouped CI matrix (2026-09-28): the serial --all run hit its
+            # 90-min cap at source 24 of 41. Inactive ids are skipped.
+            wanted = [int(x) for x in args.sources.split(",") if x.strip()]
+            active = [s for s in active if s["id"] in wanted]
         for s in active:
             try:
                 summary = remediate_source(s["id"])

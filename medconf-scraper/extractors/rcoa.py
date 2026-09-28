@@ -86,7 +86,13 @@ CARD_SEL = "article.l-listing"
 NAV_TIMEOUT_MS = 45000
 PAGE_DELAY_S = 1.5          # politeness between listing/detail loads
 MAX_LISTING_PAGES = 8       # safety cap; real listing is 4 pages (page=0..3)
-VISION_ATTEMPTS = 3         # the hosted vision model is erratic on these tables
+# The hosted vision model is erratic on these fee JPGs (empty JSON, then
+# correct on retry) but each failed attempt burns up to 90 s; 3 attempts x
+# 30 events made a run take hours. One attempt here; the nightly
+# remediator's pricing explorer retries the gaps within its vision budget.
+VISION_ATTEMPTS = 0   # 2026-09-28: 0/14 successes in a real run (timeouts + empty
+                      # JSON), ~4 min per event. Scrape leaves pricing to the
+                      # nightly remediator's bounded image path. Set >0 to re-enable.
 NAV_ATTEMPTS = 2            # navigate() rotates context on challenge; retry once
 
 _CHALLENGE_TITLE = re.compile(r"just a moment|attention required", re.I)
@@ -109,10 +115,14 @@ _UK_REGIONS = {
     "liverpool": "North West England",
     "birmingham": "West Midlands",
     "leeds": "Yorkshire and the Humber",
+    "bradford": "Yorkshire and the Humber",
+    "hull": "Yorkshire and the Humber",
     "sheffield": "Yorkshire and the Humber",
     "york": "Yorkshire and the Humber",
     "newcastle": "North East England",
     "bristol": "South West England",
+    "nottingham": "East Midlands",
+    "leicester": "East Midlands",
     "exeter": "South West England",
     "brighton": "South East England",
     "oxford": "South East England",
@@ -639,7 +649,7 @@ class RCoAExtractor(BaseExtractor):
             if any(k in low for k in ("logo", "icon", "favicon", ".svg", "sprite")):
                 continue
             srcs.append(src)
-        if srcs:
+        if srcs and VISION_ATTEMPTS > 0:
             data_urls = self._as_data_urls(srcs)
             if data_urls:
                 from vision import extract_pricing_from_images
