@@ -1,0 +1,103 @@
+[
+ {
+  "source_id": 42,
+  "slug": "arvo",
+  "class_name": "ARVOExtractor",
+  "start_url": "https://www.arvo.org/annual-meeting/",
+  "recon": {
+   "domain": "arvo.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": true,
+   "bot_protection": "cloudflare",
+   "parked_reason": "Cloudflare bot-protection challenge blocks all page access. Site requires JavaScript/challenge completion. robots.txt accessible but all HTML pages return Cloudflare \"Just a moment...\" interstitial.",
+   "notes": "ARVO (Association for Research in Vision and Ophthalmology) operates https://www.arvo.org but entire domain is behind Cloudflare managed protection. robots.txt hints at /annual-meeting/ subdirectory, suggesting annual conference exists, but event listing page cannot be verified without JS rendering or Cloudflare bypass.",
+   "batch": 2
+  },
+  "expect": [
+   "ARVO Annual Meeting"
+  ],
+  "provider": "Association for Research in Vision and Ophthalmology"
+ },
+ {
+  "source_id": 43,
+  "slug": "iasociety",
+  "class_name": "IASExtractor",
+  "start_url": "https://www.iasociety.org/conferences",
+  "recon": {
+   "domain": "iasociety.org",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": true,
+   "bot_protection": "cloudflare",
+   "listing_url": "",
+   "notes": "Site confirmed to exist (robots.txt accessible) but comprehensive Cloudflare bot protection blocks all content retrieval. Unable to verify event listings or discover events listing URL. Drupal-based site (per robots.txt structure). All common event paths (/events, /conferences, /meeting, /iac, /conference, /event, /activities, /programs) return HTTP 403 Cloudflare block.",
+   "parked_reason": "cloudflare bot protection prevents access; cannot verify event listings exist",
+   "pagination": "unknown",
+   "event_type_mix": "unknown",
+   "detail_topology": "unknown",
+   "api_url": "",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "batch": 2
+  },
+  "expect": [
+   "International AIDS Conference"
+  ],
+  "provider": "International AIDS Society"
+ },
+ {
+  "source_id": 44,
+  "slug": "mddus",
+  "class_name": "MDDUSExtractor",
+  "start_url": "https://www.mddus.com/training-and-cpd",
+  "recon": {
+   "domain": "mddus.com",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "bot_protection": "cloudflare",
+   "listing_url": "",
+   "api_url": "",
+   "event_type_mix": "none",
+   "detail_topology": "unknown",
+   "pagination": "unknown",
+   "volume_estimate": 0,
+   "expected_found": [],
+   "parked_reason": "Cloudflare protection blocks all HTML page access; cannot verify presence of dated events. Starting URL https://www.mddus.com/training-and-cpd exists per worklist but returns Cloudflare block. Common paths (/events, /courses, /training, /cpd, /education) and sitemap.xml similarly blocked. Site is Sitecore-based (per robots.txt) but actual event/course content inaccessible.",
+   "notes": "MDDUS (Medical Defence Union) site uses Cloudflare to block all bot access. While robots.txt is accessible, indicating a Sitecore site exists, no event listing content could be verified. Training/CPD section likely exists but is unreachable.",
+   "batch": 2
+  },
+  "expect": [
+   "Medical defence / risk training"
+  ],
+  "provider": "MDDUS Training"
+ },
+ {
+  "source_id": 45,
+  "slug": "themdu",
+  "class_name": "MDUExtractor",
+  "start_url": "https://themdu.com/events",
+  "recon": {
+   "domain": "themdu.com",
+   "status": "parked",
+   "platform": "unknown",
+   "js_required": false,
+   "bot_protection": "cloudflare",
+   "parked_reason": "bot_protection",
+   "listing_url": "",
+   "volume_estimate": 0,
+   "pagination": "unknown",
+   "detail_topology": "unknown",
+   "event_type_mix": "none",
+   "api_url": "",
+   "expected_found": [],
+   "notes": "Site protected by Incapsula bot protection on all paths. Discovery ladder exhausted: root domain, /learn-and-develop URL, and 7 common event/course path variants all return Incapsula challenge pages with empty content body. Cannot verify event listings or dates. Manual browser access may work but automated discovery is blocked.",
+   "batch": 2
+  },
+  "expect": [
+   "Medical defence / risk training"
+  ],
+  "provider": "MDU CPD"
+ }
+]

@@ -1,0 +1,65 @@
+{
+  "source_id": 44,
+  "slug": "mddus",
+  "class_name": "MDDUSExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/mddus.py",
+  "source_row": {
+    "source_name": "MDDUS Training & CPD",
+    "society": "Medical and Dental Defence Union of Scotland",
+    "base_url": "https://www.mddus.com/training-and-cpd/events",
+    "default_event_type": "course",
+    "pagination_type": "page_query",
+    "pagination_template": "?page={n}&orderby=date&ordertype=asc",
+    "max_pages_hint": 8,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Listing at /training-and-cpd/events (not the recon start_url) is a Sitecore search widget, 10 cards/page, 8 pages, ?page=N&orderby=date&ordertype=asc. Cards are <a class=\"result-item--event\"> with title/summary/meta inside the anchor itself — the generic DOM walker misses these (digit right after /events/ fails its URL regex) so this source needs list_shells_override. Detail page has a .p--vacancy--sidebar-details fact list (Date/Availability/Training type/CPD hours|points) and plain-text \"Course Fee: MDDUS member £X / Non-member £Y\" pricing (no <table>). Gotcha: the structured Date field is wrong on some cloned recurring-course rows (same value repeated across 3 URLs) and the intro sentence is wrong on at least one other row — extractor cross-checks both against the URL's /events/<year>/<month>/ segments before trusting either."
+  },
+  "registry_comment": "44: MDDUSExtractor,  # MDDUS training & CPD (Interactive Zoom courses), page_query listing, date cross-check for CMS date bug",
+  "probe_results": {
+    "shells": 70,
+    "shells_forced_fallback": null,
+    "details_tested": 6,
+    "with_date": 70,
+    "with_pricing": 5,
+    "with_venue": 0,
+    "with_description": 6,
+    "with_specialty": 6
+  },
+  "test_urls": [
+    "https://www.mddus.com/training-and-cpd/events/2026/september/professionalism-fulfilling-your-duties-as-a-doctor",
+    "https://www.mddus.com/training-and-cpd/events/2026/september/ai-for-hospital-doctors",
+    "https://www.mddus.com/training-and-cpd/events/2026/november/team-communication-safer-mdt-working-in-secondary-care"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.mddus.com/training-and-cpd/events/2026/september/professionalism-fulfilling-your-duties-as-a-doctor",
+      "field": "start_date / pricing_tiers",
+      "site_says": "Date 29 September 2026; Course Fee: MDDUS member £120, Non-member £175",
+      "extractor_says": "2026-09-29; [{'tier_label': 'MDDUS member', 'price_gbp': 120.0}, {'tier_label': 'Non-member', 'price_gbp': 175.0}]",
+      "match": true
+    },
+    {
+      "url": "https://www.mddus.com/training-and-cpd/events/2026/september/ai-for-hospital-doctors",
+      "field": "start_date / pricing_tiers",
+      "site_says": "sidebar Date field wrongly shows 03 September 2026 (site bug — shared by 3 cloned rows); intro sentence says 'Thursday 3 September'; URL is /2026/september/; page text: 'This member-only course is free for all MDDUS members working in a hospital setting.'",
+      "extractor_says": "2026-09-03 (resolved via URL+intro-sentence cross-check, matches this clone); pricing_tiers = [{'tier_label': 'MDDUS member', 'price_gbp': 0.0}]",
+      "match": true
+    },
+    {
+      "url": "https://www.mddus.com/training-and-cpd/events/2026/november/team-communication-safer-mdt-working-in-secondary-care",
+      "field": "start_date",
+      "site_says": "sidebar Date = 12 November 2026 (matches URL /2026/november/); intro sentence wrongly says 'Tuesday, 9 September'",
+      "extractor_says": "2026-11-12 (structured Date trusted because it agrees with the URL year+month; intro-sentence bug correctly ignored)",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Two independent per-row CMS date bugs observed live on the site (see extraction_instructions): a cloned-course template group all showing the same wrong sidebar Date, and at least one row with a copy-pasted wrong month in its intro sentence. The extractor cross-checks both fields against the URL's own /events/<year>/<month>/ segments and only accepts a day when one source's month matches the URL; if BOTH are wrong on some future row (not observed in the 6 detail pages + 71 listing cards checked by eye), that row is silently skipped rather than dated wrong — skip-over-guess was the deliberate choice per the brief ('never invent data').",
+    "Did not see a single in-person/hybrid event across all 8 listing pages (71 events, all 'Interactive Zoom courses') so event_format is hardcoded to 'online' with no venue/city/region path. If MDDUS ever runs an in-person course this extractor will still tag it online/no-venue — flagging in case a future audit run shows that.",
+    "CPD accreditation: only ever saw 'accredited by the Federation of the Royal Colleges of Physicians of the UK for N CPD credits' as the phrasing; cpd_accredited is keyed off that literal substring plus cpd_points being present. Not tested against a course with cpd_points but no accreditation phrase (didn't encounter one) — would currently mark cpd_accredited=False in that case, which seems like the right default but is unproven.",
+    "Ran the harness against the live browser (no --force-fallback path exists for this source — it's browser-first per the wave1d addendum, not http_fetch-based, so that flag doesn't exercise anything different here). Ran list_shells_override twice; identical 70-shell count both times.",
+    "71 total events on-site at test time; 1 dropped as a date-resolution failure would be silent by design, but none actually failed — all 71 resolved a date; 70 were >= today (2026-09-29), 1 was earlier today and excluded by the >= today filter, hence shells=70 not 71."
+  ]
+}

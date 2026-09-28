@@ -1,0 +1,81 @@
+{
+  "source_id": 45,
+  "slug": "themdu",
+  "class_name": "MDUExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/themdu.py",
+  "source_row": {
+    "source_name": "MDU Learn and Develop",
+    "society": "Medical Defence Union",
+    "base_url": "https://www.themdu.com/learn-and-develop",
+    "default_event_type": "course",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Listing uses list_shells_override() to call the search widget's own JSON API (/api/v1/search/global?mainTag=learnAndDevelopPage&contentTypeAliases=eventPage&pageSize=200), filtered to parent=='Course' entries with a non-empty comma-separated dates field. 36 'E-learning' entries are undated self-paced modules and always skipped; of the 8 'Course' entries, 3 have no scheduled session ('No dates available' on their own page) and are skipped too, leaving 5 dated courses / 6 sessions as of 2026-09-29. Detail pages at /learn-and-develop/course-listing/<slug> are server-rendered (no extra client fetch needed); sessions come from repeated .course-booking-section blocks (date/time/per-session location/Book-now-or-waitlist button/sold-out label), fees from .location-price .prices .member/.non-member (one flat member+non-member pair applies to every session of a course — no per-session pricing seen), CPD points from .cpd-container, cpd_accredited from whether the first rich-text paragraph says 'Accredited by' vs 'Awaiting accreditation by', description/specialty from the .rich-text-wrapper prose paragraphs before the 'Who should attend?' h2, excluding the CPD-accreditation and 'This is a full-day ... course' sentences."
+  },
+  "registry_comment": "MDU Learn & Develop — dated CPD courses (event_type='course', sessions[]) via the site's own search-widget JSON API; no /events page exists",
+  "probe_results": {
+    "shells": 5,
+    "shells_forced_fallback": 5,
+    "details_tested": 5,
+    "with_date": 5,
+    "with_pricing": 5,
+    "with_venue": 0,
+    "with_description": 5,
+    "with_specialty": 4
+  },
+  "test_urls": [
+    "https://www.themdu.com/learn-and-develop/course-listing/managing-conflict-with-colleagues",
+    "https://www.themdu.com/learn-and-develop/course-listing/improving-consultant-team-dynamics",
+    "https://www.themdu.com/learn-and-develop/course-listing/managing-challenging-conversations-with-patients"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.themdu.com/learn-and-develop/course-listing/managing-conflict-with-colleagues",
+      "field": "sessions",
+      "site_says": "Dates: 29/09/2026 09:00-16:30 Virtual (Join the waiting list / Sold out); 24/11/2026 09:00-16:30 Virtual (Book now)",
+      "extractor_says": "[{'start_date': '2026-09-29', 'start_time': '09:00', 'availability_status': 'sold_out'}, {'start_date': '2026-11-24', 'start_time': '09:00', 'availability_status': 'available'}]",
+      "match": true
+    },
+    {
+      "url": "https://www.themdu.com/learn-and-develop/course-listing/managing-conflict-with-colleagues",
+      "field": "pricing_tiers",
+      "site_says": "Non-member £260, Member £190",
+      "extractor_says": "[{'tier_label': 'Member', 'price_gbp': 190.0}, {'tier_label': 'Non-member', 'price_gbp': 260.0}]",
+      "match": true
+    },
+    {
+      "url": "https://www.themdu.com/learn-and-develop/course-listing/improving-consultant-team-dynamics",
+      "field": "cpd_accredited",
+      "site_says": "'Accredited by the Federation of the Royal Colleges of Physicians of the UK for 5 category 1 (external) CPD credits.'",
+      "extractor_says": "True",
+      "match": true
+    },
+    {
+      "url": "https://www.themdu.com/learn-and-develop/course-listing/managing-challenging-conversations-with-patients",
+      "field": "cpd_accredited",
+      "site_says": "'Awaiting accreditation by the Federation of the Royal Colleges of Physicians of the UK for 6 category 1 (external) CPD credits.'",
+      "extractor_says": "False",
+      "match": true
+    },
+    {
+      "url": "https://www.themdu.com/learn-and-develop/course-listing/leadership-foundations-for-healthcare-professionals",
+      "field": "start_date / event_format",
+      "site_says": "03/12/2026, Locations: Virtual",
+      "extractor_says": "2026-12-03, online",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Recon start_url (/events) 404s — not used. Real hub is /learn-and-develop; the correct dated-course source is its search API, discovered by hand.",
+    "/learn-and-develop/webinars: all past entries are on-demand 'Video and podcast' recordings with no MDU-hosted page and no future date; the ONE genuinely upcoming webinar has no MDU detail page either — its 'Register here' link goes straight to an external ON24 registration URL with no dates/fees/venue on themdu.com to extract. Not scraped — nothing extractable per the brief's on-demand-with-no-dated-events guidance.",
+    "/learn-and-develop/hospital-based-seminars: a fixed menu of ~10 topics delivered on request ('Enquire now'), no scheduled dates at all. Not scraped.",
+    "3 of the 8 'Course' entries in the search API currently have an empty dates field ('No dates available' on their own page): Essential communication skills, Setting up in private practice, Delivering difficult news with empathy. Correctly skipped by list_shells_override(); they'll start being picked up automatically once/if MDU schedules a session, since the filter is just 'dates non-empty', not a fixed slug list.",
+    "venue_name/city/region are None on every course probed — every session so far is 'Virtual'. The extractor does handle a non-Virtual location string (treats it as an in-person venue_name), but that path is unexercised since no in-person course was live during development; flagging as unproven rather than claiming full confidence.",
+    "specialty classifier returned None for 'Managing challenging conversations with patients' (a comms/complaints-handling course) — no false positive, just no matching keyword; acceptable per the null-over-guess rule.",
+    "No database access, git, or other files touched, per the hard rules."
+  ]
+}

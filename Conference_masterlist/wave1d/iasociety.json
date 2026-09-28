@@ -1,0 +1,50 @@
+{
+  "source_id": 43,
+  "slug": "iasociety",
+  "class_name": "IASExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/iasociety.py",
+  "source_row": {
+    "source_name": "International AIDS Society (IAS) Conferences",
+    "society": "International AIDS Society",
+    "base_url": "https://www.iasociety.org",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "No dated listing page exists (recon was right that /events, /conferences etc all 404). The homepage's 'Conferences' mega-menu names the current set of flagship conference subsites (one <nav aria-labelledby> block per conference, each with an <h2> title and a 'Find out more' link to /conferences/<slug>) - list_shells_override() parses that instead. Each subsite is one thin page (~2KB text): a 'D-D Month YYYY' date banner, one intro paragraph naming city/country and 'and virtually' (=> hybrid), and nothing else yet - no venue name, no pricing, no CPD, no abstract text. A subsite with no parseable date banner (e.g. a past conference rewritten into a retrospective) is skipped rather than scraped as-is."
+  },
+  "registry_comment": "IAS flagship conferences (International AIDS Conference, IAS Conference on HIV Science, HIVR4P) - homepage mega-menu as listing, thin marketing subsites",
+  "probe_results": {
+    "shells": 2,
+    "shells_forced_fallback": 2,
+    "details_tested": 2,
+    "with_date": 2,
+    "with_pricing": 0,
+    "with_venue": 0,
+    "with_description": 2,
+    "with_specialty": 2
+  },
+  "test_urls": [
+    "https://www.iasociety.org/conferences/ias2027",
+    "https://www.iasociety.org/conferences/hivr4p2027",
+    "https://www.iasociety.org/conferences/aids2026"
+  ],
+  "spot_check": [
+    {"url": "https://www.iasociety.org/conferences/ias2027", "field": "start_date/end_date", "site_says": "12-15 July 2027", "extractor_says": "2027-07-12 / 2027-07-15", "match": true},
+    {"url": "https://www.iasociety.org/conferences/ias2027", "field": "city/region", "site_says": "Geneva, Switzerland, and virtually", "extractor_says": "Geneva / Switzerland", "match": true},
+    {"url": "https://www.iasociety.org/conferences/ias2027", "field": "event_format", "site_says": "in Geneva ... and virtually", "extractor_says": "hybrid", "match": true},
+    {"url": "https://www.iasociety.org/conferences/hivr4p2027", "field": "start_date/end_date", "site_says": "10-12 July 2027", "extractor_says": "2027-07-10 / 2027-07-12", "match": true},
+    {"url": "https://www.iasociety.org/conferences/hivr4p2027", "field": "city/region", "site_says": "Geneva, Switzerland, and virtually", "extractor_says": "Geneva / Switzerland", "match": true},
+    {"url": "https://www.iasociety.org/conferences/aids2026", "field": "listing inclusion", "site_says": "page is now a post-conference retrospective ('Rise from Rio'), no date banner", "extractor_says": "correctly excluded from shells (no parseable date)", "match": true}
+  ],
+  "concerns": [
+    "Very thin source: only 2 upcoming shells exist site-wide (IAS 2027, HIVR4P 2027), both flagship conferences ~10 months out. No pricing, CPD, venue name, or abstract info is published yet on either subsite - fields are correctly left empty/None rather than invented, but that means near-zero field coverage today. Coverage should improve automatically as IAS builds out the subsites (registration/tickets/programme sections) closer to July 2027 - re-check with the harness in a few months.",
+    "No httpx path exists for this extractor (wave1d addendum: fetch_html/httpx will likely be blocked) - list_shells_override and extract_detail both go through self.browser.navigate() only, so the harness's --force-fallback flag doesn't change behaviour here; I ran it anyway and got identical shell counts (2/2) since there's nothing for it to toggle.",
+    "The 'Conferences' mega-menu is a small, hand-maintained set (currently 3 entries: HIVR4P 2027, IAS 2027, AIDS 2026-past) rather than a real paginated index. If IAS ever runs two upcoming conferences of the same name concurrently, or restructures the menu, list_shells_override's regex on <nav aria-labelledby=\"menu-...\"> blocks may need revisiting - flagging in case the registry maintainer wants a periodic sanity check rather than 'set and forget'.",
+    "region is set to the country name ('Switzerland'), following the convention already used by aacr.py/estro.py for non-UK sources, not a UK-style region.",
+    "Only spot-checked 2 real upcoming events by hand (there are only 2 in existence); the AIDS 2026 exclusion was verified as the third spot-check instead of a third event."
+  ]
+}

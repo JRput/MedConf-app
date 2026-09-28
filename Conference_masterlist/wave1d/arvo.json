@@ -1,0 +1,49 @@
+{
+  "source_id": 42,
+  "slug": "arvo",
+  "class_name": "ARVOExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/arvo.py",
+  "source_row": {
+    "source_name": "ARVO Annual Meeting",
+    "society": "Association for Research in Vision and Ophthalmology",
+    "base_url": "https://www.arvo.org/annual-meeting/",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": true,
+    "active": true,
+    "extraction_instructions": "Cloudflare-protected dedicated flagship microsite (not a listing of many events) — self.browser.navigate() clears the challenge via context rotation. list_shells_override() reads /about/future-meetings' Year|Date|Location table and emits ONE shell for whichever year is soonest-upcoming (title 'ARVO Annual Meeting <year>', booking_url = /registration). extract_detail() then walks /registration (two plain multi-column fee tables: core Rates + CME Rates, USD), /about (accordions for venue address + abstract deadline, server-rendered but display:none), and /abstracts (fallback deadline parse). All fees stored with currency='USD'."
+  },
+  "registry_comment": "ARVO Annual Meeting — flagship microsite, single shell per year, USD pricing tables",
+  "probe_results": {
+    "shells": 1,
+    "shells_forced_fallback": null,
+    "details_tested": 1,
+    "with_date": 1,
+    "with_pricing": 1,
+    "with_venue": 1,
+    "with_description": 1,
+    "with_specialty": 1
+  },
+  "test_urls": [
+    "https://www.arvo.org/annual-meeting/registration",
+    "https://www.arvo.org/annual-meeting/about",
+    "https://www.arvo.org/annual-meeting/abstracts"
+  ],
+  "spot_check": [
+    {"url": "https://www.arvo.org/annual-meeting/about", "field": "start_date/end_date", "site_says": "For 2027, the Meeting will be hosted May 2 - 6 in San Diego, Calif. (confirmed by /about/future-meetings table: 2027 | May 2-6 | San Diego, Calif.)", "extractor_says": "2027-05-02 / 2027-05-06", "match": true},
+    {"url": "https://www.arvo.org/annual-meeting/about", "field": "venue_name/city/region", "site_says": "The San Diego Convention Center is located at 111 Harbor Dr., San Diego, Calif. 92101", "extractor_says": "San Diego Convention Center / San Diego / California", "match": true},
+    {"url": "https://www.arvo.org/annual-meeting/registration", "field": "pricing_tiers (sample)", "site_says": "Regular member: Early Bird $385, Standard $545, Late $600", "extractor_says": "Registration · Regular member · Early Bird until March 10, 2027 = 385.0 USD; · Standard until April 23, 2027 = 545.0 USD; · Late = 600.0 USD", "match": true},
+    {"url": "https://www.arvo.org/annual-meeting/about", "field": "abstract_deadline", "site_says": "Important dates accordion: 'Dec. 4 — Abstract submission deadline' under the 2026 year marker", "extractor_says": "2026-12-04", "match": true},
+    {"url": "https://www.arvo.org/annual-meeting/registration", "field": "event_format", "site_says": "\"The 2027 ARVO Annual Meeting is scheduled to be in-person only and will not have a virtual component.\"", "extractor_says": "in_person", "match": true}
+  ],
+  "concerns": [
+    "Only ONE shell is ever emitted (the next Annual Meeting) — this is a dedicated flagship microsite with no other dated events under arvo.org/annual-meeting/. If ARVO later adds other meeting types on this domain, they will not be picked up without extending list_shells_override().",
+    "cpd_points is always None — ARVO states the Meeting is CME-accredited (AMA PRA Category 1 Credit) but never publishes a numeric credit/hour count on the public pages. cpd_accredited=True is set instead.",
+    "Venue/abstract-deadline regexes match the CURRENT (2026-09-29) accordion wording ('X is located at Y', 'Abstract submission deadline') and the exact div class 'accordion-content' from the Alpine.js-driven About page. If ARVO changes that template, these fields will silently return None — self-heals via the existing PLAYBOOK.md rule (event_format IS NULL or venue/city IS NULL re-triggers a re-fetch next scrape) rather than locking in stale data.",
+    "Two harness runs produced identical results (1 shell, 21 pricing tiers) but --force-fallback wasn't meaningfully exercisable: this extractor is browser-first throughout (self.browser.navigate() for every page, never httpx/fetch_html), matching the wave 1c/1d addenda, so http_fetch's httpx-403 patch has no effect on it either way.",
+    "Registration page occasionally needs a Cloudflare context rotation that fails on the FIRST attempt within the same browser session as the future-meetings fetch (observed once during development — browser.py warned 'not cleared by either browser profile' and silently kept the stale future-meetings page). Guarded in extract_detail() by verifying the handed-in page's URL contains '/registration' AND its HTML contains 'Registration Rates' before trusting it, else re-fetching via a fresh navigate(); did not recur on either logged harness run but is a live possibility on a slower/busier scrape."
+  ]
+}
