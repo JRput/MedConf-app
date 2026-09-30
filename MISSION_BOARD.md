@@ -121,8 +121,8 @@ Architecture rule: **platform-family extractors, not 186 bespoke modules.**
 | P3 Wave 1b — RCPE 30 · RCPCH 31 · RCOphth 32 · FPH 33 · FOM 34 · FPM 35 · ESC 36 · ACPGBI 37 · ASGBI 38 | ✅ 2026-09-26 — **GATE PASSED.** 143 active rows. Null desc/specialty 0.7 % (gate <10 %). Cloud run 36267394924 green 39/39, all nine found their full listing from runner IPs. Audit-gate fixes: RCPE boilerplate + abstract phrasing, RCPCH cookie-banner title (fallback path only), ESC venue prose, ACPGBI HTML leak. User decision: ACPGBI junk-title filter OFF (third-party calendar events wanted). Known: audit's "description shares no title token" check gave ~15 false flags — treat as advisory; remediator pricing fixer burns 400+ vision calls on image-less sources (ACPGBI) — needs a cap. |
 | P3 Wave 1c — CoSRH 39 · RCoA 40 · FICM 41 | ✅ 2026-09-28 — **GATE PASSED for 39 + 41** (CoSRH 9 events, FICM 12; cloud-green). **Key finding:** the "Cloudflare blocks headless" wall was Playwright's default context (HeadlessChrome UA / no locale / 1280x720), configured per site — `browser.py navigate()` now rotates to a fresh alt-profile context on each challenge (clearance lasts ONE load per context). No headed browser needed. RCoA (40) INACTIVE: clears from a home IP but Cloudflare also blocks GitHub-runner IPs; 30 events kept until they expire. ASTRO blocks both profiles. Housekeeping shipped: grouped scrape matrix (5 groups), remediator split into the same groups (was timing out at 24/41 sources), vision-call budget 40/run, vision log truncation. Known flaky: BTOG SiteGround challenge (4 events). |
 | P1 Recon batch 2 (remaining 164 domains, `haiku`) | ✅ 2026-09-21 — 126 resolved · 29 parked · 9 out of scope → `recon.json` now covers all 184 |
-| P3 Wave 1d — Cloudflare-parked domains now reachable (ARVO, HIMSS, ABN, USCAP, MDU, EASD, AHA, …; NOT ASTRO) | ⬜ next. Must gate in the cloud early — RCoA showed some sites also block runner IPs |
-| P3 Wave 2 (platform families) | ⬜ |
+| P3 Wave 1d — ARVO 42 · IAS 43 · MDDUS 44 · MDU 45 | ✅ 2026-09-30 — **GATE PASSED** (cloud run green 5/5 groups, 44 active sources). +65 events (MDDUS 57). Cloud access probe (`probe_cloud_access.py` + `probe-cloud-access.yml`) showed only these 4 of 18 Cloudflare-parked domains are readable from runner IPs; the other 14 (ASTRO, AHA, HIMSS, ESSKA, EANS, ABN, USCAP, FACE, ESPNIC, IAS-adjacent…) block datacenter IPs → parked with reason. ARVO clears intermittently → 3-attempt retry. Also this cycle: FICM routing change (/index.php) fixed same day; remediator vision hangs capped (no SDK retries, 60 s, 15 images / 12 min per run). |
+| P3 Wave 2 (platform families) | ⬜ planned 2026-09-30 — see §7 |
 | P3 Wave 3+ (long tail) | ⬜ |
 | P4 CI scale-up | ⬜ |
 | P5 Gates | ⬜ per-wave |
@@ -147,3 +147,16 @@ for 25 days while CI stayed green. 4th EOL in 5 months (LESSONS #6) → architec
 
 Cost: £0 external. GitHub Actions: 4 manual full runs (~30 jobs each) + one hung 6 h job.
 Open risks: vision chain verified on a synthetic fee table only; NVIDIA can still retire a whole chain at once — the probe makes that loud, not impossible.
+
+## 7. Wave 2 plan (2026-09-30)
+
+Pool: **124 resolved domains** not yet built (recon.json). By platform: wordpress_other 53 · static_html 34 · unknown 16 · spa 13 · tribe_events 4 · external_registrar 4. 30 need JS. Estimated volume ≈ 3,400 events (vs ~1,100 live today).
+
+Order by value ÷ effort, gating each sub-wave in the cloud early (RCoA/ARVO lesson):
+- **2a — Tribe Events API (4):** baets, aans, aagl, esp-pathology. One shared family extractor (BOPA already proves the API path). Cheapest win.
+- **2b — high-volume bespoke (≈10):** uroweb (700), eanm (499), sccm (244), advance-he (210), ifosworld (160), idweek (100), isuog (76), ihi (75), b-s-h (50), acep (50). Each ≥ 50 events → worth a per-source agent.
+- **2c — WordPress long tail (≈50):** try a `wordpress_generic` family extractor (post-type `/events/` + common card markup) on 5 sites first; promote to family if ≥ 3/5 need no bespoke code, else per-source agents in batches of 10.
+- **2d — static HTML + unknown (≈50):** per-source agents in batches of 10, `sonnet`; CMS hints from recon (Drupal 6, lmsitestarterduke 5, DNN 4, Umbraco 3, EventsAir 6 → EventsAir family via RCOG path).
+- **2e — SPA / external registrar (≈17):** browser-first; external registrars (BCS, BSPED, Rewired, Medical Protection) may be out of scope if the org hosts nothing itself.
+
+Gate per sub-wave: harness twice → first scrape → remediator → audit (advisory: title-token and load-more checks) → null-audit < 10 % → cloud run green. Matrix: add a 6th/7th group as needed (≤ 10 sources per job).
