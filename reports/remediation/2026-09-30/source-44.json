@@ -1,0 +1,16 @@
+{
+  "source_id": 44,
+  "source_name": "MDDUS Training & CPD",
+  "society": "MDDUS",
+  "run_at": "2026-09-30T18:21:04.385527+00:00",
+  "events_scraped": 57,
+  "events_with_gaps_at_first": 0,
+  "events_fixed": 0,
+  "events_still_incomplete": 0,
+  "patches_applied": [],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [],
+  "explorer_runs": 0,
+  "explorer_successes": 0,
+  "duration_sec": 0.9
+}

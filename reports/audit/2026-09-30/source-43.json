@@ -1,0 +1,220 @@
+{
+  "source_id": 43,
+  "source_name": "International AIDS Society (IAS) Conferences",
+  "rows": 2,
+  "passing_rows": 2,
+  "failing_rows": 0,
+  "total_missing_fields": 0,
+  "total_suspect_fields": 0,
+  "avg_completeness": 100.0,
+  "verdict": "PASS",
+  "pagination": {
+    "has_pagination": false,
+    "page_buttons": 0,
+    "next_button": false,
+    "show_more": false,
+    "load_more": false,
+    "total_hint": null,
+    "db_rows": 2
+  },
+  "pagination_warning": null,
+  "audits": [
+    {
+      "conference_id": 2050,
+      "conference_name": "HIVR4P 2027, the 6th HIV Research for Prevention Conference",
+      "event_type": "conference",
+      "source_url": "https://www.iasociety.org/conferences/hivr4p2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "HIVR4P 2027, the 6th HIV Research for Prevention Conference, will take place in ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-07-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-07-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Geneva",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "hybrid",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "HIV Prevention Research",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 4
+    },
+    {
+      "conference_id": 2052,
+      "conference_name": "IAS 2027, the 14th IAS Conference on HIV Science",
+      "event_type": "conference",
+      "source_url": "https://www.iasociety.org/conferences/ias2027",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "IAS 2027, the 14th IAS Conference on HIV Science, will be held in Geneva, Switze",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-07-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-07-15",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No venue-anchor phrases on page"
+        },
+        {
+          "field": "city",
+          "status": "OK",
+          "db_value": "Geneva",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "hybrid",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "conference",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "HIV Medicine",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No CPD mention on page"
+        },
+        {
+          "field": "abstract_status",
+          "status": "GENUINELY_ABSENT",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "No abstract programme on page"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "GENUINELY_ABSENT",
+          "db_value": "0 tiers",
+          "page_evidence": null,
+          "reason": "No pricing content on page"
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 12,
+      "total_ok": 8,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 4
+    }
+  ],
+  "audited_at": "2026-09-30T18:20:26.683715+00:00"
+}

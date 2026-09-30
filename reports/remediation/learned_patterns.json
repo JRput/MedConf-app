@@ -112,6 +112,14 @@
       "promoted": true,
       "subpage_path": null
     },
+    "www.iasociety.org|abstract_status|no_abstract_anywhere": {
+      "domain": "www.iasociety.org",
+      "field": "abstract_status",
+      "hits": 2,
+      "method": "no_abstract_anywhere",
+      "promoted": false,
+      "subpage_path": null
+    },
     "www.rcpath.org|abstract_status|no_abstract_anywhere": {
       "domain": "www.rcpath.org",
       "field": "abstract_status",

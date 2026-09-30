@@ -1,0 +1,78 @@
+{
+  "source_id": 43,
+  "source_name": "International AIDS Society (IAS) Conferences",
+  "society": "IAS",
+  "run_at": "2026-09-30T18:15:45.764908+00:00",
+  "events_scraped": 2,
+  "events_with_gaps_at_first": 2,
+  "events_fixed": 2,
+  "events_still_incomplete": 2,
+  "patches_applied": [
+    {
+      "conference_id": 2050,
+      "conference_name": "HIVR4P 2027, the 6th HIV Research for Prevention Conference",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    },
+    {
+      "conference_id": 2052,
+      "conference_name": "IAS 2027, the 14th IAS Conference on HIV Science",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "explorer:no_abstract_anywhere"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 2050,
+      "conference_name": "HIVR4P 2027, the 6th HIV Research for Prevention Conference",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 0
+          },
+          "llm_reasoning": "No page text available.",
+          "notes": []
+        }
+      ]
+    },
+    {
+      "conference_id": 2052,
+      "conference_name": "IAS 2027, the 14th IAS Conference on HIV Science",
+      "fields": [
+        "venue_name",
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [],
+            "images_ocred": 0,
+            "total_text_chars": 0
+          },
+          "llm_reasoning": "No page text available.",
+          "notes": []
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 4,
+  "explorer_successes": 2,
+  "duration_sec": 1.5
+}

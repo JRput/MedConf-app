@@ -1,0 +1,5610 @@
+{
+  "source_id": 44,
+  "source_name": "MDDUS Training & CPD",
+  "rows": 57,
+  "passing_rows": 57,
+  "failing_rows": 0,
+  "total_missing_fields": 0,
+  "total_suspect_fields": 1,
+  "avg_completeness": 100.0,
+  "verdict": "FAIL",
+  "pagination": {
+    "has_pagination": true,
+    "page_buttons": 0,
+    "next_button": false,
+    "show_more": true,
+    "load_more": false,
+    "total_hint": "10 of 71",
+    "db_rows": 57
+  },
+  "pagination_warning": "Listing has 'Show more'/'Load more' button \u2014 extractor must click these until exhausted",
+  "audits": [
+    {
+      "conference_id": 2101,
+      "conference_name": "Building a feedback culture: addressing performance issues in your team",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/may/building-a-feedback-culture---addressing-performance-issues-in-your-team",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The interactive course explores elements of a feedback culture, its link to risk",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-05-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-05-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2105,
+      "conference_name": "Professional boundaries",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/august/professional-boundaries",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course examines the importance of professional boundaries in cl",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-08-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-08-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2102,
+      "conference_name": "Wellbeing and Safety by Design",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/may/wellbeing-and-safety-by-design",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive Zoom course explores inclusive leadership, behavioural science ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-05-20",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-05-20",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2104,
+      "conference_name": "Equality, diversity and inclusion workshop",
+      "event_type": "workshop",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/may/equality-diversity-and-inclusion-workshop",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This workshop explores equality, diversity, and inclusion concepts, legal obliga",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-05-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-05-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2106,
+      "conference_name": "Leadership: DISC analysis to understand and improve communication",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/august/leadership-disc-analysis-to-understand-and-improve-communication",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course uses DISC analysis to help delegates understand personal communicati",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-08-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-08-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2107,
+      "conference_name": "Wellbeing and Safety by Design",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/august/wellbeing-and-safety-by-design",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course for healthcare leaders explores behavioural science rela",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-08-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-08-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2065,
+      "conference_name": "Building a feedback culture: addressing performance issues in the professional team",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/building-a-feedback-culture---addressing-performance-issues-in-the-professional-team",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course explores the elements of a feedback culture, its link to",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2055,
+      "conference_name": "AI for hospital doctors - balancing risks and opportunities",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/january/ai-for-hospital-doctors",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course for hospital doctors explores practical AI use in clinic",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-01-26",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-01-26",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "1 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2064,
+      "conference_name": "Probity for dentists",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/probity-for-dentists",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course explores probity in dentistry, covering honesty, transparency, patie",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2062,
+      "conference_name": "Complaints management for healthcare practitioners",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/october/complaints-management-for-healthcare-practitioners",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This three hour course equips healthcare practitioners with the confidence and c",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-07",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-07",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2056,
+      "conference_name": "AI for hospital doctors - balancing risks and opportunities",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/october/ai-for-hospital-doctors",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course for hospital doctors explores practical AI use in second",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-28",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-28",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "1 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2058,
+      "conference_name": "Confidentiality for non-clinical staff in primary care",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/september/confidentiality-for-non-clinical-staff-in-primary-care",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course covers disclosing and sharing patient information, DPA 2018 requirem",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-09-30",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-09-30",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2061,
+      "conference_name": "Professionalism: Fulfilling your duties as a dentist",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/october/professionalism-fulfilling-your-duties-as-a-dentist",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive Zoom course focuses on key areas of professionalism for dentist",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-06",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-06",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2059,
+      "conference_name": "Probity for doctors",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/october/probity-for-doctors",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course covers probity and professionalism for doctors, including ethical be",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-01",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-01",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2063,
+      "conference_name": "Mastering the 5 Key Questions \u2014 Evidence, KLOEs and What's Coming Next",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/october/mastering-the-5-key-questions",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course covers the five key CQC questions in depth, aligning qua",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-10-15",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-10-15",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2069,
+      "conference_name": "Building safety into delegation",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/building-safety-into-delegation",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course covers safe delegation in healthcare, including types of delegation,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2108,
+      "conference_name": "Building a feedback culture: addressing performance issues in your team",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/august/building-a-feedback-culture---addressing-performance-issues-in-your-team",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course explores the elements of a feedback culture, its link to",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-08-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-08-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2066,
+      "conference_name": "Team communication: Safer MDT working in primary care",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/team-communication-safer-mdt-working-in-primary-care",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course supports clinicians and non-clinical staff in primary care teams to ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2067,
+      "conference_name": "Risk management: Good practice in record keeping for doctors",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/risk-management-good-practice-in-record-keeping-for-doctors",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This five-hour interactive course covers good record keeping for doctors, includ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2109,
+      "conference_name": "Managing risk for ANPs in primary care",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/august/managing-risk-for-anps-in-primary-care",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course covers risk management for ANPs in primary care, focusing on scope o",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-08-26",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-08-26",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2110,
+      "conference_name": "Leadership: Recognising and managing team conflict to reduce risk",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/august/leadership-recognising-and-managing-team-conflict-to-reduce-risk",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The course examines the association between conflict and risk management, explor",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-08-31",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-08-31",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2070,
+      "conference_name": "Probity for doctors",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/probity-for-doctors",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "The course covers probity for doctors, focusing on honesty, transparency, profes",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2071,
+      "conference_name": "Team communication: Safer MDT working in secondary care",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/team-communication-safer-mdt-working-in-secondary-care",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course highlights the importance of effective team communication in seconda",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2078,
+      "conference_name": "Practice and patient use of technology in practice",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/practice-and-patient-use-of-technology-in-practice",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course explores regulatory, legal, scope, and process risks related to pati",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-24",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-24",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2072,
+      "conference_name": "Leadership: DISC analysis to understand and improve communication",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/leadership-disc-analysis-to-understand-and-improve-communication",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course uses DISC analysis to help delegates examine their communication sty",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2073,
+      "conference_name": "Confidentiality for non-clinical staff in primary care",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/confidentiality-for-non-clinical-staff-in-primary-care",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course covers disclosing and sharing patient information, DPA 2018 requirem",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-13",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-13",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2080,
+      "conference_name": "Professional boundaries",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/professional-boundaries",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course examines professional boundaries in clinical practice, c",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-26",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-26",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2074,
+      "conference_name": "Professionalism: Fulfilling your duties as a doctor",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/professionalism-fulfilling-your-duties-as-a-doctor",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This training course focuses on key areas of professionalism for doctors, coveri",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2075,
+      "conference_name": "Leadership: Conducting an interpersonal conflict resolution process",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/leadership-conducting-an-interpersonal-conflict-resolution-process",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This three-hour interactive course for healthcare leaders examines a conflict re",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2076,
+      "conference_name": "Communication risks for admin and reception teams in primary care",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/communication-risks-for-admin-and-reception-teams-in-primary-care",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course helps admin and reception teams in primary care identify communicati",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-19",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 2,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2077,
+      "conference_name": "Leadership: Understanding emotions to reduce risk",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/leadership-understanding-emotions-to-reduce-risk",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course for doctors and dentists in leadership roles explores em",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-20",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-20",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2079,
+      "conference_name": "AI for hospital doctors - balancing risks and opportunities",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/november/ai-for-hospital-doctors",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course for hospital doctors explores practical AI use in second",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-11-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-11-25",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "1 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2081,
+      "conference_name": "Self-reflection and developing insight",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/december/self-reflection-and-developing-insight",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course helps healthcare professionals understand and improve se",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-01",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-01",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2111,
+      "conference_name": "Leadership: Conducting an interpersonal conflict resolution process",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/september/leadership-conducting-an-interpersonal-conflict-resolution-process",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This three-hour interactive course for healthcare leaders examines a conflict re",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-09-01",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-09-01",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2083,
+      "conference_name": "AI in Dental Practice - balancing risks and opportunities",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/december/ai-in-dental-practice",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course explores practical AI use in dental practice, associated",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "1 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2084,
+      "conference_name": "Professionalism: Fulfilling your duties as a dentist",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/december/professionalism-fulfilling-your-duties-as-a-dentist",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive Zoom course focuses on key areas of professionalism for dentist",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2087,
+      "conference_name": "Professional boundaries",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/february/professional-boundaries",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course examines professional boundaries in clinical practice, c",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-03",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2085,
+      "conference_name": "Compassion versus empathy",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2026/december/compassion-versus-empathy",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive workshop explores the distinction between empathy and compassio",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2026-12-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2026-12-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2086,
+      "conference_name": "Self-reflection and developing insight",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/february/self-reflection-and-developing-insight",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course helps healthcare professionals understand and improve se",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2089,
+      "conference_name": "Leadership: Recognising and managing team conflict to reduce risk",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/february/leadership-recognising-and-managing-team-conflict-to-reduce-risk",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course examines the association between conflict and risk management, explo",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2088,
+      "conference_name": "Managing risk for ANPs in primary care",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/february/managing-risk-for-anps-in-primary-care",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "Through short talks, discussion, and case consideration, the course explores wor",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Risk Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2090,
+      "conference_name": "Leadership: Conducting an interpersonal conflict resolution process",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/february/leadership-conducting-an-interpersonal-conflict-resolution-process",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This three-hour interactive course for healthcare leaders covers a conflict reso",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2117,
+      "conference_name": "Practice Manager Leadership: DISC analysis to understand and improve communication",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/november/practice-manager-leadership-disc-analysis-to-understand-and-improve-communication",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course helps practice managers examine their communication styles using DIS",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-11-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-11-12",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2091,
+      "conference_name": "Wellbeing and Safety by Design",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/february/wellbeing-and-safety-by-design",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive Zoom course for healthcare leaders explores behavioural science",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-02-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-02-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2113,
+      "conference_name": "Building safety into delegation",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/september/building-safety-into-delegation",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course covers safe delegation in healthcare, including types of delegation,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-09-07",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-09-07",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2121,
+      "conference_name": "Building a feedback culture: addressing performance issues in your team",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/november/building-a-feedback-culture---addressing-performance-issues-in-your-team",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course explores the elements of a feedback culture, its link to",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-11-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-11-23",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2118,
+      "conference_name": "Wellbeing and Safety by Design",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/november/wellbeing-and-safety-by-design",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive Zoom course for healthcare leaders explores behavioural science",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-11-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-11-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2092,
+      "conference_name": "Creating safe and inclusive environments",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/march/creating-safe-and-inclusive-environments",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This Zoom course explores behavioural science relevant to ED&I, leadership behav",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-02",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2094,
+      "conference_name": "Professional boundaries",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/march/professional-boundaries",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course examines professional boundaries in clinical practice, c",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-04",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2095,
+      "conference_name": "Equality, diversity and inclusion workshop",
+      "event_type": "workshop",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/march/equality-diversity-and-inclusion-workshop",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This workshop explores equality, diversity and inclusion concepts, legal obligat",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-09",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2096,
+      "conference_name": "Building safety into delegation",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/march/building-safety-into-delegation",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course covers safe delegation in healthcare, including types of delegation,",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-11",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2097,
+      "conference_name": "Leadership: DISC analysis to understand and improve communication",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/march/leadership-disc-analysis-to-understand-and-improve-communication",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course helps delegates examine their working preferences and communication ",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-16",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2099,
+      "conference_name": "Practice Manager Leadership: DISC analysis to understand and improve communication",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/march/practice-manager-leadership-disc-analysis-to-understand-and-improve-communication",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course uses DISC analysis to help practice managers understand their commun",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-03-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-03-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2100,
+      "conference_name": "Professional boundaries",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/april/professional-boundaries",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course examines professional boundaries in clinical practice, c",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-04-29",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-04-29",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2116,
+      "conference_name": "Leadership: DISC analysis to understand and improve communication",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/november/leadership-disc-analysis-to-understand-and-improve-communication",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This course uses DISC analysis to help delegates examine their working preferenc",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-11-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-11-10",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Leadership & Management",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2115,
+      "conference_name": "Professional boundaries",
+      "event_type": "course",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/november/professional-boundaries",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This interactive course examines the importance of professional boundaries in cl",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-11-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-11-05",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "course",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 5,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=course \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    },
+    {
+      "conference_id": 2119,
+      "conference_name": "Equality, diversity and inclusion workshop",
+      "event_type": "workshop",
+      "source_url": "https://www.mddus.com/training-and-cpd/events/2027/november/equality-diversity-and-inclusion-workshop",
+      "fields": [
+        {
+          "field": "description",
+          "status": "OK",
+          "db_value": "This workshop explores equality, diversity and inclusion concepts, legal obligat",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "start_date",
+          "status": "OK",
+          "db_value": "2027-11-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "end_date",
+          "status": "OK",
+          "db_value": "2027-11-18",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "venue_name",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "Online event"
+        },
+        {
+          "field": "city",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_format",
+          "status": "OK",
+          "db_value": "online",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "event_type",
+          "status": "OK",
+          "db_value": "workshop",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "specialty",
+          "status": "OK",
+          "db_value": "Professionalism & Ethics",
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "is_flagship",
+          "status": "OK",
+          "db_value": false,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "cpd_points",
+          "status": "OK",
+          "db_value": 3,
+          "page_evidence": null,
+          "reason": ""
+        },
+        {
+          "field": "abstract_status",
+          "status": "NOT_APPLICABLE",
+          "db_value": null,
+          "page_evidence": null,
+          "reason": "event_type=workshop \u2014 abstracts uncommon"
+        },
+        {
+          "field": "pricing_tiers",
+          "status": "OK",
+          "db_value": "2 tiers",
+          "page_evidence": null,
+          "reason": ""
+        }
+      ],
+      "completeness_score": 100.0,
+      "total_checked": 9,
+      "total_ok": 9,
+      "total_missing": 0,
+      "total_suspect": 0,
+      "total_absent": 0
+    }
+  ],
+  "audited_at": "2026-09-30T18:21:38.180371+00:00"
+}

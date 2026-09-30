@@ -58,6 +58,10 @@ from .asgbi import ASGBIExtractor
 from .cosrh import CoSRHExtractor
 from .ficm import FICMExtractor
 from .rcoa import RCoAExtractor
+from .arvo import ARVOExtractor
+from .iasociety import IASExtractor
+from .mddus import MDDUSExtractor
+from .themdu import MDUExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -103,6 +107,10 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     39: CoSRHExtractor,                     # CoSRH (ex-FSRH) — iMIS Cloud SPA, browser-first listing, 4 fee-table shapes
     40: RCoAExtractor,                      # RCoA — INACTIVE: Cloudflare also blocks GitHub-runner IPs (works from home). Drupal, 0-indexed pager, fee JPGs
     41: FICMExtractor,                      # FICM — Drupal behind Cloudflare (browser profile rotation), 0-indexed pager, server-rendered tabs
+    42: ARVOExtractor,                      # ARVO Annual Meeting — flagship microsite, single shell per year, USD pricing tables
+    43: IASExtractor,                       # IAS flagship conferences (International AIDS Conference, IAS Conference on HIV Science, HIVR4P) - homepage mega-menu as listing, thin market
+    44: MDDUSExtractor,                     # 44: MDDUSExtractor,  # MDDUS training & CPD (Interactive Zoom courses, page_query listing, date cross-check for CMS date bug)
+    45: MDUExtractor,                       # MDU Learn & Develop — dated CPD courses (event_type='course', sessions[]) via the site's own search-widget JSON API; no /events page exists
 }
 
 
