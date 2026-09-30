@@ -89,6 +89,7 @@ from .specialty_classifier import classify_specialty
 from logger import logger
 
 BASE_URL = "https://www.arvo.org/annual-meeting"
+_CHALLENGE_TITLE_RE = re.compile(r"<title>\s*(?:just a moment|attention required)", re.I)
 FUTURE_MEETINGS_URL = f"{BASE_URL}/about/future-meetings"
 ABOUT_URL = f"{BASE_URL}/about"
 REGISTRATION_URL = f"{BASE_URL}/registration"
@@ -155,12 +156,19 @@ class ARVOExtractor(BaseExtractor):
         if browser is None:
             logger.warning("ARVO: no browser available")
             return None
-        try:
-            browser.navigate(url)
-            return browser.page.content()
-        except Exception as e:
-            logger.warning(f"ARVO: fetch of {url} failed: {e}")
-            return None
+        # arvo.org's Cloudflare clears from GitHub-runner IPs only
+        # intermittently (2 of 3 probes on 2026-09-30), so retry a couple
+        # of times; navigate() rotates to a fresh browser context each go.
+        for attempt in range(3):
+            try:
+                browser.navigate(url)
+                html = browser.page.content()
+                if not _CHALLENGE_TITLE_RE.search(html[:2000]):
+                    return html
+                logger.warning(f"ARVO: still challenged on {url} (attempt {attempt + 1}/3)")
+            except Exception as e:
+                logger.warning(f"ARVO: fetch of {url} failed (attempt {attempt + 1}/3): {e}")
+        return None
 
     # ------------------------------------------------------------------ #
     # Phase A — listing override: ONE shell for whichever meeting the
