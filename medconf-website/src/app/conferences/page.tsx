@@ -1,7 +1,7 @@
 // src/app/conferences/page.tsx
 'use client'
 
-import { useMemo } from 'react'
+import { Suspense, useMemo } from 'react'
 import { useConferences, type SortMode, type TypeFilter } from '@/hooks/useConferences'
 import { FilterPanel } from '@/components/conferences/FilterPanel'
 import { SearchBar } from '@/components/conferences/SearchBar'
@@ -12,7 +12,30 @@ import {
 import Link from 'next/link'
 import { isAbstractEffectivelyOpen } from '@/lib/conference-helpers'
 
+// `useConferences` reads the URL via useSearchParams, which opts this subtree
+// out of prerendering — Next requires an explicit Suspense boundary around it
+// or `next build` fails on this route. (Pre-existing build break, fixed here so
+// W1 can verify a clean build.)
 export default function ConferencesPage() {
+  return (
+    <Suspense fallback={<DirectoryFallback />}>
+      <ConferencesDirectory />
+    </Suspense>
+  )
+}
+
+function DirectoryFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-4" />
+        <p className="text-slate-400">Loading conferences...</p>
+      </div>
+    </div>
+  )
+}
+
+function ConferencesDirectory() {
   const {
     conferences,
     allConferences,
