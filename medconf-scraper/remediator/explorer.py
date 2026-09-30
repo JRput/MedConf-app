@@ -256,8 +256,22 @@ def llm_classify_anchors(
 # event page to the vision model — 489 calls in one run, 40+ min, and a
 # rate-limit hazard for the nightly --all run. Fee tables are rare images;
 # a source that needs more than this per run is being fed the wrong images.
-VISION_IMAGE_BUDGET = int(os.environ.get("REMEDIATOR_VISION_BUDGET", "40"))
+VISION_IMAGE_BUDGET = int(os.environ.get("REMEDIATOR_VISION_BUDGET", "15"))
+# Wall-clock cap as well: a hanging vision call costs a full timeout even
+# at one attempt, and 2026-09-29/30 showed image count alone doesn't bound
+# the run. Once exceeded, no more images are sent this process.
+VISION_TIME_BUDGET_S = int(os.environ.get("REMEDIATOR_VISION_TIME_BUDGET_S", "720"))
 _vision_images_sent = 0
+_vision_seconds = 0.0
+
+
+def vision_time_left() -> bool:
+    return _vision_seconds < VISION_TIME_BUDGET_S
+
+
+def _note_vision_time(seconds: float) -> None:
+    global _vision_seconds
+    _vision_seconds += seconds
 
 _MONEY_NEAR_IMG_RE = re.compile(
     r"(?:£|€|\$|\bfees?\b|\bprices?\b|\bregistration\b|\bdelegate\b|\btariff\b|\brates?\b|\bcost\b)",
@@ -281,6 +295,12 @@ def find_money_images(html: str, base_url: str, limit: int = 8) -> list[str]:
     urls: list[str] = []
     seen: set = set()
     remaining = VISION_IMAGE_BUDGET - _vision_images_sent
+    if not vision_time_left():
+        logger.warning(
+            f"vision time budget exhausted ({VISION_TIME_BUDGET_S}s this run) — "
+            f"skipping image pricing for {base_url}"
+        )
+        return []
     if remaining <= 0:
         logger.warning(
             f"vision budget exhausted ({VISION_IMAGE_BUDGET} images this run) — "
@@ -486,7 +506,10 @@ def explore_for_pricing(
                 if images:
                     try:
                         from vision import extract_pricing_from_images
+                        import time as _t
+                        _t0 = _t.time()
                         vtiers = extract_pricing_from_images(images)
+                        _note_vision_time(_t.time() - _t0)
                         trail.images_ocred += len(images)
                         if vtiers:
                             trail.llm_reasoning = f"Found prices via vision LLM on {len(images)} image(s) at {url}."
@@ -543,7 +566,10 @@ def explore_for_pricing(
                 if images:
                     try:
                         from vision import extract_pricing_from_images
+                        import time as _t
+                        _t0 = _t.time()
                         vtiers = extract_pricing_from_images(images)
+                        _note_vision_time(_t.time() - _t0)
                         trail.images_ocred += len(images)
                         if vtiers:
                             trail.llm_reasoning = (

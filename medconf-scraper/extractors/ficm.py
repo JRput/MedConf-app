@@ -72,7 +72,10 @@ from .specialty_classifier import classify_specialty
 from logger import logger
 
 BASE_URL = "https://www.ficm.ac.uk"
-LISTING_URL = f"{BASE_URL}/events"
+# 2026-09-30: FICM changed its routing — the plain /events view now returns a
+# truncated first page (1 card) and card links became /index.php/events/<slug>.
+# /index.php/events lists all 9 on page 0 with the same ?page=N pager.
+LISTING_URL = f"{BASE_URL}/index.php/events"
 MAX_PAGES = 6
 
 _CHALLENGE_TITLE = re.compile(r"just a moment|attention required", re.I)
@@ -238,7 +241,7 @@ class FICMExtractor(BaseExtractor):
         out: List[Dict[str, Any]] = []
         for chunk in html.split('<div class="l-listing-grid__item">')[1:]:
             card = chunk[:6000]
-            link = re.search(r'href="(/events/[^"#?]+)"', card)
+            link = re.search(r'href="(?:/index\.php)?(/events/[^"#?]+)"', card)
             if not link:
                 continue
             title_m = re.search(

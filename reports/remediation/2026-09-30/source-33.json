@@ -1,0 +1,547 @@
+{
+  "source_id": 33,
+  "source_name": "Faculty of Public Health",
+  "society": "FPH",
+  "run_at": "2026-09-30T18:14:30.686453+00:00",
+  "events_scraped": 14,
+  "events_with_gaps_at_first": 14,
+  "events_fixed": 13,
+  "events_still_incomplete": 14,
+  "patches_applied": [
+    {
+      "conference_id": 1833,
+      "conference_name": "Climate Change, Pandemic Risk and Resilient Communities: How",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1867,
+      "conference_name": "Poverty Proofing Healthcare Settings",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1849,
+      "conference_name": "FASD in Practice: Identifying, Assessing and Supporting Chil",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1864,
+      "conference_name": "Healthy Urban Places: Listening to Communities, Shaping Heal",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1870,
+      "conference_name": "Building Connectivity in Public Health - A Specialty Registr",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1814,
+      "conference_name": "Public Health Spaces: Why Disciplinary Processes are a Publi",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1818,
+      "conference_name": "The People's Emergency Briefing: Screening and Discussion",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1829,
+      "conference_name": "Barriers to Implementing the 10 Year NHS Plan Ambition",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1844,
+      "conference_name": "Public Health Spaces: Online Harms and the Case for Digital ",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1858,
+      "conference_name": "Public Health Leadership in Preventing Antimicrobial Resista",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1861,
+      "conference_name": "Scottish Public Health Conference 2026",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1807,
+      "conference_name": "Ageing is Living: Implications of the new WHO Europe healthy",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    },
+    {
+      "conference_id": 1824,
+      "conference_name": "Healthy Transport: Cars as Commercial Determinants of Health",
+      "field": "abstract_status",
+      "value_before": "(complex)",
+      "value_after": "{'abstract_open': False}",
+      "method": "no_abstract_mention"
+    }
+  ],
+  "patches_rejected_by_validator": [],
+  "patches_couldnt_fix": [
+    {
+      "conference_id": 1833,
+      "conference_name": "Climate Change, Pandemic Risk and Resilient Communities: How",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 44558
+          },
+          "llm_reasoning": "The event page contains the event title, date/time, a brief description, and a call-to-action 'Book event as an FPH member'. It also includes generic site navigation (About FPH, Vision, Membership, Policy & Advocacy, News, etc.) and footer information. No section detailing registration fees, member ",
+          "notes": [
+            "llm_event_match https://www.fph.org.uk/membership/fph-membership-fees/: matched=['communities', 'change'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/membership/annual-awards-and-prizes/: matched=['communities', 'change'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/cpd/: matched=['communities', 'change'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/regional-cpd-resources/: matched=['communities', 'change'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1853,
+      "conference_name": "Public Mental Health Conference 2026",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 44880
+          },
+          "llm_reasoning": "The page contains the event title, date, venue, programme highlights, a note that places can be booked via the conference website, and standard site navigation (About FPH, Membership, Jobs, etc.). No section detailing registration fees, member/non-member rates, day passes, early\u2011bird pricing, or any",
+          "notes": [
+            "llm_event_match https://www.fph.org.uk/membership/fph-membership-fees/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/cpd/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/regional-cpd-resources/: matched=['public'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1867,
+      "conference_name": "Poverty Proofing Healthcare Settings",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 44533
+          },
+          "llm_reasoning": "The page includes sections such as the event overview, description, and booking options labeled 'Book event as an FPH member' and 'Book event as a non-member', but no registration\u2011fee information (prices, member rates, non\u2011member rates, day passes, early\u2011bird details, etc.) is presented anywhere in ",
+          "notes": [
+            "llm_event_match https://www.fph.org.uk/membership/fph-membership-fees/: matched=['settings'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/membership/annual-awards-and-prizes/: matched=['settings'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/cpd/: matched=['settings'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/regional-cpd-resources/: matched=['settings'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1849,
+      "conference_name": "FASD in Practice: Identifying, Assessing and Supporting Chil",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 45593
+          },
+          "llm_reasoning": "The page contains the event title, date/time (11th November 2026, 12:00pm\u20111:00pm, Online), a brief description, speaker information, and two call\u2011to\u2011action links: 'Book event as an FPH member' and 'Book event as a non\u2011member'. No section listing registration fees, member rates, non\u2011member rates, day",
+          "notes": [
+            "llm_event_match https://www.fph.org.uk/membership/fph-membership-fees/: matched=['practice'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/cpd/: matched=['practice'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/regional-cpd-resources/: matched=['practice'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1864,
+      "conference_name": "Healthy Urban Places: Listening to Communities, Shaping Heal",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 44704
+          },
+          "llm_reasoning": "The page contains the event title, date/time, a description, and booking links labeled 'Book event as an FPH member' and 'Book event as a non-member', but no registration\u2011fee information (member rates, non\u2011member rates, day passes, early\u2011bird details, etc.) is presented anywhere in the visible text.",
+          "notes": [
+            "llm_event_match https://www.fph.org.uk/membership/fph-membership-fees/: matched=['communities'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/membership/annual-awards-and-prizes/: matched=['communities'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/cpd/: matched=['communities'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/regional-cpd-resources/: matched=['communities'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1870,
+      "conference_name": "Building Connectivity in Public Health - A Specialty Registr",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 45164
+          },
+          "llm_reasoning": "The page contains the event title, date/time, a brief description stating the event is 'open to Specialty Registrars by invitation only', navigation menus (About FPH, Membership, Jobs Board, etc.), and general FPH information. There is no section labelled 'Fees', 'Registration', 'Costs', or any ment",
+          "notes": []
+        }
+      ]
+    },
+    {
+      "conference_id": 1814,
+      "conference_name": "Public Health Spaces: Why Disciplinary Processes are a Publi",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 46346
+          },
+          "llm_reasoning": "The page contains the event title, date/time, description, speaker bios, and booking links labelled 'Book event as an FPH member' and 'Book event as a non-member'. No section listing registration fees, member rates, non-member rates, day passes, or any price information (including approximate or ran",
+          "notes": [
+            "llm_event_match https://www.fph.org.uk/membership/fph-membership-fees/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/membership/annual-awards-and-prizes/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/cpd/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/regional-cpd-resources/: matched=['public'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1818,
+      "conference_name": "The People's Emergency Briefing: Screening and Discussion",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 44748
+          },
+          "llm_reasoning": "The page text contains the event title, date/time, a description of the film and discussion, and calls to action 'Book event as an FPH member' and 'Book event as a non-member'. No explicit registration\u2011fee information (prices, member vs non\u2011member rates, day passes, early\u2011bird deadlines, etc.) is pr",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.fph.org.uk/membership/fph-membership-fees/",
+            "skipped_unrelated_zero_tokens: https://www.fph.org.uk/professional-development/cpd/",
+            "skipped_unrelated_zero_tokens: https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1829,
+      "conference_name": "Barriers to Implementing the 10 Year NHS Plan Ambition",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 44388
+          },
+          "llm_reasoning": "The page provides event details (date, time, description) and booking links labeled 'Book event as an FPH member' and 'Book event as a non-member', but no registration fees, member rates, non-member rates, day passes, or any pricing information is displayed anywhere in the visible text.",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.fph.org.uk/membership/fph-membership-fees/",
+            "llm_event_match https://www.fph.org.uk/membership/annual-awards-and-prizes/: matched=['year'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/cpd/: matched=['year'] verdict='no' ok=False",
+            "skipped_unrelated_zero_tokens: https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1844,
+      "conference_name": "Public Health Spaces: Online Harms and the Case for Digital ",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 46046
+          },
+          "llm_reasoning": "The page contains the event title, date/time, a description of the talk, speaker biography, and booking links labelled 'Book event as an FPH member' and 'Book event as a non-member'. No section listing registration fees, member rates, non-member rates, day passes, or any price information (including",
+          "notes": [
+            "llm_event_match https://www.fph.org.uk/membership/fph-membership-fees/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/membership/annual-awards-and-prizes/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/cpd/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/regional-cpd-resources/: matched=['public'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1858,
+      "conference_name": "Public Health Leadership in Preventing Antimicrobial Resista",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 45020
+          },
+          "llm_reasoning": "The page text includes event details (date, time, description, panellists) and links to 'Book event as an FPH member' and 'Book event as a non-member', but no actual registration fees, prices, or fee tiers are mentioned anywhere in the provided text. There is no separate Fees, Pricing, or Registrati",
+          "notes": [
+            "llm_event_match https://www.fph.org.uk/membership/fph-membership-fees/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/cpd/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/regional-cpd-resources/: matched=['public'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1861,
+      "conference_name": "Scottish Public Health Conference 2026",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 45325
+          },
+          "llm_reasoning": "The page contains sections such as About FPH, Vision for the Public's Health, Log in/MyFPH ePortfolio, Membership Eligibility Checker, Why join FPH?, Membership Categories, Membership Fees, Membership FAQs, Annual Awards and Prizes, Training & Careers, Curriculum, Professional Development, Policy & ",
+          "notes": [
+            "llm_event_match https://www.fph.org.uk/membership/fph-membership-fees/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/membership/annual-awards-and-prizes/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/cpd/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/regional-cpd-resources/: matched=['public'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1807,
+      "conference_name": "Ageing is Living: Implications of the new WHO Europe healthy",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 44864
+          },
+          "llm_reasoning": "The event page includes an overview, date/time (5th October 2026, 11:00am\u201112:30pm, Online), a description, and booking options labelled 'Book event as an FPH member' and 'Book event as a non-member'. No registration\u2011fee information (member rates, non\u2011member rates, day passes, early\u2011bird discounts, e",
+          "notes": [
+            "llm_event_match https://www.fph.org.uk/membership/fph-membership-fees/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/membership/annual-awards-and-prizes/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/cpd/: matched=['public'] verdict='no' ok=False",
+            "llm_event_match https://www.fph.org.uk/professional-development/regional-cpd-resources/: matched=['public'] verdict='no' ok=False"
+          ]
+        }
+      ]
+    },
+    {
+      "conference_id": 1824,
+      "conference_name": "Healthy Transport: Cars as Commercial Determinants of Health",
+      "fields": [
+        "pricing"
+      ],
+      "exploration_evidence": [
+        {
+          "field": "pricing",
+          "method": "not_found",
+          "places_looked": {
+            "tabs_visited": [],
+            "subpages_fetched": [
+              "https://www.fph.org.uk/membership/fph-membership-fees/",
+              "https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+              "https://www.fph.org.uk/professional-development/cpd/",
+              "https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+            ],
+            "images_ocred": 0,
+            "total_text_chars": 48664
+          },
+          "llm_reasoning": "The page contains the event title, date/time, description, speaker bios, panel members, and prompts to 'Book event as an FPH member' and 'Book event as a non-member', but no actual registration\u2011fee amounts, member vs non\u2011member prices, day passes, early\u2011bird details, or any currency information is p",
+          "notes": [
+            "skipped_unrelated_zero_tokens: https://www.fph.org.uk/membership/fph-membership-fees/",
+            "skipped_unrelated_zero_tokens: https://www.fph.org.uk/membership/annual-awards-and-prizes/",
+            "skipped_unrelated_zero_tokens: https://www.fph.org.uk/professional-development/cpd/",
+            "skipped_unrelated_zero_tokens: https://www.fph.org.uk/professional-development/regional-cpd-resources/"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer_runs": 14,
+  "explorer_successes": 0,
+  "duration_sec": 208.6
+}

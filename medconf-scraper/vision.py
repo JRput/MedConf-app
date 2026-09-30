@@ -76,7 +76,10 @@ _client: Optional[OpenAI] = None
 def _client_get() -> OpenAI:
     global _client
     if _client is None:
-        _client = OpenAI(api_key=KIMI_API_KEY, base_url=KIMI_BASE_URL)
+        # max_retries=0: the SDK's default 2 retries turned every hanging
+        # image into a ~5 min stall (remediator group E hit its 90 min cap
+        # two nights running, 2026-09-29/30). One attempt, hard 60 s.
+        _client = OpenAI(api_key=KIMI_API_KEY, base_url=KIMI_BASE_URL, max_retries=0)
     return _client
 
 
@@ -102,7 +105,7 @@ def extract_json(
     prompt: str,
     *,
     max_tokens: int = 2000,
-    timeout: float = 90.0,
+    timeout: float = 60.0,
 ) -> Optional[dict]:
     """Send one or more images + a prompt to the vision model. Returns the
     parsed JSON object on success, None on any failure (network error,
