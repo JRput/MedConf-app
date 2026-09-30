@@ -1,123 +1,494 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-/* Custom CSS Variables for MedConf Design System */
+/* ===========================================================================
+   MedConf design system — W1
+   ---------------------------------------------------------------------------
+   Light is the DEFAULT theme; dark is a designed counterpart, not an inversion.
+   Theme is toggled by next-themes via a `.dark` class on <html>.
+   The brand accent is switchable at runtime via `data-accent="teal" | "ink"`
+   on <html> so the owner can compare both candidates live on /design.
+
+   Naming:
+     --bg / --surface-*        page and panel backgrounds
+     --fg / --fg-muted / ...   text levels
+     --border-*                hairlines
+     --brand-*                 the ONE accent (actions, links, selection)
+     --ok/--warn/--danger/--info  status
+     --type-* / --fmt-*        event-type and format semantics
+   shadcn/ui's own variable names (--background, --primary, --accent …) are
+   mapped onto these at the bottom. Note shadcn's `--accent` means "subtle
+   hover surface", NOT our brand colour — hence our accent is `--brand`.
+   =========================================================================== */
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------- LIGHT --- */
 :root {
-  /* Primary palette - Cyan/Teal medical feel */
-  --color-primary-50: #ecfeff;
-  --color-primary-100: #cffafe;
-  --color-primary-200: #a5f3fc;
-  --color-primary-300: #67e8f9;
-  --color-primary-400: #22d3ee;
-  --color-primary-500: #06b6d4;
-  --color-primary-600: #0891b2;
-  --color-primary-700: #0e7490;
-  --color-primary-800: #155e75;
-  --color-primary-900: #164e63;
-  
-  /* Accent - Teal for CTAs */
-  --color-accent: #14b8a6;
-  --color-accent-light: #5eead4;
-  
-  /* Success - Green for CPD badges */
-  --color-success: #22c55e;
-  --color-success-light: #dcfce7;
-  
-  /* Warning - Amber for deadlines */
-  --color-warning: #f59e0b;
-  --color-warning-light: #fef3c7;
-  
-  /* Error */
-  --color-error: #ef4444;
-  --color-error-light: #fee2e2;
-  
-  /* Spacing rhythm - 4px base */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --space-20: 5rem;
-  --space-24: 6rem;
+  color-scheme: light;
+
+  /* Warm neutral ramp. Hue ~55°, chroma kept very low so it reads as paper,
+     not beige. Pure #fff is reserved for raised surfaces so the page itself
+     sits slightly back. */
+  --n-0:   #ffffff;
+  --n-25:  #fcfbf8;
+  --n-50:  #f8f6f2;
+  --n-100: #f1eee8;
+  --n-200: #e5e1d8;
+  --n-300: #d3cec2;
+  --n-400: #a9a396;
+  --n-500: #7d776b;
+  --n-600: #5f5a50;
+  --n-700: #46423a;
+  --n-800: #302d27;
+  --n-900: #1f1d19;
+  --n-950: #121110;
+
+  /* Surfaces */
+  --bg:            var(--n-25);
+  --surface:       var(--n-0);
+  --surface-muted: var(--n-50);
+  --surface-sunken: var(--n-100);
+  --surface-hover: var(--n-50);
+  --surface-active: var(--n-100);
+
+  /* Text */
+  --fg:        var(--n-900);
+  --fg-strong: var(--n-950);
+  --fg-muted:  var(--n-600);
+  --fg-subtle: var(--n-500);
+  --fg-onbrand: #ffffff;
+
+  /* Borders — 1px hairlines. `strong` is for focused/selected chrome. */
+  --border:        var(--n-200);
+  --border-strong: var(--n-300);
+  --border-subtle: var(--n-100);
+
+  /* Brand — deep clinical teal (default candidate) */
+  --brand:          #0f766e;
+  --brand-hover:    #0c5e58;
+  --brand-active:   #0a4a45;
+  --brand-text:     #0c5e58; /* links / accent text on --bg: 6.0:1 */
+  --brand-subtle:   #e6f2f0; /* tinted fill for selected chips */
+  --brand-subtle-hover: #d3e8e5;
+  --brand-border:   #a8d3cd;
+  --brand-ring:     #0f766e;
+
+  /* Status — muted, never fluorescent */
+  --ok:         #146c43;
+  --ok-text:    #0f5132;
+  --ok-subtle:  #e4f1e9;
+  --ok-border:  #a9d3bc;
+
+  --warn:        #94620a;
+  --warn-text:   #744c05;
+  --warn-subtle: #f9f0dc;
+  --warn-border: #e0c68c;
+
+  --danger:        #b42318;
+  --danger-text:   #912018;
+  --danger-subtle: #fbeae8;
+  --danger-border: #eeb0aa;
+
+  --info:        #1d4ed8;
+  --info-text:   #1a41b0;
+  --info-subtle: #e9eefb;
+  --info-border: #b3c3ef;
+
+  /* Event types — distinguishable without shouting */
+  --type-conference-text:   #1f3d63;
+  --type-conference-subtle: #e8eef6;
+  --type-conference-border: #bccee3;
+
+  --type-course-text:   #5b3f91;
+  --type-course-subtle: #efeafa;
+  --type-course-border: #cbbcea;
+
+  --type-workshop-text:   #8a5312;
+  --type-workshop-subtle: #f9efe2;
+  --type-workshop-border: #e5c69c;
+
+  /* Formats — deliberately quieter than event types: the icon carries most
+     of the signal, colour only nudges. */
+  --fmt-online-text:   #1a41b0;
+  --fmt-online-subtle: #e9eefb;
+  --fmt-inperson-text:   #46423a;
+  --fmt-inperson-subtle: #f1eee8;
+  --fmt-hybrid-text:   #0c5e58;
+  --fmt-hybrid-subtle: #e6f2f0;
+
+  /* Radii — small and deliberate. 999px is reserved for avatars/dots only. */
+  --r-xs: 3px;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 8px;
+  --r-xl: 12px;
+  --radius: var(--r-md); /* shadcn base */
+
+  /* Shadows — two levels, warm-tinted, never coloured glows. */
+  --sh-xs: 0 1px 2px 0 rgb(31 29 25 / 0.05);
+  --sh-sm: 0 1px 2px 0 rgb(31 29 25 / 0.06), 0 2px 6px -1px rgb(31 29 25 / 0.06);
+  --sh-md: 0 2px 4px -1px rgb(31 29 25 / 0.07), 0 8px 20px -4px rgb(31 29 25 / 0.10);
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-enter: 200ms;
+  --dur-exit: 130ms;
 }
 
-/* Font family utilities */
-.font-display {
-  font-family: var(--font-display), system-ui, sans-serif;
+/* ----------------------------------------------------------------- DARK --- */
+/* Surfaces are raised with lighter warm neutrals, not pure black. Borders are
+   low-alpha light rather than darker greys so hairlines stay visible. */
+.dark {
+  color-scheme: dark;
+
+  --n-0:   #0e0d0c;
+  --n-25:  #131211;
+  --n-50:  #191816;
+  --n-100: #201e1b;
+  --n-200: #2a2724;
+  --n-300: #38352f;
+  --n-400: #55514a;
+  --n-500: #86806f;
+  --n-600: #a8a294;
+  --n-700: #c9c3b6;
+  --n-800: #e0dbd1;
+  --n-900: #efece5;
+  --n-950: #faf8f4;
+
+  --bg:             var(--n-25);
+  --surface:        var(--n-50);
+  --surface-muted:  var(--n-100);
+  --surface-sunken: var(--n-0);
+  --surface-hover:  var(--n-100);
+  --surface-active: var(--n-200);
+
+  --fg:        var(--n-900);
+  --fg-strong: var(--n-950);
+  --fg-muted:  var(--n-600);
+  --fg-subtle: var(--n-500);
+  --fg-onbrand: #ffffff;
+
+  --border:        rgb(238 232 220 / 0.11);
+  --border-strong: rgb(238 232 220 / 0.20);
+  --border-subtle: rgb(238 232 220 / 0.06);
+
+  --brand:          #12857c;
+  --brand-hover:    #16998e;
+  --brand-active:   #0f766e;
+  --brand-text:     #67bdb2; /* 7.0:1 on --bg */
+  --brand-subtle:   rgb(45 190 175 / 0.13);
+  --brand-subtle-hover: rgb(45 190 175 / 0.20);
+  --brand-border:   rgb(45 190 175 / 0.32);
+  --brand-ring:     #35a99d;
+
+  --ok:         #1a7a4d;
+  --ok-text:    #6fc494;
+  --ok-subtle:  rgb(74 200 135 / 0.13);
+  --ok-border:  rgb(74 200 135 / 0.30);
+
+  --warn:        #8a6412;
+  --warn-text:   #d9a851;
+  --warn-subtle: rgb(220 165 70 / 0.13);
+  --warn-border: rgb(220 165 70 / 0.30);
+
+  --danger:        #ad2e22;
+  --danger-text:   #ec8b81;
+  --danger-subtle: rgb(230 120 105 / 0.14);
+  --danger-border: rgb(230 120 105 / 0.32);
+
+  --info:        #2a54c6;
+  --info-text:   #92aeee;
+  --info-subtle: rgb(130 165 235 / 0.14);
+  --info-border: rgb(130 165 235 / 0.30);
+
+  --type-conference-text:   #9db7d6;
+  --type-conference-subtle: rgb(140 175 215 / 0.14);
+  --type-conference-border: rgb(140 175 215 / 0.28);
+
+  --type-course-text:   #b9a4e2;
+  --type-course-subtle: rgb(170 145 225 / 0.15);
+  --type-course-border: rgb(170 145 225 / 0.30);
+
+  --type-workshop-text:   #d9a469;
+  --type-workshop-subtle: rgb(215 160 100 / 0.14);
+  --type-workshop-border: rgb(215 160 100 / 0.30);
+
+  --fmt-online-text:   #92aeee;
+  --fmt-online-subtle: rgb(130 165 235 / 0.13);
+  --fmt-inperson-text:   #c9c3b6;
+  --fmt-inperson-subtle: rgb(238 232 220 / 0.08);
+  --fmt-hybrid-text:   #67bdb2;
+  --fmt-hybrid-subtle: rgb(45 190 175 / 0.12);
+
+  --sh-xs: 0 1px 2px 0 rgb(0 0 0 / 0.35);
+  --sh-sm: 0 1px 2px 0 rgb(0 0 0 / 0.40), 0 2px 6px -1px rgb(0 0 0 / 0.35);
+  --sh-md: 0 2px 4px -1px rgb(0 0 0 / 0.45), 0 8px 20px -4px rgb(0 0 0 / 0.45);
 }
 
-.font-body {
-  font-family: var(--font-body), system-ui, sans-serif;
+/* ------------------------------------------------- ACCENT CANDIDATE: INK --- */
+/* Deep ink-blue alternative. Only the brand ramp changes — everything else
+   (neutrals, status, type colours) is shared, which is the point of the test. */
+[data-accent="ink"] {
+  --brand:          #1e3a8a;
+  --brand-hover:    #172e6d;
+  --brand-active:   #122350;
+  --brand-text:     #1e3a8a; /* 9.6:1 on --bg */
+  --brand-subtle:   #e9edf8;
+  --brand-subtle-hover: #d8e0f2;
+  --brand-border:   #b3c1e4;
+  --brand-ring:     #1e3a8a;
 }
 
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
+.dark[data-accent="ink"],
+.dark [data-accent="ink"] {
+  --brand:          #2f4fa8;
+  --brand-hover:    #3a5dc0;
+  --brand-active:   #27428e;
+  --brand-text:     #9db0e6;
+  --brand-subtle:   rgb(125 155 235 / 0.15);
+  --brand-subtle-hover: rgb(125 155 235 / 0.22);
+  --brand-border:   rgb(125 155 235 / 0.32);
+  --brand-ring:     #6f8ada;
 }
 
-/* Focus styles for accessibility */
-*:focus-visible {
-  outline: 2px solid #22d3ee;
-  outline-offset: 2px;
+/* ============================================================== @theme ==== */
+/* Expose tokens as Tailwind utilities: bg-surface, text-fg-muted, border-border,
+   rounded-md, shadow-sm, font-display … `inline` so the var() indirection is
+   preserved and the values re-resolve when .dark / data-accent flips. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-active: var(--surface-active);
+
+  --color-fg: var(--fg);
+  --color-fg-strong: var(--fg-strong);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-fg-onbrand: var(--fg-onbrand);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-border-subtle: var(--border-subtle);
+
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-active: var(--brand-active);
+  --color-brand-text: var(--brand-text);
+  --color-brand-subtle: var(--brand-subtle);
+  --color-brand-subtle-hover: var(--brand-subtle-hover);
+  --color-brand-border: var(--brand-border);
+
+  --color-ok: var(--ok);
+  --color-ok-text: var(--ok-text);
+  --color-ok-subtle: var(--ok-subtle);
+  --color-ok-border: var(--ok-border);
+  --color-warn: var(--warn);
+  --color-warn-text: var(--warn-text);
+  --color-warn-subtle: var(--warn-subtle);
+  --color-warn-border: var(--warn-border);
+  --color-danger: var(--danger);
+  --color-danger-text: var(--danger-text);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-danger-border: var(--danger-border);
+  --color-info: var(--info);
+  --color-info-text: var(--info-text);
+  --color-info-subtle: var(--info-subtle);
+  --color-info-border: var(--info-border);
+
+  --color-type-conference-text: var(--type-conference-text);
+  --color-type-conference-subtle: var(--type-conference-subtle);
+  --color-type-conference-border: var(--type-conference-border);
+  --color-type-course-text: var(--type-course-text);
+  --color-type-course-subtle: var(--type-course-subtle);
+  --color-type-course-border: var(--type-course-border);
+  --color-type-workshop-text: var(--type-workshop-text);
+  --color-type-workshop-subtle: var(--type-workshop-subtle);
+  --color-type-workshop-border: var(--type-workshop-border);
+
+  --color-fmt-online-text: var(--fmt-online-text);
+  --color-fmt-online-subtle: var(--fmt-online-subtle);
+  --color-fmt-inperson-text: var(--fmt-inperson-text);
+  --color-fmt-inperson-subtle: var(--fmt-inperson-subtle);
+  --color-fmt-hybrid-text: var(--fmt-hybrid-text);
+  --color-fmt-hybrid-subtle: var(--fmt-hybrid-subtle);
+
+  /* shadcn/ui variable surface, mapped onto ours */
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--fg);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--fg);
+  --color-primary: var(--brand);
+  --color-primary-foreground: var(--fg-onbrand);
+  --color-secondary: var(--surface-muted);
+  --color-secondary-foreground: var(--fg);
+  --color-muted: var(--surface-muted);
+  --color-muted-foreground: var(--fg-muted);
+  --color-accent: var(--surface-hover);
+  --color-accent-foreground: var(--fg);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--fg-onbrand);
+  --color-input: var(--border);
+  --color-ring: var(--brand-ring);
+
+  --radius-xs: var(--r-xs);
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-xl: var(--r-xl);
+
+  --shadow-xs: var(--sh-xs);
+  --shadow-sm: var(--sh-sm);
+  --shadow-md: var(--sh-md);
+
+  --font-display: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-jb), ui-monospace, SFMono-Regular, monospace;
+
+  /* 4/8 rhythm — Tailwind's default spacing scale is already 4px-based;
+     these are the named steps we reference in component specs. */
+  --spacing-gutter: 1rem;
+  --spacing-gutter-lg: 1.5rem;
 }
 
-/* Selection styling */
-::selection {
-  background-color: rgba(34, 211, 238, 0.3);
-  color: white;
+/* ====================================================== TYPE SCALE ======== */
+/* Named steps. Display sizes get negative tracking; small sizes get none or
+   slightly positive so dense rows stay legible. */
+@utility type-display {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 1.4rem + 2.2vw, 2.75rem);
+  line-height: 1.04;
+  letter-spacing: -0.032em;
+  font-weight: 600;
+}
+@utility type-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.625rem, 1.3rem + 1.1vw, 2rem);
+  line-height: 1.14;
+  letter-spacing: -0.024em;
+  font-weight: 600;
+}
+@utility type-h2 {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.22;
+  letter-spacing: -0.018em;
+  font-weight: 600;
+}
+@utility type-h3 {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  line-height: 1.32;
+  letter-spacing: -0.011em;
+  font-weight: 600;
+}
+@utility type-body {
+  font-size: 0.9375rem;
+  line-height: 1.56;
+  letter-spacing: -0.003em;
+}
+@utility type-small {
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+@utility type-caption {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+/* The all-caps mono micro-label used for dates, section eyebrows and tags. */
+@utility type-mono-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+/* Numerals that must align in a column (prices, points, counts). */
+@utility type-numeric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
-/* Custom scrollbar for webkit browsers */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* ========================================================== BASE ========== */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    overflow-y: scroll; /* no layout shift when a page grows past the fold */
+  }
+  body {
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    line-height: 1.56;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+  }
+  :focus-visible {
+    outline: 2px solid var(--brand-ring);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+  ::selection {
+    background-color: var(--brand-subtle);
+    color: var(--fg-strong);
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background-clip: content-box; background-color: var(--fg-subtle); }
 }
 
-::-webkit-scrollbar-track {
-  background: #1e293b;
+/* Motion: exits are faster than entrances; everything yields to the OS setting. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
-::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-
-/* Gradient text utility */
+/* ===================================================== LEGACY (W2–W6) ===== */
+/* Kept so the not-yet-redesigned pages keep rendering. Delete these as each
+   page is migrated; nothing new should use them. */
+.font-display { font-family: var(--font-display); }
+.font-body { font-family: var(--font-sans); }
 .gradient-text {
   background: linear-gradient(135deg, #22d3ee 0%, #14b8a6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
-/* Glass morphism card */
 .glass-card {
   background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(148, 163, 184, 0.1);
 }
-
-/* Subtle grid background pattern */
 .bg-grid-pattern {
-  background-image: 
+  background-image:
     linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
   background-size: 32px 32px;
 }
-
-/* Radial gradient glow effect */
-.glow-effect {
-  position: relative;
-}
-
+.glow-effect { position: relative; }
 .glow-effect::before {
   content: '';
   position: absolute;
@@ -129,66 +500,25 @@ html {
   transition: opacity 0.3s ease;
   z-index: -1;
 }
-
-.glow-effect:hover::before {
-  opacity: 1;
-}
-
-/* Smooth transitions for interactive elements */
-.transition-smooth {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Loading skeleton animation */
+.glow-effect:hover::before { opacity: 1; }
+.transition-smooth { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
-
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(30, 41, 59, 0.8) 25%,
-    rgba(51, 65, 85, 0.8) 50%,
-    rgba(30, 41, 59, 0.8) 75%
-  );
+  background: linear-gradient(90deg, rgba(30,41,59,.8) 25%, rgba(51,65,85,.8) 50%, rgba(30,41,59,.8) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
-
-/* Entrance animations */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
-
-/* Staggered animation delays */
+.animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
-
-/* Input styling */
-input, select, textarea {
-  font-family: inherit;
-}
-
-/* Prevent layout shift from scrollbar */
-html {
-  overflow-y: scroll;
-}
+input, select, textarea { font-family: inherit; }
