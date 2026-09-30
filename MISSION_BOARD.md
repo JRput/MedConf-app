@@ -148,7 +148,7 @@ for 25 days while CI stayed green. 4th EOL in 5 months (LESSONS #6) → architec
 Cost: £0 external. GitHub Actions: 4 manual full runs (~30 jobs each) + one hung 6 h job.
 Open risks: vision chain verified on a synthetic fee table only; NVIDIA can still retire a whole chain at once — the probe makes that loud, not impossible.
 
-## 7. Wave 2 plan (2026-09-30)
+## 7. Wave 2 plan (2026-09-30) — **PAUSED by user 2026-09-30: website layout/UX/features work takes priority. Resume with "resume wave 2" (start 2a + 2b together, 14 sources).**
 
 Pool: **124 resolved domains** not yet built (recon.json). By platform: wordpress_other 53 · static_html 34 · unknown 16 · spa 13 · tribe_events 4 · external_registrar 4. 30 need JS. Estimated volume ≈ 3,400 events (vs ~1,100 live today).
 
