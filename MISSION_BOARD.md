@@ -160,3 +160,22 @@ Order by value ÷ effort, gating each sub-wave in the cloud early (RCoA/ARVO les
 - **2e — SPA / external registrar (≈17):** browser-first; external registrars (BCS, BSPED, Rewired, Medical Protection) may be out of scope if the org hosts nothing itself.
 
 Gate per sub-wave: harness twice → first scrape → remediator → audit (advisory: title-token and load-more checks) → null-audit < 10 % → cloud run green. Matrix: add a 6th/7th group as needed (≤ 10 sources per job).
+
+---
+
+# MISSION W — Website redesign (opened 2026-09-30, APPROVED 2026-09-30 — executing)
+
+**Brief:** the site "looks too much like AI", the pill/card layout is inefficient, filtering is not up to scratch, information is dumped rather than presented. Add a personal calendar. Audits: `reports/website-audit/{ux,code,data}.md` + 13 screenshots.
+
+**Decisions (user, 2026-09-30):** light mode default + dark mode toggle · dense rows on desktop, compact cards on mobile · calendar is personal only (saved events, signed-in users) · keep a separate homepage, redesigned · no marketing fakery, honest copy (global, 1,100+ events, 45 societies).
+
+| # | Phase | Executor / model | Status |
+|---|---|---|---|
+| W1 | Design system: tokens (light+dark), type scale, shadcn/ui + Radix primitives, theme toggle, `/design` style-tile preview with 2 accent options | design-eng agent · `opus` | 🔄 |
+| W2 | Directory rebuild: server-side query + pagination, row/card list, single filter surface (date, format, specialty taxonomy, region, price incl. free/unknown, type, source, CPD), URL state, faceted counts, sort, ⌘K search | coding agents · `sonnet` (taxonomy: `haiku`) | ⬜ |
+| W3 | Personal calendar `/calendar`: month grid (saved events marked, multi-day spans), side panel, week strip on mobile, save-from-row, ICS export | `sonnet` | ⬜ |
+| W4 | Detail page: sticky essentials panel, pricing/sessions, related events, deadline countdown | `sonnet` | ⬜ |
+| W5 | Homepage (redesigned, separate) + nav shell + auth pages | `opus` design → `sonnet` build | ⬜ |
+| W6 | Dashboard / saved / settings / onboarding simplification | `sonnet` | ⬜ |
+
+Gate per phase: build in a worktree → Playwright screenshots at 390 / 768 / 1440 in both themes → Commander review → user preview on localhost → merge. Cost: £0 external (shadcn/Radix free). Skills: ui-ux-pro-max (design system generated 2026-09-30: accessible/clinical, avoid neon + AI gradients), emil-design-eng (polish), 21st.dev component patterns as reference.

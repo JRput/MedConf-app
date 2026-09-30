@@ -87,3 +87,5 @@ Skills/
 # Supabase CLI binary — too large for git, redownload as needed
 supabase-cli
 medconf-scraper/supabase
+reports/website-audit/02-conferences-desktop.png
+reports/website-audit/08-conferences-mobile.png

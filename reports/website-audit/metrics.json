@@ -1,0 +1,18 @@
+{
+  "home_desktop_ttfc": 2.2657101154327393,
+  "conferences_desktop_ttfc": 2.7060468196868896,
+  "first_ids": [
+    "1396",
+    "1843",
+    "1112",
+    "1008",
+    "1206"
+  ],
+  "cards_above_fold_desktop": 3,
+  "url_after_specialty_click": "http://localhost:3000/conferences?specialty=Cardiology",
+  "url_after_filters": "http://localhost:3000/conferences?specialty=Cardiology&q=conference&maxPrice=300",
+  "conference_detail_ttfc": 4.384340047836304,
+  "login_ttfc": 2.0514471530914307,
+  "signup_ttfc": 2.564301013946533,
+  "mobile_filters_visible": true
+}
