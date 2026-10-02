@@ -12,11 +12,15 @@ import { dateParts, formatDateRange } from '@/lib/format'
 export function DateBlock({
   startDate,
   endDate,
+  /** The event has already started but hasn't finished — see lib/format.ts `isOngoing`.
+   *  Shows "Until <end date>" instead of the now-stale start date. */
+  ongoing = false,
   size = 'md',
   className,
 }: {
   startDate: string | null
   endDate?: string | null
+  ongoing?: boolean
   size?: 'sm' | 'md'
   className?: string
 }) {
@@ -35,6 +39,23 @@ export function DateBlock({
         aria-label="Date to be confirmed"
       >
         <span className="type-mono-label">TBC</span>
+      </div>
+    )
+  }
+
+  if (ongoing && end) {
+    return (
+      <div
+        className={cn(
+          'flex shrink-0 flex-col items-center justify-center rounded-md border border-warn-border bg-warn-subtle',
+          size === 'md' ? 'h-14 w-14 gap-0.5' : 'h-11 w-11',
+          className
+        )}
+        aria-label={`Ongoing — until ${formatDateRange(startDate, endDate ?? null)}`}
+      >
+        <span className={cn('type-numeric font-semibold leading-none text-fg-strong', size === 'md' ? 'text-lg' : 'text-sm')}>{end.day}</span>
+        <span className="type-mono-label text-fg-muted">{end.month}</span>
+        {size === 'md' && <span className="type-mono-label text-[0.5625rem] leading-none text-warn-text">UNTIL</span>}
       </div>
     )
   }

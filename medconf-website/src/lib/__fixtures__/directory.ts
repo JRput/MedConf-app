@@ -152,8 +152,14 @@ function matches(e: DirectoryEvent, f: DirectoryFilters, skip: keyof DirectoryFi
 
   if (skip !== 'datePreset' && skip !== 'dateFrom' && skip !== 'dateTo') {
     const { from, to } = f.datePreset ? resolveDatePreset(f.datePreset) : { from: f.dateFrom, to: f.dateTo }
-    if (from && (!e.startDate || e.startDate < from)) return false
+    // Overlap semantics, matching directory-query.ts's applyFilters: an
+    // event already running through the window counts, not just one that
+    // STARTS inside it (a null endDate falls back to its own startDate).
     if (to && (!e.startDate || e.startDate > to)) return false
+    if (from) {
+      const effectiveEnd = e.endDate ?? e.startDate
+      if (!effectiveEnd || effectiveEnd < from) return false
+    }
   }
 
   if (skip !== 'q' && f.q.trim()) {
@@ -169,6 +175,9 @@ export function queryDirectoryFixture(filters: Partial<DirectoryFilters> = {}): 
   const f: DirectoryFilters = { ...DEFAULT_FILTERS, ...filters }
   const filtered = FIXTURE_EVENTS.filter((e) => matches(e, f, null))
 
+  const today = new Date().toISOString().slice(0, 10)
+  const isFixtureOngoing = (e: DirectoryEvent) => !!e.startDate && e.startDate < today && !!e.endDate && e.endDate >= today
+
   const sorted = [...filtered].sort((a, b) => {
     if (f.sort === 'price') {
       if (a.priceMin == null) return 1
@@ -176,6 +185,15 @@ export function queryDirectoryFixture(filters: Partial<DirectoryFilters> = {}): 
       return a.priceMin - b.priceMin
     }
     if (f.sort === 'newest') return b.id - a.id // fixture has no created_at; id order stands in
+
+    // Default 'date' sort — mirrors queryDirectory's upcoming-then-ongoing
+    // split (see splitDatePage's doc comment in directory-query.ts): events
+    // that haven't started yet come first by start_date, already-started-
+    // but-not-finished events come after, ordered by end_date.
+    const aOngoing = isFixtureOngoing(a)
+    const bOngoing = isFixtureOngoing(b)
+    if (aOngoing !== bOngoing) return aOngoing ? 1 : -1
+    if (aOngoing) return (a.endDate ?? '9999').localeCompare(b.endDate ?? '9999')
     return (a.startDate ?? '9999').localeCompare(b.startDate ?? '9999')
   })
 

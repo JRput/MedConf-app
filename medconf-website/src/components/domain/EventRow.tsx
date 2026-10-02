@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { locationLine, type DirectoryEvent } from '@/lib/directory'
+import { isOngoing } from '@/lib/format'
 import { DateBlock } from './DateBlock'
 import { EventTypeBadge } from './EventTypeBadge'
 import { FormatBadge } from './FormatBadge'
@@ -39,6 +40,9 @@ export function EventRow({
   className?: string
 }) {
   const place = locationLine(event)
+  // On-demand rows reuse start_date as an access deadline, not a real start —
+  // "ongoing" only applies to genuine start/end spans.
+  const ongoing = !event.isOnDemand && isOngoing(event.startDate, event.endDate)
 
   return (
     <div
@@ -51,7 +55,7 @@ export function EventRow({
         className
       )}
     >
-      <DateBlock startDate={event.startDate} endDate={event.endDate} />
+      <DateBlock startDate={event.startDate} endDate={event.endDate} ongoing={ongoing} />
 
       <div className="min-w-0">
         <h3

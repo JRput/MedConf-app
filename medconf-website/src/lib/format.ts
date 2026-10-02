@@ -55,6 +55,21 @@ export function daysUntil(iso: string | null | undefined): number | null {
   return Math.round((d.getTime() - today.getTime()) / 86_400_000)
 }
 
+/**
+ * True when an event has already started but hasn't finished — a
+ * long-running course/congress window like "1 Jul 2026 – 30 Jun 2027"
+ * whose start_date is now in the past but is still genuinely relevant.
+ * Used to swap the date display to "Until <end>" and rank its status badge
+ * as "Ongoing" rather than letting a stale-looking start date lead the row
+ * (see the W2 fix: a directory sorted purely by start_date put these ahead
+ * of events starting next week).
+ */
+export function isOngoing(startDate: string | null, endDate: string | null): boolean {
+  if (!startDate || !endDate) return false
+  const today = new Date().toISOString().slice(0, 10)
+  return startDate < today && endDate >= today
+}
+
 /** "in 6 days" / "tomorrow" / "today" / "3 days ago" */
 export function relativeDays(days: number): string {
   if (days === 0) return 'today'

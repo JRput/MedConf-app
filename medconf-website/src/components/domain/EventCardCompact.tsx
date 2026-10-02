@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { formatDateRange } from '@/lib/format'
+import { formatDateRange, isOngoing } from '@/lib/format'
 import { locationLine, type DirectoryEvent } from '@/lib/directory'
 import { EventTypeBadge } from './EventTypeBadge'
 import { FormatBadge } from './FormatBadge'
@@ -34,6 +34,7 @@ export function EventCardCompact({
   className?: string
 }) {
   const place = locationLine(event)
+  const ongoing = !event.isOnDemand && isOngoing(event.startDate, event.endDate)
 
   return (
     <article
@@ -46,7 +47,15 @@ export function EventCardCompact({
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <span className="type-mono-label text-fg-muted">{formatDateRange(event.startDate, event.endDate)}</span>
+        <div className="flex flex-col gap-0.5">
+          <span className={cn('type-mono-label', ongoing ? 'text-warn-text' : 'text-fg-muted')}>
+            {ongoing ? `Until ${formatDateRange(event.endDate, null)}` : formatDateRange(event.startDate, event.endDate)}
+          </span>
+          {/* The full span stays visible underneath once we've swapped the
+              headline to "Until <end>" — otherwise the start date disappears
+              entirely instead of just losing top billing. */}
+          {ongoing && <span className="type-mono-label text-[0.6875rem] text-fg-subtle">{formatDateRange(event.startDate, event.endDate)}</span>}
+        </div>
         <SaveToggle saved={saved} onToggle={onToggleSave} label={event.name} className="-mt-1.5 -mr-1.5" />
       </div>
 

@@ -155,8 +155,13 @@ function applyFilters(query: any, f: DirectoryFilters, rawSpecialty: string[], u
   if (f.abstractsOpen) q = q.eq('abstract_open', true)
 
   const { from, to } = effectiveDateRange(f)
-  if (from) q = q.gte('start_date', from)
+  // Overlap semantics, not "starts inside the window": an event that started
+  // before `from` but is still running through it (end_date >= from) must
+  // stay — otherwise a long-running course/on-demand window vanishes from
+  // "This month" the moment it's already begun. A null end_date is a
+  // single/unknown-length event, so its own start_date stands in for its end.
   if (to) q = q.lte('start_date', to)
+  if (from) q = q.or(`end_date.gte.${from},and(end_date.is.null,start_date.gte.${from})`)
 
   // Pricing: "no pricing row" (price_from IS NULL) is unknown, never free.
   // 'any' applies no price filter at all, including rows with no pricing.
@@ -171,6 +176,41 @@ function applyFilters(query: any, f: DirectoryFilters, rawSpecialty: string[], u
   }
 
   return q
+}
+
+export interface DatePageSplit {
+  upcoming: { start: number; end: number } | null
+  ongoing: { start: number; end: number } | null
+}
+
+/**
+ * The default 'date' sort puts events that haven't started yet first
+ * (ascending by start_date), then events that HAVE started but haven't
+ * ended yet — "ongoing" — ordered by end_date. Before this, a long-running
+ * course window (e.g. "1 Jul 2026 – 30 Jun 2027") sorted by its start_date
+ * like anything else, so it could out-rank events starting next week and
+ * make the directory's first page look stale (see the W2 owner's fix
+ * request). Postgres can express the ordering in one query as
+ * `ORDER BY (start_date < current_date), start_date` — the general-purpose
+ * Postgres client used here can't send that expression as an `.order()`
+ * call (it takes a column name, not an expression), so queryDirectory runs
+ * the two groups as separate counted/ranged queries and concatenates them.
+ *
+ * This function is the pure arithmetic for where a given page/pageSize
+ * window falls across that 2-group split, kept separate so it's
+ * unit-testable without a database — see __tests__/directory-query.test.ts.
+ */
+export function splitDatePage(countUpcoming: number, page: number, pageSize: number): DatePageSplit {
+  const start = (page - 1) * pageSize
+  const end = start + pageSize - 1
+
+  const upcoming = start < countUpcoming ? { start, end: Math.min(end, countUpcoming - 1) } : null
+
+  const ongoingStart = Math.max(start, countUpcoming) - countUpcoming
+  const ongoingEnd = end - countUpcoming
+  const ongoing = ongoingEnd >= 0 && ongoingEnd >= ongoingStart ? { start: ongoingStart, end: ongoingEnd } : null
+
+  return { upcoming, ongoing }
 }
 
 /**
@@ -189,38 +229,86 @@ export async function queryDirectory(
   const page = f.page > 0 ? f.page : 1
   const start = (page - 1) * pageSize
 
-  function build(useIlikeSearch: boolean) {
-    let query = supabase.from('directory_events').select('*', { count: 'exact' })
-    query = applyFilters(query, f, rawSpecialty, useIlikeSearch)
+  if (f.sort !== 'date') {
+    function build(useIlikeSearch: boolean) {
+      let query = supabase.from('directory_events').select('*', { count: 'exact' })
+      query = applyFilters(query, f, rawSpecialty, useIlikeSearch)
 
-    switch (f.sort) {
-      case 'newest':
+      if (f.sort === 'newest') {
         query = query.order('created_at', { ascending: false })
-        break
-      case 'price':
+      } else {
         // Unknown pricing sorts last regardless of direction — Postgres
         // puts NULLs last on ASC by default, which is exactly "cheapest
         // known price first, unpriced events at the bottom".
         query = query.order('price_from', { ascending: true, nullsFirst: false })
-        break
-      case 'date':
-      default:
-        query = query.order('start_date', { ascending: true, nullsFirst: false })
+      }
+      return query.range(start, start + pageSize - 1)
     }
-    return query.range(start, start + pageSize - 1)
+
+    let { data, error, count } = await build(false)
+    // search_vector / directory_events may not exist yet if the migration
+    // hasn't been applied to this environment — degrade to ilike rather
+    // than hard-failing the whole directory. See module doc comment.
+    if (error && f.q.trim() && /search_vector|column .* does not exist/i.test(error.message)) {
+      ;({ data, error, count } = await build(true))
+    }
+    if (error) throw error
+
+    const rows = ((data ?? []) as DirectoryEventRow[]).map(directoryEventFromRow)
+    return { rows, total: count ?? 0, page, pageSize }
   }
 
-  let { data, error, count } = await build(false)
-  // search_vector / directory_events may not exist yet if the migration
-  // hasn't been applied to this environment — degrade to ilike rather
-  // than hard-failing the whole directory. See module doc comment.
-  if (error && f.q.trim() && /search_vector|column .* does not exist/i.test(error.message)) {
-    ;({ data, error, count } = await build(true))
-  }
-  if (error) throw error
+  // --- Default 'date' sort: upcoming group, then ongoing group — see splitDatePage's doc comment.
+  const today = new Date().toISOString().slice(0, 10)
+  let useIlikeSearch = false
 
-  const rows = ((data ?? []) as DirectoryEventRow[]).map(directoryEventFromRow)
-  return { rows, total: count ?? 0, page, pageSize }
+  function withGroup(query: ReturnType<typeof applyFilters>, which: 'upcoming' | 'ongoing') {
+    // Undated rows (start_date IS NULL — "Date TBC") match NEITHER
+    // `gte(start_date, today)` NOR `lt(start_date, today)`, so without the
+    // explicit `.is.null` branch here they silently vanished from both
+    // groups entirely (and from `total`). They belong in "upcoming" (never
+    // "ongoing" — there's no start to have passed), sorted after every dated
+    // row via `nullsFirst: false` on the fetch below, same as before this split existed.
+    return which === 'upcoming' ? query.or(`start_date.gte.${today},start_date.is.null`) : query.lt('start_date', today).gte('end_date', today)
+  }
+
+  async function countGroup(which: 'upcoming' | 'ongoing'): Promise<number> {
+    function build(useIlike: boolean) {
+      let query = supabase.from('directory_events').select('*', { count: 'exact', head: true })
+      query = applyFilters(query, f, rawSpecialty, useIlike)
+      return withGroup(query, which)
+    }
+    let { count, error } = await build(useIlikeSearch)
+    if (error && f.q.trim() && /search_vector|column .* does not exist/i.test(error.message)) {
+      useIlikeSearch = true
+      ;({ count, error } = await build(true))
+    }
+    if (error) throw error
+    return count ?? 0
+  }
+
+  async function fetchGroup(which: 'upcoming' | 'ongoing', range: { start: number; end: number } | null): Promise<DirectoryEventRow[]> {
+    if (!range) return []
+    let query = supabase.from('directory_events').select('*')
+    query = applyFilters(query, f, rawSpecialty, useIlikeSearch)
+    query = withGroup(query, which)
+    query = query.order(which === 'upcoming' ? 'start_date' : 'end_date', { ascending: true, nullsFirst: false })
+    const { data, error } = await query.range(range.start, range.end)
+    if (error) throw error
+    return (data ?? []) as DirectoryEventRow[]
+  }
+
+  // Count upcoming first so it decides `useIlikeSearch` before ongoing's
+  // count/fetch run — both groups share the same search term either way.
+  const countUpcoming = await countGroup('upcoming')
+  const countOngoing = await countGroup('ongoing')
+  const total = countUpcoming + countOngoing
+  const split = splitDatePage(countUpcoming, page, pageSize)
+
+  const [upcomingRows, ongoingRows] = await Promise.all([fetchGroup('upcoming', split.upcoming), fetchGroup('ongoing', split.ongoing)])
+
+  const rows = [...upcomingRows, ...ongoingRows].map(directoryEventFromRow)
+  return { rows, total, page, pageSize }
 }
 
 export interface DirectoryFacets {
