@@ -5,7 +5,19 @@ import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowRight, Mail, Lock, AlertCircle } from 'lucide-react'
+import { Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { AuthCard, AuthError, AuthField, AuthTerms } from '@/components/auth/AuthCard'
+
+// Auth behaviour is unchanged from the pre-W5 page: useAuth().signUp (which
+// sets emailRedirectTo /auth/callback), the same 8-character minimum, and a
+// push to /auth/verify on success. The copy now states what an account
+// actually gives you — the directory itself is public and needs no account.
+const BENEFITS = [
+  'Save events to a personal calendar',
+  'In-app alerts for new events in your specialty',
+  'Reminders before an abstract deadline closes',
+]
 
 export default function SignUpPage() {
   const { signUp } = useAuth()
@@ -13,17 +25,20 @@ export default function SignUpPage() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email || !password) {
-      setError('Please fill in all fields')
-      return
-    }
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+
+    const next: { email?: string; password?: string } = {}
+    if (!email) next.email = 'Enter your email address'
+    if (!password) next.password = 'Choose a password'
+    else if (password.length < 8) next.password = 'Password must be at least 8 characters'
+    setFieldErrors(next)
+    if (next.email || next.password) {
+      setError('')
       return
     }
 
@@ -43,80 +58,73 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-grid-pattern">
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 -z-10" />
-      <div className="fixed top-0 right-0 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-3xl -z-10" />
-      <div className="fixed bottom-0 left-0 w-[400px] h-[400px] bg-teal-500/10 rounded-full blur-3xl -z-10" />
+    <AuthCard
+      title="Create a free account"
+      intro={
+        <ul className="space-y-1.5">
+          {BENEFITS.map((benefit) => (
+            <li key={benefit} className="flex items-start gap-2">
+              <Check className="mt-0.5 size-3.5 shrink-0 text-brand-text" aria-hidden />
+              <span>{benefit}</span>
+            </li>
+          ))}
+        </ul>
+      }
+      footer={
+        <>
+          Already have an account?{' '}
+          <Link href="/auth/login" className="font-medium text-brand-text hover:underline">
+            Sign in
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        <AuthField
+          id="email"
+          label="Email address"
+          type="email"
+          autoComplete="email"
+          placeholder="you@nhs.net"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value)
+            if (fieldErrors.email) setFieldErrors((f) => ({ ...f, email: undefined }))
+          }}
+          error={fieldErrors.email}
+          hint="We'll send a verification link here."
+        />
 
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white font-display mb-2">
-            Create your account
-          </h1>
-          <p className="text-slate-400">
-            Start discovering medical conferences
-          </p>
-        </div>
+        <AuthField
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value)
+            if (fieldErrors.password) setFieldErrors((f) => ({ ...f, password: undefined }))
+          }}
+          error={fieldErrors.password}
+          hint="At least 8 characters."
+        />
 
-        <div className="glass-card rounded-2xl p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Email address</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                />
-              </div>
-            </div>
+        {error && <AuthError message={error} />}
 
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="Min. 8 characters"
-                  className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all"
-                />
-              </div>
-            </div>
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? 'Creating account…' : 'Create account'}
+        </Button>
 
-            <p className="text-xs text-slate-500 leading-relaxed">
-              We&apos;ll send a verification link to your email. Once verified, you&apos;ll complete a quick profile setup before reaching your dashboard.
-            </p>
+        <p className="text-[0.8125rem] text-fg-muted">
+          Just looking? The{' '}
+          <Link href="/conferences" className="font-medium text-brand-text hover:underline">
+            directory is public
+          </Link>{' '}
+          — no account needed to search it.
+        </p>
 
-            {error && (
-              <div className="flex items-center gap-2 text-rose-400 text-sm bg-rose-500/10 border border-rose-500/20 rounded-lg px-4 py-3">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 text-white py-3 rounded-xl font-semibold hover:from-cyan-400 hover:to-teal-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-cyan-500/25"
-            >
-              {loading ? 'Creating account…' : 'Continue'}
-              <ArrowRight className="w-4 h-4" />
-            </button>
-
-            <p className="text-center text-sm text-slate-400">
-              Already have an account?{' '}
-              <Link href="/auth/login" className="text-cyan-400 hover:text-cyan-300 font-medium">
-                Sign in
-              </Link>
-            </p>
-          </form>
-        </div>
-      </div>
-    </div>
+        <AuthTerms />
+      </form>
+    </AuthCard>
   )
 }
