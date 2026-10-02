@@ -104,6 +104,11 @@ export function PricingTable({ tiers }: PricingTableProps) {
     return active.rows.filter(r => r.parts[1] === activeSub)
   })()
 
+  // The Notes column only ever carries an early-bird deadline — when none of
+  // the currently visible rows have one, a column of bare "—" dashes is pure
+  // noise, so drop the column entirely rather than render it empty.
+  const hasNotes = rowsForRender.some(r => r.tier.is_early_bird && r.tier.early_bird_deadline)
+
   return (
     <div className="space-y-3">
       {/* Band tabs — only rendered when grouping kicks in */}
@@ -155,7 +160,7 @@ export function PricingTable({ tiers }: PricingTableProps) {
                 {useTabs ? 'Tier' : 'Professional level'}
               </th>
               <th className="px-4 py-3 text-right font-semibold text-fg-muted">Price</th>
-              <th className="px-4 py-3 text-left font-semibold text-fg-muted">Notes</th>
+              {hasNotes && <th className="px-4 py-3 text-left font-semibold text-fg-muted">Notes</th>}
             </tr>
           </thead>
           <tbody>
@@ -175,16 +180,18 @@ export function PricingTable({ tiers }: PricingTableProps) {
                   <td className="px-4 py-3 text-right type-numeric font-semibold text-fg-strong">
                     {currencySymbol(tier.currency)}{tier.price_gbp.toFixed(2)}
                   </td>
-                  <td className="px-4 py-3">
-                    {tier.is_early_bird && tier.early_bird_deadline ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-sm border border-warn-border bg-warn-subtle px-2 py-0.5 type-caption font-medium text-warn-text">
-                        <Clock className="size-3" aria-hidden />
-                        Ends {new Date(tier.early_bird_deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                      </span>
-                    ) : (
-                      <span className="text-fg-subtle">—</span>
-                    )}
-                  </td>
+                  {hasNotes && (
+                    <td className="px-4 py-3">
+                      {tier.is_early_bird && tier.early_bird_deadline ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-sm border border-warn-border bg-warn-subtle px-2 py-0.5 type-caption font-medium text-warn-text">
+                          <Clock className="size-3" aria-hidden />
+                          Ends {new Date(tier.early_bird_deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                        </span>
+                      ) : (
+                        <span className="text-fg-subtle">—</span>
+                      )}
+                    </td>
+                  )}
                 </tr>
               )
             })}
