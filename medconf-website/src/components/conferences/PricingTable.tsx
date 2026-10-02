@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 import type { PricingTier } from '@/lib/types'
 import { Clock, ChevronDown, ChevronRight } from 'lucide-react'
 import { currencySymbol } from '@/lib/conference-helpers'
+import { cn } from '@/lib/utils'
 
 interface PricingTableProps {
   tiers: PricingTier[]
@@ -90,8 +91,8 @@ export function PricingTable({ tiers }: PricingTableProps) {
 
   if (tiers.length === 0) {
     return (
-      <p className="text-sm text-slate-500 italic">
-        Pricing information not yet available.
+      <p className="type-small text-fg-subtle italic">
+        No fee published — check the organiser&apos;s site.
       </p>
     )
   }
@@ -112,14 +113,15 @@ export function PricingTable({ tiers }: PricingTableProps) {
             <button
               key={g.name}
               onClick={() => { setActiveBand(g.name); setActiveSub('All') }}
-              className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${
+              className={cn(
+                'rounded-sm border px-3 py-1.5 type-small font-medium transition-colors duration-150',
                 activeBand === g.name
-                  ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50'
-                  : 'bg-slate-800/40 text-slate-300 border-slate-700 hover:border-slate-600'
-              }`}
+                  ? 'border-brand-border bg-brand-subtle text-brand-text'
+                  : 'border-border bg-surface text-fg-muted hover:border-border-strong hover:text-fg'
+              )}
             >
               {g.name}
-              <span className="ml-1.5 text-slate-500">· {g.rows.length}</span>
+              <span className="ml-1.5 text-fg-subtle">· {g.rows.length}</span>
             </button>
           ))}
         </div>
@@ -132,11 +134,12 @@ export function PricingTable({ tiers }: PricingTableProps) {
             <button
               key={opt}
               onClick={() => setActiveSub(opt)}
-              className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+              className={cn(
+                'rounded-sm border px-2.5 py-1 type-caption transition-colors duration-150',
                 activeSub === opt
-                  ? 'bg-slate-700 text-white border-slate-500'
-                  : 'bg-transparent text-slate-400 border-slate-700 hover:text-slate-200'
-              }`}
+                  ? 'border-border-strong bg-surface-active text-fg'
+                  : 'border-border bg-transparent text-fg-muted hover:text-fg'
+              )}
             >
               {opt}
             </button>
@@ -144,15 +147,15 @@ export function PricingTable({ tiers }: PricingTableProps) {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-slate-700">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-800">
+      <div className="overflow-hidden rounded-lg border border-border">
+        <table className="w-full type-small">
+          <thead className="bg-surface-muted">
             <tr>
-              <th className="text-left px-4 py-3 font-semibold text-slate-300">
-                {useTabs ? 'Tier' : 'Professional Level'}
+              <th className="px-4 py-3 text-left font-semibold text-fg-muted">
+                {useTabs ? 'Tier' : 'Professional level'}
               </th>
-              <th className="text-right px-4 py-3 font-semibold text-slate-300">Price</th>
-              <th className="text-left px-4 py-3 font-semibold text-slate-300">Notes</th>
+              <th className="px-4 py-3 text-right font-semibold text-fg-muted">Price</th>
+              <th className="px-4 py-3 text-left font-semibold text-fg-muted">Notes</th>
             </tr>
           </thead>
           <tbody>
@@ -167,19 +170,19 @@ export function PricingTable({ tiers }: PricingTableProps) {
                 ? parts.slice(startIdx).join(' · ') || parts.join(' · ')
                 : tier.tier_label
               return (
-                <tr key={tier.id} className={i % 2 === 0 ? 'bg-slate-800/30' : 'bg-slate-800/50'}>
-                  <td className="px-4 py-3 text-white font-medium">{rowLabel}</td>
-                  <td className="px-4 py-3 text-right text-white font-bold">
+                <tr key={tier.id} className={cn('border-t border-border-subtle', i % 2 === 1 && 'bg-surface-muted/50')}>
+                  <td className="px-4 py-3 font-medium text-fg">{rowLabel}</td>
+                  <td className="px-4 py-3 text-right type-numeric font-semibold text-fg-strong">
                     {currencySymbol(tier.currency)}{tier.price_gbp.toFixed(2)}
                   </td>
                   <td className="px-4 py-3">
                     {tier.is_early_bird && tier.early_bird_deadline ? (
-                      <span className="inline-flex items-center gap-1.5 bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-full text-xs font-medium border border-amber-500/20">
-                        <Clock className="w-3 h-3" />
+                      <span className="inline-flex items-center gap-1.5 rounded-sm border border-warn-border bg-warn-subtle px-2 py-0.5 type-caption font-medium text-warn-text">
+                        <Clock className="size-3" aria-hidden />
                         Ends {new Date(tier.early_bird_deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                       </span>
                     ) : (
-                      <span className="text-slate-500">—</span>
+                      <span className="text-fg-subtle">—</span>
                     )}
                   </td>
                 </tr>
@@ -190,29 +193,29 @@ export function PricingTable({ tiers }: PricingTableProps) {
       </div>
 
       {addOnTiers.length >= 2 && (
-        <div className="rounded-lg border border-slate-800 bg-slate-900/40">
+        <div className="rounded-lg border border-border bg-surface-muted">
           <button
             onClick={() => setAddOnsExpanded(v => !v)}
-            className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-slate-800/40 transition-colors"
+            className="flex w-full items-center justify-between px-4 py-2.5 text-left transition-colors duration-150 hover:bg-surface-hover"
             aria-expanded={addOnsExpanded}
           >
-            <span className="text-sm text-slate-300">
+            <span className="type-small text-fg">
               Optional add-ons
-              <span className="ml-2 text-slate-500 text-xs">
+              <span className="ml-2 type-caption text-fg-subtle">
                 · {addOnTiers.length} option{addOnTiers.length === 1 ? '' : 's'}
               </span>
             </span>
             {addOnsExpanded
-              ? <ChevronDown className="w-4 h-4 text-slate-400" />
-              : <ChevronRight className="w-4 h-4 text-slate-400" />}
+              ? <ChevronDown className="size-4 text-fg-muted" aria-hidden />
+              : <ChevronRight className="size-4 text-fg-muted" aria-hidden />}
           </button>
           {addOnsExpanded && (
-            <table className="w-full text-sm border-t border-slate-800">
+            <table className="w-full type-small border-t border-border-subtle">
               <tbody>
                 {addOnTiers.map((tier, i) => (
-                  <tr key={tier.id} className={i % 2 === 0 ? 'bg-slate-800/20' : 'bg-slate-800/40'}>
-                    <td className="px-4 py-2.5 text-slate-200">{tier.tier_label}</td>
-                    <td className="px-4 py-2.5 text-right text-white font-semibold">
+                  <tr key={tier.id} className={cn(i % 2 === 1 && 'bg-surface-hover')}>
+                    <td className="px-4 py-2.5 text-fg">{tier.tier_label}</td>
+                    <td className="px-4 py-2.5 text-right type-numeric font-semibold text-fg-strong">
                       {currencySymbol(tier.currency)}{tier.price_gbp.toFixed(2)}
                     </td>
                   </tr>

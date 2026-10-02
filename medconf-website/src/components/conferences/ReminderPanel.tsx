@@ -7,6 +7,8 @@ import { useAuth } from '@/hooks/useAuth'
 import type { Conference, UserReminder, ReminderType, CourseSession } from '@/lib/types'
 import { upcomingSessions } from '@/lib/conference-helpers'
 import { Bell, Plus, X, Clock, AlertCircle, Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 interface Props {
   conference: Conference
@@ -20,6 +22,9 @@ const LEAD_TIMES = [
   { days: 14, label: '2 weeks before' },
   { days: 30, label: '1 month before' },
 ]
+
+const selectClass =
+  'w-full appearance-none cursor-pointer rounded-md border border-border bg-surface px-3 py-2 type-small text-fg transition-colors duration-150 focus:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
 
 export function ReminderPanel({ conference, sessions }: Props) {
   const { user } = useAuth()
@@ -163,27 +168,27 @@ export function ReminderPanel({ conference, sessions }: Props) {
   }
 
   return (
-    <div className="glass-card rounded-xl p-5 sm:p-6 space-y-4">
+    <section className="space-y-4 rounded-lg border border-border bg-surface p-5">
       <div className="flex items-center justify-between">
-        <h2 className="font-bold text-white text-lg flex items-center gap-2">
-          <Bell className="w-5 h-5 text-cyan-400" />
+        <h2 className="type-h3 flex items-center gap-2 text-fg-strong">
+          <Bell className="size-4 text-fg-subtle" strokeWidth={1.75} aria-hidden />
           Reminders
         </h2>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="text-sm flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300"
+            className="flex items-center gap-1.5 type-small font-medium text-brand-text hover:underline"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="size-4" aria-hidden />
             Add reminder
           </button>
         )}
       </div>
 
       {loading ? (
-        <p className="text-sm text-slate-500">Loading reminders…</p>
+        <p className="type-small text-fg-subtle">Loading reminders…</p>
       ) : reminders.length === 0 && !showForm ? (
-        <p className="text-sm text-slate-400">
+        <p className="type-small text-fg-muted">
           Get a notification in advance so you don&apos;t miss the deadline.
         </p>
       ) : (
@@ -191,14 +196,14 @@ export function ReminderPanel({ conference, sessions }: Props) {
           {reminders.map(r => (
             <li
               key={r.id}
-              className="flex items-center gap-3 px-3 py-2.5 bg-slate-800/40 border border-slate-800 rounded-lg"
+              className="flex items-center gap-3 rounded-md border border-border-subtle bg-surface-muted px-3 py-2.5"
             >
-              <Clock className={`w-4 h-4 ${r.status === 'sent' ? 'text-slate-500' : 'text-amber-400'}`} />
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm ${r.status === 'sent' ? 'text-slate-400' : 'text-white'}`}>
+              <Clock className={cn('size-4', r.status === 'sent' ? 'text-fg-subtle' : 'text-warn-text')} aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className={cn('type-small', r.status === 'sent' ? 'text-fg-subtle' : 'text-fg')}>
                   {TYPE_LABEL[r.reminder_type]} · {r.lead_time_days} day{r.lead_time_days === 1 ? '' : 's'} before
                 </p>
-                <p className="text-xs text-slate-500">
+                <p className="type-caption text-fg-subtle">
                   {r.status === 'sent'
                     ? `Sent ${new Date(r.sent_at ?? r.scheduled_for).toLocaleDateString('en-GB')}`
                     : `Fires ${new Date(r.scheduled_for).toLocaleDateString('en-GB')}`}
@@ -208,9 +213,9 @@ export function ReminderPanel({ conference, sessions }: Props) {
                 <button
                   onClick={() => cancelReminder(r.id)}
                   aria-label="Cancel reminder"
-                  className="text-slate-500 hover:text-rose-400"
+                  className="text-fg-subtle transition-colors duration-150 hover:text-danger-text"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="size-4" aria-hidden />
                 </button>
               )}
             </li>
@@ -219,27 +224,27 @@ export function ReminderPanel({ conference, sessions }: Props) {
       )}
 
       {justSaved && (
-        <div className="flex items-center gap-2 text-sm text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
-          <Check className="w-4 h-4" /> Reminder set.
+        <div className="flex items-center gap-2 rounded-md border border-ok-border bg-ok-subtle px-3 py-2 type-small text-ok-text">
+          <Check className="size-4" aria-hidden /> Reminder set.
         </div>
       )}
 
       {showForm && (
-        <div className="space-y-3 border-t border-slate-800 pt-4">
+        <div className="space-y-3 border-t border-border-subtle pt-4">
           {isCourse ? (
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Which session</label>
+              <label className="mb-1.5 block type-caption font-medium text-fg-muted">Which session</label>
               <select
                 value={selectedSessionDate || availableSessions[0]?.start_date || ''}
                 onChange={e => setSelectedSessionDate(e.target.value)}
-                className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+                className={selectClass}
               >
                 {availableSessions.map(s => {
                   const dateLabel = new Date(s.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
                   const locLabel = s.city ?? 'Online'
                   const soldOut = s.availability_status === 'sold_out' ? ' · SOLD OUT' : ''
                   return (
-                    <option key={s.id} value={s.start_date} className="bg-slate-800">
+                    <option key={s.id} value={s.start_date}>
                       {dateLabel} · {locLabel}{soldOut}
                     </option>
                   )
@@ -248,56 +253,49 @@ export function ReminderPanel({ conference, sessions }: Props) {
             </div>
           ) : (
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Remind me about</label>
+              <label className="mb-1.5 block type-caption font-medium text-fg-muted">Remind me about</label>
               <select
                 value={reminderType}
                 onChange={e => setReminderType(e.target.value as ReminderType)}
-                className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+                className={selectClass}
               >
                 {availableTypes.map(t => (
-                  <option key={t.type} value={t.type} className="bg-slate-800">{t.label}</option>
+                  <option key={t.type} value={t.type}>{t.label}</option>
                 ))}
               </select>
             </div>
           )}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">When</label>
+            <label className="mb-1.5 block type-caption font-medium text-fg-muted">When</label>
             <select
               value={leadDays}
               onChange={e => setLeadDays(Number(e.target.value))}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+              className={selectClass}
             >
               {LEAD_TIMES.map(lt => (
-                <option key={lt.days} value={lt.days} className="bg-slate-800">{lt.label}</option>
+                <option key={lt.days} value={lt.days}>{lt.label}</option>
               ))}
             </select>
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 text-rose-400 text-xs bg-rose-500/10 border border-rose-500/20 rounded-lg px-3 py-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <div className="flex items-center gap-2 rounded-md border border-danger-border bg-danger-subtle px-3 py-2 type-caption text-danger-text">
+              <AlertCircle className="size-4 shrink-0" aria-hidden />
               {error}
             </div>
           )}
 
           <div className="flex gap-2">
-            <button
-              onClick={() => { setShowForm(false); setError('') }}
-              className="px-3 py-2 text-sm border border-slate-700 rounded-lg text-slate-300 hover:bg-slate-800/50 transition-all"
-            >
+            <Button variant="outline" onClick={() => { setShowForm(false); setError('') }}>
               Cancel
-            </button>
-            <button
-              onClick={handleAdd}
-              disabled={saving}
-              className="flex-1 px-3 py-2 text-sm bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-lg font-medium hover:from-cyan-400 hover:to-teal-400 disabled:opacity-50 transition-all"
-            >
+            </Button>
+            <Button className="flex-1" onClick={handleAdd} disabled={saving}>
               {saving ? 'Setting…' : 'Set reminder'}
-            </button>
+            </Button>
           </div>
         </div>
       )}
-    </div>
+    </section>
   )
 }
 

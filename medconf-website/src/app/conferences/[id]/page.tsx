@@ -1,316 +1,196 @@
 // src/app/conferences/[id]/page.tsx
-'use client'
+// Server-rendered — public and indexable, so metadata/JSON-LD need real
+// HTML on first response rather than a client-side fetch. Interactive bits
+// (save, calendar, share, reminders) live in client components underneath.
 
-import { useState, useEffect, use } from 'react'
-import { createSupabaseClient } from '@/lib/supabase'
-import { CPDBadge } from '@/components/conferences/CPDBadge'
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import type { Metadata } from 'next'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { resolveDirectory, wantsFixture } from '@/lib/directory-source'
+import { expandSpecialtyFilter, type DirectoryFilters } from '@/lib/directory-query'
+import { canonicalSpecialty } from '@/lib/taxonomy/specialties'
+import type { Conference, PricingTier, CourseSession, SourceSummary } from '@/lib/types'
+import { hasAbstractInfo } from '@/lib/conference-helpers'
+import { formatDateRange } from '@/lib/format'
+
+import { Breadcrumb } from '@/components/event/Breadcrumb'
+import { EventSidebar } from '@/components/event/EventSidebar'
+import { AbstractsBlock } from '@/components/event/AbstractsBlock'
+import { OrganiserBlock } from '@/components/event/OrganiserBlock'
+import { RelatedEvents } from '@/components/event/RelatedEvents'
+import { EventJsonLd } from '@/components/event/EventJsonLd'
+import { EventTypeBadge } from '@/components/domain/EventTypeBadge'
+import { FormatBadge } from '@/components/domain/FormatBadge'
+import { SocietyChip } from '@/components/domain/SocietyChip'
 import { PricingTable } from '@/components/conferences/PricingTable'
 import { SessionsTable } from '@/components/conferences/SessionsTable'
 import { ReminderPanel } from '@/components/conferences/ReminderPanel'
-import { SaveButton } from '@/components/ui/SaveButton'
-import type { Conference, PricingTier, CourseSession } from '@/lib/types'
-import Link from 'next/link'
-import { ArrowLeft, Calendar, MapPin, FileText, Clock, ExternalLink, Loader2, AlertCircle, Globe, Building2, Download, Share2, Check } from 'lucide-react'
-import { downloadIcs } from '@/lib/ics'
-import { isAbstractEffectivelyOpen, hasAbstractInfo } from '@/lib/conference-helpers'
 
-export default function ConferenceDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params)
-  const [conference, setConference] = useState<Conference | null>(null)
-  const [tiers, setTiers] = useState<PricingTier[]>([])
-  const [sessions, setSessions] = useState<CourseSession[]>([])
-  const [loading, setLoading] = useState(true)
-  const supabase = createSupabaseClient()
+async function fetchConferenceData(id: number) {
+  const supabase = createSupabaseServerClient()
 
-  useEffect(() => {
-    async function fetchConference() {
-      const id = Number(resolvedParams.id)
-      const [confResp, pricingResp, sessionsResp] = await Promise.all([
-        supabase.from('conferences').select('*').eq('id', id).single(),
-        supabase.from('pricing_tiers').select('*').eq('conference_id', id),
-        supabase.from('course_sessions').select('*').eq('course_id', id).order('start_date', { ascending: true }),
-      ])
+  const [confResp, pricingResp, sessionsResp] = await Promise.all([
+    supabase.from('conferences').select('*').eq('id', id).eq('archived', false).single(),
+    supabase.from('pricing_tiers').select('*').eq('conference_id', id),
+    supabase.from('course_sessions').select('*').eq('course_id', id).order('start_date', { ascending: true }),
+  ])
 
-      if (confResp.data) setConference(confResp.data)
-      if (pricingResp.data) setTiers(pricingResp.data)
-      if (sessionsResp.data) setSessions(sessionsResp.data)
-      setLoading(false)
-    }
+  if (!confResp.data) return null
 
-    fetchConference()
-  }, [resolvedParams.id])
+  const conference = confResp.data as Conference
+  const tiers = (pricingResp.data ?? []) as PricingTier[]
+  const sessions = (sessionsResp.data ?? []) as CourseSession[]
 
-  if (loading) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-4" />
-          <p className="text-slate-400 text-sm">Loading conference details...</p>
-        </div>
-      </div>
-    )
+  let society: SourceSummary['society'] = null
+  if (conference.source_id) {
+    const { data } = await supabase
+      .from('scraper_sources')
+      .select('society')
+      .eq('id', conference.source_id)
+      .single()
+    society = data?.society ?? null
   }
 
-  if (!conference) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
-            <AlertCircle className="w-8 h-8 text-rose-400" />
-          </div>
-          <h1 className="text-xl font-bold text-white mb-2">Conference not found</h1>
-          <p className="text-slate-400 mb-6">This conference may have been removed or doesn&apos;t exist.</p>
-          <Link 
-            href="/conferences"
-            className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-medium"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to directory
+  return { conference, tiers, sessions, society }
+}
+
+async function fetchRelatedEvents(conference: Conference) {
+  if (!conference.start_date) return []
+
+  const supabase = createSupabaseServerClient()
+  const { parent } = canonicalSpecialty(conference.specialty)
+  const rawSpecialty = expandSpecialtyFilter([parent])
+  if (rawSpecialty.length === 0) return []
+
+  const start = new Date(conference.start_date)
+  const from = new Date(start)
+  from.setDate(from.getDate() - 45)
+  const to = new Date(start)
+  to.setDate(to.getDate() + 45)
+  const iso = (d: Date) => d.toISOString().slice(0, 10)
+
+  const filters: Partial<DirectoryFilters> = {
+    specialty: [parent],
+    dateFrom: iso(from),
+    dateTo: iso(to),
+    sort: 'date',
+    page: 1,
+    pageSize: 5,
+  }
+
+  try {
+    const { page } = await resolveDirectory(supabase, filters, { fixture: wantsFixture(new URLSearchParams()), wantFacets: false })
+    return page.rows.filter((r) => r.id !== conference.id).slice(0, 4)
+  } catch (err) {
+    console.error('[conferences/[id]] related events query failed', err)
+    return []
+  }
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const data = await fetchConferenceData(Number(id))
+  if (!data) return { title: 'Event not found — MedConf' }
+
+  const { conference: c } = data
+  const when = formatDateRange(c.start_date, c.end_date)
+  const where = c.event_format === 'online' ? 'Online' : [c.city, c.region].filter(Boolean).join(', ')
+  const description =
+    c.description?.slice(0, 160) ??
+    [c.conference_name, when, where].filter(Boolean).join(' · ')
+
+  return {
+    title: `${c.conference_name} — MedConf`,
+    description,
+    openGraph: {
+      title: c.conference_name,
+      description,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary',
+      title: c.conference_name,
+      description,
+    },
+  }
+}
+
+export default async function ConferenceDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const data = await fetchConferenceData(Number(id))
+  if (!data) notFound()
+
+  const { conference: c, tiers, sessions, society } = data
+  const related = await fetchRelatedEvents(c)
+
+  return (
+    <div className="min-h-[calc(100vh-4rem)] bg-bg">
+      <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-8">
+        <Breadcrumb specialty={c.specialty} title={c.conference_name} />
+
+        {/* Mobile summary card sits above the fold, before the body content */}
+        <EventSidebar conference={c} tiers={tiers} className="mb-6 lg:hidden" />
+
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <main className="min-w-0 space-y-8">
+            <header className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <EventTypeBadge type={c.event_type} isFlagship={c.is_flagship} isOnDemand={c.is_on_demand} />
+                {c.event_format && <FormatBadge format={c.event_format} />}
+                {society && <SocietyChip name={society} />}
+              </div>
+              <h1 className="type-h1 text-fg-strong">{c.conference_name}</h1>
+            </header>
+
+            {c.description && (
+              <section className="space-y-2">
+                <h2 className="type-h3 text-fg-strong">About this event</h2>
+                <p className="type-body whitespace-pre-line text-fg-muted">{c.description}</p>
+              </section>
+            )}
+
+            {c.event_type === 'course' && sessions.length > 0 ? (
+              <section className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="type-h3 text-fg-strong">Programme &amp; sessions</h2>
+                  <span className="type-caption text-fg-subtle">
+                    {sessions.filter((s) => s.availability_status !== 'sold_out').length} of {sessions.length} available
+                  </span>
+                </div>
+                <SessionsTable
+                  sessions={sessions}
+                  pricingTiers={tiers}
+                  parentBookingUrl={c.booking_url ?? c.organiser_url}
+                />
+              </section>
+            ) : (
+              <section className="space-y-3">
+                <h2 className="type-h3 text-fg-strong">Fees</h2>
+                <PricingTable tiers={tiers} />
+              </section>
+            )}
+
+            {hasAbstractInfo(c) && <AbstractsBlock conference={c} />}
+
+            <OrganiserBlock conference={c} society={society} />
+
+            <ReminderPanel conference={c} sessions={sessions} />
+
+            <RelatedEvents events={related} />
+          </main>
+
+          <EventSidebar conference={c} tiers={tiers} className="hidden self-start lg:sticky lg:top-6 lg:block" />
+        </div>
+
+        <div className="mt-8 border-t border-border-subtle pt-4">
+          <Link href="/conferences" className="type-small text-fg-muted hover:text-brand-text">
+            ← Back to directory
           </Link>
         </div>
       </div>
-    )
-  }
 
-  const c = conference
-
-  const formatDate = (dateStr: string | null) => {
-    if (!dateStr) return null
-    return new Date(dateStr).toLocaleDateString('en-GB', { 
-      weekday: 'long',
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
-    })
-  }
-
-  const startFormatted = formatDate(c.start_date)
-  const endFormatted = c.end_date && c.end_date !== c.start_date 
-    ? new Date(c.end_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })
-    : null
-
-  return (
-    <div className="min-h-[calc(100vh-4rem)] bg-grid-pattern">
-      {/* Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 -z-10" />
-      
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back link */}
-        <Link 
-          href="/conferences"
-          className="inline-flex items-center gap-2 text-slate-400 hover:text-cyan-400 text-sm font-medium mb-6 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to directory
-        </Link>
-
-        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-8">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-            <div className="flex-1">
-              <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">
-                {c.specialty || 'General'}
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-bold text-white mt-2 font-display">
-                {c.conference_name}
-              </h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <ShareButton conference={c} />
-              <CalendarButton conference={c} />
-              <SaveButton conferenceId={c.id} />
-            </div>
-          </div>
-
-          {/* CPD badge */}
-          <div>
-            <CPDBadge accredited={c.cpd_accredited} points={c.cpd_points} />
-          </div>
-
-          {/* Key details grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {startFormatted && (
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-slate-400 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Date
-                </p>
-                <p className="text-white">
-                  {startFormatted}
-                  {endFormatted && ` – ${endFormatted}`}
-                </p>
-              </div>
-            )}
-
-            {/* Location — format-aware. Always renders so users know
-                whether an event is online/in-person even before a venue is
-                published. */}
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-slate-400 flex items-center gap-2">
-                {c.event_format === 'online' ? (
-                  <Globe className="w-4 h-4" />
-                ) : c.event_format === 'in_person' ? (
-                  <Building2 className="w-4 h-4" />
-                ) : (
-                  <MapPin className="w-4 h-4" />
-                )}
-                Location
-              </p>
-              {c.event_format === 'online' ? (
-                <p className="text-cyan-300 font-medium">Online</p>
-              ) : c.event_format === 'hybrid' ? (
-                <p className="text-white">
-                  <span className="text-cyan-300 font-medium">Hybrid</span>
-                  {(c.venue_name || c.city) && (
-                    <span className="text-slate-300">
-                      {' — '}
-                      {[c.venue_name, c.city].filter(Boolean).join(', ')}
-                      {c.region && ` (${c.region})`}
-                    </span>
-                  )}
-                </p>
-              ) : (c.venue_name || c.city) ? (
-                <p className="text-white">
-                  {[c.venue_name, c.city].filter(Boolean).join(', ')}
-                  {c.region && ` (${c.region})`}
-                </p>
-              ) : (
-                <p className="text-slate-500 italic">Location TBC</p>
-              )}
-            </div>
-
-            {hasAbstractInfo(c) && (
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-slate-400 flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  Abstract Submissions
-                </p>
-                <p className={isAbstractEffectivelyOpen(c) ? 'text-emerald-400 font-semibold' : 'text-slate-300'}>
-                  {isAbstractEffectivelyOpen(c) ? 'Open' : 'Closed'}
-                  <span className="text-amber-400 ml-2">
-                    {c.abstract_deadline_note
-                      ? `– ${c.abstract_deadline_note}`
-                      : c.abstract_deadline
-                        ? `– deadline ${new Date(c.abstract_deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}`
-                        : null}
-                  </span>
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Description */}
-          {c.description && (
-            <div className="space-y-3">
-              <h2 className="font-bold text-white text-lg">About this conference</h2>
-              <p className="text-slate-300 leading-relaxed">{c.description}</p>
-            </div>
-          )}
-
-          {/* Reminders */}
-          <ReminderPanel conference={c} sessions={sessions} />
-
-          {/* Sessions (for multi-session courses) or Pricing (everything
-              else). A row tagged 'course' without any course_sessions
-              children is a single-date "course" — show its parent-row
-              pricing rather than an empty sessions table. */}
-          {c.event_type === 'course' && sessions.length > 0 ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="font-bold text-white text-lg">Upcoming sessions</h2>
-                {sessions.length > 0 && (
-                  <span className="text-xs text-slate-500">
-                    {sessions.filter(s => s.availability_status !== 'sold_out').length} of {sessions.length} available
-                  </span>
-                )}
-              </div>
-              <SessionsTable
-                sessions={sessions}
-                pricingTiers={tiers}
-                parentBookingUrl={c.booking_url ?? c.organiser_url}
-              />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <h2 className="font-bold text-white text-lg">Pricing</h2>
-              <PricingTable tiers={tiers} />
-            </div>
-          )}
-
-          {/* Book CTA */}
-          <div className="bg-gradient-to-r from-cyan-500/10 to-teal-500/10 border border-cyan-500/20 rounded-xl p-6 text-center">
-            <p className="text-slate-300 mb-4">
-              Ready to attend? Book directly on the organiser&apos;s website.
-            </p>
-            {c.organiser_url ? (
-              <a 
-                href={c.organiser_url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-8 py-3 rounded-xl font-semibold hover:from-cyan-400 hover:to-teal-400 transition-all shadow-lg shadow-cyan-500/25"
-              >
-                Book on Official Site
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            ) : (
-              <p className="text-slate-400 text-sm">Booking link coming soon.</p>
-            )}
-          </div>
-        </div>
-      </div>
+      <EventJsonLd conference={c} tiers={tiers} />
     </div>
   )
 }
-
-function CalendarButton({ conference }: { conference: Conference }) {
-  // Only useful when we have a date to put on the calendar
-  if (!conference.start_date && !conference.abstract_deadline) return null
-  return (
-    <button
-      onClick={() => downloadIcs(conference)}
-      aria-label="Add to calendar"
-      className="flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-white border border-slate-700 hover:border-cyan-500/50 rounded-md px-2.5 py-1.5 transition-colors"
-    >
-      <Download className="w-3.5 h-3.5" />
-      <span className="hidden sm:inline">Add to calendar</span>
-    </button>
-  )
-}
-
-function ShareButton({ conference }: { conference: Conference }) {
-  const [copied, setCopied] = useState(false)
-
-  const handleShare = async () => {
-    const url = typeof window !== 'undefined' ? window.location.href : ''
-    const title = conference.conference_name
-    // Try the native share sheet first (mobile / supported browsers)
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({ title, url })
-        return
-      } catch {
-        // user cancelled, fall through to clipboard
-      }
-    }
-    try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // ignore — most browsers allow clipboard.writeText in user gesture
-    }
-  }
-
-  return (
-    <button
-      onClick={handleShare}
-      aria-label="Share conference"
-      className="flex items-center gap-1.5 text-xs font-medium text-slate-300 hover:text-white border border-slate-700 hover:border-cyan-500/50 rounded-md px-2.5 py-1.5 transition-colors"
-    >
-      {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
-      <span className="hidden sm:inline">{copied ? 'Copied' : 'Share'}</span>
-    </button>
-  )
-}
-
-

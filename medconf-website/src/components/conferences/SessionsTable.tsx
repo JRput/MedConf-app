@@ -2,8 +2,10 @@
 'use client'
 
 import type { CourseSession, PricingTier } from '@/lib/types'
-import { Calendar, MapPin, Building2, Globe, AlertCircle, Check, ExternalLink } from 'lucide-react'
+import { Calendar, Building2, Globe, AlertCircle, Check, ExternalLink } from 'lucide-react'
 import { upcomingSessions } from '@/lib/conference-helpers'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 interface Props {
   sessions: CourseSession[]
@@ -29,7 +31,7 @@ export function SessionsTable({ sessions, pricingTiers, parentBookingUrl }: Prop
 
   if (upcoming.length === 0) {
     return (
-      <div className="glass-card rounded-xl p-6 text-center text-sm text-slate-400">
+      <div className="rounded-lg border border-border bg-surface-muted p-5 type-small text-fg-subtle">
         No scheduled dates yet. This course may be on-demand or have run-dates
         published soon — we&apos;ll surface them automatically when they appear.
       </div>
@@ -47,65 +49,66 @@ export function SessionsTable({ sessions, pricingTiers, parentBookingUrl }: Prop
         return (
           <div
             key={s.id}
-            className={`glass-card rounded-xl px-4 py-3 flex items-start gap-4 ${
-              isSold ? 'opacity-60' : ''
-            }`}
+            className={cn(
+              'flex items-start gap-4 rounded-lg border border-border bg-surface px-4 py-3',
+              isSold && 'opacity-60'
+            )}
           >
-            <div className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-4 gap-3 items-center">
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="w-4 h-4 text-slate-500" />
+            <div className="grid min-w-0 flex-1 grid-cols-1 items-center gap-3 sm:grid-cols-4">
+              <div className="flex items-center gap-2 type-small">
+                <Calendar className="size-4 shrink-0 text-fg-subtle" aria-hidden />
                 <div>
-                  <p className="text-white font-medium leading-tight">
+                  <p className="font-medium leading-tight text-fg-strong">
                     {formatDate(s.start_date)}
                   </p>
                   {s.end_date && s.end_date !== s.start_date && (
-                    <p className="text-xs text-slate-500">to {formatDate(s.end_date)}</p>
+                    <p className="type-caption text-fg-subtle">to {formatDate(s.end_date)}</p>
                   )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-sm sm:col-span-2">
+              <div className="flex items-center gap-2 type-small sm:col-span-2">
                 {s.city ? (
-                  <Building2 className="w-4 h-4 text-slate-500" />
+                  <Building2 className="size-4 shrink-0 text-fg-subtle" aria-hidden />
                 ) : (
-                  <Globe className="w-4 h-4 text-slate-500" />
+                  <Globe className="size-4 shrink-0 text-fg-subtle" aria-hidden />
                 )}
                 <div className="min-w-0">
-                  <p className="text-white truncate">
+                  <p className="truncate text-fg">
                     {s.city ?? 'Online'}
                   </p>
                   {s.venue_name && (
-                    <p className="text-xs text-slate-500 truncate">{s.venue_name}</p>
+                    <p className="type-caption truncate text-fg-subtle">{s.venue_name}</p>
                   )}
                 </div>
               </div>
 
-              <div className="text-sm">
-                <p className="text-white font-medium">
+              <div className="type-small">
+                <p className="type-numeric font-medium text-fg-strong">
                   {price !== null ? `£${price}` : 'Price TBC'}
                 </p>
                 {s.spots_left !== null && s.spots_left !== undefined && (
-                  <p className="text-xs text-amber-400">{s.spots_left} spots left</p>
+                  <p className="type-caption text-warn-text">{s.spots_left} spots left</p>
                 )}
               </div>
             </div>
 
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex shrink-0 items-center gap-2">
               {isSold ? (
-                <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">
-                  <AlertCircle className="w-3 h-3" />
+                <Badge variant="danger">
+                  <AlertCircle className="size-3" aria-hidden />
                   Sold out
-                </span>
+                </Badge>
               ) : isLimited ? (
-                <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                  <AlertCircle className="w-3 h-3" />
+                <Badge variant="warning">
+                  <AlertCircle className="size-3" aria-hidden />
                   Limited
-                </span>
+                </Badge>
               ) : (
-                <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                  <Check className="w-3 h-3" />
+                <Badge variant="success">
+                  <Check className="size-3" aria-hidden />
                   Available
-                </span>
+                </Badge>
               )}
 
               {!isSold && href && (
@@ -113,10 +116,10 @@ export function SessionsTable({ sessions, pricingTiers, parentBookingUrl }: Prop
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs font-medium text-slate-200 hover:text-white border border-slate-700 hover:border-cyan-500/50 rounded px-2.5 py-1 flex items-center gap-1 transition-colors"
+                  className="flex items-center gap-1 rounded-sm border border-border px-2.5 py-1 type-caption font-medium text-fg transition-colors duration-150 hover:border-border-strong hover:bg-surface-hover"
                 >
                   Book
-                  <ExternalLink className="w-3 h-3" />
+                  <ExternalLink className="size-3" aria-hidden />
                 </a>
               )}
             </div>
