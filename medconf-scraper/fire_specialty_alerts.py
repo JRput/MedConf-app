@@ -6,9 +6,19 @@ Runs daily (03:00 UTC) via GitHub Actions, AFTER the main scrape cron
 
 For each opted-in user (notification_preferences.email_new_conferences=true),
 finds conferences/courses where:
-  - specialty matches the user's specialty (exact, case-insensitive)
+  - specialty matches the user's specialty
   - created_at > user.last_specialty_alert_at  (the per-user watermark)
   - not archived
+
+Since W6 onboarding, `user_profiles.specialty` stores a canonical PARENT
+SLUG from medconf-website/src/lib/taxonomy/specialties.ts (e.g. "oncology"),
+not a raw `conferences.specialty` string — a plain `.ilike(specialty)`
+against the raw column would silently stop matching for any multi-word
+parent (e.g. "general-practice" never substring-matches "General Practice").
+specialty_taxonomy.py expands the stored value (slug, or a legacy raw label
+for users who onboarded before W6) into every raw value under that parent,
+and this module queries with `.in_(...)` against that expanded list. See
+specialty_taxonomy.py's module docstring for the full rationale.
 
 If any matches found, inserts ONE batched notification ("3 new Cardiology
 events") and advances the watermark to NOW().
@@ -19,8 +29,14 @@ counts. Clicking the notification deep-links to
 
 Idempotent in the absence of new data: re-running on the same day with
 nothing fresh inserts no notifications.
+
+Usage:
+  python fire_specialty_alerts.py                  # normal run (writes)
+  python fire_specialty_alerts.py --dry-run         # no inserts/updates, just prints what would happen
+  python fire_specialty_alerts.py --explain-specialty oncology   # print the raw values a slug expands to, then exit
 """
 
+import argparse
 import os
 import sys
 from datetime import datetime, timezone
@@ -28,6 +44,8 @@ from typing import Optional
 
 from dotenv import load_dotenv
 from supabase import create_client, Client
+
+from specialty_taxonomy import TaxonomyLoadError, raw_values_for_profile_specialty
 
 
 def _supabase() -> Client:
@@ -70,7 +88,7 @@ def _format_body(rows: list, specialty: str) -> str:
     return head
 
 
-def fire_alerts(sb: Client) -> dict:
+def fire_alerts(sb: Client, dry_run: bool = False) -> dict:
     now_iso = datetime.now(timezone.utc).isoformat()
 
     # Load opted-in users joined with their specialty + watermark
@@ -104,12 +122,31 @@ def fire_alerts(sb: Client) -> dict:
         watermark = u.get("last_specialty_alert_at")
 
         try:
-            # Find specialty matches created after the watermark
+            raw_values = raw_values_for_profile_specialty(specialty)
+        except TaxonomyLoadError as e:
+            # Don't let a missing/stale specialties.json take down the whole
+            # cron run for every user — fall back to the pre-W2a behaviour
+            # for this user and keep going.
+            print(f"  user {u['id']}: taxonomy unavailable ({e}); falling back to raw ilike match")
+            raw_values = []
+
+        try:
             q = sb.table("conferences") \
                 .select("id, conference_name, event_type, created_at") \
                 .eq("archived", False) \
-                .ilike("specialty", specialty) \
                 .order("created_at", desc=True)
+            if raw_values:
+                # specialty is a canonical slug (or a legacy raw label that
+                # mapped to one) — match every raw value under that parent,
+                # e.g. "oncology" -> ["Oncology","Clinical Oncology",...].
+                q = q.in_("specialty", raw_values)
+            else:
+                # Unmapped value — not a known slug and not in the
+                # raw->canonical map (e.g. a brand-new raw specialty the
+                # scraper just introduced, before specialties.ts has been
+                # updated for it). Fall back to the original substring
+                # match rather than silently matching nothing.
+                q = q.ilike("specialty", specialty)
             if watermark:
                 q = q.gt("created_at", watermark)
             # Cap at 50 — beyond that the user gets one rolled-up notification
@@ -129,6 +166,11 @@ def fire_alerts(sb: Client) -> dict:
 
         title = _format_title(len(matches), specialty, kinds)
         body = _format_body(matches, specialty)
+
+        if dry_run:
+            alerts_fired += 1
+            print(f"  [dry-run] user {u['id']}: would fire \"{title}\" ({len(matches)} match(es); raw_values={raw_values or '[ilike fallback]'})")
+            continue
 
         try:
             sb.table("notifications").insert({
@@ -163,7 +205,34 @@ def fire_alerts(sb: Client) -> dict:
     return summary
 
 
+def _parse_args():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Query and print what would be fired, but insert no notifications and advance no watermark.",
+    )
+    parser.add_argument(
+        "--explain-specialty",
+        metavar="SLUG_OR_LABEL",
+        help="Print the raw conferences.specialty values a slug (or legacy raw label) expands to, then exit without touching the DB.",
+    )
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
+    args = _parse_args()
+
+    if args.explain_specialty:
+        raw_values = raw_values_for_profile_specialty(args.explain_specialty)
+        if not raw_values:
+            print(f"{args.explain_specialty!r} did not resolve to a known parent slug or raw label.")
+            sys.exit(1)
+        print(f"{args.explain_specialty!r} expands to {len(raw_values)} raw value(s):")
+        for v in sorted(raw_values):
+            print(f"  - {v}")
+        sys.exit(0)
+
     sb = _supabase()
-    summary = fire_alerts(sb)
+    summary = fire_alerts(sb, dry_run=args.dry_run)
     sys.exit(1 if summary["errors"] > 0 else 0)
