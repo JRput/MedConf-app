@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Menu, X, Calendar, Bookmark, Settings, LogOut, LayoutDashboard } from 'lucide-react'
 import { NotificationBell } from './NotificationBell'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 export function Navbar() {
   const { user, signOut, loading } = useAuth()
@@ -27,6 +28,9 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
+            {/* W1: the toggle is wired and persists, but only /design consumes
+                the tokens so far — the legacy pages below are hard-coded dark. */}
+            <ThemeToggle className="text-slate-400 hover:bg-slate-800/50 hover:text-white" />
             {!loading && user ? (
               <>
                 <NavLink href="/dashboard" icon={<LayoutDashboard className="w-4 h-4" />}>
