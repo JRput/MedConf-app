@@ -38,7 +38,23 @@ export function parseDirectoryUrl(params: URLSearchParams | string): DirectoryFi
   const datePreset = datePresetRaw && isOneOf(datePresetRaw, PRESETS) ? datePresetRaw : null
 
   const priceRaw = p.get('price')
-  const price = priceRaw && isOneOf(priceRaw, PRICES) ? priceRaw : DEFAULT_FILTERS.price
+  // Back-compat for pre-W2 links: `maxPrice=<GBP>` from the old client-side-
+  // filter model. Only consulted when the new `price` param is absent, so a
+  // fresh link always wins. `source`/`scope` (the other two retired params)
+  // have no equivalent in the new model — the old UI's chip-per-source-row
+  // and conference-scope split no longer exist — so they're intentionally
+  // dropped rather than mapped.
+  const maxPriceRaw = Number(p.get('maxPrice'))
+  const price =
+    priceRaw && isOneOf(priceRaw, PRICES)
+      ? priceRaw
+      : Number.isFinite(maxPriceRaw) && maxPriceRaw > 0
+        ? maxPriceRaw <= 100
+          ? 'under-100'
+          : maxPriceRaw <= 300
+            ? 'under-300'
+            : 'any'
+        : DEFAULT_FILTERS.price
 
   const sortRaw = p.get('sort')
   const sort = sortRaw && isOneOf(sortRaw, SORTS) ? sortRaw : DEFAULT_FILTERS.sort

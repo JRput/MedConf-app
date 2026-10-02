@@ -28,11 +28,14 @@ export function EventRow({
   event,
   saved = false,
   onToggleSave,
+  societyCount,
   className,
 }: {
   event: DirectoryEvent
   saved?: boolean
   onToggleSave?: (next: boolean) => void
+  /** Upcoming-event count for event.society, when the caller has it (see SocietyChip). */
+  societyCount?: number
   className?: string
 }) {
   const place = locationLine(event)
@@ -64,8 +67,12 @@ export function EventRow({
 
         <div className="mt-1.5 flex min-w-0 items-center gap-2 text-[0.8125rem] text-fg-muted">
           <EventTypeBadge type={event.eventType} isFlagship={event.isFlagship} isOnDemand={event.isOnDemand} />
+          {/* Society is the row's trust signal — the strongest element on this
+              line, leading even specialty (see SocietyChip's doc comment). */}
+          {event.society && <SocietyChip name={event.society} count={societyCount} />}
           {event.specialty && (
             <>
+              {event.society && <Dot />}
               <span className="truncate">{event.specialty}</span>
             </>
           )}
@@ -80,12 +87,6 @@ export function EventRow({
               <>
                 <Dot />
                 <span className="truncate">{place}</span>
-              </>
-            )}
-            {event.society && (
-              <>
-                <Dot />
-                <SocietyChip name={event.society} />
               </>
             )}
           </span>

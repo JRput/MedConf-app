@@ -17,12 +17,13 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { parseDirectoryUrl } from '@/lib/directory-url'
-import { queryDirectory, queryFacets } from '@/lib/directory-query'
+import { resolveDirectory, wantsFixture } from '@/lib/directory-source'
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
   const filters = parseDirectoryUrl(url.searchParams)
   const wantFacets = url.searchParams.get('facets') === '1'
+  const fixture = wantsFixture(url.searchParams)
 
   // No auth/session needed for a public, anon-key-read endpoint — use a
   // bare server client (no cookie plumbing) so this route works for both
@@ -34,13 +35,10 @@ export async function GET(request: Request) {
   )
 
   try {
-    const [page, facets] = await Promise.all([
-      queryDirectory(supabase, filters),
-      wantFacets ? queryFacets(supabase, filters) : Promise.resolve(null),
-    ])
+    const { page, facets, usedFixture } = await resolveDirectory(supabase, filters, { fixture, wantFacets })
 
     return NextResponse.json(
-      { ...page, facets },
+      { ...page, facets, usedFixture },
       { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
     )
   } catch (err) {

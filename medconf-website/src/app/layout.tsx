@@ -59,12 +59,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: accentNoFlashScript }} />
       </head>
       {/*
-        NOTE (W1): the body still carries the legacy dark slate palette so the
-        not-yet-redesigned pages keep rendering correctly. W2 flips this to
-        `bg-bg text-fg font-sans` in the same commit that migrates the
-        directory. The new token system is already live — see /design.
+        W2b: flipped to the token system in the same commit that migrates the
+        directory (see /conferences, /societies). Pages not yet redesigned
+        (home, auth, dashboard, saved) paint their own full-bleed dark
+        background over this, so they're unaffected — only the Navbar/Footer
+        chrome and any route without its own background now follow the
+        light/dark token system from globals.css.
       */}
-      <body className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-body antialiased">
+      <body className="min-h-screen flex flex-col bg-bg text-fg font-body antialiased">
         <ThemeProvider>
           <AccentProvider>
             <TooltipProvider delayDuration={200}>

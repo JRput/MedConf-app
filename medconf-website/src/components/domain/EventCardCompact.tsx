@@ -23,11 +23,14 @@ export function EventCardCompact({
   event,
   saved = false,
   onToggleSave,
+  societyCount,
   className,
 }: {
   event: DirectoryEvent
   saved?: boolean
   onToggleSave?: (next: boolean) => void
+  /** Upcoming-event count for event.society, when the caller has it (see SocietyChip). */
+  societyCount?: number
   className?: string
 }) {
   const place = locationLine(event)
@@ -56,22 +59,29 @@ export function EventCardCompact({
         {event.name}
       </h3>
 
+      {/* Society leads this line — the row's trust signal, strongest element
+          here — before specialty (see SocietyChip's doc comment). */}
+      {(event.society || event.specialty) && (
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.8125rem] text-fg-muted">
+          {event.society && <SocietyChip name={event.society} count={societyCount} />}
+          {event.specialty && (
+            <>
+              {event.society && <span aria-hidden className="text-fg-subtle">·</span>}
+              <span className="truncate">{event.specialty}</span>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[0.8125rem] text-fg-muted">
         <EventTypeBadge type={event.eventType} isFlagship={event.isFlagship} isOnDemand={event.isOnDemand} />
-        {event.specialty && <span className="truncate">{event.specialty}</span>}
-      </div>
-
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[0.8125rem] text-fg-muted">
         {event.format && <FormatBadge format={event.format} />}
         {place && <span className="truncate">{place}</span>}
         <CpdLabel accredited={event.cpdAccredited} points={event.cpdPoints} />
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-border-subtle pt-2.5">
-        <div className="flex min-w-0 items-center gap-2">
-          <PriceLabel min={event.priceMin} max={event.priceMax} currency={event.currency} size="md" />
-          <SocietyChip name={event.society} className="truncate" />
-        </div>
+        <PriceLabel min={event.priceMin} max={event.priceMax} currency={event.currency} size="md" />
         <EventStatus event={event} />
       </div>
 
