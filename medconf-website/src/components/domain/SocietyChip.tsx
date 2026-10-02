@@ -48,7 +48,10 @@ export function SocietyChip({
             e.stopPropagation()
           }}
           className={cn(
-            'relative z-10 max-w-full truncate rounded-xs text-[0.8125rem] font-medium text-fg',
+            // Never truncated — the owner's explicit call (see this file's
+            // doc comment). `shrink-0` stops a flex ancestor from squeezing
+            // it before anything else; truncate specialty/location instead.
+            'relative z-10 shrink-0 rounded-xs text-[0.8125rem] font-medium whitespace-nowrap text-fg',
             'underline-offset-2 hover:text-brand-text hover:underline',
             'focus-visible:text-brand-text focus-visible:underline focus-visible:outline-none',
             className

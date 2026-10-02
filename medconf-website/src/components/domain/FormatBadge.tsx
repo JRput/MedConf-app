@@ -32,7 +32,11 @@ export function FormatBadge({
 
   return (
     <span
-      className={cn('inline-flex items-center gap-1.5 text-fg-muted', size === 'md' ? 'text-sm' : 'text-[0.8125rem]', className)}
+      className={cn(
+        'inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-fg-muted',
+        size === 'md' ? 'text-sm' : 'text-[0.8125rem]',
+        className
+      )}
       title={showLabel ? undefined : label}
     >
       <Icon className={cn(px, tone)} strokeWidth={1.75} aria-hidden />

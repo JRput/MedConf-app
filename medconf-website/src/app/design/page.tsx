@@ -453,21 +453,37 @@ export default function DesignPage() {
       <Section
         id="directory"
         title="Directory preview"
-        note="Eight rows shaped like production data. Desktop uses EventRow; below 640px the same records render as EventCardCompact."
+        note="EventRow responds to the width of its CONTAINER, not the viewport — the three blocks below are all rendered at the same browser width, just inside containers of different widths, via the @row-sm/@row-md container-query tokens in globals.css."
       >
-        <SubHead>EventRow — desktop</SubHead>
-        {/* EventRow is a >=640px component; on a phone the directory swaps to
-            EventCardCompact. Here it scrolls rather than collapsing, so the
-            narrow screenshots show the real row, not a squashed one. */}
-        <div className="overflow-x-auto rounded-lg border border-border bg-surface">
-          <div className="min-w-[640px]">
+        <SubHead>EventRow — wide container (≥900px — the directory&apos;s own desktop content column)</SubHead>
+        {/* `@container` on this wrapper is what lets EventRow's @row-md:
+            classes evaluate at all — without a container-type ancestor they
+            never match, which is why this wrapper (not EventRow itself) owns
+            that class. Width here is whatever the page gives it (~1100px on
+            this page), comfortably over row-md (900px). */}
+        <div className="@container overflow-x-auto rounded-lg border border-border bg-surface">
+          <div className="min-w-[900px]">
             {SAMPLE_EVENTS.map((e) => (
               <EventRow key={e.id} event={e} saved={!!saved[e.id]} onToggleSave={() => toggleSave(e.id)} />
             ))}
           </div>
         </div>
 
-        <SubHead className="mt-8">EventCardCompact — mobile (shown at 390px)</SubHead>
+        <SubHead className="mt-8">
+          EventRow — narrow container (~860px — a dashboard card or a tablet-width column with no sidebar)
+        </SubHead>
+        <p className="mb-3 max-w-2xl text-[0.8125rem] text-fg-muted">
+          Same component, same data, same browser width — only the container is narrower. This is the fix: society
+          never truncates (it&apos;s the row&apos;s trust signal), only specialty/location do, and the third line wraps
+          instead of clipping &quot;In person&quot; mid-word.
+        </p>
+        <div className="@container w-[860px] max-w-full overflow-hidden rounded-lg border border-border bg-surface">
+          {SAMPLE_EVENTS.map((e) => (
+            <EventRow key={`narrow-${e.id}`} event={e} saved={!!saved[e.id]} onToggleSave={() => toggleSave(e.id)} />
+          ))}
+        </div>
+
+        <SubHead className="mt-8">EventCardCompact — below row-sm (720px container, e.g. a phone)</SubHead>
         <div className="w-full max-w-[390px] space-y-2.5 rounded-lg border border-dashed border-border bg-bg p-3">
           {SAMPLE_EVENTS.slice(0, 5).map((e) => (
             <EventCardCompact key={e.id} event={e} saved={!!saved[e.id]} onToggleSave={() => toggleSave(e.id)} />

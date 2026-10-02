@@ -25,7 +25,7 @@ export function CpdLabel({
 
   return (
     <span
-      className={cn('inline-flex items-center gap-1 text-ok-text', text, className)}
+      className={cn('inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-ok-text', text, className)}
       title={points ? `${points} CPD points` : 'CPD accredited'}
     >
       <BadgeCheck className={size === 'md' ? 'size-4' : 'size-3.5'} strokeWidth={1.75} aria-hidden />

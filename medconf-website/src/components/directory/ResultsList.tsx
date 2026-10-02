@@ -1,6 +1,7 @@
 'use client'
 
 import { AlertTriangle, SearchX } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EventRow } from '@/components/domain/EventRow'
@@ -69,8 +70,12 @@ export function ResultsList({
   }
 
   return (
-    <div className={loading ? 'opacity-60 transition-opacity duration-150' : 'transition-opacity duration-150'}>
-      <div className="hidden overflow-hidden rounded-lg border border-border bg-surface sm:block">
+    // `@container`: EventRow/EventCardCompact must respond to the width of
+    // THIS column, not the viewport — a narrow dashboard card at a wide
+    // viewport needs the same compact treatment a phone gets (see EventRow's
+    // doc comment + the container-query tokens in globals.css).
+    <div className={cn('@container', loading ? 'opacity-60 transition-opacity duration-150' : 'transition-opacity duration-150')}>
+      <div className="hidden overflow-hidden rounded-lg border border-border bg-surface @row-sm:block">
         {rows.map((event) => (
           <EventRow
             key={event.id}
@@ -81,7 +86,7 @@ export function ResultsList({
           />
         ))}
       </div>
-      <div className="space-y-2.5 sm:hidden">
+      <div className="space-y-2.5 @row-sm:hidden">
         {rows.map((event) => (
           <EventCardCompact
             key={event.id}

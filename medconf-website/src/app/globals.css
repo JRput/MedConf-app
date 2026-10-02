@@ -354,6 +354,18 @@
      these are the named steps we reference in component specs. */
   --spacing-gutter: 1rem;
   --spacing-gutter-lg: 1.5rem;
+
+  /* Container-query breakpoints for EventRow (see its doc comment) — the row
+     must adapt to the width of whatever column it's rendered in (directory
+     content column, a dashboard card, a narrow homepage section), not the
+     viewport. `row-md` sits a little under the "~1000px" a straight read of
+     the content-column math would suggest, specifically so the /conferences
+     directory's own ~968px desktop content column (1320px shell − 280px
+     sidebar − gaps) stays on the unchanged wide layout with some margin for
+     scrollbar width. Any element with `@container` on it exposes these as
+     `@row-sm:`/`@row-md:` variants on its descendants. */
+  --container-row-sm: 45rem; /* 720px — below this, the row list shows EventCardCompact instead */
+  --container-row-md: 56.25rem; /* 900px — below this, EventRow itself switches to its stacked layout */
 }
 
 /* ====================================================== TYPE SCALE ======== */
