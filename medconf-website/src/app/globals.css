@@ -467,27 +467,10 @@
 }
 
 /* ===================================================== LEGACY (W2–W6) ===== */
-/* Kept so the not-yet-redesigned pages keep rendering. Delete these as each
-   page is migrated; nothing new should use them. */
+/* Font utilities. The legacy .gradient-text/.glass-card/.bg-grid-pattern
+   classes were removed 2026-10-02 once every page was on the token system. */
 .font-display { font-family: var(--font-display); }
 .font-body { font-family: var(--font-sans); }
-.gradient-text {
-  background: linear-gradient(135deg, #22d3ee 0%, #14b8a6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.glass-card {
-  background: rgba(15, 23, 42, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(148, 163, 184, 0.1);
-}
-.bg-grid-pattern {
-  background-image:
-    linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
 .glow-effect { position: relative; }
 .glow-effect::before {
   content: '';
