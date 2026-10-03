@@ -61,11 +61,30 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   IAS: { short: 'IAS', name: 'International AIDS Society', kind: 'international', country: 'International' },
   MDDUS: { short: 'MDDUS', name: 'Medical and Dental Defence Union of Scotland', kind: 'defence', country: 'UK' },
   MDU: { short: 'MDU', name: 'Medical Defence Union', kind: 'defence', country: 'UK' },
+  RCoA: { short: 'RCoA', name: 'Royal College of Anaesthetists', kind: 'royal-college', country: 'UK' },
+  // Wave 2a/2b (2026-10-03)
+  BAETS: { short: 'BAETS', name: 'British Association of Endocrine and Thyroid Surgeons', kind: 'specialist', country: 'UK' },
+  AANS: { short: 'AANS', name: 'American Association of Neurological Surgeons', kind: 'international', country: 'US' },
+  AAGL: { short: 'AAGL', name: 'AAGL — Advancing Minimally Invasive Gynecology Worldwide', kind: 'international', country: 'US' },
+  ESP: { short: 'ESP', name: 'European Society of Pathology', kind: 'international', country: 'EU' },
+  EAU: { short: 'EAU', name: 'European Association of Urology', kind: 'international', country: 'EU' },
+  EANM: { short: 'EANM', name: 'European Association of Nuclear Medicine', kind: 'international', country: 'EU' },
+  SCCM: { short: 'SCCM', name: 'Society of Critical Care Medicine', kind: 'international', country: 'US' },
+  'Advance HE': { short: 'Advance HE', name: 'Advance HE (higher-education teaching and leadership)', kind: 'other', country: 'UK' },
+  IFOS: { short: 'IFOS', name: 'International Federation of ORL Societies', kind: 'international', country: 'International' },
+  IDWeek: { short: 'IDWeek', name: 'IDWeek — IDSA, SHEA, HIVMA and PIDS joint meeting', kind: 'international', country: 'US' },
+  ISUOG: { short: 'ISUOG', name: 'International Society of Ultrasound in Obstetrics and Gynecology', kind: 'international', country: 'International' },
+  IHI: { short: 'IHI', name: 'Institute for Healthcare Improvement', kind: 'international', country: 'US' },
+  BSH: { short: 'BSH', name: 'British Society for Haematology', kind: 'specialist', country: 'UK' },
+  ACEP: { short: 'ACEP', name: 'American College of Emergency Physicians', kind: 'international', country: 'US' },
 }
 
 export function societyInfo(short: string | null | undefined): SocietyInfo | null {
   if (!short) return null
-  return SOCIETIES[short] ?? null
+  // A source added to scraper_sources before this map is updated must still
+  // be browsable: fall back to the code as its name under 'other'. Keep the
+  // map current for full names (and run `npm run check:societies`).
+  return SOCIETIES[short] ?? { short, name: short, kind: 'other', country: 'Unknown' }
 }
 
 /** Grouped by `kind`, for a faceted society filter (royal colleges first, etc). */

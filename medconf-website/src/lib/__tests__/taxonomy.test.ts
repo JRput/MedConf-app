@@ -86,9 +86,11 @@ describe('societies taxonomy', () => {
     }
   })
 
-  it('returns null for an unknown code instead of throwing', () => {
-    expect(societyInfo('NOT-A-REAL-SOCIETY')).toBeNull()
-    expect(societyInfo(null)).toBeNull()
+  it('falls back to a usable record for an unknown code instead of null', () => {
+    const info = societyInfo('NOT-A-REAL-SOCIETY')
+    expect(info).not.toBeNull()
+    expect(info?.name).toBe('NOT-A-REAL-SOCIETY')
+    expect(info?.kind).toBe('other')
   })
 
   it('every entry has a non-empty full name distinct from its short code', () => {

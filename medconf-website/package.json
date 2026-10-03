@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "taxonomy:export": "tsx scripts/export-taxonomy.ts"
+    "taxonomy:export": "tsx scripts/export-taxonomy.ts",
+    "check:societies": "npx tsx scripts/check-societies.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
