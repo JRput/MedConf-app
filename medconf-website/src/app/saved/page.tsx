@@ -3,7 +3,7 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Bookmark } from 'lucide-react'
+import { Bookmark, CalendarDays } from 'lucide-react'
 import { useSavedConferences } from '@/hooks/useSavedConferences'
 import { AccountContainer, AccountPageHeader, AccountEmptyState } from '@/components/account/AccountPageHeader'
 import { EventRowList } from '@/components/account/EventRowList'
@@ -61,18 +61,27 @@ export default function SavedPage() {
         }
         action={
           events.length > 0 && (
-            <Select value={sort} onValueChange={(v) => setSort(v as SortMode)}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(SORT_LABEL).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/calendar">
+                  <CalendarDays className="size-4" aria-hidden />
+                  <span className="hidden sm:inline">View on calendar</span>
+                  <span className="sm:hidden">Calendar</span>
+                </Link>
+              </Button>
+              <Select value={sort} onValueChange={(v) => setSort(v as SortMode)}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(SORT_LABEL).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           )
         }
       />

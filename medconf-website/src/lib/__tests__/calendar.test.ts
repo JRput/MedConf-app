@@ -11,6 +11,7 @@ import {
   daysInMonth,
   deadlinesByDay,
   eventsInMonth,
+  eventsOnDay,
   groupByMonth,
   isValidIsoDate,
   isoWeekday,
@@ -385,6 +386,20 @@ describe('deadlinesByDay', () => {
       { start: '2026-10-26', end: '2026-12-06' }
     )
     expect(Object.keys(map).sort()).toEqual(['2026-10-26', '2026-12-06'])
+  })
+})
+
+describe('eventsOnDay', () => {
+  it('counts a multi-day event on every day it runs, not just its first', () => {
+    const events = [ev(1, '2026-11-10', '2026-11-13'), ev(2, '2026-11-12'), ev(3, '2026-11-20'), ev(4, null)]
+    expect(eventsOnDay(events, '2026-11-10').map((e) => e.id)).toEqual([1])
+    expect(eventsOnDay(events, '2026-11-12').map((e) => e.id)).toEqual([1, 2])
+    expect(eventsOnDay(events, '2026-11-13').map((e) => e.id)).toEqual([1]) // inclusive end
+    expect(eventsOnDay(events, '2026-11-14')).toEqual([])
+  })
+
+  it('never returns an undated event', () => {
+    expect(eventsOnDay([ev(1, null), ev(2, 'nope')], '2026-11-11')).toEqual([])
   })
 })
 

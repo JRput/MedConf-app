@@ -352,6 +352,18 @@ export function deadlinesByDay<T extends { id: number; abstractDeadline?: string
   return out
 }
 
+/**
+ * Events occupying a specific day — the mobile week strip's dot counts and
+ * day list. A multi-day congress counts on every day it runs, not just its
+ * first, which is the whole point of asking "what have I got on Wednesday?".
+ */
+export function eventsOnDay<T extends SpanInput>(events: readonly T[], iso: string): T[] {
+  return events.filter((e) => {
+    const span = spanOf(e)
+    return span !== null && span.start <= iso && span.end >= iso
+  })
+}
+
 /** Events that overlap a given month at all — the header's "N events this month" count. */
 export function eventsInMonth<T extends SpanInput>(events: readonly T[], year: number, month: number): T[] {
   const first = toIso(year, month, 1)

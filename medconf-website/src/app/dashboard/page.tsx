@@ -3,7 +3,6 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { CalendarClock } from 'lucide-react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { useSavedConferences } from '@/hooks/useSavedConferences'
@@ -13,6 +12,7 @@ import { SPECIALTY_PARENTS, canonicalSpecialty } from '@/lib/taxonomy/specialtie
 import { AccountContainer, AccountPageHeader, AccountSection, AccountEmptyState } from '@/components/account/AccountPageHeader'
 import { EventRowList } from '@/components/account/EventRowList'
 import { Button } from '@/components/ui/button'
+import { CalendarLinkCard } from '@/components/calendar/CalendarLinkCard'
 
 const DAYS_30 = 30 * 86_400_000
 const DAYS_7 = 7 * 86_400_000
@@ -175,16 +175,7 @@ export default function DashboardPage() {
           </AccountSection>
         )}
 
-        <Link
-          href="/calendar"
-          className="flex items-center gap-3 rounded-lg border border-dashed border-border bg-surface-muted px-5 py-4 text-fg-muted transition-colors duration-150 hover:border-border-strong hover:text-fg"
-        >
-          <CalendarClock className="size-5 shrink-0" aria-hidden />
-          <div>
-            <p className="text-[0.9375rem] font-medium">Calendar — coming next</p>
-            <p className="type-small">See your saved events laid out on a month grid.</p>
-          </div>
-        </Link>
+        <CalendarLinkCard events={saved} />
       </div>
     </AccountContainer>
   )
