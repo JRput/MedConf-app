@@ -202,23 +202,63 @@ class MDUExtractor(BaseExtractor):
     # ------------------------------------------------------------------ #
     # Listing — the search-widget's own JSON API, filtered to dated Courses
     # ------------------------------------------------------------------ #
+    # themdu.com sits behind Imperva Incapsula. A cold browser's first load of
+    # the API URL gets an EMPTY body (an Incapsula JS stub that sets a cookie
+    # and reloads itself a moment later); `browser.navigate()` only detects
+    # Cloudflare titles, so it returns immediately and we used to read the
+    # empty body -> "non-JSON: Expecting value: line 1 column 1" -> 0 shells
+    # (cloud run 37107343533, 2026-10-03). Reproduced locally: attempt 1 empty,
+    # attempts 2-3 full 74KB JSON. So: poll for the reloaded body, then retry
+    # with backoff, warming the cookie via the hub page on later attempts.
+    _API_ATTEMPTS = 4
+    _API_POLL_SECS = 12
+
+    def _fetch_search_payload(self, browser) -> Optional[Dict[str, Any]]:
+        import time
+        last_body = ""
+        for attempt in range(1, self._API_ATTEMPTS + 1):
+            try:
+                if attempt >= 3:
+                    # Warm the Incapsula session on a normal page first.
+                    browser.navigate(f"{BASE}/learn-and-develop")
+                browser.navigate(SEARCH_API)
+                deadline = time.time() + self._API_POLL_SECS
+                raw = ""
+                while True:
+                    raw = (browser.page.evaluate(
+                        "() => document.body ? (document.body.innerText || '') : ''"
+                    ) or "").strip()
+                    if raw.startswith("{") or time.time() >= deadline:
+                        break
+                    browser.page.wait_for_timeout(1000)
+                last_body = raw
+                payload = json.loads(raw)
+                if isinstance(payload, dict) and isinstance(payload.get("results"), list):
+                    if attempt > 1:
+                        logger.info(f"MDU: search API OK on attempt {attempt}")
+                    return payload
+                logger.warning(f"MDU: search API JSON missing 'results' (attempt {attempt}): {raw[:200]!r}")
+            except Exception as e:
+                logger.warning(
+                    f"MDU: search API attempt {attempt}/{self._API_ATTEMPTS} failed: {e}; "
+                    f"body[:200]={last_body[:200]!r}"
+                )
+            if attempt < self._API_ATTEMPTS:
+                time.sleep(2 ** attempt)
+        logger.warning(
+            f"MDU: search API unusable after {self._API_ATTEMPTS} attempts "
+            f"(likely Incapsula block); last body[:200]={last_body[:200]!r}"
+        )
+        return None
+
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
         browser = getattr(self, "browser", None)
         if browser is None:
             logger.warning("MDU: no BrowserController available")
             return None
 
-        try:
-            browser.navigate(SEARCH_API)
-            raw = browser.page.evaluate("() => document.body.innerText || ''")
-        except Exception as e:
-            logger.warning(f"MDU: search API fetch failed: {e}")
-            return None
-
-        try:
-            payload = json.loads(raw)
-        except Exception as e:
-            logger.warning(f"MDU: search API returned non-JSON: {e}")
+        payload = self._fetch_search_payload(browser)
+        if payload is None:
             return None
 
         results = payload.get("results") or []

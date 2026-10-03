@@ -74,22 +74,76 @@ class RCSEngCoursesExtractor(BaseExtractor):
     # ------------------------------------------------------------------ #
     # Listing override — sitemap instead of DOM walker
     # ------------------------------------------------------------------ #
+    # Listing pages walked when sitemap.xml is unavailable (2026-10-03: the
+    # sitemap returned 502 for a whole cloud run). The listing is an Angular
+    # SPA that shows 10 at a time, so we click any "load more" control and
+    # harvest every course-detail href rendered.
+    FALLBACK_LISTING_URLS = (
+        "https://www.rcseng.ac.uk/education-and-exams/courses/surgical/",
+        "https://www.rcseng.ac.uk/education-and-exams/courses/search/",
+    )
+
+    def _fetch_sitemap_urls(self) -> List[str]:
+        import time
+        last_err: Any = None
+        for attempt in range(1, 4):
+            try:
+                with httpx.Client(timeout=30.0, follow_redirects=True) as c:
+                    resp = c.get(SITEMAP_URL)
+                    resp.raise_for_status()
+                    return sorted(set(COURSE_URL_RE.findall(resp.text)))
+            except Exception as e:
+                last_err = e
+                logger.warning(f"RCSEng courses: sitemap attempt {attempt}/3 failed ({e})")
+                if attempt < 3:
+                    time.sleep(2 ** attempt)
+        logger.warning(f"RCSEng courses: sitemap unavailable after 3 attempts ({last_err})")
+        return []
+
+    def _harvest_listing_urls(self) -> List[str]:
+        browser = getattr(self, "browser", None)
+        if browser is None:
+            return []
+        found: set = set()
+        for listing in self.FALLBACK_LISTING_URLS:
+            try:
+                browser.navigate(listing)
+                page = browser.page
+                for _ in range(40):  # click "load more" until it stops yielding links
+                    before = len(found)
+                    hrefs = page.evaluate(
+                        "() => Array.from(document.querySelectorAll('a[href]')).map(a => a.href)"
+                    ) or []
+                    for h in hrefs:
+                        m = COURSE_URL_RE.match(h.split("?")[0].split("#")[0].rstrip("/") + "/")
+                        if m:
+                            found.add(m.group(0))
+                    btn = page.query_selector(
+                        "button:has-text('Load more'), a:has-text('Load more'), "
+                        "button:has-text('Show more'), a:has-text('Show more')"
+                    )
+                    if not btn or len(found) == before and _ > 0:
+                        break
+                    btn.click()
+                    page.wait_for_timeout(1200)
+            except Exception as e:
+                logger.warning(f"RCSEng courses: fallback listing {listing} failed ({e})")
+        return sorted(found)
+
+    # ------------------------------------------------------------------ #
+    # Listing override — sitemap (with retries), else rendered listing pages
+    # ------------------------------------------------------------------ #
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
-        try:
-            with httpx.Client(timeout=30.0, follow_redirects=True) as c:
-                resp = c.get(SITEMAP_URL)
-                resp.raise_for_status()
-                xml = resp.text
-        except Exception as e:
-            logger.warning(f"RCSEng courses: sitemap fetch failed ({e}); falling back to DOM")
-            return None
-
-        urls = sorted(set(COURSE_URL_RE.findall(xml)))
+        urls = self._fetch_sitemap_urls()
         if not urls:
-            logger.warning("RCSEng courses: no course URLs found in sitemap")
+            logger.warning("RCSEng courses: no course URLs from sitemap; walking listing pages")
+            urls = self._harvest_listing_urls()
+            if urls:
+                logger.info(f"RCSEng courses: {len(urls)} courses harvested from listing pages")
+        if not urls:
+            logger.warning("RCSEng courses: no course URLs from sitemap or listing pages "
+                           "(site likely down) - falling back to DOM walker")
             return None
-
-        logger.info(f"RCSEng courses: {len(urls)} courses found in sitemap")
 
         shells: List[Dict[str, Any]] = []
         for url in urls:
