@@ -6,7 +6,7 @@
 >
 > **LLM models — fallback chains** (2026-09-20, after NVIDIA retired every configured model on 2026-08-26 and calls failed silently for 25 days): text chain = `nvidia/nemotron-3-super-120b-a12b` → `meta/muse-glimmer-30b` → `openai/gpt-oss-20b`; vision chain = `meta/muse-glimmer-30b` → `meta/llama-3.2-11b-vision-instruct`. `llm_client.chat_completion()` advances past any model that 404s/410s. `probe_models.py` runs as the first job of the daily scrape — whole chain dead = red run. Defaults live in `config.py`; override with `KIMI_MODEL_CHAIN` / `KIMI_VISION_MODEL_CHAIN`.
 >
-> **Not yet deployed.** Frontend runs on localhost only (`PORT=3001 npm run dev`). No Vercel/production URL.
+> **Not yet deployed.** Frontend runs on localhost only (`PORT=3000 npm run dev`). No Vercel/production URL. **Website redesigned 2026-10-03 (Mission W):** light/dark design system, server-side directory (`directory_events` view), `/societies`, `/calendar` (personal). Design tile at `/design`. DB migrations: `medconf-scraper/apply_migration.py`.
 
 ---
 

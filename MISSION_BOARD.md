@@ -163,7 +163,7 @@ Gate per sub-wave: harness twice → first scrape → remediator → audit (advi
 
 ---
 
-# MISSION W — Website redesign (opened 2026-09-30, APPROVED 2026-09-30 — executing)
+# MISSION W — Website redesign (opened 2026-09-30 · **DELIVERED 2026-10-03**, merged to main `6690533`)
 
 **Brief:** the site "looks too much like AI", the pill/card layout is inefficient, filtering is not up to scratch, information is dumped rather than presented. Add a personal calendar. Audits: `reports/website-audit/{ux,code,data}.md` + 13 screenshots.
 
@@ -171,11 +171,15 @@ Gate per sub-wave: harness twice → first scrape → remediator → audit (advi
 
 | # | Phase | Executor / model | Status |
 |---|---|---|---|
-| W1 | Design system: tokens (light+dark), type scale, shadcn/ui + Radix primitives, theme toggle, `/design` style-tile preview with 2 accent options | design-eng agent · `opus` | 🔄 |
-| W2 | Directory rebuild: server-side query + pagination, row/card list, single filter surface (date, format, specialty taxonomy, region, price incl. free/unknown, type, source, CPD), URL state, faceted counts, sort, ⌘K search | coding agents · `sonnet` (taxonomy: `haiku`) | ⬜ |
-| W3 | Personal calendar `/calendar`: month grid (saved events marked, multi-day spans), side panel, week strip on mobile, save-from-row, ICS export | `sonnet` | ⬜ |
-| W4 | Detail page: sticky essentials panel, pricing/sessions, related events, deadline countdown | `sonnet` | ⬜ |
-| W5 | Homepage (redesigned, separate) + nav shell + auth pages | `opus` design → `sonnet` build | ⬜ |
-| W6 | Dashboard / saved / settings / onboarding simplification | `sonnet` | ⬜ |
+| W1 | Design system: warm-neutral tokens (light+dark), Figtree/Inter/JetBrains Mono, shadcn/ui re-themed, domain primitives, `/design` tile | `opus` | ✅ teal accent chosen |
+| W2 | Directory rebuild: `directory_events` view + facets RPC (migration applied via session pooler), server-side pagination, single filter surface, society-first rows, `/societies`, ⌘K | `sonnet` | ✅ 37 tests; undated-rows bug fixed |
+| W3 | Personal calendar `/calendar`: custom month engine, spanning bars, interactive abstract-deadline markers, agenda + week strip, ICS feed | `opus` | ✅ 96 tests total |
+| W4 | Detail page: sticky essentials, tabbed fees, sessions, related events, JSON-LD | `sonnet` | ✅ |
+| W5 | Homepage (live numbers, closing soon, this month, browse by specialty/society) + auth cards | `opus` | ✅ |
+| W6 | Dashboard / saved / settings / onboarding on the kit; alerts cron now taxonomy-aware | `sonnet` | ✅ |
 
 Gate per phase: build in a worktree → Playwright screenshots at 390 / 768 / 1440 in both themes → Commander review → user preview on localhost → merge. Cost: £0 external (shadcn/Radix free). Skills: ui-ux-pro-max (design system generated 2026-09-30: accessible/clinical, avoid neon + AI gradients), emil-design-eng (polish), 21st.dev component patterns as reference.
+
+**Mission W close-out:** every route on the token system (sweep: 9 routes × 3 widths × 2 themes, no legacy markup). Throwaway test accounts to delete in Supabase Auth: `medconf-w3-calendar-6a46d3@mailinator.com` + one W6 mailinator account (oncology registrar). Follow-ups parked: `user_reminders` markers on the calendar; tablet row density; W5 noted `country` is unknown for 479 events (recon/scraper gap, affects the UK/International filter counts).
+
+**Next:** resume Wave 2 (§7) — say "resume wave 2".
