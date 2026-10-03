@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { formatDateRange } from '@/lib/format'
+import { formatDateRange, isOngoing } from '@/lib/format'
 import { locationLine, type DirectoryEvent } from '@/lib/directory'
 import { EventTypeBadge } from './EventTypeBadge'
 import { FormatBadge } from './FormatBadge'
@@ -23,14 +23,18 @@ export function EventCardCompact({
   event,
   saved = false,
   onToggleSave,
+  societyCount,
   className,
 }: {
   event: DirectoryEvent
   saved?: boolean
   onToggleSave?: (next: boolean) => void
+  /** Upcoming-event count for event.society, when the caller has it (see SocietyChip). */
+  societyCount?: number
   className?: string
 }) {
   const place = locationLine(event)
+  const ongoing = !event.isOnDemand && isOngoing(event.startDate, event.endDate)
 
   return (
     <article
@@ -43,7 +47,15 @@ export function EventCardCompact({
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <span className="type-mono-label text-fg-muted">{formatDateRange(event.startDate, event.endDate)}</span>
+        <div className="flex flex-col gap-0.5">
+          <span className={cn('type-mono-label', ongoing ? 'text-warn-text' : 'text-fg-muted')}>
+            {ongoing ? `Until ${formatDateRange(event.endDate, null)}` : formatDateRange(event.startDate, event.endDate)}
+          </span>
+          {/* The full span stays visible underneath once we've swapped the
+              headline to "Until <end>" — otherwise the start date disappears
+              entirely instead of just losing top billing. */}
+          {ongoing && <span className="type-mono-label text-[0.6875rem] text-fg-subtle">{formatDateRange(event.startDate, event.endDate)}</span>}
+        </div>
         <SaveToggle saved={saved} onToggle={onToggleSave} label={event.name} className="-mt-1.5 -mr-1.5" />
       </div>
 
@@ -56,22 +68,29 @@ export function EventCardCompact({
         {event.name}
       </h3>
 
+      {/* Society leads this line — the row's trust signal, strongest element
+          here — before specialty (see SocietyChip's doc comment). */}
+      {(event.society || event.specialty) && (
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.8125rem] text-fg-muted">
+          {event.society && <SocietyChip name={event.society} count={societyCount} />}
+          {event.specialty && (
+            <>
+              {event.society && <span aria-hidden className="text-fg-subtle">·</span>}
+              <span className="truncate">{event.specialty}</span>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-[0.8125rem] text-fg-muted">
         <EventTypeBadge type={event.eventType} isFlagship={event.isFlagship} isOnDemand={event.isOnDemand} />
-        {event.specialty && <span className="truncate">{event.specialty}</span>}
-      </div>
-
-      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[0.8125rem] text-fg-muted">
         {event.format && <FormatBadge format={event.format} />}
         {place && <span className="truncate">{place}</span>}
         <CpdLabel accredited={event.cpdAccredited} points={event.cpdPoints} />
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-border-subtle pt-2.5">
-        <div className="flex min-w-0 items-center gap-2">
-          <PriceLabel min={event.priceMin} max={event.priceMax} currency={event.currency} size="md" />
-          <SocietyChip name={event.society} className="truncate" />
-        </div>
+        <PriceLabel min={event.priceMin} max={event.priceMax} currency={event.currency} size="md" />
         <EventStatus event={event} />
       </div>
 

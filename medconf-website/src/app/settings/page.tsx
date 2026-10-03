@@ -1,219 +1,144 @@
 // src/app/settings/page.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Check, Loader2, LogOut } from 'lucide-react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
-import type { NotificationPreferences } from '@/lib/types'
-import { Settings, Bell, Clock, Loader2, Check, AlertCircle } from 'lucide-react'
+import { SPECIALTY_PARENTS, canonicalSpecialty } from '@/lib/taxonomy/specialties'
+import { AccountContainer, AccountPageHeader, AccountSection } from '@/components/account/AccountPageHeader'
+import { SpecialtyCombobox } from '@/components/account/SpecialtyCombobox'
+import { GradeSelect } from '@/components/account/GradeSelect'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { toast } from 'sonner'
 
-type ToggleKey = 'email_new_conferences' | 'email_abstract_deadlines' | 'email_price_changes'
+function toSpecialtySlug(raw: string | null): string | null {
+  if (!raw) return null
+  if (SPECIALTY_PARENTS.some((p) => p.slug === raw)) return raw
+  return canonicalSpecialty(raw).parent
+}
 
 export default function SettingsPage() {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
+  const router = useRouter()
   const supabase = createSupabaseClient()
-  const [prefs, setPrefs] = useState<NotificationPreferences | null>(null)
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [fullName, setFullName] = useState('')
+  const [specialtySlug, setSpecialtySlug] = useState<string | null>(null)
+  const [grade, setGrade] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
-
-    async function fetchPrefs() {
-      const { data } = await supabase
-        .from('notification_preferences')
-        .select('*')
-        .eq('id', user!.id)
-        .maybeSingle()
-
-      if (data) {
-        setPrefs(data)
-      } else {
-        // Lazily create defaults if the row is missing (shouldn't usually
-        // happen — onboarding writes one — but make settings self-healing).
-        const defaults = {
-          id: user!.id,
-          email_new_conferences: true,
-          email_abstract_deadlines: true,
-          email_price_changes: false,
-          email_frequency: 'weekly',
-        }
-        const { data: inserted } = await supabase
-          .from('notification_preferences')
-          .insert(defaults)
-          .select('*')
-          .single()
-        if (inserted) setPrefs(inserted)
-      }
-      setLoading(false)
-    }
-
-    fetchPrefs()
-  }, [user, supabase])
+    supabase
+      .from('user_profiles')
+      .select('full_name, specialty, role')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setFullName(data?.full_name ?? '')
+        setSpecialtySlug(toSpecialtySlug(data?.specialty ?? null))
+        setGrade(data?.role ?? null)
+        setLoading(false)
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
 
   const handleSave = async () => {
-    if (!prefs || !user) return
-
+    if (!user) return
     setSaving(true)
-
-    await supabase.from('notification_preferences').update({
-      email_new_conferences: prefs.email_new_conferences,
-      email_abstract_deadlines: prefs.email_abstract_deadlines,
-      email_price_changes: prefs.email_price_changes,
-      email_frequency: prefs.email_frequency,
-    }).eq('id', user.id)
-
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({ full_name: fullName.trim() || null, specialty: specialtySlug, role: grade })
+      .eq('id', user.id)
     setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
+    if (error) {
+      toast.error('Could not save your profile', { description: error.message })
+      return
+    }
+    toast.success('Profile updated')
   }
 
-  const toggle = (key: ToggleKey) =>
-    setPrefs(p => p ? { ...p, [key]: !p[key] } : p)
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/')
+  }
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-4" />
-          <p className="text-slate-400 text-sm">Loading preferences...</p>
-        </div>
-      </div>
+      <AccountContainer className="flex items-center justify-center">
+        <Loader2 className="size-6 animate-spin text-fg-subtle" />
+      </AccountContainer>
     )
   }
-
-  if (!prefs) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
-            <AlertCircle className="w-8 h-8 text-rose-400" />
-          </div>
-          <p className="text-slate-400">Could not load preferences. Please try again later.</p>
-        </div>
-      </div>
-    )
-  }
-
-  const toggles: { key: ToggleKey; label: string; desc: string }[] = [
-    {
-      key: 'email_new_conferences',
-      label: 'New conferences in your specialty',
-      desc: 'Be notified when new conferences matching your specialty are added to the directory',
-    },
-    {
-      key: 'email_abstract_deadlines',
-      label: 'Abstract deadline reminders',
-      desc: 'Get reminders as abstract submission deadlines approach on your saved conferences',
-    },
-    {
-      key: 'email_price_changes',
-      label: 'Price changes',
-      desc: 'Get notified when registration pricing changes on your saved conferences',
-    },
-  ]
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-grid-pattern">
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 -z-10" />
+    <AccountContainer className="max-w-[640px]">
+      <AccountPageHeader title="Settings" subtitle="Your profile, appearance and notifications." />
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-500/20 border border-violet-500/30 flex items-center justify-center">
-              <Settings className="w-5 h-5 text-violet-400" />
+      <div className="space-y-8">
+        <AccountSection title="Profile">
+          <div className="space-y-4 rounded-lg border border-border bg-surface p-5">
+            <Field label="Name">
+              <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Dr Jai Rajput" />
+            </Field>
+            <Field label="Specialty">
+              <SpecialtyCombobox value={specialtySlug} onChange={setSpecialtySlug} />
+            </Field>
+            <Field label="Grade">
+              <GradeSelect value={grade} onChange={setGrade} />
+            </Field>
+            <div className="flex justify-end pt-1">
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
+                {saving ? 'Saving…' : 'Save changes'}
+              </Button>
             </div>
-            <h1 className="text-3xl font-bold text-white font-display">Notification settings</h1>
           </div>
-          <p className="text-slate-400 ml-13">Choose which alerts you want to receive</p>
-        </div>
+        </AccountSection>
 
-        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-8">
-          <div className="space-y-6">
-            <h2 className="font-bold text-white text-lg flex items-center gap-2">
-              <Bell className="w-5 h-5 text-cyan-400" />
-              Alerts
-            </h2>
-
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-sm text-amber-200">
-              <strong className="font-semibold">Email digests are not yet available.</strong>{' '}
-              The preferences below are saved to your profile but no
-              emails are sent yet. In-app notifications for saved-event
-              reminders and specialty alerts are live and can be viewed
-              from the bell icon.
+        <AccountSection title="Appearance">
+          <div className="flex items-center justify-between rounded-lg border border-border bg-surface p-5">
+            <div>
+              <p className="text-[0.9375rem] font-medium text-fg">Theme</p>
+              <p className="type-small text-fg-muted">Light or dark — follows your choice, not your system setting.</p>
             </div>
-
-            {toggles.map(item => (
-              <div key={item.key} className="flex items-start justify-between gap-4 p-4 bg-slate-800/30 rounded-xl opacity-60">
-                <div>
-                  <p className="font-medium text-white flex items-center gap-2">
-                    {item.label}
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                      Coming soon
-                    </span>
-                  </p>
-                  <p className="text-sm text-slate-400 mt-1">{item.desc}</p>
-                </div>
-                <button
-                  disabled
-                  aria-disabled="true"
-                  className={`relative w-12 h-7 rounded-full flex-shrink-0 bg-slate-700 cursor-not-allowed`}
-                >
-                  <span className="absolute top-1 left-1 w-5 h-5 bg-white/40 rounded-full shadow" />
-                </button>
-              </div>
-            ))}
+            <ThemeToggle />
           </div>
+        </AccountSection>
 
-          <div className="space-y-4 opacity-60">
-            <h2 className="font-bold text-white text-lg flex items-center gap-2">
-              <Clock className="w-5 h-5 text-cyan-400" />
-              Digest frequency
-              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                Coming soon
-              </span>
-            </h2>
-            <select
-              disabled
-              value={prefs.email_frequency}
-              onChange={e => setPrefs(p => p ? { ...p, email_frequency: e.target.value } : p)}
-              className="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl text-white cursor-not-allowed appearance-none"
-            >
-              <option value="immediate" className="bg-slate-800">Immediate</option>
-              <option value="daily" className="bg-slate-800">Daily digest</option>
-              <option value="weekly" className="bg-slate-800">Weekly digest</option>
-            </select>
+        <AccountSection title="Notifications">
+          <div className="rounded-lg border border-border bg-surface p-5">
+            <p className="type-small text-fg-muted">
+              In-app notifications for saved-event reminders and specialty alerts are on by default — see the bell icon. Email digests
+              are coming soon.
+            </p>
           </div>
+        </AccountSection>
 
-          <div className="pt-4">
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 text-white py-3 rounded-xl font-semibold hover:from-cyan-400 hover:to-teal-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-cyan-500/25"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving…
-                </>
-              ) : (
-                <>
-                  <Check className="w-4 h-4" />
-                  Save preferences
-                </>
-              )}
-            </button>
+        <Separator />
 
-            {saved && (
-              <p className="text-emerald-400 text-sm text-center mt-4 flex items-center justify-center gap-2">
-                <Check className="w-4 h-4" />
-                Preferences saved successfully
-              </p>
-            )}
-          </div>
-        </div>
+        <AccountSection title="Account">
+          <Button variant="outline" onClick={handleSignOut} className="w-full sm:w-auto">
+            <LogOut className="size-4" />
+            Sign out
+          </Button>
+        </AccountSection>
       </div>
+    </AccountContainer>
+  )
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <label className="type-mono-label text-fg-subtle">{label}</label>
+      {children}
     </div>
   )
 }

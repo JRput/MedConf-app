@@ -1,439 +1,191 @@
 // src/app/dashboard/page.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
+import { CalendarClock } from 'lucide-react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
-import type { Conference } from '@/lib/types'
-import {
-  Bookmark, Calendar, Bell, FileText, Sparkles, Clock,
-  ArrowRight, Loader2, MapPin, Building2,
-} from 'lucide-react'
-import { isAbstractEffectivelyOpen } from '@/lib/conference-helpers'
+import { useSavedConferences } from '@/hooks/useSavedConferences'
+import { directoryEventFromRow, type DirectoryEvent, type DirectoryEventRow } from '@/lib/directory'
+import { expandSpecialtyFilter } from '@/lib/directory-query'
+import { SPECIALTY_PARENTS, canonicalSpecialty } from '@/lib/taxonomy/specialties'
+import { AccountContainer, AccountPageHeader, AccountSection, AccountEmptyState } from '@/components/account/AccountPageHeader'
+import { EventRowList } from '@/components/account/EventRowList'
+import { Button } from '@/components/ui/button'
 
-interface DashboardData {
-  fullName: string | null
-  specialty: string | null
-  totalSaved: number
-  upcomingSaved: Conference[]
-  closingDeadlines: Conference[]
-  newInSpecialty: Conference[]
+const DAYS_30 = 30 * 86_400_000
+const DAYS_7 = 7 * 86_400_000
+
+/** Legacy profiles may still hold a raw specialty string from the old fixed
+ *  onboarding list (e.g. "Cardiology") rather than a taxonomy slug — map
+ *  either shape to a parent slug so queryDirectory-style filtering works
+ *  the same regardless of when the user signed up. */
+function toSpecialtySlug(raw: string | null): string | null {
+  if (!raw) return null
+  if (SPECIALTY_PARENTS.some((p) => p.slug === raw)) return raw
+  return canonicalSpecialty(raw).parent
 }
 
 export default function DashboardPage() {
   const { user } = useAuth()
   const supabase = createSupabaseClient()
-  const [data, setData] = useState<DashboardData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { events: saved, loading: savedLoading, toggleSave, savedIds } = useSavedConferences()
+
+  const [fullName, setFullName] = useState<string | null>(null)
+  const [specialtySlug, setSpecialtySlug] = useState<string | null>(null)
+  const [profileLoaded, setProfileLoaded] = useState(false)
+  const [deadlines, setDeadlines] = useState<DirectoryEvent[]>([])
+  const [newInSpecialty, setNewInSpecialty] = useState<DirectoryEvent[]>([])
+  const [feedLoading, setFeedLoading] = useState(true)
 
   useEffect(() => {
     if (!user) return
 
-    const load = async () => {
-      const today = new Date().toISOString().slice(0, 10)
-      const in14 = new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10)
-      const oneWeekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString()
-
-      // Round 1: profile (needed for the specialty filter) + saved IDs.
-      // Both come from small tables keyed by user_id, so they're fast.
-      const [profileResp, savedIdsResp] = await Promise.all([
-        supabase
-          .from('user_profiles')
-          .select('full_name, specialty')
-          .eq('id', user.id)
-          .single(),
-        supabase
-          .from('saved_conferences')
-          .select('conference_id')
-          .eq('user_id', user.id),
-      ])
-
-      const fullName = profileResp.data?.full_name ?? null
-      const specialty = profileResp.data?.specialty ?? null
-      const savedIds = (savedIdsResp.data ?? []).map(r => r.conference_id)
-      const totalSaved = savedIds.length
-
-      // Round 2: the three conferences queries run in parallel. Skipping
-      // ones whose precondition isn't met (no saved IDs / no specialty)
-      // by resolving an empty array, so Promise.all stays balanced.
-      const upcomingP = savedIds.length > 0
-        ? supabase
-            .from('conferences')
-            .select('*')
-            .in('id', savedIds)
-            .eq('archived', false)
-            .gte('start_date', today)
-            .order('start_date', { ascending: true })
-            .limit(3)
-        : Promise.resolve({ data: [] as Conference[] })
-
-      const closingP = supabase
-        .from('conferences')
-        .select('*')
-        .eq('archived', false)
-        .not('abstract_deadline', 'is', null)
-        .gte('abstract_deadline', today)
-        .lte('abstract_deadline', in14)
-        .order('abstract_deadline', { ascending: true })
-        .limit(3)
-
-      // Use eq instead of ilike — specialty values come from a controlled
-      // dropdown, so case matches. ilike was forcing a sequential scan
-      // because there's no functional lower() index.
-      const newInSpecP = specialty
-        ? supabase
-            .from('conferences')
-            .select('*')
-            .eq('archived', false)
-            .eq('specialty', specialty)
-            .gte('created_at', oneWeekAgo)
-            .order('created_at', { ascending: false })
-            .limit(3)
-        : Promise.resolve({ data: [] as Conference[] })
-
-      const [upcomingResp, closingResp, newInSpecResp] = await Promise.all([upcomingP, closingP, newInSpecP])
-
-      setData({
-        fullName,
-        specialty,
-        totalSaved,
-        upcomingSaved: (upcomingResp.data ?? []) as Conference[],
-        closingDeadlines: (closingResp.data ?? []) as Conference[],
-        newInSpecialty: (newInSpecResp.data ?? []) as Conference[],
+    supabase
+      .from('user_profiles')
+      .select('full_name, specialty')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        setFullName(data?.full_name ?? null)
+        setSpecialtySlug(toSpecialtySlug(data?.specialty ?? null))
+        setProfileLoaded(true)
       })
-      setLoading(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
+
+  useEffect(() => {
+    if (!profileLoaded) return
+    if (!specialtySlug) {
+      setDeadlines([])
+      setNewInSpecialty([])
+      setFeedLoading(false)
+      return
     }
 
-    load()
-  }, [user, supabase])
+    const rawSpecialty = expandSpecialtyFilter([specialtySlug])
+    const today = new Date().toISOString().slice(0, 10)
+    const in30 = new Date(Date.now() + DAYS_30).toISOString().slice(0, 10)
+    const sevenDaysAgo = new Date(Date.now() - DAYS_7).toISOString()
 
-  if (loading || !data) {
-    return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
-      </div>
-    )
-  }
+    setFeedLoading(true)
+    Promise.all([
+      supabase
+        .from('directory_events')
+        .select('*')
+        .in('specialty', rawSpecialty)
+        .not('abstract_deadline', 'is', null)
+        .gte('abstract_deadline', today)
+        .lte('abstract_deadline', in30)
+        .order('abstract_deadline', { ascending: true })
+        .limit(5),
+      supabase
+        .from('directory_events')
+        .select('*')
+        .in('specialty', rawSpecialty)
+        .gte('created_at', sevenDaysAgo)
+        .order('created_at', { ascending: false })
+        .limit(5),
+    ]).then(([deadlineResp, newResp]) => {
+      setDeadlines(((deadlineResp.data ?? []) as DirectoryEventRow[]).map(directoryEventFromRow))
+      setNewInSpecialty(((newResp.data ?? []) as DirectoryEventRow[]).map(directoryEventFromRow))
+      setFeedLoading(false)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileLoaded, specialtySlug])
 
-  const firstName = data.fullName?.split(' ')[0] || 'there'
-  const nextDeadline = data.closingDeadlines[0]
-  const daysUntil = (dateStr: string | null) => {
-    if (!dateStr) return null
-    const diff = Math.ceil(
-      (new Date(dateStr).getTime() - Date.now()) / 86400_000
-    )
-    return diff
-  }
+  const next30Days = useMemo(() => {
+    const cutoff = new Date(Date.now() + DAYS_30).toISOString().slice(0, 10)
+    const today = new Date().toISOString().slice(0, 10)
+    return saved
+      .filter((e) => {
+        const relevantDate = e.endDate ?? e.startDate
+        if (!e.startDate) return false // "Date TBC" saves don't belong on a dated timeline
+        return e.startDate <= cutoff && (!relevantDate || relevantDate >= today)
+      })
+      .sort((a, b) => (a.startDate ?? '').localeCompare(b.startDate ?? ''))
+  }, [saved])
+
+  const specialtyLabel = specialtySlug ? SPECIALTY_PARENTS.find((p) => p.slug === specialtySlug)?.label : null
+  const firstName = fullName?.split(' ')[0] || null
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-grid-pattern">
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 -z-10" />
+    <AccountContainer className="max-w-[920px]">
+      <AccountPageHeader
+        title={firstName ? `Welcome back, ${firstName}` : 'Your dashboard'}
+        subtitle={
+          specialtyLabel
+            ? `Tracking ${specialtyLabel.toLowerCase()} and your saved events.`
+            : 'Save events from the directory to start tracking them here.'
+        }
+      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-white font-display">
-            Welcome back, {firstName}
-          </h1>
-          {nextDeadline ? (
-            <p className="text-slate-400 mt-2">
-              Your next abstract deadline:{' '}
-              <Link
-                href={`/conferences/${nextDeadline.id}`}
-                className="text-cyan-400 hover:text-cyan-300"
-              >
-                {nextDeadline.conference_name}
-              </Link>
-              {' '}in {daysUntil(nextDeadline.abstract_deadline)} days
-            </p>
-          ) : (
-            <p className="text-slate-400 mt-2">
-              {data.specialty
-                ? `Showing conferences tailored to your interest in ${data.specialty}.`
-                : 'Browse the directory to find conferences and save the ones that interest you.'}
-            </p>
-          )}
-        </div>
-
-        {/* Stats row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <StatCard
-            icon={Bookmark}
-            label="Saved conferences"
-            value={data.totalSaved.toString()}
-            href="/saved"
-            tint="cyan"
-          />
-          <StatCard
-            icon={Clock}
-            label="Deadlines in next 14 days"
-            value={data.closingDeadlines.length.toString()}
-            // Land on the directory sorted by deadline (the default) so
-            // the closing-soon abstract deadlines surface at the top.
-            href="/conferences?sort=deadline"
-            tint="amber"
-          />
-          <StatCard
-            icon={Sparkles}
-            label={data.specialty ? `New in ${data.specialty}` : 'New this week'}
-            value={data.newInSpecialty.length.toString()}
-            // Deep-link straight into the specialty-filtered directory,
-            // sorted by recently-added so the new arrivals are at the top
-            // with the green NEW pill. Matches the click target the
-            // notification bell uses for the same content.
-            href={data.specialty
-              ? `/conferences?specialty=${encodeURIComponent(data.specialty)}&sort=recently_added`
-              : `/conferences?sort=recently_added`}
-            tint="teal"
-          />
-        </div>
-
-        {/* Saved upcoming */}
-        <Section
-          title="Your upcoming saved conferences"
-          actionLabel="View all"
-          actionHref="/saved"
+      <div className="space-y-10">
+        <AccountSection
+          title="Your next 30 days"
+          action={
+            <Link href="/saved" className="type-small font-medium text-brand-text hover:underline">
+              View all saved
+            </Link>
+          }
         >
-          {data.upcomingSaved.length === 0 ? (
-            <EmptyState
-              icon={Bookmark}
-              title="Nothing saved yet"
-              description="Browse the directory and click the save button on conferences you want to track."
-              ctaLabel="Browse conferences"
-              ctaHref="/conferences"
+          <EventRowList
+            events={next30Days}
+            savedIds={savedIds}
+            onToggleSave={(id) => toggleSave(id)}
+            loading={savedLoading}
+            emptyState={
+              <AccountEmptyState
+                title="Nothing saved yet"
+                description="Save events from the directory to see them here."
+                action={
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/conferences">Browse the directory</Link>
+                  </Button>
+                }
+              />
+            }
+          />
+        </AccountSection>
+
+        {specialtySlug && (
+          <AccountSection title={`Deadlines in ${specialtyLabel}`}>
+            <EventRowList
+              events={deadlines}
+              savedIds={savedIds}
+              onToggleSave={(id) => toggleSave(id)}
+              loading={feedLoading}
+              emptyState={
+                <AccountEmptyState title="No deadlines in the next 30 days" description="We'll surface them here as they approach." />
+              }
             />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {data.upcomingSaved.map(c => <MiniConferenceCard key={c.id} c={c} />)}
-            </div>
-          )}
-        </Section>
-
-        {/* Closing soon */}
-        <Section
-          title="Abstract deadlines closing soon"
-          actionLabel="See all"
-          actionHref="/conferences"
-        >
-          {data.closingDeadlines.length === 0 ? (
-            <EmptyState
-              icon={Clock}
-              title="No deadlines in the next 14 days"
-              description="We'll surface them here as they approach."
-            />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {data.closingDeadlines.map(c => <MiniConferenceCard key={c.id} c={c} highlightDeadline />)}
-            </div>
-          )}
-        </Section>
-
-        {/* What's coming */}
-        <Section title="Coming to your dashboard">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FeatureCard
-              icon={Bell}
-              title="In-app reminders"
-              description="Set custom reminders for abstract deadlines and conference start dates. You'll see them right here in the bell icon."
-              comingSoon
-            />
-            <FeatureCard
-              icon={FileText}
-              title="Submission tracker"
-              description="Log every abstract you submit and track it from Submitted → Under Review → Accepted across every conference."
-              comingSoon
-            />
-          </div>
-        </Section>
-
-      </div>
-    </div>
-  )
-}
-
-function StatCard({
-  icon: Icon, label, value, href, tint,
-}: {
-  icon: typeof Bookmark
-  label: string
-  value: string
-  href: string
-  tint: 'cyan' | 'amber' | 'teal'
-}) {
-  const tints = {
-    cyan: 'border-cyan-500/30 hover:border-cyan-500/60 text-cyan-400',
-    amber: 'border-amber-500/30 hover:border-amber-500/60 text-amber-400',
-    teal: 'border-teal-500/30 hover:border-teal-500/60 text-teal-400',
-  }
-  return (
-    <Link
-      href={href}
-      className={`glass-card rounded-xl p-5 border transition-all ${tints[tint]}`}
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-slate-400">{label}</p>
-          <p className="text-3xl font-bold text-white mt-2">{value}</p>
-        </div>
-        <Icon className={`w-6 h-6 ${tints[tint].split(' ').pop()}`} />
-      </div>
-    </Link>
-  )
-}
-
-function Section({
-  title, actionLabel, actionHref, children,
-}: {
-  title: string
-  actionLabel?: string
-  actionHref?: string
-  children: React.ReactNode
-}) {
-  return (
-    <section>
-      <div className="flex items-end justify-between mb-4">
-        <h2 className="text-lg font-bold text-white">{title}</h2>
-        {actionLabel && actionHref && (
-          <Link href={actionHref} className="text-sm text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
-            {actionLabel} <ArrowRight className="w-4 h-4" />
-          </Link>
+          </AccountSection>
         )}
-      </div>
-      {children}
-    </section>
-  )
-}
 
-function MiniConferenceCard({ c, highlightDeadline = false }: { c: Conference; highlightDeadline?: boolean }) {
-  const dateLabel = c.start_date
-    ? new Date(c.start_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-    : 'Date TBC'
-  const deadlineLabel = c.abstract_deadline
-    ? new Date(c.abstract_deadline).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-    : null
-  const daysLeft = c.abstract_deadline
-    ? Math.ceil((new Date(c.abstract_deadline).getTime() - Date.now()) / 86400_000)
-    : null
-
-  return (
-    <Link
-      href={`/conferences/${c.id}`}
-      className="glass-card rounded-xl p-4 block hover:border-cyan-500/30 transition-all"
-    >
-      {c.specialty && (
-        <span className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">
-          {c.specialty}
-        </span>
-      )}
-      <h3 className="font-bold text-white text-sm leading-tight line-clamp-2 mt-1">
-        {c.conference_name}
-      </h3>
-      <div className="mt-3 space-y-1.5 text-xs text-slate-400">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-3.5 h-3.5 text-slate-500" />
-          <span>{dateLabel}</span>
-        </div>
-        {(c.city || c.event_format) && (
-          <div className="flex items-center gap-2">
-            {c.event_format === 'online'
-              ? <MapPin className="w-3.5 h-3.5 text-slate-500" />
-              : <Building2 className="w-3.5 h-3.5 text-slate-500" />}
-            <span>
-              {c.event_format === 'online' ? 'Online' : (c.city || 'Location TBC')}
-            </span>
-          </div>
+        {specialtySlug && (
+          <AccountSection title={`New in ${specialtyLabel} this week`}>
+            <EventRowList
+              events={newInSpecialty}
+              savedIds={savedIds}
+              onToggleSave={(id) => toggleSave(id)}
+              loading={feedLoading}
+              emptyState={<AccountEmptyState title="Nothing new this week" description="Check back soon, or browse the full directory." />}
+            />
+          </AccountSection>
         )}
-        {/* Abstract submission state — always surfaced when relevant so a saved
-            conference whose deadline has passed doesn't quietly look the same
-            as one that's still accepting. */}
-        {highlightDeadline && deadlineLabel ? (
-          <div className="flex items-center gap-2 text-amber-400 font-medium">
-            <Clock className="w-3.5 h-3.5" />
-            <span>
-              Deadline {deadlineLabel}{daysLeft !== null ? ` · ${daysLeft}d left` : ''}
-            </span>
-          </div>
-        ) : isAbstractEffectivelyOpen(c) && deadlineLabel && daysLeft !== null && daysLeft <= 14 ? (
-          <div className="flex items-center gap-2 text-amber-400 font-medium">
-            <FileText className="w-3.5 h-3.5" />
-            <span>
-              {daysLeft === 0 ? 'Deadline today' :
-               daysLeft === 1 ? '1 day left' :
-               `${daysLeft} days left`}
-            </span>
-          </div>
-        ) : isAbstractEffectivelyOpen(c) ? (
-          <div className="flex items-center gap-2 text-amber-400">
-            <FileText className="w-3.5 h-3.5" />
-            <span>Abstracts open</span>
-          </div>
-        ) : c.abstract_deadline ? (
-          <div className="flex items-center gap-2 text-slate-500">
-            <FileText className="w-3.5 h-3.5" />
-            <span>Abstracts closed</span>
-          </div>
-        ) : null}
-      </div>
-    </Link>
-  )
-}
 
-function EmptyState({
-  icon: Icon, title, description, ctaLabel, ctaHref,
-}: {
-  icon: typeof Bookmark
-  title: string
-  description: string
-  ctaLabel?: string
-  ctaHref?: string
-}) {
-  return (
-    <div className="glass-card rounded-xl p-8 text-center">
-      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-800/50 flex items-center justify-center">
-        <Icon className="w-6 h-6 text-slate-500" />
-      </div>
-      <h3 className="text-white font-semibold mb-1">{title}</h3>
-      <p className="text-sm text-slate-400 max-w-md mx-auto">{description}</p>
-      {ctaLabel && ctaHref && (
         <Link
-          href={ctaHref}
-          className="inline-flex items-center gap-2 mt-4 text-cyan-400 hover:text-cyan-300 text-sm font-medium"
+          href="/calendar"
+          className="flex items-center gap-3 rounded-lg border border-dashed border-border bg-surface-muted px-5 py-4 text-fg-muted transition-colors duration-150 hover:border-border-strong hover:text-fg"
         >
-          {ctaLabel} <ArrowRight className="w-4 h-4" />
-        </Link>
-      )}
-    </div>
-  )
-}
-
-function FeatureCard({
-  icon: Icon, title, description, comingSoon = false,
-}: {
-  icon: typeof Bookmark
-  title: string
-  description: string
-  comingSoon?: boolean
-}) {
-  return (
-    <div className="glass-card rounded-xl p-5 border border-slate-700/50">
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-lg bg-slate-800/50 border border-slate-700 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-5 h-5 text-slate-400" />
-        </div>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-white">{title}</h3>
-            {comingSoon && (
-              <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
-                Coming soon
-              </span>
-            )}
+          <CalendarClock className="size-5 shrink-0" aria-hidden />
+          <div>
+            <p className="text-[0.9375rem] font-medium">Calendar — coming next</p>
+            <p className="type-small">See your saved events laid out on a month grid.</p>
           </div>
-          <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">{description}</p>
-        </div>
+        </Link>
       </div>
-    </div>
+    </AccountContainer>
   )
 }

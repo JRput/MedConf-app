@@ -1,47 +1,37 @@
 // src/app/auth/verify/page.tsx
 import Link from 'next/link'
-import { Mail, ArrowRight } from 'lucide-react'
+import { Mail } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { AuthCard } from '@/components/auth/AuthCard'
 
+// Still a plain server component — it has no state, it just tells you what
+// happens next. The pulsing gradient envelope tile is gone; the icon is a
+// flat tile, and the spam-folder tip is a quiet note rather than a callout
+// panel inside a panel.
 export default function VerifyPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-grid-pattern">
-      {/* Background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 -z-10" />
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-3xl -z-10" />
-
-      <div className="w-full max-w-md text-center">
-        <div className="glass-card rounded-2xl p-10">
-          {/* Animated envelope icon */}
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-teal-500/20 border border-cyan-500/30 flex items-center justify-center animate-pulse">
-            <Mail className="w-10 h-10 text-cyan-400" />
-          </div>
-
-          <h1 className="text-2xl font-bold text-white font-display mb-3">Check your email</h1>
-          
-          <p className="text-slate-400 mb-6 leading-relaxed">
-            We&apos;ve sent a verification link to your email address. 
-            Click the link to verify your account and get started exploring medical conferences.
-          </p>
-
-          <div className="space-y-4">
-            <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700">
-              <p className="text-sm text-slate-300">
-                <span className="font-medium text-cyan-400">Tip:</span> Check your spam folder if you don&apos;t see the email within a few minutes.
-              </p>
-            </div>
-
-            <Link 
-              href="/auth/login"
-              className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 font-medium text-sm"
-            >
-              Back to sign in
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
+    <AuthCard
+      title="Check your email"
+      intro="We've sent a verification link to the address you signed up with. Open it to activate your account — then you'll set your specialty and grade once, and land on your dashboard."
+      footer={
+        <Link href="/auth/login" className="font-medium text-brand-text hover:underline">
+          Back to sign in
+        </Link>
+      }
+    >
+      <div className="flex items-start gap-3 rounded-md border border-border bg-surface-muted px-3 py-3">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-md border border-border bg-surface">
+          <Mail className="size-4 text-fg-muted" aria-hidden />
+        </span>
+        <p className="text-[0.8125rem] leading-relaxed text-fg-muted">
+          Nothing after a few minutes? Check your spam or quarantine folder — NHS mail filters are strict. The link
+          expires after 24 hours; sign in again to send a fresh one.
+        </p>
       </div>
-    </div>
+
+      <Button variant="outline" className="mt-4 w-full" asChild>
+        <Link href="/conferences">Browse the directory meanwhile</Link>
+      </Button>
+    </AuthCard>
   )
 }
-
-

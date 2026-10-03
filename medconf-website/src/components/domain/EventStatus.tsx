@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { DeadlineBadge } from './DeadlineBadge'
-import { daysUntil } from '@/lib/format'
+import { daysUntil, isOngoing } from '@/lib/format'
 import type { DirectoryEvent } from '@/lib/directory'
 
 /**
@@ -10,9 +10,12 @@ import type { DirectoryEvent } from '@/lib/directory'
  * stopped communicating anything. Priority, highest first:
  *   1. Sold out            — changes whether you can act at all
  *   2. Abstract deadline   — time-critical, and only inside 14 days
- *   3. On-demand expiry    — same urgency logic, different verb
- *   4. Abstracts open      — useful, not urgent
- *   5. nothing
+ *   3. Ongoing             — ranks below sold-out/deadline (per the W2 fix
+ *                            request) but still above the two "useful, not
+ *                            urgent" states below it
+ *   4. On-demand expiry    — same urgency logic, different verb
+ *   5. Abstracts open      — useful, not urgent
+ *   6. nothing
  */
 export function EventStatus({ event, className }: { event: DirectoryEvent; className?: string }) {
   if (event.isSoldOut) {
@@ -26,6 +29,14 @@ export function EventStatus({ event, className }: { event: DirectoryEvent; class
   const deadlineDays = daysUntil(event.abstractDeadline)
   if (event.abstractOpen && deadlineDays !== null && deadlineDays >= 0 && deadlineDays <= 14) {
     return <DeadlineBadge deadline={event.abstractDeadline} className={className} />
+  }
+
+  if (!event.isOnDemand && isOngoing(event.startDate, event.endDate)) {
+    return (
+      <Badge variant="neutral" className={className}>
+        Ongoing
+      </Badge>
+    )
   }
 
   if (event.isOnDemand) {

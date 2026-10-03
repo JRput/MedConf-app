@@ -1,289 +1,217 @@
 // src/app/page.tsx
-import Link from 'next/link'
-import { Search, Calendar, Bell, Award, ArrowRight, Check, Stethoscope, MapPin, PoundSterling } from 'lucide-react'
+//
+// The homepage. A separate surface from the directory (owner's W5 decision),
+// but built from the directory's own data and primitives so nothing on it is
+// decorative or invented: every number comes from queryFacets/queryDirectory
+// at render time, and every row is a real event you can click through to.
+//
+// What this replaced (see reports/website-audit/ux.md #5 and its "AI-look
+// removal list"): two blur-3xl gradient orbs, a cyan→teal .gradient-text
+// headline, three rotated "floating" cards containing fabricated events, a
+// "UK's #1 Medical Conference Directory" badge, gradient CTA buttons with
+// colour-matched glow shadows, a fake filter-panel mock-up, and centred
+// marketing copy throughout.
+//
+// Server component with ISR: directory data moves on a daily cron (02:00 UTC
+// scrape, 04:00 UTC remediator — see CLAUDE.md §3), so an hourly revalidate is
+// generous and means no spinner and no skeleton: the page is HTML by the time
+// it reaches the browser.
 
-export default function HomePage() {
+import { createServerClient } from '@supabase/ssr'
+import { resolveDirectory } from '@/lib/directory-source'
+import { daysUntil } from '@/lib/format'
+import { SPECIALTY_PARENTS } from '@/lib/taxonomy/specialties'
+import { societyInfo } from '@/lib/taxonomy/societies'
+import type { DirectoryEvent } from '@/lib/directory'
+import { HomeHero, type QuickEntry } from '@/components/home/HomeHero'
+import { HomeSection } from '@/components/home/HomeSection'
+import { HomeEventList } from '@/components/home/HomeEventList'
+import { BrowseTiles, type BrowseTile } from '@/components/home/BrowseTiles'
+import { HowItWorks } from '@/components/home/HowItWorks'
+
+export const revalidate = 3600
+
+export const metadata = {
+  title: 'MedConf — medical conferences, courses and CPD in one directory',
+  description:
+    'Search medical conferences, courses and CPD events from royal colleges, faculties and international societies. Filter by specialty, date, format, price and society. Free, no account needed.',
+}
+
+/** How many featured society tiles the "Browse by society" band shows. */
+const FEATURED_SOCIETIES = ['RCGP', 'RCP', 'RCSEng', 'RCPsych', 'ESMO', 'ASCO', 'RCPCH', 'RSM']
+/** Deadline horizon for "Closing soon" — matches DeadlineBadge's urgency bands. */
+const CLOSING_SOON_DAYS = 14
+
+/**
+ * Hero-chip labels for the handful of taxonomy parents whose full label is a
+ * mouthful in a 390px-wide chip row. Same slug, same filter, shorter name —
+ * the full label is still what the "Browse by specialty" tiles and the
+ * directory's own filter panel show, so nothing is being renamed, only
+ * abbreviated in the one place width is scarce.
+ */
+const CHIP_LABEL: Record<string, string> = {
+  'leadership-management': 'Leadership & Management',
+  'obgyn-womens-health': 'Obstetrics & Gynaecology',
+  'msk-trauma-orthopaedics': 'Trauma & Orthopaedics',
+  'pathology-laboratory-medicine': 'Pathology',
+  'anaesthetics-critical-care': 'Anaesthetics & ICU',
+  'medicine-general': 'Internal Medicine',
+  'surgery-general': 'General Surgery',
+  'psychiatry-mental-health': 'Psychiatry',
+  'medical-education': 'Medical Education',
+  'radiology-imaging': 'Radiology',
+}
+
+export default async function HomePage() {
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => [], setAll: () => {} } }
+  )
+
+  const opts = { fixture: false, wantFacets: false }
+
+  const [overview, thisMonth, abstractsOpen, onlineThisMonth, sourceCount] = await Promise.all([
+    // pageSize 1 — we want `total` and the facet counts, not rows.
+    resolveDirectory(supabase, { pageSize: 1 }, { fixture: false, wantFacets: true }),
+    resolveDirectory(supabase, { datePreset: 'this-month', pageSize: 6 }, opts),
+    // Only ~55 events have abstracts open at any time (data.md §1), so one
+    // page covers the lot; the 14-day window and the deadline sort are then
+    // applied here rather than in SQL, since queryDirectory's `sort` has no
+    // abstract_deadline option and adding one for a single homepage band
+    // would be the wrong place to put it.
+    resolveDirectory(supabase, { abstractsOpen: true, pageSize: 100 }, opts),
+    resolveDirectory(supabase, { datePreset: 'this-month', format: ['online'], pageSize: 1 }, opts),
+    countSources(supabase),
+  ])
+
+  const facets = overview.facets
+  const eventCount = overview.page.total
+  const societyCounts = facets?.society ?? {}
+  const societyCount = Object.keys(societyCounts).length
+
+  const closingSoon = sortByDeadline(abstractsOpen.page.rows)
+  const closingWithin14 = closingSoon.filter((e) => {
+    const d = daysUntil(e.abstractDeadline)
+    return d !== null && d >= 0 && d <= CLOSING_SOON_DAYS
+  })
+  // Prefer genuinely-urgent rows; if none are inside the window today, fall
+  // back to the next deadlines rather than showing an empty band — the badge
+  // on each row still states the real urgency either way.
+  const closingRows = (closingWithin14.length ? closingWithin14 : closingSoon).slice(0, 5)
+
+  const specialtyCounts = facets?.specialty ?? {}
+  const rankedSpecialties = SPECIALTY_PARENTS.filter((p) => p.slug !== 'other' && (specialtyCounts[p.slug] ?? 0) > 0).sort(
+    (a, b) => (specialtyCounts[b.slug] ?? 0) - (specialtyCounts[a.slug] ?? 0)
+  )
+
+  const quickEntries: QuickEntry[] = [
+    ...rankedSpecialties.slice(0, 4).map((p) => ({
+      label: CHIP_LABEL[p.slug] ?? p.label,
+      href: `/conferences?specialty=${encodeURIComponent(p.slug)}`,
+      count: specialtyCounts[p.slug] ?? null,
+    })),
+    {
+      label: 'Online this month',
+      href: '/conferences?datePreset=this-month&format=online',
+      count: onlineThisMonth.page.total || null,
+    },
+    { label: 'Free', href: '/conferences?price=free', count: facets?.priceBucket.free ?? null },
+  ]
+
+  const specialtyTiles: BrowseTile[] = rankedSpecialties.slice(0, 12).map((p) => ({
+    label: p.label,
+    href: `/conferences?specialty=${encodeURIComponent(p.slug)}`,
+    count: specialtyCounts[p.slug] ?? 0,
+  }))
+
+  const societyTiles: BrowseTile[] = FEATURED_SOCIETIES.filter((short) => (societyCounts[short] ?? 0) > 0).map((short) => ({
+    label: short,
+    sub: societyInfo(short)?.name,
+    href: `/conferences?society=${encodeURIComponent(short)}`,
+    count: societyCounts[short] ?? 0,
+  }))
+
+  const usedFixture = overview.usedFixture
+
   return (
-    <div className="bg-slate-950">
-      {/* Hero Section */}
-      <section className="relative min-h-[calc(100vh-4rem)] flex items-center overflow-hidden">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-50" />
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gradient-to-br from-cyan-500/20 via-teal-500/10 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-violet-500/10 via-purple-500/5 to-transparent rounded-full blur-3xl" />
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <div className="max-w-3xl">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-slate-800/50 border border-slate-700 rounded-full px-4 py-2 mb-8">
-              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-              <span className="text-sm text-slate-300">UK&apos;s #1 Medical Conference Directory</span>
-            </div>
+    <div className="mx-auto max-w-[1180px] px-4 pb-20 sm:px-6">
+      {usedFixture && (
+        <p className="type-mono-label pt-4 text-warn-text">
+          Showing sample data — live counts will appear once the database is reachable.
+        </p>
+      )}
 
-            {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-display text-white leading-tight mb-6">
-              Find the right medical
-              <br />
-              <span className="gradient-text">conferences for your career</span>
-          </h1>
+      <HomeHero eventCount={eventCount} societyCount={societyCount} quickEntries={quickEntries} />
 
-            {/* Subheadline */}
-            <p className="text-lg sm:text-xl text-slate-400 mb-10 max-w-2xl leading-relaxed">
-              MedConf is the UK&apos;s comprehensive directory for medical conferences, talks, and CPD opportunities. 
-              Search, filter, and save — all in one place.
-            </p>
+      {closingRows.length > 0 && (
+        <HomeSection
+          title="Closing soon"
+          note={
+            closingWithin14.length
+              ? `${closingWithin14.length} abstract deadline${closingWithin14.length === 1 ? '' : 's'} within ${CLOSING_SOON_DAYS} days`
+              : 'Next abstract deadlines'
+          }
+          link={{ href: '/conferences?abstractsOpen=1', label: 'All with abstracts open' }}
+        >
+          <HomeEventList events={closingRows} societyCounts={societyCounts} />
+        </HomeSection>
+      )}
 
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link 
-                href="/auth/signup" 
-                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-cyan-400 hover:to-teal-400 transition-all shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40"
-              >
-                Get Started Free
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link 
-                href="/auth/login" 
-                className="inline-flex items-center justify-center gap-2 border border-slate-700 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-slate-800/50 hover:border-slate-600 transition-all"
-              >
-                Sign In
-              </Link>
-            </div>
+      {thisMonth.page.rows.length > 0 && (
+        <HomeSection
+          title="This month"
+          note={`${thisMonth.page.total.toLocaleString('en-GB')} events running or starting before the end of the month`}
+          link={{ href: '/conferences?datePreset=this-month', label: 'All this month' }}
+        >
+          <HomeEventList events={thisMonth.page.rows} societyCounts={societyCounts} />
+        </HomeSection>
+      )}
 
-            {/* Trust indicators */}
-            <div className="flex flex-wrap gap-6 mt-12 text-sm text-slate-400">
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400" />
-                <span>Free to use</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400" />
-                <span>200+ conferences</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-emerald-400" />
-                <span>Updated weekly</span>
-              </div>
-            </div>
-          </div>
-        </div>
+      {specialtyTiles.length > 0 && (
+        <HomeSection title="Browse by specialty" link={{ href: '/conferences', label: 'All specialties' }}>
+          <BrowseTiles tiles={specialtyTiles} />
+        </HomeSection>
+      )}
 
-        {/* Decorative illustration - floating cards */}
-        <div className="hidden lg:block absolute right-10 top-1/2 -translate-y-1/2 w-[400px]">
-          <div className="relative">
-            {/* Card 1 */}
-            <div className="glass-card rounded-xl p-4 absolute top-0 right-0 w-72 transform rotate-3 animate-fade-in-up">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-semibold text-cyan-400 uppercase">Cardiology</span>
-                <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-2 py-0.5 rounded-full">
-                  <Award className="w-3 h-3" />
-                  12 CPD
-                </span>
-              </div>
-              <h3 className="font-bold text-white text-sm mb-2">British Cardiovascular Society Conference 2026</h3>
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <Calendar className="w-3 h-3" />
-                <span>3-5 June 2026</span>
-              </div>
-            </div>
+      {societyTiles.length > 0 && (
+        <HomeSection
+          title="Browse by society"
+          note={`${societyCount} societies with events listed`}
+          link={{ href: '/societies', label: 'All societies' }}
+        >
+          <BrowseTiles tiles={societyTiles} />
+        </HomeSection>
+      )}
 
-            {/* Card 2 */}
-            <div className="glass-card rounded-xl p-4 absolute top-32 left-10 w-64 transform -rotate-2 animate-fade-in-up delay-200">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-semibold text-violet-400 uppercase">Surgery</span>
-                <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-2 py-0.5 rounded-full">
-                  <Award className="w-3 h-3" />
-                  8 CPD
-                </span>
-              </div>
-              <h3 className="font-bold text-white text-sm mb-2">Royal College of Surgeons Annual Meeting</h3>
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <MapPin className="w-3 h-3" />
-                <span>London</span>
-              </div>
-            </div>
-
-            {/* Card 3 */}
-            <div className="glass-card rounded-xl p-4 absolute top-64 right-8 w-60 transform rotate-1 animate-fade-in-up delay-400">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-semibold text-amber-400 uppercase">GP</span>
-                <span className="text-xs text-slate-400">From £150</span>
-              </div>
-              <h3 className="font-bold text-white text-sm mb-2">Primary Care Conference UK</h3>
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <Calendar className="w-3 h-3" />
-                <span>15-16 March 2026</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-24 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold font-display text-white mb-4">
-              Everything you need to find the right event
-            </h2>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Stop wasting time searching across dozens of websites. MedConf brings it all together.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { 
-                icon: <Search className="w-6 h-6" />,
-                iconBg: 'from-cyan-500/20 to-teal-500/20',
-                iconColor: 'text-cyan-400',
-                title: 'Browse & Filter', 
-                desc: 'Filter conferences by specialty, location, price range, and CPD status. Find what matters to you in seconds.' 
-              },
-              { 
-                icon: <Calendar className="w-6 h-6" />,
-                iconBg: 'from-violet-500/20 to-purple-500/20',
-                iconColor: 'text-violet-400',
-                title: 'Full Details', 
-                desc: 'See complete pricing breakdowns, CPD points, abstract submission status, and venue information.' 
-              },
-              { 
-                icon: <Bell className="w-6 h-6" />,
-                iconBg: 'from-amber-500/20 to-orange-500/20',
-                iconColor: 'text-amber-400',
-                title: 'Stay Informed', 
-                desc: 'Get notified when new conferences in your specialty are added, and never miss a deadline.' 
-              },
-            ].map(f => (
-              <div 
-                key={f.title} 
-                className="glass-card rounded-xl p-6 hover:border-cyan-500/30 transition-all duration-300 group"
-              >
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${f.iconBg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <div className={f.iconColor}>{f.icon}</div>
-                </div>
-                <h3 className="font-bold text-white text-lg mb-2">{f.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Filter Preview Section */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900/50 to-slate-950" />
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold font-display text-white mb-6">
-                Find exactly what you&apos;re looking for
-              </h2>
-              <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-                Our powerful filtering system helps you narrow down conferences by what matters most to you — 
-                whether that&apos;s specialty, budget, or location.
-              </p>
-
-              <div className="space-y-4">
-                {[
-                  { icon: <Stethoscope className="w-5 h-5" />, label: 'Filter by 15+ medical specialties' },
-                  { icon: <MapPin className="w-5 h-5" />, label: 'Find events near you across the UK' },
-                  { icon: <PoundSterling className="w-5 h-5" />, label: 'See prices for your professional level' },
-                  { icon: <Award className="w-5 h-5" />, label: 'Only show CPD-accredited events' },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-                      {item.icon}
-                    </div>
-                    <span className="text-slate-300">{item.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Filter preview UI */}
-            <div className="glass-card rounded-xl p-6">
-              <h3 className="font-bold text-white mb-4 flex items-center gap-2">
-                <Search className="w-4 h-4 text-cyan-400" />
-                Filters
-              </h3>
-              
-              <div className="space-y-6">
-                <div>
-                  <label className="text-sm text-slate-400 mb-2 block">Specialty</label>
-                  <div className="flex flex-wrap gap-2">
-                    {['All', 'Cardiology', 'Surgery', 'GP', 'Emergency'].map((s, i) => (
-                      <span 
-                        key={s} 
-                        className={`text-xs px-3 py-1.5 rounded-full border ${
-                          i === 1 
-                            ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40' 
-                            : 'bg-slate-800/50 text-slate-400 border-slate-700'
-                        }`}
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm text-slate-400 mb-2 block">Location</label>
-                  <div className="bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-300 text-sm">
-                    London
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-sm text-slate-400 mb-2 block">Price Range</label>
-                  <div className="flex flex-wrap gap-2">
-                    {['Any', 'Free', 'Under £100', 'Under £300'].map((p, i) => (
-                      <span 
-                        key={p} 
-                        className={`text-xs px-3 py-1.5 rounded-full border ${
-                          i === 2 
-                            ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/40' 
-                            : 'bg-slate-800/50 text-slate-400 border-slate-700'
-                        }`}
-                      >
-                        {p}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 relative">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="glass-card rounded-2xl p-8 sm:p-12 relative overflow-hidden">
-            {/* Gradient bg */}
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-teal-500/10" />
-            
-            <div className="relative">
-              <h2 className="text-3xl sm:text-4xl font-bold font-display text-white mb-4">
-                Ready to find your next conference?
-              </h2>
-              <p className="text-slate-400 text-lg mb-8 max-w-xl mx-auto">
-                Join thousands of healthcare professionals already using MedConf to discover CPD opportunities.
-              </p>
-              
-              <Link 
-                href="/auth/signup" 
-                className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-10 py-4 rounded-xl font-semibold text-lg hover:from-cyan-400 hover:to-teal-400 transition-all shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40"
-              >
-                Get Started Free
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HowItWorks sourceCount={sourceCount} />
     </div>
   )
+}
+
+/** Soonest abstract deadline first; rows with no published deadline last. */
+function sortByDeadline(rows: DirectoryEvent[]): DirectoryEvent[] {
+  return [...rows].sort((a, b) => {
+    if (a.abstractDeadline && b.abstractDeadline) return a.abstractDeadline.localeCompare(b.abstractDeadline)
+    if (a.abstractDeadline) return -1
+    if (b.abstractDeadline) return 1
+    return 0
+  })
+}
+
+/**
+ * How many organiser feeds the scraper tracks — the one number on this page
+ * that isn't a directory facet. `scraper_sources` has a public-read RLS
+ * policy (supabase_schema.sql), so the anon key can count it. If that ever
+ * changes, fall back to the figure in reports/website-audit/data.md rather
+ * than failing the page render.
+ */
+async function countSources(supabase: ReturnType<typeof createServerClient>): Promise<number> {
+  try {
+    const { count, error } = await supabase.from('scraper_sources').select('id', { count: 'exact', head: true })
+    if (error) throw error
+    return count ?? 45
+  } catch {
+    return 45
+  }
 }

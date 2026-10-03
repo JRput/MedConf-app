@@ -4,95 +4,87 @@
 import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Menu, X, Calendar, Bookmark, Settings, LogOut, LayoutDashboard } from 'lucide-react'
+import { Menu, X, Calendar, Bookmark, Settings, LogOut, LayoutDashboard, Building2 } from 'lucide-react'
 import { NotificationBell } from './NotificationBell'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 export function Navbar() {
   const { user, signOut, loading } = useAuth()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <nav className="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 backdrop-blur-sm bg-opacity-95">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-teal-500 flex items-center justify-center shadow-lg shadow-cyan-500/25 group-hover:shadow-cyan-500/40 transition-shadow">
-              <span className="text-white font-bold text-sm">M</span>
+    <nav className="sticky top-0 z-40 border-b border-border bg-bg">
+      <div className="mx-auto max-w-[1320px] px-4 sm:px-6">
+        <div className="flex h-16 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex size-8 items-center justify-center rounded-md bg-brand">
+              <span className="text-sm font-bold text-fg-onbrand">M</span>
             </div>
-            <span className="text-xl font-bold text-white tracking-tight">
-              Med<span className="text-cyan-400">Conf</span>
-            </span>
+            <span className="type-h3 text-fg-strong">MedConf</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            {/* W1: the toggle is wired and persists, but only /design consumes
-                the tokens so far — the legacy pages below are hard-coded dark. */}
-            <ThemeToggle className="text-slate-400 hover:bg-slate-800/50 hover:text-white" />
+          <div className="hidden items-center gap-1 md:flex">
+            <ThemeToggle />
+            <NavLink href="/conferences" icon={<Calendar className="size-4" />}>
+              Directory
+            </NavLink>
+            <NavLink href="/societies" icon={<Building2 className="size-4" />}>
+              Societies
+            </NavLink>
             {!loading && user ? (
               <>
-                <NavLink href="/dashboard" icon={<LayoutDashboard className="w-4 h-4" />}>
+                <NavLink href="/dashboard" icon={<LayoutDashboard className="size-4" />}>
                   Dashboard
                 </NavLink>
-                <NavLink href="/conferences" icon={<Calendar className="w-4 h-4" />}>
-                  Conferences
-                </NavLink>
-                <NavLink href="/saved" icon={<Bookmark className="w-4 h-4" />}>
+                <NavLink href="/saved" icon={<Bookmark className="size-4" />}>
                   Saved
                 </NavLink>
-                <NavLink href="/settings" icon={<Settings className="w-4 h-4" />}>
+                <NavLink href="/settings" icon={<Settings className="size-4" />}>
                   Settings
                 </NavLink>
                 <NotificationBell />
-                <button
-                  onClick={signOut}
-                  className="flex items-center gap-2 text-sm text-slate-400 hover:text-rose-400 px-4 py-2 rounded-lg hover:bg-slate-800/50 transition-all duration-200"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sign Out
-                </button>
+                <Button variant="ghost" size="sm" onClick={signOut}>
+                  <LogOut className="size-4" />
+                  Sign out
+                </Button>
               </>
             ) : !loading ? (
               <>
-                <Link 
-                  href="/auth/login" 
-                  className="text-sm text-slate-300 hover:text-white px-4 py-2 rounded-lg hover:bg-slate-800/50 transition-all duration-200"
-                >
-                  Sign In
-                </Link>
-                <Link 
-                  href="/auth/signup" 
-                  className="text-sm bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-5 py-2 rounded-lg font-medium hover:from-cyan-400 hover:to-teal-400 transition-all duration-200 shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40"
-                >
-                  Get Started
-                </Link>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/auth/login">Sign in</Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href="/auth/signup">Get started</Link>
+                </Button>
               </>
             ) : null}
           </div>
 
-          {/* Mobile menu button */}
-          <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-slate-400 hover:text-white p-2"
+          <button
+            onClick={() => setIsMenuOpen((o) => !o)}
+            className="rounded-md p-2 text-fg-muted hover:bg-surface-hover hover:text-fg md:hidden"
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-slate-800 bg-slate-900/95 backdrop-blur-sm">
-          <div className="px-4 py-4 space-y-2">
+        <div className="border-t border-border bg-bg md:hidden">
+          <div className="space-y-1 px-4 py-4">
+            <MobileNavLink href="/conferences" onClick={() => setIsMenuOpen(false)}>
+              Directory
+            </MobileNavLink>
+            <MobileNavLink href="/societies" onClick={() => setIsMenuOpen(false)}>
+              Societies
+            </MobileNavLink>
             {!loading && user ? (
               <>
                 <MobileNavLink href="/dashboard" onClick={() => setIsMenuOpen(false)}>
                   Dashboard
-                </MobileNavLink>
-                <MobileNavLink href="/conferences" onClick={() => setIsMenuOpen(false)}>
-                  Conferences
                 </MobileNavLink>
                 <MobileNavLink href="/saved" onClick={() => setIsMenuOpen(false)}>
                   Saved
@@ -100,24 +92,27 @@ export function Navbar() {
                 <MobileNavLink href="/settings" onClick={() => setIsMenuOpen(false)}>
                   Settings
                 </MobileNavLink>
-                <button 
-                  onClick={() => { signOut(); setIsMenuOpen(false); }}
-                  className="w-full text-left text-sm text-rose-400 px-4 py-3 rounded-lg hover:bg-slate-800/50 transition-all"
+                <button
+                  onClick={() => {
+                    signOut()
+                    setIsMenuOpen(false)
+                  }}
+                  className="block w-full rounded-md px-3 py-2.5 text-left text-[0.9375rem] text-danger-text hover:bg-surface-hover"
                 >
-                  Sign Out
+                  Sign out
                 </button>
               </>
             ) : !loading ? (
               <>
                 <MobileNavLink href="/auth/login" onClick={() => setIsMenuOpen(false)}>
-                  Sign In
+                  Sign in
                 </MobileNavLink>
-                <Link 
+                <Link
                   href="/auth/signup"
                   onClick={() => setIsMenuOpen(false)}
-                  className="block text-center text-sm bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-4 py-3 rounded-lg font-medium"
+                  className="mt-1 block rounded-md bg-brand px-3 py-2.5 text-center text-[0.9375rem] font-medium text-fg-onbrand"
                 >
-                  Get Started
+                  Get started
                 </Link>
               </>
             ) : null}
@@ -130,9 +125,12 @@ export function Navbar() {
 
 function NavLink({ href, children, icon }: { href: string; children: React.ReactNode; icon?: React.ReactNode }) {
   return (
-    <Link 
+    <Link
       href={href}
-      className="flex items-center gap-2 text-sm text-slate-300 hover:text-white px-4 py-2 rounded-lg hover:bg-slate-800/50 transition-all duration-200"
+      className={cn(
+        'flex items-center gap-2 rounded-md px-3 py-2 text-[0.8125rem] font-medium text-fg-muted',
+        'transition-colors duration-150 hover:bg-surface-hover hover:text-fg'
+      )}
     >
       {icon}
       {children}
@@ -142,14 +140,8 @@ function NavLink({ href, children, icon }: { href: string; children: React.React
 
 function MobileNavLink({ href, children, onClick }: { href: string; children: React.ReactNode; onClick: () => void }) {
   return (
-    <Link 
-      href={href}
-      onClick={onClick}
-      className="block text-sm text-slate-300 px-4 py-3 rounded-lg hover:bg-slate-800/50 transition-all"
-    >
+    <Link href={href} onClick={onClick} className="block rounded-md px-3 py-2.5 text-[0.9375rem] text-fg hover:bg-surface-hover">
       {children}
     </Link>
   )
 }
-
-
