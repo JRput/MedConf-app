@@ -297,7 +297,10 @@ class AgentLoop:
         # micro-sites (e.g. rcgpac.org.uk) the listing card may only carry the
         # end date or no date at all — fall back to detail-extracted dates then.
         start_date = shell.get("start_date") or detail.get("start_date")
-        end_date = detail.get("end_date") or shell.get("start_date") or detail.get("start_date")
+        # Listing shells carry end_date for API-fed sources (Tribe family, IFOS);
+        # falling straight back to start_date silently collapsed every
+        # multi-day congress to one day (found 2026-10-03 on IFOS).
+        end_date = detail.get("end_date") or shell.get("end_date") or start_date
 
         # Description fallback: if the detail page's description is null
         # (typical when the LLM call timed out / 504'd), fall back to the
