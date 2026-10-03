@@ -14,7 +14,7 @@
     "max_pages_hint": 4,
     "detail_is_multipage": false,
     "active": true,
-    "extraction_instructions": "Nuxt SPA; ?page=N is ignored server-side. list_shells_override loads the calendar in the browser, captures the site's own public GraphQL Authorization header, then pages entries (16/page, offset) from cms.uroweb.org/graphql until entryCount; live upcoming events only (on-demand excluded). Detail pages are server-rendered: .lead description, .event-details table (Organiser, CME, Venue, Location 'City, Country'). Fees appear on 13 pages as rich-text tables (Category | EAU Member | Non-EAU Member, or a single member/non-member row) parsed by a bespoke EUR parser; other pages have none. Hotel room rates in prose are ignored. Specialty is always Urology."
+    "extraction_instructions": "Nuxt SPA; ?page=N is ignored server-side. list_shells_override loads the calendar in the browser, captures the site's own public GraphQL Authorization header, then pages entries (16/page, offset) from cms.uroweb.org/graphql until entryCount; live upcoming events only (on-demand excluded). Detail pages are server-rendered: .lead description, .event-details table (Organiser, CME, Venue, Location 'City, Country'). Fees appear on 13 pages as rich-text tables (Category | EAU Member | Non-EAU Member, or a single member/non-member row) parsed by a bespoke EUR parser; other pages have none. Hotel room rates in prose are ignored. Specialty is always Urology. Detail anchors 'Join event'/'Register here' give the external organiser_url (newsletter/social hosts rejected)."
   },
   "registry_comment": "EAU Events (50) - Nuxt SPA, listing via site's own GraphQL (token captured in-browser), 55 upcoming live events, EUR/no fees published",
   "probe_results": {
@@ -69,7 +69,7 @@
     "Multi-day courses like Robotic Urology Course show a single date in the site's dateRange even when the text says two days; extractor follows the site's date.",
     "Some pages have no description (e.g. Eger ESU course); description is then None. Site-wide boilerplate meta description is deliberately rejected.",
     "Region holds the country from 'City, Country'; shell city is used when the page has no Location row (region None then).",
-    "Fee tables on 13 of 54 pages parsed to EUR tiers (labels 'Registration \u00b7 <Category> \u00b7 EAU Member/Non-EAU Member'); other pages publish no fee. booking_url remains the uroweb page.",
-    "Description is scoped to event content sections (excludes metadata table, organiser contact, share bar, nav/footer) and rejects chrome phrases; 12 pages have no description text at all and return None."
+    "Description is scoped to event content sections (excludes metadata table, organiser contact, share bar, nav/footer) and rejects chrome phrases; 12 pages have no description text at all and return None.",
+    "organiser_url and booking_url are set to the event's external 'Join event'/'Register here' link (36 of 54 events); source_url stays the uroweb page. The other 18 pages show no such link, so both stay on the uroweb page. Fee tables on 13 of 54 pages parse to EUR tiers; other pages publish no fee."
   ]
 }

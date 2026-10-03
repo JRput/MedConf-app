@@ -114,6 +114,11 @@ _CHROME_RE = re.compile(
     r"terms (?:of|and) (?:use|conditions)|powered by",
     re.I,
 )
+_BAD_LINK_HOST_RE = re.compile(
+    r"laposta|mailchimp|list-manage|linkedin|facebook|instagram|youtube|twitter|(^|\.)x\.com$|"
+    r"whatsapp|t\.co$",
+    re.I,
+)
 _EUR_RE = re.compile(r"^\s*(?:€|EUR)\s*(\d[\d,.\s]*?)\s*$|^\s*(\d[\d,.\s]*?)\s*(?:€|EUR)\s*$")
 
 
@@ -252,6 +257,12 @@ class UrowebExtractor(BaseExtractor):
                         if (!p.closest(SKIP) && !p.closest('table')) paras.push(txt(p));
                     });
                 });
+                const links = [];
+                root.querySelectorAll('a[href]').forEach(a => {
+                    if (a.closest(SKIP)) return;
+                    const t = txt(a).replace(/\s+/g, ' ').trim().toLowerCase();
+                    if (/^(join event|register( here| now)?|registration|book (now|here))$/.test(t)) links.push(a.href);
+                });
                 const tables = [];
                 root.querySelectorAll('section.section table').forEach(t => {
                     if (t.closest('.event-details, footer, nav, header')) return;
@@ -259,7 +270,7 @@ class UrowebExtractor(BaseExtractor):
                         Array.from(tr.querySelectorAll('th, td')).map(c => txt(c).replace(/\s+/g, ' ').trim())));
                 });
                 const og = document.querySelector('meta[property="og:description"], meta[name=description]');
-                return {meta, lead, paras, tables, og: og ? og.content : '',
+                return {meta, lead, paras, tables, links, og: og ? og.content : '',
                         body: (root.innerText || '').slice(0, 6000)};
             }""") or {}
         except Exception as e:  # noqa: BLE001
@@ -329,6 +340,12 @@ class UrowebExtractor(BaseExtractor):
         # EAU is a urology society: every event is Urology. Topic pills are
         # sub-topics, so keep them out of the specialty field.
         out["specialty"] = "Urology"
+        # The event's own website / registration page ("Join event" /
+        # "Register here"). source_url stays the uroweb page (dedupe key).
+        ext = self._external_link(raw.get("links") or [], shell.get("booking_url"))
+        if ext:
+            out["organiser_url"] = ext
+            out["booking_url"] = ext
         out["pricing_tiers"] = self._fee_tiers(raw.get("tables") or [])
         out["is_sold_out"] = False
         return out
@@ -372,3 +389,17 @@ class UrowebExtractor(BaseExtractor):
                         "early_bird_deadline": None,
                     })
         return tiers
+
+    @staticmethod
+    def _external_link(links: List[str], own_url: Optional[str]) -> Optional[str]:
+        from urllib.parse import urlparse
+        for href in links:
+            u = urlparse(href or "")
+            if u.scheme not in ("http", "https") or not u.netloc:
+                continue
+            if _BAD_LINK_HOST_RE.search(u.netloc):
+                continue
+            if own_url and href.rstrip("/") == own_url.rstrip("/"):
+                continue
+            return href
+        return None
