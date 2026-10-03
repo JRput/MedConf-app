@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowUpRight, BookmarkX, Download, MapPin, X } from 'lucide-react'
+import { ArrowUpRight, BookmarkX, Download, FileClock, MapPin, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { locationLine, type DirectoryEvent } from '@/lib/directory'
 import { formatDateRange, isOngoing } from '@/lib/format'
+import { deadlineCountdown, shortDateLabel, todayIso } from '@/lib/calendar'
 import { downloadIcsFeed } from '@/lib/ics'
 import { societyInfo } from '@/lib/taxonomy/societies'
 import { DateBlock } from '@/components/domain/DateBlock'
@@ -17,6 +18,7 @@ import { EventStatus } from '@/components/domain/EventStatus'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import { LG_QUERY, useMediaQuery } from './useMediaQuery'
+import { useLocale } from './useLocale'
 
 /**
  * What a chip opens: the event's summary, close enough to the detail page to
@@ -32,13 +34,17 @@ export function EventPanelBody({
   event,
   onClose,
   onUnsave,
+  highlightDeadline = false,
   className,
 }: {
   event: DirectoryEvent
   onClose?: () => void
   onUnsave?: (event: DirectoryEvent) => void
+  /** Opened from a deadline marker — lead with the deadline, not the event. */
+  highlightDeadline?: boolean
   className?: string
 }) {
+  const locale = useLocale()
   const place = locationLine(event)
   const ongoing = !event.isOnDemand && isOngoing(event.startDate, event.endDate)
   const society = event.society ? (societyInfo(event.society)?.name ?? event.society) : null
@@ -71,6 +77,19 @@ export function EventPanelBody({
       </div>
 
       <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
+        {/* When the panel was opened FROM a deadline marker, the deadline is
+            the thing being asked about — so it leads, with the countdown spelt
+            out, rather than sitting four fields down as a bare date. */}
+        {highlightDeadline && event.abstractDeadline && (
+          <div className="flex items-start gap-2 rounded-md border border-warn-border bg-warn-subtle px-3 py-2">
+            <FileClock className="mt-0.5 size-4 shrink-0 text-warn-text" strokeWidth={2} aria-hidden />
+            <p className="type-small font-medium text-warn-text">
+              Abstract deadline: {shortDateLabel(event.abstractDeadline, locale)} —{' '}
+              {deadlineCountdown(event.abstractDeadline, todayIso())}
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center gap-2">
           <EventTypeBadge type={event.eventType} isFlagship={event.isFlagship} isOnDemand={event.isOnDemand} />
           <EventStatus event={event} />
@@ -115,7 +134,9 @@ export function EventPanelBody({
           )}
         </div>
 
-        {event.abstractDeadline && (
+        {/* Skipped when the highlighted row above already states it — the same
+            date twice in one short panel reads as a mistake. */}
+        {event.abstractDeadline && !highlightDeadline && (
           <Field label="Abstract deadline">
             <p className="type-numeric text-[0.875rem] text-fg">{formatDateRange(event.abstractDeadline, null)}</p>
           </Field>
@@ -172,10 +193,12 @@ export function EventPanelHost({
   event,
   onClose,
   onUnsave,
+  highlightDeadline = false,
 }: {
   event: DirectoryEvent | null
   onClose: () => void
   onUnsave?: (event: DirectoryEvent) => void
+  highlightDeadline?: boolean
 }) {
   const isWide = useMediaQuery(LG_QUERY)
 
@@ -189,7 +212,7 @@ export function EventPanelHost({
           // Sticky so the panel stays with you as the grid scrolls, and
           // scroll-capped so a long summary never pushes the page.
           <div className="sticky top-20 flex max-h-[calc(100vh-6rem)] overflow-hidden rounded-lg border border-border bg-surface shadow-sm">
-            <EventPanelBody event={event} onClose={onClose} onUnsave={onUnsave} />
+            <EventPanelBody event={event} onClose={onClose} onUnsave={onUnsave} highlightDeadline={highlightDeadline} />
           </div>
         )}
       </aside>
@@ -202,7 +225,7 @@ export function EventPanelHost({
         {event && (
           <>
             <SheetTitle className="sr-only">{event.name}</SheetTitle>
-            <EventPanelBody event={event} onClose={onClose} onUnsave={onUnsave} />
+            <EventPanelBody event={event} onClose={onClose} onUnsave={onUnsave} highlightDeadline={highlightDeadline} />
           </>
         )}
       </SheetContent>

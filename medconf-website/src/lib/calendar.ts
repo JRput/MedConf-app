@@ -364,6 +364,31 @@ export function eventsOnDay<T extends SpanInput>(events: readonly T[], iso: stri
   })
 }
 
+/**
+ * Saved events whose abstract deadline falls in the next `days` days — the
+ * agenda's "Upcoming deadlines" block.
+ *
+ * Soonest first, and a deadline that has already passed is left out: the point
+ * of the block is "act now", and a closed deadline is not actionable.
+ */
+export function upcomingDeadlines<T extends { id: number; abstractDeadline?: string | null }>(
+  events: readonly T[],
+  { from, days = 60 }: { from: string; days?: number }
+): T[] {
+  const until = addDays(from, days)
+  return events
+    .filter((e) => {
+      const d = e.abstractDeadline
+      return isValidIsoDate(d) && (d as string) >= from && (d as string) <= until
+    })
+    .sort((a, b) => {
+      const da = a.abstractDeadline as string
+      const db = b.abstractDeadline as string
+      if (da !== db) return da < db ? -1 : 1
+      return a.id - b.id
+    })
+}
+
 /** Events that overlap a given month at all — the header's "N events this month" count. */
 export function eventsInMonth<T extends SpanInput>(events: readonly T[], year: number, month: number): T[] {
   const first = toIso(year, month, 1)
@@ -449,6 +474,34 @@ export function weekdayLabels(weekStartsOn: WeekStart = 1, locale?: string, widt
   const fmt = new Intl.DateTimeFormat(locale, { weekday: width, timeZone: 'UTC' })
   // 2024-01-07 was a Sunday, so +weekday lands on each day of the week.
   return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(Date.UTC(2024, 0, 7 + ((weekStartsOn + i) % 7)))))
+}
+
+/** "Sat 3 Oct" — the compact dated form used on deadline rows and markers. */
+export function shortDateLabel(iso: string, locale?: string): string {
+  const parts = splitIso(iso)
+  if (!parts) return iso
+  return new Intl.DateTimeFormat(locale, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(new Date(Date.UTC(parts.year, parts.month - 1, parts.day)))
+}
+
+/**
+ * How long is left to submit, as a phrase: "0 days left" on the closing day,
+ * "closed" once it has passed.
+ *
+ * Deliberately counts days rather than saying "today"/"tomorrow" — a
+ * submission deadline is a countdown people act on, and "0 days left" lands
+ * harder than "today" when it is the last chance.
+ */
+export function deadlineCountdown(deadlineIso: string, today: string): string {
+  const days = daysBetween(today, deadlineIso)
+  if (days < 0) return days === -1 ? 'closed yesterday' : `closed ${Math.abs(days)} days ago`
+  if (days === 0) return '0 days left'
+  if (days === 1) return '1 day left'
+  return `${days} days left`
 }
 
 /** Full weekday + date, for the side panel heading and `aria-label`s. */

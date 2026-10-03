@@ -9,6 +9,7 @@ import {
   columnOf,
   daysBetween,
   daysInMonth,
+  deadlineCountdown,
   deadlinesByDay,
   eventsInMonth,
   eventsOnDay,
@@ -19,8 +20,10 @@ import {
   monthMatrix,
   parseMonthKey,
   placeSpans,
+  shortDateLabel,
   toIso,
   todayIso,
+  upcomingDeadlines,
   weekdayLabels,
   type SpanInput,
 } from '../calendar'
@@ -400,6 +403,65 @@ describe('eventsOnDay', () => {
 
   it('never returns an undated event', () => {
     expect(eventsOnDay([ev(1, null), ev(2, 'nope')], '2026-11-11')).toEqual([])
+  })
+})
+
+describe('upcomingDeadlines', () => {
+  const events = [
+    { id: 1, abstractDeadline: '2026-10-20' },
+    { id: 2, abstractDeadline: '2026-10-03' }, // today — still open
+    { id: 3, abstractDeadline: '2026-10-02' }, // yesterday — closed
+    { id: 4, abstractDeadline: '2026-12-02' }, // day 60 exactly
+    { id: 5, abstractDeadline: '2026-12-03' }, // day 61 — out
+    { id: 6, abstractDeadline: null },
+    { id: 7, abstractDeadline: 'whenever' },
+  ]
+
+  it('returns open deadlines inside the window, soonest first', () => {
+    expect(upcomingDeadlines(events, { from: '2026-10-03' }).map((e) => e.id)).toEqual([2, 1, 4])
+  })
+
+  it('includes the closing day itself and the last day of the window', () => {
+    const ids = upcomingDeadlines(events, { from: '2026-10-03', days: 60 }).map((e) => e.id)
+    expect(ids).toContain(2) // closes today
+    expect(ids).toContain(4) // exactly 60 days out
+    expect(ids).not.toContain(5) // one day past the window
+    expect(ids).not.toContain(3) // already closed
+  })
+
+  it('respects a shorter window and breaks ties by id', () => {
+    expect(upcomingDeadlines(events, { from: '2026-10-03', days: 7 }).map((e) => e.id)).toEqual([2])
+    const sameDay = [
+      { id: 9, abstractDeadline: '2026-10-10' },
+      { id: 4, abstractDeadline: '2026-10-10' },
+    ]
+    expect(upcomingDeadlines(sameDay, { from: '2026-10-03' }).map((e) => e.id)).toEqual([4, 9])
+  })
+})
+
+describe('deadlineCountdown', () => {
+  it('counts down to the closing day and reports closure after it', () => {
+    expect(deadlineCountdown('2026-10-03', '2026-10-03')).toBe('0 days left')
+    expect(deadlineCountdown('2026-10-04', '2026-10-03')).toBe('1 day left')
+    expect(deadlineCountdown('2026-10-13', '2026-10-03')).toBe('10 days left')
+    expect(deadlineCountdown('2026-10-02', '2026-10-03')).toBe('closed yesterday')
+    expect(deadlineCountdown('2026-09-28', '2026-10-03')).toBe('closed 5 days ago')
+  })
+
+  it('counts whole days across a month boundary and a DST weekend', () => {
+    expect(deadlineCountdown('2026-11-01', '2026-10-25')).toBe('7 days left')
+    expect(deadlineCountdown('2027-01-01', '2026-12-31')).toBe('1 day left')
+  })
+})
+
+describe('shortDateLabel', () => {
+  it('renders a weekday, day and short month', () => {
+    expect(shortDateLabel('2026-10-03', 'en-GB')).toMatch(/^Sat\b.*3.*Oct/)
+    expect(shortDateLabel('2026-12-25', 'en-GB')).toMatch(/Dec/)
+  })
+
+  it('returns the raw string rather than throwing on a malformed date', () => {
+    expect(shortDateLabel('nope', 'en-GB')).toBe('nope')
   })
 })
 

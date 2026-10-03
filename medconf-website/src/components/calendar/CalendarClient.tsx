@@ -43,7 +43,13 @@ export function CalendarClient() {
     [searchParams]
   )
 
-  const [selected, setSelected] = useState<DirectoryEvent | null>(null)
+  // The panel needs to know HOW it was opened: from a chip (the event leads)
+  // or from a deadline marker (the deadline leads). Carrying that alongside
+  // the event is simpler than a second piece of state that could drift out of
+  // sync with it.
+  const [selected, setSelected] = useState<{ event: DirectoryEvent; viaDeadline: boolean } | null>(null)
+  const selectEvent = useCallback((event: DirectoryEvent) => setSelected({ event, viaDeadline: false }), [])
+  const selectDeadline = useCallback((event: DirectoryEvent) => setSelected({ event, viaDeadline: true }), [])
   // Phones get the week strip by default; this is the opt-in to the real grid.
   const [gridOnPhone, setGridOnPhone] = useState(false)
   const [weekAnchor, setWeekAnchor] = useState(() => todayIso())
@@ -227,8 +233,9 @@ export function CalendarClient() {
                 year={year}
                 month={month}
                 events={events}
-                selectedId={selected?.id ?? null}
-                onSelect={setSelected}
+                selectedId={selected?.event.id ?? null}
+                onSelect={selectEvent}
+                onSelectDeadline={selectDeadline}
                 maxLanes={3}
               />
               {monthCount === 0 && (
@@ -254,7 +261,12 @@ export function CalendarClient() {
           )}
         </div>
 
-        <EventPanelHost event={selected} onClose={() => setSelected(null)} onUnsave={handleUnsave} />
+        <EventPanelHost
+          event={selected?.event ?? null}
+          highlightDeadline={selected?.viaDeadline ?? false}
+          onClose={() => setSelected(null)}
+          onUnsave={handleUnsave}
+        />
       </div>
     </div>
   )

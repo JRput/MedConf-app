@@ -14,7 +14,7 @@ export function CalendarLegend({ className }: { className?: string }) {
       <Item className="border-type-workshop-border bg-type-workshop-subtle">Workshop</Item>
       <li className="flex items-center gap-1.5 type-mono-label text-fg-subtle">
         <FileClock className="size-3 text-warn-text" strokeWidth={2} aria-hidden />
-        Abstract deadline
+        Abstract deadline (for a saved event)
       </li>
     </ul>
   )

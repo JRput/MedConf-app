@@ -1,12 +1,14 @@
 'use client'
 
 import { useMemo, useRef } from 'react'
+import Link from 'next/link'
 import { ChevronLeft, ChevronRight, FileClock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { DirectoryEvent } from '@/lib/directory'
 import {
   addDays,
   columnOf,
+  deadlineCountdown,
   deadlinesByDay,
   eventsOnDay,
   longDateLabel,
@@ -146,14 +148,34 @@ export function WeekStrip({
       <div>
         <h2 className="mb-2 type-h3 text-fg-strong">{longDateLabel(anchor, locale)}</h2>
 
+        {/* Deadlines sit ABOVE the day's events and are named one per line:
+            on a phone the icon-only marker of the desktop grid has nowhere to
+            put a tooltip, so the day list is where "whose deadline is this?"
+            gets answered. */}
         {dayDeadlines.length > 0 && (
-          <div className="mb-2.5 flex items-start gap-2 rounded-md border border-warn-border bg-warn-subtle px-3 py-2">
-            <FileClock className="mt-0.5 size-4 shrink-0 text-warn-text" strokeWidth={2} aria-hidden />
-            <p className="type-small text-warn-text">
-              Abstract deadline{dayDeadlines.length === 1 ? '' : 's'}:{' '}
-              {dayDeadlines.map((e) => e.name).join(', ')}
-            </p>
-          </div>
+          <section className="mb-3">
+            <h3 className="mb-1.5 flex items-center gap-1.5 type-mono-label text-warn-text">
+              <FileClock className="size-3.5" strokeWidth={2} aria-hidden />
+              Deadlines
+            </h3>
+            <ul className="space-y-1.5">
+              {dayDeadlines.map((e) => (
+                <li key={e.id}>
+                  <Link
+                    href={e.href}
+                    className="flex min-h-11 items-center gap-2 rounded-md border border-warn-border bg-warn-subtle px-3 py-2 transition-colors duration-150 active:brightness-[0.97] dark:active:brightness-[1.12]"
+                  >
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[0.8125rem] leading-snug font-medium text-fg-strong">{e.name}</span>
+                      <span className="mt-0.5 block type-mono-label text-warn-text">
+                        Abstracts close · {deadlineCountdown(anchor, today)}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
 
         {dayEvents.length === 0 ? (

@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo } from 'react'
-import { FileClock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { DirectoryEvent } from '@/lib/directory'
 import {
@@ -15,6 +14,7 @@ import {
   type WeekLayout,
 } from '@/lib/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { DeadlineMarker } from './DeadlineMarker'
 import { EventChip, EventChipRow } from './EventChip'
 import { useLocale } from './useLocale'
 
@@ -44,6 +44,8 @@ const LANE_H = 20
 const LANE_GAP = 2
 const HEADER_H = 26
 const OVERFLOW_H = 18
+/** Reserved under the day number for the abstract-deadline marker. */
+const DEADLINE_H = 18
 
 export function MonthGrid({
   year,
@@ -52,6 +54,7 @@ export function MonthGrid({
   selectedId,
   onSelect,
   onSelectDay,
+  onSelectDeadline,
   maxLanes = 3,
   compact = false,
   className,
@@ -64,6 +67,8 @@ export function MonthGrid({
   onSelect?: (event: DirectoryEvent) => void
   /** Clicking empty space in a day cell — used by the mobile day list. */
   onSelectDay?: (iso: string) => void
+  /** Clicking a deadline marker — opens the panel with the deadline called out. */
+  onSelectDeadline?: (event: DirectoryEvent) => void
   /** Lanes shown before events spill into "+N more". */
   maxLanes?: number
   /** Dashboard mini-grid mode: dots only, non-interactive. */
@@ -105,12 +110,23 @@ export function MonthGrid({
   // one month and the next changes, which is the cheaper of the two evils.
   const lanesUsed = Math.max(1, Math.min(maxLanes, Math.max(1, ...layout.map((w) => w.laneCount))))
   const hasOverflow = layout.some((w) => Object.keys(w.hiddenCountByDay).length > 0)
+  // The deadline strip is reserved for the whole month as soon as ANY day in
+  // view carries one, rather than per row. The chip overlay is positioned in
+  // JS while the marker's labelled/icon-only form is chosen by a CSS container
+  // query, so JS cannot know how tall the marker renders — reserving one fixed
+  // strip is what keeps the two from ever overlapping.
+  const deadlineH = !compact && Object.keys(deadlines).length > 0 ? DEADLINE_H : 0
+  const headerH = HEADER_H + deadlineH
   const rowHeight = compact
     ? 34
-    : HEADER_H + lanesUsed * (LANE_H + LANE_GAP) + (hasOverflow ? OVERFLOW_H : 2)
+    : headerH + lanesUsed * (LANE_H + LANE_GAP) + (hasOverflow ? OVERFLOW_H : 2)
 
   return (
-    <div className={cn('overflow-hidden rounded-lg border border-border bg-surface', className)}>
+    // `@container`: the deadline marker shows its "Abstracts: <title>" label
+    // only where a day cell is wide enough for it, which depends on how wide
+    // the GRID is (side panel open or not, phone or desktop) — not on the
+    // viewport. Same mechanism EventRow uses; see globals.css's --container-row-*.
+    <div className={cn('@container overflow-hidden rounded-lg border border-border bg-surface', className)}>
       {/* Weekday header */}
       <div className="grid grid-cols-7 border-b border-border bg-surface-muted">
         {labels.map((label, i) => (
@@ -139,6 +155,8 @@ export function MonthGrid({
           selectedId={selectedId}
           onSelect={onSelect}
           onSelectDay={onSelectDay}
+          onSelectDeadline={onSelectDeadline}
+          headerH={headerH}
           lanesUsed={lanesUsed}
           compact={compact}
           height={rowHeight}
@@ -159,6 +177,8 @@ function WeekRow({
   selectedId,
   onSelect,
   onSelectDay,
+  onSelectDeadline,
+  headerH,
   lanesUsed,
   compact,
   height,
@@ -173,6 +193,8 @@ function WeekRow({
   selectedId?: number | null
   onSelect?: (event: DirectoryEvent) => void
   onSelectDay?: (iso: string) => void
+  onSelectDeadline?: (event: DirectoryEvent) => void
+  headerH: number
   lanesUsed: number
   compact: boolean
   height: number
@@ -188,7 +210,9 @@ function WeekRow({
           key={cell.iso}
           cell={cell}
           isToday={cell.iso === today}
-          deadlineCount={deadlines[cell.iso]?.length ?? 0}
+          deadlineEvents={deadlines[cell.iso]}
+          locale={locale}
+          onSelectDeadline={onSelectDeadline}
           dots={dots[cell.iso]}
           onSelectDay={onSelectDay}
           compact={compact}
@@ -199,7 +223,7 @@ function WeekRow({
       {/* Event overlay. `pointer-events-none` so the empty parts of a row stay
           clickable as day cells; each chip re-enables them for itself. */}
       {!compact && (
-        <div className="pointer-events-none absolute inset-x-0" style={{ top: HEADER_H, bottom: 0 }}>
+        <div className="pointer-events-none absolute inset-x-0" style={{ top: headerH, bottom: 0 }}>
           {layout.segments.map((seg) => (
             <div
               key={`${seg.event.id}-${seg.week}`}
@@ -246,7 +270,9 @@ function WeekRow({
 function DayCellBox({
   cell,
   isToday,
-  deadlineCount,
+  deadlineEvents,
+  locale,
+  onSelectDeadline,
   dots,
   onSelectDay,
   compact,
@@ -254,7 +280,9 @@ function DayCellBox({
 }: {
   cell: DayCell
   isToday: boolean
-  deadlineCount: number
+  deadlineEvents?: DirectoryEvent[]
+  locale: string
+  onSelectDeadline?: (event: DirectoryEvent) => void
   dots?: DirectoryEvent[]
   onSelectDay?: (iso: string) => void
   compact: boolean
@@ -276,17 +304,16 @@ function DayCellBox({
         >
           {cell.day}
         </span>
-        {!compact && deadlineCount > 0 && (
-          <span
-            className="inline-flex items-center gap-0.5 text-warn-text"
-            title={`${deadlineCount} abstract deadline${deadlineCount === 1 ? '' : 's'}`}
-            aria-label={`${deadlineCount} abstract deadline${deadlineCount === 1 ? '' : 's'}`}
-          >
-            <FileClock className="size-3" strokeWidth={2} aria-hidden />
-            {deadlineCount > 1 && <span className="type-mono-label text-[0.5625rem]">{deadlineCount}</span>}
-          </span>
-        )}
       </div>
+
+      {/* The deadline strip. Its height is reserved for every cell in a month
+          that has any deadline, so the rows stay aligned whether or not this
+          particular day carries one. */}
+      {!compact && deadlineEvents && deadlineEvents.length > 0 && (
+        <div className="mt-0.5">
+          <DeadlineMarker iso={cell.iso} events={deadlineEvents} locale={locale} onSelect={onSelectDeadline} />
+        </div>
+      )}
 
       {compact && dots && dots.length > 0 && (
         <div className="mt-0.5 flex items-center justify-center gap-0.5">
