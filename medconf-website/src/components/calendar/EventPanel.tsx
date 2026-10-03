@@ -105,9 +105,14 @@ export function EventPanelBody({
           <Field label="From">
             <PriceLabel min={event.priceMin} max={event.priceMax} currency={event.currency} size="md" />
           </Field>
-          <Field label="CPD">
-            <CpdLabel accredited={event.cpdAccredited} points={event.cpdPoints} />
-          </Field>
+          {/* CpdLabel renders nothing when the event is not accredited, so the
+              Field has to be conditional too — otherwise the panel shows a
+              "CPD" heading with a blank underneath it. */}
+          {event.cpdAccredited && (
+            <Field label="CPD">
+              <CpdLabel accredited={event.cpdAccredited} points={event.cpdPoints} />
+            </Field>
+          )}
         </div>
 
         {event.abstractDeadline && (

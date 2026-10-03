@@ -61,6 +61,15 @@ export function WeekStrip({
     [events, anchor]
   )
 
+  /** The soonest day after `anchor` that has anything on it — the empty state's way out. */
+  const nextDay = useMemo(() => {
+    const starts = events
+      .map((e) => e.startDate)
+      .filter((d): d is string => Boolean(d) && (d as string) > anchor)
+      .sort()
+    return starts[0] ?? null
+  }, [events, anchor])
+
   const onTouchEnd = (e: React.TouchEvent) => {
     const start = touchStart.current
     touchStart.current = null
@@ -148,9 +157,21 @@ export function WeekStrip({
         )}
 
         {dayEvents.length === 0 ? (
-          <p className="rounded-lg border border-dashed border-border bg-surface-muted px-4 py-6 text-center type-small text-fg-muted">
-            Nothing saved on this day.
-          </p>
+          // A bare "nothing here" on the day you happen to land on is a dead
+          // end, and on a phone the way out is several swipes away — so the
+          // empty state carries the jump to the next day that has something.
+          <div className="rounded-lg border border-dashed border-border bg-surface-muted px-4 py-6 text-center">
+            <p className="type-small text-fg-muted">Nothing saved on this day.</p>
+            {nextDay && (
+              <button
+                type="button"
+                onClick={() => onAnchorChange(nextDay)}
+                className="mt-2 min-h-11 type-small font-medium text-brand-text hover:underline"
+              >
+                Next: {longDateLabel(nextDay, locale)}
+              </button>
+            )}
+          </div>
         ) : (
           <div className="space-y-2.5">
             {dayEvents.map((event) => (

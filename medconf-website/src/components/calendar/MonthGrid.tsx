@@ -28,9 +28,11 @@ import { useLocale } from './useLocale'
  * aligned at any container width without measuring anything in JS.
  *
  * Lane height is fixed, so a row's height is arithmetic rather than content —
- * `header + visibleLanes × lane + overflow`. Every row is therefore the same
- * height and the grid does not reflow as you page months (see monthMatrix's
- * `fixedWeeks` note for the other half of that promise).
+ * `header + lanesUsed × lane + overflow`. Every row in a month is therefore
+ * identical and nothing shifts as the grid scrolls, while `lanesUsed` adapts
+ * to the busiest week so a quiet month is not padded out with lanes nothing
+ * uses. The row COUNT is fixed at 6 (see monthMatrix's `fixedWeeks` note),
+ * which is what keeps paging between months from feeling like a jump.
  *
  * `compact` is the dashboard's mini month: dots instead of chips, no overflow
  * affordance, not interactive. Same engine, same month maths — so the mini
@@ -96,7 +98,16 @@ export function MonthGrid({
     return out
   }, [compact, layout, matrix])
 
-  const rowHeight = compact ? 34 : HEADER_H + maxLanes * (LANE_H + LANE_GAP) + OVERFLOW_H
+  // Size rows to what this month actually needs rather than always reserving
+  // `maxLanes` + an overflow strip. A quiet month was paying ~60px of dead
+  // space per row for lanes nothing ever used. Every row in a given month is
+  // still identical, so nothing shifts as you scroll — only the step between
+  // one month and the next changes, which is the cheaper of the two evils.
+  const lanesUsed = Math.max(1, Math.min(maxLanes, Math.max(1, ...layout.map((w) => w.laneCount))))
+  const hasOverflow = layout.some((w) => Object.keys(w.hiddenCountByDay).length > 0)
+  const rowHeight = compact
+    ? 34
+    : HEADER_H + lanesUsed * (LANE_H + LANE_GAP) + (hasOverflow ? OVERFLOW_H : 2)
 
   return (
     <div className={cn('overflow-hidden rounded-lg border border-border bg-surface', className)}>
@@ -128,7 +139,7 @@ export function MonthGrid({
           selectedId={selectedId}
           onSelect={onSelect}
           onSelectDay={onSelectDay}
-          maxLanes={maxLanes}
+          lanesUsed={lanesUsed}
           compact={compact}
           height={rowHeight}
           isLast={w === matrix.weeks.length - 1}
@@ -148,7 +159,7 @@ function WeekRow({
   selectedId,
   onSelect,
   onSelectDay,
-  maxLanes,
+  lanesUsed,
   compact,
   height,
   isLast,
@@ -162,7 +173,7 @@ function WeekRow({
   selectedId?: number | null
   onSelect?: (event: DirectoryEvent) => void
   onSelectDay?: (iso: string) => void
-  maxLanes: number
+  lanesUsed: number
   compact: boolean
   height: number
   isLast: boolean
@@ -208,7 +219,7 @@ function WeekRow({
           {Object.keys(layout.hiddenCountByDay).length > 0 && (
             <div
               className="absolute inset-x-0 grid grid-cols-7"
-              style={{ top: maxLanes * (LANE_H + LANE_GAP), height: OVERFLOW_H }}
+              style={{ top: lanesUsed * (LANE_H + LANE_GAP), height: OVERFLOW_H }}
             >
               {week.map((cell, col) => {
                 const count = layout.hiddenCountByDay[cell.iso] ?? 0
@@ -345,7 +356,14 @@ function OverflowButton({
         <button
           type="button"
           className={cn(
-            'mx-px flex h-full items-center rounded-sm px-1.5 text-left type-mono-label',
+            // `pointer-events-auto` is load-bearing: the whole overlay is
+            // pointer-events-none so empty parts of a row stay clickable as
+            // day cells, which means every interactive thing inside it has to
+            // opt back in. Without this the popover can never open — the day
+            // cell underneath swallows the click.
+            // `w-fit`, not the full column: a full-width hover bar reads as a
+            // selected day rather than a small "there is more here" control.
+            'pointer-events-auto mx-px flex h-full w-fit items-center rounded-sm px-1.5 text-left type-mono-label',
             'text-fg-muted transition-colors duration-150 hover:bg-surface-active hover:text-fg',
             'focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none'
           )}
