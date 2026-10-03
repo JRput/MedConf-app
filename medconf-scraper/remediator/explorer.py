@@ -63,6 +63,8 @@ class ExploreResult:
     method: str
     audit_trail: AuditTrail
     found: bool
+    # Tier 3: external page the value was found on (organiser/booking URL patch)
+    external_url: Optional[str] = None
 
     def to_dict(self) -> dict:
         return {
@@ -70,6 +72,7 @@ class ExploreResult:
             "value": self.value,
             "method": self.method,
             "found": self.found,
+            "external_url": self.external_url,
             "audit_trail": asdict(self.audit_trail),
         }
 
@@ -110,24 +113,82 @@ EXTERNAL_FOLLOW_TEXT_RE = re.compile(
 )
 
 
+# Generic anchor text ("here", "this link", a bare URL...) that says nothing
+# on its own; only followed when the SURROUNDING sentence is about
+# registration / fees / the organiser (BSH: "Further details and
+# registration can be found <a>here</a>").
+GENERIC_ANCHOR_RE = re.compile(
+    r"^\s*(?:click\s+)?(?:here|this\s+(?:link|page|website|site)|"
+    r"(?:the\s+)?(?:event\s+|conference\s+|organiser'?s?\s+)?(?:website|web\s*page|page|site|link)|"
+    r"(?:visit\s+)?(?:the\s+)?website|link|read\s+more|visit|"
+    r"(?:https?://|www\.)\S+|[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/\S*)?)\s*[.:>»]*\s*$",
+    re.I,
+)
+EXTERNAL_CONTEXT_RE = re.compile(
+    r"(register|registration|book|booking|fees?|prices?|cost|tickets?|programme|"
+    r"further\s+details|more\s+information|organis(?:ed|er)|hosted\s+by)",
+    re.I,
+)
+_CHROME_BLOCK_RE = re.compile(
+    r"<(nav|header|footer|aside|script|style)\b.*?</\1\s*>", re.I | re.S,
+)
+_ANCHOR_RE = re.compile(r'<a\b[^>]*?href="([^"]+)"[^>]*>(.{1,400}?)</a>', re.I | re.S)
+_CONTEXT_CHARS = 200
+_MARK = "\x00LINK\x00"
+
+
+def _anchor_context(html: str, start: int, end: int) -> str:
+    """Tag-stripped text within +-_CONTEXT_CHARS of the anchor at html[start:end]."""
+    window = html[max(0, start - 800): end + 800]
+    rel = start - max(0, start - 800)
+    window = window[:rel] + _MARK + window[rel + (end - start):]
+    # Block-level tags are hard boundaries: context stays inside the same
+    # paragraph / list item / cell as the anchor.
+    window = re.sub(r"</?(?:p|li|ul|ol|div|br|h[1-6]|tr|td|th|section|article)\b[^>]*>",
+                    "\x01", window, flags=re.I)
+    text = _html.unescape(re.sub(r"<[^>]+>", " ", window))
+    text = re.sub(r"[ \t\r\n]+", " ", text)
+    i = text.find(_MARK)
+    if i < 0:
+        return ""
+    before = text[max(0, i - _CONTEXT_CHARS): i].split("\x01")[-1]
+    after = text[i + len(_MARK): i + len(_MARK) + _CONTEXT_CHARS].split("\x01")[0]
+    return before + " " + after
+
+
 def find_external_event_links(
     html: str, base_url: str, limit: int = 3,
 ) -> list[tuple[str, str]]:
-    """External (cross-domain) anchors whose link TEXT suggests they lead
-    to the official event page. Returns (url, link_text) tuples.
+    """External (cross-domain) anchors that probably lead to the official
+    event page. Returns (url, link_text) tuples, best first.
+
+    Two ways to qualify:
+      1. The anchor TEXT matches EXTERNAL_FOLLOW_TEXT_RE (register, more info...)
+         -- highest priority.
+      2. The anchor text is generic ("here", "this link", a bare URL, the
+         external domain) AND the surrounding +-200 chars mention
+         registration / fees / organiser -- lower priority. Anchors inside
+         nav/header/footer/aside blocks are ignored for this rule.
 
     Used as a Tier 3 fallback when same-domain exploration found no fees
-    (typical for aggregator sites that list 3rd-party events and link
-    out to the actual course host for details — e.g. BOPA listing a
-    Royal Marsden module). Caller MUST still apply identity-token +
+    (aggregator sites linking out to the real host, e.g. BOPA -> Royal
+    Marsden, BSH -> RCPSG). Caller MUST still apply identity-token +
     LLM event-match gates before extracting from these pages.
     """
     host = urlparse(base_url).netloc.lower()
-    candidates: list[tuple[str, str]] = []
+    # Spans of site chrome: generic anchors inside them never qualify.
+    chrome_spans = [(m.start(), m.end()) for m in _CHROME_BLOCK_RE.finditer(html)]
+
+    def in_chrome(pos: int) -> bool:
+        return any(a <= pos < b for a, b in chrome_spans)
+
+    explicit: list[tuple[str, str]] = []
+    contextual: list[tuple[str, str]] = []
     seen: set = set()
-    for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>([^<]{1,120})</a>', html):
+    for m in _ANCHOR_RE.finditer(html):
         href = m.group(1).strip()
-        text = re.sub(r"\s+", " ", m.group(2)).strip()
+        text = _html.unescape(re.sub(r"<[^>]+>", " ", m.group(2)))
+        text = re.sub(r"\s+", " ", text).strip()
         if not href or not text or href.startswith("#") or href.startswith("javascript:"):
             continue
         if not href.startswith("http"):
@@ -142,17 +203,20 @@ def find_external_event_links(
         # Skip junk hosts
         if any(j in ext_host for j in JUNK_EXTERNAL_HOSTS):
             continue
-        # Link text must look like an "official event page" pointer
-        if not EXTERNAL_FOLLOW_TEXT_RE.search(text):
-            continue
         clean = href.split("#")[0]
         if clean in seen:
             continue
-        seen.add(clean)
-        candidates.append((clean, text[:80]))
-        if len(candidates) >= limit:
-            break
-    return candidates
+        if EXTERNAL_FOLLOW_TEXT_RE.search(text):
+            seen.add(clean)
+            explicit.append((clean, text[:80]))
+        elif (GENERIC_ANCHOR_RE.match(text) or ext_host.replace("www.", "") in text.lower()):
+            if in_chrome(m.start()):
+                continue
+            ctx = _anchor_context(html, m.start(), m.end())
+            if EXTERNAL_CONTEXT_RE.search(ctx):
+                seen.add(clean)
+                contextual.append((clean, text[:80]))
+    return (explicit + contextual)[:limit]
 
 
 def find_same_domain_anchors(html: str, base_url: str, limit: int = 25) -> list[str]:
@@ -670,7 +734,7 @@ def explore_for_pricing(
                 return ExploreResult(
                     field="pricing", value=tiers,
                     method=f"external_text:{urlparse(ext_url).netloc}",
-                    audit_trail=trail, found=True,
+                    audit_trail=trail, found=True, external_url=ext_url,
                 )
             # External page might also have fee images
             if sub_html:
@@ -694,7 +758,7 @@ def explore_for_pricing(
                             return ExploreResult(
                                 field="pricing", value=vtiers,
                                 method=f"external_vision:{urlparse(ext_url).netloc}",
-                                audit_trail=trail, found=True,
+                                audit_trail=trail, found=True, external_url=ext_url,
                             )
                     except Exception as e:
                         trail.notes.append(f"external_vision_failed: {e}")

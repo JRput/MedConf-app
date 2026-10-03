@@ -39,6 +39,7 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
     # Validate pricing tiers
     tiers = cleaned.get("pricing_tiers", [])
     valid_tiers: List[Dict[str, Any]] = []
+    seen_tiers = set()
 
     # Junk labels that carry no user-facing meaning. BOPA's Tribe API
     # returns cost ranges as two synthetic tiers labelled "From"/"To";
@@ -60,6 +61,10 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
         lbl = lbl.strip(" -–—:·|/")
         # Collapse repeated whitespace
         lbl = re.sub(r"\s+", " ", lbl).strip()
+        # Strip call-to-action text that leaks in from booking buttons when a
+        # fee table is read off an external registration page ("Register and
+        # save Members", "Book now Member" — BSH→RCPSG, 2026-10-04).
+        lbl = re.sub(r"^(?:register(?:\s+and\s+save)?|book\s+now|book\s+here|buy\s+now|sign\s+up)\b[\s:·-]*", "", lbl, flags=re.I).strip()
         return lbl
 
     for t in tiers:
@@ -78,6 +83,11 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
             )
             continue
         t["tier_label"] = cleaned_label
+        # Drop exact duplicates (same label ignoring case/plural, same price)
+        key = (re.sub(r"s$", "", cleaned_label.lower()), float(t["price_gbp"]), (t.get("currency") or "GBP"))
+        if key in seen_tiers:
+            continue
+        seen_tiers.add(key)
         valid_tiers.append(t)
 
     cleaned["pricing_tiers"] = valid_tiers

@@ -201,6 +201,7 @@ def remediate_source(source_id: int) -> dict:
                 value: Any = None
                 method: Optional[str] = None
                 trail_dict: Optional[dict] = None
+                result = None
 
                 # TIER 1 — quick fixer
                 if fixer:
@@ -306,6 +307,26 @@ def remediate_source(source_id: int) -> dict:
                         "value_after": str(value)[:200],
                         "method": method,
                     })
+                    # Tier 3 found fees on an external page: point the
+                    # organiser link (and the booking link, if it was just
+                    # the listing page) at it.
+                    ext = getattr(result, "external_url", None) if field == "pricing" else None
+                    if ext:
+                        link_patches = {}
+                        if row.get("organiser_url") in (None, "", row.get("source_url")):
+                            link_patches["organiser_url"] = ext
+                        if row.get("booking_url") in (None, "", row.get("source_url")):
+                            link_patches["booking_url"] = ext
+                        for lf, lv in link_patches.items():
+                            if _patch_row(sb, row["id"], lf, lv):
+                                patches_applied.append({
+                                    "conference_id": row["id"],
+                                    "conference_name": (row.get("conference_name") or "")[:60],
+                                    "field": lf,
+                                    "value_before": str(row.get(lf))[:80],
+                                    "value_after": lv[:200],
+                                    "method": f"external_link_follow:{method}",
+                                })
                 else:
                     unfixed.append(field)
             if unfixed:
