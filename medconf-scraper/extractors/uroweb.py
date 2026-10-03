@@ -108,6 +108,26 @@ def _event_type(live_type: Optional[str], title: str) -> str:
     return "conference"
 
 
+_CHROME_RE = re.compile(
+    r"cookie|privacy|©|share this|newsletter|log in|become (?:a )?member|sign up|"
+    r"subscribe|contact our organiser|e-?mail:|mailto|all rights reserved|accept all|"
+    r"terms (?:of|and) (?:use|conditions)|powered by",
+    re.I,
+)
+_EUR_RE = re.compile(r"^\s*(?:€|EUR)\s*(\d[\d,.\s]*?)\s*$|^\s*(\d[\d,.\s]*?)\s*(?:€|EUR)\s*$")
+
+
+def _eur(cell: str) -> Optional[float]:
+    m = _EUR_RE.match((cell or "").replace("\xa0", " "))
+    if not m:
+        return None
+    raw = (m.group(1) or m.group(2) or "").replace(" ", "").replace(",", "")
+    try:
+        return float(raw)
+    except ValueError:
+        return None
+
+
 def _clean(text: Optional[str]) -> str:
     return re.sub(r"\s+", " ", (text or "").replace("\xa0", " ")).strip()
 
@@ -223,11 +243,23 @@ class UrowebExtractor(BaseExtractor):
                 const lead = txt(document.querySelector('h1 ~ .lead, .lead'));
                 const paras = [];
                 const root = document.querySelector('main') || document.body;
-                root.querySelectorAll('section.section p').forEach(p => {
-                    if (!p.closest('footer, nav, header')) paras.push(txt(p));
+                // Event body = content sections only; never the metadata table,
+                // organiser contact block, share bar, header/nav/footer.
+                const SKIP = '.event-details, .event-contact, .social-links, footer, nav, header, [class*=cookie], [id*=cookie]';
+                root.querySelectorAll('section.section').forEach(sec => {
+                    if (sec.matches(SKIP) || sec.closest(SKIP)) return;
+                    sec.querySelectorAll('p').forEach(p => {
+                        if (!p.closest(SKIP) && !p.closest('table')) paras.push(txt(p));
+                    });
+                });
+                const tables = [];
+                root.querySelectorAll('section.section table').forEach(t => {
+                    if (t.closest('.event-details, footer, nav, header')) return;
+                    tables.push(Array.from(t.querySelectorAll('tr')).map(tr =>
+                        Array.from(tr.querySelectorAll('th, td')).map(c => txt(c).replace(/\s+/g, ' ').trim())));
                 });
                 const og = document.querySelector('meta[property="og:description"], meta[name=description]');
-                return {meta, lead, paras, og: og ? og.content : '',
+                return {meta, lead, paras, tables, og: og ? og.content : '',
                         body: (root.innerText || '').slice(0, 6000)};
             }""") or {}
         except Exception as e:  # noqa: BLE001
@@ -275,7 +307,7 @@ class UrowebExtractor(BaseExtractor):
             desc = ""
             for p in raw.get("paras") or []:
                 p = _clean(p)
-                if len(p) >= 60 and not re.search(r"cookie|privacy|©|share this event", p, re.I):
+                if len(p) >= 60 and not _CHROME_RE.search(p):
                     desc = p
                     break
         if not desc:
@@ -297,6 +329,46 @@ class UrowebExtractor(BaseExtractor):
         # EAU is a urology society: every event is Urology. Topic pills are
         # sub-topics, so keep them out of the specialty field.
         out["specialty"] = "Urology"
-        out["pricing_tiers"] = []
+        out["pricing_tiers"] = self._fee_tiers(raw.get("tables") or [])
         out["is_sold_out"] = False
         return out
+
+    # ------------------------------------------------------------------ #
+    # Fees — rich-text tables under a "Fees and inclusions" heading:
+    #   [Category | EAU Member | Non-EAU Member] + one row per category, or
+    #   [EAU Member | Non-EAU Member] + a single price row.
+    # Hotel room rates in prose are not registration fees and are ignored
+    # (only table cells are read).
+    # ------------------------------------------------------------------ #
+    @staticmethod
+    def _fee_tiers(tables: List[List[List[str]]]) -> List[Dict[str, Any]]:
+        tiers: List[Dict[str, Any]] = []
+        seen = set()
+        for rows in tables:
+            rows = [[_clean(c) for c in r] for r in rows if r]
+            if len(rows) < 2:
+                continue
+            header = rows[0]
+            for row in rows[1:]:
+                if not any(_eur(c) is not None for c in row):
+                    continue
+                if _eur(row[0]) is None and len(row) >= 2:
+                    category, cols, cells = row[0], header[1:], row[1:]
+                else:
+                    category, cols, cells = "Delegate", header, row
+                for col, cell in zip(cols, cells):
+                    price = _eur(cell)
+                    if price is None or not col:
+                        continue
+                    label = f"Registration \u00b7 {category} \u00b7 {col}"[:160]
+                    if (label, price) in seen:
+                        continue
+                    seen.add((label, price))
+                    tiers.append({
+                        "tier_label": label,
+                        "price_gbp": price,
+                        "currency": "EUR",
+                        "is_early_bird": False,
+                        "early_bird_deadline": None,
+                    })
+        return tiers

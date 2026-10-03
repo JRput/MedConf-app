@@ -14,17 +14,17 @@
     "max_pages_hint": 4,
     "detail_is_multipage": false,
     "active": true,
-    "extraction_instructions": "Nuxt SPA; ?page=N is ignored server-side. list_shells_override loads the calendar in the browser, captures the site's own public GraphQL Authorization header, then pages entries (16/page, offset) from cms.uroweb.org/graphql until entryCount; live upcoming events only (on-demand excluded). Detail pages are server-rendered: .lead description, .event-details table (Organiser, CME, Venue, Location 'City, Country'). No fees are published (registration is on organiser sites), so pricing is []. Specialty is always Urology."
+    "extraction_instructions": "Nuxt SPA; ?page=N is ignored server-side. list_shells_override loads the calendar in the browser, captures the site's own public GraphQL Authorization header, then pages entries (16/page, offset) from cms.uroweb.org/graphql until entryCount; live upcoming events only (on-demand excluded). Detail pages are server-rendered: .lead description, .event-details table (Organiser, CME, Venue, Location 'City, Country'). Fees appear on 13 pages as rich-text tables (Category | EAU Member | Non-EAU Member, or a single member/non-member row) parsed by a bespoke EUR parser; other pages have none. Hotel room rates in prose are ignored. Specialty is always Urology."
   },
   "registry_comment": "EAU Events (50) - Nuxt SPA, listing via site's own GraphQL (token captured in-browser), 55 upcoming live events, EUR/no fees published",
   "probe_results": {
-    "shells": 55,
+    "shells": 54,
     "shells_forced_fallback": 55,
-    "details_tested": 5,
+    "details_tested": 54,
     "with_date": 5,
-    "with_pricing": 0,
+    "with_pricing": 13,
     "with_venue": 4,
-    "with_description": 4,
+    "with_description": 42,
     "with_specialty": 5
   },
   "test_urls": [
@@ -65,10 +65,11 @@
   "concerns": [
     "Recon volume estimate of ~700 was the sitemap (includes past + on-demand). The calendar's own entryCount is 55 upcoming live events; all 55 fetched, unique, matching. Two runs identical.",
     "On-demand education (/education-events/education, separate Craft entry type) is deliberately excluded; revisit if wanted via is_on_demand.",
-    "No fees on any EAU page (registration is on external organiser sites), so pricing_tiers is [] for all events; booking_url is the uroweb event page, not the organiser's external 'Join event' link.",
     "Listing depends on capturing the site's public GraphQL bearer token from a browser request and on the Craft query shape; a site redesign could break it. After 3 failed tries it logs an error and returns [] (no silent partial listing).",
     "Multi-day courses like Robotic Urology Course show a single date in the site's dateRange even when the text says two days; extractor follows the site's date.",
     "Some pages have no description (e.g. Eger ESU course); description is then None. Site-wide boilerplate meta description is deliberately rejected.",
-    "Region holds the country from 'City, Country'; shell city is used when the page has no Location row (region None then)."
+    "Region holds the country from 'City, Country'; shell city is used when the page has no Location row (region None then).",
+    "Fee tables on 13 of 54 pages parsed to EUR tiers (labels 'Registration \u00b7 <Category> \u00b7 EAU Member/Non-EAU Member'); other pages publish no fee. booking_url remains the uroweb page.",
+    "Description is scoped to event content sections (excludes metadata table, organiser contact, share bar, nav/footer) and rejects chrome phrases; 12 pages have no description text at all and return None."
   ]
 }
