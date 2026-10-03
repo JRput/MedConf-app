@@ -76,6 +76,28 @@ _LEADERSHIP_KW = (
 )
 
 
+_UK_REGIONS = {
+    "london": "London", "manchester": "North West England", "liverpool": "North West England",
+    "leeds": "Yorkshire and the Humber", "sheffield": "Yorkshire and the Humber",
+    "york": "Yorkshire and the Humber", "newcastle": "North East England",
+    "birmingham": "West Midlands", "coventry": "West Midlands", "bristol": "South West England",
+    "exeter": "South West England", "bath": "South West England", "cardiff": "Wales", "swansea": "Wales",
+    "edinburgh": "Scotland", "glasgow": "Scotland", "aberdeen": "Scotland", "dundee": "Scotland",
+    "belfast": "Northern Ireland", "dublin": "Ireland", "cambridge": "East of England",
+    "norwich": "East of England", "oxford": "South East England", "brighton": "South East England",
+    "southampton": "South East England", "reading": "South East England", "leicester": "East Midlands",
+    "nottingham": "East Midlands", "derby": "East Midlands", "loughborough": "East Midlands",
+}
+
+
+def _infer_region(city: str) -> Optional[str]:
+    c = (city or "").lower()
+    for k, v in _UK_REGIONS.items():
+        if k in c:
+            return v
+    return None
+
+
 def _clean(s: str) -> str:
     s = re.sub(r"<[^>]+>", " ", s or "")
     return re.sub(r"\s+", " ", _htmlmod.unescape(s)).strip()
@@ -240,22 +262,11 @@ class AdvanceHeExtractor(BaseExtractor):
         mm = re.search(r"<main.*?</main>", html, re.DOTALL)
         main_html = re.split(r"Related events", mm.group(0))[0] if mm else ""
         result.update(self._soft_fields(result["conference_name"], main_html, llm_call))
-        # ---- format / venue ----
-        loc = _clean(venue_loc)
-        fmt = None
-        probe = f"{result['conference_name']} {loc} {self._subtitle(body_text)}"
-        if re.search(r"hybrid", probe, re.I):
-            fmt = "hybrid"
-        elif _ONLINE_RE.search(probe) or re.search(
-                r"\b(virtual|online) (programme|course|event|workshop|conference|session)s?\b",
-                (result.get("description") or ""), re.I):
-            fmt = "online"
-        elif loc:
-            fmt = "in_person"
-        if fmt:
-            result["event_format"] = fmt
-        if loc and fmt == "in_person":
-            result["venue_name"] = loc
+        # ---- format / venue / city ----
+        result.update(self._where(
+            result["conference_name"], adv_type, _clean(venue_loc), body_text,
+            result.get("description") or "",
+        ))
 
         # ---- pricing ----
         result["pricing_tiers"] = self._pricing(html)
@@ -274,6 +285,111 @@ class AdvanceHeExtractor(BaseExtractor):
     # ------------------------------------------------------------------ #
     # Helpers
     # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------ #
+    # Where: format, venue, city, region
+    # ------------------------------------------------------------------ #
+    # Advance HE publishes location in three places, in priority order:
+    #   1. rich pages: "<dates> , <Venue>, <City>, UK" or "<dates> , Virtual"
+    #      directly under the title (before the Book-now button);
+    #   2. data-session "loc" (usually empty);
+    #   3. prose: "fully online", "virtual programme", "residential", ...
+    # Sparse pages (Elevate panels, roadshows, governor sessions, member
+    # webinars) state nothing at all. Those are the sector's online
+    # webinars/briefings, so they DEFAULT to "online" (an audit-gate
+    # requirement: every row needs an event_format). Only a stated in-person
+    # signal flips a row to in_person/hybrid.
+    _LINE_RE = re.compile(
+        r"20\d{2}\s*,\s*(.{2,90}?)\s+(?:Book now|Book your|Call for|Register|Read the)")
+    _ONLINE_PROSE_RE = re.compile(
+        r"fully online|delivered online|online (?:programme|course|event|workshop|session|conference|webinar)s?"
+        r"|virtual (?:programme|course|event|workshop|session|conference)s?|via zoom|on zoom|microsoft teams"
+        r"|webinar", re.I)
+    _INPERSON_PROSE_RE = re.compile(
+        r"residential|in[- ]person|face[- ]to[- ]face", re.I)
+
+    def _where(self, title: str, adv_type: str, loc: str, body_text: str, desc: str) -> Dict[str, Any]:
+        out: Dict[str, Any] = {}
+        flat = re.sub(r"\s+", " ", body_text)
+        line = ""
+        m = self._LINE_RE.search(flat[:1800])
+        if m:
+            line = m.group(1).strip(" ,")
+        else:
+            # No Book-now terminator (e.g. member-benefit forum pages): take the
+            # text after "<year>," and cut at the next sentence-like word, but
+            # only accept it when it names a known city or online/virtual.
+            m2 = re.search(r"20\d{2}\s*,\s*(.{2,90})", flat[:1800])
+            if m2:
+                cand = re.split(r"\s+(?:The|This|Join|A|An|Our|We|Call|Book|Register)\s", m2.group(1))[0].strip(" ,.")
+                if re.search(r"\b(virtual|online)\b", cand, re.I) or any(
+                        re.search(rf"\b{k}\b", cand.lower()) for k in _UK_REGIONS):
+                    line = cand
+        where = loc or line
+        if not where:
+            dm = re.search(r"Delivery:\s*(.{2,50}?)\s+Event type", flat)
+            if dm:
+                where = dm.group(1).strip()
+
+        # "In person (Central London)" / "In person" / "Hybrid (London)"
+        in_person_label = False
+        if where:
+            lm = re.match(r"(in[- ]person|face[- ]to[- ]face|hybrid)\b\s*[-–:]?\s*\(?([^)]*)\)?$", where, re.I)
+            if lm:
+                in_person_label = True
+                kind = lm.group(1).lower()
+                where = lm.group(2).strip()
+                if kind == "hybrid":
+                    out["event_format"] = "hybrid"
+                if not where:
+                    out.setdefault("event_format", "in_person")
+                    return out
+
+        if where:
+            if re.search(r"\b(virtual|online|zoom|teams|webinar)\b", where, re.I):
+                out["event_format"] = "online"
+                return out
+            where = where.strip(" .,")
+            parts = [p.strip() for p in where.split(",") if p.strip()]
+            parts = [p for p in parts if p.upper() not in ("UK", "UNITED KINGDOM", "ENGLAND", "SCOTLAND", "WALES",
+                                                          "NORTHERN IRELAND", "IRELAND")] or parts
+            city = venue = None
+            low = where.lower()
+            known = next((k for k in _UK_REGIONS if re.search(rf"\b{k}\b", low)), None)
+            if known:
+                city = known.title()
+                # drop the trailing segment that carries the city; the rest is the venue
+                venue = ", ".join(parts[:-1]) if len(parts) > 1 else where
+            elif len(parts) > 1:
+                city, venue = parts[-1], ", ".join(parts[:-1])
+            if city and len(city) <= 40:
+                out["city"] = city
+                reg = _infer_region(city)
+                if reg:
+                    out["region"] = reg
+                if venue and not in_person_label:
+                    out["venue_name"] = venue
+                out.setdefault("event_format", "in_person")
+                return out
+
+        # prose signals (title + summary + body)
+        # Template boilerplate on virtual events too: "Event map (in-person events only)".
+        flat = re.sub(r"\(?in[- ]person events only\)?", " ", flat, flags=re.I)
+        text = f"{title} {desc} {flat}"
+        online = bool(self._ONLINE_PROSE_RE.search(text))
+        inperson = bool(self._INPERSON_PROSE_RE.search(text))
+        if re.search(r"\bhybrid\b", text, re.I) or (online and inperson):
+            out["event_format"] = "hybrid"
+        elif inperson:
+            out["event_format"] = "in_person"
+            # "In-person modules will take place in the North of England" -> region only
+            rm = re.search(r"(?:take place|held|delivered|located) in (?:the )?([A-Z][A-Za-z ]{3,30}?)(?:\.|,| Event)", flat)
+            if rm:
+                out["region"] = rm.group(1).strip()
+        else:
+            # Nothing stated anywhere (or only online signals): default online.
+            out["event_format"] = "online"
+        return out
+
     @staticmethod
     def _main_text(html: str) -> str:
         m = re.search(r"<main.*?</main>", html, re.DOTALL)

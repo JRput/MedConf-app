@@ -1,32 +1,75 @@
 {
-  "source_id": 53, "slug": "advance_he", "class_name": "AdvanceHeExtractor", "status": "done",
-  "file_written": "medconf-scraper/extractors/advance_he.py",
-  "source_row": {
-    "source_name": "Advance HE Events", "society": "Advance HE", "base_url": "https://advance-he.ac.uk/events/",
-    "default_event_type": "mixed", "pagination_type": "page_query",
-    "pagination_template": "https://advance-he.ac.uk/events/?query-10-page={page}",
-    "max_pages_hint": 20, "detail_is_multipage": false, "active": true,
-    "extraction_instructions": "WordPress query-loop listing, 6 items per page over ~20 pages (?query-10-page=N), ascending by start date; each li has title, start epoch (data-date) and detail link. list_shells_override walks all pages at ~1 req/s, dedupes by URL and drops past-start items. Detail pages are sparse: Event type, Event summary (when present), schedule rows with data-session epochs, and an Event prices table (product, ticket, GBP). No venue is published, so venue/city stay null. Many events are non-medical governance or leadership; specialty is Medical Education or Leadership & Management."
+ "source_id": 53,
+ "slug": "advance_he",
+ "class_name": "AdvanceHeExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/advance_he.py",
+ "source_row": {
+  "source_name": "Advance HE Events",
+  "society": "Advance HE",
+  "base_url": "https://advance-he.ac.uk/events/",
+  "default_event_type": "mixed",
+  "pagination_type": "page_query",
+  "pagination_template": "https://advance-he.ac.uk/events/?query-10-page={page}",
+  "max_pages_hint": 20,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "WordPress query-loop listing, 6 items per page over ~20 pages (?query-10-page=N), ascending by start date; each li has title, start epoch (data-date) and detail link. list_shells_override walks all pages at ~1 req/s, dedupes by URL and drops past-start items. Detail pages are sparse: Event type, Event summary (when present), schedule rows with data-session epochs, and an Event prices table (product, ticket, GBP). No venue is published, so venue/city stay null. Many events are non-medical governance or leadership; specialty is Medical Education or Leadership & Management."
+ },
+ "registry_comment": "Advance HE: UK HE leadership/teaching/governance events, WordPress query-loop listing (~111 upcoming), sparse detail pages with GBP ticket table",
+ "probe_results": {
+  "shells": 111,
+  "shells_forced_fallback": 111,
+  "details_tested": 30,
+  "with_date": 30,
+  "with_pricing": 30,
+  "with_venue": 1,
+  "with_description": null,
+  "with_specialty": 8
+ },
+ "test_urls": [
+  "https://advance-he.ac.uk/events/diversifying-leadership-28-south/",
+  "https://advance-he.ac.uk/events/senior-fellowship-support-programme-2-jan-2027/",
+  "https://advance-he.ac.uk/events/dvc-pvc-educational-excellence-network-19-november-2026/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://advance-he.ac.uk/events/diversifying-leadership-28-south/",
+   "field": "dates",
+   "site_says": "Wed 7 Oct 2026 - Fri 5 Mar 2027",
+   "extractor_says": "2026-10-07 to 2027-03-05",
+   "match": true
   },
-  "registry_comment": "Advance HE: UK HE leadership/teaching/governance events, WordPress query-loop listing (~111 upcoming), sparse detail pages with GBP ticket table",
-  "probe_results": {"shells": 111, "shells_forced_fallback": 111, "details_tested": 8, "with_date": 8, "with_pricing": 8, "with_venue": 0, "with_description": 6, "with_specialty": 8},
-  "test_urls": [
-    "https://advance-he.ac.uk/events/diversifying-leadership-28-south/",
-    "https://advance-he.ac.uk/events/senior-fellowship-support-programme-2-jan-2027/",
-    "https://advance-he.ac.uk/events/dvc-pvc-educational-excellence-network-19-november-2026/"
-  ],
-  "spot_check": [
-    {"url": "https://advance-he.ac.uk/events/diversifying-leadership-28-south/", "field": "dates", "site_says": "Wed 7 Oct 2026 - Fri 5 Mar 2027", "extractor_says": "2026-10-07 to 2027-03-05", "match": true},
-    {"url": "https://advance-he.ac.uk/events/diversifying-leadership-28-south/", "field": "start_time", "site_says": "epoch 1791360900 = 08:15 UTC = 09:15 BST", "extractor_says": "09:15", "match": true},
-    {"url": "https://advance-he.ac.uk/events/senior-fellowship-support-programme-2-jan-2027/", "field": "fees", "site_says": "Member 795 / EB 755 / Non-member 1055 / EB 1000", "extractor_says": "4 tiers 795, 755, 1055, 1000 GBP", "match": true},
-    {"url": "https://advance-he.ac.uk/events/dvc-pvc-educational-excellence-network-19-november-2026/", "field": "fee", "site_says": "Member only, GBP 0", "extractor_says": "one 0.00 tier", "match": true}
-  ],
-  "concerns": [
-    "No venue or city is published on most pages (data-session loc is empty), so venue_name/city/region are null and event_format is set only when the title or summary says online/virtual/webinar.",
-    "Listing is 111 upcoming of 114 unique items; the site states no total, so count was proven by walking to the empty page (page 21 returns no items). Today is 2026-10-03 in this environment, so 3 past-start items are skipped.",
-    "Some listing links point at /programmes-events/... or /programme-events/... paths that redirect to rich pages; extract_detail handles both layouts.",
-    "Some events appear twice under different URLs (Elevate panels, Athena Swan paid/free); they are kept as separate rows.",
-    "Specialty is deliberately only Medical Education or Leadership & Management unless the shared classifier finds a clinical term in the title. Many events are not medical.",
-    "Dev used about 80 requests in total, above the ~60 guideline, because each harness run walks 20 listing pages and three runs were needed."
-  ]
+  {
+   "url": "https://advance-he.ac.uk/events/diversifying-leadership-28-south/",
+   "field": "start_time",
+   "site_says": "epoch 1791360900 = 08:15 UTC = 09:15 BST",
+   "extractor_says": "09:15",
+   "match": true
+  },
+  {
+   "url": "https://advance-he.ac.uk/events/senior-fellowship-support-programme-2-jan-2027/",
+   "field": "fees",
+   "site_says": "Member 795 / EB 755 / Non-member 1055 / EB 1000",
+   "extractor_says": "4 tiers 795, 755, 1055, 1000 GBP",
+   "match": true
+  },
+  {
+   "url": "https://advance-he.ac.uk/events/dvc-pvc-educational-excellence-network-19-november-2026/",
+   "field": "fee",
+   "site_says": "Member only, GBP 0",
+   "extractor_says": "one 0.00 tier",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "No venue or city is published on most pages (data-session loc is empty), so venue_name/city/region are null and event_format is set only when the title or summary says online/virtual/webinar.",
+  "Listing is 111 upcoming of 114 unique items; the site states no total, so count was proven by walking to the empty page (page 21 returns no items). Today is 2026-10-03 in this environment, so 3 past-start items are skipped.",
+  "Some listing links point at /programmes-events/... or /programme-events/... paths that redirect to rich pages; extract_detail handles both layouts.",
+  "Some events appear twice under different URLs (Elevate panels, Athena Swan paid/free); they are kept as separate rows.",
+  "Specialty is deliberately only Medical Education or Leadership & Management unless the shared classifier finds a clinical term in the title. Many events are not medical.",
+  "Dev used about 80 requests in total, above the ~60 guideline, because each harness run walks 20 listing pages and three runs were needed.",
+  "Audit fix: event_format is now set on every row. Stated location comes from the date line under the title, data-session loc, a 'Delivery:' line, or prose. 28 of 30 sampled rows state nothing in-person, so they default to online (Elevate panels, roadshows, member webinars, governor sessions); a few of those may really be in person, which the site does not say.",
+  "City is filled only when the page names one (3 of ~111 pages name a venue or city: EDI Conference Manchester, Governance Conference London, Irish Governance Forum Dublin, Clerks network London, TLC Nottingham). Residential/in-person programmes that name no place (Diversifying Leadership North/South, Leading Departments) are in_person or hybrid with city null and at most a region."
+ ]
 }

@@ -128,6 +128,24 @@ def fix_abstract_status(
 
     text_l = page_text.lower()
 
+    # 0. Poster competitions / case-report prizes / trainee prizes (no "abstract"
+    #    wording needed). Delegates to the shared classifier.
+    from extractors.abstract_classifier import classify_submission, _find_programme
+    if _find_programme(page_text)[0]:
+        start = None
+        try:
+            start = date.fromisoformat(str(row.get("start_date"))[:10])
+        except (ValueError, TypeError):
+            pass
+        p_open, p_deadline, p_note = classify_submission(page_text, date.today(), start)
+        if p_deadline or p_note:
+            out = {"abstract_open": p_open}
+            if p_deadline:
+                out["abstract_deadline"] = p_deadline.isoformat()
+            if p_note:
+                out["abstract_deadline_note"] = p_note
+            return out, "programme_" + ("deadline" if p_deadline else "note")
+
     # No abstract mention at all → confirm closed
     if "abstract" not in text_l:
         return {"abstract_open": False}, "no_abstract_mention"

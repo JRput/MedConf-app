@@ -35,6 +35,7 @@ import html as html_lib
 import json
 import re
 import time
+from .abstract_classifier import classify_submission
 from datetime import date
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urljoin
@@ -302,6 +303,11 @@ class BSHExtractor(BaseExtractor):
         }
         if sessions:
             result["sessions"] = sessions
+        # Poster competitions / case-report prizes (e.g. International Pathology Day)
+        sub_open, sub_deadline, sub_note = classify_submission(text, today, start)
+        result["abstract_open"] = sub_open
+        result["abstract_deadline"] = sub_deadline.isoformat() if sub_deadline else None
+        result["abstract_deadline_note"] = sub_note
         result.update(self._soft_fields(title, intro, llm_call))
         return result
 
