@@ -132,3 +132,10 @@ These sites need a real browser. Rules on top of the above:
 - International sources: set `currency` per tier (USD/EUR); city + country in `city`/`region`.
 - Cloud access for your domain was probed from a GitHub runner before you were spawned; your prompt
   says the result. If "blocked-intermittent", add a 3-try retry on the listing fetch like `arvo.py`.
+
+## Coverage checklist (mandatory from 2026-10-04)
+Before you mark a source `done`, check it against `extractors/PLAYBOOK.md` → "Coverage checklist"
+(multi-day ranges, fees via external "here" links, image fee tables, same-site Registration
+sub-pages, two-hop external sites, poster/case competitions, call-for-papers PDFs, CTA text in
+tier labels). State in `concerns` which of those you verified and how. Empty `pricing_tiers`
+must be justified against ALL fee locations, not just the page text.
