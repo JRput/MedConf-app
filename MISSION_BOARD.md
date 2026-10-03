@@ -183,3 +183,18 @@ Gate per phase: build in a worktree → Playwright screenshots at 390 / 768 / 14
 **Mission W close-out:** every route on the token system (sweep: 9 routes × 3 widths × 2 themes, no legacy markup). Throwaway test accounts to delete in Supabase Auth: `medconf-w3-calendar-6a46d3@mailinator.com` + one W6 mailinator account (oncology registrar). Follow-ups parked: `user_reminders` markers on the calendar; tablet row density; W5 noted `country` is unknown for 479 events (recon/scraper gap, affects the UK/International filter counts).
 
 **Next:** resume Wave 2 (§7) — say "resume wave 2".
+
+---
+
+# MISSION P — Pricing & submission coverage (opened 2026-10-04 — executing)
+
+**Brief (owner):** prices are being missed across sources; "Price TBC" must mean the price is truly not published. Examples: KSUOG precongress course (ISUOG) has its fee table as an inline base64 PNG — not detected; BSH International Pathology Day has a poster competition with a submission date — not captured.
+**Root causes found:** (a) the audit only flags missing prices when currency text is visible, so image-only fee pages are never flagged; (b) the explorer's image pass needs currency words within 600 chars and skips `data:` URIs; (c) the abstract classifier needs explicit open/deadline wording near abstract/poster; (d) several extractors miss on-page price text (audit: RCPSG 21 rows, Resus 13, Advance HE 8, uroweb 7).
+
+| # | Task | Executor | Status |
+|---|---|---|---|
+| P1 | Survey every active row with 0 tiers (≈588): classify page as text-prices-missed / image-fees (incl. data URIs) / external-registration-link / truly none → CSV per source | `sonnet`, read-only | 🔄 |
+| P2 | Detection: audit flags image-only fee pages; explorer handles data: URIs + fee headings without currency text; vision budget tuned under the new time caps; ISUOG/others benefit centrally | `sonnet` | 🔄 |
+| P3 | Per-source extractor fixes for text prices missed (from P1 + audit): RCPSG, Resus, Advance HE, uroweb, + whatever P1 adds | `sonnet` per source | ⬜ after P1 |
+| P4 | Submissions: poster-competition / "submit posters" wording + submission deadline parsing in `abstract_classifier`; verify BSH 2532; scan all sources for the pattern | `sonnet` | 🔄 |
+| P5 | Gate: re-run remediator on affected sources; tiers before/after per source; "Price TBC" count must drop to P1's "truly none" bucket ± noise | direct | ⬜ |
