@@ -409,3 +409,29 @@ b.close()
 ```
 
 If all three pages return reasonable data, run the full `python main.py --run-now`. If one page returns garbage, fix before scraping the whole source.
+
+---
+
+## Coverage checklist — the misses we have already paid for (2026-10-04)
+
+Every one of these was found by the owner on a live source after the source had "passed".
+They are now enforced in shared code + the nightly audit, but a new extractor must still
+be checked against them before sign-off (`python -m remediator.audit --source N` must be
+clean on these points, and the build JSON's `concerns` must say so explicitly).
+
+| # | Pattern | Example | Where it is caught now |
+|---|---|---|---|
+| 1 | **Multi-day events collapsed to one day** — the detail extractor didn't return `end_date`, or a range regex only matched one date format | IFOS, Tribe sites (merge bug); RCGP, RSM, RCEM, RCPSG (range parsing) | `llm_agent._merge_shell_and_detail` keeps the shell's `end_date`; `end_date` is in the listing hash; `test_date_ranges.py` |
+| 2 | **Fees on an external page linked with generic text** ("registration can be found *here*") | BSH Glasgow Surgical Forum → rcpsg.ac.uk | explorer Tier 3 scores links by the surrounding sentence; patches `organiser_url`/`booking_url` |
+| 3 | **Fee table is an image** (incl. inline `data:image` base64), no currency text on the page | ISUOG / KSUOG course | audit flags "fee table appears to be an image"; explorer sends heading-adjacent images (incl. data URIs) to vision |
+| 4 | **Fees on the site's own sub-page** reached via a real "Registration" nav link, not a guessable suffix | IFAD (via SCCM) | explorer follows same-host registration/fees links before guessing suffixes |
+| 5 | **Two hops**: listing → external event site → its registration sub-page | uroweb ESSIC 2026 | extractor stores the external site as `organiser_url`; explorer applies the sub-page follow on external pages |
+| 6 | **Poster / case competition** with a closing date but no "abstract" wording | BSH International Pathology Day | `classify_submission` in `abstract_classifier`; remediator abstract fixer |
+| 7 | **Call for papers with the deadline inside a linked PDF / portal**, extractor never set abstract fields | Advance HE Teaching & Learning Conf | submission detection runs in the merge step for EVERY source; one PDF/portal link followed; audit flags "call for papers but no deadline" |
+| 8 | **CTA text leaking into tier labels** ("Register and save Members") and duplicate tiers | BSH via RCPSG | validator strips CTA prefixes and dedupes (label, price) |
+
+Rules that follow from the table:
+- `pricing_tiers = []` is only acceptable when the page, its images, its same-site registration link AND its external event site (one hop + sub-pages) have been checked. Say which in `concerns`.
+- Never leave `end_date` to the merge step's fallback if the listing or page shows a range.
+- Do not call the abstract classifier yourself unless you have better page text than the merge step — it runs for you.
+- Run the harness twice (normal + `--force-fallback`) AND the audit; attach the audit summary to the build JSON.
