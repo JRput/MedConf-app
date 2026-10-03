@@ -1,0 +1,395 @@
+[
+ {
+  "source_id": 46,
+  "slug": "baets",
+  "class_name": "BaetsExtractor",
+  "group": "2a-tribe",
+  "recon": {
+   "domain": "baets.org.uk",
+   "status": "resolved",
+   "platform": "tribe_events",
+   "listing_url": "https://www.baets.org.uk/events/",
+   "api_url": "https://www.baets.org.uk/wp-json/tribe/events/v1/events",
+   "js_required": false,
+   "event_type_mix": "conference",
+   "volume_estimate": 2,
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "bot_protection": "none",
+   "expected_found": [
+    "BAETS 2026 Annual Scientific Meeting"
+   ],
+   "notes": "Tribe Events (WordPress Events Calendar plugin v6.17.5) returns clean JSON API. Two upcoming conferences: BAETS 2026 Annual Scientific Meeting (2026-10-08) and International Association of Endocrine Surgeons 2026 Meeting (2026-11-06). Event details (dates, venue) displayed on event page; registration and pricing handled via external website links (e.g., sympomed.pl for BAETS meeting). No pagination needed (both events fit on single page).",
+   "batch": 2
+  },
+  "expect": [
+   "BAETS Annual Meeting"
+  ],
+  "provider": "British Association of Endocrine and Thyroid Surgeons (BAETS)"
+ },
+ {
+  "source_id": 47,
+  "slug": "aans",
+  "class_name": "AansExtractor",
+  "group": "2a-tribe",
+  "recon": {
+   "domain": "aans.org",
+   "status": "resolved",
+   "platform": "tribe_events",
+   "api_url": "https://www.aans.org/wp-json/tribe/events/v1/events",
+   "listing_url": "https://www.aans.org/events/",
+   "js_required": false,
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "conference",
+   "bot_protection": "none",
+   "volume_estimate": 8,
+   "expected_found": [
+    "American Association of Neurological Surgeons (AANS) Annual Meeting"
+   ],
+   "notes": "Tribe Events WordPress plugin with REST API. 8 upcoming events in catalog; key matches include AANS Annual Meeting 2027 (April 9) and 2028 (April 21), plus section-specific annual meetings. Pricing details reside on individual event pages; API returns empty cost fields.",
+   "batch": 2
+  },
+  "expect": [
+   "AANS Annual Scientific Meeting"
+  ],
+  "provider": "American Association of Neurological Surgeons"
+ },
+ {
+  "source_id": 48,
+  "slug": "aagl",
+  "class_name": "AaglExtractor",
+  "group": "2a-tribe",
+  "recon": {
+   "domain": "aagl.org",
+   "status": "resolved",
+   "platform": "tribe_events",
+   "listing_url": "https://aagl.org/events-calender/",
+   "api_url": "https://aagl.org/wp-json/tribe/events/v1/",
+   "js_required": true,
+   "bot_protection": "cloudflare",
+   "volume_estimate": 6,
+   "pagination": "unknown",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "mixed",
+   "expected_found": [
+    "55th Global Congress on MIGS",
+    "56th Global Congress on MIGS",
+    "22nd AAGL International Congress",
+    "23rd AAGL International Congress"
+   ],
+   "notes": "Tribe Events (The Events Calendar WordPress plugin). Events listing at /events-calender/ with dynamic JS rendering. 6 upcoming dated events visible (2026-09 to 2027-11). Detail pages include dates (start/end), venue, location, price, and categories. Supports conferences, courses, webinars, and workshops. Expected name \"AAGL Global Congress\" found as multiple Global Congress and International Congress editions. AWS WAF blocks direct API access but schema.org markup pre-rendered in HTML for all events.",
+   "batch": 2
+  },
+  "expect": [
+   "AAGL Global Congress"
+  ],
+  "provider": "American Association of Gynecologic Laparoscopists"
+ },
+ {
+  "source_id": 49,
+  "slug": "esp_pathology",
+  "class_name": "EspPathologyExtractor",
+  "group": "2a-tribe",
+  "recon": {
+   "domain": "esp-pathology.org",
+   "status": "resolved",
+   "platform": "tribe_events",
+   "listing_url": "https://www.esp-pathology.org/events/",
+   "api_url": "https://www.esp-pathology.org/wp-json/tribe/events/v1/events",
+   "js_required": false,
+   "bot_protection": "none",
+   "volume_estimate": 7,
+   "pagination": "query_param",
+   "detail_topology": "on_event_page",
+   "event_type_mix": "mixed",
+   "expected_found": [
+    "Pathology Visions 2026"
+   ],
+   "notes": "Tribe Events platform with working JSON API. 7 upcoming dated events currently listed (ESP Workshop on Digital/Computational Pathology Sept 28-29, Pathology Visions 2026 Oct 16-18, EScoP courses Nov-Dec). Expected \"ESP Congress\" not found in current listing. HTML pagination shows 3 pages but includes past events; API returns only upcoming events.",
+   "batch": 2
+  },
+  "expect": [
+   "ESP Congress"
+  ],
+  "provider": "European Society of Pathology"
+ },
+ {
+  "source_id": 50,
+  "slug": "uroweb",
+  "class_name": "UrowebExtractor",
+  "group": "2b-bespoke",
+  "recon": {
+   "domain": "uroweb.org",
+   "status": "resolved",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "https://uroweb.org/education-events/events",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "bot_protection": "none",
+   "volume_estimate": 700,
+   "pagination": "unknown",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "EAU Congress"
+   ],
+   "notes": "European Association of Urology events calendar. 42nd Annual EAU Congress is flagship event (hosted at eaucongress.uroweb.org subdomain). Sitemap shows 704 education events with individual detail pages. Verified upcoming dated event: 2026-11-21. SPA requires client-side rendering to see event listings.",
+   "batch": 2
+  },
+  "expect": [
+   "EAU Congress"
+  ],
+  "provider": "European Association of Urology"
+ },
+ {
+  "source_id": 51,
+  "slug": "eanm",
+  "class_name": "EanmExtractor",
+  "group": "2b-bespoke",
+  "recon": {
+   "domain": "eanm.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "js_required": true,
+   "listing_url": "https://eanm.org/the-eanm-community/opportunities/calendar-of-events/",
+   "api_url": "",
+   "bot_protection": "none",
+   "event_type_mix": "conference",
+   "volume_estimate": 499,
+   "pagination": "load_more",
+   "detail_topology": "on_event_page",
+   "expected_found": [
+    "EANM Congress"
+   ],
+   "notes": "WordPress site using Stache Themes Event Calendar plugin. Calendar page requires JavaScript to render events. Verified ~499 event URLs in wp-sitemap-posts-stec_event-1.xml. Individual event pages (e.g., /stec_event/eanm26-annual-congress/) contain full details. Expected event \"EANM Congress\" found as \"EANM26 Annual Congress\". Calendar supports multiple layout views (agenda, month, grid) with navigation and filtering.",
+   "batch": 2
+  },
+  "expect": [
+   "EANM Congress"
+  ],
+  "provider": "European Association of Nuclear Medicine"
+ },
+ {
+  "source_id": 52,
+  "slug": "sccm",
+  "class_name": "SccmExtractor",
+  "group": "2b-bespoke",
+  "recon": {
+   "domain": "sccm.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.sccm.org/education-center/conference-calendar",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 244,
+   "bot_protection": "none",
+   "expected_found": [
+    "2027 Critical Care Congress"
+   ],
+   "notes": "SCCM operates a comprehensive events calendar hosting 244+ critical care education events including their flagship annual Critical Care Congress (2027: March 14-16, San Diego). Events are pre-rendered in static HTML with details (dates, location, event type, description) visible on the listing page. ASP.NET backend, no pagination needed.",
+   "batch": 2
+  },
+  "expect": [
+   "SCCM Critical Care Congress"
+  ],
+  "provider": "Society of Critical Care Medicine"
+ },
+ {
+  "source_id": 53,
+  "slug": "advance_he",
+  "class_name": "AdvanceHeExtractor",
+  "group": "2b-bespoke",
+  "recon": {
+   "domain": "advance-he.ac.uk",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.advance-he.ac.uk/events",
+   "js_required": false,
+   "pagination": "query_param",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "volume_estimate": 210,
+   "expected_found": [
+    "Teaching and education fellowships"
+   ],
+   "bot_protection": "none",
+   "api_url": "",
+   "notes": "WordPress site with FacetWP filtering. Fellowship programmes, workshops, and CPD events. All expected content (teaching/education fellowships) verified on both /fellowship landing page and in active events listing. 200+ dated events across 21 pages.",
+   "batch": 2
+  },
+  "expect": [
+   "Teaching and education fellowships"
+  ],
+  "provider": "Advance HE"
+ },
+ {
+  "source_id": 54,
+  "slug": "ifosworld",
+  "class_name": "IfosworldExtractor",
+  "group": "2b-bespoke",
+  "recon": {
+   "domain": "ifosworld.org",
+   "status": "resolved",
+   "platform": "wordpress_other",
+   "listing_url": "https://www.ifosworld.org/events",
+   "api_url": "https://www.ifosworld.org/wp-json/tribe/events/v1/events",
+   "js_required": false,
+   "bot_protection": "none",
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "query_param",
+   "volume_estimate": 160,
+   "expected_found": [],
+   "notes": "WordPress with Tribe Events Calendar plugin (v6.17.4). Listing at /events shows upcoming dated events Oct 2026-Mar 2027. API endpoint returns JSON with paginated events (16 pages total, ~10 per page). Event details on individual /event/[slug]/ pages. Expected event \"IFOS World Congress\" not found in listing\u2014site hosts diverse ORL conferences, congresses, and webinars including AAO-HNSF 2026 Annual Meeting, various World Congresses on Otology/Rhinology/Laryngology, and training courses.",
+   "batch": 2
+  },
+  "expect": [
+   "IFOS World Congress"
+  ],
+  "provider": "International Federation of Oto-Rhino-Laryngological Societies"
+ },
+ {
+  "source_id": 55,
+  "slug": "idweek",
+  "class_name": "IdweekExtractor",
+  "group": "2b-bespoke",
+  "recon": {
+   "domain": "idweek.org",
+   "status": "resolved",
+   "platform": "spa",
+   "js_required": true,
+   "listing_url": "https://www.idweek.org/program/",
+   "event_type_mix": "conference",
+   "volume_estimate": 100,
+   "pagination": "none",
+   "detail_topology": "mixed",
+   "api_url": "https://idweek2026.eventscribe.net/",
+   "bot_protection": "cloudflare",
+   "expected_found": [
+    "IDWeek"
+   ],
+   "notes": "Single flagship annual conference for infectious disease professionals. IDWeek 2026 program hosted on main site with overview; detailed sessions on EventScribe platform (Cloudflare-protected). Homepage indicates 100+ sessions and workshops.",
+   "batch": 2
+  },
+  "expect": [
+   "IDWeek"
+  ],
+  "provider": "IDSA / SHEA / HIVMA / PIDS / SIDP"
+ },
+ {
+  "source_id": 56,
+  "slug": "isuog",
+  "class_name": "IsuogExtractor",
+  "group": "2b-bespoke",
+  "recon": {
+   "domain": "isuog.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "listing_url": "https://www.isuog.org/events/events-calendar.html",
+   "js_required": false,
+   "event_type_mix": "mixed",
+   "detail_topology": "on_event_page",
+   "pagination": "none",
+   "volume_estimate": 76,
+   "bot_protection": "none",
+   "expected_found": [
+    "ISUOG World Congress"
+   ],
+   "notes": "ISUOG operates an events calendar with 76+ upcoming dated events spanning webinars and advanced courses. World Congress 2027 (13-16 Sep, Lisbon) is the flagship conference; 2026 has concluded. Detail pages show venue/date/description; no pagination needed.",
+   "api_url": "",
+   "batch": 2
+  },
+  "expect": [
+   "ISUOG World Congress"
+  ],
+  "provider": "International Society of Ultrasound in Obstetrics and Gynecology"
+ },
+ {
+  "source_id": 57,
+  "slug": "ihi",
+  "class_name": "IhiExtractor",
+  "group": "2b-bespoke",
+  "recon": {
+   "domain": "ihi.org",
+   "status": "resolved",
+   "platform": "static_html",
+   "js_required": false,
+   "listing_url": "https://www.ihi.org/learn/courses",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "detail_topology": "tabs",
+   "pagination": "load_more",
+   "volume_estimate": 75,
+   "bot_protection": "none",
+   "expected_found": [
+    "Quality improvement and patient safety"
+   ],
+   "notes": "Drupal 11 site with dual listing structure: /learn/courses for 70+ courses (many with 2026\u20132027 start dates) and /connect/events for conferences. IHI Forum 2026 (Dec 6\u20139) and 2027 flagship events confirmed with future dates. Details (fees, location) on event subpages. AJAX pagination available.",
+   "batch": 2
+  },
+  "expect": [
+   "Quality improvement and patient safety"
+  ],
+  "provider": "IHI Open School"
+ },
+ {
+  "source_id": 58,
+  "slug": "b_s_h",
+  "class_name": "BSHExtractor",
+  "group": "2b-bespoke",
+  "recon": {
+   "domain": "b-s-h.org.uk",
+   "status": "resolved",
+   "platform": "unknown",
+   "js_required": true,
+   "listing_url": "https://b-s-h.org.uk/education/conference-and-events/events",
+   "api_url": "",
+   "event_type_mix": "mixed",
+   "volume_estimate": 50,
+   "pagination": "unknown",
+   "detail_topology": "standard_subpages",
+   "bot_protection": "cloudflare",
+   "expected_found": [
+    "BSH Annual Scientific Meeting"
+   ],
+   "notes": "Umbraco-based site with React client-side rendering. 147 event pages found in sitemap including future-dated events (2025-2027). Main listing URL confirmed; individual event detail pages exist but load content via React. Cloudflare protection present. Some pages return 403 when curl-accessed (likely bot protection).",
+   "batch": 2
+  },
+  "expect": [
+   "BSH Annual Scientific Meeting"
+  ],
+  "provider": "British Society for Haematology (BSH)"
+ },
+ {
+  "source_id": 59,
+  "slug": "acep",
+  "class_name": "AcepExtractor",
+  "group": "2b-bespoke",
+  "recon": {
+   "domain": "acep.org",
+   "status": "resolved",
+   "platform": "spa",
+   "listing_url": "https://www.acep.org/master-calendar",
+   "js_required": true,
+   "detail_topology": "on_event_page",
+   "event_type_mix": "conference",
+   "pagination": "unknown",
+   "volume_estimate": 50,
+   "bot_protection": "none",
+   "api_url": "",
+   "expected_found": [
+    "ACEP Scientific Assembly"
+   ],
+   "notes": "AngularJS SPA at /master-calendar displays upcoming events via ng-repeat (list requires JS rendering). Individual event pages (e.g. /master-calendar/acep31-scientific-assembly) show full details: dates, location, fees on-page. ACEP31 runs 9/22-10/7/2026. Sitemap reveals 7+ annual Scientific Assembly editions (ACEP26-32) plus courses and regional conferences. No API access observed; content loaded client-side. No login wall.",
+   "batch": 2
+  },
+  "expect": [
+   "ACEP Scientific Assembly"
+  ],
+  "provider": "American College of Emergency Physicians"
+ }
+]

@@ -1,0 +1,92 @@
+[
+ {
+  "domain": "baets.org.uk",
+  "candidate_urls": [
+   "https://www.baets.org.uk/events/",
+   "https://www.baets.org.uk/wp-json/tribe/events/v1/events"
+  ]
+ },
+ {
+  "domain": "aans.org",
+  "candidate_urls": [
+   "https://www.aans.org/events/",
+   "https://www.aans.org/wp-json/tribe/events/v1/events"
+  ]
+ },
+ {
+  "domain": "aagl.org",
+  "candidate_urls": [
+   "https://aagl.org/events-calender/",
+   "https://aagl.org/wp-json/tribe/events/v1/"
+  ]
+ },
+ {
+  "domain": "esp-pathology.org",
+  "candidate_urls": [
+   "https://www.esp-pathology.org/events/",
+   "https://www.esp-pathology.org/wp-json/tribe/events/v1/events"
+  ]
+ },
+ {
+  "domain": "uroweb.org",
+  "candidate_urls": [
+   "https://uroweb.org/education-events/events"
+  ]
+ },
+ {
+  "domain": "eanm.org",
+  "candidate_urls": [
+   "https://eanm.org/the-eanm-community/opportunities/calendar-of-events/"
+  ]
+ },
+ {
+  "domain": "sccm.org",
+  "candidate_urls": [
+   "https://www.sccm.org/education-center/conference-calendar"
+  ]
+ },
+ {
+  "domain": "advance-he.ac.uk",
+  "candidate_urls": [
+   "https://www.advance-he.ac.uk/events"
+  ]
+ },
+ {
+  "domain": "ifosworld.org",
+  "candidate_urls": [
+   "https://www.ifosworld.org/events",
+   "https://www.ifosworld.org/wp-json/tribe/events/v1/events"
+  ]
+ },
+ {
+  "domain": "idweek.org",
+  "candidate_urls": [
+   "https://www.idweek.org/program/",
+   "https://idweek2026.eventscribe.net/"
+  ]
+ },
+ {
+  "domain": "isuog.org",
+  "candidate_urls": [
+   "https://www.isuog.org/events/events-calendar.html"
+  ]
+ },
+ {
+  "domain": "ihi.org",
+  "candidate_urls": [
+   "https://www.ihi.org/learn/courses"
+  ]
+ },
+ {
+  "domain": "b-s-h.org.uk",
+  "candidate_urls": [
+   "https://b-s-h.org.uk/education/conference-and-events/events"
+  ]
+ },
+ {
+  "domain": "acep.org",
+  "candidate_urls": [
+   "https://www.acep.org/master-calendar"
+  ]
+ }
+]
