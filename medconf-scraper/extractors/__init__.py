@@ -62,6 +62,20 @@ from .arvo import ARVOExtractor
 from .iasociety import IASExtractor
 from .mddus import MDDUSExtractor
 from .themdu import MDUExtractor
+from .baets import BaetsExtractor
+from .aans import AansExtractor
+from .aagl import AaglExtractor
+from .esp_pathology import EspPathologyExtractor
+from .uroweb import UrowebExtractor
+from .eanm import EanmExtractor
+from .sccm import SccmExtractor
+from .advance_he import AdvanceHeExtractor
+from .ifosworld import IfosworldExtractor
+from .idweek import IdweekExtractor
+from .isuog import IsuogExtractor
+from .ihi import IhiExtractor
+from .b_s_h import BSHExtractor
+from .acep import AcepExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -111,6 +125,20 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     43: IASExtractor,                       # IAS flagship conferences (International AIDS Conference, IAS Conference on HIV Science, HIVR4P) - homepage mega-menu as listing, thin market
     44: MDDUSExtractor,                     # 44: MDDUSExtractor,  # MDDUS training & CPD (Interactive Zoom courses, page_query listing, date cross-check for CMS date bug)
     45: MDUExtractor,                       # MDU Learn & Develop — dated CPD courses (event_type='course', sessions[]) via the site's own search-widget JSON API; no /events page exists
+    46: BaetsExtractor,                     # BAETS - Tribe Events API family
+    47: AansExtractor,                      # AANS - Tribe Events API family
+    48: AaglExtractor,                      # AAGL - Tribe Events API family
+    49: EspPathologyExtractor,              # ESP - Tribe Events API family
+    50: UrowebExtractor,                    # EAU Events (50) - Nuxt SPA, listing via site's own GraphQL (token captured in-browser), 55 upcoming live events, EUR/no fees publi
+    51: EanmExtractor,                      # European Association of Nuclear Medicine - calendar of events via Stec REST API (EANM + third-party listings)
+    52: SccmExtractor,                      # 52: SCCM — single calendar page (75 cards) + flagship Congress page; shells use #evt-hash identity URLs, real link returned as boo
+    53: AdvanceHeExtractor,                 # Advance HE: UK HE leadership/teaching/governance events, WordPress query-loop listing (~111 upcoming), sparse detail pages with GB
+    54: IfosworldExtractor,                 # IFOS ORL congress calendar - Tribe Events REST API, ~16 upcoming, USD fees when stated
+    55: IdweekExtractor,                    # IDWeek annual meeting - flagship microsite, single shell per year, USD pricing table
+    56: IsuogExtractor,                     # ISUOG — static events calendar (upcoming tab only), approved courses + education webinars/livestream courses, GBP fee tables
+    57: IhiExtractor,                       # IHI — dated course/certification runs from /learn/courses cards + ConferenceEvent JSON-LD from /connect/events; USD
+    58: BSHExtractor,                       # British Society for Haematology (events listing, server-rendered)
+    59: AcepExtractor,                      # 59: ACEP — American College of Emergency Physicians event calendar (JSON API listing, USD, no fees published)
 }
 
 

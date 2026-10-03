@@ -1,0 +1,96 @@
+{
+ "source_id": 56,
+ "slug": "isuog",
+ "class_name": "IsuogExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/isuog.py",
+ "source_row": {
+  "source_name": "ISUOG",
+  "society": "International Society of Ultrasound in Obstetrics and Gynecology",
+  "base_url": "https://www.isuog.org/events/events-calendar.html",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Server-rendered single-page calendar; list_shells_override reads only the 'Upcoming events' tab (#tab-upcoming-article-list, ~19 cards, count checked against the page's 'N events found'); the Past tab is lazy-loaded history and ignored. Listing date is canonical (a detail page once had a typo'd year); detail supplies end date, time, fees, CME, venue. Two detail shapes: ISUOG Approved Courses (free-text, organiser registration link, rare Venue/Course fee lines) and ISUOG Education webinars/livestreamed courses (Registration section with GBP fee table, Early Bird vs Standard columns; free webinars say 'free to attend'). Education items tagged 'UK' in the listing are organiser location, not event location."
+ },
+ "registry_comment": "ISUOG — static events calendar (upcoming tab only), approved courses + education webinars/livestream courses, GBP fee tables",
+ "probe_results": {
+  "shells": 19,
+  "shells_forced_fallback": 19,
+  "details_tested": 19,
+  "with_date": 19,
+  "with_pricing": 11,
+  "with_venue": 2,
+  "with_description": 19,
+  "with_specialty": 19
+ },
+ "test_urls": [
+  "https://www.isuog.org/event/exploring-the-fetal-brain.html",
+  "https://www.isuog.org/event/advanced-course-on-gynecological-ultrasound.html",
+  "https://www.isuog.org/event/from-detection-to-diagnosis-the-experts-guide-to-adnexal-masses.html"
+ ],
+ "spot_check": [
+  {
+   "url": "exploring-the-fetal-brain",
+   "field": "dates",
+   "site_says": "24-25 Oct 2026 (CME header 24/10/2026 - 25/10/2026)",
+   "extractor_says": "2026-10-24 / 2026-10-25",
+   "match": true
+  },
+  {
+   "url": "exploring-the-fetal-brain",
+   "field": "fees",
+   "site_says": "Members £294, Non-members £385, 8 categories, Standard from 29 Sep 2026",
+   "extractor_says": "8 GBP Standard tiers, 294 / 385 ...",
+   "match": true
+  },
+  {
+   "url": "exploring-the-fetal-brain",
+   "field": "cpd",
+   "site_says": "11.0 European CME credits (EACCME)",
+   "extractor_says": "11.0, accredited",
+   "match": true
+  },
+  {
+   "url": "advanced-course-on-gynecological-ultrasound",
+   "field": "dates",
+   "site_says": "25-29 January 2027",
+   "extractor_says": "2027-01-25 / 2027-01-29",
+   "match": true
+  },
+  {
+   "url": "advanced-course-on-gynecological-ultrasound",
+   "field": "venue/city",
+   "site_says": "Malmö, SWEDEN, Skane University Hospital, MKC ...",
+   "extractor_says": "venue as printed; city Malmö; region Sweden",
+   "match": true
+  },
+  {
+   "url": "advanced-course-on-gynecological-ultrasound",
+   "field": "fee",
+   "site_says": "17500 SEK plus 25% VAT, total 21875 SEK",
+   "extractor_says": "21875 SEK",
+   "match": true
+  },
+  {
+   "url": "https://www.isuog.org/event/from-detection-to-diagnosis-the-experts-guide-to-adnexal-masses.html",
+   "field": "time/fee/format",
+   "site_says": "28 Oct 2026 12:00 GMT, free webinar",
+   "extractor_says": "12:00, one GBP 0 tier, online",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Recon said ~76 events; the site's Upcoming tab holds 19 (the 76 included past events). World Congress 2027 (Lisbon) is not yet on the calendar, so it is not in the shells.",
+  "Non-GBP fee: Malmö course fee is SEK; tier carries currency SEK with the VAT-inclusive total. Confirm the frontend handles SEK (conventions list GBP/USD/EUR/HKD/SGD/CHF/BRL only).",
+  "Fee table category labels are kept as printed, so the two Spanish Education courses have Spanish category names; their prices are GBP.",
+  "Early-bird columns whose deadline has passed are dropped; with the 'Standard price from <date>' column treated as current.",
+  "Most Approved Courses state no fee on the ISUOG page (registration is on the organiser's site), so pricing is [] for them. booking_url is set to the external registration link when one is found.",
+  "Specialty is the constant 'Obstetrics & Gynaecology' (society remit, same convention as rcog.py); description is LLM with first-paragraph backstop. The LLM returned 429 for a few calls during testing and the backstop was used.",
+  "Education pages print ISUOG-London as CME location; treated as online (livestreamed), so venue/city/region are None for them. The one hybrid course (Apr 2027) has no venue on the page.",
+  "Only the Upcoming tab is read; I did not check whether the lazy-loaded Past tab ever holds future-dated items."
+ ]
+}

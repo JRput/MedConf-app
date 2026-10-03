@@ -1,0 +1,57 @@
+{
+ "source_id": 49,
+ "slug": "esp_pathology",
+ "class_name": "EspPathologyExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/esp_pathology.py",
+ "source_row": {
+  "source_name": "ESP Events",
+  "society": "ESP",
+  "base_url": "https://www.esp-pathology.org/events/",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "WordPress Tribe Events site. Listing and detail both come from the JSON API (/wp-json/tribe/events/v1/events?per_page=50&start_date=today) via extractors/tribe_events.py; no HTML walk. Fees parsed from the description text where present."
+ },
+ "registry_comment": "ESP - Tribe Events API family",
+ "probe_results": {
+  "shells": 6,
+  "shells_forced_fallback": 6,
+  "details_tested": 6,
+  "with_date": 6,
+  "with_pricing": 4,
+  "with_venue": 3,
+  "with_description": 5,
+  "with_specialty": 6
+ },
+ "test_urls": [
+  "https://www.esp-pathology.org/event/escop-course-on-breast-pathology/",
+  "https://www.esp-pathology.org/event/ksp-2026/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.esp-pathology.org/event/escop-course-on-breast-pathology/",
+   "field": "fees",
+   "site_says": "EUR 380 / 420 / 400 / 440 (members/non-members, with or without dinner)",
+   "extractor_says": "4 EUR tiers, same amounts",
+   "match": true
+  },
+  {
+   "url": "https://www.esp-pathology.org/event/ksp-2026/",
+   "field": "venue",
+   "site_says": "Venue: Lottle Hotel Seoul, Seoul, South Korea",
+   "extractor_says": "venue_name same, city Seoul, region South Korea",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Family helper extractors/tribe_events.py is new and shared; BOPA was not touched.",
+  "Recon said 7 events; API returns 6 upcoming. 'ESP Congress' is not in the feed.",
+  "Pathology Visions 2026 and KSP 2026 are external events listed by ESP; kept, descriptions mostly empty/short.",
+  "Perinatal course has no location published yet (null). Venue for EScoP courses is not on the page, only city/country.",
+  "Description for EScoP courses includes a trailing 'Attendance:' fragment because the API text drops the date line."
+ ]
+}

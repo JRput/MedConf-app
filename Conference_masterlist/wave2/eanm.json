@@ -1,0 +1,83 @@
+{
+ "source_id": 51,
+ "slug": "eanm",
+ "class_name": "EanmExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/eanm.py",
+ "source_row": {
+  "source_name": "EANM Calendar of Events",
+  "society": "EANM",
+  "base_url": "https://eanm.org/the-eanm-community/opportunities/calendar-of-events/",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Calendar is JS-rendered (Stec plugin) but the full list is public JSON at /wp-json/stec/v5/events?per_page=100&page=N (499 records, 5 pages, archive back to 2017; filter to upcoming locally). All fields come from the API record carried on the shell; event pages (/stec_event/<slug>/) are JS shells with nothing extra. Mix of EANM own events (Annual Congress, ESMIT webinars/courses) and third-party events; society is mapped from the external-link host, never blanket EANM. Third-party API dates can be sloppy, so they are narrowed to explicit date ranges in the body text."
+ },
+ "registry_comment": "European Association of Nuclear Medicine - calendar of events via Stec REST API (EANM + third-party listings)",
+ "probe_results": {
+  "shells": 35,
+  "shells_forced_fallback": 35,
+  "details_tested": 35,
+  "with_date": 35,
+  "with_pricing": 1,
+  "with_venue": 11,
+  "with_description": 9,
+  "with_specialty": 34
+ },
+ "test_urls": [
+  "https://eanm.org/stec_event/6th-international-dental-advanced-dentistry-oral-health-conference-exhibition/",
+  "https://eanm.org/stec_event/6th-international-conference-on-cardiology/",
+  "https://eanm.org/stec_event/esmit-onsite-course-radioguided-surgery/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://eanm.org/stec_event/6th-international-dental-advanced-dentistry-oral-health-conference-exhibition/",
+   "field": "dates",
+   "site_says": "Dates: 04-05 February 2027 (API range was 2026-08-11..2027-02-05)",
+   "extractor_says": "2027-02-04..2027-02-05",
+   "match": true
+  },
+  {
+   "url": "https://eanm.org/stec_event/6th-international-dental-advanced-dentistry-oral-health-conference-exhibition/",
+   "field": "venue/city/cpd",
+   "site_says": "AC Hotel by Marriott, Kuala Lumpur, Malaysia; 30 CME / 30 CPD credits",
+   "extractor_says": "AC Hotel by Marriott | Kuala Lumpur | Malaysia | 30",
+   "match": true
+  },
+  {
+   "url": "https://eanm.org/stec_event/6th-international-conference-on-cardiology/",
+   "field": "dates/venue",
+   "site_says": "November 13-14, 2026; Grand Mercure Bangkok Atrium, Bangkok, Thailand",
+   "extractor_says": "2026-11-13..2026-11-14; Grand Mercure Bangkok Atrium, Bangkok, Thailand",
+   "match": true
+  },
+  {
+   "url": "https://eanm.org/stec_event/esmit-onsite-course-radioguided-surgery/",
+   "field": "dates/location/type",
+   "site_says": "25-26 Nov 2027, 'Onsite Course ... (in Valencia, Spain)'",
+   "extractor_says": "2027-11-25..2027-11-26, course, Valencia, Spain, in_person",
+   "match": true
+  },
+  {
+   "url": "https://eanm.org/stec_event/eanm26-annual-congress/",
+   "field": "dates",
+   "site_says": "17-21 Oct 2026 (rendered page shows UTC-shifted 16 Oct 23:00 - 21 Oct 23:00)",
+   "extractor_says": "2026-10-17..2026-10-21",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Source is the Stec REST API (/wp-json/stec/v5/events), not HTML. Unauthenticated and stable so far, but a plugin update could change the route. Listing returns None (keeps old rows) if any page fails after 3 tries.",
+  "Count proven: API X-WP-Total=499, 5 pages, all 499 unique. Only 35 are upcoming (rest is archive back to 2017), so expect ~35 live rows, not ~499.",
+  "Third-party listings (about 12 of 35) are kept per owner decision; society is mapped from the external-link host (UCG Conferences, Scientex, EMUC, MELODI, NMN Society, Stress and Behavior) or title (Pakistan Society of Nuclear Medicine, ICPO). The 'Welcome to Fusion' webinar has no identifiable organiser and falls back to 'Third-party organiser (EANM calendar)', which will show as a pseudo-society on /societies. Owner may prefer a different label.",
+  "booking_url/source_url is the eanm.org event page (dedupe key); it is a JS shell. The organiser's real registration link is stored as organiser_url only (no dedicated booking field).",
+  "API dates are sloppy for third-party entries; narrowed to explicit text ranges inside the API window (dental 04-05 Feb 2027, Caribbean 13-15 Jan 2027). Entries with no text dates keep API dates.",
+  "start_time kept only for EANM's own events (ESMIT webinars/courses), as entered in the calendar (site timezone); the rendered page shows it UTC-shifted. Third-party entries dropped the calendar default 08:00/09:00.",
+  "No fees published anywhere: pricing_tiers=[] except the free Fusion webinar (one GBP 0 tier). EANM'26 Congress has no venue, format or fees on the calendar (microsite eanm26.eanm.org holds them); leave to the remediator explorer. Format left None for it rather than guessed.",
+  "ESMIT events have no description (all point at one generic landing page); left None rather than templated. CPD figures for third-party events are the organisers' own claims.",
+  "Requests used: 5 API pages per listing run, 1 microsite fetch, plus a handful of event pages; well under the 60 budget per run, 1 req/s."
+ ]
+}

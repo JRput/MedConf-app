@@ -1,0 +1,56 @@
+{
+ "source_id": 48,
+ "slug": "aagl",
+ "class_name": "AaglExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/aagl.py",
+ "source_row": {
+  "source_name": "AAGL Events",
+  "society": "AAGL",
+  "base_url": "https://aagl.org/events-calender/",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "WordPress Tribe Events site. Listing and detail both come from the JSON API (/wp-json/tribe/events/v1/events?per_page=50&start_date=today) via extractors/tribe_events.py; no HTML walk. Fees parsed from the description text where present."
+ },
+ "registry_comment": "AAGL - Tribe Events API family",
+ "probe_results": {
+  "shells": 5,
+  "shells_forced_fallback": 5,
+  "details_tested": 5,
+  "with_date": 5,
+  "with_pricing": 0,
+  "with_venue": 4,
+  "with_description": 2,
+  "with_specialty": 5
+ },
+ "test_urls": [
+  "https://aagl.org/event/55th-global-congress-on-migs/",
+  "https://aagl.org/event/22nd-aagl-international-congress/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://aagl.org/event/55th-global-congress-on-migs/",
+   "field": "venue/dates",
+   "site_says": "November 13-16, 2026 Hynes Convention Center, Boston",
+   "extractor_says": "2026-11-13..16, Hynes Convention Center, Boston, United States",
+   "match": true
+  },
+  {
+   "url": "https://aagl.org/event/22nd-aagl-international-congress/",
+   "field": "city",
+   "site_says": "June 16-19, 2027 Warsaw, Poland",
+   "extractor_says": "Warsaw, Poland (from description header, API venue empty)",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Family helper extractors/tribe_events.py is new and shared; BOPA was not touched.",
+  "The Tribe JSON API answered plain httpx from this machine, and the event HTML also loaded here. The Human Verification page was seen only from the GitHub runner, so the browser fallback inside fetch_html is untested against it; the API call is wrapped in a 3-try retry and a <pre>-JSON parser for that path.",
+  "No fees on any AAGL page; most congress records have no prose description.",
+  "Tampa course has no country in the API, so region is 'Florida'."
+ ]
+}

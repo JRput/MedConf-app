@@ -1,0 +1,56 @@
+{
+ "source_id": 46,
+ "slug": "baets",
+ "class_name": "BaetsExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/baets.py",
+ "source_row": {
+  "source_name": "BAETS Events",
+  "society": "BAETS",
+  "base_url": "https://www.baets.org.uk/events/",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "WordPress Tribe Events site. Listing and detail both come from the JSON API (/wp-json/tribe/events/v1/events?per_page=50&start_date=today) via extractors/tribe_events.py; no HTML walk. Fees parsed from the description text where present."
+ },
+ "registry_comment": "BAETS - Tribe Events API family",
+ "probe_results": {
+  "shells": 4,
+  "shells_forced_fallback": 4,
+  "details_tested": 4,
+  "with_date": 4,
+  "with_pricing": 2,
+  "with_venue": 2,
+  "with_description": 2,
+  "with_specialty": 4
+ },
+ "test_urls": [
+  "https://baets.org.uk/event/baets-thyroid-masterclass-2027/",
+  "https://baets.org.uk/event/baets-2026-annual-scientific-meeting/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://baets.org.uk/event/baets-thyroid-masterclass-2027/",
+   "field": "fees",
+   "site_says": "BAETS members \u00a3225; both masterclasses \u00a370 second day",
+   "extractor_says": "225 GBP, 70 GBP",
+   "match": true
+  },
+  {
+   "url": "https://baets.org.uk/event/baets-2026-annual-scientific-meeting/",
+   "field": "venue/dates",
+   "site_says": "Oct 8 8:00 - Oct 9 17:00, ul. Fabryczna 13, Krak\u00f3w, Poland",
+   "extractor_says": "2026-10-08..09, 08:00, Krak\u00f3w, Poland",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Family helper extractors/tribe_events.py is new and shared; BOPA was not touched.",
+  "Recon said 2 events; API returns 4 upcoming (adds two 2027 masterclasses). Annual Scientific Meeting and IAES meeting have no fee on the page (external registration).",
+  "Masterclass venue not given in API or page text, so venue/format left null.",
+  "Second fee tier label is long (the site's own wording)."
+ ]
+}

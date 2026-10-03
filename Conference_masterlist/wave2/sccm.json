@@ -1,0 +1,76 @@
+{
+  "source_id": 52,
+  "slug": "sccm",
+  "class_name": "SccmExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/sccm.py",
+  "source_row": {
+    "source_name": "SCCM Conference Calendar",
+    "society": "Society of Critical Care Medicine",
+    "base_url": "https://sccm.org/education-center/conference-calendar",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Single server-rendered page; ~75 cards (div.filterData.list-item, client-side jplist filter, no pagination) with date(s), time, city or venue, type/category tags, title, short description. Every card links OUT to a third-party page, hrefs repeat across dates, so list_shells_override gives each shell a stable identity URL <listing>#evt-<hash> and extract_detail returns the real link as booking_url. The flagship Critical Care Congress is not a card; it is added from /annual-congress/critical-care-conference. Card types map: Hosted Training->course, SCCM Congress (pre-Congress sessions)->workshop, Webcast->workshop/online, Non-SCCM Event->conference. No fees on the site pages (Congress registration is on Cloudflare-blocked eventscribe), so pricing_tiers is []. Use bare host sccm.org; www.sccm.org does not resolve everywhere."
+  },
+  "registry_comment": "52: SCCM \u2014 single calendar page (75 cards) + flagship Congress page; shells use #evt-hash identity URLs, real link returned as booking_url; no fees available.",
+  "probe_results": {
+    "shells": 76,
+    "shells_forced_fallback": 76,
+    "details_tested": 8,
+    "with_date": 8,
+    "with_pricing": 0,
+    "with_venue": 3,
+    "with_description": 8,
+    "with_specialty": 8
+  },
+  "test_urls": [
+    "https://sccm.org/education-center/conference-calendar#evt-<hash> (ARDS and ECMO in Trauma, 2026-10-20)",
+    "https://sccm.org/education-center/conference-calendar#evt-<hash> (VitalTalk: Mastering Tough Conversations, 2027-03-13)",
+    "https://sccm.org/annual-congress/critical-care-conference (2027 Critical Care Congress)"
+  ],
+  "spot_check": [
+    {
+      "url": "listing card: ARDS and ECMO in Trauma",
+      "field": "date/time/format",
+      "site_says": "10/20/2026, 1:00-2:00 p.m. Central, Zoom",
+      "extractor_says": "2026-10-20, 13:00, online, workshop",
+      "match": true
+    },
+    {
+      "url": "listing card: VitalTalk: Mastering Tough Conversations",
+      "field": "date/time/venue",
+      "site_says": "3/13/2027, 8:00 a.m.-5:00 p.m. Pacific, Hilton San Diego Bayfront",
+      "extractor_says": "2027-03-13, 08:00, Hilton San Diego Bayfront, San Diego, California, USA",
+      "match": true
+    },
+    {
+      "url": "listing card: FCCS-Regions Hospital",
+      "field": "dates/location/type",
+      "site_says": "11/5/2026-11/6/2026, Saint Paul, MN, Hosted Training",
+      "extractor_says": "2026-11-05..2026-11-06, Saint Paul, Minnesota USA, course",
+      "match": true
+    },
+    {
+      "url": "https://sccm.org/annual-congress/critical-care-conference",
+      "field": "dates/venue",
+      "site_says": "March 14-16, 2027, San Diego Convention Center",
+      "extractor_says": "2027-03-14..2027-03-16, San Diego Convention Center",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Recon said ~244 events; the page holds 75 cards (all upcoming) plus the Congress page = 76 shells. The page states no total, so 75 is the count of cards on the page, not a proven site total.",
+    "No pricing anywhere: card pages are third-party and Congress registration is on congress2027.eventscribe.net, which returns a Cloudflare 403 to my IP. pricing_tiers is [] for all 76.",
+    "Each slow-path event navigates the browser to the 300KB listing (#evt-hash) and parses from the shell payload; harmless but redundant. Fast-path skip keeps steady-state loads low.",
+    "Card href (booking_url) targets are third-party sites; several (eventscribe, Facebook, Zoom) are not scraped, only linked. 15 pre-Congress sessions are separate workshop rows (they have separate times/prices).",
+    "Hosted-training descriptions are deterministic templates from title + category (listing has none); host contact details on the cards are deliberately dropped as personal data.",
+    "Event identity hash = title|start|end|time|location|category; if SCCM edits any of those, the old row stops being seen and a new one appears (old one is archived by the unseen-14d rule).",
+    "Congress abstract submission closed 2026-09-03, so abstract_open False and no deadline recorded. CPD only parsed for SCCM-hosted webcast pages (ACE credits); other events None.",
+    "Flagship shell is built from the Congress page's hero date line; if SCCM restructures that page the flagship is dropped with a warning (calendar cards unaffected).",
+    "www.sccm.org did not resolve from my machine; the extractor uses and rewrites to bare sccm.org. source_row.base_url should be the bare host as given."
+  ]
+}

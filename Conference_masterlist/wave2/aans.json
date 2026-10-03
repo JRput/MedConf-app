@@ -1,0 +1,57 @@
+{
+ "source_id": 47,
+ "slug": "aans",
+ "class_name": "AansExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/aans.py",
+ "source_row": {
+  "source_name": "AANS Events",
+  "society": "AANS",
+  "base_url": "https://www.aans.org/events/",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "WordPress Tribe Events site. Listing and detail both come from the JSON API (/wp-json/tribe/events/v1/events?per_page=50&start_date=today) via extractors/tribe_events.py; no HTML walk. Fees parsed from the description text where present."
+ },
+ "registry_comment": "AANS - Tribe Events API family",
+ "probe_results": {
+  "shells": 5,
+  "shells_forced_fallback": 5,
+  "details_tested": 5,
+  "with_date": 5,
+  "with_pricing": 0,
+  "with_venue": 0,
+  "with_description": 2,
+  "with_specialty": 5
+ },
+ "test_urls": [
+  "https://www.aans.org/event/american-association-of-neurological-surgeons-aans-annual-meeting-3/",
+  "https://www.aans.org/event/northwesterns-chicago-2027-advanced-training-in-skull-base-surgery/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.aans.org/event/american-association-of-neurological-surgeons-aans-annual-meeting-3/",
+   "field": "dates",
+   "site_says": "April 9, 2027 - April 12, 2027",
+   "extractor_says": "2027-04-09..2027-04-12",
+   "match": true
+  },
+  {
+   "url": "https://www.aans.org/event/northwesterns-chicago-2027-advanced-training-in-skull-base-surgery/",
+   "field": "event_type/format",
+   "site_says": "three-day cadaveric course (VR anatomy is a teaching aid)",
+   "extractor_says": "course, format null",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Family helper extractors/tribe_events.py is new and shared; BOPA was not touched.",
+  "API returns 6 records; one is an exact duplicate (title+date) of the Pediatric Section meeting and is deduped, leaving 5.",
+  "No venue, fees or CPD in the API or the pages; those stay empty. Annual Meeting records have no description.",
+  "Includes an advocacy webinar (FDA user-fee reauthorization, category AANS/CNS). I kept it; consider filtering if it is judged non-CPD.",
+  "specialty forced to Neurology because the title classifier tagged the Pediatric section meeting Paediatrics."
+ ]
+}

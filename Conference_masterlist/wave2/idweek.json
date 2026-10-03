@@ -1,0 +1,80 @@
+{
+ "source_id": 55,
+ "slug": "idweek",
+ "class_name": "IdweekExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/idweek.py",
+ "source_row": {
+  "source_name": "IDWeek",
+  "society": "IDSA / SHEA / HIVMA / PIDS / SIDP",
+  "base_url": "https://www.idweek.org/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "One annual flagship meeting, not a listing: list_shells_override parses the homepage hero line (dates, city) into a single shell. Detail reads /registration/ (USD fee table, Advance/Regular/Onsite plus hotel-block discount columns) and /abstracts/ (Regular Abstracts Closes). Sessions live on EventScribe (Cloudflare) and are deliberately not scraped."
+ },
+ "registry_comment": "IDWeek annual meeting - flagship microsite, single shell per year, USD pricing table",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.idweek.org/",
+  "https://www.idweek.org/registration/",
+  "https://www.idweek.org/abstracts/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.idweek.org/registration/",
+   "field": "Member Advance fee",
+   "site_says": "$900",
+   "extractor_says": "900 USD",
+   "match": true
+  },
+  {
+   "url": "https://www.idweek.org/registration/",
+   "field": "Nonmember Onsite fee",
+   "site_says": "$1,920",
+   "extractor_says": "1920 USD",
+   "match": true
+  },
+  {
+   "url": "https://www.idweek.org/",
+   "field": "dates/city",
+   "site_says": "Oct. 21-24, 2026 | Washington, D.C.",
+   "extractor_says": "2026-10-21..2026-10-24 Washington",
+   "match": true
+  },
+  {
+   "url": "https://www.idweek.org/",
+   "field": "venue",
+   "site_says": "Walter E. Washington Convention Center",
+   "extractor_says": "Walter E. Washington Convention Center",
+   "match": true
+  },
+  {
+   "url": "https://www.idweek.org/abstracts/",
+   "field": "abstract deadline",
+   "site_says": "Regular Abstracts Closes Apr 30, 2026",
+   "extractor_says": "2026-04-30 (abstract_open False)",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Modelled as ONE conference; ~100 sessions on EventScribe (Cloudflare) deliberately not scraped.",
+  "Premeeting workshops (Oct 20, e.g. ID Board Review Course) not modelled as separate rows.",
+  "Pricing: 54 tiers; the hotel-block discount columns are labelled with a 'Hotel-block discount' suffix. Advance tiers flagged is_early_bird with no deadline date (Aug 1 is stated only inside the label).",
+  "Homepage hero date regex is format-specific ('Mon. D-D, YYYY | City'); if the site redesigns it returns no shells (logged).",
+  "Once the meeting is over, no shell is returned until the site shows next year's dates.",
+  "cpd_points None: site gives credits only via /ce-credits/, not parsed."
+ ]
+}

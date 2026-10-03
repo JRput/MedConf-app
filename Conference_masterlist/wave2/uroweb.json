@@ -1,0 +1,74 @@
+{
+  "source_id": 50,
+  "slug": "uroweb",
+  "class_name": "UrowebExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/uroweb.py",
+  "source_row": {
+    "source_name": "EAU (European Association of Urology) Events",
+    "society": "European Association of Urology",
+    "base_url": "https://uroweb.org/education-events/events",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 4,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Nuxt SPA; ?page=N is ignored server-side. list_shells_override loads the calendar in the browser, captures the site's own public GraphQL Authorization header, then pages entries (16/page, offset) from cms.uroweb.org/graphql until entryCount; live upcoming events only (on-demand excluded). Detail pages are server-rendered: .lead description, .event-details table (Organiser, CME, Venue, Location 'City, Country'). No fees are published (registration is on organiser sites), so pricing is []. Specialty is always Urology."
+  },
+  "registry_comment": "EAU Events (50) - Nuxt SPA, listing via site's own GraphQL (token captured in-browser), 55 upcoming live events, EUR/no fees published",
+  "probe_results": {
+    "shells": 55,
+    "shells_forced_fallback": 55,
+    "details_tested": 5,
+    "with_date": 5,
+    "with_pricing": 0,
+    "with_venue": 4,
+    "with_description": 4,
+    "with_specialty": 5
+  },
+  "test_urls": [
+    "https://uroweb.org/education-events/masterclass-on-functional-urology-2",
+    "https://uroweb.org/education-events/42nd-annual-eau-congress",
+    "https://uroweb.org/education-events/urowebinar-robotic-nephron-sparing-surgery-diverse-techniques-for-various-lesions"
+  ],
+  "spot_check": [
+    {
+      "url": "https://uroweb.org/education-events/masterclass-on-functional-urology-2",
+      "field": "dates",
+      "site_says": "Thu, 22 Oct - Fri, 23 Oct 2026",
+      "extractor_says": "2026-10-22 to 2026-10-23",
+      "match": true
+    },
+    {
+      "url": "https://uroweb.org/education-events/masterclass-on-functional-urology-2",
+      "field": "location/CME",
+      "site_says": "Leuven, Belgium; CME 11.00; no venue row",
+      "extractor_says": "Leuven / Belgium; 11.0; venue None",
+      "match": true
+    },
+    {
+      "url": "https://uroweb.org/education-events/42nd-annual-eau-congress",
+      "field": "dates/venue",
+      "site_says": "19-22 Mar 2027; Amsterdam RAI; CME to be approved",
+      "extractor_says": "2027-03-19 to 2027-03-22; Amsterdam RAI; cpd None",
+      "match": true
+    },
+    {
+      "url": "https://uroweb.org/education-events/urowebinar-robotic-nephron-sparing-surgery-diverse-techniques-for-various-lesions",
+      "field": "date/format/CME",
+      "site_says": "Tue 6 Oct 2026; Online; CME 1.00",
+      "extractor_says": "2026-10-06; online; 1.0",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Recon volume estimate of ~700 was the sitemap (includes past + on-demand). The calendar's own entryCount is 55 upcoming live events; all 55 fetched, unique, matching. Two runs identical.",
+    "On-demand education (/education-events/education, separate Craft entry type) is deliberately excluded; revisit if wanted via is_on_demand.",
+    "No fees on any EAU page (registration is on external organiser sites), so pricing_tiers is [] for all events; booking_url is the uroweb event page, not the organiser's external 'Join event' link.",
+    "Listing depends on capturing the site's public GraphQL bearer token from a browser request and on the Craft query shape; a site redesign could break it. After 3 failed tries it logs an error and returns [] (no silent partial listing).",
+    "Multi-day courses like Robotic Urology Course show a single date in the site's dateRange even when the text says two days; extractor follows the site's date.",
+    "Some pages have no description (e.g. Eger ESU course); description is then None. Site-wide boilerplate meta description is deliberately rejected.",
+    "Region holds the country from 'City, Country'; shell city is used when the page has no Location row (region None then)."
+  ]
+}

@@ -1,0 +1,76 @@
+{
+ "source_id": 59,
+ "slug": "acep",
+ "class_name": "AcepExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/acep.py",
+ "source_row": {
+  "source_name": "ACEP Event Calendar",
+  "society": "American College of Emergency Physicians",
+  "base_url": "https://www.acep.org/master-calendar",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Listing comes from one JSON endpoint, /api/events/currentevents, returning every calendar event (no pagination); list_shells_override reads it. Detail pages /master-calendar/<slug> are server-rendered (mcEvent-* classes) but publish no fees; pricing_tiers is []. Locations are usually just a US state. Events more than 24 months out are skipped."
+ },
+ "registry_comment": "59: ACEP \u2014 American College of Emergency Physicians event calendar (JSON API listing, USD, no fees published)",
+ "probe_results": {
+  "shells": 47,
+  "shells_forced_fallback": 47,
+  "details_tested": 5,
+  "with_date": 5,
+  "with_pricing": 0,
+  "with_venue": 0,
+  "with_description": 5,
+  "with_specialty": 5
+ },
+ "test_urls": [
+  "https://www.acep.org/master-calendar/research-academy-2026-2027---session-1",
+  "https://www.acep.org/master-calendar/2026-de-octubre---webinar-en-espanol-via-aerea",
+  "https://www.acep.org/master-calendar/medical-spanish--cultural-awareness-conference7"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.acep.org/master-calendar/research-academy-2026-2027---session-1",
+   "field": "dates",
+   "site_says": "10/2/2026 - 10/4/2026",
+   "extractor_says": "2026-10-02 to 2026-10-04",
+   "match": true
+  },
+  {
+   "url": "https://www.acep.org/master-calendar/research-academy-2026-2027---session-1",
+   "field": "cme/location",
+   "site_says": "CME 18.75 hours; Illinois",
+   "extractor_says": "cpd_points 18.75; region Illinois",
+   "match": true
+  },
+  {
+   "url": "https://www.acep.org/master-calendar/2026-de-octubre---webinar-en-espanol-via-aerea",
+   "field": "time/format",
+   "site_says": "10/5/2026 2:00 PM - 3:00 PM Central; Webinar",
+   "extractor_says": "start_time 14:00; online",
+   "match": true
+  },
+  {
+   "url": "https://www.acep.org/master-calendar/medical-spanish--cultural-awareness-conference7",
+   "field": "dates/location/cme",
+   "site_says": "10/30/2026 - 11/2/2026; La Paz, BCS, Mexico; 45 hours",
+   "extractor_says": "2026-10-30 to 2026-11-02; city La Paz, region Mexico; 45.0",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "ACEP publishes no fees on its pages (registration is on organiser sites), so pricing_tiers is [] for every event.",
+  "Venue is rarely published: most US events give only a state (e.g. ACEP26 Scientific Assembly shows just 'Illinois'); city stays None rather than guessed.",
+  "The API answers XML unless Accept: application/json is sent; extractor sends that header and falls back to the Playwright context request API (Chromium's XML viewer breaks fetch_html on the browser path). Both paths give 47 shells.",
+  "booking_url is set to the organiser's own link when one is valid, else the ACEP page; source_url stays the ACEP page for dedupe.",
+  "Events starting more than 24 months out (ACEP29-32 placeholders) are skipped; ended events are skipped. 54 API rows -> 47 shells.",
+  "ACEP types everything Conference/Webinar; event_type is derived from the title (course/workshop/conference), a heuristic.",
+  "Webinars are included as event_type workshop with event_format online; drop them if on-demand/webinars are out of scope.",
+  "One LLM 429 seen during the forced-fallback run; the deterministic description/specialty backstop covered it.",
+  "No registry change made; extractors/__init__.py needs the entry for id 59."
+ ]
+}

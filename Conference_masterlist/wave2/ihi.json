@@ -1,0 +1,75 @@
+{
+  "source_id": 57,
+  "slug": "ihi",
+  "class_name": "IhiExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/ihi.py",
+  "source_row": {
+    "source_name": "IHI",
+    "society": "Institute for Healthcare Improvement",
+    "base_url": "https://www.ihi.org/learn/courses",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Listing: /learn/courses is ONE server-rendered page of ~24 .ihi-card cards (no pagination); only cards labelled 'Begins <date>' or 'Last Call <date>' are dated runs (courses live under /learn/courses and /learn/certifications). Flagship events come from schema.org ConferenceEvent JSON-LD on /connect/events (IHI Forum, Lisbon Healthcare Improvement Forum). Detail: JSON-LD Event gives start/end/format; 'Format/Where/Fee/Groups of 3 or more' header gives venue and USD fees; CPD from 'approved to provide N credits'. Skips On-Demand, In-Progress and Interest List cards."
+  },
+  "registry_comment": "IHI \u2014 dated course/certification runs from /learn/courses cards + ConferenceEvent JSON-LD from /connect/events; USD",
+  "probe_results": {
+    "shells": 13,
+    "shells_forced_fallback": 13,
+    "details_tested": 13,
+    "with_date": 13,
+    "with_pricing": 12,
+    "with_venue": 3,
+    "with_description": 13,
+    "with_specialty": 13
+  },
+  "test_urls": [
+    "https://www.ihi.org/learn/courses/ihi-breakthrough-series-college",
+    "https://www.ihi.org/learn/courses/improvement-advisor-in-person",
+    "https://events.ihi.org/forum"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.ihi.org/learn/courses/ihi-breakthrough-series-college",
+      "field": "fees",
+      "site_says": "Fee $4,995; Groups of 3 or more $4,246 (USD, per person)",
+      "extractor_says": "4995 USD individual; 4246 USD group",
+      "match": true
+    },
+    {
+      "url": "https://www.ihi.org/learn/courses/ihi-breakthrough-series-college",
+      "field": "dates/venue",
+      "site_says": "Begins Oct 14, 2026; Online & In-Person; Boston, MA",
+      "extractor_says": "2026-10-14 to 2026-12-03; hybrid; Boston, United States",
+      "match": true
+    },
+    {
+      "url": "https://www.ihi.org/learn/courses/improvement-advisor-in-person",
+      "field": "fee/where/start",
+      "site_says": "$16,400 USD; London, England; opens 28 January 2027 (JSON-LD start 2027-01-29)",
+      "extractor_says": "16400 USD; London, England; 2027-01-29 to 2028-06-23",
+      "match": true
+    },
+    {
+      "url": "https://events.ihi.org/forum",
+      "field": "dates/fees",
+      "site_says": "Dec 6-9, 2026 Phoenix; General $1595, Pre-Conf $445/$645, Hall Only $400",
+      "extractor_says": "2026-12-06 to 2026-12-09; Phoenix; 4 tiers 1595/445/645/400",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Volume is 13, not the ~75 recon estimate: the courses listing has only 24 cards total. Skipped: 1 On-Demand, 2 In-Progress, 10 Interest List (undated). Plus 1 webinar 'Informational Call' (plain Event, Zoom link) skipped on the events page. These skipped counts come from the live page on 2026-10-03 and will change.",
+    "'Last Call' course (Better Quality Through Better Measurement) started 2026-09-24 but registration is open until 2026-10-21, so start_date is in the past while end_date (2026-12-17) is future. Kept because it is still bookable; the archival rule should key off end_date.",
+    "Interest List courses become dated runs when IHI opens a cohort; they will be picked up automatically once their card label changes to 'Begins ...'.",
+    "Lisbon forum (internationalforum.bmj.com) is a BMJ-run site with no parsable fee table: pricing_tiers is empty. IHI Forum early-bird (-$200 until Sep 30) is not modelled, only the standard rates.",
+    "Forum fees page contains a stale previous-year block below the current one; parser stops at 'In-Person Registration'. If IHI reorders that page the fee parse may need a look.",
+    "Year-long programmes (Improvement Advisor) have end_date up to 2028; region for US cities is set to 'United States' since the site only gives a state abbreviation.",
+    "Course card URLs for certification runs contain double-encoded %25 junk from IHI; they resolve (200) so kept verbatim as booking_url/dedupe key.",
+    "Cloud access: no bot protection seen; --force-fallback (Playwright path) gave identical 13 shells. with_pricing 12/13 because the Lisbon event has none."
+  ]
+}

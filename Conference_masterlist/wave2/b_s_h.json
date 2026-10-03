@@ -1,0 +1,82 @@
+{
+  "source_id": 58,
+  "slug": "b_s_h",
+  "class_name": "BSHExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/b_s_h.py",
+  "source_row": {
+    "source_name": "British Society for Haematology (BSH)",
+    "society": "British Society for Haematology",
+    "base_url": "https://b-s-h.org.uk/education/conference-and-events/events",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Server-rendered Umbraco; one un-paginated listing of ~25 upcoming events (BSH events + External events) as page-grid-item cards. Caption is 'Month D, City' with no year; year comes from the detail page timeline card / Date line / fee-block date. Fees in ul.price blocks (category header, member/non-member GBP). External events have no fees. No CPD published."
+  },
+  "registry_comment": "British Society for Haematology (events listing, server-rendered)",
+  "probe_results": {
+    "shells": 24,
+    "shells_forced_fallback": 24,
+    "details_tested": 24,
+    "with_date": 24,
+    "with_pricing": 12,
+    "with_venue": 12,
+    "with_description": 24,
+    "with_specialty": 24
+  },
+  "test_urls": [
+    "https://b-s-h.org.uk/education/conference-and-events/events/uk-mds-education-day-2026",
+    "https://b-s-h.org.uk/education/conference-and-events/events/2027-bsh-paediatric-special-interest-group-meeting",
+    "https://b-s-h.org.uk/education/conference-and-events/events/vte-together-1"
+  ],
+  "spot_check": [
+    {
+      "url": "https://b-s-h.org.uk/education/conference-and-events/events/uk-mds-education-day-2026",
+      "field": "date/time/venue",
+      "site_says": "Friday October 9th; 9.00-17.00; Friends House Euston; London",
+      "extractor_says": "2026-10-09; 09:00; Friends House Euston; London",
+      "match": true
+    },
+    {
+      "url": "https://b-s-h.org.uk/education/conference-and-events/events/uk-mds-education-day-2026",
+      "field": "fees",
+      "site_says": "Consultants \u00a380 members/\u00a3160 non; Trainees & AHPs \u00a345/\u00a390",
+      "extractor_says": "4 tiers 80/160/45/90 GBP",
+      "match": true
+    },
+    {
+      "url": "https://b-s-h.org.uk/education/conference-and-events/events/2027-bsh-paediatric-special-interest-group-meeting",
+      "field": "date",
+      "site_says": "'Friday 22 January 2026' (site typo; fee block says January 22nd 2027, and 22 Jan 2027 is a Friday)",
+      "extractor_says": "2027-01-22 (weekday check corrects the year)",
+      "match": true
+    },
+    {
+      "url": "https://b-s-h.org.uk/education/conference-and-events/events/2027-bsh-paediatric-special-interest-group-meeting",
+      "field": "fees/venue",
+      "site_says": "\u00a380/\u00a3160 consultants, \u00a345/\u00a390 non-consultants; Friends House, Euston",
+      "extractor_says": "4 tiers 80/160/45/90; venue Friends House, Euston",
+      "match": true
+    },
+    {
+      "url": "https://b-s-h.org.uk/education/conference-and-events/events/vte-together-1",
+      "field": "date/city",
+      "site_says": "timeline card October 5th 2026; caption 'October 5-6, Dublin'",
+      "extractor_says": "2026-10-05 to 2026-10-06; Dublin, Ireland; no fees (external)",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Listing captions have no year; year is resolved from the external-event timeline card, Date line (weekday-checked), fee-block date, else next occurrence. Dates are 24/24 sane today but a future page with none of these and a past-month caption could roll to next year.",
+    "The date beneath each fee block is a pricing/registration cut-off, not the event date; used only as a year hint.",
+    "IMG Webinar series (caption 'September 30', already past) is emitted as one course parent with 4 upcoming sessions (years inferred from fee-block year). A running series whose sessions are all past would return start_date None.",
+    "External events (12 of 24, run by third parties) have no fees on the BSH page: pricing_tiers []. booking_url is the BSH detail page, not the organiser site.",
+    "No CPD points published on any page (cardio-oncology course says CPD 'being applied for'); cpd_points None.",
+    "Webinars default to event_type 'conference' unless the intro says course/workshop/teaching session/taster day/education day. Online webinars have no city, venue None.",
+    "Cloudflare did not block curl or httpx from this home IP; forced-fallback (Playwright) run also returned 24 shells. Listing fetch has a 3-try retry. Sitemap lists ~147 historic event pages but the listing only shows upcoming ones, so none were added.",
+    "Harness LLM calls hit 429 intermittently; deterministic description/specialty backstops were used where that occurred (specialty classifier may mislabel, e.g. VTE together -> Women's Health)."
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "source_id": 54,
+  "slug": "ifosworld",
+  "class_name": "IfosworldExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/ifosworld.py",
+  "source_row": {
+    "source_name": "IFOS (International Federation of ORL Societies)",
+    "society": "IFOS",
+    "base_url": "https://www.ifosworld.org/events",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "WordPress Tribe Events site; the listing is read from /wp-json/tribe/events/v1/events (per_page=50, walks total_pages). The API record holds every field, so extract_detail works from the shell. Curated aggregator of third-party ORL congresses: booking_url is the organiser website. Same meeting is often posted twice (deduped on start_date + venue string). Fees only when Tribe cost is set, currency from cost_details."
+  },
+  "registry_comment": "IFOS ORL congress calendar - Tribe Events REST API, ~16 upcoming, USD fees when stated",
+  "probe_results": {
+    "shells": 14,
+    "shells_forced_fallback": 14,
+    "details_tested": 14,
+    "with_date": 14,
+    "with_pricing": 2,
+    "with_venue": 11,
+    "with_description": 14,
+    "with_specialty": 14
+  },
+  "test_urls": [
+    "https://ifosworld.org/event/6th-world-congress-on-otology-rhinology-laryngology-cpd-accredited/",
+    "https://ifosworld.org/event/9th-world-meet-on-ent-otolaryngology-hns/",
+    "https://ifosworld.org/event/16th-asia-oceania-orl-hns-congress/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://ifosworld.org/event/6th-world-congress-on-otology-rhinology-laryngology-cpd-accredited/",
+      "field": "dates/time",
+      "site_says": "October 26 @ 8h30 - October 27 @ 17h30",
+      "extractor_says": "2026-10-26 to 2026-10-27, 08:30",
+      "match": true
+    },
+    {
+      "url": "https://ifosworld.org/event/6th-world-congress-on-otology-rhinology-laryngology-cpd-accredited/",
+      "field": "fee/venue",
+      "site_says": "$670; Occidental Aran Park, Rome, Italy",
+      "extractor_says": "USD 670 Registration; venue Occidental Aran Park, city Rome, region Italy",
+      "match": true
+    },
+    {
+      "url": "https://ifosworld.org/event/9th-world-meet-on-ent-otolaryngology-hns/",
+      "field": "dates/fee/venue",
+      "site_says": "Feb 4-5 2027 9h00-17h00; $599; Crowne Plaza Dubai-Deira, Dubai, UAE",
+      "extractor_says": "2027-02-04..05, 09:00, USD 599, Crowne Plaza Dubai-Deira, Dubai, United Arab Emirates",
+      "match": true
+    },
+    {
+      "url": "https://ifosworld.org/event/16th-asia-oceania-orl-hns-congress/",
+      "field": "dates/venue",
+      "site_says": "March 23-26 2027; Kyoto International Conference Center, Kyoto, Japan; no cost",
+      "extractor_says": "2027-03-23..26, same venue, Kyoto, Japan, no tiers",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Recon volume estimate (~160) was wrong: the API total is 16 upcoming (2 dupes removed = 14 shells). Real count proven against the API's own 'total' field.",
+    "Duplicates (Rome 6th World Congress, London World Tinnitus Congress) are deduped on start_date + venue string, keeping the record with an organiser website/cost/longest text; a legit second event on the same day at an identical venue string would be collapsed.",
+    "API is slow (~18 s per call); fetch timeout set to 90 s with 3 tries. Only 1 page is needed at per_page=50.",
+    "Only 2 of 14 events state a fee in Tribe (USD); others get no tiers. Organiser sites are third-party and not scraped.",
+    "booking_url is the organiser's own site (listing 'website'); source_url stays the ifosworld.org event URL. Tinnitus 4797 has no website so falls back to the ifosworld URL.",
+    "Specialty is hard-set to 'ENT' (federation scope) because the keyword classifier tags thyroidology as Endocrinology.",
+    "Meniere's symposium city is 'Chiyoda-ku' (Tribe's value; a Tokyo ward). Event 'ESSA' description is the site's own terse text ('4ESSA INVIT FLY ...').",
+    "Navigation of the thin /event/ wrapper page is slow and can hit the 10 s domcontentloaded timeout; extract_detail does not depend on the page.",
+    "No shared-file changes needed. tribe_events.py did not exist when built, so this builds on the API directly (not subclassed)."
+  ]
+}
