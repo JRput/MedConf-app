@@ -236,10 +236,46 @@ class AgentLoop:
                 shell=shell,
                 llm_call=self._llm_call,
             )
-            return self._merge_shell_and_detail(shell, detail)
+            merged = self._merge_shell_and_detail(shell, detail)
+            self._ensure_submission_info(merged, booking_url)
+            return merged
         except Exception as e:
             logger.warning(f"  Detail extraction failed for '{title_short}': {e}")
             return self._merge_shell_only(shell)
+
+    def _ensure_submission_info(self, merged: Dict[str, Any], url: str) -> None:
+        """Pipeline-level guarantee (Mission P6): if the extractor left every
+        submission field empty, classify the already-loaded detail page text and,
+        failing that, follow ONE call-for-papers link. Extractor values always
+        win. Never raises."""
+        try:
+            if (merged.get("abstract_deadline") or merged.get("abstract_deadline_note")
+                    or merged.get("abstract_open") is True):
+                return
+            from datetime import date
+            from extractors.abstract_classifier import classify_page_submission
+            text = (self.browser.get_page_text() or "")[:60_000]
+            html = ""
+            try:
+                html = self.browser.page.content()
+            except Exception:
+                pass
+            start = None
+            try:
+                start = date.fromisoformat(str(merged.get("start_date"))[:10])
+            except (ValueError, TypeError):
+                pass
+            hit = classify_page_submission(text, html, url, date.today(), start)
+            if not hit:
+                return
+            is_open, deadline, note, source = hit
+            merged["abstract_open"] = bool(is_open)
+            merged["abstract_deadline"] = deadline.isoformat() if deadline else None
+            merged["abstract_deadline_note"] = note
+            logger.info(f"  submission info from {source}: open={is_open} "
+                        f"deadline={deadline} note={note}")
+        except Exception as e:
+            logger.warning(f"  submission guarantee skipped: {e}")
 
     # ------------------------------------------------------------------ #
     # Browser lifecycle helpers (called explicitly by scraper.py now)

@@ -146,6 +146,30 @@ def fix_abstract_status(
                 out["abstract_deadline_note"] = p_note
             return out, "programme_" + ("deadline" if p_deadline else "note")
 
+    # 0b. Call for papers / submission programme with no deadline on the page:
+    #     follow ONE link (PDF preferred, else portal) — Mission P6.
+    from extractors.abstract_classifier import (
+        has_submission_programme, follow_call_for_papers)
+    src_url = row.get("source_url") or ""
+    if (src_url.startswith("http") and has_submission_programme(page_text)
+            and not row.get("abstract_deadline")):
+        try:
+            from extractors.http_fetch import fetch_html
+            page_html = fetch_html(src_url, timeout=20.0)
+        except Exception:
+            page_html = None
+        start = None
+        try:
+            start = date.fromisoformat(str(row.get("start_date"))[:10])
+        except (ValueError, TypeError):
+            pass
+        hit = follow_call_for_papers(page_html or "", src_url, None, date.today(), start)
+        if hit:
+            f_open, f_deadline, f_note = hit
+            return ({"abstract_open": f_open,
+                     "abstract_deadline": f_deadline.isoformat(),
+                     "abstract_deadline_note": f_note}, "call_for_papers_follow")
+
     # No abstract mention at all → confirm closed
     if "abstract" not in text_l:
         return {"abstract_open": False}, "no_abstract_mention"
