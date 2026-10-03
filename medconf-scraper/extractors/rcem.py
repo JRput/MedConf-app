@@ -55,6 +55,20 @@ _TEXTUAL_DATE_RE = re.compile(r"\b(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})\b")
 _TEXTUAL_RANGE_RE = re.compile(
     r"\b(\d{1,2})(?:\s+[A-Za-z]+)?\s*[-–]\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})\b"
 )
+_MON_ALT = (r"(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|"
+            r"Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)")
+_WEEKDAY_OPT = r"(?:(?:Mon|Tues?|Wed(?:nes)?|Thu(?:rs)?|Fri|Sat(?:ur)?|Sun)(?:day)?\.?,?\s+)?"
+# Any date range: "Wednesday 11 - Thursday 12 November 2026", "4 - 5 June 2026",
+# "29 June - 2 July 2026", "Tuesday 17 \u2013 Wednesday 18 November" (no year),
+# "18 to 19 June 2026". Weekday names optional on both sides; month/year of the
+# start are optional (inherited from the end).
+_RANGE_RE = re.compile(
+    r"\b" + _WEEKDAY_OPT + r"(\d{1,2})(?:\s+" + _MON_ALT + r")?(?:\s+(\d{4}))?"
+    r"\s*(?:to|[-\u2013\u2014])\s*" + _WEEKDAY_OPT +
+    r"(\d{1,2})\s+" + _MON_ALT + r"(?:\s+(\d{4}))?\b",
+    re.I,
+)
+_DAY_MON_RE = re.compile(r"\b(\d{1,2})\s+" + _MON_ALT + r"\b", re.I)
 _CPD_RE = re.compile(r"(\d+)\s*[-–]?\s*CPD\s*points?", re.I)
 
 
@@ -373,6 +387,37 @@ class RCEMExtractor(BaseExtractor):
             logger.warning(f"RCEM headline strongs failed: {e}")
             return []
 
+    def _next_occurrence(self, month_name: str, day: int) -> Optional[str]:
+        """Year-less date -> this year, or next year if already past."""
+        from datetime import date
+        today = date.today()
+        iso = self._iso(str(today.year), month_name, str(day))
+        if iso and iso < today.isoformat():
+            iso = self._iso(str(today.year + 1), month_name, str(day))
+        return iso
+
+    def _parse_range(self, text: str) -> Optional[Tuple[str, str]]:
+        """Parse a multi-day range to (start_iso, end_iso); None if absent/invalid."""
+        for m in _RANGE_RE.finditer(text or ""):
+            d1, mon1, y1, d2, mon2, y2 = m.groups()
+            mon1 = mon1 or mon2
+            if y2:
+                end = self._iso(y2, mon2, d2)
+                start = self._iso(y1 or y2, mon1, d1)
+                # "30 Dec - 2 Jan 2027": start belongs to the previous year
+                if start and end and start > end and not y1:
+                    start = self._iso(str(int(y2) - 1), mon1, d1)
+            else:
+                start = self._next_occurrence(mon1, int(d1))
+                if not start:
+                    continue
+                end = self._iso(start[:4], mon2, d2)
+                if end and end < start:
+                    end = self._iso(str(int(start[:4]) + 1), mon2, d2)
+            if start and end and start < end:
+                return start, end
+        return None
+
     def _extract_dates(
         self,
         line1: str,
@@ -392,24 +437,11 @@ class RCEMExtractor(BaseExtractor):
         """
         combined = line1 + " " + line2
 
-        # Range "29 June - 2 July 2026" or "4 - 5 June 2026"
-        m = _TEXTUAL_RANGE_RE.search(combined)
-        if m:
-            d1, d2, month, year = m.group(1), m.group(2), m.group(3), m.group(4)
-            # Cross-month form: "29 June - 2 July 2026" — _TEXTUAL_RANGE_RE
-            # only matches the trailing month, so we need a cross-month re-check
-            cross = re.search(
-                r"\b(\d{1,2})\s+([A-Za-z]+)\s*[-–]\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})\b",
-                combined,
-            )
-            if cross:
-                d1, mon1, d2, mon2, year = cross.group(1), cross.group(2), cross.group(3), cross.group(4), cross.group(5)
-                start = self._iso(year, mon1, d1)
-                end = self._iso(year, mon2, d2)
-                return start, end, None
-            start = self._iso(year, month, d1)
-            end = self._iso(year, month, d2)
-            return start, end, None
+        # Range: "29 June - 2 July 2026", "4 - 5 June 2026",
+        # "Wednesday 11 \u2013 Thursday 12 November 2026", "17 - 18 November" (no year)
+        rng = self._parse_range(combined)
+        if rng:
+            return rng[0], rng[1], None
 
         # Single textual date "19 June 2026" (also handles "Available until 24 June 2026")
         m = _TEXTUAL_DATE_RE.search(combined)
@@ -419,13 +451,10 @@ class RCEMExtractor(BaseExtractor):
 
         # Year-less form "Thursday 9 July" — assume current year, but roll to
         # next year if that date is already in the past.
-        m = re.search(r"\b(\d{1,2})\s+([A-Za-z]+)\b", combined)
+        # Always the FIRST date in the text (never the last).
+        m = _DAY_MON_RE.search(combined)
         if m:
-            from datetime import date
-            today = date.today()
-            iso = self._iso(str(today.year), m.group(2), m.group(1))
-            if iso and iso < today.isoformat():
-                iso = self._iso(str(today.year + 1), m.group(2), m.group(1))
+            iso = self._next_occurrence(m.group(2), int(m.group(1)))
             if iso:
                 return iso, None, None
 
@@ -474,6 +503,7 @@ class RCEMExtractor(BaseExtractor):
             if (
                 _TEXTUAL_DATE_RE.search(p)
                 or _TEXTUAL_RANGE_RE.search(p)
+                or _RANGE_RE.search(p)
                 or _DDMMYYYY_RE.search(p)
                 or re.match(r"^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b", pl)
                 or "available until" in pl

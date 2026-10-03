@@ -413,24 +413,70 @@ class RSMExtractor(BaseExtractor):
     # ------------------------------------------------------------------ #
     # End-date for multi-day events
     # ------------------------------------------------------------------ #
+    _MON = (r"(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|"
+            r"Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.?")
+    _WD = r"(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*\.?,?\s+)?"
+    _MONTHS = {"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,"jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12}
+    # "30 Nov 2026 from 8:30am to 1 Dec 2026 at 4:00pm", "Mon 18 May 2026 to Tue 19 May 2026",
+    # "30 Nov - 1 Dec 2026" (year only on the end date).
+    _RANGE_FULL_RE = re.compile(
+        r"\b" + _WD + r"(\d{1,2})\s+" + _MON + r"(?:\s+(\d{4}))?"
+        r"(?:\s+(?:from|at)\s+\d{1,2}(?::\d{2})?\s*[ap]m)?"
+        r"\s*(?:to|[-\u2013\u2014])\s*" + _WD + r"(\d{1,2})\s+" + _MON + r"\s+(\d{4})\b",
+        re.I,
+    )
+    # "18-19 May 2026", "18 \u2013 19 May 2026"
+    _RANGE_SHORT_RE = re.compile(
+        r"\b(\d{1,2})\s*[-\u2013\u2014]\s*(\d{1,2})\s+" + _MON + r"\s+(\d{4})\b", re.I,
+    )
+
+    @classmethod
+    def _iso(cls, y: int, mon: str, d: int) -> Optional[str]:
+        from datetime import date
+        try:
+            return date(y, cls._MONTHS[mon.lower()[:3]], d).isoformat()
+        except (KeyError, ValueError):
+            return None
+
+    @classmethod
+    def _parse_date_range(cls, text: str) -> Optional[tuple]:
+        """Return (start_iso, end_iso) for a multi-day date string, else None."""
+        for m in cls._RANGE_FULL_RE.finditer(text or ""):
+            d1, mon1, y1, d2, mon2, y2 = m.groups()
+            y2i = int(y2)
+            start = cls._iso(int(y1) if y1 else y2i, mon1, int(d1))
+            end = cls._iso(y2i, mon2, int(d2))
+            if start and end and end > start:
+                return start, end
+        m = cls._RANGE_SHORT_RE.search(text or "")
+        if m:
+            d1, d2, mon, y = m.groups()
+            start = cls._iso(int(y), mon, int(d1))
+            end = cls._iso(int(y), mon, int(d2))
+            if start and end and end > start:
+                return start, end
+        return None
+
     def _extract_end_date(self, page: Page, shell: Dict[str, Any]) -> Optional[str]:
         """
-        RSM detail pages show "Date" sections like "18 May 2026" (single day) or
-        "18-19 May 2026" / "18 - 19 May 2026" (range). If a range is present,
-        return the end day in ISO. Otherwise return None (caller defaults end=start).
+        RSM detail pages show a "Date and time" block. Single day:
+        "Tue 8 Dec 2026 from 9:00am to 4:00pm". Multi-day: "Mon 30 Nov 2026 from
+        8:30am to 1 Dec 2026 at 4:00pm", "Mon 18 May 2026 to Tue 19 May 2026",
+        or "18-19 May 2026". Returns the end day in ISO, or None for single-day.
         """
         text = page.evaluate("() => document.body.textContent || ''")
-        # "18-19 May 2026" or "18 - 19 May 2026"
-        m = re.search(r"\b(\d{1,2})\s*[-–]\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})", text)
-        if not m:
+        seg = re.search(r"Date and time\s*(.{0,160})", text, re.S)
+        rng = self._parse_date_range(seg.group(1)) if seg else None
+        if rng is None:
+            # Legacy fallback: a short "18-19 May 2026" anywhere on the page.
+            m = self._RANGE_SHORT_RE.search(text)
+            rng = self._parse_date_range(m.group(0)) if m else None
+        if rng is None:
             return None
-        end_day = int(m.group(2))
-        month_name = m.group(3).lower()[:3]
-        year = int(m.group(4))
-        months = {"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,"jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12}
-        if month_name not in months:
+        start_iso = shell.get("start_date")
+        if start_iso and rng[1] < start_iso:
             return None
-        return f"{year:04d}-{months[month_name]:02d}-{end_day:02d}"
+        return rng[1]
 
     # ------------------------------------------------------------------ #
     # Description + specialty (LLM, small prompt)

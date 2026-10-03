@@ -172,6 +172,15 @@ class RCPSGExtractor(BaseExtractor):
         # 2. Session date(s) — either <select> (multi) or <input> (single)
         sessions_raw = self._extract_session_dates(page)
 
+        # 2b. Visible date-range line (e.g. "5\u20136 October 2026"). Only trusted
+        # when its start matches a session date; "two day" prose is never used.
+        try:
+            visible_text = page.evaluate("() => document.body.innerText || ''")
+        except Exception:
+            visible_text = ""
+        rng = self._parse_range_lines(visible_text)
+        range_end_by_start = {rng[0]: rng[1]} if rng else {}
+
         # 3. Pricing (deterministic, flat across sessions — no evidence of
         # per-session variation on any probed page)
         result["pricing_tiers"] = self._extract_pricing(page)
@@ -191,7 +200,7 @@ class RCPSGExtractor(BaseExtractor):
                 venue_fields = self._venue_from_location(s.get("location"))
                 sessions.append({
                     "start_date": s["date"],
-                    "end_date": None,
+                    "end_date": range_end_by_start.get(s["date"]),
                     "start_time": None,
                     "duration_text": None,
                     "availability_status": "unknown",
@@ -208,7 +217,7 @@ class RCPSGExtractor(BaseExtractor):
             upcoming.sort(key=lambda s: s["date"])
             first = upcoming[0] if upcoming else sessions_raw[0]
             result["start_date"] = first["date"]
-            result["end_date"] = None
+            result["end_date"] = range_end_by_start.get(first["date"])
 
             # Parent venue only if every upcoming session shares one location
             locs = {s.get("location") for s in (upcoming or sessions_raw) if s.get("location")}
@@ -222,7 +231,7 @@ class RCPSGExtractor(BaseExtractor):
         elif len(sessions_raw) == 1:
             s = sessions_raw[0]
             result["start_date"] = s["date"]
-            result["end_date"] = None
+            result["end_date"] = range_end_by_start.get(s["date"])
             result.update(self._venue_from_location(s.get("location")))
         else:
             # No date found at all — leave null, will retry next run per
@@ -242,6 +251,36 @@ class RCPSGExtractor(BaseExtractor):
         result["abstract_deadline"] = deadline.isoformat() if deadline else None
 
         return result
+
+    # ------------------------------------------------------------------ #
+    # Visible date-range line ("5\u20136 October 2026")
+    # ------------------------------------------------------------------ #
+    _MON = (r"(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|"
+            r"Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)")
+    _MONTH_NUM = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+                  "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12}
+    # Whole-line forms only: "5-6 October 2026", "30 September - 1 October 2026".
+    _LINE_RANGE_RE = re.compile(
+        r"^\s*(\d{1,2})(?:\s+" + _MON + r")?\s*[-\u2013\u2014]\s*(\d{1,2})\s+" + _MON + r"\s+(\d{4})\s*$",
+        re.I,
+    )
+
+    @classmethod
+    def _parse_range_lines(cls, text: str) -> Optional[Tuple[str, str]]:
+        """Find a standalone date-range line in page text -> (start_iso, end_iso)."""
+        for line in (text or "").splitlines():
+            m = cls._LINE_RANGE_RE.match(line)
+            if not m:
+                continue
+            d1, mon1, d2, mon2, year = m.groups()
+            try:
+                end = date(int(year), cls._MONTH_NUM[mon2.lower()[:3]], int(d2))
+                start = date(int(year), cls._MONTH_NUM[(mon1 or mon2).lower()[:3]], int(d1))
+            except (KeyError, ValueError):
+                continue
+            if start < end:
+                return start.isoformat(), end.isoformat()
+        return None
 
     # ------------------------------------------------------------------ #
     # Session dates — read the <select>/<input id="education-date"> widget

@@ -321,19 +321,52 @@ class RCGPExtractor(BaseExtractor):
         # We default false to be honest — the dashboard can show "CPD: unspecified" rather than fabricate.
         return False
 
+    _EVENT_END_RE = re.compile(
+        r"Event\s+end\s*:\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})", re.I,
+    )
+    _MONTHS = {"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,
+               "jul":7,"aug":8,"sep":9,"oct":10,"nov":11,"dec":12}
+
+    @classmethod
+    def _parse_event_end(cls, text: str) -> Optional[str]:
+        """Parse the engage page's 'Event end: 30 October 2026, 17:30 (GMT)' field."""
+        m = cls._EVENT_END_RE.search(text or "")
+        if not m:
+            return None
+        mon = cls._MONTHS.get(m.group(2).lower()[:3])
+        if not mon:
+            return None
+        try:
+            from datetime import date
+            return date(int(m.group(3)), mon, int(m.group(1))).isoformat()
+        except ValueError:
+            return None
+
     def _extract_end_date_from_shell_or_page(
         self, shell: Dict[str, Any], page: Page,
     ) -> Optional[str]:
-        """RCGP detail pages don't show date ranges. Best signal is the event title for multi-day courses."""
+        """
+        Engage detail pages carry an explicit 'Event end:' field — prefer it.
+        Fall back to the "N-day" title heuristic only when the field is absent.
+        """
+        start_iso = shell.get("start_date")
+        try:
+            text = page.evaluate("() => document.body.innerText || document.body.textContent || ''")
+        except Exception:
+            text = ""
+        explicit = self._parse_event_end(text)
+        if explicit and (not start_iso or explicit >= start_iso):
+            return explicit
+
         title = shell.get("title") or ""
         # "3-day", "Two-day" hints
         m = re.search(r"\b(\d+)[- ]day\b", title, re.I)
-        if m and shell.get("start_date"):
+        if m and start_iso:
             n_days = int(m.group(1))
             if 2 <= n_days <= 14:
                 from datetime import datetime, timedelta
                 try:
-                    start = datetime.strptime(shell["start_date"], "%Y-%m-%d")
+                    start = datetime.strptime(start_iso, "%Y-%m-%d")
                     return (start + timedelta(days=n_days - 1)).strftime("%Y-%m-%d")
                 except ValueError:
                     return None
