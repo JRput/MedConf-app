@@ -147,9 +147,12 @@ function FormatIcon({ format }: { format: Conference['event_format'] }) {
 function CalendarButton({ conference }: { conference: Conference }) {
   if (!conference.start_date && !conference.abstract_deadline) return null
   return (
+    // Labelled for what it is: a file for an EXTERNAL calendar. Inside
+    // MedConf, saving an event is what puts it on /calendar — there is no
+    // separate "add to calendar" step to confuse this with.
     <Button variant="outline" onClick={() => downloadIcs(conference)}>
       <Download className="size-4" aria-hidden />
-      Add to calendar
+      Export .ics
     </Button>
   )
 }

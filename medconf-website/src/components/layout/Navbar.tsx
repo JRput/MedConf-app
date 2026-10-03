@@ -4,7 +4,7 @@
 import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Menu, X, Calendar, Bookmark, Settings, LogOut, LayoutDashboard, Building2 } from 'lucide-react'
+import { Menu, X, Calendar, CalendarDays, Bookmark, Settings, LogOut, LayoutDashboard, Building2 } from 'lucide-react'
 import { NotificationBell } from './NotificationBell'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Button } from '@/components/ui/button'
@@ -37,6 +37,9 @@ export function Navbar() {
               <>
                 <NavLink href="/dashboard" icon={<LayoutDashboard className="size-4" />}>
                   Dashboard
+                </NavLink>
+                <NavLink href="/calendar" icon={<CalendarDays className="size-4" />}>
+                  Calendar
                 </NavLink>
                 <NavLink href="/saved" icon={<Bookmark className="size-4" />}>
                   Saved
@@ -85,6 +88,9 @@ export function Navbar() {
               <>
                 <MobileNavLink href="/dashboard" onClick={() => setIsMenuOpen(false)}>
                   Dashboard
+                </MobileNavLink>
+                <MobileNavLink href="/calendar" onClick={() => setIsMenuOpen(false)}>
+                  Calendar
                 </MobileNavLink>
                 <MobileNavLink href="/saved" onClick={() => setIsMenuOpen(false)}>
                   Saved

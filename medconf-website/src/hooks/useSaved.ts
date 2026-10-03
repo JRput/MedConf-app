@@ -1,7 +1,7 @@
 // src/hooks/useSaved.ts
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -41,28 +41,42 @@ export function useSaved() {
 
   const savedIds = user ? fetchedIds : EMPTY_SET
 
+  // A ref that always mirrors the CURRENT set, so toggleSave can decide which
+  // way to flip without reading the `savedIds` captured in its own closure.
+  // Without this, any caller that holds onto a toggleSave from an earlier
+  // render flips the wrong way: the calendar's undo toast captures the
+  // function at the moment of unsaving, so on click it still believed the
+  // event was saved and issued a second DELETE instead of re-inserting it.
+  // The same staleness would bite a fast double-tap on any save button.
+  const savedRef = useRef<Set<number>>(savedIds)
+  savedRef.current = savedIds
+
   const isSaved = useCallback((conferenceId: number) => savedIds.has(conferenceId), [savedIds])
 
   const toggleSave = async (conferenceId: number) => {
     if (!user) return
 
-    if (isSaved(conferenceId)) {
-      // Remove from saved
-      await supabase.from('saved_conferences').delete()
-        .eq('user_id', user.id).eq('conference_id', conferenceId)
-
+    if (savedRef.current.has(conferenceId)) {
+      // Remove from saved. Optimistic: flip local state first (and the ref
+      // with it) so a rapid second call sees the new truth rather than
+      // repeating this branch.
+      savedRef.current = new Set([...savedRef.current].filter((id) => id !== conferenceId))
       setFetchedIds(prev => {
         const next = new Set(prev)
         next.delete(conferenceId)
         return next
       })
+
+      await supabase.from('saved_conferences').delete()
+        .eq('user_id', user.id).eq('conference_id', conferenceId)
     } else {
       // Add to saved
+      savedRef.current = new Set([...savedRef.current, conferenceId])
+      setFetchedIds(prev => new Set([...prev, conferenceId]))
+
       await supabase.from('saved_conferences').insert({
         user_id: user.id, conference_id: conferenceId
       })
-
-      setFetchedIds(prev => new Set([...prev, conferenceId]))
     }
   }
 
