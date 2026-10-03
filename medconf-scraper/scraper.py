@@ -39,6 +39,9 @@ def _compute_listing_hash(shell: Dict[str, Any]) -> str:
     parts = [
         str(shell.get("title") or ""),
         str(shell.get("start_date") or ""),
+        # end_date added 2026-10-03: API-fed listings carry it, and without it
+        # a corrected end date could never trigger a re-extract.
+        str(shell.get("end_date") or ""),
         str(shell.get("start_time") or ""),
         "1" if shell.get("is_sold_out") else "0",
         str(shell.get("location_hint") or ""),
