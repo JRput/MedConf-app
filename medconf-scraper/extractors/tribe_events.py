@@ -354,7 +354,10 @@ class TribeEventsExtractor(BaseExtractor):
             "venue_name": (venue.get("venue") or "").strip() or None,
             "city": (venue.get("city") or "").strip() or None,
             "country": (venue.get("country") or "").strip() or None,
-            "province": (venue.get("province") or "").strip() or None,
+            "province": (venue.get("province") or venue.get("stateprovince") or "").strip() or None,
+            "address": (venue.get("address") or "").strip() or None,
+            "is_virtual": e.get("is_virtual"),
+            "virtual_url": (e.get("virtual_url") or "").strip() or None,
             "organizer": (organizer[0].get("organizer") if organizer and isinstance(organizer[0], dict) else None),
             "website": (e.get("website") or "").strip() or None,
             "categories": cats,
@@ -381,23 +384,35 @@ class TribeEventsExtractor(BaseExtractor):
         out["event_type"] = self.classify_event_type(title, cats)
         out["society"] = self.SOCIETY
 
-        # Location: API venue first, then per-site text hook
-        venue, city, country = shell.get("venue_name"), shell.get("city"), shell.get("country")
+        # Location. venue_name comes ONLY from the API venue record (never prose);
+        # city falls back to the address line, then to the per-site text hook.
+        venue = (shell.get("venue_name") or "").strip() or None
+        city, country = shell.get("city"), shell.get("country")
+        if not city and shell.get("address"):
+            parts = [p.strip() for p in shell["address"].split(",") if p.strip()]
+            if len(parts) >= 2:
+                city = re.sub(r"^\d[\d\- ]*\s*", "", parts[-2] if len(parts) > 2 else parts[-1]) or None
         if not (venue or city):
             hit = self.location_from_text(text, shell)
             if hit:
-                venue, city, country = hit
+                _prose_venue, city, country = hit   # prose venue deliberately discarded
         if city and "," in city:
             city = city.split(",")[0].strip()
         if venue and venue.lower() in ("online", "virtual", "webinar"):
             venue = None
+        if venue and len(venue) > 80:
+            cut = venue[:80]
+            idx = max(cut.rfind(","), cut.rfind(" "))
+            venue = (cut[:idx] if idx >= 30 else cut).rstrip(" ,;-")
         probe = f"{title} {' '.join(cats)} {text[:300]}".lower()
         is_online_word = bool(re.search(
             r"\b(webinar|webcast|zoom|livestream|live[- ]stream|"
             r"virtual (?:event|meeting|conference|congress|course|workshop|session)s?|"
             r"online (?:event|meeting|conference|congress|course|workshop|session|only|webinar)s?)\b", probe))
-        if venue or city:
-            out["event_format"] = "hybrid" if re.search(r"\bhybrid\b", probe) else "in_person"
+        virtual_flag = bool(shell.get("is_virtual")) or bool(shell.get("virtual_url"))
+        physical = bool(venue or city)
+        if physical:
+            out["event_format"] = "hybrid" if (virtual_flag or re.search(r"\bhybrid\b", probe)) else "in_person"
             if venue:
                 out["venue_name"] = venue
             if city:
@@ -405,8 +420,11 @@ class TribeEventsExtractor(BaseExtractor):
             region = country or shell.get("province")
             if region:
                 out["region"] = region
-        elif is_online_word:
+        elif virtual_flag or is_online_word:
             out["event_format"] = "online"
+        elif shell.get("is_virtual") is False:
+            # Tribe's own flag says "not virtual" and there are no online cues
+            out["event_format"] = "in_person"
 
         # Fees: text first (richer), then Tribe's structured cost
         tiers = parse_fee_lines(lines, default_currency=self.DEFAULT_CURRENCY)

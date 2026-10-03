@@ -42,11 +42,13 @@ from playwright.sync_api import Page
 from .base import BaseExtractor
 from .http_fetch import fetch_html
 from .specialty_classifier import classify_specialty
+from .abstract_classifier import extract_abstract_info
 from logger import logger
 
 HOST = "https://sccm.org"
 LISTING_URL = f"{HOST}/education-center/conference-calendar"
 CONGRESS_URL = f"{HOST}/annual-congress/critical-care-conference"
+CONGRESS_ABSTRACTS_URL = f"{HOST}/annual-congress/abstracts-and-case-reports"
 DEFAULT_SPECIALTY = "Intensive Care Medicine"
 
 _MONTHS = {m: i for i, m in enumerate(
@@ -248,8 +250,18 @@ class SccmExtractor(BaseExtractor):
         cards = parse_cards(listing)
         logger.info(f"SCCM: {len(cards)} upcoming calendar cards")
 
+        # Third-party (Non-SCCM) conferences with a unique external link use that link as
+        # their identity, so later stages (remediator, abstract detection) read the event's
+        # OWN page instead of the shared listing page.
+        href_count: Dict[str, int] = {}
+        for c in cards:
+            href_count[c["href"]] = href_count.get(c["href"], 0) + 1
+
         shells: List[Dict[str, Any]] = []
         for c in cards:
+            own_page = (any("sccm event" in t.lower() and "non" in t.lower() for t in c["types"])
+                        and c["href"].startswith("http") and not c["href"].startswith(HOST)
+                        and href_count[c["href"]] == 1)
             loc_l = c["location"].lower()
             online = ("zoom" in loc_l or "virtual" in loc_l or "online" in loc_l
                       or "webcast" in " ".join(c["types"]).lower()
@@ -258,7 +270,7 @@ class SccmExtractor(BaseExtractor):
             has_place = bool(c["location"]) and not online
             shells.append({
                 "title": c["title"],
-                "booking_url": f"{LISTING_URL}#evt-{c['ident']}",
+                "booking_url": c["href"] if own_page else f"{LISTING_URL}#evt-{c['ident']}",
                 "start_date": c["start_date"],
                 "start_time": _start_time(c["time_txt"]),
                 "location_hint": "Online" if online else (c["location"] or None) if has_place else None,
@@ -267,6 +279,7 @@ class SccmExtractor(BaseExtractor):
                 "_sccm": {
                     "end_date": c["end_date"], "location": c["location"], "online": online,
                     "types": c["types"], "categories": c["categories"], "href": c["href"],
+                    "own_page": own_page,
                 },
             })
 
@@ -302,7 +315,7 @@ class SccmExtractor(BaseExtractor):
         if not meta:
             # Shell lost its payload (should not happen) — rebuild from the live listing.
             return self._from_listing_page(page, shell, llm_call)
-        return self._card_detail(shell, meta, llm_call)
+        return self._card_detail(shell, meta, llm_call, page)
 
     def _from_listing_page(self, page, shell, llm_call) -> Dict[str, Any]:
         ident = (shell.get("booking_url") or "").rsplit("#evt-", 1)[-1]
@@ -322,7 +335,7 @@ class SccmExtractor(BaseExtractor):
         return {}
 
     # -- calendar card ------------------------------------------------------ #
-    def _card_detail(self, shell, meta, llm_call) -> Dict[str, Any]:
+    def _card_detail(self, shell, meta, llm_call, page=None) -> Dict[str, Any]:
         title = shell.get("title") or ""
         types = meta.get("types") or []
         cats = meta.get("categories") or []
@@ -338,7 +351,18 @@ class SccmExtractor(BaseExtractor):
             "booking_url": href or None,
             "organiser_url": href or None,
             "pricing_tiers": [],
+            # Calendar cards never advertise abstracts; only the event's OWN page can.
+            "abstract_open": False,
         }
+        if meta.get("own_page") and page is not None:
+            try:
+                own_text = _txt(page.content())
+            except Exception:
+                own_text = ""
+            is_open, deadline = extract_abstract_info(own_text)
+            res["abstract_open"] = bool(is_open)
+            if deadline:
+                res["abstract_deadline"] = deadline.isoformat()
 
         # Venue / city / region / format
         raw_loc = meta.get("location") or ""
@@ -427,6 +451,23 @@ class SccmExtractor(BaseExtractor):
             "description": shell.get("description_hint") or None,
             "abstract_open": False,
         }
+        # Abstract programme lives on its own page; classify THAT text only.
+        ab_html = fetch_html(CONGRESS_ABSTRACTS_URL, browser=getattr(self, "browser", None))
+        if ab_html:
+            is_open, deadline = extract_abstract_info(_txt(ab_html))
+            res["abstract_open"] = bool(is_open)
+            if deadline:
+                res["abstract_deadline"] = deadline.isoformat()
+            else:
+                # "September 3, 2026: Submission period closes at 11:59 p.m. Central Time"
+                m = re.search(r"((?:January|February|March|April|May|June|July|August|September|October|"
+                              r"November|December)\s+\d{1,2},\s+20\d{2}):\s*Submission period closes",
+                              _txt(ab_html))
+                if m:
+                    mo, d, y = re.match(r"(\w+)\s+(\d{1,2}),\s+(\d{4})", m.group(1)).groups()
+                    dl = date(int(y), _MONTHS[mo.lower()], int(d))
+                    res["abstract_deadline"] = dl.isoformat()
+                    res["abstract_open"] = dl >= date.today()
         res.update(_split_location(meta.get("location") or ""))
         if re.search(r"accredited continuing education|ACE\)? credit", text, re.I):
             res["cpd_accredited"] = True

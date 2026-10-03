@@ -14,7 +14,7 @@
     "max_pages_hint": 1,
     "detail_is_multipage": false,
     "active": true,
-    "extraction_instructions": "Single server-rendered page; ~75 cards (div.filterData.list-item, client-side jplist filter, no pagination) with date(s), time, city or venue, type/category tags, title, short description. Every card links OUT to a third-party page, hrefs repeat across dates, so list_shells_override gives each shell a stable identity URL <listing>#evt-<hash> and extract_detail returns the real link as booking_url. The flagship Critical Care Congress is not a card; it is added from /annual-congress/critical-care-conference. Card types map: Hosted Training->course, SCCM Congress (pre-Congress sessions)->workshop, Webcast->workshop/online, Non-SCCM Event->conference. No fees on the site pages (Congress registration is on Cloudflare-blocked eventscribe), so pricing_tiers is []. Use bare host sccm.org; www.sccm.org does not resolve everywhere."
+    "extraction_instructions": "Single server-rendered page; ~75 cards (div.filterData.list-item, client-side jplist filter, no pagination) with date(s), time, city or venue, type/category tags, title, short description. Every card links OUT to a third-party page, hrefs repeat across dates, so list_shells_override gives each shell a stable identity URL <listing>#evt-<hash> and extract_detail returns the real link as booking_url. The flagship Critical Care Congress is not a card; it is added from /annual-congress/critical-care-conference. Card types map: Hosted Training->course, SCCM Congress (pre-Congress sessions)->workshop, Webcast->workshop/online, Non-SCCM Event->conference. No fees on the site pages (Congress registration is on Cloudflare-blocked eventscribe), so pricing_tiers is []. Use bare host sccm.org; www.sccm.org does not resolve everywhere. Third-party (Non-SCCM) conferences use their own external URL as source_url; the Congress abstract status is read from its abstracts page (closed 2026-09-03)."
   },
   "registry_comment": "52: SCCM \u2014 single calendar page (75 cards) + flagship Congress page; shells use #evt-hash identity URLs, real link returned as booking_url; no fees available.",
   "probe_results": {
@@ -71,6 +71,7 @@
     "Event identity hash = title|start|end|time|location|category; if SCCM edits any of those, the old row stops being seen and a new one appears (old one is archived by the unseen-14d rule).",
     "Congress abstract submission closed 2026-09-03, so abstract_open False and no deadline recorded. CPD only parsed for SCCM-hosted webcast pages (ACE credits); other events None.",
     "Flagship shell is built from the Congress page's hero date line; if SCCM restructures that page the flagship is dropped with a warning (calendar cards unaffected).",
-    "www.sccm.org did not resolve from my machine; the extractor uses and rewrites to bare sccm.org. source_row.base_url should be the bare host as given."
+    "www.sccm.org did not resolve from my machine; the extractor uses and rewrites to bare sccm.org. source_row.base_url should be the bare host as given.",
+    "Audit fix 2026-10-04: abstract_open now only comes from the event's own page. The 9 third-party conferences use their own external URL as source_url (was the shared listing, whose Congress text made the remediator mark them open); the Congress abstract deadline 2026-09-03 is parsed from /annual-congress/abstracts-and-case-reports (closed, so False). All other cards are False."
   ]
 }

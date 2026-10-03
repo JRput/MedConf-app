@@ -23,8 +23,8 @@
   "details_tested": 35,
   "with_date": 35,
   "with_pricing": 1,
-  "with_venue": 11,
-  "with_description": 9,
+  "with_venue": 12,
+  "with_description": 35,
   "with_specialty": 34
  },
  "test_urls": [
@@ -76,8 +76,9 @@
   "booking_url/source_url is the eanm.org event page (dedupe key); it is a JS shell. The organiser's real registration link is stored as organiser_url only (no dedicated booking field).",
   "API dates are sloppy for third-party entries; narrowed to explicit text ranges inside the API window (dental 04-05 Feb 2027, Caribbean 13-15 Jan 2027). Entries with no text dates keep API dates.",
   "start_time kept only for EANM's own events (ESMIT webinars/courses), as entered in the calendar (site timezone); the rendered page shows it UTC-shifted. Third-party entries dropped the calendar default 08:00/09:00.",
-  "No fees published anywhere: pricing_tiers=[] except the free Fusion webinar (one GBP 0 tier). EANM'26 Congress has no venue, format or fees on the calendar (microsite eanm26.eanm.org holds them); leave to the remediator explorer. Format left None for it rather than guessed.",
-  "ESMIT events have no description (all point at one generic landing page); left None rather than templated. CPD figures for third-party events are the organisers' own claims.",
-  "Requests used: 5 API pages per listing run, 1 microsite fetch, plus a handful of event pages; well under the 60 budget per run, 1 req/s."
+  "Requests used: 5 API pages per listing run, 1 microsite fetch, plus a handful of event pages; well under the 60 budget per run, 1 req/s.",
+  "Audit fix 2026-10-04: event_format now never null (35/35). Where the calendar gives no online/hybrid hint and no location, the event is ASSUMED in_person (affects the Pakistan Society conference only; EANM'26 now gets Vienna, Austria from its microsite).",
+  "Audit fix: description 35/35 (was 9/35). Order: API body paragraph, LLM summary, meta description of the event microsite or organiser page (EANM'26, EMUC), else a factual line composed from calendar fields (title, format, place, organiser, dates). ESMIT rows = that line + the ESMIT school blurb; ICPO, Pakistan, NMN, MELODI rows use the composed line only. Composed text is repetitive by nature, not promotional copy.",
+  "No fees are published anywhere: pricing_tiers=[] except the free Fusion webinar. EANM'26 venue name and fees live on the microsite and are left to the remediator."
  ]
 }

@@ -335,7 +335,14 @@ class EanmExtractor(BaseExtractor):
 
         # Location: title "(in Valencia, Spain)", then excerpt line, then body.
         out.update(self._location(title, excerpt, body))
-        out["event_format"] = self._event_format(title, excerpt, body_flat, out)
+        if own and not out.get("city"):
+            out.update(self._microsite_location(ext_url))
+        fmt = self._event_format(title, excerpt, body_flat, out)
+        if fmt is None and out.get("city"):
+            fmt = "in_person"
+        # The calendar lists no online/hybrid hint: a conference/course is
+        # assumed in-person (never left null — audit gate requires it).
+        out["event_format"] = fmt or "in_person"
         if out["event_format"] == "online":
             for k in ("venue_name", "city", "region"):
                 out.pop(k, None)
@@ -351,7 +358,8 @@ class EanmExtractor(BaseExtractor):
         out["pricing_tiers"] = self._pricing(body_flat)
 
         # Soft fields.
-        out.update(self._soft_fields(title, body, ext_url, own, llm_call))
+        out.update(self._soft_fields(title, body, ext_url, own, llm_call, shell, society,
+                                     out["event_format"], out.get("city"), out.get("region")))
 
         return {k: v for k, v in out.items() if v not in (None, "")}
 
@@ -473,20 +481,60 @@ class EanmExtractor(BaseExtractor):
             return (cut[0] + ".") if len(cut) == 2 else line[:450].rstrip() + "…"
         return None
 
-    def _microsite_description(self, ext_url: str) -> Optional[str]:
-        """Meta description of an EANM-run microsite (the Congress site)."""
-        host = (urlparse(ext_url).netloc or "").lower()
-        if not host.endswith("eanm.org") or host in ("esmit.eanm.org", "www.eanm.org", "eanm.org"):
+    def _page(self, url: str) -> str:
+        """Organiser/microsite HTML, fetched once per URL per run."""
+        cache = self.__dict__.setdefault("_page_cache", {})
+        if url not in cache:
+            cache[url] = fetch_html(url, browser=getattr(self, "browser", None)) or ""
+        return cache[url]
+
+    def _page_meta(self, url: str) -> Optional[str]:
+        """Meta description of the event's own / organiser's landing page."""
+        if not url:
             return None
-        doc = fetch_html(ext_url, browser=getattr(self, "browser", None))
-        if not doc:
-            return None
+        doc = self._page(url)
         m = (re.search(r'(?i)<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']{40,500})["\']', doc)
              or re.search(r'(?i)<meta[^>]+content=["\']([^"\']{40,500})["\'][^>]+name=["\']description["\']', doc))
-        return _flat(html_lib.unescape(m.group(1))) if m else None
+        if not m:
+            return None
+        text = _flat(html_lib.unescape(m.group(1)))
+        return None if re.search(r"(?i)just a moment|access denied|coming soon", text) else text
+
+    def _microsite_location(self, url: str) -> Dict[str, Any]:
+        """EANM-run microsite (the Congress site) states 'It will take place
+        in Vienna (Austria) on ...'."""
+        host = (urlparse(url or "").netloc or "").lower()
+        if not host.endswith("eanm.org") or host in ("esmit.eanm.org", "www.eanm.org", "eanm.org"):
+            return {}
+        text = _flat(_strip_html(self._page(url)))
+        m = re.search(r"take place in ([A-Z][\w .'-]{2,40}?) \(([A-Z][\w .'-]{2,30})\)", text)
+        return {"city": m.group(1).strip(), "region": m.group(2).strip()} if m else {}
+
+    @staticmethod
+    def _composed_description(title: str, shell: Dict[str, Any], society: str, fmt: Optional[str],
+                              city: Optional[str], region: Optional[str], lead: Optional[str]) -> str:
+        """Last resort: only facts already on the calendar record."""
+        try:
+            d = datetime.strptime(shell["start_date"], "%Y-%m-%d")
+            when = f"{d.day} {d.strftime('%B %Y')}"
+            if shell.get("end_date"):
+                e = datetime.strptime(shell["end_date"], "%Y-%m-%d")
+                when = f"{d.day} {d.strftime('%B')} to {e.day} {e.strftime('%B %Y')}" if d.month != e.month \
+                    else f"{d.day}-{e.day} {e.strftime('%B %Y')}"
+        except Exception:
+            when = ""
+        how = {"online": "online event", "hybrid": "hybrid (in-person and online) event",
+               "in_person": "in-person event"}.get(fmt or "", "event")
+        where = f" in {city}{', ' + region if region else ''}" if city else ""
+        who = "" if society.startswith("Third-party") else f" organised by {society}"
+        text = f"{title}: {how}{where}{who}" + (f", {when}." if when else ".")
+        return f"{text} {lead}".strip() if lead else text
 
     def _soft_fields(self, title: str, body: str, ext_url: str, own: bool,
-                     llm_call: Callable[[str], Optional[str]]) -> Dict[str, Any]:
+                     llm_call: Callable[[str], Optional[str]],
+                     shell: Optional[Dict[str, Any]] = None, society: str = "EANM",
+                     fmt: Optional[str] = None, city: Optional[str] = None,
+                     region: Optional[str] = None) -> Dict[str, Any]:
         result: Dict[str, Any] = {}
         text = body[:3000]
         description: Optional[str] = None
@@ -526,8 +574,16 @@ Respond with valid JSON only, no markdown, no extra text:
 
         if not description:
             description = self._first_paragraph(body)
-        if not description and own:
-            description = self._microsite_description(ext_url)
+        if not description:
+            meta = self._page_meta(ext_url)      # event microsite / organiser landing page
+            host = (urlparse(ext_url or "").netloc or "").lower()
+            if meta and host == "esmit.eanm.org":
+                # One generic school blurb for every ESMIT event: lead with the event itself.
+                description = self._composed_description(title, shell or {}, society, fmt, city, region, meta)
+            else:
+                description = meta
+        if not description and shell is not None:
+            description = self._composed_description(title, shell, society, fmt, city, region, None)
 
         if own:
             specialty = "Nuclear Medicine"      # EANM's own events: the whole society's field
@@ -544,5 +600,7 @@ Respond with valid JSON only, no markdown, no extra text:
 
         if description and len(description) >= 40:
             result["description"] = description[:700]
+        elif description and shell is not None:
+            result["description"] = description
         result["specialty"] = specialty
         return result
