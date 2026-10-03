@@ -48,6 +48,14 @@ _SPA_MARKERS = (
 _SHORT_BODY_THRESHOLD = 3000
 
 
+def _past_deadline() -> bool:
+    try:
+        from .explorer import source_time_up
+        return source_time_up()
+    except Exception:
+        return False
+
+
 class PageCache:
     """Per-run cache. One instance per CLI invocation."""
 
@@ -63,6 +71,14 @@ class PageCache:
         sub-page discovery purposes."""
         if url in self._html_cache:
             return self._html_cache[url]
+        # Profiled 2026-10-03: text + HTML used to be two separate GETs of the
+        # same URL per row. Fetch text first (it fills the HTML cache too).
+        if url not in self._cache and not _past_deadline():
+            self.get(url)
+            if url in self._html_cache:
+                return self._html_cache[url]
+        if _past_deadline():
+            return None
         try:
             with httpx.Client(timeout=20, follow_redirects=True,
                               headers={"User-Agent": USER_AGENT}) as c:
@@ -83,6 +99,8 @@ class PageCache:
         """
         if url in self._cache:
             return self._cache[url]
+        if _past_deadline():
+            return None  # not cached: nothing was attempted
         text = self._fetch(url)
         self._cache[url] = text
         return text
@@ -117,6 +135,7 @@ class PageCache:
                               headers={"User-Agent": USER_AGENT}) as c:
                 r = c.get(url)
                 r.raise_for_status()
+                self._html_cache[url] = r.text
                 # Strip tags, decode entities, THEN normalize whitespace.
                 # Order matters: &nbsp; decodes to \xa0 which regex \s+
                 # matches — but only if we normalize AFTER unescape. Doing
@@ -131,6 +150,7 @@ class PageCache:
                 return t[:200000]
         except Exception as e:
             logger.warning(f"remediator: httpx fetch failed for {url}: {e}")
+            self._html_cache.setdefault(url, None)
             return None
 
     def _fetch_browser(self, url: str) -> Optional[str]:

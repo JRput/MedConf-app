@@ -60,6 +60,7 @@ import base64
 import json
 import logging
 import re
+import time
 from typing import List, Optional
 
 import httpx
@@ -71,6 +72,31 @@ from llm_client import chat_completion, current_model
 logger = logging.getLogger(__name__)
 
 _client: Optional[OpenAI] = None
+
+
+def call_with_hard_timeout(fn, seconds: float):
+    """Run fn() in a daemon thread and give up after `seconds` of WALL-CLOCK
+    time. The OpenAI/httpx `timeout` is per socket operation, not total: a
+    server that keeps the connection alive without finishing the response
+    stalled one remediator call for ~7 min on 2026-10-03 (source 37).
+    Raises TimeoutError on expiry; re-raises fn's own exception."""
+    import threading
+    box: dict = {}
+
+    def _run():
+        try:
+            box["v"] = fn()
+        except BaseException as e:  # noqa: BLE001 - re-raised in caller
+            box["e"] = e
+
+    t = threading.Thread(target=_run, daemon=True)
+    t.start()
+    t.join(seconds)
+    if t.is_alive():
+        raise TimeoutError(f"call exceeded {seconds:.0f}s hard cap")
+    if "e" in box:
+        raise box["e"]
+    return box.get("v")
 
 
 def _client_get() -> OpenAI:
@@ -135,13 +161,16 @@ def extract_json(
         return None
 
     try:
-        resp = chat_completion(
-            _client_get(),
-            chain="vision",
-            messages=[{"role": "user", "content": content}],
-            temperature=0.0,
-            max_tokens=max_tokens,
-            timeout=timeout,
+        resp = call_with_hard_timeout(
+            lambda: chat_completion(
+                _client_get(),
+                chain="vision",
+                messages=[{"role": "user", "content": content}],
+                temperature=0.0,
+                max_tokens=max_tokens,
+                timeout=timeout,
+            ),
+            timeout + 20,
         )
         raw = (resp.choices[0].message.content or "").strip()
     except Exception as e:
@@ -203,7 +232,7 @@ Rules:
 """
 
 
-def extract_pricing_from_images(image_urls: List[str]) -> list[dict]:
+def extract_pricing_from_images(image_urls: List[str], stop_at: Optional[float] = None) -> list[dict]:
     """High-level helper: send pricing images to the vision model and
     return a list of pricing_tier dicts ready for insertion.
 
@@ -219,6 +248,9 @@ def extract_pricing_from_images(image_urls: List[str]) -> list[dict]:
         return []
     all_tier_dicts: list[dict] = []
     for url in image_urls:
+        if stop_at is not None and time.time() >= stop_at:
+            logger.warning("vision: stop_at deadline reached — skipping remaining images")
+            break
         result = extract_json([url], PRICING_PROMPT, max_tokens=3000)
         if not result or "tiers" not in result:
             logger.warning(f"vision: no tiers extracted from {url[:120]}")  # url may be a multi-MB data: URL

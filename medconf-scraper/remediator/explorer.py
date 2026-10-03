@@ -334,8 +334,97 @@ EXPLORER_UA = (
 )
 
 
-def fetch_page_text_and_html(url: str, *, timeout: float = 25.0) -> tuple[Optional[str], Optional[str]]:
-    """Return (text_only, raw_html) — text stripped of tags, html for anchor scanning."""
+# --- Run-level fetch layer -------------------------------------------------
+# Profiling sources 33/37 (2026-10-03): every event re-fetched the site
+# homepage and the same handful of "membership / awards / cpd" anchors, plus
+# 6 guessed per-event suffixes (almost all 404), with a 25 s timeout each and
+# no memory of failures. All fetches now go through one per-process cache
+# (successes AND failures), a per-host circuit breaker for hosts that keep
+# timing out, and a hard deadline the runner sets for the current source.
+FETCH_CACHE: dict = {}
+_host_slow_hits: dict = {}
+HOST_BREAKER_THRESHOLD = int(os.environ.get("REMEDIATOR_HOST_BREAKER", "3"))
+# Max network fetches (cache misses) one explorer call may make.
+EXPLORE_MAX_FETCHES = int(os.environ.get("REMEDIATOR_EXPLORE_MAX_FETCHES", "10"))
+# Max wall-clock seconds one explorer call may spend.
+EXPLORE_MAX_SECONDS = float(os.environ.get("REMEDIATOR_EXPLORE_MAX_SECONDS", "90"))
+# Max LLM event-identity checks one explorer call may make. Profiled on
+# source 33: 56 of 53+ text calls (81 s of 206 s) were these checks, mostly
+# re-judging the same site-wide pages (membership, awards, CPD) per event.
+EXPLORE_MAX_LLM_CHECKS = int(os.environ.get("REMEDIATOR_EXPLORE_MAX_LLM_CHECKS", "2"))
+EVENT_MATCH_CACHE: dict = {}
+FETCH_TIMEOUT_S = float(os.environ.get("REMEDIATOR_FETCH_TIMEOUT_S", "12"))
+
+_source_deadline: Optional[float] = None  # epoch seconds; None = unlimited
+fetch_stats = {"network": 0, "cache_hits": 0, "network_seconds": 0.0, "breaker_skips": 0}
+
+
+def set_source_deadline(deadline: Optional[float]) -> None:
+    """Runner sets this at the start of each source (and clears it after)."""
+    global _source_deadline
+    _source_deadline = deadline
+
+
+def get_source_deadline() -> Optional[float]:
+    return _source_deadline
+
+
+def source_time_up() -> bool:
+    import time as _t
+    return _source_deadline is not None and _t.time() >= _source_deadline
+
+
+def reset_fetch_state() -> None:
+    FETCH_CACHE.clear()
+    EVENT_MATCH_CACHE.clear()
+    _host_slow_hits.clear()
+    for k in fetch_stats:
+        fetch_stats[k] = 0 if k != "network_seconds" else 0.0
+
+
+class ExploreBudget:
+    """Per-explorer-call cap on network fetches and wall-clock time."""
+
+    def __init__(self):
+        import time as _t
+        self._t = _t
+        self.started = _t.time()
+        self.fetches = 0
+        self.llm_checks = 0
+
+    def exhausted(self) -> bool:
+        return (
+            source_time_up()
+            or self.fetches >= EXPLORE_MAX_FETCHES
+            or (self._t.time() - self.started) >= EXPLORE_MAX_SECONDS
+        )
+
+    def fetch(self, url: str, **kw) -> tuple[Optional[str], Optional[str]]:
+        """Budget-aware fetch. Cache hits are free; misses count."""
+        if url in FETCH_CACHE:
+            return fetch_page_text_and_html(url, **kw)
+        if self.exhausted():
+            return None, None
+        self.fetches += 1
+        return fetch_page_text_and_html(url, **kw)
+
+
+def fetch_page_text_and_html(url: str, *, timeout: float = FETCH_TIMEOUT_S) -> tuple[Optional[str], Optional[str]]:
+    """Return (text_only, raw_html) — text stripped of tags, html for anchor scanning.
+    Cached per process (failures included), host-circuit-broken, and
+    refused once the source deadline has passed."""
+    import time as _t
+    if url in FETCH_CACHE:
+        fetch_stats["cache_hits"] += 1
+        return FETCH_CACHE[url]
+    if source_time_up():
+        return None, None
+    host = urlparse(url).netloc.lower()
+    if _host_slow_hits.get(host, 0) >= HOST_BREAKER_THRESHOLD:
+        fetch_stats["breaker_skips"] += 1
+        return None, None
+    t0 = _t.time()
+    result: tuple[Optional[str], Optional[str]] = (None, None)
     try:
         with httpx.Client(timeout=timeout, follow_redirects=True,
                           headers={"User-Agent": EXPLORER_UA, "Accept": "text/html,application/xhtml+xml"}) as c:
@@ -351,10 +440,18 @@ def fetch_page_text_and_html(url: str, *, timeout: float = 25.0) -> tuple[Option
             text = re.sub(r"\s+", " ", text).strip()
             # Cap at 200k — matches the fetcher's cap. 25k truncation
             # broke abstract detection on BTOG (content at offset 148k).
-            return text[:200000], html
+            result = (text[:200000], html)
+    except httpx.HTTPStatusError as e:
+        # A 404/403 is a fast, definitive answer — not a slow host.
+        logger.warning(f"explorer: fetch failed for {url}: HTTP {e.response.status_code}")
     except Exception as e:
-        logger.warning(f"explorer: fetch failed for {url}: {e}")
-        return None, None
+        # Timeouts / connection errors: these are what burn the clock.
+        _host_slow_hits[host] = _host_slow_hits.get(host, 0) + 1
+        logger.warning(f"explorer: fetch failed for {url}: {type(e).__name__}")
+    fetch_stats["network"] += 1
+    fetch_stats["network_seconds"] += _t.time() - t0
+    FETCH_CACHE[url] = result
+    return result
 
 
 def explore_for_pricing(
@@ -370,6 +467,7 @@ def explore_for_pricing(
     trail.total_text_chars = len(page_text or "")
     accumulated_text = page_text or ""
     accumulated_tiers: list = []
+    budget = ExploreBudget()
 
     # 1. Inventory: tabs already in page_text (fetcher expanded them).
     # If text contains £/$/€, try regex sweep first
@@ -394,7 +492,7 @@ def explore_for_pricing(
         # individual event page but IS on the homepage.
         try:
             home_url = f"https://{host}/"
-            _, home_html = fetch_page_text_and_html(home_url)
+            _, home_html = budget.fetch(home_url)
             if home_html:
                 home_anchors = find_same_domain_anchors(home_html, home_url, limit=10)
                 anchors.extend(home_anchors)
@@ -461,6 +559,13 @@ def explore_for_pricing(
                 return True
             # Ambiguous: 1 of several tokens matched. Ask the LLM —
             # cheap insurance against cross-event contamination.
+            cache_key = (url, frozenset(matched))
+            if cache_key in EVENT_MATCH_CACHE:
+                return EVENT_MATCH_CACHE[cache_key]
+            if budget.llm_checks >= EXPLORE_MAX_LLM_CHECKS or source_time_up():
+                trail.notes.append(f"llm_event_match_skipped (cap) {url}: treated as no match")
+                return False
+            budget.llm_checks += 1
             sample = sub_text[:3000]
             prompt = (
                 f"You are checking if a web page is about a specific event.\n\n"
@@ -477,6 +582,8 @@ def explore_for_pricing(
             trail.notes.append(
                 f"llm_event_match {url}: matched={matched} verdict={verdict!r} ok={ok}"
             )
+            if raw:  # don't cache LLM outages as "no"
+                EVENT_MATCH_CACHE[cache_key] = ok
             return ok
 
         seen: set = set()
@@ -484,7 +591,10 @@ def explore_for_pricing(
             if url in seen or url == base_url:
                 continue
             seen.add(url)
-            sub_text, sub_html = fetch_page_text_and_html(url)
+            if budget.exhausted():
+                trail.notes.append("explore_budget_exhausted: stopped sub-page walk")
+                break
+            sub_text, sub_html = budget.fetch(url)
             if not sub_text:
                 continue
             trail.subpages_fetched.append(url)
@@ -508,7 +618,7 @@ def explore_for_pricing(
                         from vision import extract_pricing_from_images
                         import time as _t
                         _t0 = _t.time()
-                        vtiers = extract_pricing_from_images(images)
+                        vtiers = extract_pricing_from_images(images, stop_at=_source_deadline)
                         _note_vision_time(_t.time() - _t0)
                         trail.images_ocred += len(images)
                         if vtiers:
@@ -538,7 +648,9 @@ def explore_for_pricing(
         for ext_url, link_text in externals:
             if ext_url in (trail.subpages_fetched):
                 continue
-            sub_text, sub_html = fetch_page_text_and_html(ext_url)
+            if budget.exhausted():
+                break
+            sub_text, sub_html = budget.fetch(ext_url)
             if not sub_text:
                 trail.notes.append(f"external_fetch_failed: {ext_url}")
                 continue
@@ -568,7 +680,7 @@ def explore_for_pricing(
                         from vision import extract_pricing_from_images
                         import time as _t
                         _t0 = _t.time()
-                        vtiers = extract_pricing_from_images(images)
+                        vtiers = extract_pricing_from_images(images, stop_at=_source_deadline)
                         _note_vision_time(_t.time() - _t0)
                         trail.images_ocred += len(images)
                         if vtiers:
@@ -687,6 +799,7 @@ def explore_for_abstract_status(
     sub-page walk, then LLM with full context."""
     trail = AuditTrail()
     trail.total_text_chars = len(page_text or "")
+    budget = ExploreBudget()
     from .fixers.abstract import fix_abstract_status
 
     # 1. Standard fixer on the main page
@@ -714,7 +827,10 @@ def explore_for_abstract_status(
             if url in seen or url == base_url:
                 continue
             seen.add(url)
-            sub_text, _ = fetch_page_text_and_html(url)
+            if budget.exhausted():
+                trail.notes.append("explore_budget_exhausted: stopped sub-page walk")
+                break
+            sub_text, _ = budget.fetch(url)
             if not sub_text:
                 continue
             trail.subpages_fetched.append(url)

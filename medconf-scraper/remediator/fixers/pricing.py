@@ -160,31 +160,40 @@ def fix_pricing(
         for suffix in ("/fees", "/fees-and-how-to-book", "/registration-and-fees"):
             fees_urls.append(source_url.split("?")[0].rstrip("/") + suffix)
 
+    # Profiled 2026-10-03 (ACPGBI, source 37): this tier-1 path fetched each
+    # guessed fees page with an uncached httpx.get and then sent EVERY
+    # non-logo <img> on a 200 response to the vision model — bypassing the
+    # explorer's image/time budgets, so a run kept making 60 s vision calls
+    # long after "vision budget exhausted" was logged. It now shares the
+    # explorer's cached/circuit-broken fetcher, the money-proximity image
+    # filter, and the process-wide vision budgets.
+    from remediator.explorer import (
+        fetch_page_text_and_html, find_money_images, source_time_up,
+        get_source_deadline,
+        _note_vision_time,
+    )
     image_urls: List[str] = []
     for fees_url in fees_urls:
-        try:
-            r = httpx.get(fees_url, timeout=20, follow_redirects=True,
-                          headers={"User-Agent": "Mozilla/5.0 (MedConf remediator)"})
-            if r.status_code >= 400:
-                continue
-            html = r.text
-        except Exception:
+        if source_time_up():
+            break
+        clean, html = fetch_page_text_and_html(fees_url)
+        if not html:
             continue
         # Try text regex on the fees page too
-        from urllib.parse import urlparse
-        clean = re.sub(r"<[^>]+>", " ", html)
-        clean = re.sub(r"\s+", " ", clean).strip()
-        tiers = _text_pricing_sweep(clean)
+        tiers = _text_pricing_sweep(clean or "")
         if tiers:
             return tiers, "text_regex_fees_page"
-        # Collect image URLs for vision LLM
-        image_urls.extend(_find_fee_image_urls(html, fees_url))
+        # Collect image URLs for vision LLM (budgeted + money-proximity filtered)
+        image_urls.extend(find_money_images(html, fees_url, limit=6))
 
     # 4. Vision LLM on collected images
     if image_urls:
         try:
+            import time as _t
             from vision import extract_pricing_from_images
-            tiers = extract_pricing_from_images(image_urls)
+            _t0 = _t.time()
+            tiers = extract_pricing_from_images(image_urls, stop_at=get_source_deadline())
+            _note_vision_time(_t.time() - _t0)
             if tiers:
                 return tiers, "vision_llm"
         except Exception as e:

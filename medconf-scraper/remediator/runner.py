@@ -11,6 +11,7 @@ For one source:
 
 from __future__ import annotations
 import logging
+import os
 import time
 from collections import defaultdict
 from typing import Any, Optional
@@ -20,10 +21,20 @@ from .fetcher import PageCache
 from .fixers import REGISTRY as FIXERS
 from .validators import validate
 from .report import write_report
-from .explorer import EXPLORERS
+from .explorer import (
+    EXPLORERS, set_source_deadline, get_source_deadline, source_time_up,
+    reset_fetch_state, fetch_stats,
+)
 from .learned_patterns import record_success, get_promoted_patterns
 
 logger = logging.getLogger(__name__)
+
+# Hard wall-clock budget per source (2026-10-03). Group E of the nightly job
+# was cancelled at its 90-min cap because one slow source (FPH 860 s, then
+# ESC/ACPGBI) could eat the whole group. After this many seconds the
+# remaining rows of the source are skipped with a warning; the report says so.
+LLM_CALL_HARD_S = float(os.environ.get("REMEDIATOR_LLM_CALL_HARD_S", "75"))
+SOURCE_BUDGET_S = float(os.environ.get("REMEDIATOR_SOURCE_BUDGET_S", "600"))
 
 
 def _get_supabase():
@@ -36,17 +47,28 @@ def _llm_call_factory():
     from openai import OpenAI
     from config import KIMI_API_KEY, KIMI_BASE_URL
     from llm_client import chat_completion
-    client = OpenAI(api_key=KIMI_API_KEY, base_url=KIMI_BASE_URL)
+    from vision import call_with_hard_timeout
+    # max_retries=0: SDK retries multiplied each hang (see vision._client_get).
+    client = OpenAI(api_key=KIMI_API_KEY, base_url=KIMI_BASE_URL, max_retries=0)
 
     def call(prompt: str, *, max_tokens: int = 800) -> Optional[str]:
         try:
-            resp = chat_completion(
-                client,
-                chain="text",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.0,
-                max_tokens=max_tokens,
-                timeout=60.0,
+            # Hard wall-clock cap per call, also clipped to what is left of
+            # the source budget (+10 s grace) so one hung call can't overrun it.
+            cap = LLM_CALL_HARD_S
+            dl = get_source_deadline()
+            if dl is not None:
+                cap = max(10.0, min(cap, dl - time.time() + 10.0))
+            resp = call_with_hard_timeout(
+                lambda: chat_completion(
+                    client,
+                    chain="text",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.0,
+                    max_tokens=max_tokens,
+                    timeout=60.0,
+                ),
+                cap,
             )
             return (resp.choices[0].message.content or "").strip()
         except Exception as e:
@@ -150,6 +172,10 @@ def remediate_source(source_id: int) -> dict:
     )
 
     llm_call = _llm_call_factory()
+    reset_fetch_state()
+    set_source_deadline(started + SOURCE_BUDGET_S)
+    rows_skipped = 0
+    budget_exhausted = False
     patches_applied: list = []
     patches_rejected: list = []
     patches_couldnt_fix: list = []
@@ -157,6 +183,15 @@ def remediate_source(source_id: int) -> dict:
 
     with PageCache() as cache:
         for row, gaps in gaps_per_row:
+            if source_time_up():
+                rows_skipped += 1
+                if not budget_exhausted:
+                    budget_exhausted = True
+                    logger.warning(
+                        f"remediator source {source_id}: time budget "
+                        f"{SOURCE_BUDGET_S:.0f}s exhausted — skipping remaining rows"
+                    )
+                continue
             url = row.get("source_url")
             page_text = cache.get(url) if url else None
             page_html = cache.get_html(url) if url else None
@@ -213,7 +248,7 @@ def remediate_source(source_id: int) -> dict:
                         logger.debug(f"promoted-pattern replay failed: {e}")
 
                 # TIER 2 — explorer escalation when Tier 1 returns null
-                if value is None and field in EXPLORERS and url:
+                if value is None and field in EXPLORERS and url and not source_time_up():
                     try:
                         explorer = EXPLORERS[field]
                         result = explorer(
@@ -280,7 +315,10 @@ def remediate_source(source_id: int) -> dict:
                     "fields": unfixed,
                 })
 
+    set_source_deadline(None)
     duration = time.time() - started
+    stats = {k: (round(v, 1) if isinstance(v, float) else v) for k, v in fetch_stats.items()}
+    logger.info(f"remediator source {source_id}: done in {duration:.0f}s, fetch stats {stats}")
     report_path = write_report(
         source_id=source_id,
         source_name=source.get("source_name") or "?",
@@ -292,6 +330,10 @@ def remediate_source(source_id: int) -> dict:
         patches_couldnt_fix=patches_couldnt_fix,
         duration_sec=duration,
         explorer_trails=explorer_trails,
+        budget_exhausted=budget_exhausted,
+        rows_skipped=rows_skipped,
+        budget_s=SOURCE_BUDGET_S,
+        fetch_stats=stats,
     )
 
     return {
@@ -302,5 +344,7 @@ def remediate_source(source_id: int) -> dict:
         "patches_rejected": len(patches_rejected),
         "patches_couldnt_fix": len(patches_couldnt_fix),
         "duration_sec": round(duration, 1),
+        "budget_exhausted": budget_exhausted,
+        "rows_skipped_by_budget": rows_skipped,
         "report_path": str(report_path),
     }

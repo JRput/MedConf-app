@@ -23,6 +23,10 @@ def write_report(
     patches_couldnt_fix: List[dict],
     duration_sec: float,
     explorer_trails: List[dict] | None = None,
+    budget_exhausted: bool = False,
+    rows_skipped: int = 0,
+    budget_s: float | None = None,
+    fetch_stats: dict | None = None,
 ) -> Path:
     repo_root = Path(__file__).resolve().parent.parent.parent
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -71,6 +75,10 @@ def write_report(
         "explorer_runs": len(explorer_trails or []),
         "explorer_successes": sum(1 for t in (explorer_trails or []) if t.get("found")),
         "duration_sec": round(duration_sec, 1),
+        "budget_exhausted": budget_exhausted,
+        "rows_skipped_by_budget": rows_skipped,
+        "source_budget_s": budget_s,
+        "fetch_stats": fetch_stats or {},
     }
     out_path.write_text(json.dumps(report, indent=2, default=str))
     return out_path
@@ -119,4 +127,7 @@ def print_summary(report_path: Path) -> None:
     print(border)
     print(f"  Report: {report_path}")
     print(f"  Duration: {data['duration_sec']}s")
+    if data.get("budget_exhausted"):
+        print(f"  ⚠ TIME BUDGET HIT ({data.get('source_budget_s')}s): "
+              f"{data.get('rows_skipped_by_budget', 0)} row(s) skipped, will retry next run")
     print(border)
