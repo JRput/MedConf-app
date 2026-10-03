@@ -57,6 +57,7 @@ ROTATION LOG:
 
 from __future__ import annotations
 import base64
+import datetime
 import json
 import logging
 import re
@@ -223,9 +224,9 @@ Output ONLY this JSON shape, no prose, no markdown fences:
 
 Rules:
 - Include EVERY dimension (section, attendee type, timeframe/band) in every tier_label, separated by " · ".
-- currency: read €/£/$ symbols. Use "GBP", "USD", "EUR" — default GBP if unclear.
+- currency: the 3-letter ISO code. Prefer a code or country printed in the image (e.g. "USD 100", "(USD)", "KRW", "CHF") over a bare symbol. Symbols: £=GBP, €=EUR, ₩=KRW, ¥ or 円=JPY, S$=SGD, HK$=HKD, plain $=USD. If no code or symbol is visible anywhere, set "currency": null — do NOT guess GBP.
 - is_early_bird true ONLY for columns/rows explicitly labelled "Early", "Super Early Bird" etc.
-- early_bird_deadline: ISO YYYY-MM-DD ONLY if the year is visible in the image. Do NOT guess a year.
+- early_bird_deadline: ISO YYYY-MM-DD ONLY if the year is visible in the image; copy the digits exactly as printed. Do NOT guess a year.
 - If a single price spans multiple columns (one flat rate shown across a merged cell), emit ONE tier for that row (not duplicates).
 - Be exhaustive but do NOT invent rows that aren't visible.
 - If no fee table is visible in the image, return {"tiers": []}.
@@ -265,12 +266,27 @@ def extract_pricing_from_images(image_urls: List[str], stop_at: Optional[float] 
         label = _clean_vision_label(str(t.get("tier_label", "")))[:200]
         if not label or price <= 0:
             continue
-        currency = str(t.get("currency", "GBP")).upper()[:3]
+        currency = normalize_currency(t.get("currency"))
+        if currency is None:
+            logger.warning(
+                f"vision: tier {label!r} has no determinable currency "
+                f"(raw={t.get('currency')!r}) — leaving null, not guessing GBP")
         deadline = t.get("early_bird_deadline")
         # Reject year-guessed deadlines (e.g. LLM defaulting to 2024 when
         # the image just said "Until 27 May"). Only trust a full date.
         if deadline and (not isinstance(deadline, str) or len(deadline) != 10):
             deadline = None
+        # Misread years happen (KSUOG image said 2026-08-16, model returned
+        # 2028-08-10): an early-bird deadline outside last year..next year is dropped.
+        if deadline:
+            try:
+                yr = int(deadline[:4])
+                this = datetime.date.today().year
+                if not (this - 1 <= yr <= this + 1):
+                    logger.warning(f"vision: dropping implausible early_bird_deadline {deadline}")
+                    deadline = None
+            except ValueError:
+                deadline = None
         tiers.append({
             "tier_label": label,
             "price_gbp": price,        # historical column name; currency disambiguates
@@ -285,10 +301,35 @@ def extract_pricing_from_images(image_urls: List[str], stop_at: Optional[float] 
 # "GBP", "SAS" etc.). Add to this whitelist when a new source uses one.
 _LABEL_ACRONYMS = {
     "EmA", "LMIC", "GBP", "USD", "EUR", "SGD", "HKD", "SAS", "GP",
-    "NHS", "RCP", "RCR", "MRCP", "IMT", "STR", "HCP", "FY", "SHO",
+    "KRW", "JPY", "CHF", "AUD", "CAD", "INR", "BRL", "NHS", "RCP", "RCR", "MRCP", "IMT", "STR", "HCP", "FY", "SHO",
     "AACR", "ASCO", "ESMO", "ESTRO", "BOPA", "BTOG", "RCEM", "RSM",
 }
 _ACRO_LOOKUP = {a.lower(): a for a in _LABEL_ACRONYMS}
+
+
+_CURRENCY_SYMBOLS = {
+    "£": "GBP", "€": "EUR", "₩": "KRW", "¥": "JPY", "円": "JPY", "$": "USD",
+    "S$": "SGD", "HK$": "HKD", "US$": "USD", "A$": "AUD", "C$": "CAD", "₹": "INR",
+    "CHF": "CHF", "R$": "BRL",
+}
+
+
+def normalize_currency(raw) -> Optional[str]:
+    """3-letter ISO code or common symbol -> ISO code; anything else
+    (None, '', 'unknown', 'N/A') -> None. Never defaults to GBP."""
+    if raw is None:
+        return None
+    s = str(raw).strip()
+    if not s:
+        return None
+    if s in _CURRENCY_SYMBOLS:
+        return _CURRENCY_SYMBOLS[s]
+    u = s.upper()
+    if u in _CURRENCY_SYMBOLS:
+        return _CURRENCY_SYMBOLS[u]
+    if re.fullmatch(r"[A-Z]{3}", u) and u not in {"N/A", "NAN", "UNK", "NUL"}:
+        return u
+    return None
 
 
 def _clean_vision_label(raw: str) -> str:

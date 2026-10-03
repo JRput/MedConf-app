@@ -59,6 +59,14 @@ def validate_specialty(value: str) -> bool:
     return 3 <= len(value) <= 80
 
 
+# Matches pricing_tiers.currency in production (CLAUDE.md §5) plus KRW and the
+# few others already accepted. KRW/JPY/INR prices are routinely 5-6 digits.
+_VALID_CURRENCIES = ("GBP", "USD", "EUR", "HKD", "SGD", "CHF", "BRL",
+                     "AUD", "CAD", "INR", "JPY", "KRW")
+_HIGH_DENOMINATION = ("KRW", "JPY", "INR")
+_HIGH_DENOMINATION_CAP = 10_000_000
+
+
 def validate_pricing_tiers(value: list) -> bool:
     if not isinstance(value, list) or not value:
         return False
@@ -67,12 +75,14 @@ def validate_pricing_tiers(value: list) -> bool:
             return False
         label = t.get("tier_label")
         price = t.get("price_gbp")
-        currency = t.get("currency", "GBP")
+        currency = t.get("currency", "GBP")   # key absent = legacy text path (GBP)
         if not isinstance(label, str) or len(label) < 3 or len(label) > 200:
             return False
-        if not isinstance(price, (int, float)) or price < 0 or price > 50000:
+        cap = _HIGH_DENOMINATION_CAP if currency in _HIGH_DENOMINATION else 50000
+        if not isinstance(price, (int, float)) or price < 0 or price > cap:
             return False
-        if currency not in ("GBP", "USD", "EUR", "AUD", "CAD", "INR", "JPY"):
+        # A present-but-null/unknown currency (vision could not read one) is rejected, not defaulted.
+        if currency not in _VALID_CURRENCIES:
             return False
     return True
 

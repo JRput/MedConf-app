@@ -51,6 +51,7 @@ class AuditTrail:
     tabs_visited: list = field(default_factory=list)
     subpages_fetched: list = field(default_factory=list)
     images_ocred: int = 0
+    image_selections: list = field(default_factory=list)  # {src, rule(s), size} per image sent to vision
     total_text_chars: int = 0
     llm_reasoning: str = ""
     notes: list = field(default_factory=list)
@@ -262,6 +263,45 @@ def find_same_domain_anchors(html: str, base_url: str, limit: int = 25) -> list[
     return candidates
 
 
+_REG_LINK_RE = re.compile(
+    r"\b(?:registration|register|fees?|pricing|prices?|rates?|tickets?|book(?:ing)?|"
+    r"how\s+to\s+(?:book|register))\b", re.I)
+_REG_LINK_NEG_RE = re.compile(r"newsletter|subscribe|unsubscribe|log\s?in|sign\s?in|privacy|cookie", re.I)
+
+
+def find_registration_links(html: str, base_url: str, limit: int = 3) -> list[tuple[str, str]]:
+    """Same-host links whose anchor text OR href says registration/fees/
+    pricing/tickets/booking, nav links included (flagship microsites keep
+    "Registration" in the nav). Returns [(absolute_url, link_text)], deduped,
+    capped. Other-host links are never returned (external follow is a
+    separate, identity-gated tier)."""
+    host = urlparse(base_url).netloc.lower().removeprefix("www.")
+    self_url = base_url.split("#")[0].split("?")[0].rstrip("/")
+    out: list[tuple[str, str]] = []
+    seen: set = set()
+    for m in re.finditer(r'<a\b[^>]*?href=["\']([^"\']+)["\'][^>]*>(.*?)</a\s*>', html or "", re.I | re.S):
+        href = m.group(1).strip()
+        if not href or href.startswith(("#", "javascript:", "mailto:", "tel:")):
+            continue
+        text = re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", m.group(2)))).strip()
+        absolute = urljoin(base_url, href)
+        pu = urlparse(absolute)
+        if pu.scheme not in ("http", "https") or pu.netloc.lower().removeprefix("www.") != host:
+            continue
+        clean = absolute.split("#")[0].split("?")[0]
+        if clean.rstrip("/") == self_url or clean in seen:
+            continue
+        if _REG_LINK_NEG_RE.search(text) or _REG_LINK_NEG_RE.search(pu.path):
+            continue
+        if not (_REG_LINK_RE.search(text[:80]) or _REG_LINK_RE.search(pu.path.replace("-", " ").replace("_", " "))):
+            continue
+        seen.add(clean)
+        out.append((clean, text[:60]))
+        if len(out) >= limit:
+            break
+    return out
+
+
 def llm_classify_anchors(
     *, html: str, base_url: str, field: str,
     event_title: str, llm_call: Callable[[str], Optional[str]],
@@ -337,27 +377,19 @@ def _note_vision_time(seconds: float) -> None:
     global _vision_seconds
     _vision_seconds += seconds
 
-_MONEY_NEAR_IMG_RE = re.compile(
-    r"(?:£|€|\$|\bfees?\b|\bprices?\b|\bregistration\b|\bdelegate\b|\btariff\b|\brates?\b|\bcost\b)",
-    re.I,
-)
-_IMG_SKIP_RE = re.compile(
-    r"logo|/brand/|icon|favicon|\.svg|sponsor|partner|banner|hero|avatar|profile|"
-    r"headshot|thumb|social|twitter|facebook|linkedin|youtube|instagram|\.gif$|"
-    r"1x1|pixel|spacer|badge|award|accredit",
-    re.I,
-)
-
-
-def find_money_images(html: str, base_url: str, limit: int = 8) -> list[str]:
-    """Find <img> URLs that plausibly show a fee table: raster images with
-    money/fee wording within ~600 chars either side in the HTML. Sponsor
-    logos, photos, icons and social chrome are skipped by name. Returns
-    absolute URLs, capped by `limit` and by the process-wide vision budget."""
+def find_money_images(html: str, base_url: str, limit: int = 8, *,
+                      strict: bool = False, trail: Optional["AuditTrail"] = None) -> list[str]:
+    """Find <img> sources that plausibly show a fee table (see
+    remediator/image_scan.py for the rules): images under a fee/registration
+    heading block, images with money words within ~600 chars, or substantial
+    images whose alt/src mention fee|price|rate|regist. `data:image/*;base64,`
+    sources pass through unchanged (vision takes data URLs). Images under 120px
+    are skipped, larger images come first, and sponsor logos/photos/icons are
+    skipped by name. Capped by `limit` and the process-wide vision budgets.
+    strict=True keeps only fee-heading images (main event page). The rule that
+    selected each image is recorded in `trail.image_selections`."""
     global _vision_images_sent
-    from urllib.parse import urljoin
-    urls: list[str] = []
-    seen: set = set()
+    from .image_scan import select_fee_images
     remaining = VISION_IMAGE_BUDGET - _vision_images_sent
     if not vision_time_left():
         logger.warning(
@@ -371,25 +403,28 @@ def find_money_images(html: str, base_url: str, limit: int = 8) -> list[str]:
             f"skipping image pricing for {base_url}"
         )
         return []
-    for m in re.finditer(r'<img[^>]*src=["\']([^"\']+)["\']', html, re.I):
-        src = m.group(1).strip()
-        if src.startswith("//"):
-            src = "https:" + src
-        elif not src.lower().startswith("http"):
-            src = urljoin(base_url, src)
-        if _IMG_SKIP_RE.search(src.lower()) or _IMG_SKIP_RE.search(m.group(0).lower()):
-            continue
-        window = html[max(0, m.start() - 600): m.end() + 600]
-        if not _MONEY_NEAR_IMG_RE.search(re.sub(r"<[^>]+>", " ", window)):
-            continue
-        if src in seen:
-            continue
-        seen.add(src)
-        urls.append(src)
-        if len(urls) >= min(limit, remaining):
-            break
-    _vision_images_sent += len(urls)
-    return urls
+    chosen = select_fee_images(html, base_url, strict=strict)[: min(limit, remaining)]
+    for c in chosen:
+        info = {"image": c.label(), "page": base_url, "rules": list(c.rules),
+                "size": f"{c.width or '?'}x{c.height or '?'}"}
+        logger.info(f"explorer: vision candidate {info}")
+        if trail is not None:
+            trail.image_selections.append(info)
+    _vision_images_sent += len(chosen)
+    return [c.src for c in chosen]
+
+
+def usable_vision_tiers(vtiers: list, trail: Optional["AuditTrail"] = None) -> list:
+    """Drop vision tiers whose currency could not be determined (null) —
+    never guess GBP. Logged and noted on the trail."""
+    keep = [t for t in (vtiers or []) if t.get("currency")]
+    dropped = len(vtiers or []) - len(keep)
+    if dropped:
+        msg = f"vision: dropped {dropped} tier(s) with unknown currency (not guessing GBP)"
+        logger.warning(msg)
+        if trail is not None:
+            trail.notes.append(msg)
+    return keep
 
 
 EXPLORER_UA = (
@@ -518,6 +553,63 @@ def fetch_page_text_and_html(url: str, *, timeout: float = FETCH_TIMEOUT_S) -> t
     return result
 
 
+def _plain_table_tiers(html: Optional[str], trail: Optional["AuditTrail"] = None) -> list:
+    """Plain-number <table> fee grids (pricing_tables parser). Currency must
+    be detected from the table/heading; tiers without one are dropped, never
+    defaulted to GBP."""
+    if not html:
+        return []
+    try:
+        from extractors.pricing_tables import parse_pricing_tables
+        return usable_vision_tiers(parse_pricing_tables(html, default_currency="", max_tiers=40), trail)
+    except Exception as e:
+        logger.debug(f"explorer: pricing_tables pass failed: {e}")
+        return []
+
+
+def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudget",
+                                  trail: "AuditTrail", limit: int = 2):
+    """On an external event site, fetch up to `limit` same-host registration/
+    fees links and run the text sweep then the (budgeted) image pass on each.
+    Returns (tiers, url, method) or None. Records `external_subpage_followed`."""
+    from .fixers.pricing import _text_pricing_sweep as _sweep
+    for url, text in find_registration_links(html, base_url, limit=limit):
+        if budget.exhausted():
+            trail.notes.append("explore_budget_exhausted: stopped external sub-page walk")
+            return None
+        sub_text, sub_html = budget.fetch(url)
+        if not sub_text:
+            continue
+        trail.subpages_fetched.append(url)
+        trail.total_text_chars += len(sub_text)
+        trail.notes.append(f"external_subpage_followed: {url} ({text})")
+        tiers = _sweep(sub_text)
+        if tiers:
+            trail.notes.append(f"external_subpage_text: {len(tiers)} tiers from {url}")
+            return tiers, url, "text"
+        tt = _plain_table_tiers(sub_html, trail)
+        if tt:
+            trail.notes.append(f"external_subpage_table: {len(tt)} tiers from {url}")
+            return tt, url, "table"
+        if sub_html and vision_time_left() and not source_time_up():
+            images = find_money_images(sub_html, url, limit=4, trail=trail)
+            if images:
+                try:
+                    from vision import extract_pricing_from_images
+                    import time as _t
+                    _t0 = _t.time()
+                    vt = usable_vision_tiers(
+                        extract_pricing_from_images(images, stop_at=get_source_deadline()), trail)
+                    _note_vision_time(_t.time() - _t0)
+                    trail.images_ocred += len(images)
+                    if vt:
+                        trail.notes.append(f"external_subpage_vision: {len(vt)} tiers from {url}")
+                        return vt, url, "vision"
+                except Exception as e:
+                    trail.notes.append(f"external_subpage_vision_failed: {e}")
+    return None
+
+
 def explore_for_pricing(
     *,
     row: dict,
@@ -545,12 +637,41 @@ def explore_for_pricing(
             audit_trail=trail, found=True,
         )
 
+    # 1b. Main-page fee image: only an image sitting under this page's own
+    # fee/registration heading (strict) — not site-wide promo banners.
+    if page_html and vision_time_left() and not source_time_up():
+        images = find_money_images(page_html, base_url, limit=2, strict=True, trail=trail)
+        if images:
+            try:
+                from vision import extract_pricing_from_images
+                import time as _t
+                _t0 = _t.time()
+                vtiers = usable_vision_tiers(
+                    extract_pricing_from_images(images, stop_at=_source_deadline), trail)
+                _note_vision_time(_t.time() - _t0)
+                trail.images_ocred += len(images)
+                if vtiers:
+                    trail.llm_reasoning = (
+                        f"Found prices via vision LLM on {len(images)} fee-heading image(s) "
+                        f"on the main event page.")
+                    trail.notes.append(f"vision_main_page: {len(vtiers)} tiers")
+                    return ExploreResult(
+                        field="pricing", value=vtiers, method="vision_main_page",
+                        audit_trail=trail, found=True,
+                    )
+            except Exception as e:
+                trail.notes.append(f"vision_main_page_failed: {e}")
+
     # 2. Walk same-domain sub-pages if HTML available
     parsed = urlparse(base_url)
     host = parsed.netloc.lower()
     if page_html and not any(d in host for d in SKIP_SUBPAGE_GUESS_DOMAINS):
         # Discover relevant sub-pages via anchor scanning (smarter than fixed guesses)
-        anchors = find_same_domain_anchors(page_html, base_url, limit=15)
+        # Explicit registration/fees links on the page (nav included) go
+        # BEFORE any guessed suffix or loosely-matched anchor.
+        reg_links = find_registration_links(page_html, base_url, limit=3)
+        reg_link_text = {u: t for u, t in reg_links}
+        anchors = [u for u, _ in reg_links] + find_same_domain_anchors(page_html, base_url, limit=15)
         # Walk homepage too — many sites put fees on a dedicated sub-site
         # (e.g. /latest-conference-2026/) that isn't linked from the
         # individual event page but IS on the homepage.
@@ -662,6 +783,8 @@ def explore_for_pricing(
             if not sub_text:
                 continue
             trail.subpages_fetched.append(url)
+            if url in reg_link_text:
+                trail.notes.append(f"subpage_followed: {url} ({reg_link_text[url]})")
             trail.total_text_chars += len(sub_text)
             # Event-identity gate — skip if this sub-page isn't about our event
             if not page_matches_event(sub_text, url):
@@ -674,15 +797,23 @@ def explore_for_pricing(
                     field="pricing", value=tiers, method=f"subpage_text:{urlparse(url).path}",
                     audit_trail=trail, found=True,
                 )
+            ttiers = _plain_table_tiers(sub_html, trail)
+            if ttiers:
+                trail.llm_reasoning = f"Found prices in a fee table on sub-page {url}."
+                trail.notes.append(f"table_subpage: {len(ttiers)} tiers from {url}")
+                return ExploreResult(
+                    field="pricing", value=ttiers, method=f"subpage_table:{urlparse(url).path}",
+                    audit_trail=trail, found=True,
+                )
             # No text prices — collect fee images
             if sub_html:
-                images = find_money_images(sub_html, url, limit=6)
+                images = find_money_images(sub_html, url, limit=6, trail=trail)
                 if images:
                     try:
                         from vision import extract_pricing_from_images
                         import time as _t
                         _t0 = _t.time()
-                        vtiers = extract_pricing_from_images(images, stop_at=_source_deadline)
+                        vtiers = usable_vision_tiers(extract_pricing_from_images(images, stop_at=_source_deadline), trail)
                         _note_vision_time(_t.time() - _t0)
                         trail.images_ocred += len(images)
                         if vtiers:
@@ -707,8 +838,12 @@ def explore_for_pricing(
     # page (typical when a society lists 3rd-party events — e.g. BOPA
     # listing a Royal Marsden School module), follow it. Same identity
     # gate applies on the external page text.
-    if page_html and identity_tokens:
-        externals = find_external_event_links(page_html, base_url, limit=3)
+    organiser = (row.get("organiser_url") or "").strip()
+    has_organiser = bool(organiser) and organiser.split("#")[0].rstrip("/") != (row.get("source_url") or base_url).split("#")[0].rstrip("/")
+    if identity_tokens and (page_html or has_organiser):
+        externals = find_external_event_links(page_html or "", base_url, limit=3)
+        if has_organiser and organiser not in [u for u, _ in externals]:
+            externals.insert(0, (organiser, "organiser_url"))
         for ext_url, link_text in externals:
             if ext_url in (trail.subpages_fetched):
                 continue
@@ -738,13 +873,13 @@ def explore_for_pricing(
                 )
             # External page might also have fee images
             if sub_html:
-                images = find_money_images(sub_html, ext_url, limit=4)
+                images = find_money_images(sub_html, ext_url, limit=4, trail=trail)
                 if images:
                     try:
                         from vision import extract_pricing_from_images
                         import time as _t
                         _t0 = _t.time()
-                        vtiers = extract_pricing_from_images(images, stop_at=_source_deadline)
+                        vtiers = usable_vision_tiers(extract_pricing_from_images(images, stop_at=_source_deadline), trail)
                         _note_vision_time(_t.time() - _t0)
                         trail.images_ocred += len(images)
                         if vtiers:
@@ -762,6 +897,20 @@ def explore_for_pricing(
                             )
                     except Exception as e:
                         trail.notes.append(f"external_vision_failed: {e}")
+            # Two-hop: the external congress site keeps fees on its own
+            # "Registration" sub-page. Same-host, max 2, shared fetch caps.
+            if sub_html:
+                hop = _follow_registration_subpages(sub_html, ext_url, budget, trail, limit=2)
+                if hop:
+                    htiers, hop_url, hop_method = hop
+                    trail.llm_reasoning = (
+                        f"Followed external link {link_text!r} to {ext_url}, then its "
+                        f"registration sub-page {hop_url}. Found prices via {hop_method}.")
+                    return ExploreResult(
+                        field="pricing", value=htiers,
+                        method=f"external_subpage_{hop_method}:{urlparse(hop_url).netloc}",
+                        audit_trail=trail, found=True, external_url=ext_url,
+                    )
 
     # 4. LLM with full context: ask if anywhere we've collected mentions money
     title = row.get("conference_name") or ""

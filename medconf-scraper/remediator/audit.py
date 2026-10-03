@@ -374,6 +374,15 @@ def check_abstract_status(row, page_text, page_html, source) -> FieldVerdict:
                   tl) is not None
     )
 
+    # Call-for-papers / poster / prize programmes that never say "abstract"
+    # (Mission P6: Advance HE "Call for Papers" with the deadline in a PDF).
+    from extractors.abstract_classifier import has_submission_programme
+    if not ad and not an and has_submission_programme(page_text or ""):
+        return FieldVerdict("abstract_status", "MISSING",
+                            f"open={ao} deadline={ad}",
+                            page_evidence="Page has a call for papers / submission programme",
+                            reason="MISSING — page has a call for papers / submission programme but no deadline stored")
+
     if not has_abstract_content:
         # Genuinely no abstracts advertised
         if ao is True:
@@ -460,6 +469,23 @@ def check_pricing(row, page_text, page_html, source, pricing_tiers,
             )
     except Exception as e:
         logger.debug(f"audit: plain-table probe failed: {e}")
+
+    # Second look #1b — fee table that is an IMAGE. A fee/registration
+    # heading followed by a substantial <img> (inline data: URI, >=300px,
+    # or alt/src naming fee|price|rate|regist) with no currency text on the
+    # page (that case returned above). Detection only: the audit never runs
+    # vision; the remediator's explorer does.
+    try:
+        from remediator.image_scan import fee_image_signal
+        img = fee_image_signal(page_html or "", row.get("source_url") or "")
+        if img is not None:
+            return FieldVerdict(
+                "pricing_tiers", "MISSING", "0 tiers",
+                page_evidence=f"heading {img.heading!r} followed by image {img.label()}",
+                reason="Fee table appears to be an image (needs vision)",
+            )
+    except Exception as e:
+        logger.debug(f"audit: fee-image probe failed: {e}")
 
     # Second look #2 — Playwright hydration probe for SPA sources.
     # Loads /registration, /fees, /rates via a real browser and checks

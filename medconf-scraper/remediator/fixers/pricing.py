@@ -16,8 +16,13 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
+# "complimentary" alone is NOT enough: SCCM's shared calendar page says
+# "Registered attendees receive complimentary access to the webcast" about one
+# unrelated event, which marked 67 paid events free (2026-10-04).
 _FREE_RE = re.compile(
-    r"\b(?:free\s+(?:of\s+charge|to\s+attend|admission)|complimentary|no\s+(?:cost|fee)\s+to\s+attend)\b",
+    r"\b(?:free\s+(?:of\s+charge|to\s+attend|admission)|"
+    r"complimentary\s+(?:registration|admission|entry|attendance|tickets?)|"
+    r"no\s+(?:cost|fee)\s+to\s+attend)\b",
     re.I,
 )
 
@@ -168,7 +173,7 @@ def fix_pricing(
     # explorer's cached/circuit-broken fetcher, the money-proximity image
     # filter, and the process-wide vision budgets.
     from remediator.explorer import (
-        fetch_page_text_and_html, find_money_images, source_time_up,
+        fetch_page_text_and_html, find_money_images, source_time_up, usable_vision_tiers,
         get_source_deadline,
         _note_vision_time,
     )
@@ -192,7 +197,7 @@ def fix_pricing(
             import time as _t
             from vision import extract_pricing_from_images
             _t0 = _t.time()
-            tiers = extract_pricing_from_images(image_urls, stop_at=get_source_deadline())
+            tiers = usable_vision_tiers(extract_pricing_from_images(image_urls, stop_at=get_source_deadline()))
             _note_vision_time(_t.time() - _t0)
             if tiers:
                 return tiers, "vision_llm"
