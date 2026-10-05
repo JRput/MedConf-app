@@ -204,4 +204,6 @@ Gate per phase: build in a worktree → Playwright screenshots at 390 / 768 / 14
 | P9 | PDF/DOCX fee tables in the explorer | `sonnet` | ✅ `acdf905` — bucket D was mostly a false positive (SCCM's 66 rows all linked an endorsement-application PDF; excluded); real fee PDFs (BSH) parse |
 | P10 | Harness `--coverage` pre-registration gate reusing the audit detectors | `sonnet` | ✅ `50814f4` + `f8415be` |
 | P11 | Remediator row rotation (`remediation_attempted_at`, never-attempted first) | `sonnet` | ✅ `22954c6` — SCCM backlog now drains ~8 rows/night; IFAD reached but still no tiers (JS-rendered fee section → P12) |
-| P12 | External-site fees: only 1/50 bucket-C rows gained tiers after remediation; diagnose link picking / identity gate / fee formats / budget, fix, recount | `sonnet` | 🔄 |
+| P12 | External-site fees: only 1/50 bucket-C rows gained tiers; diagnose + fix (also ESSIC 2184 → essicmeeting.eu, IFAD 2574 JS-rendered fee section) | `sonnet` | 🔄 |
+| P13 | ACEP: API gives state only — location fallback from event page/microsite (owner: 9/39 city, 1/39 venue) | `sonnet` | 🔄 |
+| P14 | Evidence-based LOCATION_ON_PAGE check in coverage_checks + audit (page names venue/city but none stored) — PLAYBOOK row 9 | `sonnet` | 🔄 |
