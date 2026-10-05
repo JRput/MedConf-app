@@ -203,5 +203,5 @@ Gate per phase: build in a worktree → Playwright screenshots at 390 / 768 / 14
 | P8 | Why the 35 didn't heal → fix + re-run | `sonnet` | ✅ `7d83d4d` — 19/30 now carry a deadline/note (11 deadlines, 5 closed, 3 placeholder); 11 were survey false positives (RCEM nav item). 22 tests |
 | P9 | PDF/DOCX fee tables in the explorer | `sonnet` | ✅ `acdf905` — bucket D was mostly a false positive (SCCM's 66 rows all linked an endorsement-application PDF; excluded); real fee PDFs (BSH) parse |
 | P10 | Harness `--coverage` pre-registration gate reusing the audit detectors | `sonnet` | ✅ `50814f4` + `f8415be` |
-| P11 | Remediator row rotation: `remediation_attempted_at` column + NULLS-FIRST ordering so the 600 s budget moves through the backlog (SCCM: 55/76 rows never attempted; IFAD 2574 never reached) | `sonnet` | 🔄 |
+| P11 | Remediator row rotation (`remediation_attempted_at`, never-attempted first) | `sonnet` | ✅ `22954c6` — SCCM backlog now drains ~8 rows/night; IFAD reached but still no tiers (JS-rendered fee section → P12) |
 | P12 | External-site fees: only 1/50 bucket-C rows gained tiers after remediation; diagnose link picking / identity gate / fee formats / budget, fix, recount | `sonnet` | 🔄 |
