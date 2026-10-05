@@ -395,8 +395,13 @@ class RCPSGExtractor(BaseExtractor):
                 if (feesDiv) out.push((feesDiv.textContent || '').replace(/\s+/g, ' ').trim());
                 const regBlock = document.querySelector('.course-register-block p');
                 if (regBlock) out.push((regBlock.textContent || '').replace(/\s+/g, ' ').trim());
-                return out;
-            }""") or []
+                // On-demand recordings / digital modules: no fees tab or register
+                // block — the price sits in a "Purchase now" image-text-CTA panel.
+                const purchase = Array.from(document.querySelectorAll('.itc-info'))
+                    .map(e => (e.textContent || '').replace(/\s+/g, ' ').trim())
+                    .filter(t => /purchase now/i.test(t) && t.includes('\u00a3'));
+                return {blocks: out, purchase: purchase};
+            }""") or {}
         except Exception as e:
             logger.warning(f"RCPSG: pricing extraction failed: {e}")
             return []
@@ -404,11 +409,37 @@ class RCPSGExtractor(BaseExtractor):
         # Prefer the fees tab (richer) over the register-block summary; only
         # fall back to the second block if the first yielded nothing.
         tiers: List[Dict[str, Any]] = []
-        for text in blocks:
+        for text in blocks.get("blocks", []):
             tiers = self._parse_fee_pairs(text)
             if tiers:
-                break
+                return tiers
+        for text in blocks.get("purchase", []):
+            tiers = self._parse_purchase_block(text)
+            if tiers:
+                return tiers
         return tiers
+
+    # "All of this content for just £120"  (single price; member discounts are
+    # applied at checkout and not quantified on the page, so none are invented)
+    # "All of this content comes for just £60 for members (£110 for non members)"
+    _PURCHASE_AMT = r"£\s*([0-9]+(?:,[0-9]{3})*(?:\.[0-9]{1,2})?)"
+    _PURCHASE_MEMBER_RE = re.compile(
+        _PURCHASE_AMT + r"\s*for\s+(?:College\s+)?members?\b[^£]{0,40}?" + _PURCHASE_AMT +
+        r"\s*for\s+non[- ]?members?", re.I)
+    _PURCHASE_SINGLE_RE = re.compile(r"\bfor\s+just\s+" + _PURCHASE_AMT, re.I)
+
+    @classmethod
+    def _parse_purchase_block(cls, text: str) -> List[Dict[str, Any]]:
+        def tier(label: str, amt: str) -> Dict[str, Any]:
+            return {"tier_label": label, "price_gbp": float(amt.replace(",", "")),
+                    "is_early_bird": False, "early_bird_deadline": None}
+        m = cls._PURCHASE_MEMBER_RE.search(text or "")
+        if m:
+            return [tier("Member", m.group(1)), tier("Non-member", m.group(2))]
+        m = cls._PURCHASE_SINGLE_RE.search(text or "")
+        if m:
+            return [tier("Standard", m.group(1))]
+        return []
 
     # Prose sentences ("The Diploma fee is £4,545...") produce grammatically
     # plausible but useless "labels" like "The Diploma Fee Is" or "You Will
