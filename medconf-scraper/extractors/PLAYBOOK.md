@@ -434,4 +434,5 @@ Rules that follow from the table:
 - `pricing_tiers = []` is only acceptable when the page, its images, its same-site registration link AND its external event site (one hop + sub-pages) have been checked. Say which in `concerns`.
 - Never leave `end_date` to the merge step's fallback if the listing or page shows a range.
 - Do not call the abstract classifier yourself unless you have better page text than the merge step — it runs for you.
+- Run with `--coverage` before sign-off: `harness.py <mod> <Cls> <build.json> --details N --coverage` checks patterns 1-8 on real pages before the source is registered (exit 2 = a PRICE_*/SUBMISSION_* warning fired; resolve it or explain it in `concerns`).
 - Run the harness twice (normal + `--force-fallback`) AND the audit; attach the audit summary to the build JSON.

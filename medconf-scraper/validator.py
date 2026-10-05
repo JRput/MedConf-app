@@ -8,6 +8,12 @@ from typing import Dict, Any, List
 REQUIRED_FIELDS = ["conference_name", "source_url"]
 
 
+# Call-to-action text that leaks into tier labels from booking buttons.
+CTA_PREFIX_RE = re.compile(
+    r"^(?:register(?:\s+and\s+save)?|book\s+now|book\s+here|buy\s+now|sign\s+up)\b[\s:·-]*",
+    re.I)
+
+
 def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
     """
     Validates a single conference record.
@@ -64,7 +70,7 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
         # Strip call-to-action text that leaks in from booking buttons when a
         # fee table is read off an external registration page ("Register and
         # save Members", "Book now Member" — BSH→RCPSG, 2026-10-04).
-        lbl = re.sub(r"^(?:register(?:\s+and\s+save)?|book\s+now|book\s+here|buy\s+now|sign\s+up)\b[\s:·-]*", "", lbl, flags=re.I).strip()
+        lbl = CTA_PREFIX_RE.sub("", lbl).strip()
         return lbl
 
     for t in tiers:

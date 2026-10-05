@@ -200,6 +200,12 @@ def check_start_date(row, page_text, page_html, source) -> FieldVerdict:
                         reason="Page contains no obvious date")
 
 
+DATE_RANGE_RE = re.compile(
+    r"\d{1,2}(?:st|nd|rd|th)?\s*(?:[-–]|to)\s*\d{1,2}(?:st|nd|rd|th)?\s+"
+    r"(?:January|February|March|April|May|June|July|August|September|October|November|December)"
+    r"\s+\d{4}", re.I)
+
+
 def check_end_date(row, page_text, page_html, source) -> FieldVerdict:
     v = row.get("end_date")
     start = row.get("start_date")
@@ -209,12 +215,7 @@ def check_end_date(row, page_text, page_html, source) -> FieldVerdict:
         return FieldVerdict("end_date", "NOT_APPLICABLE",
                             reason="No start_date so end_date irrelevant")
     # Check page for a date range
-    m = re.search(
-        r"\d{1,2}(?:st|nd|rd|th)?\s*(?:[-–]|to)\s*\d{1,2}(?:st|nd|rd|th)?\s+"
-        r"(?:January|February|March|April|May|June|July|August|September|October|November|December)"
-        r"\s+\d{4}",
-        page_text or "", re.I,
-    )
+    m = DATE_RANGE_RE.search(page_text or "")
     if m:
         return FieldVerdict("end_date", "MISSING", None,
                             page_evidence=m.group(0),
@@ -421,31 +422,39 @@ def check_abstract_status(row, page_text, page_html, source) -> FieldVerdict:
                         f"open={ao} deadline={ad} note={an}")
 
 
+FREE_EVENT_RE = re.compile(r"(?:free\s+(?:to\s+attend|of\s+charge|event|admission)|"
+                           r"complimentary|no\s+(?:cost|charge|fee))")
+
+
+def price_text_signal(page_text: str) -> bool:
+    """True when the page shows currency amounts that look like fees (not
+    just a no-show/cancellation penalty). Pure; shared with the new-source
+    coverage checks."""
+    if not re.search(r"[£$€]\s*\d+", page_text or ""):
+        return False
+    tl = (page_text or "").lower()
+    penalty_context = re.search(
+        r"(?:do\s+not\s+attend|charged\s+a\s+fee\s+of|"
+        r"cancellation\s+fee|no-show)", tl)
+    return bool(not penalty_context or re.search(
+        r"[£$€]\s*\d+\s+(?:member|non|early|standard|full|conference|registration)", tl))
+
+
 def check_pricing(row, page_text, page_html, source, pricing_tiers,
                    cache=None) -> FieldVerdict:
     n = len(pricing_tiers or [])
     tl = (page_text or "").lower()
-    is_free = re.search(r"(?:free\s+(?:to\s+attend|of\s+charge|event|admission)|"
-                        r"complimentary|no\s+(?:cost|charge|fee))", tl)
-    has_prices = bool(re.search(r"[£$€]\s*\d+", page_text or ""))
+    is_free = FREE_EVENT_RE.search(tl)
 
     if n > 0:
         return FieldVerdict("pricing_tiers", "OK", f"{n} tiers")
     if is_free:
         return FieldVerdict("pricing_tiers", "GENUINELY_ABSENT", "0 tiers",
                             reason="Page indicates free event")
-    if has_prices:
-        # Filter out no-show penalties
-        penalty_context = re.search(
-            r"(?:do\s+not\s+attend|charged\s+a\s+fee\s+of|"
-            r"cancellation\s+fee|no-show)",
-            tl,
-        )
-        if not penalty_context or re.search(r"[£$€]\s*\d+\s+(?:member|non|early|standard|full|conference|registration)",
-                                             tl):
-            return FieldVerdict("pricing_tiers", "MISSING", "0 tiers",
-                                page_evidence="Page has £ amounts",
-                                reason="Prices on page but no tiers in DB")
+    if price_text_signal(page_text):
+        return FieldVerdict("pricing_tiers", "MISSING", "0 tiers",
+                            page_evidence="Page has £ amounts",
+                            reason="Prices on page but no tiers in DB")
 
     # Second look #1 — plain-number pricing tables in the raw HTML.
     # WordPress-style pages render fees as <table> rows under a
