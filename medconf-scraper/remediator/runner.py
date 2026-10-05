@@ -24,7 +24,7 @@ from .validators import validate
 from .report import write_report
 from .explorer import (
     EXPLORERS, set_source_deadline, get_source_deadline, source_time_up,
-    reset_fetch_state, fetch_stats,
+    reset_fetch_state, fetch_stats, close_render_browser,
 )
 from .learned_patterns import record_success, get_promoted_patterns
 
@@ -208,7 +208,11 @@ def remediate_source(source_id: int) -> dict:
             page_text = cache.get(url) if url else None
             page_html = cache.get_html(url) if url else None
             unfixed = []
+            row = {**row, "_detail_is_multipage": bool(source.get("detail_is_multipage"))}
+            done_fields: set = set()
             for field in gaps:
+                if field in done_fields:
+                    continue
                 fixer = FIXERS.get(field)
                 value: Any = None
                 method: Optional[str] = None
@@ -278,6 +282,21 @@ def remediate_source(source_id: int) -> dict:
                             "conference_name": (row.get("conference_name") or "")[:60],
                             **trail_dict,
                         })
+                        # Side finding from a nav page (abstract deadline on
+                        # an "Abstracts" page found while hunting for fees).
+                        _ab = (getattr(result, "extras", None) or {}).get("abstract_status")
+                        if _ab and field == "pricing" and "abstract_status" in gaps \
+                                and validate("abstract_status", _ab):
+                            if _patch_row(sb, row["id"], "abstract_status", _ab):
+                                done_fields.add("abstract_status")
+                                patches_applied.append({
+                                    "conference_id": row["id"],
+                                    "conference_name": (row.get("conference_name") or "")[:60],
+                                    "field": "abstract_status",
+                                    "value_before": "(complex)",
+                                    "value_after": str(_ab)[:200],
+                                    "method": "explorer:nav_abstract",
+                                })
                         if result.found and result.value is not None:
                             value = result.value
                             method = f"explorer:{result.method}"
@@ -363,6 +382,7 @@ def remediate_source(source_id: int) -> dict:
                 })
 
     set_source_deadline(None)
+    close_render_browser()
     duration = time.time() - started
     oldest_unattempted_days = None
     if skipped_rows:

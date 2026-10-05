@@ -66,9 +66,13 @@ class ExploreResult:
     found: bool
     # Tier 3: external page the value was found on (organiser/booking URL patch)
     external_url: Optional[str] = None
+    # Side findings the runner may patch (e.g. {"abstract_status": {...}} found
+    # on a nav page while hunting for fees).
+    extras: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {
+            "extras": self.extras,
             "field": self.field,
             "value": self.value,
             "method": self.method,
@@ -494,6 +498,7 @@ def source_time_up() -> bool:
 def reset_fetch_state() -> None:
     FETCH_CACHE.clear()
     EVENT_MATCH_CACHE.clear()
+    RENDER_CACHE.clear()
     _host_slow_hits.clear()
     for k in fetch_stats:
         fetch_stats[k] = 0 if k != "network_seconds" else 0.0
@@ -654,10 +659,21 @@ def _flat_text_price_sweep(text: str, max_tiers: int = 40) -> list:
 
 
 def _external_page_tiers(text: Optional[str], html: Optional[str],
-                         trail: Optional["AuditTrail"] = None) -> tuple[list, str]:
-    """Fee tiers from a fetched external/registration page: line sweep, then
-    plain fee tables, then the flat-text sweep. Returns (tiers, method)."""
+                         trail: Optional["AuditTrail"] = None,
+                         lines: Optional[str] = None) -> tuple[list, str]:
+    """Fee tiers from a fetched external/registration page: matrix fee grid,
+    line sweep, plain fee tables, then the flat-text sweep. `lines` is the
+    newline-structured text (rendered innerText) when available.
+    Returns (tiers, method)."""
     from .fixers.pricing import _text_pricing_sweep
+    from .fee_matrix import parse_fee_matrix, html_to_lines
+    try:
+        grid = parse_fee_matrix(lines or (html_to_lines(html) if html else ""))
+    except Exception as e:  # never let a parser bug sink the page
+        logger.debug(f"explorer: fee matrix parse failed: {e}")
+        grid = []
+    if grid:
+        return grid, "matrix"
     t = _text_pricing_sweep(text or "")
     flat = _flat_text_price_sweep(text or "")
     # The inline sweep can glue several prices into one junk label; the
@@ -860,6 +876,240 @@ def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudg
     return None
 
 
+# --- Nav-page follow (microsites whose fees sit under "General Info") --------
+NAV_MAX_PAGES = 3
+NAV_MAX_LINKS = 8
+NAV_FETCH_ALLOWANCE = int(os.environ.get("REMEDIATOR_EXPLORE_NAV_FETCHES", "5"))
+NAV_RENDER_WAIT_MS = int(os.environ.get("REMEDIATOR_NAV_RENDER_WAIT_MS", "4000"))
+_NAV_SKIP_RE = re.compile(
+    r"\b(?:privacy|contact|home|news|sponsor\w*|exhibit\w*|gallery|cookies?|terms|"
+    r"log\s?in|sign\s?in|member\s+area|newsletter|press|media)\b", re.I)
+# (rank, regex) - lower rank first. Fees often hide under General/Practical Info.
+_NAV_FEE_RANKS = (
+    (0, re.compile(r"\b(?:registration|register|fees?|pricing|prices?|tickets?)\b", re.I)),
+    (1, re.compile(r"\b(?:general\s+info(?:rmation)?|practical(?:\s+info(?:rmation)?)?)\b", re.I)),
+    (2, re.compile(r"\b(?:info(?:rmation)?|participants?|delegates?|attend\w*|venue)\b", re.I)),
+)
+_NAV_ABSTRACT_RE = re.compile(
+    r"\b(?:abstracts?|call\s+for\s+(?:papers|abstracts|posters)|submissions?|posters?)\b", re.I)
+
+RENDER_CACHE: dict = {}
+_render_browser = None
+
+
+def close_render_browser() -> None:
+    """Shut the lazily-started Playwright used for JS-rendered nav sites."""
+    global _render_browser
+    if _render_browser is not None:
+        try:
+            _render_browser.close()
+        except Exception:
+            pass
+        _render_browser = None
+
+
+def render_page(url: str) -> tuple[Optional[str], Optional[str], list]:
+    """Rendered-DOM fetch for JS sites (Wix etc.): (innerText, outer HTML,
+    [(abs_url, text, in_nav)]). Cached per run. (None, None, []) on failure or
+    once the source deadline has passed."""
+    global _render_browser
+    if url in RENDER_CACHE:
+        return RENDER_CACHE[url]
+    if source_time_up():
+        return None, None, []
+    result: tuple = (None, None, [])
+    try:
+        if _render_browser is None:
+            from browser import BrowserController
+            _render_browser = BrowserController()
+            _render_browser.launch()
+            import atexit
+            atexit.register(close_render_browser)
+        b = _render_browser
+        b.navigate(url)
+        b.page.wait_for_timeout(NAV_RENDER_WAIT_MS)
+        text = b.page.evaluate("() => document.body.innerText || ''") or ""
+        html = b.page.content()
+        raw = b.page.evaluate(
+            """() => [...document.querySelectorAll('a[href]')].map(a => [a.href,
+                 (a.innerText || a.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 80),
+                 !!a.closest('nav, header, [role=navigation]')])""") or []
+        links = [(h, t, bool(n)) for h, t, n in raw]
+        result = (text[:200000], html, links)
+    except Exception as e:
+        logger.warning(f"explorer: rendered fetch failed for {url}: {type(e).__name__}: {e}")
+    RENDER_CACHE[url] = result
+    return result
+
+
+def static_nav_links(html: str, base_url: str) -> list:
+    """Anchors from raw HTML as [(abs_url, text, in_nav)] (nav/header anchors flagged)."""
+    out: list = []
+    if not html:
+        return out
+    nav_spans = [(m.start(), m.end()) for m in re.finditer(
+        r"<(nav|header)\b.*?</\1\s*>", html, re.I | re.S)]
+    for m in _ANCHOR_RE.finditer(html):
+        href = m.group(1).strip()
+        if not href or href.startswith(("#", "javascript:", "mailto:", "tel:")):
+            continue
+        text = re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", m.group(2)))).strip()
+        in_nav = any(a <= m.start() < b for a, b in nav_spans)
+        out.append((urljoin(base_url, href), text[:80], in_nav))
+    return out
+
+
+def prioritise_nav_links(links: list, base_url: str, *, need_abstract: bool = True,
+                         max_pages: int = NAV_MAX_PAGES,
+                         max_links: int = NAV_MAX_LINKS) -> list:
+    """Top-level nav links worth fetching: [(url, text, kind)] with kind
+    "fees" or "abstract". Same host only, at most `max_links` considered
+    (nav-contained first), privacy/contact/home/news/sponsor/gallery skipped.
+    Fee-ish pages (registration|fees|general info|practical|information|
+    participants|attend|venue) come before abstract/call-for-papers pages;
+    one abstract slot is reserved so a long fee list cannot crowd it out."""
+    host = urlparse(base_url).netloc.lower().removeprefix("www.")
+    self_url = base_url.split("#")[0].split("?")[0].rstrip("/")
+    nav = [l for l in links if l[2]] or list(links)
+    seen: set = set()
+    cands: list = []
+    for url, text, _in_nav in nav:
+        pu = urlparse(url)
+        if pu.scheme not in ("http", "https") or pu.netloc.lower().removeprefix("www.") != host:
+            continue
+        clean = url.split("#")[0].split("?")[0]
+        if clean.rstrip("/") == self_url or clean in seen:
+            continue
+        seen.add(clean)
+        if not text and not pu.path.strip("/"):
+            continue
+        cands.append((clean, text))
+        if len(cands) >= max_links:
+            break
+    fees: list = []
+    abstracts: list = []
+    for url, text in cands:
+        path = urlparse(url).path.replace("-", " ").replace("_", " ")
+        if not urlparse(url).path.strip("/") or _NAV_SKIP_RE.search(text) or _NAV_SKIP_RE.search(path):
+            continue
+        rank = next((r for r, rx in _NAV_FEE_RANKS if rx.search(text)), None)
+        if rank is not None:
+            fees.append((rank, url, text))
+        elif _NAV_ABSTRACT_RE.search(text):
+            if need_abstract:
+                abstracts.append((url, text))
+        else:
+            rank = next((r for r, rx in _NAV_FEE_RANKS if rx.search(path)), None)
+            if rank is not None:
+                fees.append((rank, url, text))
+            elif need_abstract and _NAV_ABSTRACT_RE.search(path):
+                abstracts.append((url, text))
+    fees.sort(key=lambda x: x[0])  # stable
+    chosen = [(u, t, "fees") for _, u, t in fees[:max_pages - 1 if abstracts else max_pages]]
+    chosen += [(u, t, "abstract") for u, t in abstracts[:max(1, max_pages - len(chosen))]]
+    for _, u, t in fees[len(chosen):]:
+        if len(chosen) >= max_pages:
+            break
+        if all(u != c[0] for c in chosen):
+            chosen.append((u, t, "fees"))
+    return chosen[:max_pages]
+
+
+def _nav_abstract_status(row: dict, text: str) -> Optional[dict]:
+    """classify_submission on a nav page -> abstract_status patch dict (only
+    when it finds a deadline or an explicit programme state)."""
+    if not text or not re.search(r"abstract|poster|call for papers", text, re.I):
+        return None
+    from datetime import date
+    from extractors.abstract_classifier import classify_submission
+    start = None
+    try:
+        start = date.fromisoformat(str(row.get("start_date"))[:10])
+    except (ValueError, TypeError):
+        pass
+    is_open, deadline, note = classify_submission(text, date.today(), start)
+    if deadline:
+        return {"abstract_open": bool(is_open), "abstract_deadline": deadline.isoformat(),
+                "abstract_deadline_note": None}
+    return None
+
+
+def _follow_nav_pages(row: dict, html: str, base_url: str, trail: "AuditTrail",
+                      extras: dict, llm_call=None):
+    """Microsite fallback: no registration-named link, so follow up to 3 of
+    the site's top-level nav pages (General Info / Practical / Abstracts ...).
+    Runs every fee detector on each page and the abstract classifier on
+    abstract pages (result lands in extras["abstract_status"]).
+    Returns (tiers, url, method) or None. Own small fetch allowance."""
+    if not html or any(str(n).startswith("nav_page_followed:") for n in trail.notes):
+        return None
+    budget = ExploreBudget(max_fetches=NAV_FETCH_ALLOWANCE)
+    need_abs = not row.get("abstract_deadline")
+    rendered = False
+    picks = prioritise_nav_links(static_nav_links(html, base_url), base_url, need_abstract=need_abs)
+    if not picks and not budget.exhausted():
+        budget.fetches += 1
+        r_text, r_html, r_links = render_page(base_url)
+        rendered = bool(r_links)
+        picks = prioritise_nav_links(r_links, base_url, need_abstract=need_abs)
+        trail.notes.append(f"nav_links_rendered: {len(r_links)} links, {len(picks)} picked")
+    found = None
+    for url, text, kind in picks:
+        if budget.exhausted():
+            trail.notes.append("explore_budget_exhausted: stopped nav-page walk")
+            break
+        if kind == "fees" and found:
+            continue
+        if kind == "abstract" and "abstract_status" in extras:
+            continue
+        budget.fetches += 1
+        _t = None
+        if rendered:
+            p_lines, p_html, _l = render_page(url)
+        else:
+            _t, p_html = fetch_page_text_and_html(url)
+            p_lines = None
+        flat = re.sub(r"\s+", " ", p_lines) if p_lines else (_t or "")
+        if not (flat or p_html):
+            continue
+        trail.subpages_fetched.append(url)
+        trail.total_text_chars += len(flat or "")
+        trail.notes.append(f"nav_page_followed: {url} ({text})")
+        if need_abs and "abstract_status" not in extras:
+            ab = _nav_abstract_status(row, flat or "")
+            if ab:
+                extras["abstract_status"] = ab
+                trail.notes.append(
+                    f"nav_abstract: deadline {ab['abstract_deadline']} open={ab['abstract_open']} from {url}")
+        if kind == "fees" and not found:
+            tiers, how = _external_page_tiers(flat, p_html, trail, lines=p_lines)
+            if tiers:
+                trail.notes.append(f"nav_{how}: {len(tiers)} tiers from {url}")
+                found = (tiers, url, f"nav_{how}")
+                continue
+            _pdf = _follow_fee_document(p_html, url, budget, trail)
+            if _pdf:
+                found = _pdf
+                continue
+            if p_html and vision_time_left() and not source_time_up():
+                images = find_money_images(p_html, url, limit=4, trail=trail)
+                if images:
+                    try:
+                        from vision import extract_pricing_from_images
+                        import time as _t2
+                        _t0 = _t2.time()
+                        vt = usable_vision_tiers(
+                            extract_pricing_from_images(images, stop_at=get_source_deadline()), trail)
+                        _note_vision_time(_t2.time() - _t0)
+                        trail.images_ocred += len(images)
+                        if vt:
+                            trail.notes.append(f"nav_vision: {len(vt)} tiers from {url}")
+                            found = (vt, url, "nav_vision")
+                    except Exception as e:
+                        trail.notes.append(f"nav_vision_failed: {e}")
+    return found
+
+
 def explore_for_pricing(
     *,
     row: dict,
@@ -868,7 +1118,24 @@ def explore_for_pricing(
     base_url: str,
     llm_call: Callable[[str], Optional[str]],
 ) -> ExploreResult:
-    """Pricing-specific exploration. Returns ExploreResult."""
+    """Pricing-specific exploration. Returns ExploreResult; side findings
+    (abstract status from a nav page) ride on `result.extras`."""
+    extras: dict = {}
+    res = _explore_for_pricing(row=row, page_text=page_text, page_html=page_html,
+                               base_url=base_url, llm_call=llm_call, extras=extras)
+    res.extras = extras
+    return res
+
+
+def _explore_for_pricing(
+    *,
+    row: dict,
+    page_text: str,
+    page_html: Optional[str],
+    base_url: str,
+    llm_call: Callable[[str], Optional[str]],
+    extras: dict,
+) -> ExploreResult:
     trail = AuditTrail()
     trail.total_text_chars = len(page_text or "")
     accumulated_text = page_text or ""
@@ -1097,6 +1364,19 @@ def explore_for_pricing(
                     except Exception as e:
                         trail.notes.append(f"vision_failed_on_{url}: {e}")
 
+    # 2b. Own-site microsite (source flagged detail_is_multipage): same nav
+    # fallback as for external sites, only when the walk above found nothing.
+    if page_html and row.get("_detail_is_multipage") and not find_registration_links(page_html, base_url, limit=1):
+        nav = _follow_nav_pages(row, page_html, base_url, trail, extras, llm_call)
+        if nav:
+            ntiers, nav_url, nav_method = nav
+            trail.llm_reasoning = f"Followed nav page {nav_url} of the event microsite. Found prices via {nav_method}."
+            return ExploreResult(
+                field="pricing", value=ntiers,
+                method=(nav_method if nav_method.startswith("pdf:") else f"subpage_{nav_method}:{urlparse(nav_url).path}"),
+                audit_trail=trail, found=True,
+            )
+
     # Note: We deliberately do NOT run vision LLM on the main event page's
     # images here. Doing so picks up unrelated site-wide promo banners (e.g.
     # an org's flagship-conference reg-fee.jpeg appearing as a "register now"
@@ -1198,6 +1478,21 @@ def explore_for_pricing(
                         field="pricing", value=htiers,
                         method=(hop_method if hop_method.startswith("pdf:")
                                 else f"external_subpage_{hop_method}:{urlparse(hop_url).netloc}"),
+                        audit_trail=trail, found=True, external_url=ext_url,
+                    )
+            # No registration-named link anywhere: fees often sit under a nav
+            # page such as "General Info" (Wix congress microsites).
+            if sub_html:
+                nav = _follow_nav_pages(row, sub_html, ext_url, trail, extras, llm_call)
+                if nav:
+                    ntiers, nav_url, nav_method = nav
+                    trail.llm_reasoning = (
+                        f"Followed external link {link_text!r} to {ext_url}, then nav page "
+                        f"{nav_url}. Found prices via {nav_method}.")
+                    return ExploreResult(
+                        field="pricing", value=ntiers,
+                        method=(nav_method if nav_method.startswith("pdf:")
+                                else f"external_{nav_method}:{urlparse(nav_url).netloc}"),
                         audit_trail=trail, found=True, external_url=ext_url,
                     )
 
