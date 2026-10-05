@@ -18,8 +18,17 @@ Leadership & Advocacy) and third-party courses/webinars ACEP lists for
 chapters and partners. Listing = API (`list_shells_override`). Detail pages
 (`/master-calendar/<slug>`) are server-rendered with stable classes:
 mcEvent-host, mcEvent-date, mcEvent-time, mcEvent-location, mcEvent-cme-hours,
-mcEvent-web, mcEvent-description. NO fees appear anywhere on ACEP's pages
-(registration happens on the organiser's own site), so pricing_tiers is [].
+mcEvent-web, mcEvent-description. Fees are NOT on the master-calendar pages
+themselves. Third-party events (chapters, ESEM...) publish them on the
+organiser's own site (left to the nightly explorer's two-hop follow). For
+ACEP-run events the API `Website` is an internal /link/<guid>.aspx redirect to
+a microsite (acep.org/sa, /accelerate, /lac, .../Immersive-Learning/<x>); we
+resolve it, follow the "Register Today" link to booking_url, and parse fees
+from the microsite: "Cost: $240" lines and the div-based `crTable`/`crRow`
+pricing pages (ACEP26 /sa/registration/conference-pricing, ACEP Accelerate
+/accelerate/pricing/*-pricing). Only used when the page is demonstrably for
+the same edition (ACEPnn token / start year), so ACEP27 never inherits the
+ACEP26 price list.
 
 Quirks:
 - EventEndDate carries a bogus "Z" suffix; only the date part is used.
@@ -108,6 +117,96 @@ def _organiser_url(website: Optional[str]) -> Optional[str]:
     if re.match(r"(?i)^(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)+(/\S*)?$", w):
         return "https://" + w
     return None  # free text such as "OHIO CHAPTER ACEP"
+
+
+_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; MedConf/1.0)"}
+_ACEP_HOST = re.compile(r"(?i)^https?://(www\.)?acep\.org(/|$)")
+
+
+def _txt(frag: str) -> str:
+    return re.sub(r"\s+", " ", html_lib.unescape(re.sub(r"<[^>]+>", " ", frag or ""))).strip()
+
+
+def _get(url: str, timeout: float = 25.0):
+    """(final_url, html) following redirects; (url, '') on failure."""
+    try:
+        import httpx
+        with httpx.Client(timeout=timeout, follow_redirects=True, headers=_HEADERS) as c:
+            r = c.get(url)
+            if r.status_code < 400:
+                return str(r.url), r.text
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"ACEP fetch failed {url}: {e}")
+    return url, ""
+
+
+def _price(cell: str) -> Optional[float]:
+    m = re.search(r"\$\s*([\d,]+(?:\.\d+)?)", cell or "")
+    if not m:
+        return None
+    try:
+        return float(m.group(1).replace(",", ""))
+    except ValueError:
+        return None
+
+
+def _parse_cr_tables(html: str, event_label: str = "") -> List[Dict[str, Any]]:
+    """ACEP microsite pricing: <section id="crTable"> with div.crRow/crCol cells.
+    Label = [Event ·] [Section ·] Category; USD."""
+    tiers: List[Dict[str, Any]] = []
+    for sec in re.finditer(r'(?is)<section id="crTable"[^>]*>(.*?)</section>', html):
+        heads = [h for h in (_txt(x) for x in re.findall(
+            r"(?is)<h[1-4][^>]*>(.*?)</h[1-4]>", html[:sec.start()])) if h]
+        heads = [h for h in heads if not re.search(r"(?i)dates for this event|policy|policies|^pricing$", h)]
+        section = heads[-1] if heads else ""
+        if re.search(r"(?i)pricing$", section):
+            section = re.sub(r"(?i)\s*pricing$", "", section).strip()
+        parts = re.split(r'(?is)<div class="crRow">', sec.group(1))[1:]
+        for row in parts:
+            cells = re.findall(r'(?is)<div class="crCol col\d">(.*?)</div>\s*(?=<div class="crCol|\s*$|\s*</div>)', row)
+            cells = [_txt(c) for c in cells] or [_txt(c) for c in re.findall(r'(?is)<div class="crCol col\d">(.*?)</div>', row)]
+            if len(cells) < 2:
+                continue
+            label, price = cells[0], None
+            for c in reversed(cells[1:]):
+                price = _price(c)
+                if price is not None:
+                    break
+            if not label or not price or re.search(r"(?i)per hour", " ".join(cells)):
+                continue
+            kind = "Add-on" if re.match(r"(?i)(guest badge|skills labs?|escaped)", label) else section
+            if kind == "Conference":
+                kind = "Full Conference"
+            label = re.sub(r"\s*\(Only available.*?\)", "", label).rstrip("*").strip()
+            names = [x for x in (event_label, kind, label) if x]
+            names = [x for i, x in enumerate(names) if i == 0 or x != names[i - 1]]
+            lbl = " · ".join(names)[:120]
+            tiers.append({"tier_label": lbl, "price_gbp": price, "currency": "USD",
+                          "is_early_bird": bool(re.search(r"(?i)early", label)),
+                          "early_bird_deadline": None})
+    seen, out = set(), []
+    for t in tiers:
+        k = (t["tier_label"], t["price_gbp"])
+        if k not in seen:
+            seen.add(k)
+            out.append(t)
+    return out
+
+
+def _register_link(html: str, base: str) -> Optional[str]:
+    from urllib.parse import urljoin
+    m = re.search(r'(?is)<a[^>]+id="microsite-reg-link"[^>]+href="([^"]+)"', html)
+    if not m:
+        for a in re.finditer(r'(?is)<a[^>]+href="([^"]+)"[^>]*>(.{0,120}?)</a>', html):
+            if re.search(r"(?i)^\s*(register( now| today| here)?|buy tickets?|get tickets?)\b", _txt(a.group(2))):
+                m = a
+                break
+    if not m:
+        return None
+    href = html_lib.unescape(m.group(1)).strip()
+    if href.startswith(("#", "javascript", "mailto")):
+        return None
+    return urljoin(base, href)
 
 
 class AcepExtractor(BaseExtractor):
@@ -270,7 +369,7 @@ class AcepExtractor(BaseExtractor):
 
         result: Dict[str, Any] = {
             "event_type": shell.get("event_type") or "conference",
-            "pricing_tiers": [],  # ACEP publishes no fees; registration is on organiser sites
+            "pricing_tiers": [],  # filled by _follow_registration for ACEP-run events
             "is_sold_out": False,
         }
         for k in ("start_date", "end_date", "venue_name", "city", "region", "event_format",
@@ -294,6 +393,7 @@ class AcepExtractor(BaseExtractor):
             if ou:
                 result["organiser_url"] = ou
         result["booking_url"] = result.get("organiser_url") or url
+        self._follow_registration(result, shell)
 
         if "cpd_points" not in result:
             m = re.search(r"(?is)mcEvent-cme-hours[^>]*>\s*([\d.]+)", html)
@@ -305,6 +405,75 @@ class AcepExtractor(BaseExtractor):
         body = _flatten(dm.group(1)) if dm else (shell.get("description_hint") or "")
         result.update(self._soft_fields(title, body, shell, llm_call))
         return result
+
+    # ------------------------------------------------------------------ #
+    # Registration / fees (ACEP microsites + external organiser homes).
+    # ------------------------------------------------------------------ #
+    def _follow_registration(self, result: Dict[str, Any], shell: Dict[str, Any]) -> None:
+        from urllib.parse import urlparse
+        ou = result.get("organiser_url")
+        if not ou:
+            return
+        title = shell.get("title") or ""
+        year = (shell.get("start_date") or "")[:4]
+        tok = re.search(r"(?i)\bACEP\s?(\d{2})\b", title)
+
+        if _ACEP_HOST.match(ou) and "/master-calendar" not in ou:
+            final, page = _get(ou)
+            if not page:
+                return
+            if "/learn.acep" in final or "learn.acep.org" in final:
+                return
+            result["organiser_url"] = final
+            low = page.lower()
+            reg = _register_link(page, final)
+            years = set(re.findall(r"\b(20\d\d)\b", low))
+            if tok:
+                # edition of the microsite = digits of the registration mcode (ACEP-26)
+                mc = re.search(r"(?i)mcode=[a-z]+-?(\d{2,3})\b", reg or "")
+                same_edition = bool(mc and mc.group(1).endswith(tok.group(1)))
+            else:
+                same_edition = not years or year in years
+            if reg and same_edition:
+                result["booking_url"] = reg
+            else:
+                result["booking_url"] = final
+            if not same_edition:
+                return
+            tiers: List[Dict[str, Any]] = []
+            m = re.search(r"(?i)\bCost:\s*(\$\s*[\d,]+(?:\.\d+)?)", _txt(page))
+            if m:
+                tiers.append({"tier_label": "Registration", "price_gbp": _price(m.group(1)),
+                              "currency": "USD", "is_early_bird": False,
+                              "early_bird_deadline": None})
+            tiers += _parse_cr_tables(page)
+            if not tiers:
+                links = []
+                for h in re.findall(r'(?is)<a[^>]+href="([^"]*pricing[^"]*)"[^>]*>(.*?)</a>', page):
+                    href = html_lib.unescape(h[0])
+                    if "policies" in href or "mailto" in href:
+                        continue
+                    if href.startswith("/"):
+                        href = f"{SITE}{href}"
+                    if href not in [x[0] for x in links] and _ACEP_HOST.match(href):
+                        links.append((href, _txt(h[1])))
+                for href, name in links[:8]:
+                    _, ph = _get(href)
+                    if not ph or (year and year not in ph and not tok):
+                        continue
+                    one = _parse_cr_tables(ph, "" if len(links) == 1 else name)
+                    tiers += one
+            if tiers:
+                result["pricing_tiers"] = tiers[:120]
+            return
+
+        # External organiser: if we only have a home / shallow page, look for a
+        # registration link so the explorer's second hop lands on the fees.
+        if not _ACEP_HOST.match(ou) and len(urlparse(ou).path.strip("/").split("/")) <= 1:
+            final, page = _get(ou)
+            reg = _register_link(page, final) if page else None
+            if reg and reg.rstrip("/") != ou.rstrip("/"):
+                result["booking_url"] = reg
 
     def _soft_fields(self, title: Optional[str], body: str, shell: Dict[str, Any],
                      llm_call: Callable[[str], Optional[str]]) -> Dict[str, Any]:
