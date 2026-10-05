@@ -127,8 +127,19 @@ def _txt(frag: str) -> str:
     return re.sub(r"\s+", " ", html_lib.unescape(re.sub(r"<[^>]+>", " ", frag or ""))).strip()
 
 
+_CACHE: Dict[str, Any] = {}
+
+
 def _get(url: str, timeout: float = 25.0):
-    """(final_url, html) following redirects; (url, '') on failure."""
+    """(final_url, html) following redirects; (url, '') on failure. Cached per process."""
+    if url in _CACHE:
+        return _CACHE[url]
+    out = _get_uncached(url, timeout)
+    _CACHE[url] = out
+    return out
+
+
+def _get_uncached(url: str, timeout: float = 25.0):
     try:
         import httpx
         with httpx.Client(timeout=timeout, follow_redirects=True, headers=_HEADERS) as c:
@@ -207,6 +218,111 @@ def _register_link(html: str, base: str) -> Optional[str]:
     if href.startswith(("#", "javascript", "mailto")):
         return None
     return urljoin(base, href)
+
+
+
+_STATES = {
+    "alabama": "AL", "alaska": "AK", "arizona": "AZ", "arkansas": "AR", "california": "CA",
+    "colorado": "CO", "connecticut": "CT", "delaware": "DE", "district of columbia": "DC",
+    "florida": "FL", "georgia": "GA", "hawaii": "HI", "idaho": "ID", "illinois": "IL",
+    "indiana": "IN", "iowa": "IA", "kansas": "KS", "kentucky": "KY", "louisiana": "LA",
+    "maine": "ME", "maryland": "MD", "massachusetts": "MA", "michigan": "MI", "minnesota": "MN",
+    "mississippi": "MS", "missouri": "MO", "montana": "MT", "nebraska": "NE", "nevada": "NV",
+    "new hampshire": "NH", "new jersey": "NJ", "new mexico": "NM", "new york": "NY",
+    "north carolina": "NC", "north dakota": "ND", "ohio": "OH", "oklahoma": "OK", "oregon": "OR",
+    "pennsylvania": "PA", "rhode island": "RI", "south carolina": "SC", "south dakota": "SD",
+    "tennessee": "TN", "texas": "TX", "utah": "UT", "vermont": "VT", "virginia": "VA",
+    "washington": "WA", "west virginia": "WV", "wisconsin": "WI", "wyoming": "WY",
+}
+_ABBR_TO_STATE = {v: k.title() for k, v in _STATES.items()}
+_VENUE_KW = (r"Resort(?: (?:&|and) Spa)?|Hotel|Inn|Suites|Convention Center|Conference Center|Centre|Center|"
+             r"Place|Marquis|Lodge|Hall|Campus|University|Hospital|Marriott|Hilton|Hyatt|Westin|Sheraton|Omni")
+_CITY_PREFIX = {"san", "las", "new", "los", "st.", "saint", "fort", "salt", "kansas", "santa", "el",
+                "palm", "mount", "lake", "north", "south", "west", "east", "grand", "baton", "oklahoma"}
+
+
+def _state_forms(region: Optional[str]) -> Optional[List[str]]:
+    """Name + abbreviation forms of a US state region, else None."""
+    r = (region or "").strip()
+    if not r:
+        return None
+    if r.upper() in _ABBR_TO_STATE:
+        return [_ABBR_TO_STATE[r.upper()], r.upper()]
+    if r.lower() in _STATES:
+        return [r.title() if r.lower() != "district of columbia" else "District of Columbia", _STATES[r.lower()]]
+    return None
+
+
+_MULTIWORD_CITIES = ("lake buena vista", "salt lake city", "kansas city", "oklahoma city", "palm springs",
+                     "baton rouge", "grand rapids", "new orleans", "san antonio", "san diego",
+                     "san francisco", "las vegas", "los angeles", "fort worth", "st. louis",
+                     "new york", "santa fe", "myrtle beach", "virginia beach", "atlantic city")
+_LEAD_NOISE = re.compile(r"^(?:Meeting Details|Location|Venue|Where|Held at|Join us at|Hotel)\s+")
+
+
+def _split_venue_city(chunk: str) -> tuple:
+    chunk = _LEAD_NOISE.sub("", chunk.strip())
+    low = chunk.lower()
+    for c in _MULTIWORD_CITIES:
+        if low.endswith(c):
+            head = chunk[: len(chunk) - len(c)].strip()
+            return (head or None), chunk[len(chunk) - len(c):]
+    return _split_venue_city_core(chunk)
+
+
+def _split_venue_city_core(chunk: str) -> tuple:
+    """Capitalised tokens preceding ", <State>" -> (venue|None, city|None).
+    A city is only returned with the venue keyword split or a 1-2 word tail."""
+    toks = chunk.split()
+    if not toks:
+        return None, None
+    # "Marriott Marquis Chicago Chicago" -> repeated city word
+    if len(toks) >= 2 and toks[-1] == toks[-2]:
+        return (" ".join(toks[:-1]) or None), toks[-1]
+    kw = [i for i, t in enumerate(toks) if re.fullmatch(_VENUE_KW.replace("(?: (?:&|and) Spa)?", ""), t)]
+    if kw:
+        k = kw[-1]
+        rest = toks[k + 1:]
+        if rest and len(rest) <= 3:
+            return " ".join(toks[: k + 1]), " ".join(rest)
+        if not rest:
+            return None, None
+    n = 2 if len(toks) >= 2 and toks[-2].lower() in _CITY_PREFIX else 1
+    return None, " ".join(toks[-n:])
+
+
+def _find_location(text: str, region: Optional[str]) -> Dict[str, Optional[str]]:
+    """Venue/city from free text. The city must sit directly before the event's
+    own state (name or abbreviation), so nothing is guessed from the state alone."""
+    forms = _state_forms(region)
+    if not forms or not text:
+        return {}
+    t = re.sub(r"\s+", " ", text)
+    st = "|".join(re.escape(f) for f in forms)
+    # Street address with zip: "<Venue> 1970 West Broad St. Columbus, OH 43223"
+    m = re.search(rf"((?:[A-Z][\w'’&.\-]*\s){{1,5}}(?:{_VENUE_KW}))\s+\d+ [^,]{{3,40}}?,?\s+"
+                  rf"([A-Z][a-z]+(?: [A-Z][a-z]+)?),\s*(?:{st})\s+\d{{5}}", t)
+    if m:
+        return {"venue_name": m.group(1).strip(), "city": m.group(2).strip()}
+    tok = r"[A-Z][A-Za-z.'’&\-]*"
+    for m in re.finditer(rf"((?:{tok} ){{0,7}}{tok}),\s*(?:{st})\b", t):
+        chunk = m.group(1)
+        venue, city = _split_venue_city(chunk)
+        if city and re.fullmatch(rf"{tok}(?: {tok}){{0,2}}", city) and \
+                city.lower() not in ("the", "in", "at", "join", "hotel", "event", "location"):
+            return {"venue_name": venue, "city": city}
+    return {}
+
+
+_MC_NAME = re.compile(
+    r"(?:at|in) (?:the )?((?:[A-Z][\w'’&.\-]*\s){1,5}(?:" + _VENUE_KW + r"))(?=[ ,.]|$)")
+
+
+def _microsite_venue(text: str) -> Optional[str]:
+    """'Join us for ACEP26 at the McCormick Place Convention Center'."""
+    m = re.search(r"(?:Join us|held|taking place|located)[^.]{0,40}? at (?:the )?((?:[A-Z][\w'’&.\-]*\s){1,5}"
+                  rf"(?:{_VENUE_KW}))(?=[ ,.]|$)", re.sub(r"\s+", " ", text))
+    return m.group(1).strip() if m else None
 
 
 class AcepExtractor(BaseExtractor):
@@ -394,6 +510,8 @@ class AcepExtractor(BaseExtractor):
                 result["organiser_url"] = ou
         result["booking_url"] = result.get("organiser_url") or url
         self._follow_registration(result, shell)
+        self._fill_location(result, shell, html)
+        result.pop("_same_edition", None)
 
         if "cpd_points" not in result:
             m = re.search(r"(?is)mcEvent-cme-hours[^>]*>\s*([\d.]+)", html)
@@ -434,6 +552,7 @@ class AcepExtractor(BaseExtractor):
                 same_edition = bool(mc and mc.group(1).endswith(tok.group(1)))
             else:
                 same_edition = not years or year in years
+            result["_same_edition"] = same_edition
             if reg and same_edition:
                 result["booking_url"] = reg
             else:
@@ -474,6 +593,52 @@ class AcepExtractor(BaseExtractor):
             reg = _register_link(page, final) if page else None
             if reg and reg.rstrip("/") != ou.rstrip("/"):
                 result["booking_url"] = reg
+
+    # ------------------------------------------------------------------ #
+    # Location fallback chain: API -> ACEP event page -> ACEP microsite
+    # (+ its travel page) -> third-party organiser page. Never guesses a
+    # city from a state alone.
+    # ------------------------------------------------------------------ #
+    def _fill_location(self, result: Dict[str, Any], shell: Dict[str, Any], html: str) -> None:
+        if result.get("event_format") == "online":
+            return
+        if result.get("city") and result.get("venue_name"):
+            return
+        region = result.get("region")
+        if _state_forms(region) is None:
+            return  # country-level or empty region: only the API/page can say more
+        # (2) ACEP event page: location block / address lines in the description.
+        texts: List[tuple] = []
+        loc = self._grab(html, "mcEvent-location") or ""
+        dm = re.search(r'(?is)<div[^>]*class="[^"]*mcEvent-description[^"]*"[^>]*>(.*?)</div>', html)
+        texts.append(("page", f"{loc} {_flatten(dm.group(1)) if dm else shell.get('description_hint') or ''}"))
+        ou = result.get("organiser_url")
+        if ou:
+            _, ohtml = _get(ou)
+            if ohtml:
+                otext = _flatten(re.sub(r"(?is)<(script|style|noscript)[^>]*>.*?</\1>", " ", ohtml))
+                texts.append(("microsite" if _ACEP_HOST.match(ou) else "organiser", otext))
+                if _ACEP_HOST.match(ou):
+                    # (3) the microsite's travel page names the venue
+                    for href in re.findall(r'(?is)href="(/[^"#?]*(?:travel|venue|hotel)[^"#?]*)"', ohtml)[:3]:
+                        _, th = _get(SITE + href)
+                        if th:
+                            texts.append(("travel", _flatten(re.sub(
+                                r"(?is)<(script|style|noscript)[^>]*>.*?</\1>", " ", th))))
+        for kind, text in texts:
+            found = _find_location(text, region)
+            if kind in ("microsite", "travel") and result.get("_same_edition") is False:
+                found.pop("venue_name", None)   # microsite names another edition's venue
+            elif kind in ("microsite", "travel") and not result.get("venue_name"):
+                v = _microsite_venue(text)
+                if v and not found.get("venue_name"):
+                    found["venue_name"] = v
+            if found.get("city") and not result.get("city"):
+                result["city"] = found["city"]
+            if found.get("venue_name") and not result.get("venue_name"):
+                result["venue_name"] = found["venue_name"]
+            if result.get("city") and result.get("venue_name"):
+                break
 
     def _soft_fields(self, title: Optional[str], body: str, shell: Dict[str, Any],
                      llm_call: Callable[[str], Optional[str]]) -> Dict[str, Any]:
