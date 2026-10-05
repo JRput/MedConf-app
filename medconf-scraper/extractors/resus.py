@@ -30,10 +30,13 @@ Each course page server-renders:
   - Pure e-learning pages (e.g. Anaphylaxis essentials) have NO
     availability table → parent row with sessions=[] and format=online.
 
-FEES ARE NOT PUBLISHED — each Course Centre sets its own fee locally and
-booking is by contacting the organiser directly. We therefore emit NO
-pricing tiers, ever, for this source. Do not "fix" this by scraping a
-number; there isn't one.
+FEES: centre-run courses (ALS/ILS/NLS/ARNI...) have NO public candidate
+fee — each Course Centre sets its own. Those pages DO contain "£31.57 per
+Candidate registration / £35.89 per manual", but that is what RCUK charges
+the CENTRE, so it must never become a tier. Only RCUK-run e-learning
+products sell directly ("The BLSi course costs £80 inc VAT", "The course
+costs £35 (Incl. VAT)"); _direct_price() captures exactly that wording
+and nothing else.
 
 Session pages are fetched with httpx (server-rendered HTML, no JS
 needed) so we never navigate the Playwright page away from the detail
@@ -206,10 +209,30 @@ class ResusExtractor(BaseExtractor):
             "abstract_open": False,
             "abstract_deadline": None,
             "sessions": upcoming,
-            # FEES NOT PUBLISHED by this source (set locally per Course
-            # Centre) — always empty, never fabricate.
-            "pricing_tiers": [],
+            # Centre-run courses: no candidate fee (see module docstring).
+            # Direct-sale RCUK products: single tier from the stated price.
+            "pricing_tiers": self._direct_price(body_text),
         }
+
+    @staticmethod
+    def _direct_price(body_text: str) -> List[Dict[str, Any]]:
+        """Candidate price for RCUK-sold courses only. Requires 'purchase'
+        context via the Learning Portal wording; ignores centre charges and
+        volume/licence prices."""
+        text = re.sub(r"\s+", " ", html.unescape(body_text or "")).replace("\xa0", " ")
+        if "Learning Portal" not in text:
+            return []
+        m = (re.search(r"course (?:costs|is)\s*£\s?(\d+(?:\.\d{2})?)\s*\(?\s*(?:inc|incl)", text, re.I)
+             or re.search(r"cost of the e-learning course is\s*£\s?(\d+(?:\.\d{2})?)", text, re.I))
+        if not m:
+            return []
+        return [{
+            "tier_label": "Course fee (incl. VAT)",
+            "price_gbp": float(m.group(1)),
+            "is_early_bird": False,
+            "early_bird_deadline": None,
+            "currency": "GBP",
+        }]
 
     # ------------------------------------------------------------------ #
     # Sessions — httpx walk of the Drupal Views availability table
