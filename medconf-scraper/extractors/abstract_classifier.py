@@ -32,6 +32,8 @@ _CLOSED_PATTERNS = [
     r"closed\s+for\s+submissions?",
     r"submissions?\s+have\s+closed",
     r"submissions?\s+closed",
+    r"submissions?\s+(?:for\s+[^.\n]{1,40}?\s+)?(?:have|has)\s+(?:now\s+)?closed",
+    r"call\s+for\s+(?:\w+\s+){1,6}?(?:is|are|has)\s+(?:now\s+|been\s+)?closed",
     r"deadline\s+has\s+passed",
     r"submission\s+deadline\s+has\s+passed",
 ]
@@ -57,7 +59,7 @@ _OPEN_RE = [re.compile(p, re.IGNORECASE) for p in _OPEN_PATTERNS]
 # pull out the actual day/month/year regardless of surrounding fluff.
 _DEADLINE_CAPTURE_PATTERNS = [
     r"deadline\s+for\s+(?:submissions?|abstracts?|posters?|papers?|proposals?)\s*(?:is|:|-)\s*([^.\n]{4,80})",
-    r"(?:abstract|poster|submission)\s+(?:submission\s+)?deadline\s*[:\-]\s*([^.\n]{4,80})",
+    r"(?:abstract|poster|submission)\s+(?:submission\s+)?deadline\s*(?:[:\-]\s*|\s(?=\d|[A-Za-z]{3,9}\s+\d))([^.\n]{4,80})",
     r"submit\s+(?:your\s+)?(?:abstract|poster|paper)?\s*by\s+([^.\n]{4,80})",
     r"submissions?\s+close\s+(?:on\s+)?([^.\n]{4,80})",
     r"deadline\s*[:\-]\s*([^.\n]{4,80})",  # very generic — last resort
@@ -142,7 +144,14 @@ def _parse_date_phrase(phrase: str) -> Optional[date]:
 # Mission P4 — BSH International Pathology Day poster competition).
 # ---------------------------------------------------------------------------
 _PROGRAMME_PATTERNS = [
+    (r"call\s+for\s+posters?\b", "Call for posters"),
+    (r"call\s+for\s+(?:workshops?|contributions?|presentations?)\b", "Call for contributions"),
     (r"poster\s+competitions?", "Poster competition"),
+    # "Deadlines 28 Jan 2027 Abstract Submission" style tables (date precedes the label)
+    (r"\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}\s+(?:abstracts?|posters?|papers?)\s+submissions?\b", "Abstract submission"),
+    (r"abstract\s+submission\s+(?:form|deadline|portal)\b", "Abstract submission"),
+    (r"submit\s+(?:\w+\s+){0,3}?(?:presentation|session|workshop)\s+proposals?", "Presentation proposals"),
+    (r"submit\s+(?:\w+\s+){0,3}?abstracts?\b", "Abstract submission"),
     (r"submit\s+(?:\w+\s+){0,2}?posters?\b", "Poster submissions"),
     (r"posters?\s+submissions?", "Poster submissions"),
     (r"case[\s-]+reports?\s+(?:competition|prize|submissions?)", "Case report competition"),
@@ -155,17 +164,21 @@ _PROGRAMME_RE = [(re.compile(p, re.IGNORECASE), label) for p, label in _PROGRAMM
 # Deadline phrasings, applied only inside a window around a programme mention
 # (so "no later than" about registration elsewhere on the page is ignored).
 _PROGRAMME_DEADLINE_PATTERNS = [
+    r"(\d{1,2}\s*(?:st|nd|rd|th)?\s+[A-Za-z]{3,9}\s+\d{4})\s+(?:abstracts?|posters?|papers?)\s+submissions?\b",
+    r"(?:abstracts?|posters?|paper)\s+submissions?\s+deadline\s*[:\-\u2013]?\s*([^.\n]{4,100})",
+    r"(?:enter|entries|entry)\s+(?:\w+\s+){0,5}?by\s+([^.\n]{4,100})",
     r"(?:competition|submissions?|entries|posters?|abstracts?|case\s+reports?)\s+(?:will\s+)?clos(?:es|e|ing)\b([^.\n]{4,100})",
     r"deadline\s+for\s+(?:\w+\s+){0,2}?(?:submissions?|entries|abstracts?|posters?)\s*(?:is|:|-|\u2013)?\s*([^.\n]{4,100})",
     r"(?:closing\s+date|deadline)\s*(?:for\s+(?:\w+\s+){0,2}?)?(?:is|:|-|\u2013)\s*([^.\n]{4,100})",
     r"submi(?:t|tted|ssions?)\s+(?:\w+\s+){0,5}?by\s+([^.\n]{4,100})",
     r"entries\s+(?:must\s+be\s+)?(?:received\s+|submitted\s+)?by\s+([^.\n]{4,100})",
     r"no\s+later\s+than\s+([^.\n]{4,100})",
+    r"closing\s+date(?:\s+for\s+(?:\w+\s+){0,4}?)?\s*(?:is|will\s+be|:|has\s+been\s+(?:extended|moved)(?:\s+(?:to|until))?\s*:?)\s*([^.\n]{4,100})",
 ]
 _PROGRAMME_DEADLINE_RE = [re.compile(p, re.IGNORECASE) for p in _PROGRAMME_DEADLINE_PATTERNS]
 
 _PROGRAMME_OPEN_RE = re.compile(
-    r"(?:submissions?|entries|competition|call\s+for\s+\w+)\s+(?:is\s+|are\s+)?(?:now\s+)?open\b"
+    r"(?:submissions?|entries|competition|call\s+for\s+\w+(?:\s+[^.\n]{1,80}?)?)\s+(?:is\s+|are\s+)?(?:now\s+)?open\b"
     r"|now\s+open\s+for\s+(?:\w+\s+){0,2}?(?:submissions?|entries)"
     r"|open\s+for\s+(?:\w+\s+){0,2}?(?:submissions?|entries)",
     re.IGNORECASE,
@@ -273,7 +286,11 @@ def classify_submission(
                 break
 
     if is_explicitly_closed:
-        return False, deadline, None
+        note = None
+        if deadline is None and (prog_label or _CFP_MENTION_RE.search(page_text)):
+            generic = "Abstract submissions" if re.search(r"abstract", page_text, re.I) else "Call for papers"
+            note = f"{prog_label or generic} \u2014 closed"
+        return False, deadline, note
     if deadline and deadline < today:
         return False, deadline, None
     if deadline:
@@ -308,11 +325,17 @@ from urllib.parse import urljoin, urlparse
 _CFP_MENTION_RE = re.compile(
     r"call\s+for\s+(?:papers|abstracts|proposals|cases)"
     r"|submit\s+(?:your|an?)\s+(?:abstract|proposal|paper)"
-    r"|abstract\s+submissions?",
+    r"|submit\s+(?:\w+\s+){0,3}?abstracts?\b"
+    r"|call\s+for\s+(?:posters?|contributions?)"
+    r"|submit\s+(?:\w+\s+){0,3}?(?:presentation|session|workshop)\s+proposals?"
+    # Bare "Abstract Submission" is also a nav-menu label (RCEM): only count it
+    # when submission wording follows within ~150 chars.
+    r"|abstract\s+submissions?(?=[^.]{0,150}?(?:deadline|open|clos|invit|submit|accept|form\b|portal|notif|\bby\s+\d|20\d\d))",
     re.IGNORECASE,
 )
 _CFP_LINK_RE = re.compile(
-    r"call[\s_-]*for[\s_-]*(?:papers|abstracts|proposals)|abstract|submission"
+    r"call[\s_-]*for[\s_-]*(?:papers|abstracts|proposals|posters?|contributions)|abstract|submission"
+    r"|poster[\s_-]*(?:competition|submission|call)|\bsubmit\b|\bform\b"
     r"|proposal|smapply|oxfordabstracts|exordo",
     re.IGNORECASE,
 )
@@ -444,11 +467,12 @@ def classify_page_submission(
     deadline found) one call-for-papers follow. Returns
     (open, deadline, note, source) with source in {'page text', 'call for papers'},
     or None when nothing was found."""
-    page_text = (page_text or "")[:60_000]
+    page_text = (page_text or "")[:250_000]
     is_open, deadline, note = classify_submission(page_text, today, event_start)
     if deadline or is_open:
         return is_open, deadline, note, "page text"
-    if has_submission_programme(page_text):
+    already_closed = bool(note and note.endswith("closed"))
+    if has_submission_programme(page_text) and not already_closed:
         hit = follow_call_for_papers(page_html, base_url, fetcher, today, event_start)
         if hit:
             return hit[0], hit[1], hit[2], "call for papers"

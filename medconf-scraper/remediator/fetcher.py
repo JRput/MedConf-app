@@ -112,7 +112,14 @@ class PageCache:
         # httpx first. If it comes back short + shows SPA markers in the
         # raw HTML, escalate to Playwright — this catches new Wix / React /
         # Nuxt hosts without needing to add them to _JS_HOSTS first.
+        self._last_status = None
         text = self._fetch_httpx(url)
+        # WAF / bot-wall (403, 429, 503): httpx is blocked but a real browser
+        # usually gets through (P8: vidknoxgroup.com 403 left a whole page unread).
+        # 404s are NOT retried — the explorer probes many guessed sub-paths.
+        if text is None and getattr(self, "_last_status", None) in (403, 429, 503):
+            logger.info(f"remediator: {url} blocked (HTTP {self._last_status}) — trying Playwright")
+            return self._fetch_browser(url)
         if text is not None and len(text) < _SHORT_BODY_THRESHOLD:
             raw = self._html_cache.get(url) or ""
             raw_compact = re.sub(r"\s+", "", raw)
@@ -151,6 +158,7 @@ class PageCache:
         except Exception as e:
             logger.warning(f"remediator: httpx fetch failed for {url}: {e}")
             self._html_cache.setdefault(url, None)
+            self._last_status = getattr(getattr(e, "response", None), "status_code", None)
             return None
 
     def _fetch_browser(self, url: str) -> Optional[str]:

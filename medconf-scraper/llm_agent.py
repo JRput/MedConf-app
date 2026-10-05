@@ -254,7 +254,7 @@ class AgentLoop:
                 return
             from datetime import date
             from extractors.abstract_classifier import classify_page_submission
-            text = (self.browser.get_page_text() or "")[:60_000]
+            text = (self.browser.get_page_text() or "")[:250_000]
             html = ""
             try:
                 html = self.browser.page.content()

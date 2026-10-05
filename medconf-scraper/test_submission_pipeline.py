@@ -110,3 +110,84 @@ def test_colon_form_deadline_with_midnight():
         "Call for papers and guide to submissions\nDeadline for submissions: midnight 24 November 2026\n",
         TODAY, date(2027, 7, 6))
     assert out == (True, date(2026, 11, 24), None)
+
+
+# ---------------------------------------------------------------------------
+# Mission P8 (2026-10-05)
+# ---------------------------------------------------------------------------
+RCEM_NAV = ("On-Demand Events Further Information Information for Speakers Abstract Submission "
+            "Event Booking Terms and Conditions Event FAQs Marketing and Sponsorship Opportunities "
+            "CPD Continuing Professional Development RCEMLearning CPD Diary Journal Club")
+
+
+def test_p8_nav_menu_abstract_submission_is_not_a_programme():
+    assert not ac.has_submission_programme(RCEM_NAV)
+    assert ac.classify_page_submission(RCEM_NAV, "", BASE, TODAY) is None
+
+
+def test_p8_real_abstract_submission_wording_still_counts():
+    assert ac.has_submission_programme("Abstract Submission Abstract submissions are open until the deadline.")
+    assert ac.has_submission_programme("Abstract submission deadline 5 May 2027")
+
+
+def test_p8_late_page_text_is_not_truncated():
+    text = ("x " * 70_000) + "Call for Posters will close 7 October 2026. submit an abstract"
+    out = ac.classify_page_submission(text, "", BASE, TODAY, date(2027, 4, 20))
+    assert out[:2] == (True, date(2026, 10, 7))
+
+
+def test_p8_follows_submission_form_link_when_page_has_no_date():
+    html = ('<a href="/poster-competition/">Poster competition webpage</a>'
+            '<a href="/contact">Contact</a>')
+    seen = []
+
+    def fetcher(url):
+        seen.append(url)
+        return "html", "<p>Poster competition. Deadline for entries: 25 October 2026</p>"
+
+    text = "Please submit your abstract through the Poster competition webpage."
+    out = ac.classify_page_submission(text, html, BASE, TODAY, date(2026, 12, 4), fetcher)
+    assert out[:2] == (True, date(2026, 10, 25)) and out[3] == "call for papers"
+    assert seen == ["https://advance-he.ac.uk/poster-competition/"]
+
+
+def test_p8_closed_programme_does_not_follow_a_link():
+    def boom(url):
+        raise AssertionError("must not fetch when the call is already closed")
+    out = ac.classify_page_submission("Call for posters is now closed.",
+                                      '<a href="/abstracts">Abstracts</a>', BASE, TODAY, None, boom)
+    assert out[:3] == (False, None, "Call for posters — closed")
+
+
+def test_p8_fixer_uses_programme_patterns_not_no_abstract_mention():
+    from remediator.fixers.abstract import fix_abstract_status
+    row = {"start_date": "2026-11-27", "source_url": ""}
+    val, method = fix_abstract_status(row, "Call for posters The call for posters is now closed.", lambda p: None)
+    assert method == "programme_note"
+    assert val == {"abstract_open": False, "abstract_deadline_note": "Call for posters — closed"}
+    val, method = fix_abstract_status(
+        row, "Call for posters. Enter your submission by 1pm Friday 2 December 2026.", lambda p: None)
+    assert method == "programme_deadline" and val["abstract_deadline"] == "2026-12-02"
+    assert val["abstract_deadline_note"] is None
+
+
+def test_p8_detector_flags_workshops_for_abstract_status():
+    from remediator.detector import detect_gaps
+    row = {"event_type": "workshop", "abstract_open": False, "specialty": "x",
+           "event_format": "online", "cpd_points": 1, "cpd_accredited": True}
+    assert "abstract_status" in detect_gaps(row, True)
+    row["is_on_demand"] = True
+    assert "abstract_status" not in detect_gaps(row, True)
+
+
+def test_p8_detector_reexamines_placeholder_notes_only():
+    from remediator.detector import detect_gaps
+    base = {"event_type": "conference", "abstract_open": False, "specialty": "x",
+            "event_format": "online", "cpd_points": 1, "cpd_accredited": True}
+    assert "abstract_status" in detect_gaps(
+        {**base, "abstract_deadline_note": "Poster submissions — see page for submission date"}, True)
+    assert "abstract_status" not in detect_gaps(
+        {**base, "abstract_deadline_note": "Call for posters — closed"}, True)
+    assert "abstract_status" not in detect_gaps(
+        {**base, "abstract_deadline_note": "Poster submissions — see page for submission date",
+         "abstract_deadline": "2026-12-01"}, True)

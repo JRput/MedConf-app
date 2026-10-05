@@ -128,47 +128,45 @@ def fix_abstract_status(
 
     text_l = page_text.lower()
 
-    # 0. Poster competitions / case-report prizes / trainee prizes (no "abstract"
-    #    wording needed). Delegates to the shared classifier.
-    from extractors.abstract_classifier import classify_submission, _find_programme
-    if _find_programme(page_text)[0]:
-        start = None
-        try:
-            start = date.fromisoformat(str(row.get("start_date"))[:10])
-        except (ValueError, TypeError):
-            pass
-        p_open, p_deadline, p_note = classify_submission(page_text, date.today(), start)
-        if p_deadline or p_note:
-            out = {"abstract_open": p_open}
-            if p_deadline:
-                out["abstract_deadline"] = p_deadline.isoformat()
-            if p_note:
-                out["abstract_deadline_note"] = p_note
-            return out, "programme_" + ("deadline" if p_deadline else "note")
-
-    # 0b. Call for papers / submission programme with no deadline on the page:
-    #     follow ONE link (PDF preferred, else portal) — Mission P6.
+    # 0. Shared classifier (abstracts, calls for posters/contributions, poster
+    #    competitions, trainee prizes, "Deadlines <date> Abstract Submission"
+    #    tables). A deadline wins outright; a bare note is held back so the
+    #    one-link follow below gets a chance to find the date.
     from extractors.abstract_classifier import (
-        has_submission_programme, follow_call_for_papers)
+        classify_submission, has_submission_programme, follow_call_for_papers,
+        find_call_for_papers_link)
+    start = None
+    try:
+        start = date.fromisoformat(str(row.get("start_date"))[:10])
+    except (ValueError, TypeError):
+        pass
+    p_open, p_deadline, p_note = classify_submission(page_text, date.today(), start)
+    if p_deadline:
+        # note=None clears any earlier placeholder ("see page for submission date")
+        out = {"abstract_open": p_open, "abstract_deadline": p_deadline.isoformat(),
+               "abstract_deadline_note": None}
+        return out, "programme_deadline"
+    closed_note = bool(p_note and p_note.endswith("closed"))
+
+    # 0b. Programme advertised, no deadline on the page: follow ONE link (PDF
+    #     preferred, else the submission form / poster-competition webpage).
     src_url = row.get("source_url") or ""
-    if (src_url.startswith("http") and has_submission_programme(page_text)
-            and not row.get("abstract_deadline")):
+    if (src_url.startswith("http") and not closed_note
+            and has_submission_programme(page_text)):
         try:
             from extractors.http_fetch import fetch_html
             page_html = fetch_html(src_url, timeout=20.0)
         except Exception:
             page_html = None
-        start = None
-        try:
-            start = date.fromisoformat(str(row.get("start_date"))[:10])
-        except (ValueError, TypeError):
-            pass
         hit = follow_call_for_papers(page_html or "", src_url, None, date.today(), start)
         if hit:
             f_open, f_deadline, f_note = hit
             return ({"abstract_open": f_open,
                      "abstract_deadline": f_deadline.isoformat(),
                      "abstract_deadline_note": f_note}, "call_for_papers_follow")
+    if p_note:
+        out = {"abstract_open": p_open, "abstract_deadline_note": p_note}
+        return out, "programme_note"
 
     # No abstract mention at all → confirm closed
     if "abstract" not in text_l:
