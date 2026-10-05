@@ -200,7 +200,7 @@ Gate per phase: build in a worktree → Playwright screenshots at 390 / 768 / 14
 | P5 | Gate: re-run remediator on affected sources; tiers before/after per source; "Price TBC" count must drop to P1's "truly none" bucket ± noise | direct | ⬜ |
 | P6 | **Pipeline-level submission detection** (owner: Advance HE Teaching & Learning Conf 2027 has a call for papers + deadline in a linked PDF — missed; only 3/61 extractors call the abstract classifier): run `classify_submission` on every detail page in the merge step regardless of extractor; follow one call-for-papers PDF/portal link (bounded) and parse its deadline; audit flags "call for papers on page but no deadline" | `sonnet` | ✅ `6f56e50` |
 | P7 | Submissions survey | `sonnet` | ✅ 722 conferences w/o deadline: 586 no programme · 35 missed (A 14 on page, B 17 elsewhere, C 4) — RCPsych 13, RCEM 11 · 99 unfetched. **0/35 healed by the remediator** → P8 |
-| P8 | Why the 35 didn't heal (patterns: 'call for posters', submission forms, 'Deadlines' tables; remediator gating) → fix + re-run | `sonnet` | 🔄 |
+| P8 | Why the 35 didn't heal → fix + re-run | `sonnet` | ✅ `7d83d4d` — 19/30 now carry a deadline/note (11 deadlines, 5 closed, 3 placeholder); 11 were survey false positives (RCEM nav item). 22 tests |
 | P9 | PDF/DOCX fee tables in the explorer (bucket D, 106 rows, SCCM 66) | `sonnet` | 🔄 |
 | P10 | Harness `--coverage` pre-registration gate reusing the audit detectors | `sonnet` | ✅ `50814f4` + `f8415be` |
 | P11 | Remediator row rotation: `remediation_attempted_at` column + NULLS-FIRST ordering so the 600 s budget moves through the backlog (SCCM: 55/76 rows never attempted; IFAD 2574 never reached) | `sonnet` | 🔄 |
