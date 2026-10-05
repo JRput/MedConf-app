@@ -109,9 +109,17 @@ EXTERNAL_FOLLOW_TEXT_RE = re.compile(
     r"learn\s+more|view\s+course|course\s+(?:details?|page)|module\s+details?|"
     r"official(?:\s+(?:website|page))?|programme\s+(?:details?|page)|"
     r"event\s+(?:page|website)|conference\s+website|"
-    r"visit\s+(?:the\s+)?(?:event|conference)|hosted\s+by)",
+    r"visit\s+(?:the\s+)?(?:event|conference)|hosted\s+by|"
+    r"book\s+(?:online|event|tickets?|your|a\s+place|your\s+place)|"
+    r"(?:further|full|more)\s+(?:details|information)|buy\s+tickets?|get\s+tickets?|"
+    r"tickets?\s+(?:here|available)|reserve\s+(?:a\s+)?(?:place|seat))",
     re.I,
 )
+# Hosts whose anchors are event-registration links even with generic text.
+TICKETING_HOST_RE = re.compile(
+    r"(eventbrite|cvent|eventsair|regonline|ticketsource|oxfordabstracts|"
+    r"ticketlight|tickettailor|eventzilla|bookwhen|gotowebinar|zoom\.us/webinar|"
+    r"onlineregistrationform|congressbooking|conferencecare|cmevents)", re.I)
 
 
 # Generic anchor text ("here", "this link", a bare URL...) that says nothing
@@ -133,7 +141,7 @@ EXTERNAL_CONTEXT_RE = re.compile(
 _CHROME_BLOCK_RE = re.compile(
     r"<(nav|header|footer|aside|script|style)\b.*?</\1\s*>", re.I | re.S,
 )
-_ANCHOR_RE = re.compile(r'<a\b[^>]*?href="([^"]+)"[^>]*>(.{1,400}?)</a>', re.I | re.S)
+_ANCHOR_RE = re.compile(r"""<a\b[^>]*?href=["']([^"']+)["'][^>]*>(.{0,400}?)</a>""", re.I | re.S)
 _CONTEXT_CHARS = 200
 _MARK = "\x00LINK\x00"
 
@@ -158,7 +166,7 @@ def _anchor_context(html: str, start: int, end: int) -> str:
 
 
 def find_external_event_links(
-    html: str, base_url: str, limit: int = 3,
+    html: str, base_url: str, limit: int = 4,
 ) -> list[tuple[str, str]]:
     """External (cross-domain) anchors that probably lead to the official
     event page. Returns (url, link_text) tuples, best first.
@@ -190,11 +198,18 @@ def find_external_event_links(
         href = m.group(1).strip()
         text = _html.unescape(re.sub(r"<[^>]+>", " ", m.group(2)))
         text = re.sub(r"\s+", " ", text).strip()
-        if not href or not text or href.startswith("#") or href.startswith("javascript:"):
+        if not href or href.startswith("#") or href.startswith("javascript:"):
             continue
+        href = _html.unescape(href)
+        if href.startswith("//"):
+            href = "https:" + href
         if not href.startswith("http"):
             continue
         parsed = urlparse(href)
+        # Image-only buttons have no text: only a ticketing-platform host
+        # makes them worth following.
+        if not text and not TICKETING_HOST_RE.search(parsed.netloc or ""):
+            continue
         if not parsed.netloc:
             continue
         ext_host = parsed.netloc.lower()
@@ -207,7 +222,8 @@ def find_external_event_links(
         clean = href.split("#")[0]
         if clean in seen:
             continue
-        if EXTERNAL_FOLLOW_TEXT_RE.search(text):
+        if EXTERNAL_FOLLOW_TEXT_RE.search(text) or (
+                TICKETING_HOST_RE.search(ext_host) and not in_chrome(m.start())):
             seen.add(clean)
             explicit.append((clean, text[:80]))
         elif (GENERIC_ANCHOR_RE.match(text) or ext_host.replace("www.", "") in text.lower()):
@@ -451,6 +467,8 @@ EXPLORE_MAX_SECONDS = float(os.environ.get("REMEDIATOR_EXPLORE_MAX_SECONDS", "90
 # source 33: 56 of 53+ text calls (81 s of 206 s) were these checks, mostly
 # re-judging the same site-wide pages (membership, awards, CPD) per event.
 EXPLORE_MAX_LLM_CHECKS = int(os.environ.get("REMEDIATOR_EXPLORE_MAX_LLM_CHECKS", "2"))
+# Separate fetch allowance for the external-link tier (page + registration hop).
+EXPLORE_EXTERNAL_FETCHES = int(os.environ.get("REMEDIATOR_EXPLORE_EXTERNAL_FETCHES", "5"))
 EVENT_MATCH_CACHE: dict = {}
 FETCH_TIMEOUT_S = float(os.environ.get("REMEDIATOR_FETCH_TIMEOUT_S", "12"))
 
@@ -484,17 +502,18 @@ def reset_fetch_state() -> None:
 class ExploreBudget:
     """Per-explorer-call cap on network fetches and wall-clock time."""
 
-    def __init__(self):
+    def __init__(self, max_fetches: Optional[int] = None):
         import time as _t
         self._t = _t
         self.started = _t.time()
         self.fetches = 0
         self.llm_checks = 0
+        self.max_fetches = EXPLORE_MAX_FETCHES if max_fetches is None else max_fetches
 
     def exhausted(self) -> bool:
         return (
             source_time_up()
-            or self.fetches >= EXPLORE_MAX_FETCHES
+            or self.fetches >= self.max_fetches
             or (self._t.time() - self.started) >= EXPLORE_MAX_SECONDS
         )
 
@@ -551,6 +570,141 @@ def fetch_page_text_and_html(url: str, *, timeout: float = FETCH_TIMEOUT_S) -> t
     fetch_stats["network_seconds"] += _t.time() - t0
     FETCH_CACHE[url] = result
     return result
+
+
+# --- External-page fee extraction (flat text) -------------------------------
+# Fetched text is whitespace-collapsed, so the line-based sweep only sees
+# "label-word £N" shapes. External registration pages typically render
+# "Medical Students - £10 Nurses - £35 ..." or "Regular $ 799 Price Until ...".
+_FLAT_PRICE_RE = re.compile(r"([£$€])\s?(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{2}))?")
+_FLAT_FEE_CTX_RE = re.compile(
+    r"(registration|register|pricing|prices?|fees?|tickets?|delegate|rates?|early\s*bird|book\s+your)", re.I)
+_FLAT_LABEL_JUNK_RE = re.compile(
+    r"\b(budget|under|over|refund|holding|sponsor\w*|exhibit\w*|donat\w*|up\s+to|"
+    r"administrative|charge|deposit|subscription)\b", re.I)
+_FLAT_NOISE_RE = re.compile(
+    r"(price\s+until\b[^A-Za-z]*(?:[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})?|\bselect\b|\bpay\s+now\b|"
+    r"\badd\s+to\s+(?:cart|basket)\b|\bper\s+(?:person|delegate)\b)", re.I)
+
+
+_FLAT_ROLE_RE = re.compile(
+    r"(member|student|delegate|consultant|trainee|nurse|doctor|registrar|fellow|resident|"
+    r"early|standard|regular|concession|industry|speaker|listener|visitor|attendee|physician)", re.I)
+_PRICE_FIRST_RE = re.compile(r"^\s*[-\u2013\u2014]\s*[A-Za-z]")
+
+
+def _flat_text_price_sweep(text: str, max_tiers: int = 40) -> list:
+    """Tiers from flattened text where each price is preceded by its label
+    ("Label - £N", "Label $ N"). Needs >=2 distinct labelled prices and a
+    fee-context word shortly before the first one; sponsor budgets, refunds
+    and holding fees are rejected. Never guesses a currency: the symbol
+    decides (£/$/€)."""
+    if not text or len(text) < 20:
+        return []
+    tiers: list = []
+    seen: set = set()
+    prev_end = 0
+    first_start = None
+    for m in _FLAT_PRICE_RE.finditer(text):
+        raw = text[max(prev_end, m.start() - 120): m.start()]
+        prev_end = m.end()
+        label = _FLAT_NOISE_RE.sub(" ", raw)
+        # a sentence / heading boundary ends the previous context
+        label = re.split(r"[:.!?]\s+|\s{2,}", label)[-1] if re.search(r"[:.!?]\s", label) else label
+        # leading deadline dates ("Ends: April 5, 2027 Speaker ...") are not part of the label
+        label = re.sub(r"^\W*(?:(?:ends?|until|by|before|from|valid)\b\W*)?(?:[A-Z][a-z]{2,8}\.?\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4}|\d{1,2}(?:st|nd|rd|th)?\s+[A-Z][a-z]{2,8}\.?,?\s+\d{4})\W*", "", label)
+        label = re.sub(r"\s+", " ", label).strip(" -\u2013\u2014:|,/*$\u00a3\u20ac")
+        if not re.fullmatch(r"[A-Za-z0-9 ,/&()'\u2019.+\-\u2013]+", label):
+            continue  # script/JSON residue, not a fee label
+        # leading digits-only/price residue e.g. "- Medic / Nurse" is price-first: skip
+        if len(label) < 3 or len(label) > 90 or not re.search(r"[A-Za-z]{3}", label):
+            continue
+        if _FLAT_LABEL_JUNK_RE.search(label):
+            continue
+        # "Day pass £20 - Medic / Nurse": the label FOLLOWS the price. Mixed
+        # label orders mislabel tiers, so refuse the whole page.
+        if (_PRICE_FIRST_RE.match(text[m.end(): m.end() + 6])
+                and not re.search(r"[-\u2013\u2014:|]\s*$", raw)):
+            return []
+        try:
+            price = float(m.group(2).replace(",", "") + ("." + m.group(3) if m.group(3) else ""))
+        except ValueError:
+            continue
+        if price <= 0 or price > 50000:
+            continue
+        if first_start is None:
+            first_start = m.start()
+        key = (label.lower(), price)
+        if key in seen:
+            continue
+        seen.add(key)
+        tiers.append({
+            "tier_label": label[:200], "price_gbp": price,
+            "currency": {"£": "GBP", "$": "USD", "\u20ac": "EUR"}[m.group(1)],
+            "is_early_bird": "early" in label.lower(), "early_bird_deadline": None,
+        })
+        if len(tiers) > max_tiers:
+            return []
+    if len(tiers) < 2 or first_start is None:
+        return []
+    role_hits = sum(1 for t in tiers if _FLAT_ROLE_RE.search(t["tier_label"]))
+    if not (_FLAT_FEE_CTX_RE.search(text[max(0, first_start - 1500): first_start + 300]) or role_hits >= 2):
+        return []
+    return tiers
+
+
+def _external_page_tiers(text: Optional[str], html: Optional[str],
+                         trail: Optional["AuditTrail"] = None) -> tuple[list, str]:
+    """Fee tiers from a fetched external/registration page: line sweep, then
+    plain fee tables, then the flat-text sweep. Returns (tiers, method)."""
+    from .fixers.pricing import _text_pricing_sweep
+    t = _text_pricing_sweep(text or "")
+    flat = _flat_text_price_sweep(text or "")
+    # The inline sweep can glue several prices into one junk label; the
+    # flat sweep wins when it recovers more (cleanly labelled) tiers.
+    if t and len(flat) <= len(t):
+        return t, "text"
+    tt = _plain_table_tiers(html, trail)
+    if tt:
+        return tt, "table"
+    if flat:
+        return flat, "flat"
+    return [], ""
+
+
+_DATE_FMT = ("%-d %B %Y", "%d %B %Y", "%B %-d", "%-d %B", "%B %-d, %Y", "%-d %b %Y")
+
+
+def external_identity_ok(row: dict, text: str) -> bool:
+    """Loose identity gate for an external page that the event's OWN page
+    linked explicitly (the link is the main identity evidence): accept on any
+    distinctive title token (>=4 letters, or an acronym/number token such as
+    "crsm" / "2026 annual") or on the event start date written out."""
+    low = (text or "").lower()
+    if not low:
+        return False
+    title = (row.get("conference_name") or "").lower()
+    weak = {"the", "and", "for", "with", "from", "event", "course", "conference", "training",
+            "annual", "meeting", "online", "live", "webinar", "series", "international"}
+    toks = {t for t in re.findall(r"[a-z0-9]{4,}", title) if t not in weak and not t.isdigit()}
+    toks |= {t for t in re.findall(r"\b[a-z]{3}\b", title) if t not in weak and t.isalpha()
+             and re.search(rf"\b{t.upper()}\b", row.get("conference_name") or "")}
+    if any(t in low for t in toks):
+        return True
+    sd = (row.get("start_date") or "")[:10]
+    if sd:
+        try:
+            import datetime as _dt
+            d = _dt.date.fromisoformat(sd)
+            for f in _DATE_FMT:
+                try:
+                    if d.strftime(f).lower() in low:
+                        return True
+                except ValueError:
+                    pass
+        except ValueError:
+            pass
+    return False
 
 
 def _plain_table_tiers(html: Optional[str], trail: Optional["AuditTrail"] = None) -> list:
@@ -720,6 +874,8 @@ def explore_for_pricing(
     accumulated_text = page_text or ""
     accumulated_tiers: list = []
     budget = ExploreBudget()
+    identity_tokens: set = set()  # filled by the sub-page block; Tier 3 must not NameError without it
+    external_seen: Optional[str] = None  # last external page fetched (organiser_url retry hint)
 
     # 1. Inventory: tabs already in page_text (fetcher expanded them).
     # If text contains £/$/€, try regex sweep first
@@ -800,8 +956,13 @@ def explore_for_pricing(
             except Exception as e:
                 trail.notes.append(f"llm_classify_failed: {e}")
         # Also try common suffixes off the base URL
+        # Guessed suffixes are the lowest-value candidates (many CMSs answer 200
+        # for any path, each then costing a vision call). When the page links
+        # out explicitly (register / book online / ticketing host) the Tier 3
+        # external follow is the better use of the budget, so skip the guesses.
+        _has_explicit_external = bool(find_external_event_links(page_html, base_url, limit=1))
         seed = base_url.split("?")[0].rstrip("/")
-        for suffix in COMMON_SUBPAGE_SUFFIXES[:6]:
+        for suffix in ([] if _has_explicit_external else COMMON_SUBPAGE_SUFFIXES[:6]):
             anchors.append(seed + suffix)
         # CRITICAL: gate to verify any sub-page is actually about THIS event
         # before extracting pricing. Prevents cross-contamination across
@@ -950,8 +1111,13 @@ def explore_for_pricing(
     # gate applies on the external page text.
     organiser = (row.get("organiser_url") or "").strip()
     has_organiser = bool(organiser) and organiser.split("#")[0].rstrip("/") != (row.get("source_url") or base_url).split("#")[0].rstrip("/")
-    if identity_tokens and (page_html or has_organiser):
-        externals = find_external_event_links(page_html or "", base_url, limit=3)
+    if page_html or has_organiser:
+        # The same-domain walk above routinely burns the whole fetch budget on
+        # guessed sub-pages (survey P12: 40+ of 50 rows never reached their
+        # external link). Tier 3 gets its own small allowance, still bounded
+        # by the per-source deadline.
+        budget = ExploreBudget(max_fetches=EXPLORE_EXTERNAL_FETCHES)
+        externals = find_external_event_links(page_html or "", base_url, limit=4)
         if has_organiser and organiser not in [u for u, _ in externals]:
             externals.insert(0, (organiser, "organiser_url"))
         for ext_url, link_text in externals:
@@ -966,19 +1132,25 @@ def explore_for_pricing(
             trail.subpages_fetched.append(ext_url)
             trail.total_text_chars += len(sub_text)
             trail.notes.append(f"external_followed: {ext_url} (link text: {link_text!r})")
-            if not page_matches_event(sub_text, ext_url):
+            # The event's own page linked here explicitly, so the link is the
+            # identity evidence: a loose token/date match is enough. Fall back
+            # to the strict gate only when that fails.
+            if not (external_identity_ok(row, sub_text)
+                    or (identity_tokens and page_matches_event(sub_text, ext_url))):
+                trail.notes.append(f"external_identity_rejected: {ext_url}")
                 continue
-            # External text regex sweep
-            tiers = _text_pricing_sweep(sub_text)
+            external_seen = external_seen or ext_url
+            # External text regex sweep + fee tables + flat "Label - £N" text
+            tiers, _how = _external_page_tiers(sub_text, sub_html, trail)
             if tiers:
                 trail.llm_reasoning = (
                     f"Followed external link {link_text!r} to {ext_url} "
-                    f"(aggregator-style listing). Found prices via text regex."
+                    f"(aggregator-style listing). Found prices via {_how} extraction."
                 )
-                trail.notes.append(f"external_text: {len(tiers)} tiers from {ext_url}")
+                trail.notes.append(f"external_{_how}: {len(tiers)} tiers from {ext_url}")
                 return ExploreResult(
                     field="pricing", value=tiers,
-                    method=f"external_text:{urlparse(ext_url).netloc}",
+                    method=f"external_{'text' if _how == 'text' else _how}:{urlparse(ext_url).netloc}",
                     audit_trail=trail, found=True, external_url=ext_url,
                 )
             # External page might also have fee images
@@ -1036,7 +1208,7 @@ def explore_for_pricing(
         trail.llm_reasoning = "No page text available."
         return ExploreResult(
             field="pricing", value=None, method="not_found",
-            audit_trail=trail, found=False,
+            audit_trail=trail, found=False, external_url=external_seen,
         )
     prompt = f"""You are looking for REGISTRATION FEES for a medical event.
 
@@ -1060,7 +1232,7 @@ PAGE TEXT:
         trail.llm_reasoning = "LLM call failed (rate limit or 5xx)."
         return ExploreResult(
             field="pricing", value=None, method="not_found",
-            audit_trail=trail, found=False,
+            audit_trail=trail, found=False, external_url=external_seen,
         )
     try:
         # Strip code fences
@@ -1080,14 +1252,14 @@ PAGE TEXT:
         trail.llm_reasoning = f"LLM JSON parse failed: {e}"
         return ExploreResult(
             field="pricing", value=None, method="not_found",
-            audit_trail=trail, found=False,
+            audit_trail=trail, found=False, external_url=external_seen,
         )
     trail.llm_reasoning = parsed.get("reasoning", "")[:300]
     parsed_tiers = parsed.get("tiers", [])
     if not parsed_tiers:
         return ExploreResult(
             field="pricing", value=None, method="not_found",
-            audit_trail=trail, found=False,
+            audit_trail=trail, found=False, external_url=external_seen,
         )
     # Convert LLM tiers to our schema
     out_tiers: list = []
@@ -1109,7 +1281,7 @@ PAGE TEXT:
     if not out_tiers:
         return ExploreResult(
             field="pricing", value=None, method="not_found",
-            audit_trail=trail, found=False,
+            audit_trail=trail, found=False, external_url=external_seen,
         )
     return ExploreResult(
         field="pricing", value=out_tiers, method="llm_full_context",
