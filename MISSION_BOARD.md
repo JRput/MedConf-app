@@ -195,11 +195,13 @@ Gate per phase: build in a worktree → Playwright screenshots at 390 / 768 / 14
 |---|---|---|---|
 | P1 | Survey every active row with 0 tiers | `sonnet`, read-only | ✅ 2026-10-05 — 675 rows: A text-missed 37 (Resus 13, RCPSG 8, ACEP 6) · B image 3 · C external site 87 (ACPGBI 17, FPH 10, ACEP 10, Advance HE 8, BSH 5) · D linked PDF 106 (SCCM 66) · E member-only 5 · **F truly none 403** (RCGP 135, ESMO 48, RCPath 45, EAU 40) · unfetchable 34 (RCoA/RSM/FICM/EventsAir). `reports/pricing/2026-10-05-survey.*` |
 | P2 | Detection: image fee tables (data URIs), same-site registration links, two-hop external sub-pages, currency from image, free-event rule tightened | `sonnet` | ✅ `6ab6b45` (KSUOG 2492 → 2 USD tiers). Incident: 67 false £0 tiers on SCCM from 'complimentary' — reverted |
-| P3 | Per-source fixes for text prices missed: Resus 29, RCPSG 25, ACEP 59 (uroweb done `4eaf600`) | `sonnet` ×3 | 🔄 |
+| P3 | Per-source fixes for text prices missed | `sonnet` ×3 | ✅ Resus `749da3f` (2 real; 11 were centre charges) · RCPSG `063f1c1` (8/8) · ACEP `a3c468b` (microsite fees) |
 | P4 | Submissions: poster-competition / "submit posters" wording + submission deadline parsing in `abstract_classifier`; verify BSH 2532; scan all sources for the pattern | `sonnet` | ✅ `957f464` (BSH 2532 → 2026-10-27) |
 | P5 | Gate: re-run remediator on affected sources; tiers before/after per source; "Price TBC" count must drop to P1's "truly none" bucket ± noise | direct | ⬜ |
 | P6 | **Pipeline-level submission detection** (owner: Advance HE Teaching & Learning Conf 2027 has a call for papers + deadline in a linked PDF — missed; only 3/61 extractors call the abstract classifier): run `classify_submission` on every detail page in the merge step regardless of extractor; follow one call-for-papers PDF/portal link (bounded) and parse its deadline; audit flags "call for papers on page but no deadline" | `sonnet` | ✅ `6f56e50` |
 | P7 | Submissions survey | `sonnet` | ✅ 722 conferences w/o deadline: 586 no programme · 35 missed (A 14 on page, B 17 elsewhere, C 4) — RCPsych 13, RCEM 11 · 99 unfetched. **0/35 healed by the remediator** → P8 |
 | P8 | Why the 35 didn't heal (patterns: 'call for posters', submission forms, 'Deadlines' tables; remediator gating) → fix + re-run | `sonnet` | 🔄 |
 | P9 | PDF/DOCX fee tables in the explorer (bucket D, 106 rows, SCCM 66) | `sonnet` | 🔄 |
-| P10 | Harness `--coverage` pre-registration gate reusing the audit detectors | `sonnet` | ✅ `50814f4` (112 tests) |
+| P10 | Harness `--coverage` pre-registration gate reusing the audit detectors | `sonnet` | ✅ `50814f4` + `f8415be` |
+| P11 | Remediator row rotation: `remediation_attempted_at` column + NULLS-FIRST ordering so the 600 s budget moves through the backlog (SCCM: 55/76 rows never attempted; IFAD 2574 never reached) | `sonnet` | 🔄 |
+| P12 | External-site fees: only 1/50 bucket-C rows gained tiers after remediation; diagnose link picking / identity gate / fee formats / budget, fix, recount | `sonnet` | 🔄 |
