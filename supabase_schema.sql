@@ -80,6 +80,8 @@ CREATE TABLE IF NOT EXISTS conferences (
     -- (e.g. "see event page for details"). When NULL, the date governs.
     abstract_deadline_note TEXT,
     abstract_deadline DATE,
+    -- Remediator round-robin stamp (when the last remediation attempt started)
+    remediation_attempted_at TIMESTAMPTZ,
     organiser_url TEXT,
     booking_url TEXT,
     source_url TEXT UNIQUE NOT NULL,

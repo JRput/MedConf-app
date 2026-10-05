@@ -13,10 +13,11 @@ from __future__ import annotations
 import logging
 import os
 import time
+from datetime import datetime, timezone
 from collections import defaultdict
 from typing import Any, Optional
 
-from .detector import detect_gaps_for_rows
+from .detector import detect_gaps_for_rows, order_gap_rows
 from .fetcher import PageCache
 from .fixers import REGISTRY as FIXERS
 from .validators import validate
@@ -165,7 +166,12 @@ def remediate_source(source_id: int) -> dict:
 
     # Detect gaps
     gaps_per_row = detect_gaps_for_rows(conferences, pricing_by_conf)
+    gaps_per_row = order_gap_rows(gaps_per_row)
     events_with_gaps = len(gaps_per_row)
+    logger.info(
+        f"remediator source {source_id}: first rows this run: "
+        f"{[r['id'] for r, _ in gaps_per_row[:3]]}"
+    )
     logger.info(
         f"remediator source {source_id}: "
         f"{events_with_gaps}/{len(conferences)} rows have gaps"
@@ -175,7 +181,9 @@ def remediate_source(source_id: int) -> dict:
     reset_fetch_state()
     set_source_deadline(started + SOURCE_BUDGET_S)
     rows_skipped = 0
+    attempted = 0
     budget_exhausted = False
+    skipped_rows: list = []
     patches_applied: list = []
     patches_rejected: list = []
     patches_couldnt_fix: list = []
@@ -185,13 +193,17 @@ def remediate_source(source_id: int) -> dict:
         for row, gaps in gaps_per_row:
             if source_time_up():
                 rows_skipped += 1
+                skipped_rows.append(row)
                 if not budget_exhausted:
                     budget_exhausted = True
-                    logger.warning(
-                        f"remediator source {source_id}: time budget "
-                        f"{SOURCE_BUDGET_S:.0f}s exhausted — skipping remaining rows"
-                    )
                 continue
+            attempted += 1
+            try:
+                sb.table("conferences").update(
+                    {"remediation_attempted_at": datetime.now(timezone.utc).isoformat()}
+                ).eq("id", row["id"]).execute()
+            except Exception as e:
+                logger.warning(f"remediator: attempt stamp failed for {row['id']}: {e}")
             url = row.get("source_url")
             page_text = cache.get(url) if url else None
             page_html = cache.get_html(url) if url else None
@@ -248,6 +260,7 @@ def remediate_source(source_id: int) -> dict:
                     except Exception as e:
                         logger.debug(f"promoted-pattern replay failed: {e}")
 
+                result = None
                 # TIER 2 — explorer escalation when Tier 1 returns null
                 if value is None and field in EXPLORERS and url and not source_time_up():
                     try:
@@ -287,6 +300,19 @@ def remediate_source(source_id: int) -> dict:
                         )
 
                 if value is None:
+                    # No fees, but the explorer reached an external event page:
+                    # keep it as organiser_url so the next run can retry cheaply.
+                    _ext = getattr(result, "external_url", None) if (result is not None and field == "pricing") else None
+                    if _ext and row.get("organiser_url") in (None, "", row.get("source_url")):
+                        if _patch_row(sb, row["id"], "organiser_url", _ext):
+                            patches_applied.append({
+                                "conference_id": row["id"],
+                                "conference_name": (row.get("conference_name") or "")[:60],
+                                "field": "organiser_url",
+                                "value_before": str(row.get("organiser_url"))[:80],
+                                "value_after": _ext[:200],
+                                "method": "external_link_recorded:no_fees_found",
+                            })
                     unfixed.append(field)
                     continue
                 if not validate(field, value):
@@ -338,6 +364,27 @@ def remediate_source(source_id: int) -> dict:
 
     set_source_deadline(None)
     duration = time.time() - started
+    oldest_unattempted_days = None
+    if skipped_rows:
+        now_dt = datetime.now(timezone.utc)
+        ages = []
+        for r in skipped_rows:
+            v = r.get("remediation_attempted_at")
+            if not v:
+                ages.append(None)
+                continue
+            d = datetime.fromisoformat(str(v).replace("Z", "+00:00"))
+            ages.append((now_dt - d).total_seconds() / 86400)
+        known = [a for a in ages if a is not None]
+        oldest_unattempted_days = (
+            "never" if any(a is None for a in ages) else round(max(known), 1)
+        )
+        stale7 = sum(1 for a in ages if a is None or a > 7)
+        logger.warning(
+            f"remediator source {source_id}: time budget {SOURCE_BUDGET_S:.0f}s "
+            f"exhausted — attempted {attempted}, skipped {rows_skipped}; "
+            f"{stale7} rows unattempted for >7 days (oldest: {oldest_unattempted_days})"
+        )
     stats = {k: (round(v, 1) if isinstance(v, float) else v) for k, v in fetch_stats.items()}
     logger.info(f"remediator source {source_id}: done in {duration:.0f}s, fetch stats {stats}")
     report_path = write_report(
@@ -367,5 +414,8 @@ def remediate_source(source_id: int) -> dict:
         "duration_sec": round(duration, 1),
         "budget_exhausted": budget_exhausted,
         "rows_skipped_by_budget": rows_skipped,
+        "attempted": attempted,
+        "skipped_budget": rows_skipped,
+        "oldest_unattempted_days": oldest_unattempted_days,
         "report_path": str(report_path),
     }

@@ -82,12 +82,23 @@ def detect_gaps(
     #       deadline info — conferences typically have abstract calls; if
     #       the page genuinely has none, the fixer returns
     #       {"abstract_open": False} and we stop flagging on next run.
-    # Courses/workshops typically don't have abstracts, so we skip them
-    # to avoid wasted LLM calls.
+    # Courses typically don't have abstracts, so we skip them to avoid wasted
+    # LLM calls. Workshops are included since P8 (RCEM workshop-type rows
+    # advertised calls for abstracts but were never examined).
+    #   (c) P8: the stored note is only a placeholder ("... see page for
+    #       submission date") and no deadline is known — re-examine so improved
+    #       patterns / link-following can upgrade it. Real notes and closed
+    #       notes ("Call for posters — closed") are final.
+    note = (row.get("abstract_deadline_note") or "")
+    placeholder_note = ("see page for submission date" in note
+                        or "see event page for details" in note)
     if row.get("abstract_open") and not row.get("abstract_deadline") \
             and not row.get("abstract_deadline_note"):
         gaps.append("abstract_status")
-    elif row.get("event_type") == "conference" \
+    elif placeholder_note and not row.get("abstract_deadline") \
+            and not row.get("is_on_demand"):
+        gaps.append("abstract_status")
+    elif row.get("event_type") in ("conference", "workshop") \
             and not row.get("abstract_deadline") \
             and not row.get("abstract_deadline_note") \
             and not row.get("is_on_demand"):
@@ -111,3 +122,41 @@ def detect_gaps_for_rows(
         if gaps:
             out.append((r, gaps))
     return out
+
+
+def order_gap_rows(
+    gap_rows: List[Tuple[dict, List[str]]],
+    *,
+    now=None,
+    recent_days: float = 3.0,
+) -> List[Tuple[dict, List[str]]]:
+    """Round-robin ordering for budget-limited runs.
+
+    Never-attempted rows (remediation_attempted_at NULL) first, then oldest
+    attempt first (ties by id). Rows attempted within ``recent_days`` sort
+    after everything older but are never excluded.
+    """
+    from datetime import datetime, timezone, timedelta
+
+    now = now or datetime.now(timezone.utc)
+    cutoff = now - timedelta(days=recent_days)
+
+    def _ts(row):
+        v = row.get("remediation_attempted_at")
+        if not v:
+            return None
+        if isinstance(v, datetime):
+            d = v
+        else:
+            d = datetime.fromisoformat(str(v).replace("Z", "+00:00"))
+        return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+
+    def key(item):
+        row = item[0]
+        t = _ts(row)
+        if t is None:
+            return (0, 0.0, row.get("id") or 0)
+        recent = 1 if t >= cutoff else 0
+        return (1 + recent, t.timestamp(), row.get("id") or 0)
+
+    return sorted(gap_rows, key=key)
