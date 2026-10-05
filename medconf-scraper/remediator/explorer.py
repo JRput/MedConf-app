@@ -567,6 +567,99 @@ def _plain_table_tiers(html: Optional[str], trail: Optional["AuditTrail"] = None
         return []
 
 
+PDF_FETCH_TIMEOUT_S = float(os.environ.get("REMEDIATOR_PDF_TIMEOUT_S", "15"))
+PDF_MAX_TIERS = 40
+_PLAIN_FEE_LINE_RE = re.compile(r"^(?P<label>[A-Za-z][^\d$£€|]{2,100}?)[\s.:|\-]*(?P<price>\d{1,3}(?:[,.]\d{3})+|\d{2,5})(?:[.,]\d{2})?\s*$")
+PDF_CACHE: dict = {}
+
+
+def _fetch_document_text(url: str, trail: "AuditTrail") -> Optional[str]:
+    """Download a PDF/DOCX (15 s timeout, 8 MB cap, cached) and return its text."""
+    from .pdf_text import document_to_text, PDF_MAX_BYTES
+    if url in PDF_CACHE:
+        return PDF_CACHE[url]
+    text: Optional[str] = None
+    try:
+        with httpx.Client(timeout=PDF_FETCH_TIMEOUT_S, follow_redirects=True,
+                          headers={"User-Agent": EXPLORER_UA}) as c:
+            r = c.get(url)
+            r.raise_for_status()
+            if len(r.content) > PDF_MAX_BYTES:
+                trail.notes.append(f"pdf_skipped_too_large: {url}")
+            else:
+                text = document_to_text(r.content, url)
+    except Exception as e:
+        trail.notes.append(f"pdf_fetch_failed: {url} ({type(e).__name__})")
+    PDF_CACHE[url] = text
+    return text
+
+
+def _tiers_from_document_text(text: str, trail: "AuditTrail") -> list:
+    """Run the text sweep and the plain-number parser over extracted document
+    text. Every tier needs a label and a detected currency; years/page numbers
+    are not prices; capped at PDF_MAX_TIERS."""
+    from .fixers.pricing import _text_pricing_sweep
+    # "Consultant: £40 + VAT" -> drop the tax/unit suffix so line patterns match.
+    text = re.sub(r"(?im)([£$€]\s*[\d,]+(?:\.\d+)?)\s*(?:\+|plus|incl?\.?|excl?\.?|ex\.?)?\s*(?:VAT|GST|tax)\b.*$", r"\1", text)
+    tiers = []
+    for t in _text_pricing_sweep(text):
+        # Inline sweep can span a line break; keep only the label's own line.
+        label = (t.get("tier_label") or "").split("\n")[-1].strip()
+        if len(re.findall(r"[A-Za-z]", label)) >= 3 and not any(
+                x["tier_label"].lower() == label.lower() and x["price_gbp"] == t["price_gbp"] for x in tiers):
+            tiers.append({**t, "tier_label": label})
+    if not tiers:
+        # Plain-number fee lines ("Member  450") -> pseudo table for the
+        # shared parser. Needs a currency word/code somewhere in the document.
+        from extractors.pricing_tables import _detect_currency, parse_pricing_tables
+        currency = _detect_currency(text[:20000], "")
+        rows = []
+        for line in text.splitlines():
+            m = _PLAIN_FEE_LINE_RE.match(line.strip())
+            if not m:
+                continue
+            label, price = m.group("label").strip(" .:|-"), m.group("price")
+            if re.fullmatch(r"(19|20)\d\d", price) or len(re.findall(r"[A-Za-z]", label)) < 3:
+                continue  # year / page-number-ish
+            if re.search(r"(?i)\b(page|tel|phone|fax|postcode|room|floor)\b", label):
+                continue
+            rows.append(f"<tr><td>{_html.escape(label)}</td><td>{price}</td></tr>")
+        if currency and rows:
+            tiers = parse_pricing_tables(
+                f"<h3>Registration fees {currency}</h3><table>{''.join(rows)}</table>",
+                default_currency="", max_tiers=PDF_MAX_TIERS)
+    tiers = [t for t in usable_vision_tiers(tiers, trail)
+             if (t.get("tier_label") or "").strip() and t.get("price_gbp")]
+    return tiers[:PDF_MAX_TIERS]
+
+
+def _follow_fee_document(html: Optional[str], base_url: str, budget: "ExploreBudget",
+                         trail: "AuditTrail"):
+    """At most one fee-ish PDF/DOCX per event. Returns (tiers, url, method) or None.
+    Records `pdf_followed: <url>` in the trail."""
+    if not html or any(str(n).startswith("pdf_followed:") for n in trail.notes):
+        return None
+    from .pdf_text import find_fee_documents
+    for url, _text in find_fee_documents(html, base_url, limit=2):
+        if budget.exhausted():
+            return None
+        budget.fetches += 1
+        text = _fetch_document_text(url, trail)
+        trail.notes.append(f"pdf_followed: {url}")
+        if not text or len(text.strip()) < 40:
+            trail.notes.append(f"pdf_no_text_layer (scanned?): {url}")
+            continue
+        trail.total_text_chars += len(text)
+        tiers = _tiers_from_document_text(text, trail)
+        if tiers:
+            from urllib.parse import unquote
+            name = unquote(urlparse(url).path.rsplit("/", 1)[-1])
+            trail.notes.append(f"pdf_tiers: {len(tiers)} from {url}")
+            return tiers, url, f"pdf:{name}"
+        return None  # one document per event
+    return None
+
+
 def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudget",
                                   trail: "AuditTrail", limit: int = 2):
     """On an external event site, fetch up to `limit` same-host registration/
@@ -591,6 +684,9 @@ def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudg
         if tt:
             trail.notes.append(f"external_subpage_table: {len(tt)} tiers from {url}")
             return tt, url, "table"
+        _pdf = _follow_fee_document(sub_html, url, budget, trail)
+        if _pdf:
+            return _pdf
         if sub_html and vision_time_left() and not source_time_up():
             images = find_money_images(sub_html, url, limit=4, trail=trail)
             if images:
@@ -661,6 +757,14 @@ def explore_for_pricing(
                     )
             except Exception as e:
                 trail.notes.append(f"vision_main_page_failed: {e}")
+
+    # 1c. Fee PDF/DOCX linked from the main page.
+    _pdf = _follow_fee_document(page_html, base_url, budget, trail)
+    if _pdf:
+        ptiers, purl, pmethod = _pdf
+        trail.llm_reasoning = f"Found prices in linked fee document {purl}."
+        return ExploreResult(field="pricing", value=ptiers, method=pmethod,
+                             audit_trail=trail, found=True, external_url=purl)
 
     # 2. Walk same-domain sub-pages if HTML available
     parsed = urlparse(base_url)
@@ -805,6 +909,12 @@ def explore_for_pricing(
                     field="pricing", value=ttiers, method=f"subpage_table:{urlparse(url).path}",
                     audit_trail=trail, found=True,
                 )
+            _pdf = _follow_fee_document(sub_html, url, budget, trail)
+            if _pdf:
+                ptiers, purl, pmethod = _pdf
+                trail.llm_reasoning = f"Found prices in fee document {purl} linked from {url}."
+                return ExploreResult(field="pricing", value=ptiers, method=pmethod,
+                                     audit_trail=trail, found=True, external_url=purl)
             # No text prices — collect fee images
             if sub_html:
                 images = find_money_images(sub_html, url, limit=6, trail=trail)
@@ -897,6 +1007,12 @@ def explore_for_pricing(
                             )
                     except Exception as e:
                         trail.notes.append(f"external_vision_failed: {e}")
+            _pdf = _follow_fee_document(sub_html, ext_url, budget, trail)
+            if _pdf:
+                ptiers, purl, pmethod = _pdf
+                trail.llm_reasoning = f"Followed external link to {ext_url}; fees in linked document {purl}."
+                return ExploreResult(field="pricing", value=ptiers, method=pmethod,
+                                     audit_trail=trail, found=True, external_url=ext_url)
             # Two-hop: the external congress site keeps fees on its own
             # "Registration" sub-page. Same-host, max 2, shared fetch caps.
             if sub_html:
@@ -908,7 +1024,8 @@ def explore_for_pricing(
                         f"registration sub-page {hop_url}. Found prices via {hop_method}.")
                     return ExploreResult(
                         field="pricing", value=htiers,
-                        method=f"external_subpage_{hop_method}:{urlparse(hop_url).netloc}",
+                        method=(hop_method if hop_method.startswith("pdf:")
+                                else f"external_subpage_{hop_method}:{urlparse(hop_url).netloc}"),
                         audit_trail=trail, found=True, external_url=ext_url,
                     )
 
