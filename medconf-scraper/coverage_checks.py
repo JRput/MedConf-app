@@ -36,7 +36,50 @@ def is_blocking(w: Warning) -> bool:
     return w.code.startswith(BLOCKING_PREFIXES)
 
 
-def run_coverage_checks(merged_event: dict, page_html: str, page_text: str, base_url: str) -> List[Warning]:
+# Account / newsletter sign-up, not registration for THIS event.
+_ACCOUNT_LINK_RE = re.compile(
+    r"register\s+(?:as|for\s+(?:an?\s+)?(?:account|updates?|newsletter|alerts?|interest))|register\s+your\s+interest|"
+    r"create\s+(?:an?\s+)?account|sign[\s-]?up|log\s?in|sign[\s-]?in|my\s+account|subscribe|join\s+(?:us|now|the)|"
+    r"become\s+a\s+member|membership", re.I)
+_ANCHOR_HREF_RE = re.compile(r'<a\b[^>]*?href=["\']([^"\']+)["\']', re.I)
+
+
+def event_registration_links(html: str, base_url: str, listing_html: str = "") -> list:
+    """Same-site registration links that are about THIS event: the explorer's
+    picker, run on the page with nav/header/footer/aside removed, minus links
+    that also appear on the listing page (site chrome) and account/newsletter
+    sign-up links. Coverage-only; the explorer keeps nav links on purpose."""
+    from urllib.parse import urljoin
+    from remediator.explorer import _CHROME_BLOCK_RE, find_registration_links
+    body = _CHROME_BLOCK_RE.sub(" ", html or "")
+    chrome = set()
+    if listing_html:
+        for h in _ANCHOR_HREF_RE.findall(listing_html):
+            chrome.add(urljoin(base_url, h).split("#")[0].split("?")[0].rstrip("/"))
+    out = []
+    for url, text in find_registration_links(body, base_url, limit=10):
+        if _ACCOUNT_LINK_RE.search(text) or _ACCOUNT_LINK_RE.search(url.replace("-", " ").replace("_", " ")):
+            continue
+        if url.rstrip("/") in chrome:
+            continue
+        out.append((url, text))
+    return out[:3]
+
+
+def _own_text(html: str, text: str) -> str:
+    """Page text without anchors and nav/header/footer/aside blocks, so "2 Day"
+    in a link to a different course (Resus e-ALS -> ALS 2 Day) is not read as
+    this event's length. Falls back to the plain text when no HTML is given."""
+    if not html:
+        return text
+    from remediator.explorer import _CHROME_BLOCK_RE
+    h = _CHROME_BLOCK_RE.sub(" ", html)
+    h = re.sub(r"<a\b[^>]*>.*?</a\s*>", " ", h, flags=re.I | re.S)
+    return re.sub(r"<[^>]+>", " ", h)
+
+
+def run_coverage_checks(merged_event: dict, page_html: str, page_text: str, base_url: str,
+                        listing_html: str = "") -> List[Warning]:
     ev = merged_event or {}
     html, text = page_html or "", page_text or ""
     base_url = base_url or ev.get("booking_url") or ev.get("source_url") or ""
@@ -47,7 +90,7 @@ def run_coverage_checks(merged_event: dict, page_html: str, page_text: str, base
     start, end = ev.get("start_date"), ev.get("end_date")
     if start and (not end or end == start):
         from remediator.audit import DATE_RANGE_RE
-        m = DATE_RANGE_RE.search(text) or _NDAY_RE.search(text)
+        m = DATE_RANGE_RE.search(text) or _NDAY_RE.search(_own_text(html, text))
         if m:
             out.append(Warning("SINGLE_DAY_SUSPECT",
                                "end_date equals start_date but the page shows a multi-day range or wording",
@@ -70,8 +113,8 @@ def run_coverage_checks(merged_event: dict, page_html: str, page_text: str, base
                                        f"heading {img.heading!r} image {img.label()}"))
             except Exception:
                 pass
-            from remediator.explorer import find_external_event_links, find_registration_links
-            reg = find_registration_links(html, base_url)
+            from remediator.explorer import find_external_event_links
+            reg = event_registration_links(html, base_url, listing_html)
             if reg:
                 out.append(Warning("PRICE_SAME_SITE_LINK", "no tiers but the page links to a same-site registration/fees page",
                                    "; ".join(f"{t} -> {u}" for u, t in reg)))

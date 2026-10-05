@@ -55,6 +55,12 @@ try:
         shells = b.get_event_cards_paginated(source); via = "generic DOM walker"
     print(f"PHASE A via {via}: {len(shells)} shells; dated={sum(1 for s in shells if s.get('start_date'))}")
     for s in shells[:5]: print("   ", (s.get("title") or "")[:60], "|", s.get("start_date"), "|", s.get("booking_url"))
+    listing_html = ""
+    if a.coverage:
+        try:
+            b.navigate(source["base_url"]); listing_html = b.page.content()
+        except Exception as e:
+            print("  COVERAGE: could not load listing page for chrome filtering:", e)
     if shells:
         step = max(1, len(shells) // a.details)
         for s in shells[::step][: a.details]:
@@ -76,7 +82,7 @@ try:
                     html, text = b.page.content(), b.page.inner_text("body")
                 except Exception as e:
                     html, text = "", ""; print("   COVERAGE: could not read page:", e)
-                ws = run_coverage_checks(merged, html, text, b.page.url or merged.get("booking_url") or "")
+                ws = run_coverage_checks(merged, html, text, b.page.url or merged.get("booking_url") or "", listing_html)
                 if ws:
                     for w in ws:
                         cov_counts[w.code] += 1; cov_blocking |= is_blocking(w)

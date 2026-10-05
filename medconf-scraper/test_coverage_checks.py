@@ -95,3 +95,29 @@ def test_blocking_classification():
     html, text = page("<h2>Call for Papers</h2>")
     ws = run_coverage_checks({**EV, "abstract_deadline": None}, html, text, BASE)
     assert any(is_blocking(w) for w in ws)
+
+
+def test_nav_and_account_links_ignored():
+    ev = {**EV, "pricing_tiers": []}
+    nav = '<nav><a href="/register-as-resusready">Register as ResusReady</a><a href="/registration">Registration</a></nav>'
+    body = nav + '<p>Course info.</p><a href="/sign-up">Sign up for updates</a><a href="/account">Create account</a>'
+    assert codes(ev, body) == []
+
+
+def test_listing_chrome_link_ignored_but_event_link_kept():
+    ev = {**EV, "pricing_tiers": []}
+    html, text = page('<a href="/book-your-place/">Book your place</a><a href="/events/forum/registration">Register for this event</a>')
+    listing = '<a href="/book-your-place/">Book your place</a>'
+    ws = run_coverage_checks(ev, html, text, BASE, listing)
+    assert [w.code for w in ws] == ["PRICE_SAME_SITE_LINK"]
+    assert "book-your-place" not in ws[0].evidence
+
+
+def test_two_day_wording_matching_row_is_clean():
+    ev = {**EV, "start_date": "2026-11-05", "end_date": "2026-11-06"}
+    assert codes(ev, "<p>A two-day meeting, 5-6 November 2026</p>") == []
+
+
+def test_nday_in_link_to_other_course_ignored():
+    ev = {**EV, "end_date": "2026-11-05"}
+    assert codes(ev, '<p>e-learning plus one day face to face</p><a href="/als-2-day">ALS: 2 Day Course</a>') == []
