@@ -206,4 +206,4 @@ Gate per phase: build in a worktree → Playwright screenshots at 390 / 768 / 14
 | P11 | Remediator row rotation (`remediation_attempted_at`, never-attempted first) | `sonnet` | ✅ `22954c6` — SCCM backlog now drains ~8 rows/night; IFAD reached but still no tiers (JS-rendered fee section → P12) |
 | P12 | External-site fees: only 1/50 bucket-C rows gained tiers; diagnose + fix (also ESSIC 2184 → essicmeeting.eu, IFAD 2574 JS-rendered fee section) | `sonnet` | 🔄 |
 | P13 | ACEP location fallback (API state-only → event page → microsite → organiser) | `sonnet` | ✅ `65e9884` — city 9→18, venue 1→7 of 39; 8 online; ~14 organisers publish no venue |
-| P14 | Evidence-based LOCATION_ON_PAGE check in coverage_checks + audit (page names venue/city but none stored) — PLAYBOOK row 9 | `sonnet` | 🔄 |
+| P14 | Evidence-based LOCATION_ON_PAGE in coverage_checks + audit (+ linked booking/organiser page lookup) — PLAYBOOK row 9 | `sonnet` | ✅ `56a365e` |
