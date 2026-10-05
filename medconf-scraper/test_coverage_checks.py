@@ -121,3 +121,63 @@ def test_two_day_wording_matching_row_is_clean():
 def test_nday_in_link_to_other_course_ignored():
     ev = {**EV, "end_date": "2026-11-05"}
     assert codes(ev, '<p>e-learning plus one day face to face</p><a href="/als-2-day">ALS: 2 Day Course</a>') == []
+
+
+# --- pattern 9: location on page, not stored --------------------------------
+LOC_EV = {**EV, "event_format": "in_person", "city": None, "venue_name": None}
+ACEP = ('<header><a href="/">ACEP</a></header><main><h1>ACEP26</h1><div class="loc"><strong>Location:</strong>'
+        '<p>McCormick Place, Chicago, IL</p></div></main><footer>ACEP, 4950 W Royal Ln, Irving, TX 75063</footer>')
+
+
+def test_location_on_page_acep_style():
+    assert codes(LOC_EV, ACEP) == ["LOCATION_ON_PAGE"]
+
+
+def test_location_jsonld():
+    ld = ('<script type="application/ld+json">{"@type":"Event","location":{"@type":"Place","name":"ExCeL",'
+          '"address":{"addressLocality":"London"}}}</script><p>Hi</p>')
+    assert codes(LOC_EV, ld) == ["LOCATION_ON_PAGE"]
+
+
+def test_location_venue_keyword_line():
+    assert codes(LOC_EV, "<p>Join us</p><p>Hilton Garden Hotel</p>") == ["LOCATION_ON_PAGE"]
+
+
+def test_location_online_webinar_clean():
+    ev = {**LOC_EV, "event_format": "online"}
+    assert codes(ev, ACEP) == []
+    assert codes(LOC_EV, "<p>Location: Online via Zoom</p><p>Webinar</p>") == []
+
+
+def test_location_footer_address_only_clean():
+    body = "<main><p>A talk.</p></main><footer>Royal College, 12 High Street, Leeds LS1 4AB</footer>"
+    assert codes(LOC_EV, body) == []
+
+
+def test_location_stored_clean():
+    assert codes({**LOC_EV, "city": "Chicago"}, ACEP) == []
+
+
+def test_audit_city_venue_missing_with_page_evidence():
+    from remediator.audit import check_city, check_venue_name
+    row = {"event_format": "in_person", "city": None, "venue_name": None}
+    c = check_city(row, "", f"<html><body>{ACEP}</body></html>", {})
+    v = check_venue_name(row, "", f"<html><body>{ACEP}</body></html>", {})
+    for r in (c, v):
+        assert r.status == "MISSING" and "page names a venue/city" in r.reason
+    assert check_city({**row, "event_format": "online"}, "", ACEP, {}).status == "NOT_APPLICABLE"
+
+
+def test_location_on_linked_booking_page():
+    from coverage_checks import location_on_linked_pages
+    ev = {**LOC_EV, "booking_url": "https://chapter.example.org/conf"}
+    html, text = page("<p>Location:</p><p>Hilton Columbus, Columbus, OH</p>")
+    ws = location_on_linked_pages(ev, "https://acep.example/cal/x", lambda u: (html, text))
+    assert [w.code for w in ws] == ["LOCATION_ON_PAGE"]
+    assert location_on_linked_pages({**ev, "city": "Columbus"}, "", lambda u: (html, text)) == []
+    assert location_on_linked_pages(ev, "", lambda u: (_ for _ in ()).throw(RuntimeError())) == []
+
+
+def test_form_field_labels_are_not_a_location():
+    body = "<form><label>Address</label><label>Address Line 2</label><label>City</label></form>"
+    assert codes(LOC_EV, body) == []

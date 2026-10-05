@@ -130,6 +130,14 @@ def run_coverage_checks(merged_event: dict, page_html: str, page_text: str, base
             out.append(Warning("SUBMISSION_NO_DEADLINE",
                                "page advertises a call for papers / submission programme but no deadline or note is set"))
 
+    # 9. venue/city on the page but not stored
+    if (not (ev.get("city") or "").strip() and not (ev.get("venue_name") or "").strip()
+            and (ev.get("event_format") or "").lower() in ("in_person", "hybrid")):
+        from extractors.location_evidence import find_location_evidence
+        loc = find_location_evidence(html, text)
+        if loc:
+            out.append(Warning("LOCATION_ON_PAGE", "page names a venue/city but none stored", loc))
+
     # 7-8. tier list hygiene
     from validator import CTA_PREFIX_RE
     seen, dup = set(), []
@@ -144,3 +152,31 @@ def run_coverage_checks(merged_event: dict, page_html: str, page_text: str, base
     if dup:
         out.append(Warning("DUPLICATE_TIERS", "same label and price appears more than once", "; ".join(dup)))
     return out
+
+
+def location_on_linked_pages(merged_event: dict, current_url: str, fetch, already_found: bool = False) -> List[Warning]:
+    """Pattern 9 when the event row has no city/venue and the detail page itself
+    has no location evidence: look at the event's own booking/organiser site
+    (ACEP: the master-calendar page has none, the chapter microsite names the
+    venue). `fetch(url) -> (html, text)` is injected so this stays testable;
+    the harness passes a browser fetch. At most two pages are fetched."""
+    ev = merged_event or {}
+    if already_found or (ev.get("city") or "").strip() or (ev.get("venue_name") or "").strip():
+        return []
+    if (ev.get("event_format") or "").lower() not in ("in_person", "hybrid"):
+        return []
+    from extractors.location_evidence import find_location_evidence
+    seen = {(current_url or "").split("#")[0]}
+    for key in ("booking_url", "organiser_url"):
+        u = (ev.get(key) or "").split("#")[0]
+        if not u.startswith("http") or u in seen:
+            continue
+        seen.add(u)
+        try:
+            h, t = fetch(u)
+        except Exception:
+            continue
+        loc = find_location_evidence(h or "", t or "")
+        if loc:
+            return [Warning("LOCATION_ON_PAGE", f"linked {key} page names a venue/city but none stored", f"{u} :: {loc}")]
+    return []

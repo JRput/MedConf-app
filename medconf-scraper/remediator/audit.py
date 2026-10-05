@@ -224,6 +224,17 @@ def check_end_date(row, page_text, page_html, source) -> FieldVerdict:
                         reason="Single-day event; end_date = start_date implicit")
 
 
+def _location_evidence_if_unset(row, page_text, page_html) -> Optional[str]:
+    """Evidence that the page names a venue/city, only when the row has
+    neither and the event is in_person/hybrid."""
+    if (row.get("city") or "").strip() or (row.get("venue_name") or "").strip():
+        return None
+    if (row.get("event_format") or "").lower() not in ("in_person", "hybrid"):
+        return None
+    from extractors.location_evidence import find_location_evidence
+    return find_location_evidence(page_html or "", page_text or "")
+
+
 def check_venue_name(row, page_text, page_html, source) -> FieldVerdict:
     v = (row.get("venue_name") or "").strip()
     fmt = (row.get("event_format") or "").lower()
@@ -250,6 +261,10 @@ def check_venue_name(row, page_text, page_html, source) -> FieldVerdict:
     # Missing — look for specific venue-anchor phrases followed by a name.
     # Exclude generic phrases like "Venue common areas" that are section
     # headers rather than named venues.
+    loc_ev = _location_evidence_if_unset(row, page_text, page_html)
+    if loc_ev:
+        return FieldVerdict("venue_name", "MISSING", None, page_evidence=loc_ev,
+                            reason="MISSING — page names a venue/city but none stored")
     ev = _has_evidence_of(page_text,
         r"(?:will\s+be\s+held\s+at|held\s+at|hosted\s+at|takes?\s+place\s+at)\s+"
         r"the\s+[A-Z][\w'&,\-. ]{5,80}")
@@ -267,6 +282,10 @@ def check_city(row, page_text, page_html, source) -> FieldVerdict:
         return FieldVerdict("city", "NOT_APPLICABLE" if not v else "OK", v or None)
     if v:
         return FieldVerdict("city", "OK", v)
+    ev = _location_evidence_if_unset(row, page_text, page_html)
+    if ev:
+        return FieldVerdict("city", "MISSING", None, page_evidence=ev,
+                            reason="MISSING — page names a venue/city but none stored")
     return FieldVerdict("city", "MISSING",
                         reason="In-person event with no city set")
 

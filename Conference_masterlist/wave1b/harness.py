@@ -83,6 +83,12 @@ try:
                 except Exception as e:
                     html, text = "", ""; print("   COVERAGE: could not read page:", e)
                 ws = run_coverage_checks(merged, html, text, b.page.url or merged.get("booking_url") or "", listing_html)
+                print(f"   coverage page      {b.page.url}")
+                from coverage_checks import location_on_linked_pages
+                def _fetch(u):
+                    b.navigate(u); r = (b.page.content(), b.page.inner_text("body"))
+                    return r
+                ws += location_on_linked_pages(merged, b.page.url, _fetch, any(w.code == "LOCATION_ON_PAGE" for w in ws))
                 if ws:
                     for w in ws:
                         cov_counts[w.code] += 1; cov_blocking |= is_blocking(w)
