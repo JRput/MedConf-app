@@ -41,6 +41,8 @@ jobs:
             source_ids: "25,26,27,28,29,34,38,39,42,43,45"
           - group: E
             source_ids: "30,31,32,33,35,36,37,41"
+          - group: F
+            source_ids: "46,47,48,49,50,51,52,53,54,55,56,57,58,59"
 
     steps:
       - name: Check out repository
