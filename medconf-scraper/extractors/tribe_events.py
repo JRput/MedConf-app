@@ -110,6 +110,37 @@ def pick_description(lines: List[str], title: str) -> Optional[str]:
     return desc if len(desc) >= 50 else None
 
 
+# ── venue cleaning ─────────────────────────────────────────────────────────
+
+_VENUE_STOP_RE = re.compile(
+    r"\s*(?:Sessions?:|Address:|Accommodation:|Registration\b|More information|Information regarding|"
+    r"This is an external event|\(?\d{3}\)?[ -]\d{3}[ -]\d{4})", re.I)
+
+
+def clip_venue(venue: Optional[str], limit: int = 80) -> Optional[str]:
+    """Cut an over-long venue at a word boundary (never mid-word)."""
+    if venue and len(venue) > limit:
+        cut = venue[:limit]
+        idx = max(cut.rfind(","), cut.rfind(" "))
+        venue = (cut[:idx] if idx >= 30 else cut).rstrip(" ,;-")
+    return venue or None
+
+
+def clean_prose_venue(raw: Optional[str]) -> Optional[str]:
+    """Reduce a prose-derived venue string to just the venue name: cut at the
+    next label ("Sessions:", "Address:", "Accommodation:"...), drop literal escapes, then clip. Returns None when nothing sensible is left."""
+    if not raw:
+        return None
+    v = raw.replace("\\u00a0", " ").replace("\u00a0", " ")
+    m = _VENUE_STOP_RE.search(v)
+    if m:
+        v = v[:m.start()]
+    v = re.sub(r"\s+", " ", v).strip(" ,;:-.")
+    if len(v) < 4 or not re.search(r"[A-Za-z]", v):
+        return None
+    return clip_venue(v)
+
+
 # ── location-from-text helper (shared by sites whose API venue is empty) ────
 
 _TWO_WORD_COUNTRIES = {
@@ -242,6 +273,29 @@ def tiers_from_cost_details(e: Dict[str, Any], default_currency: str) -> List[Di
 
 # ── the family base class ───────────────────────────────────────────────────
 
+_FALLBACK_ONLINE_RE = re.compile(
+    r"\b(?:webinar|webcast|zoom|microsoft teams|livestream|live[- ]stream|online|virtual)\b", re.I)
+_FALLBACK_INPERSON_RE = re.compile(
+    r"\b(?:in[- ]person|face[- ]to[- ]face|hands[- ]on|cadaver(?:ic)?|delegates?\s+(?:will\s+)?attend\w*|"
+    r"places (?:are )?limited|royal college of|college of (?:surgeons|physicians)|hospital|university|"
+    r"hotel|conference cent(?:re|er)|venue|residential)\b", re.I)
+
+
+def infer_format_from_text(text: str) -> Optional[str]:
+    """Last-resort event_format from body text when the Tribe venue record and
+    virtual flag are both empty. Online wording wins only when no in-person cue
+    is present; both present -> hybrid; neither -> None (leave unset)."""
+    online = bool(_FALLBACK_ONLINE_RE.search(text or ""))
+    inperson = bool(_FALLBACK_INPERSON_RE.search(text or ""))
+    if online and inperson:
+        return "hybrid" if re.search(r"\bhybrid\b", text, re.I) else "online"
+    if online:
+        return "online"
+    if inperson:
+        return "in_person"
+    return None
+
+
 class TribeEventsExtractor(BaseExtractor):
     API_URL: str = ""                # full URL of /wp-json/tribe/events/v1/events
     SOCIETY: str = ""
@@ -286,13 +340,48 @@ class TribeEventsExtractor(BaseExtractor):
                 return None
         return None
 
+    def _fetch_api_via_cleared_browser(self, url: str) -> Optional[str]:
+        """Runner IPs get a 'Human Verification' challenge on some Tribe sites
+        (AAGL, 2026-10-06 cloud run). The challenge is cleared by a real
+        browser navigation to the site, but the JSON endpoint fetched through
+        httpx (or a bare browser goto) never carries the clearance cookie.
+        So: navigate the browser to the site root to clear it, then request
+        the API URL through the page's request context (shares cookies)."""
+        browser = getattr(self, "browser", None)
+        if browser is None or not getattr(browser, "page", None):
+            return None
+        try:
+            root = re.match(r"https?://[^/]+", url).group(0)
+            browser.navigate(root + "/")
+            # In-page fetch: carries the challenge token (aws-waf-token /
+            # cf_clearance) exactly as the site's own JS would.
+            result = browser.page.evaluate(
+                "u => fetch(u, {credentials: 'include'}).then(r => r.text().then(t => [r.status, t]))", url
+            )
+            status, text = result[0], result[1]
+            if 200 <= int(status) < 300:
+                return text
+            logger.warning(f"{self.SOCIETY} Tribe API via cleared browser: HTTP {status}")
+        except Exception as exc:  # noqa: BLE001
+            logger.warning(f"{self.SOCIETY} Tribe API via cleared browser failed: {exc}")
+        return None
+
     def _fetch_api_page(self, url: str) -> Optional[dict]:
         for attempt in range(3):
-            body = fetch_html(url, browser=getattr(self, "browser", None), headers=_USER_AGENT_HEADERS)
+            if attempt == 0:
+                body = fetch_html(url, browser=getattr(self, "browser", None), headers=_USER_AGENT_HEADERS)
+            else:
+                body = self._fetch_api_via_cleared_browser(url) or fetch_html(
+                    url, browser=getattr(self, "browser", None), headers=_USER_AGENT_HEADERS
+                )
             data = self._parse_json_body(body) if body else None
             if isinstance(data, dict) and "events" in data:
                 return data
-            logger.warning(f"{self.SOCIETY} Tribe API attempt {attempt + 1}/3 failed for {url}")
+            snippet = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", body or ""))[:160]
+            logger.warning(
+                f"{self.SOCIETY} Tribe API attempt {attempt + 1}/3 failed for {url} "
+                f"(body {len(body or '')} chars: {snippet!r})"
+            )
             time.sleep(2 * (attempt + 1))
         return None
 
@@ -392,18 +481,20 @@ class TribeEventsExtractor(BaseExtractor):
             parts = [p.strip() for p in shell["address"].split(",") if p.strip()]
             if len(parts) >= 2:
                 city = re.sub(r"^\d[\d\- ]*\s*", "", parts[-2] if len(parts) > 2 else parts[-1]) or None
-        if not (venue or city):
+        if not (venue and city):
             hit = self.location_from_text(text, shell)
             if hit:
-                _prose_venue, city, country = hit   # prose venue deliberately discarded
+                prose_venue, hit_city, hit_country = hit
+                # A prose venue is accepted only when the site hook found an
+                # explicit "Venue:" label, and only after boundary-trimming.
+                venue = venue or clean_prose_venue(prose_venue)
+                if not city:
+                    city, country = hit_city, hit_country
         if city and "," in city:
             city = city.split(",")[0].strip()
         if venue and venue.lower() in ("online", "virtual", "webinar"):
             venue = None
-        if venue and len(venue) > 80:
-            cut = venue[:80]
-            idx = max(cut.rfind(","), cut.rfind(" "))
-            venue = (cut[:idx] if idx >= 30 else cut).rstrip(" ,;-")
+        venue = clip_venue(venue)
         probe = f"{title} {' '.join(cats)} {text[:300]}".lower()
         is_online_word = bool(re.search(
             r"\b(webinar|webcast|zoom|livestream|live[- ]stream|"
@@ -425,6 +516,14 @@ class TribeEventsExtractor(BaseExtractor):
         elif shell.get("is_virtual") is False:
             # Tribe's own flag says "not virtual" and there are no online cues
             out["event_format"] = "in_person"
+        else:
+            # No venue record, no virtual flag, no explicit online cue. Fall
+            # back to the page text: a named institution / "in person" /
+            # hands-on wording means in person (e.g. BAETS masterclasses whose
+            # Tribe venue is blank but whose body names the host college).
+            fmt = infer_format_from_text(f"{title} {' '.join(cats)} {' '.join(lines)}")
+            if fmt:
+                out["event_format"] = fmt
 
         # Fees: text first (richer), then Tribe's structured cost
         tiers = parse_fee_lines(lines, default_currency=self.DEFAULT_CURRENCY)

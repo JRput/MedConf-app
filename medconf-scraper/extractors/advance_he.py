@@ -233,6 +233,13 @@ class AdvanceHeExtractor(BaseExtractor):
         today = date.today().isoformat()
         if spans:
             spans = [sp for sp in spans if (sp[1] or sp[0]) >= today]
+        elif "event-details" not in html and shell.get("start_date"):
+            # Programme / member-benefit templates (/programmes-events/...,
+            # advance-he.org/eu/...) have no event-details block. The listing
+            # date is authoritative; the rest comes from the page prose.
+            sd = shell["start_date"]
+            if sd >= today:
+                spans = [(sd, shell.get("end_date") or sd)]
         if not spans:
             return result  # past or undated — leave dates null
 
@@ -268,8 +275,16 @@ class AdvanceHeExtractor(BaseExtractor):
             result.get("description") or "",
         ))
 
+        # Sparse pages (no summary, no prose) carry only the event-details
+        # block. Compose a short event-specific description from those page
+        # facts rather than leave it empty or inherit a generic site blurb.
+        if not result.get("description"):
+            result["description"] = self._fact_description(
+                result["conference_name"], adv_type, result["start_date"],
+                result["end_date"], result.get("event_format"), result.get("city"))
+
         # ---- pricing ----
-        result["pricing_tiers"] = self._pricing(html)
+        result["pricing_tiers"] = self._pricing(html) or self._pricing_prose(body_text)
 
         # ---- sold out ----
         result["is_sold_out"] = bool(_SOLD_OUT_RE.search(body_text))
@@ -391,6 +406,23 @@ class AdvanceHeExtractor(BaseExtractor):
         return out
 
     @staticmethod
+    def _fact_description(title: str, adv_type: str, start: str, end: str,
+                          fmt: Optional[str], city: Optional[str]) -> str:
+        def fmt_d(iso: str) -> str:
+            d = date.fromisoformat(iso)
+            return f"{d.day} {d.strftime('%b %Y')}"
+        kind = re.sub(r"\s+", " ", (adv_type or "").strip())
+        what = f"{kind}" if kind else "event"
+        if kind and not re.search(r"event|programme|course|conference|workshop|webinar|network", kind, re.I):
+            what = f"{kind} event"
+        when = fmt_d(start) if (not end or end == start) else f"{fmt_d(start)} to {fmt_d(end)}"
+        how = {"online": "online", "hybrid": "in person and online"}.get(fmt or "")
+        if fmt == "in_person":
+            how = f"in person in {city}" if city else "in person"
+        tail = f", delivered {how}" if how else ""
+        return f"{title}: an Advance HE {what} running {when}{tail}. See the booking page for programme details."
+
+    @staticmethod
     def _main_text(html: str) -> str:
         m = re.search(r"<main.*?</main>", html, re.DOTALL)
         t = m.group(0) if m else html
@@ -460,6 +492,27 @@ class AdvanceHeExtractor(BaseExtractor):
                 "tier_label": label, "price_gbp": price, "currency": "GBP",
                 "is_early_bird": early, "early_bird_deadline": None,
             })
+        return tiers
+
+    _PROSE_FEE_RE = re.compile(
+        r"(Early[\s-]*bird\s+)?(Non[\s-]*member|Member|Standard|Full)\s+(?:Ticket|Fee|Rate|Price)?\s*:\s*"
+        r"£\s*([0-9]+(?:,[0-9]{3})*(?:\.[0-9]+)?)", re.I)
+
+    @classmethod
+    def _pricing_prose(cls, body_text: str) -> List[Dict[str, Any]]:
+        """Programme pages state fees in prose: 'Member Ticket: £6190
+        Non-Member Ticket: £8235'. Only labelled Member/Non-Member style
+        amounts are taken, never a bare £ in free text."""
+        flat = re.sub(r"\s+", " ", body_text or "")
+        tiers, seen = [], set()
+        for early, cat, amt in cls._PROSE_FEE_RE.findall(flat):
+            cat = "Non-Member" if cat.lower().startswith("non") else cat.title()
+            label = " · ".join(["Registration", cat] + (["Early Bird"] if early else []))
+            if label in seen:
+                continue
+            seen.add(label)
+            tiers.append({"tier_label": label, "price_gbp": float(amt.replace(",", "")),
+                          "currency": "GBP", "is_early_bird": bool(early), "early_bird_deadline": None})
         return tiers
 
     def _soft_fields(
