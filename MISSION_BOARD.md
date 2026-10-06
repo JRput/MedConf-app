@@ -208,3 +208,7 @@ Gate per phase: build in a worktree → Playwright screenshots at 390 / 768 / 14
 | P13 | ACEP location fallback (API state-only → event page → microsite → organiser) | `sonnet` | ✅ `65e9884` — city 9→18, venue 1→7 of 39; 8 online; ~14 organisers publish no venue |
 | P14 | Evidence-based LOCATION_ON_PAGE in coverage_checks + audit (+ linked booking/organiser page lookup) — PLAYBOOK row 9 | `sonnet` | ✅ `56a365e` |
 | P15 | Explorer: microsite nav follow (General Info, Abstracts) + matrix fee-grid parser | `sonnet` | ✅ — ESSIC 2184: 0 → 16 EUR tiers, deadline 2026-07-30 |
+| P16 | Advance HE: 9 rows with £ on page but no tiers; generic descriptions; BAETS event_format null (2 rows) | `sonnet` | 🔄 |
+| P17 | tribe_events/ISUOG venue_name truncated at 200 chars (9 rows); SCCM 2572/2575 "$ 399" fees missed; ISBT 2568 deadline | `sonnet` | 🔄 |
+
+**Wave 2a/2b gate (2026-10-06):** audit 46–59 re-run after P8–P15; null-audit 406 rows: 0.2 % null description, 0 % null specialty ✅. Group F added to both matrices; cloud run https://github.com/JRput/MedConf-app/actions/runs/37521017822 🔄.
