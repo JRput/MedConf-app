@@ -208,7 +208,7 @@ Gate per phase: build in a worktree → Playwright screenshots at 390 / 768 / 14
 | P13 | ACEP location fallback (API state-only → event page → microsite → organiser) | `sonnet` | ✅ `65e9884` — city 9→18, venue 1→7 of 39; 8 online; ~14 organisers publish no venue |
 | P14 | Evidence-based LOCATION_ON_PAGE in coverage_checks + audit (+ linked booking/organiser page lookup) — PLAYBOOK row 9 | `sonnet` | ✅ `56a365e` |
 | P15 | Explorer: microsite nav follow (General Info, Abstracts) + matrix fee-grid parser | `sonnet` | ✅ — ESSIC 2184: 0 → 16 EUR tiers, deadline 2026-07-30 |
-| P16 | Advance HE: 9 rows with £ on page but no tiers; generic descriptions; BAETS event_format null (2 rows) | `sonnet` | 🔄 |
-| P17 | tribe_events/ISUOG venue_name truncated at 200 chars (9 rows); SCCM 2572/2575 "$ 399" fees missed; ISBT 2568 deadline | `sonnet` | 🔄 |
+| P16 | Advance HE £-flags (New Relic script text — fetcher now strips scripts for all sources), programme-page tiers, BAETS event_format | `sonnet` | ✅ — audit 48 → 98/111 |
+| P17 | venue prose trimming (tribe/ESP/ISUOG), SCCM JS-rendered fee grid (2572: 21 tiers; 2575: 3), ISBT: no deadline published | `sonnet` | ✅ `8380273` |
 
-**Wave 2a/2b gate (2026-10-06):** audit 46–59 re-run after P8–P15; null-audit 406 rows: 0.2 % null description, 0 % null specialty ✅. Group F added to both matrices; cloud run https://github.com/JRput/MedConf-app/actions/runs/37521017822 🔄.
+**Wave 2a/2b gate (2026-10-06):** audit 46–59 re-run after P8–P15; null-audit 406 rows: 0.2 % null description, 0 % null specialty ✅. Group F added to both matrices; run 1 (37521017822): 13/14 green, AAGL red — AWS WAF 'Human Verification' not in the challenge regex (fixed `c4969a0` + in-page API fetch). Run 2: https://github.com/JRput/MedConf-app/actions/runs/37531074749 🔄.
