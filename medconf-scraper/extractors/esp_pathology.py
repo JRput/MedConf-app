@@ -18,7 +18,8 @@ class EspPathologyExtractor(TribeEventsExtractor):
 
     def location_from_text(self, text, shell):
         loc = city_country_after_year(text)
-        if not loc:
+        v = re.search(r"\bVenue:\s*(.+)", text)
+        venue = v.group(1) if v else None   # trimmed by clean_prose_venue downstream
+        if not (loc or venue):
             return None
-        v = re.search(r"Venue:\s*(.+?)(?:\s+Sessions:|\s+More information|\.\s|$)", text[:600])
-        return (v.group(1).strip() if v else None), loc[0], loc[1]
+        return venue, (loc[0] if loc else None), (loc[1] if loc else None)

@@ -592,6 +592,7 @@ _FLAT_NOISE_RE = re.compile(
     r"\badd\s+to\s+(?:cart|basket)\b|\bper\s+(?:person|delegate)\b)", re.I)
 
 
+_FLAT_CARD_BREAK_RE = re.compile(r"register\s+now|registration\s+pricing|[{};]", re.I)
 _FLAT_ROLE_RE = re.compile(
     r"(member|student|delegate|consultant|trainee|nurse|doctor|registrar|fellow|resident|"
     r"early|standard|regular|concession|industry|speaker|listener|visitor|attendee|physician)", re.I)
@@ -613,6 +614,9 @@ def _flat_text_price_sweep(text: str, max_tiers: int = 40) -> list:
     for m in _FLAT_PRICE_RE.finditer(text):
         raw = text[max(prev_end, m.start() - 120): m.start()]
         prev_end = m.end()
+        # Card layouts: a "REGISTER NOW" button, or leaked CSS/JS braces, end
+        # the previous card; the label is only what follows.
+        raw = _FLAT_CARD_BREAK_RE.split(raw)[-1]
         label = _FLAT_NOISE_RE.sub(" ", raw)
         # a sentence / heading boundary ends the previous context
         label = re.split(r"[:.!?]\s+|\s{2,}", label)[-1] if re.search(r"[:.!?]\s", label) else label
@@ -678,7 +682,7 @@ def _external_page_tiers(text: Optional[str], html: Optional[str],
     flat = _flat_text_price_sweep(text or "")
     # The inline sweep can glue several prices into one junk label; the
     # flat sweep wins when it recovers more (cleanly labelled) tiers.
-    if t and len(flat) <= len(t):
+    if t and len(flat) <= len(t) and not any("\n" in x["tier_label"] for x in t):
         return t, "text"
     tt = _plain_table_tiers(html, trail)
     if tt:
@@ -830,6 +834,24 @@ def _follow_fee_document(html: Optional[str], base_url: str, budget: "ExploreBud
     return None
 
 
+def _rendered_fee_tiers(url: str, html: Optional[str], trail: "AuditTrail"):
+    """Fee grids loaded by JavaScript (Scientex registration forms fetch their
+    prices from an XHR) are absent from the static HTML. When a registration/
+    fees page yielded nothing statically but is script-driven, render it once
+    and run the matrix/sweep detectors on the rendered innerText.
+    Returns (tiers, method) or ([], "")."""
+    if source_time_up() or html is None or not re.search(r"<script\b", html, re.I):
+        return [], ""
+    note = f"rendered_fee_retry: {url}"
+    if note in trail.notes:
+        return [], ""
+    trail.notes.append(note)
+    r_text, r_html, _links = render_page(url)
+    if not r_text:
+        return [], ""
+    return _external_page_tiers(re.sub(r"[ \t\r\f\v]+", " ", r_text).replace("\n", " "), r_html or html, trail, lines=r_text)
+
+
 def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudget",
                                   trail: "AuditTrail", limit: int = 2):
     """On an external event site, fetch up to `limit` same-host registration/
@@ -857,6 +879,10 @@ def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudg
         _pdf = _follow_fee_document(sub_html, url, budget, trail)
         if _pdf:
             return _pdf
+        rt, how = _rendered_fee_tiers(url, sub_html, trail)
+        if rt:
+            trail.notes.append(f"external_subpage_rendered_{how}: {len(rt)} tiers from {url}")
+            return rt, url, f"rendered_{how}"
         if sub_html and vision_time_left() and not source_time_up():
             images = find_money_images(sub_html, url, limit=4, trail=trail)
             if images:
@@ -897,8 +923,23 @@ RENDER_CACHE: dict = {}
 _render_browser = None
 
 
+# Rendering runs on ONE dedicated worker thread: Playwright's sync API refuses
+# to start inside a thread that already has a running event loop, and
+# remediator.fetcher's PageCache (its 403 fallback) leaves one on the caller's
+# thread. The browser object must also stay on the thread that created it.
+from concurrent.futures import ThreadPoolExecutor as _TPE
+_RENDER_POOL = _TPE(max_workers=1, thread_name_prefix="explorer-render")
+
+
 def close_render_browser() -> None:
     """Shut the lazily-started Playwright used for JS-rendered nav sites."""
+    try:
+        _RENDER_POOL.submit(_close_render_browser_impl).result(timeout=30)
+    except Exception:
+        _close_render_browser_impl()
+
+
+def _close_render_browser_impl() -> None:
     global _render_browser
     if _render_browser is not None:
         try:
@@ -911,12 +952,20 @@ def close_render_browser() -> None:
 def render_page(url: str) -> tuple[Optional[str], Optional[str], list]:
     """Rendered-DOM fetch for JS sites (Wix etc.): (innerText, outer HTML,
     [(abs_url, text, in_nav)]). Cached per run. (None, None, []) on failure or
-    once the source deadline has passed."""
-    global _render_browser
+    once the source deadline has passed. Runs on the render worker thread."""
     if url in RENDER_CACHE:
         return RENDER_CACHE[url]
     if source_time_up():
         return None, None, []
+    try:
+        return _RENDER_POOL.submit(_render_page_impl, url).result(timeout=120)
+    except Exception as e:
+        logger.warning(f"explorer: rendered fetch failed for {url}: {type(e).__name__}: {e}")
+        return None, None, []
+
+
+def _render_page_impl(url: str) -> tuple[Optional[str], Optional[str], list]:
+    global _render_browser
     result: tuple = (None, None, [])
     try:
         if _render_browser is None:
@@ -1091,6 +1140,12 @@ def _follow_nav_pages(row: dict, html: str, base_url: str, trail: "AuditTrail",
             if _pdf:
                 found = _pdf
                 continue
+            if not rendered:
+                rt, how = _rendered_fee_tiers(url, p_html, trail)
+                if rt:
+                    trail.notes.append(f"nav_rendered_{how}: {len(rt)} tiers from {url}")
+                    found = (rt, url, f"nav_rendered_{how}")
+                    continue
             if p_html and vision_time_left() and not source_time_up():
                 images = find_money_images(p_html, url, limit=4, trail=trail)
                 if images:
@@ -1343,6 +1398,17 @@ def _explore_for_pricing(
                 trail.llm_reasoning = f"Found prices in fee document {purl} linked from {url}."
                 return ExploreResult(field="pricing", value=ptiers, method=pmethod,
                                      audit_trail=trail, found=True, external_url=purl)
+            # Script-driven fee grid on a registration-named page: render it once.
+            if url in reg_link_text:
+                rtiers, rhow = _rendered_fee_tiers(url, sub_html, trail)
+                if rtiers:
+                    trail.llm_reasoning = f"Found prices on rendered sub-page {url} via {rhow}."
+                    trail.notes.append(f"rendered_{rhow}_subpage: {len(rtiers)} tiers from {url}")
+                    return ExploreResult(
+                        field="pricing", value=rtiers,
+                        method=f"subpage_rendered_{rhow}:{urlparse(url).path}",
+                        audit_trail=trail, found=True,
+                    )
             # No text prices — collect fee images
             if sub_html:
                 images = find_money_images(sub_html, url, limit=6, trail=trail)

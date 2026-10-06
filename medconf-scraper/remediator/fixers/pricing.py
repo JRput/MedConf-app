@@ -51,7 +51,7 @@ _PRICE_LABEL_WORDS = (
     "members?", "non[- ]members?", "standard", "early[- ]bird",
     "late", "charge", "registration", "ticket", "delegate",
     "consultant", "trainee", "resident", "junior", "senior",
-    "student", "associate",
+    "student", "associate", "speaker", "listener", "poster", "participant", "attendee",
 )
 
 
@@ -111,7 +111,7 @@ def _text_pricing_sweep(page_text: str) -> List[dict]:
     # (e.g. "Late registration £200").
     label_alt = "|".join(_PRICE_LABEL_WORDS)
     inline_rx = re.compile(
-        rf"((?:[A-Za-z][A-Za-z-]{{2,30}}\s+){{0,3}}(?:{label_alt}))"
+        rf"((?:[A-Za-z][A-Za-z-]{{2,30}}[ \t]+){{0,3}}(?:{label_alt}))"   # same-line words only: no label may span a line break
         r"\s*[:\-]?\s*"
         r"([£$€])\s*([\d,]+(?:\.\d+)?)",
         re.I,

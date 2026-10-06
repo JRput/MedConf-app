@@ -15,7 +15,7 @@ import os
 import time
 from datetime import datetime, timezone
 from collections import defaultdict
-from typing import Any, Optional
+from typing import Any, Iterable, Optional
 
 from .detector import detect_gaps_for_rows, order_gap_rows
 from .fetcher import PageCache
@@ -112,8 +112,9 @@ def _patch_row(supabase, conference_id: int, field: str, value: Any) -> bool:
         return False
 
 
-def remediate_source(source_id: int) -> dict:
-    """Run the full remediator pass on one source. Returns the summary dict."""
+def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -> dict:
+    """Run the full remediator pass on one source. Returns the summary dict.
+    `only_ids` restricts the pass to those conference ids (targeted re-runs)."""
     started = time.time()
     sb = _get_supabase()
 
@@ -167,6 +168,9 @@ def remediate_source(source_id: int) -> dict:
     # Detect gaps
     gaps_per_row = detect_gaps_for_rows(conferences, pricing_by_conf)
     gaps_per_row = order_gap_rows(gaps_per_row)
+    if only_ids is not None:
+        _keep = {int(i) for i in only_ids}
+        gaps_per_row = [(r, g) for r, g in gaps_per_row if r["id"] in _keep]
     events_with_gaps = len(gaps_per_row)
     logger.info(
         f"remediator source {source_id}: first rows this run: "

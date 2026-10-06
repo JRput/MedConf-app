@@ -151,7 +151,12 @@ class PageCache:
                 # Cap at 200k chars — many WordPress event pages are
                 # 100k-200k after tag stripping, and critical content
                 # (abstract deadlines, fees) often lives near the bottom.
-                t = re.sub(r"<[^>]+>", " ", r.text)
+                # Drop <script>/<style>/<noscript> bodies first (keep JSON-LD):
+                # inline analytics bundles (New Relic etc.) contain "$5"/"£1"
+                # lookalikes that trip the audit's price signal.
+                t = re.sub(r"<(script|style|noscript)\b(?![^>]*ld\+json)[^>]*>.*?</\1\s*>",
+                           " ", r.text, flags=re.S | re.I)
+                t = re.sub(r"<[^>]+>", " ", t)
                 t = _html.unescape(t)
                 t = re.sub(r"\s+", " ", t).strip()
                 return t[:200000]

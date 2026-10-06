@@ -286,6 +286,71 @@ def _col_oriented(lines: list) -> list:
     return tiers
 
 
+_ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+_TAB_HDR_SKIP_RE = re.compile(r"^(?:qty|quantity|registration\s*type|ticket\s*type|category|type|price|fees?)$", re.I)
+
+
+def _tab_grid(lines: list) -> list:
+    """Tab-separated fee grid as rendered by registration forms (Scientex shape):
+
+        Registration Type<TAB>Early Bird
+        2026-05-31<TAB>Mid Term
+        2026-09-15<TAB>Final Call
+        2026-11-21<TAB>Qty
+        Speaker Registration<TAB>$ 399<TAB>$ 499<TAB>$ 599<TAB>
+
+    Each row is "label<TAB>price<TAB>price...". The timeframe header is spread
+    over the lines above the first row, with ISO deadline dates interleaved
+    (a date follows the timeframe it closes). Symbols may be separated from the
+    amount by a space; a currency symbol is mandatory."""
+    rows: list = []
+    for idx, ln in enumerate(lines):
+        if "\t" not in ln:
+            continue
+        parts = [p.strip() for p in ln.split("\t") if p.strip()]
+        if len(parts) < 3 or _cells(parts[0]) is not None or len(parts[0]) > 80 \
+                or not re.search(r"[A-Za-z]{3}", parts[0]):
+            continue
+        cells = _cells(" ".join(parts[1:]))
+        if not cells or len([c for c in cells if c[0] is not None]) < 2 or len(cells) != len(parts) - 1:
+            continue
+        rows.append((idx, parts[0], cells))
+    if not rows:
+        return []
+    tiers: list = []
+    first = rows[0][0]
+    toks: list = []
+    for ln in lines[max(0, first - 8):first]:
+        toks.extend(t.strip() for t in ln.split("\t") if t.strip())
+    for i in range(len(toks) - 1, -1, -1):          # header starts at the "Registration Type" cell
+        if re.match(r"(?i)registration\s*type|ticket\s*type|category$", toks[i]):
+            toks = toks[i:]
+            break
+    frames: list = []                                # [(name, deadline|None)]
+    for t in toks:
+        if _TAB_HDR_SKIP_RE.match(t):
+            continue
+        if _ISO_DATE_RE.match(t):
+            if frames and frames[-1][1] is None:
+                frames[-1] = (frames[-1][0], t)
+            continue
+        if len(t) <= 30 and re.search(r"[A-Za-z]{3}", t):
+            frames.append((t, None))
+    for _, label, cells in rows:
+        k = len(cells)
+        if len(frames) < k:
+            continue
+        hdr = frames[-k:] if len(frames) > k else frames
+        for (tf, dl), (amt, cur) in zip(hdr, cells):
+            if amt is None or amt <= 0 or amt > 50000:
+                continue
+            t = _tier(_label([label, tf]), amt, cur, tf)
+            if t["is_early_bird"] and dl:
+                t["early_bird_deadline"] = dl
+            tiers.append(t)
+    return tiers
+
+
 def parse_fee_matrix(text: str, max_tiers: int = 40, min_tiers: int = 4) -> list:
     """Tiers from a matrix fee grid in a line stream. [] when there is no
     grid of at least `min_tiers` prices. Row-oriented grids first, then the
@@ -293,7 +358,7 @@ def parse_fee_matrix(text: str, max_tiers: int = 40, min_tiers: int = 4) -> list
     lines = _norm(text or "")
     if len(lines) < 4:
         return []
-    for fn in (_row_oriented, _col_oriented):
+    for fn in (_row_oriented, _col_oriented, _tab_grid):
         tiers = fn(lines)
         seen, uniq = set(), []
         for t in tiers:

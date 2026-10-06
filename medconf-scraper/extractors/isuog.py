@@ -102,6 +102,26 @@ _RANGE_RE = re.compile(
 )
 
 
+def clean_venue_line(raw: Optional[str], limit: int = 80) -> Optional[str]:
+    """A "Venue:" line is "<City>, <COUNTRY>, <Hospital>, <street>, <room>".
+    Keep whole comma-separated parts up to `limit` chars (drops the street/room
+    tail), and reject prose (sentences that merely follow the word "Location")."""
+    v = _clean(raw or "").rstrip(".")
+    if not v:
+        return None
+    if re.search(r"\.\s+[A-Z]|\b(?:will be|is held|to be held|we welcome)\b|[”\"]", v):
+        return None
+    out: List[str] = []
+    for part in (p.strip() for p in v.split(",")):
+        if not part:
+            continue
+        if out and len(", ".join(out + [part])) > limit:
+            break
+        out.append(part)
+    v = ", ".join(out)[:limit].rstrip(" ,;-")
+    return v if len(v) >= 4 else None
+
+
 def _parse_range(text: str) -> tuple[Optional[date], Optional[date]]:
     """'25-29 January 2027' / '28-28 October 2026' / '30 Jan - 2 Feb 2027' /
     'Saturday 24 October and Sunday 25 October 2026' -> (start, end)."""
@@ -367,7 +387,7 @@ class IsuogExtractor(BaseExtractor):
         venue = None
         vm = re.search(r"\b(?:Venue|Location)\s*:\s*([^\n]{4,})", text)
         if vm:
-            venue = _clean(vm.group(1)).rstrip(".")[:200] or None
+            venue = clean_venue_line(vm.group(1))
 
         if fmt == "online":
             # ISUOG's listing tags its (London-run) Education items with "UK";
