@@ -148,7 +148,7 @@ for 25 days while CI stayed green. 4th EOL in 5 months (LESSONS #6) → architec
 Cost: £0 external. GitHub Actions: 4 manual full runs (~30 jobs each) + one hung 6 h job.
 Open risks: vision chain verified on a synthetic fee table only; NVIDIA can still retire a whole chain at once — the probe makes that loud, not impossible.
 
-## 7. Wave 2 plan (2026-09-30) — 2a + 2b DELIVERED 2026-10-06 (sources 46–59). **2c started 2026-10-09:** family trial `wordpress_generic` on ersnet / bsge / ecco-ibd / fdiworlddental / bcis (agent `w2c-wp-family`, `sonnet`); promote to family if ≥3/5 need no bespoke parsing, then batches of 10 over the remaining 45 resolved WordPress domains. Website copy change in parallel (W7: "Price TBC"/"No fee published" → organiser-site prompt; organiser link under every fee table).
+## 7. Wave 2 plan (2026-09-30) — 2a + 2b DELIVERED 2026-10-06 (sources 46–59). **2c started 2026-10-09:** family trial `wordpress_generic` on ersnet / bsge / ecco-ibd / fdiworlddental / bcis (agent `w2c-wp-family`, `sonnet`); promote to family if ≥3/5 need no bespoke parsing, then batches of 10 over the remaining 45 resolved WordPress domains. W7 website copy ✅ `5ce95ef` ("See organiser site" replaces Price TBC on rows/cards/sessions; fee-table empty state + footer link to organiser; 103 vitest, tsc clean).
 
 Pool: **124 resolved domains** not yet built (recon.json). By platform: wordpress_other 53 · static_html 34 · unknown 16 · spa 13 · tribe_events 4 · external_registrar 4. 30 need JS. Estimated volume ≈ 3,400 events (vs ~1,100 live today).
 
