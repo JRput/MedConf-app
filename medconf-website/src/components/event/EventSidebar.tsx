@@ -98,7 +98,7 @@ export function EventSidebar({
       {(c.cpd_accredited || priceMin !== null) && (
         <div className="flex items-center justify-between gap-3 border-t border-border-subtle pt-4">
           <CpdLabel accredited={c.cpd_accredited} points={c.cpd_points} size="md" />
-          <PriceLabel min={priceMin} max={priceMax} currency={currency} size="md" />
+          <PriceLabel min={priceMin} max={priceMax} currency={currency} href={c.organiser_url ?? c.booking_url} size="md" />
         </div>
       )}
 

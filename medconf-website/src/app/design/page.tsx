@@ -420,6 +420,7 @@ export default function DesignPage() {
               <Labelled label="USD"><PriceLabel min={795} max={1450} currency="USD" size="md" /></Labelled>
               <Labelled label="EUR"><PriceLabel min={640} max={1180} currency="EUR" size="md" /></Labelled>
               <Labelled label="unknown"><PriceLabel min={null} size="md" /></Labelled>
+              <Labelled label="unknown + link"><PriceLabel min={null} size="md" href="https://example.org/register" /></Labelled>
             </div>
           </Panel>
 

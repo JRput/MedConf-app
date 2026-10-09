@@ -3,12 +3,28 @@
 
 import { useMemo, useState } from 'react'
 import type { PricingTier } from '@/lib/types'
-import { Clock, ChevronDown, ChevronRight } from 'lucide-react'
+import { Clock, ChevronDown, ChevronRight, ArrowUpRight } from 'lucide-react'
 import { currencySymbol } from '@/lib/conference-helpers'
 import { cn } from '@/lib/utils'
 
 interface PricingTableProps {
   tiers: PricingTier[]
+  /** Organiser's site; powers the "Visit organiser site" prompts. */
+  organiserUrl?: string | null
+}
+
+function OrganiserLink({ href, className }: { href: string; className?: string }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn('inline-flex items-center gap-1 font-medium text-brand-text hover:underline', className)}
+    >
+      Visit organiser site
+      <ArrowUpRight className="size-3.5" aria-hidden />
+    </a>
+  )
 }
 
 // When extractors emit composite labels like
@@ -29,7 +45,7 @@ function isAddOn(label: string): boolean {
   return ADD_ON_TOKEN_RE.test(label)
 }
 
-export function PricingTable({ tiers }: PricingTableProps) {
+export function PricingTable({ tiers, organiserUrl }: PricingTableProps) {
   // Separate optional add-ons (lunch, dinner, workshop) from core
   // registration tiers. Only bucket if there are >=2 add-ons — a single
   // one is noise not worth its own section.
@@ -91,9 +107,14 @@ export function PricingTable({ tiers }: PricingTableProps) {
 
   if (tiers.length === 0) {
     return (
-      <p className="type-small text-fg-subtle italic">
-        No fee published — check the organiser&apos;s site.
-      </p>
+      <div className="space-y-2 rounded-lg border border-border bg-surface-muted p-4 type-small">
+        <p className="text-fg-muted">Registration fees are listed on the organiser&apos;s site.</p>
+        {organiserUrl ? (
+          <OrganiserLink href={organiserUrl} />
+        ) : (
+          <p className="text-fg-subtle">Visit the organiser&apos;s site to register.</p>
+        )}
+      </div>
     )
   }
 
@@ -232,6 +253,11 @@ export function PricingTable({ tiers }: PricingTableProps) {
           )}
         </div>
       )}
+
+      <p className="type-caption text-fg-subtle">
+        Fees are taken from the organiser&apos;s site and may change — confirm before booking.
+        {organiserUrl && <> <OrganiserLink href={organiserUrl} className="type-caption" /></>}
+      </p>
     </div>
   )
 }

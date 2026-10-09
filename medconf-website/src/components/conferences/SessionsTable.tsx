@@ -85,7 +85,19 @@ export function SessionsTable({ sessions, pricingTiers, parentBookingUrl }: Prop
 
               <div className="type-small">
                 <p className="type-numeric font-medium text-fg-strong">
-                  {price !== null ? `£${price}` : 'Price TBC'}
+                  {price !== null ? `£${price}` : href ? (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-0.5 font-normal text-fg-subtle hover:text-brand-text hover:underline"
+                    >
+                      See organiser site
+                      <ExternalLink className="size-3" aria-hidden />
+                    </a>
+                  ) : (
+                    <span className="font-normal text-fg-subtle">See organiser site</span>
+                  )}
                 </p>
                 {s.spots_left !== null && s.spots_left !== undefined && (
                   <p className="type-caption text-warn-text">{s.spots_left} spots left</p>

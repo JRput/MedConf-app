@@ -36,6 +36,8 @@ export interface DirectoryEvent {
   // populate them — only directoryEventFromRow() does.
   country?: 'uk' | 'international' | 'unknown'
   sourceShortName?: string | null
+  /** Organiser's own site (falls back to the booking URL) — used for "See organiser site" prompts. */
+  organiserUrl?: string | null
 }
 
 /**
@@ -79,6 +81,7 @@ export function toDirectoryEvent(
     abstractDeadline: c.abstract_deadline,
     abstractDeadlineNote: c.abstract_deadline_note,
     abstractOpen: isAbstractEffectivelyOpen(c),
+    organiserUrl: c.organiser_url ?? c.booking_url ?? null,
   }
 }
 
@@ -116,6 +119,7 @@ export function directoryEventFromRow(row: DirectoryEventRow): DirectoryEvent {
     abstractOpen: row.abstract_open && (!row.abstract_deadline || row.abstract_deadline >= new Date().toISOString().slice(0, 10)),
     country: row.country_guess,
     sourceShortName: row.source_short_name,
+    organiserUrl: row.organiser_url ?? row.booking_url ?? null,
   }
 }
 

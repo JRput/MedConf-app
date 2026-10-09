@@ -122,7 +122,7 @@ export function EventPanelBody({
 
         <div className="grid grid-cols-2 gap-4">
           <Field label="From">
-            <PriceLabel min={event.priceMin} max={event.priceMax} currency={event.currency} size="md" />
+            <PriceLabel min={event.priceMin} max={event.priceMax} currency={event.currency} href={event.organiserUrl} size="md" />
           </Field>
           {/* CpdLabel renders nothing when the event is not accredited, so the
               Field has to be conditional too — otherwise the panel shows a

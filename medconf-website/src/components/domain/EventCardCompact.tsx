@@ -90,7 +90,7 @@ export function EventCardCompact({
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-border-subtle pt-2.5">
-        <PriceLabel min={event.priceMin} max={event.priceMax} currency={event.currency} size="md" />
+        <PriceLabel min={event.priceMin} max={event.priceMax} currency={event.currency} href={event.organiserUrl} size="md" />
         <EventStatus event={event} />
       </div>
 

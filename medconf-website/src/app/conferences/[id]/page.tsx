@@ -167,7 +167,7 @@ export default async function ConferenceDetailPage({ params }: { params: Promise
             ) : (
               <section className="space-y-3">
                 <h2 className="type-h3 text-fg-strong">Fees</h2>
-                <PricingTable tiers={tiers} />
+                <PricingTable tiers={tiers} organiserUrl={c.organiser_url ?? c.booking_url} />
               </section>
             )}
 
