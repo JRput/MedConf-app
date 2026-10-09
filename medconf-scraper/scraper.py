@@ -93,8 +93,22 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
         summary["conferences_found"] = len(shells)
 
         if not shells:
-            summary["status"] = "failed"
-            summary["error_details"] = "No event cards extracted from listing"
+            challenged = getattr(agent.browser, "challenged_count", 0) or 0
+            if challenged > 0:
+                # Intermittent runner-IP block, not a broken extractor. Record
+                # it loudly (WARNING + 'blocked' status) but let main decide
+                # whether the streak is long enough to fail the group.
+                summary["status"] = "blocked"
+                summary["error_details"] = (
+                    "blocked by anti-bot challenge "
+                    f"({getattr(agent.browser, 'last_challenge_url', None)}); "
+                    "No event cards extracted from listing"
+                )
+                logger.warning(f"Source {source['id']} ({source.get('source_name')}): "
+                               f"BLOCKED by anti-bot challenge, no cards extracted")
+            else:
+                summary["status"] = "failed"
+                summary["error_details"] = "No event cards extracted from listing"
             summary["run_ended_at"] = datetime.utcnow().isoformat()
             return summary
 

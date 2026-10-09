@@ -75,6 +75,10 @@ class BrowserController:
         self.page: Optional[Page] = None
         self._alt_context = None   # created lazily on first challenge
         self._on_alt_profile = False
+        # Anti-bot evidence for scrape_source: bumped whenever a page stays
+        # challenged after every browser profile has been tried.
+        self.challenged_count = 0
+        self.last_challenge_url: Optional[str] = None
 
     def launch(self) -> None:
         """Launch a headless Chromium browser and open a blank page."""
@@ -155,6 +159,8 @@ class BrowserController:
             else:
                 self.page = old_page
                 self._alt_context = prev_context
+                self.challenged_count += 1
+                self.last_challenge_url = url
                 logger.warning(f"Cloudflare challenge on {url} not cleared by either browser profile")
                 return
             if not self._on_alt_profile:

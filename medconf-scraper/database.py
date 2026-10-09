@@ -27,6 +27,21 @@ def update_source_status(source_id: int, status: str) -> None:
     }).eq("id", source_id).execute()
 
 
+def get_recent_log_statuses(source_id: int, limit: int = 2) -> List[str]:
+    """Statuses of a source's most recent scraper_logs rows, newest first."""
+    rows = (
+        supabase.table("scraper_logs")
+        .select("status")
+        .eq("source_id", source_id)
+        .order("run_started_at", desc=True)
+        .limit(limit)
+        .execute()
+        .data
+        or []
+    )
+    return [r["status"] for r in rows]
+
+
 def get_conference_by_source_url(source_url: str) -> Optional[Dict[str, Any]]:
     """Check if a conference with this source URL already exists."""
     response = supabase.table("conferences").select("*").eq("source_url", source_url).execute()
@@ -145,6 +160,8 @@ def archive_stale_conferences(stale_days: int = 14) -> int:
     threshold = (datetime.utcnow() - timedelta(days=stale_days)).isoformat()
 
     # Identify sources with at least one successful scrape in the window.
+    # NB: only status == 'success' counts as healthy, so 'failed' and
+    # 'blocked' (anti-bot) runs never vouch for a source.
     healthy_logs = (
         supabase.table("scraper_logs")
         .select("source_id")

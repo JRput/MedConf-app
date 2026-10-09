@@ -17,6 +17,7 @@ import sys
 from config import validate_config
 from database import (
     get_active_sources,
+    get_recent_log_statuses,
     archive_expired_conferences,
     archive_stale_conferences,
     archive_undated_past_conferences,
@@ -26,6 +27,24 @@ from database import (
 from logger import logger, log_scrape_run
 from scheduler import run_all_sources, start_scheduler
 from scraper import scrape_source
+
+
+BLOCKED_STREAK_LIMIT = 3
+
+
+def blocked_streak_reached(source_id: int, limit: int = BLOCKED_STREAK_LIMIT) -> bool:
+    """True if the current blocked run is the `limit`-th consecutive one.
+
+    Call BEFORE logging the current run: the previous limit-1 log rows must
+    all be 'blocked'. A lookup failure counts as not reached (never mask a
+    real failure, but don't turn a DB hiccup into a red run either).
+    """
+    try:
+        prior = get_recent_log_statuses(source_id, limit - 1)
+    except Exception as e:
+        logger.warning(f"Source {source_id}: blocked-streak lookup failed: {e}")
+        return False
+    return len(prior) == limit - 1 and all(st == "blocked" for st in prior)
 
 
 def run_single_source(source_id: int) -> int:
@@ -38,6 +57,7 @@ def run_single_source(source_id: int) -> int:
 
     logger.info(f"Single-source run: scraping source {target['id']}: {target['source_name']}")
     summary = scrape_source(target)
+    streak_reached = summary["status"] == "blocked" and blocked_streak_reached(target["id"])
     log_scrape_run(summary)
     if summary["status"] in ("success", "partial"):
         try:
@@ -57,6 +77,12 @@ def run_single_source(source_id: int) -> int:
     except Exception as e:
         logger.warning(f"Housekeeping sweep failed: {e}")
 
+    if summary["status"] == "blocked":
+        if streak_reached:
+            logger.error(f"Source {target['id']} blocked by anti-bot for "
+                         f"{BLOCKED_STREAK_LIMIT} consecutive runs")
+            return 1
+        return 2   # tolerated: already warned + recorded as 'blocked' (counted, not failed)
     return 0 if summary["status"] in ("success", "partial") else 1
 
 
@@ -70,17 +96,25 @@ def run_source_group(source_ids: list[int]) -> int:
     still goes red and names the culprits.
     """
     failed: list[int] = []
+    blocked: list[int] = []
     for sid in source_ids:
         try:
             rc = run_single_source(sid)
         except Exception as e:  # never let one source kill the group
             logger.error(f"Source {sid} crashed: {e}")
             rc = 1
-        if rc != 0:
+        if rc == 2:
+            blocked.append(sid)   # anti-bot challenge, tolerated (<3 consecutive runs)
+        elif rc != 0:
             failed.append(sid)
     if failed:
-        logger.error(f"Group finished with failures in source(s): {failed}")
+        logger.error(f"Group finished with failures in source(s): {failed}"
+                     + (f"; blocked by anti-bot (tolerated): {blocked}" if blocked else ""))
         return 1
+    if blocked:
+        logger.warning(f"Group finished: {len(source_ids) - len(blocked)} source(s) succeeded, "
+                       f"{len(blocked)} blocked by anti-bot (tolerated): {blocked}")
+        return 0
     logger.info(f"Group finished: all {len(source_ids)} source(s) succeeded")
     return 0
 
