@@ -81,6 +81,16 @@ from .bsge import BsgeExtractor
 from .bcis import BcisExtractor
 from .fdi import FdiExtractor
 from .ecco_ibd import EccoIbdExtractor
+from .easl import EaslExtractor
+from .bapras import BaprasExtractor
+from .esicm import EsicmExtractor
+from .apm import ApmExtractor
+from .era import EraExtractor
+from .eusem import EusemExtractor
+from .dermamedical import DermamedicalExtractor
+from .biasp import BiaspExtractor
+from .bia import BiaExtractor
+from .sam import SamExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -149,6 +159,16 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     62: BcisExtractor,                       # 62: British Cardiovascular Intervention Society - WordPress generic family (constants only)
     63: FdiExtractor,                        # 63: FDI World Dental Federation - family extractor on Drupal archive (constants only)
     64: EccoIbdExtractor,                    # 64: ECCO - family extractor on Joomla calendar (constants only)
+    65: EaslExtractor,                       # 65: EASL (European Association for the Study of the Liver) events: WordPress family subclass + bespoke venue/course/organiser_url handling
+    66: BaprasExtractor,                     # 66: BAPRAS events: Sitefinity listing via WordPress family base; bespoke prose fee/location parser and organiser_url
+    67: EsicmExtractor,                      # 67: ESICM events: 'Next events' grid only; bespoke header (city/venue) and fee-grid parsing
+    68: ApmExtractor,                        # 68: APM events: MEC list skin parsed with divider year; ticket block fees; JSON-LD offers ignored
+    69: EraExtractor,                        # 69: ERA events: multi-source shells (endorsed events, Congress, Education Meetings, CME courses); external sites left to the explorer
+    70: EusemExtractor,                      # 70: European Society for Emergency Medicine - Joomla course articles, home-menu walk (family subclass + listing override)
+    71: DermamedicalExtractor,               # 71: Derma Medical UK aesthetic-medicine courses - WooCommerce variation JSON -> course + sessions (family subclass + override)
+    72: BiaspExtractor,                      # 72: British and Irish Association of Stroke Physicians - single free-form events page, block parser (BaseExtractor, bespoke)
+    73: BiaExtractor,                        # 73: British Infection Association - concrete5 event_list cards, family subclass + prose venue parsing
+    74: SamExtractor,                        # 74: Society for Acute Medicine - Events Manager, three listing URLs unioned, per-page H1 + date line (family subclass + overrides)
 }
 
 

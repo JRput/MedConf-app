@@ -82,6 +82,16 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   BCIS: { short: 'BCIS', name: 'British Cardiovascular Intervention Society', kind: 'specialist', country: 'UK' },
   FDI: { short: 'FDI', name: 'FDI World Dental Federation', kind: 'international', country: 'International' },
   ECCO: { short: 'ECCO', name: "European Crohn's and Colitis Organisation", kind: 'international', country: 'EU' },
+  EASL: { short: 'EASL', name: 'European Association for the Study of the Liver', kind: 'international', country: 'EU' },
+  BAPRAS: { short: 'BAPRAS', name: 'British Association of Plastic, Reconstructive and Aesthetic Surgeons', kind: 'specialist', country: 'UK' },
+  ESICM: { short: 'ESICM', name: 'European Society of Intensive Care Medicine', kind: 'international', country: 'EU' },
+  APM: { short: 'APM', name: 'Association for Palliative Medicine', kind: 'specialist', country: 'UK' },
+  ERA: { short: 'ERA', name: 'European Renal Association', kind: 'international', country: 'EU' },
+  EUSEM: { short: 'EUSEM', name: 'European Society for Emergency Medicine', kind: 'international', country: 'EU' },
+  'Derma Medical': { short: 'Derma Medical', name: 'Derma Medical (aesthetic medicine training)', kind: 'other', country: 'UK' },
+  BIASP: { short: 'BIASP', name: 'British and Irish Association of Stroke Physicians', kind: 'specialist', country: 'UK' },
+  BIA: { short: 'BIA', name: 'British Infection Association', kind: 'specialist', country: 'UK' },
+  SAM: { short: 'SAM', name: 'Society for Acute Medicine', kind: 'specialist', country: 'UK' },
 }
 
 export function societyInfo(short: string | null | undefined): SocietyInfo | null {
