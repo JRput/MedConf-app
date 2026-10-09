@@ -202,10 +202,15 @@ Uzbekistan Venezuela Vietnam Wales Zimbabwe""".split()) | {
     "South Korea", "Hong Kong", "Sri Lanka", "United Arab Emirates", "UAE", "Czech Republic", "North Macedonia", "The Netherlands",
     "Northern Ireland", "Republic of Ireland", "Bosnia and Herzegovina", "Taiwan, China", "Costa Rica", "Puerto Rico"}
 _VENUE_KW_RE = re.compile(
-    r"\b(?:centre|center|hospital|infirmary|university|institute|college|hotel|hall|clinic|clinique|klinik|school|academy|museum|theatre|"
+    r"\b(?:\w*klinik\w*|\w*krankenhaus|\w*spital|centre|center|hospital|infirmary|university|institute|college|hotel|hall|clinic|clinique|klinik|school|academy|museum|theatre|"
     r"theater|arena|campus|laboratory|library|congress|convention|suite|building|house|room|block|floor|church|palace|castle|"
     r"stadium|auditorium|pavilion|messe|palais|expo|royal|hilton|marriott|mercure|novotel|sheraton|hyatt|radisson|premier inn|holiday inn|ibis|"
     r"st\.?\s+\w+'s)\b", re.I)
+_UK_COUNTIES = set("""Bedfordshire Berkshire Buckinghamshire Cambridgeshire Cheshire Cornwall Cumbria Derbyshire Devon Dorset Durham Essex
+Gloucestershire Hampshire Herefordshire Hertfordshire Kent Lancashire Leicestershire Lincolnshire Merseyside Norfolk Northamptonshire
+Northumberland Nottinghamshire Oxfordshire Rutland Shropshire Somerset Staffordshire Suffolk Surrey Sussex Warwickshire Wiltshire
+Worcestershire Yorkshire""".split()) | {"East Sussex", "West Sussex", "North Yorkshire", "South Yorkshire", "West Yorkshire", "East Yorkshire",
+    "West Midlands", "Greater London", "Greater Manchester", "Tyne and Wear", "Isle of Wight", "East Riding of Yorkshire"}
 _POSTCODE_RE = re.compile(r"^(?:[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}|\d{4,6}(?:-\d{4})?|[A-Z]{2}\s?\d{4,5})$")
 _ONLINE_ONLY_RE = re.compile(r"^(?:online|virtual|webinar|zoom|teams|on[\s-]?demand|livestream|remote|tba|tbc|tbd|to be (?:announced|confirmed))\b", re.I)
 
@@ -237,6 +242,9 @@ def split_location(raw: Optional[str]) -> Tuple[Optional[str], Optional[str], Op
     parts = [p for p in parts if p]
     if not parts:
         return None, None, country
+    if len(parts) >= 2 and parts[-1] in _UK_COUNTIES:     # "Guildford, Surrey": the county is the region, not the city
+        county = parts.pop()
+        country = f"{county}, {country}" if country else county
     kw = [bool(_VENUE_KW_RE.search(p)) for p in parts]
     if len(parts) == 1:
         return (parts[0], None, country) if (kw[0] or re.search(r"\d", parts[0])) else (None, parts[0], country)
@@ -244,7 +252,7 @@ def split_location(raw: Optional[str]) -> Tuple[Optional[str], Optional[str], Op
         city = parts[-1] if not kw[-1] and not re.match(r"\d", parts[-1]) else None
         body = parts[:-1] if city else parts
         for i, p in enumerate(body):                  # drop the street address and anything after it
-            if re.match(r"\d", p) and i > 0:
+            if i > 0 and (re.match(r"\d", p) or re.search(r"\d\s*[a-z]?$|\b(?:strasse|stra\u00dfe|straat|street|st\.|road|rd|avenue|ave|rue|via|calle|platz|weg|lane|way)\b", p, re.I)):
                 body = body[:i]
                 break
         return ", ".join(body[:3]), city, country
@@ -713,6 +721,10 @@ class WordPressGenericExtractor(BaseExtractor):
     def skip_event(self, shell: Dict[str, Any]) -> bool:
         return False
 
+    def venue_from_lines(self, lines: List[str], shell: Dict[str, Any]) -> Optional[str]:
+        """Optional per-site hook: raw venue text found in the detail page lines (default none)."""
+        return None
+
     def parse_listing(self, html: str, url: str) -> List[Dict[str, Any]]:
         return parse_listing_cards(html, url, event_link_re=self.EVENT_LINK_RE or default_event_link_re(self.LISTING_URL),
                                    card_split_re=self.CARD_SPLIT_RE, allow_external=self.EXTERNAL_LINKS)
@@ -900,6 +912,12 @@ class WordPressGenericExtractor(BaseExtractor):
             v, c, k = split_location(shell["venue_raw"])
             if c == city and v:
                 venue = v
+        if not venue:
+            hv = self.venue_from_lines(lines, shell)
+            if hv:
+                v, c, k = split_location(hv)
+                venue = v
+                city, country = city or c, country or k
         venue = clip_venue(venue)
         probe = f"{title} {category} {' '.join(head[:6])}".lower()
         mode = str((ld or {}).get("eventAttendanceMode") or "")

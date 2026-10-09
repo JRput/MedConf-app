@@ -51,14 +51,13 @@
       "url": "https://www.bsge.org.uk/event/bsge-seniors-professional-development-meeting/",
       "field": "city",
       "site_says": "MATTU, The Leggett Building, Daphne Jackson Road, Guildford, Surrey, GU2 7WG",
-      "extractor_says": "city Surrey",
-      "match": false
+      "extractor_says": "city Guildford, region Surrey (unit test; event not in the 8-sample)",
+      "match": true
     }
   ],
   "concerns": [
     "Platform: WordPress + FacetWP (client-side filters). Subclass = 0 constants beyond the five common ones, 0 lines of parsing code.",
     "29 shells = the site's own FacetWP total_rows (29 across 2 pages via /event/page/2/), so the count is proven against the site's stated total. Recon's ~40 was an overestimate.",
-    "The site's location field is free text entered by hosts: a county can land in the city slot ('Surrey' for Guildford) and one third-party listing reads 'Bangkok Atrium' as the city. Not fixable generically.",
     "Price range pages ('GBP 200-GBP 350', 'EUR 199 - EUR 1199') are stored as 'Lowest rate' / 'Highest rate' tiers because the site gives no grade labels.",
     "Descriptions are empty on many pages (the page is just a field block): with_description 2/5 is the site, not the parser.",
     "Harness SINGLE_DAY_SUSPECT ('4 days') is a false positive from the site's GDPR cookie table ('Duration 1 year 1 month 4 days'); PRICE_EXTERNAL_LINK is a free Zoom registration for a webinar. Neither is a missed fee/date. Many BSGE events are third-party (Arlo, Zoom, conference-broker sites) whose own fee pages are shared-explorer territory.",
@@ -66,6 +65,7 @@
     "Coverage checklist: (1) multi-day ranges: listing date-range parser plus header-zone range on the detail page, both unit-tested; (2/4/5) fees on external or same-site registration pages are NOT followed by the family - left to remediator.explorer (PLAYBOOK says it handles them); the harness PRICE_*_LINK warnings below are those cases; (3) image fee tables not checked here (no site showed one); (6/7) call-for-papers deadlines left to the merge step per PLAYBOOK (extract_abstract_info is deliberately not called), harness SUBMISSION_NO_DEADLINE warnings are that step's job; (8) CTA text: no tier labels come from link text; (9) location on page: header-line / labelled-line / JSON-LD parsing, harness LOCATION_ON_PAGE never fired.",
     "No JSON-LD Event exists on any trial site (checked all five listing and detail pages), so the JSON-LD offers path is covered by offline fixtures only, not by a live page.",
     "WP REST path (REST_POST_TYPE) is implemented and unit-tested offline but OFF by default and unproven live: /wp-json/wp/v2/events (ERS) and /wp/v2/event (BCIS) exist but return acf=[] and no event dates (the core 'date' is the publish date); BSGE exposes no events post type. HTML cards are the only date source on these sites.",
-    "with_venue in probe_results counts venue_name OR city (both are location evidence); venue_name alone is lower and noted per site."
+    "with_venue in probe_results counts venue_name OR city (both are location evidence); venue_name alone is lower and noted per site.",
+    "split_location now moves a trailing UK county to region ('Guildford, Surrey' -> city Guildford, region Surrey); free-text oddities such as 'The NEC Birmingham' as city remain."
   ]
 }

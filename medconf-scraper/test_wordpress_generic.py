@@ -172,6 +172,9 @@ def test_yearless_weekday_date_resolves_year_and_past_stays_past():
     ("National Taiwan University Children's Hospital, Taiwan, China", ("National Taiwan University Children's Hospital", None, "Taiwan")),
     ("Keele University", ("Keele University", None, None)),
     ("Barcelona, Spain", (None, "Barcelona", "Spain")),
+    ("MATTU, The Leggett Building, Daphne Jackson Road, Guildford, Surrey, GU2 7WG.", ("MATTU, The Leggett Building", "Guildford", "Surrey")),
+    ("Colchester Hospital, Colchester, Essex, United Kingdom", ("Colchester Hospital", "Colchester", "Essex, United Kingdom")),
+    ("Surrey, England", (None, "Surrey", "England")),
 ])
 def test_split_location(raw, expected):
     assert split_location(raw) == expected
@@ -333,3 +336,16 @@ def test_list_shells_far_future_placeholder_dropped_and_undated_lookup(monkeypat
     shells = Plain({"id": 0}).list_shells_override()
     assert [s["title"] for s in shells] == ["Undated course"]
     assert shells[0]["start_date"] == soon.isoformat()
+
+
+def test_ers_venue_tab_hook():
+    ex = ErsnetExtractor({"id": 0})
+    lines = ["ERS members", "\u20ac1,000", "Thoraxklinik", "Roentgenstrasse 1", "69126, Heidelberg", "Germany", "Cancellation policy", "Upon receipt"]
+    assert ex.venue_from_lines(lines, {}) == "Thoraxklinik, Roentgenstrasse 1, 69126, Heidelberg, Germany"
+    assert ex.venue_from_lines(["Fees", "Free", "Cancellation policy"], {}) is None
+    panel = ["Venue", "x", "Venue", "Eurostars Roma Aeterna Hotel", "Via Casilina, 125", "00176 Rome", "Italy", "Tel: +39 06"]
+    assert split_location(ex.venue_from_lines(panel, {})) == ("Eurostars Roma Aeterna Hotel", "Rome", "Italy")
+    html = ("<h1>Skills course</h1><p>2\u20134 November, 2026 | Heidelberg, Germany</p><p>ERS members</p><p>\u20ac1,000</p><p>Thoraxklinik</p>"
+            "<p>Roentgenstrasse 1</p><p>69126, Heidelberg</p><p>Germany</p><p>Cancellation policy</p>")
+    out = ex.detail_from_html(html, {"title": "Skills course", "venue_raw": "Heidelberg, Germany"}, lambda p: None)
+    assert out["venue_name"] == "Thoraxklinik" and out["city"] == "Heidelberg" and out["region"] == "Germany"
