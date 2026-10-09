@@ -349,3 +349,26 @@ def test_ers_venue_tab_hook():
             "<p>Roentgenstrasse 1</p><p>69126, Heidelberg</p><p>Germany</p><p>Cancellation policy</p>")
     out = ex.detail_from_html(html, {"title": "Skills course", "venue_raw": "Heidelberg, Germany"}, lambda p: None)
     assert out["venue_name"] == "Thoraxklinik" and out["city"] == "Heidelberg" and out["region"] == "Germany"
+
+
+def test_tbc_location_is_unknown_not_online():
+    assert split_location("TBC") == (None, None, None) and split_location("To be confirmed") == (None, None, None)
+    out = BsgeExtractor({"id": 0}).detail_from_html("<h1>Meeting</h1><p>Start Date: 12/11/2026</p><p>Location: TBC</p>",
+                                                    {"title": "Meeting", "venue_raw": "TBC"}, lambda p: None)
+    assert out.get("event_format") is None and "city" not in out
+
+
+def test_form_wrapped_body_is_kept():
+    html = ("<form action='/x'><h1>Wrapped Course</h1><p>Tuesday 10 November 2026 | Leeds General Infirmary, Leeds</p>"
+            "<p>This course gives registrars practical training across the full range of core techniques in depth.</p></form>")
+    out = BsgeExtractor({"id": 0}).detail_from_html(html, {"title": "Wrapped Course"}, lambda p: None)
+    assert out["start_date"] == "2026-11-10" and out["description"].startswith("This course gives")
+
+
+def test_cpd_rejects_year_like_values():
+    ex = BsgeExtractor({"id": 0})
+    run = lambda body: ex.detail_from_html(f"<h1>X</h1><p>{body}</p>", {"title": "X"}, lambda p: None)
+    assert "cpd_points" not in run("November 2026 CME Credits will be available")
+    assert "cpd_points" not in run("0 CPD points")
+    assert run("This meeting carries 6 CPD points.")["cpd_points"] == 6.0
+    assert run("CME credits: 12.5")["cpd_points"] == 12.5

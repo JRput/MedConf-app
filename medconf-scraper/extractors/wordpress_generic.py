@@ -212,7 +212,8 @@ Northumberland Nottinghamshire Oxfordshire Rutland Shropshire Somerset Staffords
 Worcestershire Yorkshire""".split()) | {"East Sussex", "West Sussex", "North Yorkshire", "South Yorkshire", "West Yorkshire", "East Yorkshire",
     "West Midlands", "Greater London", "Greater Manchester", "Tyne and Wear", "Isle of Wight", "East Riding of Yorkshire"}
 _POSTCODE_RE = re.compile(r"^(?:[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}|\d{4,6}(?:-\d{4})?|[A-Z]{2}\s?\d{4,5})$")
-_ONLINE_ONLY_RE = re.compile(r"^(?:online|virtual|webinar|zoom|teams|on[\s-]?demand|livestream|remote|tba|tbc|tbd|to be (?:announced|confirmed))\b", re.I)
+_ONLINE_ONLY_RE = re.compile(r"^(?:online|virtual|webinar|zoom|teams|on[\s-]?demand|livestream|remote)\b", re.I)
+_UNKNOWN_LOC_RE = re.compile(r"^(?:tba|tbc|tbd|to be (?:announced|confirmed|determined)|location tbc|venue tbc)\b", re.I)
 
 
 def split_location(raw: Optional[str]) -> Tuple[Optional[str], Optional[str], Optional[str]]:
@@ -225,7 +226,7 @@ def split_location(raw: Optional[str]) -> Tuple[Optional[str], Optional[str], Op
     if "|" in raw:                                   # "Lectures online | Practical | In-person | RCOG, London"
         raw = raw.split("|")[-1].strip(" ,;-\u2013.")
     raw = re.sub(r"\s[-\u2013]\s*(?=(?:%s)$)" % "|".join(sorted(map(re.escape, _COUNTRIES), key=len, reverse=True)), ", ", raw)
-    if not raw or _ONLINE_ONLY_RE.match(raw):
+    if not raw or _ONLINE_ONLY_RE.match(raw) or _UNKNOWN_LOC_RE.match(raw):
         return None, None, None
     parts = [p.strip(" .") for p in raw.split(",") if p.strip(" .")]
     country = None
@@ -664,11 +665,12 @@ def fee_tiers_from_lines(lines: List[str], default_currency: str = "GBP") -> Lis
 _CPD_RE = re.compile(
     r"(\d+(?:\.\d+)?)\s*(?:external\s+)?(?:CPD|CME|EBAP|CE)\s*(?:points?|credits?|hours?)"
     r"|(?:CPD|CME)\s*(?:points?|credits?)\s*[:=-]?\s*(\d+(?:\.\d+)?)", re.I)
+_MONTH_WORD = r"jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
 _FMT_TOKEN_RE = re.compile(r"^(?:in[\s-]?person|online|virtual|hybrid|face[\s-]to[\s-]face|webinar|webcast|livestream)$", re.I)
 _COOKIE_RE = re.compile(r"cookie|consent|remembering users|privacy|gdpr|browser|javascript|session storage|third[- ]party|"
                         r"\bCDN\b|network administrator|redirected to|click on continue|you must (?:log|sign)|please (?:log|sign)|log in|login", re.I)
 _SOLD_OUT_RE = re.compile(r"\b(?:sold out|fully booked|event full|no places (?:left|remaining)|waiting list only)\b", re.I)
-_DETAIL_CHROME_RE = re.compile(r"(?is)<(script|style|svg|noscript|nav|footer|aside|form|template)\b.*?</\1\s*>")
+_DETAIL_CHROME_RE = re.compile(r"(?is)<(script|style|svg|noscript|nav|footer|aside|template)\b.*?</\1\s*>")
 
 
 def _meta(html: str, name: str) -> Optional[str]:
@@ -901,6 +903,8 @@ class WordPressGenericExtractor(BaseExtractor):
             raw = shell.get("venue_raw")
             labelled = self._labelled_location(lines)
             for cand in (raw, labelled):
+                if cand and _UNKNOWN_LOC_RE.match(cand.strip()):
+                    break                                  # TBC/TBA: unknown, not online
                 if cand and _ONLINE_ONLY_RE.match(cand.strip()):
                     virtual = True
                     break
@@ -954,13 +958,17 @@ class WordPressGenericExtractor(BaseExtractor):
             out["is_sold_out"] = True
 
         # CPD
-        m = _CPD_RE.search(text)
-        if m:
+        for m in _CPD_RE.finditer(text):
             try:
-                out["cpd_points"] = float(m.group(1) or m.group(2))
-                out["cpd_accredited"] = True
+                val = float(m.group(1) or m.group(2))
             except ValueError:
-                pass
+                continue
+            near = text[max(0, m.start() - 14):m.start()] + text[m.end():m.end() + 1]
+            if not 0.5 <= val <= 100 or (re.search(_MONTH_WORD, near, re.I) and val >= 1000):
+                continue                                   # "November 2026 CME credits" is a year, not points
+            out["cpd_points"] = val
+            out["cpd_accredited"] = True
+            break
 
         # abstracts / call for papers: left to the merge step (PLAYBOOK pattern 7), which sees the page text and follows PDFs
 
