@@ -160,7 +160,7 @@ export function EventRow({
         <div className="flex items-center justify-end gap-3 sm:gap-4">
           <CpdLabel accredited={event.cpdAccredited} points={event.cpdPoints} className="hidden xl:inline-flex" />
           <EventStatus event={event} className="hidden md:inline-flex" />
-          <PriceLabel min={event.priceMin} max={event.priceMax} currency={event.currency} href={event.organiserUrl} className="w-20 shrink-0 text-right" />
+          <PriceLabel min={event.priceMin} max={event.priceMax} currency={event.currency} href={event.organiserUrl} className="w-28 shrink-0 justify-end text-right" />
           <SaveToggle saved={saved} onToggle={onToggleSave} label={event.name} />
         </div>
       </div>
