@@ -135,7 +135,7 @@ def test_httpx_blocked_without_browser_registers_block():
         assert http_fetch.fetch_html("https://x.example/e", browser=None, timeout=5.0) is None
     finally:
         _restore_httpx_client(original)
-    assert http_fetch.last_block["count"] == 1
+    assert http_fetch.last_fetch_problem["blocked"] == 1
 
 
 def test_httpx_404_is_not_a_block(monkeypatch):
@@ -146,10 +146,66 @@ def test_httpx_404_is_not_a_block(monkeypatch):
         assert http_fetch.fetch_html("https://x.example/e", browser=None, timeout=5.0) is None
     finally:
         _restore_httpx_client(original)
-    assert http_fetch.last_block["count"] == 0
+    assert http_fetch.last_fetch_problem["blocked"] == 0 and http_fetch.last_fetch_problem["unreachable"] == 0
 
 
 def test_stale_block_does_not_leak_into_next_source(monkeypatch):
-    http_fetch.last_block["count"] = 5
+    http_fetch.last_fetch_problem["unreachable"] = 5
     s = _scrape(monkeypatch, False)   # scrape_source resets the registry
     assert s["status"] == "failed"
+
+
+# --- unreachable (FDI case: connect timeouts, no HTTP response) ---------------
+import httpx as _httpx
+
+
+def _timeout_agent():
+    class Agent(FakeAgent):
+        def __init__(self, source):
+            caller_page, _ = _make_caller_page(_DeadNewPage())
+            self.browser = FakeBrowserController(caller_page)
+            self.browser.challenged_count = 0
+            self.browser.last_challenge_url = None
+
+        def list_shells(self):
+            for _ in range(3):
+                http_fetch.fetch_html("https://fdi.example/all-events", browser=self.browser, timeout=1.0)
+            return []
+    return Agent
+
+
+def test_three_connect_timeouts_is_unreachable(monkeypatch, caplog):
+    original = http_fetch.httpx.Client
+    try:
+        _patch_httpx_client(None, _httpx.ConnectTimeout("timed out"))
+        monkeypatch.setattr(scraper, "AgentLoop", _timeout_agent())
+        with caplog.at_level(logging.WARNING, logger="medconf-scraper"):
+            s = scraper.scrape_source({"id": 63, "source_name": "FDI", "base_url": "https://fdi.example"})
+    finally:
+        _restore_httpx_client(original)
+    assert s["status"] == "unreachable"
+    assert "fdi.example" in s["error_details"]
+    assert any("UNREACHABLE" in r.message and "FDI" in r.message for r in caplog.records)
+
+
+def test_http_404_listing_stays_failed(monkeypatch):
+    original = http_fetch.httpx.Client
+    try:
+        _patch_httpx_client(None, FakeResponse(404, "nope"))
+        monkeypatch.setattr(scraper, "AgentLoop", _timeout_agent())
+        s = scraper.scrape_source({"id": 63, "source_name": "FDI", "base_url": "https://fdi.example"})
+    finally:
+        _restore_httpx_client(original)
+    assert s["status"] == "failed"
+
+
+def test_unreachable_tolerated_once(monkeypatch):
+    assert _run_single(monkeypatch, "unreachable", ["success", "success"]) == 2
+
+
+def test_mixed_blocked_unreachable_streak_goes_red(monkeypatch, caplog):
+    with caplog.at_level(logging.ERROR, logger="medconf-scraper"):
+        assert _run_single(monkeypatch, "unreachable", ["blocked", "unreachable"]) == 1
+        assert _run_single(monkeypatch, "blocked", ["unreachable", "blocked"]) == 1
+    assert any("3 consecutive runs" in r.message for r in caplog.records)
+    assert _run_single(monkeypatch, "unreachable", ["blocked", "failed"]) == 2

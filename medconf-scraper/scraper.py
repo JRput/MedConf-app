@@ -95,19 +95,31 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
         summary["conferences_found"] = len(shells)
 
         if not shells:
-            challenged = (getattr(agent.browser, "challenged_count", 0) or 0) + http_fetch.last_block["count"]
+            fp = http_fetch.last_fetch_problem
+            challenged = (getattr(agent.browser, "challenged_count", 0) or 0) + fp["blocked"]
             if challenged > 0:
                 # Intermittent runner-IP block, not a broken extractor. Record
                 # it loudly (WARNING + 'blocked' status) but let main decide
                 # whether the streak is long enough to fail the group.
                 summary["status"] = "blocked"
+                where = getattr(agent.browser, "last_challenge_url", None) or fp["url"].get("blocked")
                 summary["error_details"] = (
-                    "blocked by anti-bot challenge "
-                    f"({getattr(agent.browser, 'last_challenge_url', None) or http_fetch.last_block['url']}); "
+                    f"blocked by anti-bot challenge ({where}); "
                     "No event cards extracted from listing"
                 )
                 logger.warning(f"Source {source['id']} ({source.get('source_name')}): "
                                f"BLOCKED by anti-bot challenge, no cards extracted")
+            elif fp["unreachable"] > 0:
+                # Only transport failures (timeout/DNS/reset), never an HTTP
+                # response: a transient outage, tolerated like 'blocked'.
+                summary["status"] = "unreachable"
+                where = fp["url"].get("unreachable")
+                summary["error_details"] = (
+                    f"source unreachable, no HTTP response ({where}); "
+                    "No event cards extracted from listing"
+                )
+                logger.warning(f"Source {source['id']} ({source.get('source_name')}): "
+                               f"UNREACHABLE ({where}), no cards extracted")
             else:
                 summary["status"] = "failed"
                 summary["error_details"] = "No event cards extracted from listing"

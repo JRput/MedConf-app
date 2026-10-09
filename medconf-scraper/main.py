@@ -30,6 +30,8 @@ from scraper import scrape_source
 
 
 BLOCKED_STREAK_LIMIT = 3
+# Non-success outcomes tolerated individually; N in a row go red.
+TOLERATED_STATUSES = ("blocked", "unreachable")
 
 
 def blocked_streak_reached(source_id: int, limit: int = BLOCKED_STREAK_LIMIT) -> bool:
@@ -44,7 +46,7 @@ def blocked_streak_reached(source_id: int, limit: int = BLOCKED_STREAK_LIMIT) ->
     except Exception as e:
         logger.warning(f"Source {source_id}: blocked-streak lookup failed: {e}")
         return False
-    return len(prior) == limit - 1 and all(st == "blocked" for st in prior)
+    return len(prior) == limit - 1 and all(st in TOLERATED_STATUSES for st in prior)
 
 
 def run_single_source(source_id: int) -> int:
@@ -57,7 +59,7 @@ def run_single_source(source_id: int) -> int:
 
     logger.info(f"Single-source run: scraping source {target['id']}: {target['source_name']}")
     summary = scrape_source(target)
-    streak_reached = summary["status"] == "blocked" and blocked_streak_reached(target["id"])
+    streak_reached = summary["status"] in TOLERATED_STATUSES and blocked_streak_reached(target["id"])
     log_scrape_run(summary)
     if summary["status"] in ("success", "partial"):
         try:
@@ -77,10 +79,12 @@ def run_single_source(source_id: int) -> int:
     except Exception as e:
         logger.warning(f"Housekeeping sweep failed: {e}")
 
-    if summary["status"] == "blocked":
+    if summary["status"] in TOLERATED_STATUSES:
         if streak_reached:
-            logger.error(f"Source {target['id']} blocked by anti-bot for "
-                         f"{BLOCKED_STREAK_LIMIT} consecutive runs")
+            what = "blocked by anti-bot" if summary["status"] == "blocked" else "unreachable"
+            logger.error(f"Source {target['id']} {what} for "
+                         f"{BLOCKED_STREAK_LIMIT} consecutive runs"
+                         + ("" if summary["status"] == "blocked" else " (blocked/unreachable)"))
             return 1
         return 2   # tolerated: already warned + recorded as 'blocked' (counted, not failed)
     return 0 if summary["status"] in ("success", "partial") else 1

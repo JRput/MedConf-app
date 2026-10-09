@@ -46,24 +46,36 @@ _BLOCKED_STATUSES = {403, 429, 503, 202}
 _MIN_PLAUSIBLE_BODY_LEN = 500
 
 
-# Registry of anti-bot blocks seen by fetch_html in this process, so
-# scrape_source can tell "0 cards because blocked" from "0 cards, extractor
-# broken" even when no BrowserController was passed in.
-last_block: dict = {"count": 0, "url": None}
+# Registry of fetch problems seen by fetch_html in this process, so
+# scrape_source can tell "0 cards because blocked/unreachable" from "0 cards,
+# extractor broken" even when no BrowserController was passed in.
+#   blocked     - the site answered but refused us (403/429/503/challenge)
+#   unreachable - no HTTP response at all on any attempt (timeout, DNS, reset)
+last_fetch_problem: dict = {"blocked": 0, "unreachable": 0, "url": {}}
+
+# Per-call scratch: what the browser fallback saw.
+_attempt: dict = {"nav_error": False, "saw_body": False}
 
 
 def reset_blocks() -> None:
-    last_block["count"] = 0
-    last_block["url"] = None
+    last_fetch_problem["blocked"] = 0
+    last_fetch_problem["unreachable"] = 0
+    last_fetch_problem["url"] = {}
 
 
-def _record_block(url: str, browser: Any) -> None:
-    """httpx was blocked AND the browser fallback produced nothing usable."""
-    last_block["count"] += 1
-    last_block["url"] = url
-    if browser is not None and hasattr(browser, "challenged_count"):
+def _record_problem(kind: str, url: str, browser: Any) -> None:
+    last_fetch_problem[kind] += 1
+    last_fetch_problem["url"][kind] = url
+    if kind == "blocked" and browser is not None and hasattr(browser, "challenged_count"):
         browser.challenged_count += 1
         browser.last_challenge_url = url
+
+
+def _finish_failed(url: str, browser: Any, httpx_blocked: bool) -> None:
+    """Every attempt failed. Blocked if any HTTP-level refusal or challenge
+    page was seen; otherwise (only transport errors) unreachable."""
+    kind = "blocked" if (httpx_blocked or _attempt["saw_body"]) else "unreachable"
+    _record_problem(kind, url, browser)
 
 
 def _looks_blocked(status_code: int, body: Optional[str]) -> Optional[str]:
@@ -121,6 +133,7 @@ def _poll_stable_body(page: Any, url: str, wait_s: float, expect_selector: Optio
             break
         page.wait_for_timeout(1000)
     if body:
+        _attempt["saw_body"] = True
         logger.warning(f"http_fetch: {url} still showing a challenge/empty-shell page after {wait_s:.0f}s")
     return None
 
@@ -134,6 +147,7 @@ def _fetch_via_own_page(url: str, page: Any, wait_s: float = 20.0, expect_select
         page.goto(url, wait_until="load", timeout=30000)
         return _poll_stable_body(page, url, wait_s, expect_selector)
     except Exception as e:
+        _attempt["nav_error"] = True
         logger.warning(f"http_fetch: own-page fetch of {url} failed: {e}")
         return None
 
@@ -158,6 +172,7 @@ def _fetch_via_browser(url: str, page: Any, wait_s: float = 20.0, expect_selecto
         new_page.goto(url, wait_until="load", timeout=30000)
         return _poll_stable_body(new_page, url, wait_s, expect_selector)
     except Exception as e:
+        _attempt["nav_error"] = True
         logger.warning(f"http_fetch: Playwright fetch of {url} failed: {e}")
         return None
     finally:
@@ -209,6 +224,7 @@ def fetch_html(
     req_headers = {**DEFAULT_HEADERS, **(headers or {})}
 
     httpx_blocked = False
+    _attempt.update(nav_error=False, saw_body=False)
     status, body = _fetch_httpx(url, req_headers, timeout)
     if status is not None:
         reason = _looks_blocked(status, body)
@@ -227,25 +243,24 @@ def fetch_html(
     if loaded_page is not None:
         logger.warning(f"http_fetch: reading already-loaded browser page for {url}")
         result = _poll_stable_body(loaded_page, url, 20.0, expect_selector)
-        if result is None and httpx_blocked:
-            _record_block(url, browser)
+        if result is None:
+            _finish_failed(url, browser, httpx_blocked)
         return result
 
     page = getattr(browser, "page", browser) if browser is not None else None
     if page is not None and reuse_page:
         logger.warning(f"http_fetch: falling back to Playwright (own page) for {url}")
         result = _fetch_via_own_page(url, page, expect_selector=expect_selector)
-        if result is None and httpx_blocked:
-            _record_block(url, browser)
+        if result is None:
+            _finish_failed(url, browser, httpx_blocked)
         return result
     if page is None:
         logger.warning(f"http_fetch: no browser available for {url}; giving up")
-        if httpx_blocked:
-            _record_block(url, browser)
+        _finish_failed(url, browser, httpx_blocked)
         return None
 
     logger.warning(f"http_fetch: falling back to Playwright (new page) for {url}")
     result = _fetch_via_browser(url, page, expect_selector=expect_selector)
-    if result is None and httpx_blocked:
-        _record_block(url, browser)
+    if result is None:
+        _finish_failed(url, browser, httpx_blocked)
     return result
