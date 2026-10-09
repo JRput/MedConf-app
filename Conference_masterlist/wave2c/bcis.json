@@ -1,0 +1,71 @@
+{
+  "source_id": 0,
+  "slug": "bcis",
+  "class_name": "BcisExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/bcis.py",
+  "source_row": {
+    "source_name": "BCIS events",
+    "society": "British Cardiovascular Intervention Society",
+    "base_url": "https://www.bcis.org.uk/event/",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.bcis.org.uk/event/page/{n}/",
+    "max_pages_hint": 6,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "/event/page/N/ (rel=next); archive shows full posts; dates like 'Tuesday 10 November' have NO year (resolved from weekday); fees live on external Millbrook registration sites."
+  },
+  "registry_comment": "British Cardiovascular Intervention Society - WordPress generic family (constants only)",
+  "probe_results": {
+    "shells": 6,
+    "shells_forced_fallback": 6,
+    "details_tested": 5,
+    "with_date": 5,
+    "with_pricing": 0,
+    "with_venue": 2,
+    "with_description": 1,
+    "with_specialty": 5
+  },
+  "test_urls": [
+    "https://www.bcis.org.uk/event/bcis-research-day/",
+    "https://www.bcis.org.uk/event/bcis-cardiac-physiologists-catheter-lab-course-2/",
+    "https://www.bcis.org.uk/event/bcis-education-forum-bifurcation-pci-2/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.bcis.org.uk/event/bcis-research-day/",
+      "field": "date+venue",
+      "site_says": "Thursday 3 December 2026 | One-Day | In-Person | Royal College of Physicians, London",
+      "extractor_says": "2026-12-03, Royal College of Physicians, London, in_person",
+      "match": true
+    },
+    {
+      "url": "https://www.bcis.org.uk/event/bcis-cardiac-physiologists-catheter-lab-course-2/",
+      "field": "dates",
+      "site_says": "Monday 12 - Tuesday 13 April 2027 in Bristol",
+      "extractor_says": "2027-04-12..2027-04-13, city None",
+      "match": false
+    },
+    {
+      "url": "https://www.bcis.org.uk/event/bcis-education-forum-bifurcation-pci-2/",
+      "field": "date+format",
+      "site_says": "Tuesday 10 November | 19:00-20:00 | Webinar",
+      "extractor_says": "2026-11-10 19:00, online (year inferred from weekday)",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Platform: WordPress custom theme (event post type, REST has no dates). Subclass = 0 constants beyond the common ones, 0 lines of parsing code.",
+    "Dates on cards/pages have NO year ('Tuesday 10 November'); the base resolves the year from the weekday (nearest match) - needed a base-class feature for this site. A weekday/date mismatch on the site would yield a wrong year.",
+    "Only 6 upcoming events: the archive is ~90 posts and mostly past; 'Transcatheter Mitral UK' and similar 'More information coming soon' posts have no date and are dropped. Recon's ~25 included past events.",
+    "pricing_tiers is empty for every tested event and that is NOT proven correct: all fees sit on external Millbrook registration sites (millbrook-events.co.uk/...). Harness fired PRICE_EXTERNAL_LINK 3/5. This is the two-hop pattern 5 and depends entirely on the shared explorer following the 'Register Here' link.",
+    "City is missing when the venue is only in a sentence ('...will take place ... in Bristol'); no prose location parsing by design.",
+    "The archive page renders full post bodies, so the listing parse reads each post's content; fine for 10 posts per page.",
+    "Registration needed in extractors/__init__.py (not touched): import the class and add it to EXTRACTOR_REGISTRY under the new source id. wordpress_generic.py itself needs no registration.",
+    "Coverage checklist: (1) multi-day ranges: listing date-range parser plus header-zone range on the detail page, both unit-tested; (2/4/5) fees on external or same-site registration pages are NOT followed by the family - left to remediator.explorer (PLAYBOOK says it handles them); the harness PRICE_*_LINK warnings below are those cases; (3) image fee tables not checked here (no site showed one); (6/7) call-for-papers deadlines left to the merge step per PLAYBOOK (extract_abstract_info is deliberately not called), harness SUBMISSION_NO_DEADLINE warnings are that step's job; (8) CTA text: no tier labels come from link text; (9) location on page: header-line / labelled-line / JSON-LD parsing, harness LOCATION_ON_PAGE never fired.",
+    "No JSON-LD Event exists on any trial site (checked all five listing and detail pages), so the JSON-LD offers path is covered by offline fixtures only, not by a live page.",
+    "WP REST path (REST_POST_TYPE) is implemented and unit-tested offline but OFF by default and unproven live: /wp-json/wp/v2/events (ERS) and /wp/v2/event (BCIS) exist but return acf=[] and no event dates (the core 'date' is the publish date); BSGE exposes no events post type. HTML cards are the only date source on these sites.",
+    "with_venue in probe_results counts venue_name OR city (both are location evidence); venue_name alone is lower and noted per site."
+  ]
+}

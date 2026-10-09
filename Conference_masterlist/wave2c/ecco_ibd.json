@@ -1,0 +1,70 @@
+{
+  "source_id": 0,
+  "slug": "ecco_ibd",
+  "class_name": "EccoIbdExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/ecco_ibd.py",
+  "source_row": {
+    "source_name": "ECCO event calendar",
+    "society": "European Crohn's and Colitis Organisation",
+    "base_url": "https://ecco-ibd.eu/congress-events/event-calendar",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Joomla/YOOtheme (not WordPress). Single page of el-item cards (h4 title, Date/Location/Organiser h5 blocks, 'Visit website' link); links point at other organisers' sites, which are the detail pages. Cards with no link are dropped."
+  },
+  "registry_comment": "ECCO - family extractor on Joomla calendar (constants only)",
+  "probe_results": {
+    "shells": 11,
+    "shells_forced_fallback": 11,
+    "details_tested": 5,
+    "with_date": 5,
+    "with_pricing": 1,
+    "with_venue": 4,
+    "with_description": 3,
+    "with_specialty": 5
+  },
+  "test_urls": [
+    "https://ueg.eu/p/200",
+    "https://ibdnepal.org/",
+    "https://stmarksacademicinstitute.org.uk/courses/frontiers-in-colorectal-and-intestinal-disease2026/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://ecco-ibd.eu/congress-events/event-calendar",
+      "field": "UEG Week card",
+      "site_says": "October 17 - 20, 2026; Barcelona, Spain",
+      "extractor_says": "2026-10-17..2026-10-20, Barcelona, Spain",
+      "match": true
+    },
+    {
+      "url": "https://ecco-ibd.eu/congress-events/event-calendar",
+      "field": "ECCO Congress card",
+      "site_says": "March 3-6, 2027; Bella Center, Copenhagen, Denmark",
+      "extractor_says": "2027-03-03..2027-03-06 (listing); detail on ecco27 overview page not harness-sampled",
+      "match": true
+    },
+    {
+      "url": "https://stmarksacademicinstitute.org.uk/courses/frontiers-in-colorectal-and-intestinal-disease2026/",
+      "field": "fees",
+      "site_says": "GBP 250; From 1 Oct: GBP 300",
+      "extractor_says": "pricing_tiers []",
+      "match": false
+    }
+  ],
+  "concerns": [
+    "NOT WordPress: Joomla with YOOtheme (recon said wordpress_other). Works with 3 constants (CARD_SPLIT_RE on el-item cards, EXTERNAL_LINKS, EVENT_LINK_RE) and 0 lines of parsing code, but only after adding an 'accept external links' switch to the base.",
+    "11 shells, not ~40: the calendar is one page of third-party events (UEG Week, Nepal, Taiwan, NZ, Japan, Egypt ...) plus the ECCO Congress 2027. One card (AIG IBD Summit) has no link and is dropped. ECCO's own educational workshop is only in the homepage slider and is already past.",
+    "Every shell's detail page is ANOTHER organiser's site, so detail quality varies: fees found for 1/5 (UEG, 12 tiers - not manually verified), harness fired PRICE_TEXT_ON_PAGE (St Mark's: 'GBP 250; From 1 Oct: GBP 300' - time-tiered amounts with no heading, not parsed), PRICE_SAME_SITE_LINK, PRICE_EXTERNAL_LINK (Eventbrite) and SUBMISSION_NO_DEADLINE.",
+    "society is set to 'ECCO' for all shells although most are other societies' meetings; the registry owner should decide whether a calendar of third-party events belongs under the ECCO society name or should set society from the card's Organiser line.",
+    "Third-party descriptions on the Taiwan site were empty; Japan's city came through as the venue complex name.",
+    "Registration needed in extractors/__init__.py (not touched): import the class and add it to EXTRACTOR_REGISTRY under the new source id. wordpress_generic.py itself needs no registration.",
+    "Coverage checklist: (1) multi-day ranges: listing date-range parser plus header-zone range on the detail page, both unit-tested; (2/4/5) fees on external or same-site registration pages are NOT followed by the family - left to remediator.explorer (PLAYBOOK says it handles them); the harness PRICE_*_LINK warnings below are those cases; (3) image fee tables not checked here (no site showed one); (6/7) call-for-papers deadlines left to the merge step per PLAYBOOK (extract_abstract_info is deliberately not called), harness SUBMISSION_NO_DEADLINE warnings are that step's job; (8) CTA text: no tier labels come from link text; (9) location on page: header-line / labelled-line / JSON-LD parsing, harness LOCATION_ON_PAGE never fired.",
+    "No JSON-LD Event exists on any trial site (checked all five listing and detail pages), so the JSON-LD offers path is covered by offline fixtures only, not by a live page.",
+    "WP REST path (REST_POST_TYPE) is implemented and unit-tested offline but OFF by default and unproven live: /wp-json/wp/v2/events (ERS) and /wp/v2/event (BCIS) exist but return acf=[] and no event dates (the core 'date' is the publish date); BSGE exposes no events post type. HTML cards are the only date source on these sites.",
+    "with_venue in probe_results counts venue_name OR city (both are location evidence); venue_name alone is lower and noted per site."
+  ]
+}

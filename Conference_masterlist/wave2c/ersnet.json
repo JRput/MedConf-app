@@ -1,0 +1,71 @@
+{
+  "source_id": 0,
+  "slug": "ersnet",
+  "class_name": "ErsnetExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/ersnet.py",
+  "source_row": {
+    "source_name": "ERS - European Respiratory Society events",
+    "society": "European Respiratory Society",
+    "base_url": "https://www.ersnet.org/events/",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.ersnet.org/events/page/{n}/",
+    "max_pages_hint": 6,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "/events/page/N/ (rel=next); cards .card__preview with .subheading, .h5 title, .date, .venue; detail header 'D-D Month, YYYY | City, Country' + Fees tab (label/amount lines)."
+  },
+  "registry_comment": "European Respiratory Society - WordPress generic family (constants only)",
+  "probe_results": {
+    "shells": 29,
+    "shells_forced_fallback": 29,
+    "details_tested": 5,
+    "with_date": 5,
+    "with_pricing": 3,
+    "with_venue": 1,
+    "with_description": 4,
+    "with_specialty": 5
+  },
+  "test_urls": [
+    "https://www.ersnet.org/events/skills-course-interventional-bronchoscopy-6/",
+    "https://www.ersnet.org/events/clinical-exercise-testing/",
+    "https://channel.ersnet.org/event-561-lsc-2027-programming-lung-health-across-the-life-course"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.ersnet.org/events/skills-course-interventional-bronchoscopy-6/",
+      "field": "dates+city",
+      "site_says": "2-4 November, 2026 | Heidelberg, Germany",
+      "extractor_says": "2026-11-02..2026-11-04, Heidelberg, Germany",
+      "match": true
+    },
+    {
+      "url": "https://www.ersnet.org/events/skills-course-interventional-bronchoscopy-6/",
+      "field": "fees",
+      "site_says": "ERS members EUR 1,000; Non-ERS members EUR 1,100",
+      "extractor_says": "2 tiers EUR 1000 / 1100",
+      "match": true
+    },
+    {
+      "url": "https://channel.ersnet.org/media-122357-breathlessness-and-its-causes-a-joint-ers-esc-clinical-update-19-november-2026",
+      "field": "date+fee",
+      "site_says": "19 November, 2026 | Online; Fees: Free for ERS members and non-members",
+      "extractor_says": "2026-11-19, online, EUR 0 tier (listing card)",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Platform: WordPress (custom theme, Yoast). Subclass = 1 regex constant, 0 lines of parsing code.",
+    "Listing: /events/ ?page walk via pagination-next; the site's '48 pages' is a WP artifact - only pages 1-3 hold cards, the walk stops after 2 pages with nothing new. 29 upcoming events found (expected ~48 in recon was the all-time sitemap count). Cards also link to channel.ersnet.org (/event-NNN conferences, /media-NNN webinars); those are included via EVENT_LINK_RE, which is why the base accepts same-site subdomains.",
+    "venue_name is 0/5: ERS puts the venue address in an unlabelled Venue tab panel after the fee panel; the family reads only the 'Heidelberg, Germany' header/card line, so city+country are set but not the venue building. A ~10-line hook (venue panel) would fix it - this is the one place ERS would need bespoke code.",
+    "Undated cards (EBUS part 3, sleep programme parts, e-learning) cost one page load each at listing time and are dropped when the page shows no date; capped at 30 per run. Two e-learning cards carry a placeholder date in 2030/2031 and are dropped by MAX_FUTURE_DAYS (1100).",
+    "Channel conference pages (event-NNN) put the real fee on my.ersnet.org or a /hp-NNN-registration sub-page; harness PRICE_EXTERNAL_LINK (ERS Satellites) fired - needs the shared explorer to follow. Webinar pages include 'Fees: Free ...' and become a EUR 0 tier.",
+    "Channel pages are Vimeo/CDN heavy; description is filtered for 'CDN connection issue' / login boilerplate but a few webinar pages have no real prose (description None).",
+    "Registration needed in extractors/__init__.py (not touched): import the class and add it to EXTRACTOR_REGISTRY under the new source id. wordpress_generic.py itself needs no registration.",
+    "Coverage checklist: (1) multi-day ranges: listing date-range parser plus header-zone range on the detail page, both unit-tested; (2/4/5) fees on external or same-site registration pages are NOT followed by the family - left to remediator.explorer (PLAYBOOK says it handles them); the harness PRICE_*_LINK warnings below are those cases; (3) image fee tables not checked here (no site showed one); (6/7) call-for-papers deadlines left to the merge step per PLAYBOOK (extract_abstract_info is deliberately not called), harness SUBMISSION_NO_DEADLINE warnings are that step's job; (8) CTA text: no tier labels come from link text; (9) location on page: header-line / labelled-line / JSON-LD parsing, harness LOCATION_ON_PAGE never fired.",
+    "No JSON-LD Event exists on any trial site (checked all five listing and detail pages), so the JSON-LD offers path is covered by offline fixtures only, not by a live page.",
+    "WP REST path (REST_POST_TYPE) is implemented and unit-tested offline but OFF by default and unproven live: /wp-json/wp/v2/events (ERS) and /wp/v2/event (BCIS) exist but return acf=[] and no event dates (the core 'date' is the publish date); BSGE exposes no events post type. HTML cards are the only date source on these sites.",
+    "with_venue in probe_results counts venue_name OR city (both are location evidence); venue_name alone is lower and noted per site."
+  ]
+}

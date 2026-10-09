@@ -1,0 +1,70 @@
+{
+  "source_id": 0,
+  "slug": "fdi",
+  "class_name": "FdiExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/fdi.py",
+  "source_row": {
+    "source_name": "FDI World Dental Federation events",
+    "society": "FDI World Dental Federation",
+    "base_url": "https://www.fdiworlddental.org/all-events",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.fdiworlddental.org/all-events?page={n}",
+    "max_pages_hint": 6,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Drupal 10 (not WordPress). /all-events lists <article class='node--type-event'> teasers (10 per page, ?page=N 0-based pager with rel=next); date range in <time> tags, CE-programme teasers also carry a 'City, Country' line; event pages are root-level slugs."
+  },
+  "registry_comment": "FDI World Dental Federation - family extractor on Drupal archive (constants only)",
+  "probe_results": {
+    "shells": 6,
+    "shells_forced_fallback": 6,
+    "details_tested": 5,
+    "with_date": 5,
+    "with_pricing": 0,
+    "with_venue": 2,
+    "with_description": 5,
+    "with_specialty": 5
+  },
+  "test_urls": [
+    "https://www.fdiworlddental.org/fdi-world-dental-congress-2027",
+    "https://www.fdiworlddental.org/fdi-regional-congress",
+    "https://www.fdiworlddental.org/saving-pulp-daily-practice-practical-approach-vital-pulp-therapy"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.fdiworlddental.org/fdi-world-dental-congress-2027",
+      "field": "dates",
+      "site_says": "21 October 2027 - 24 October 2027",
+      "extractor_says": "2027-10-21..2027-10-24",
+      "match": true
+    },
+    {
+      "url": "https://www.fdiworlddental.org/fdi-regional-congress",
+      "field": "dates",
+      "site_says": "21 October 2026 - 23 October 2026",
+      "extractor_says": "2026-10-21..2026-10-23, no location (page does not state one)",
+      "match": true
+    },
+    {
+      "url": "https://www.fdiworlddental.org/saving-pulp-daily-practice-practical-approach-vital-pulp-therapy",
+      "field": "format",
+      "site_says": "CE programme teaser, place line 'Bekasi, Indonesia' (speaker origin)",
+      "extractor_says": "event_format online, no city",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "NOT WordPress: Drupal 10 (recon said wordpress_other). It still works with 3 constants (CARD_SPLIT_RE on <article node--type-event>, EVENT_LINK_RE for root-level slugs, ONLINE_CATEGORY_RE) and 0 lines of parsing code, because the family parser assumes only 'one chunk per event link'.",
+    "6 upcoming events; the listing is date-descending and pages 2+ are past, so the walk stops after 2 empty pages. Recon's ~30 included past events.",
+    "'CE programme' teasers show the speaker's country as the place line; ONLINE_CATEGORY_RE makes them online with no venue. Without it they were stored as in-person in Honduras/Indonesia.",
+    "pricing_tiers empty for all 5: no fee text, tables, images or registration links on the tested pages (checked page text; harness coverage was clean). Congress registration lives on separate congress microsites, which the explorer's two-hop step would have to find.",
+    "Location is absent for the Regional Congress and WDC pages (not stated in page text), so city/venue stay empty.",
+    "Registration needed in extractors/__init__.py (not touched): import the class and add it to EXTRACTOR_REGISTRY under the new source id. wordpress_generic.py itself needs no registration.",
+    "Coverage checklist: (1) multi-day ranges: listing date-range parser plus header-zone range on the detail page, both unit-tested; (2/4/5) fees on external or same-site registration pages are NOT followed by the family - left to remediator.explorer (PLAYBOOK says it handles them); the harness PRICE_*_LINK warnings below are those cases; (3) image fee tables not checked here (no site showed one); (6/7) call-for-papers deadlines left to the merge step per PLAYBOOK (extract_abstract_info is deliberately not called), harness SUBMISSION_NO_DEADLINE warnings are that step's job; (8) CTA text: no tier labels come from link text; (9) location on page: header-line / labelled-line / JSON-LD parsing, harness LOCATION_ON_PAGE never fired.",
+    "No JSON-LD Event exists on any trial site (checked all five listing and detail pages), so the JSON-LD offers path is covered by offline fixtures only, not by a live page.",
+    "WP REST path (REST_POST_TYPE) is implemented and unit-tested offline but OFF by default and unproven live: /wp-json/wp/v2/events (ERS) and /wp/v2/event (BCIS) exist but return acf=[] and no event dates (the core 'date' is the publish date); BSGE exposes no events post type. HTML cards are the only date source on these sites.",
+    "with_venue in probe_results counts venue_name OR city (both are location evidence); venue_name alone is lower and noted per site."
+  ]
+}
