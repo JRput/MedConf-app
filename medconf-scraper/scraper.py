@@ -16,6 +16,7 @@ import hashlib
 from datetime import datetime
 from typing import Dict, Any, Optional
 
+from extractors import http_fetch
 from llm_agent import AgentLoop
 from validator import validate_conference
 from database import (
@@ -83,6 +84,7 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
     skipped_unchanged = 0
     seen_bumped = 0
 
+    http_fetch.reset_blocks()
     agent = AgentLoop(source)
 
     try:
@@ -93,7 +95,7 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
         summary["conferences_found"] = len(shells)
 
         if not shells:
-            challenged = getattr(agent.browser, "challenged_count", 0) or 0
+            challenged = (getattr(agent.browser, "challenged_count", 0) or 0) + http_fetch.last_block["count"]
             if challenged > 0:
                 # Intermittent runner-IP block, not a broken extractor. Record
                 # it loudly (WARNING + 'blocked' status) but let main decide
@@ -101,7 +103,7 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
                 summary["status"] = "blocked"
                 summary["error_details"] = (
                     "blocked by anti-bot challenge "
-                    f"({getattr(agent.browser, 'last_challenge_url', None)}); "
+                    f"({getattr(agent.browser, 'last_challenge_url', None) or http_fetch.last_block['url']}); "
                     "No event cards extracted from listing"
                 )
                 logger.warning(f"Source {source['id']} ({source.get('source_name')}): "
