@@ -10,7 +10,45 @@ import time
 
 # Cloudflare's interstitial. Real pages embed Turnstile scripts too, so only
 # the <title> is a safe marker (learned the hard way 2026-09-26).
-_CHALLENGE_TITLE_RE = re.compile(r"<title>\s*(?:just a moment|attention required|human verification|verify you are human|access denied)", re.I)
+_CHALLENGE_TITLE_RE = re.compile(r"<title>\s*(?:just a moment|attention required|human verification|verify you are human|access denied|403 - forbidden)", re.I)
+
+# Strong markers: only ever present on a real interstitial (never on a page that
+# merely embeds Cloudflare's passive /cdn-cgi/challenge-platform/ script).
+_CHALLENGE_STRONG_RE = re.compile(
+    r"sgcaptcha|cf-chl|cf_chl_opt|__cf_chl_rt_tk|cf-browser-verification|"
+    r"checking your browser|aws-waf-token",
+    re.I,
+)
+# Weak markers: also appear on ordinary pages (login-form Turnstile widgets,
+# AWS WAF captcha script tags, the phrase "just a moment" in copy). They only
+# count when the page has no real content shape (<=1 link).
+_CHALLENGE_WEAK_RE = re.compile(r"turnstile|awswaf|aws\s*waf|just a moment|attention required", re.I)
+_ANCHOR_RE = re.compile(r"<a\s[^>]*href=", re.I)
+_BLOCKED_STATUSES = {403, 429, 503}
+
+
+def looks_like_challenge(html, status=None) -> bool:
+    """True if `html` (and optional HTTP status) is a bot-challenge interstitial.
+
+    Shared by BrowserController._is_challenged and extractors.http_fetch.
+    The passive challenge-platform script alone is NOT a challenge.
+    """
+    if status in _BLOCKED_STATUSES:
+        return True
+    head = html or ""
+    if _CHALLENGE_TITLE_RE.search(head[:5000]):
+        return True
+    if _CHALLENGE_STRONG_RE.search(head):
+        return True
+    if _CHALLENGE_WEAK_RE.search(head) and len(_ANCHOR_RE.findall(head)) <= 1:
+        return True
+    return False
+
+
+def has_content_shape(html) -> bool:
+    """A real listing/detail page links to more than one place."""
+    return len(_ANCHOR_RE.findall(html or "")) > 1
+
 
 # Alternate browser profile — a plain desktop Chrome. Cloudflare's managed
 # challenge is configured per site: RCoA / FICM / ARVO / HIMSS / ABN reject
@@ -81,7 +119,7 @@ class BrowserController:
     # --- Cloudflare challenge handling ---------------------------------
     def _is_challenged(self) -> bool:
         try:
-            return bool(_CHALLENGE_TITLE_RE.search(self.page.content()[:2000]))
+            return looks_like_challenge(self.page.content())
         except Exception:
             return False
 

@@ -197,6 +197,67 @@ def test_looks_blocked_real_200_page_is_fine():
     assert http_fetch._looks_blocked(200, body) is None
 
 
+def test_passive_challenge_platform_script_is_not_blocked():
+    body = ("<html><body>" + ("real content " * 100) + '<a href="/a">a</a><a href="/b">b</a>'
+            '<script src="/cdn-cgi/challenge-platform/scripts/jsd/main.js"></script></body></html>')
+    assert http_fetch._looks_blocked(200, body) is None
+
+
+def test_real_just_a_moment_page_is_blocked():
+    body = "<html><head><title>Just a moment...</title></head><body>" + ("x " * 400) + "</body></html>"
+    assert http_fetch._looks_blocked(200, body) is not None
+    cf = "<html><body>" + ("x " * 400) + "<script>window._cf_chl_opt={}</script></body></html>"
+    assert http_fetch._looks_blocked(200, cf) is not None
+
+
+def test_aws_waf_page_is_blocked():
+    body = ("<html><head><script src='https://x.awswaf.com/challenge.js'></script></head><body>"
+            + ("x " * 400) + "</body></html>")
+    assert http_fetch._looks_blocked(200, body) is not None
+
+
+def test_browser_fallback_rejects_markerless_empty_shell():
+    shell = "<html><body>" + ("x " * 400) + "</body></html>"  # no links, no title marker
+    page = FakePage([shell])
+    page.wait_for_load_state = lambda *a, **k: None
+    assert http_fetch._poll_stable_body(page, "u", 0.0) is None
+
+
+def test_expect_selector_overrides_anchor_check():
+    shell = "<html><body>" + ("x " * 400) + "</body></html>"
+    page = FakePage([shell])
+    page.wait_for_load_state = lambda *a, **k: None
+    page.query_selector = lambda sel: object()
+    assert http_fetch._poll_stable_body(page, "u", 0.0, "div.event") == shell
+
+
+# BTOG regression (2026-10-09). Trimmed shape of the real /events/ page:
+# relative AND absolute hrefs, a nav, a few cards, passive CF script.
+BTOG_REAL = ("<!DOCTYPE html><html lang='en-GB' class='js'><head><meta charset='UTF-8'>"
+             "<link rel='pingback' href='https://btog.org/xmlrpc.php'><title>Events - BTOG</title></head><body>"
+             "<nav><a href='/'>Home</a><a href='/about/'>About</a><a href='https://btog.org/events/'>Events</a></nav>"
+             + "".join(f"<article class='event'><a href='/events/e{i}/'>Event {i}</a><p>{'text ' * 40}</p></article>" for i in range(4))
+             + "<script src='/cdn-cgi/challenge-platform/scripts/jsd/main.js'></script></body></html>")
+# What a fresh Playwright context actually gets from BTOG: an 80 kB 403 page, no links.
+BTOG_FRESH_CONTEXT_403 = ("<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'>"
+                          "<title>403 - Forbidden</title><style>" + ("a{color:red}" * 3000) + "</style></head>"
+                          "<body><h1>Forbidden</h1></body></html>")
+
+
+def test_btog_real_page_accepted_on_own_page():
+    page = FakePage([BTOG_REAL])
+    page.wait_for_load_state = lambda *a, **k: None
+    assert http_fetch._poll_stable_body(page, "https://www.btog.org/events/", 0.0) == BTOG_REAL
+
+
+def test_btog_fresh_context_403_page_rejected():
+    from browser import looks_like_challenge
+    assert looks_like_challenge(BTOG_FRESH_CONTEXT_403)
+    page = FakePage([BTOG_FRESH_CONTEXT_403])
+    page.wait_for_load_state = lambda *a, **k: None
+    assert http_fetch._poll_stable_body(page, "u", 0.0) is None
+
+
 def test_httpx_success_path_never_touches_browser():
     original = http_fetch.httpx.Client
     try:
@@ -220,7 +281,7 @@ def test_fallback_used_when_httpx_blocked_403():
     try:
         _patch_httpx_client(None, FakeResponse(403, "Forbidden"))
 
-        good_html = "<html><body>real page</body></html>"
+        good_html = "<html><body>real page<a href='/a'>a</a><a href='/b'>b</a></body></html>"
         fake_new_page = FakePage([good_html])
         caller_page, new_context = _make_caller_page(fake_new_page)
         browser = FakeBrowserController(caller_page)
@@ -242,7 +303,7 @@ def test_fallback_used_when_httpx_returns_202():
     original = http_fetch.httpx.Client
     try:
         _patch_httpx_client(None, FakeResponse(202, "Accepted"))
-        good_html = "<html><body>real page after 202</body></html>"
+        good_html = "<html><body>real page after 202<a href='/a'>a</a><a href='/b'>b</a></body></html>"
         caller_page, _ = _make_caller_page(FakePage([good_html]))
         browser = FakeBrowserController(caller_page)
 
@@ -258,7 +319,7 @@ def test_fallback_waits_out_a_challenge_interstitial():
         _patch_httpx_client(None, FakeResponse(403, "Forbidden"))
         # First .content() call sees the challenge, then it resolves.
         challenge = "<html><body>Just a moment...</body></html>"
-        resolved = "<html><body>" + ("real content " * 50) + "</body></html>"
+        resolved = "<html><body>" + ("real content " * 50) + '<a href="/a">a</a><a href="/b">b</a></body></html>'
         fake_new_page = FakePage([challenge, resolved])
         caller_page, _ = _make_caller_page(fake_new_page)
         browser = FakeBrowserController(caller_page)
@@ -305,7 +366,7 @@ def test_accepts_raw_page_in_place_of_browser_controller():
     original = http_fetch.httpx.Client
     try:
         _patch_httpx_client(None, FakeResponse(403, "Forbidden"))
-        good_html = "<html><body>fetched via raw page context</body></html>"
+        good_html = "<html><body>fetched via raw page context<a href='/a'>a</a><a href='/b'>b</a></body></html>"
         raw_page, _ = _make_caller_page(FakePage([good_html]))
         result = http_fetch.fetch_html("https://example.org/hub", browser=raw_page, timeout=5.0)
         assert result == good_html

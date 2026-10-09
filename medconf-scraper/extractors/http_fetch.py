@@ -26,6 +26,7 @@ from typing import Any, Optional
 import httpx
 
 from logger import logger
+from browser import looks_like_challenge, has_content_shape
 
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
@@ -40,14 +41,6 @@ DEFAULT_HEADERS = {
 # Treat these as "the site refused us", not "the page really is empty".
 _BLOCKED_STATUSES = {403, 429, 503, 202}
 
-# Markers of bot-challenge interstitials (Cloudflare, SiteGround sgcaptcha, etc.)
-_CHALLENGE_MARKERS = re.compile(
-    r"sgcaptcha|just a moment|cf-chl|checking your browser|"
-    r"cf-browser-verification|attention required|challenge-platform|"
-    r"/cdn-cgi/challenge-platform",
-    re.I,
-)
-
 # A real listing/detail page is never this short; a 200 this small is
 # almost always an interstitial or an error page dressed as 200.
 _MIN_PLAUSIBLE_BODY_LEN = 500
@@ -58,7 +51,7 @@ def _looks_blocked(status_code: int, body: Optional[str]) -> Optional[str]:
     if status_code in _BLOCKED_STATUSES:
         return f"status {status_code}"
     if status_code == 200:
-        if _CHALLENGE_MARKERS.search(body or ""):
+        if looks_like_challenge(body):
             return "challenge markers in body"
         if len(body or "") < _MIN_PLAUSIBLE_BODY_LEN:
             return f"suspiciously short 200 body ({len(body or '')} chars)"
@@ -76,7 +69,18 @@ def _fetch_httpx(url: str, headers: dict, timeout: float):
         return None, None
 
 
-def _poll_stable_body(page: Any, url: str, wait_s: float) -> Optional[str]:
+def _has_expected_content(page: Any, body: str, expect_selector: Optional[str]) -> bool:
+    """Sanity check that a browser-fetched page is real, not a challenge page
+    with no recognisable marker (dermamedical.co.uk, ~80 kB)."""
+    if expect_selector:
+        try:
+            return page.query_selector(expect_selector) is not None
+        except Exception:
+            return False
+    return has_content_shape(body)
+
+
+def _poll_stable_body(page: Any, url: str, wait_s: float, expect_selector: Optional[str] = None) -> Optional[str]:
     """Poll `page` until it shows a stable, challenge-free body.
 
     A challenge interstitial (BTOG's SiteGround 202, seen on CI 2026-09-20)
@@ -91,31 +95,30 @@ def _poll_stable_body(page: Any, url: str, wait_s: float) -> Optional[str]:
             body = page.content()
         except Exception:
             body = None
-        if body and not _CHALLENGE_MARKERS.search(body):
+        if body and not looks_like_challenge(body) and _has_expected_content(page, body, expect_selector):
             return body
         if time.time() >= deadline:
             break
         page.wait_for_timeout(1000)
-    if body and _CHALLENGE_MARKERS.search(body):
-        logger.warning(f"http_fetch: {url} still showing a challenge page after {wait_s:.0f}s")
-        return None
-    return body
+    if body:
+        logger.warning(f"http_fetch: {url} still showing a challenge/empty-shell page after {wait_s:.0f}s")
+    return None
 
 
-def _fetch_via_own_page(url: str, page: Any, wait_s: float = 20.0) -> Optional[str]:
+def _fetch_via_own_page(url: str, page: Any, wait_s: float = 20.0, expect_selector: Optional[str] = None) -> Optional[str]:
     """Navigate the caller's OWN page to `url` and return its HTML. Only for
     callers that own the page outright (listing phase). On CI 2026-09-21 the
     scraper's long-lived main page cleared BTOG's challenge while a fresh
     context did not, so BTOG's listing uses this path."""
     try:
         page.goto(url, wait_until="load", timeout=30000)
-        return _poll_stable_body(page, url, wait_s)
+        return _poll_stable_body(page, url, wait_s, expect_selector)
     except Exception as e:
         logger.warning(f"http_fetch: own-page fetch of {url} failed: {e}")
         return None
 
 
-def _fetch_via_browser(url: str, page: Any, wait_s: float = 20.0) -> Optional[str]:
+def _fetch_via_browser(url: str, page: Any, wait_s: float = 20.0, expect_selector: Optional[str] = None) -> Optional[str]:
     """Fetch `url` in a brand-new context+page on `page`'s Browser, waiting
     briefly for a challenge interstitial to auto-resolve. Never touches
     `page` itself.
@@ -133,7 +136,7 @@ def _fetch_via_browser(url: str, page: Any, wait_s: float = 20.0) -> Optional[st
         new_page = new_context.new_page()
         new_page.set_default_timeout(30000)
         new_page.goto(url, wait_until="load", timeout=30000)
-        return _poll_stable_body(new_page, url, wait_s)
+        return _poll_stable_body(new_page, url, wait_s, expect_selector)
     except Exception as e:
         logger.warning(f"http_fetch: Playwright fetch of {url} failed: {e}")
         return None
@@ -158,6 +161,7 @@ def fetch_html(
     timeout: float = 30.0,
     reuse_page: bool = False,
     loaded_page: Any = None,
+    expect_selector: Optional[str] = None,
 ) -> Optional[str]:
     """Fetch a URL's HTML, trying httpx first and falling back to a real
     browser when the response looks bot-blocked.
@@ -174,6 +178,9 @@ def fetch_html(
       - `reuse_page=True`: navigate the browser's own page (listing phase
         only — the caller must own the page).
       - default: a fresh context+page, leaving the caller's page untouched.
+
+    `expect_selector`: optional CSS selector that must match on a browser-fetched
+    page for it to count as real (default: page links to >1 place).
 
     Never raises. Returns None if both paths fail (or if httpx succeeds
     with what looks like a real page, in which case the browser is never
@@ -197,15 +204,15 @@ def fetch_html(
 
     if loaded_page is not None:
         logger.warning(f"http_fetch: reading already-loaded browser page for {url}")
-        return _poll_stable_body(loaded_page, url, 20.0)
+        return _poll_stable_body(loaded_page, url, 20.0, expect_selector)
 
     page = getattr(browser, "page", browser) if browser is not None else None
     if page is not None and reuse_page:
         logger.warning(f"http_fetch: falling back to Playwright (own page) for {url}")
-        return _fetch_via_own_page(url, page)
+        return _fetch_via_own_page(url, page, expect_selector=expect_selector)
     if page is None:
         logger.warning(f"http_fetch: no browser available for {url}; giving up")
         return None
 
     logger.warning(f"http_fetch: falling back to Playwright (new page) for {url}")
-    return _fetch_via_browser(url, page)
+    return _fetch_via_browser(url, page, expect_selector=expect_selector)

@@ -99,6 +99,14 @@ _JUNK_TITLE_RE = re.compile(
 )
 
 
+def _first_not_none(*vals):
+    """First argument that is not None (False/0/'' count as real values)."""
+    for v in vals:
+        if v is not None:
+            return v
+    return None
+
+
 def _is_junk_title(title: Optional[str]) -> bool:
     """True when the listing-card title is an empty-state / loading / error
     message that slipped in because a JS-rendered listing rendered its
@@ -380,6 +388,8 @@ class AgentLoop:
             or "conference"
         )
 
+        is_on_demand = bool(_first_not_none(detail.get("is_on_demand"), shell.get("is_on_demand"), False))
+
         # Sessions array is course-specific. Pass through to the upsert layer.
         sessions = detail.get("sessions")
 
@@ -387,7 +397,7 @@ class AgentLoop:
             # Deterministic from listing
             "conference_name": conference_name,
             "event_type": event_type,
-            "is_sold_out": shell.get("is_sold_out", False),
+            "is_sold_out": bool(_first_not_none(detail.get("is_sold_out"), shell.get("is_sold_out"), False)),
             "start_date": start_date,
             "start_time": shell.get("start_time"),
             # LLM-derived from detail page
@@ -399,7 +409,7 @@ class AgentLoop:
             "city": city,
             "region": detail.get("region"),
             "event_format": event_format,
-            "cpd_points": detail.get("cpd_points"),
+            "cpd_points": _first_not_none(detail.get("cpd_points"), shell.get("cpd_points")),
             "cpd_accredited": bool(detail.get("cpd_accredited", False)),
             "abstract_open": bool(detail.get("abstract_open", False)),
             "abstract_deadline": detail.get("abstract_deadline"),
@@ -407,7 +417,7 @@ class AgentLoop:
             "pricing_tiers": detail.get("pricing_tiers", []) or [],
             # On-demand catch-up flag (RCEM source 7). When True, start_date
             # holds the "available until" deadline rather than a live date.
-            "is_on_demand": bool(detail.get("is_on_demand", False)),
+            "is_on_demand": is_on_demand,
             "on_demand_original_date": detail.get("on_demand_original_date"),
             # Flagship = international/national major LIVE conference. Detection chain:
             #   1. Per-source extractor set detail["is_flagship"] directly
@@ -428,7 +438,7 @@ class AgentLoop:
             # the On-Demand chip).
             "is_flagship": bool(detail.get("is_flagship") or (
                 event_type == "conference"
-                and not detail.get("is_on_demand", False)
+                and not is_on_demand
                 and (
                     _is_flagship_from_url(booking_url)
                     or _is_flagship_from_title(conference_name)
