@@ -1,0 +1,92 @@
+[
+  {
+    "domain": "bcis.org.uk",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "js_required": false,
+    "listing_url": "https://www.bcis.org.uk/event/",
+    "api_url": "",
+    "event_type_mix": "mixed",
+    "volume_estimate": 25,
+    "pagination": "query_param",
+    "detail_topology": "on_event_page",
+    "bot_protection": "none",
+    "expected_found": [
+      "BCIS Research Day",
+      "BCIS Structural Trainees Course",
+      "BCIS Cardiac Physiologists Catheter Lab Course"
+    ],
+    "notes": "WordPress site with static HTML event archive. Events show dates and locations on individual pages; registration/booking redirects to external ticketing platforms. No dated annual flagship found by that exact name, but multiple BCIS-led conferences and courses visible with future dates (Dec 2026, April 2027).",
+    "batch": 2
+  },
+  {
+    "domain": "bsge.org.uk",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "js_required": false,
+    "listing_url": "https://www.bsge.org.uk/event/",
+    "api_url": "",
+    "event_type_mix": "mixed",
+    "detail_topology": "on_event_page",
+    "pagination": "query_param",
+    "bot_protection": "none",
+    "volume_estimate": 40,
+    "expected_found": [],
+    "notes": "WordPress site using GeoDirectory for events (not Tribe Events). Dates, venue, and pricing info on individual event pages. BSGE Annual Scientific Meeting not currently listed; other BSGE events (courses, webinars, meetings) active. September-October 2026 events visible.",
+    "batch": 2
+  },
+  {
+    "domain": "ecco-ibd.eu",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "listing_url": "https://www.ecco-ibd.eu/congress-events/event-calendar",
+    "js_required": false,
+    "bot_protection": "none",
+    "event_type_mix": "conference",
+    "pagination": "query_param",
+    "detail_topology": "on_event_page",
+    "volume_estimate": 40,
+    "expected_found": [
+      "ECCO Congress"
+    ],
+    "api_url": "",
+    "notes": "Joomla CMS with YooTheme template. Event Calendar listing page displays major events (22nd Congress of ECCO 2027, UEG Week, educational workshops) with pagination via ?page parameter. Individual event pages at /ecco27/our-congress/overview contain detailed information including dates (March 3-6, 2027), venue (Bella Center, Copenhagen), pricing tiers (EUR 250-400 member savings), and registration links. No APIs or JavaScript required; all content is static HTML.",
+    "batch": 2
+  },
+  {
+    "domain": "ersnet.org",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "listing_url": "https://www.ersnet.org/events/",
+    "js_required": false,
+    "event_type_mix": "conference",
+    "pagination": "query_param",
+    "detail_topology": "on_event_page",
+    "api_url": "https://www.ersnet.org/wp-json/wp/v2/posts",
+    "volume_estimate": 48,
+    "expected_found": [
+      "ERS Congress"
+    ],
+    "bot_protection": "none",
+    "notes": "ERS (European Respiratory Society) hosts 853 events in their sitemap (mix of past/current). The /events/ page shows 48 pages of paginated events with query parameters (?page=N). Verified upcoming 2026/2027 dated events: ERS Congress 2026 (Barcelona, passed Sept 2026), Cough Conference 2026, Respiratory Failure Conference 2026, Early Detection Conference 2027, Lung Science Conference 2027. Events appear on detail pages in static HTML with dates in visible text and schema markup.",
+    "batch": 2
+  },
+  {
+    "domain": "fdiworlddental.org",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "js_required": false,
+    "listing_url": "https://www.fdiworlddental.org/all-events",
+    "api_url": "",
+    "pagination": "query_param",
+    "bot_protection": "none",
+    "event_type_mix": "conference",
+    "detail_topology": "on_event_page",
+    "volume_estimate": 30,
+    "expected_found": [
+      "FDI World Dental Congress"
+    ],
+    "notes": "Drupal 10 CMS with /all-events listing page. Pagination via query param (?page=0,1,2...). Events display 10 per page with detail pages showing dates, venue, location. Confirmed: FDI World Dental Congress 2027 (21-24 Oct, Mumbai, India) and FDI Regional Congress 2026 (21-23 Oct, Kenya). No API detected.",
+    "batch": 2
+  }
+]
