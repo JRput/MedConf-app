@@ -11,7 +11,8 @@ import json, re, sys, time, os
 os.environ.setdefault("SUPABASE_URL", "x"); os.environ.setdefault("SUPABASE_KEY", "x"); os.environ.setdefault("KIMI_API_KEY", "x")
 from browser import BrowserController
 
-CHAL = re.compile(r"<title>\s*(?:just a moment|attention required|checking your browser|403|access denied|forbidden)", re.I)
+# Shared detector (browser.py) — keep probe and scraper in sync (HQ lesson #12).
+from browser import looks_like_challenge, has_content_shape  # noqa: E402
 cands = json.load(open(sys.argv[1]))
 out = []
 b = BrowserController(); b.launch()
@@ -22,7 +23,7 @@ for c in cands:
         try:
             b.navigate(url)
             html = b.page.content()
-            ok = not CHAL.search(html[:2000]) and len(html) > 5000
+            ok = not looks_like_challenge(html, 200) and has_content_shape(html) and len(html) > 5000
             rec["results"].append({"url": url, "cleared": ok, "secs": round(time.time() - t, 1), "title": b.page.title()[:60], "len": len(html)})
         except Exception as e:
             rec["results"].append({"url": url, "cleared": False, "secs": round(time.time() - t, 1), "error": str(e)[:100]})

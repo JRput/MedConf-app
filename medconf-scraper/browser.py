@@ -10,7 +10,7 @@ import time
 
 # Cloudflare's interstitial. Real pages embed Turnstile scripts too, so only
 # the <title> is a safe marker (learned the hard way 2026-09-26).
-_CHALLENGE_TITLE_RE = re.compile(r"<title>\s*(?:just a moment|attention required|human verification|verify you are human|access denied|403 - forbidden)", re.I)
+_CHALLENGE_TITLE_RE = re.compile(r"<title>\s*(?:just a moment|attention required|human verification|security verification|verify you are human|access denied|403 - forbidden)", re.I)
 
 # Strong markers: only ever present on a real interstitial (never on a page that
 # merely embeds Cloudflare's passive /cdn-cgi/challenge-platform/ script).
