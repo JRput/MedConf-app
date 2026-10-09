@@ -1,0 +1,73 @@
+{
+  "source_id": 0,
+  "slug": "easl",
+  "class_name": "EaslExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/easl.py",
+  "source_row": {
+    "source_name": "EASL Events",
+    "society": "EASL",
+    "base_url": "https://easl.eu/what-we-do/events/",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://easl.eu/what-we-do/events/{page}/",
+    "max_pages_hint": 3,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Elementor loop cards (10 per page, 3 pages, rel=next / 'page-numbers next' link) at /what-we-do/events/, event pages under /event/<slug>/. Card has title, 'D - D Month, YYYY' and 'City, Country'. Detail pages are thin 'Key Information' blocks (Location / Dates / Topic); only Summit microsites carry a Venue address and fee tables. 'Talk Liver To Me' podcast episodes are skipped. Schools / Academy / Masterclass / Bootcamp pages are application-only courses with no fee. Register now / Visit Website external link is stored as organiser_url."
+  },
+  "registry_comment": "EASL (European Association for the Study of the Liver) events: WordPress family subclass + bespoke venue/course/organiser_url handling",
+  "probe_results": {
+    "shells": 18,
+    "shells_forced_fallback": 18,
+    "details_tested": 18,
+    "with_date": 18,
+    "with_pricing": 2,
+    "with_venue": 2,
+    "with_description": 15,
+    "with_specialty": 18
+  },
+  "test_urls": [
+    "https://easl.eu/event/easl-liver-cancer-summit-2027/",
+    "https://easl.eu/event/easl-masld-guidelines-academy-module-2-a-deeper-dive-into-masld/",
+    "https://easl.eu/event/delta-cure-2026/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://easl.eu/event/easl-liver-cancer-summit-2027/",
+      "field": "venue",
+      "site_says": "Venue address: Palacio de Congresos de Valencia",
+      "extractor_says": "Palacio de Congresos de Valencia, Valencia, Spain",
+      "match": true
+    },
+    {
+      "url": "https://easl.eu/event/easl-liver-cancer-summit-2027/",
+      "field": "fees",
+      "site_says": "Onsite Delegate member EUR 715, trainees 220, low-income 100 (+ non-member and online grids)",
+      "extractor_says": "8 EUR tiers, first three 715 / 220 / 100",
+      "match": true
+    },
+    {
+      "url": "https://easl.eu/event/easl-masld-guidelines-academy-module-2-a-deeper-dive-into-masld/",
+      "field": "dates/location",
+      "site_says": "8 - 9 October, 2026, Antwerp, Belgium",
+      "extractor_says": "2026-10-08..2026-10-09, Antwerp, Belgium, course",
+      "match": true
+    },
+    {
+      "url": "https://easl.eu/event/challenges-in-the-treatment-of-hepatocelular-carcinoma/",
+      "field": "end_date",
+      "site_says": "Dates: 25 June, 2027 (page boilerplate says schools last up to 2 days)",
+      "extractor_says": "2027-06-25 single day",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Site lists 22 upcoming entries (10+10+2 over 3 pages); 18 emitted. 4 'Talk Liver To Me' podcast episodes (location = the podcast) skipped as listen-on-demand audio, not attendable events. Say if they should be kept as online rows.",
+    "Fees: only the two Summit microsites (Liver Cancer, SLD) show fee tables on easl.eu. EASL Congress 2027 fees are on easlcongress.eu, Delta Cure 2026 on deltacure2026.com, AASLD The Liver Meeting 2026 on aasld.org: organiser_url is set to those for the explorer (two-hop). Schools / Academy / Masterclass pages are application-only (travel covered), so empty tiers are correct there; Congress 2028/2029 are save-the-date stubs.",
+    "AASLD The Liver Meeting 2026 and the two AASLD-EASL Masterclasses are third-party/co-hosted entries on EASL's calendar; society stays EASL. EASL Congress 2028/2029 have location 'TBC': city/format left empty (base class treats a TBC place as virtual, overridden in the subclass; base fix suggested).",
+    "Harness coverage: SUBMISSION_NO_DEADLINE on Congress 2027 / Summits / Masterclass 2026 is expected (abstract detection runs in the merge step). SINGLE_DAY_SUSPECT on the Madrid HCC school is a false positive (generic '2 days' boilerplate; page date is one day).",
+    "Base-class suggestions (not applied): treat TBC/TBA location as unknown, not online; the CPD regex should not accept a bare year as a points count (ESICM 'November 2026 CME Credits' gave 2026.0, fixed locally).",
+    "Coverage checklist: (1) multi-day: listing ranges kept as end_date; (2) external fee links: organiser_url set from the Register/Visit link; (3) image fee tables: none seen; (4) same-site registration sub-pages: see per-source note; (5) two-hop: organiser_url handed to explorer; (6) poster competitions: none; (7) call-for-papers/portals left to the merge step (harness coverage shows SUBMISSION_NO_DEADLINE as expected); (8) no CTA text in tier labels."
+  ]
+}

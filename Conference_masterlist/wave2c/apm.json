@@ -1,0 +1,65 @@
+{
+  "source_id": 0,
+  "slug": "apm",
+  "class_name": "ApmExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/apm.py",
+  "source_row": {
+    "source_name": "APM Events",
+    "society": "APM",
+    "base_url": "https://apmonline.org/events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Modern Events Calendar list skin: month dividers ('November 2026') then article cards with year-less dates ('04 - 27 Jan'); the year comes from the divider. No load-more control renders and /wp-json/mec/v1/events returns []. Detail pages hold a 'Book Event' ticket block (name, price with or without GBP sign, 'Available Tickets: N') and a JSON-LD Event; the hidden 'ticket is sold out' sentence under every ticket is a template, not a signal. Webinars are online; the congress sells tickets on pccongress.org.uk (PDF price list)."
+  },
+  "registry_comment": "APM events: MEC list skin parsed with divider year; ticket block fees; JSON-LD offers ignored",
+  "probe_results": {
+    "shells": 7,
+    "shells_forced_fallback": 7,
+    "details_tested": 7,
+    "with_date": 7,
+    "with_pricing": 6,
+    "with_venue": 2,
+    "with_description": 7,
+    "with_specialty": 7
+  },
+  "test_urls": [
+    "https://apmonline.org/events/ug-sif-conf26/",
+    "https://apmonline.org/events/therapeutics_081226/",
+    "https://apmonline.org/events/ethics-2027/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://apmonline.org/events/ug-sif-conf26/",
+      "field": "fees",
+      "site_says": "APM Member - Late Registrant 140; Non Member - Late Registrant 180; Medical Student - Late Registrant 20 (Available Tickets: 0)",
+      "extractor_says": "140 / 180 / 20 GBP",
+      "match": true
+    },
+    {
+      "url": "https://apmonline.org/events/therapeutics_081226/",
+      "field": "fees",
+      "site_says": "APM Member morning 30 / full day 60; Non Member morning 40 / full day 80",
+      "extractor_says": "30 / 60 / 40 / 80 GBP",
+      "match": true
+    },
+    {
+      "url": "https://apmonline.org/events/ethics-2027/",
+      "field": "dates/fees",
+      "site_says": "Jan 04 - 27 2027; APM Member Early Bird 125, Non-Member Early Bird 152",
+      "extractor_says": "2027-01-04..2027-01-27; 125 and 152 flagged early bird",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Listing shows 7 upcoming events and no load-more control (MEC renders one only when more exist); recon's '9+' was not reproducible. MEC REST route returns []; the WP REST mec-events route lists 46 posts but carries no event dates, so it cannot be used for completeness.",
+    "JSON-LD offers on MEC pages are the first ticket only (or a blank cost rendered as 0): ignored, tiers come from the 'Book Event' block. Tickets with no price and a 'FREE to attend' note become GBP 0. is_sold_out is only set if every ticket says 'Available Tickets: 0'.",
+    "Palliative Care Congress 2027: no fee on apmonline.org; tickets on pccongress.org.uk/buy-pcc-tickets and a PDF price list (filesusr.com). organiser_url is the ticket page; the explorer's PDF reader should pick up the price list. CPD 'being sought' so no points.",
+    "Ethics Course early-bird deadline is not stated on the page, so early_bird_deadline is empty. Webinars have no venue by design (format online); APM Juniors/online series are classed as workshop.",
+    "Coverage checklist: (1) multi-day: listing ranges kept as end_date; (2) external fee links: organiser_url set from the Register/Visit link; (3) image fee tables: none seen; (4) same-site registration sub-pages: see per-source note; (5) two-hop: organiser_url handed to explorer; (6) poster competitions: none; (7) call-for-papers/portals left to the merge step (harness coverage shows SUBMISSION_NO_DEADLINE as expected); (8) no CTA text in tier labels."
+  ]
+}

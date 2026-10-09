@@ -1,0 +1,74 @@
+{
+  "source_id": 0,
+  "slug": "bapras",
+  "class_name": "BaprasExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/bapras.py",
+  "source_row": {
+    "source_name": "BAPRAS Courses, Meetings and Events",
+    "society": "BAPRAS",
+    "base_url": "https://www.bapras.org.uk/professionals/training-and-education/courses-meetings-and-events",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.bapras.org.uk/professionals/training-and-education/courses-meetings-and-events/page/{page}",
+    "max_pages_hint": 3,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Sitefinity (not WordPress) card list, 8 per page over 3 pages, upcoming first. Card: <section class=search-news__result> with title link (internal page or external Cvent link), <date> with <sup> ordinals, category button. Detail pages are free-form blurbs (Date / Location / Event information / Registration fees: / Find out more and register) inside one ASP.NET <form>; fees are written as prose (Consultant: GBP 120, Trainee: GBP 80; 'GBP 500 (Early Bird before ...)'). Many pages only link to the organiser's own site, stored as organiser_url."
+  },
+  "registry_comment": "BAPRAS events: Sitefinity listing via WordPress family base; bespoke prose fee/location parser and organiser_url",
+  "probe_results": {
+    "shells": 17,
+    "shells_forced_fallback": 17,
+    "details_tested": 17,
+    "with_date": 17,
+    "with_pricing": 10,
+    "with_venue": 15,
+    "with_description": 16,
+    "with_specialty": 17
+  },
+  "test_urls": [
+    "https://www.bapras.org.uk/professionals/training-and-education/courses-meetings-and-events/sculpture-for-surgeons-2026",
+    "https://www.bapras.org.uk/professionals/training-and-education/courses-meetings-and-events/imperial-cadaveric-flap-dissection-and-microsurgery-course",
+    "https://www.bapras.org.uk/professionals/training-and-education/courses-meetings-and-events/focus-on-melanoma-meeting-2026"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.bapras.org.uk/professionals/training-and-education/courses-meetings-and-events/imperial-cadaveric-flap-dissection-and-microsurgery-course",
+      "field": "fees",
+      "site_says": "Dissection and microsurgery places GBP 1950; observers from GBP 250",
+      "extractor_says": "1950.0 and 250.0 (two tiers)",
+      "match": true
+    },
+    {
+      "url": "https://www.bapras.org.uk/professionals/training-and-education/courses-meetings-and-events/focus-on-melanoma-meeting-2026",
+      "field": "fees/venue",
+      "site_says": "From GBP 76 (nurse member) to GBP 184 (consultant member - early bird); Royal College of Physicians, London",
+      "extractor_says": "76 and 184 (early bird), RCP, London",
+      "match": true
+    },
+    {
+      "url": "https://www.bapras.org.uk/professionals/training-and-education/courses-meetings-and-events/sculpture-for-surgeons-2026",
+      "field": "dates/fees",
+      "site_says": "30 Oct - 1 Nov 2026; Consultant 850, Trainee 600, Medical student 300",
+      "extractor_says": "2026-10-30..2026-11-01; 850/600/300",
+      "match": true
+    },
+    {
+      "url": "https://www.bapras.org.uk/professionals/training-and-education/bapras-events/bapras-congess-2026",
+      "field": "venue",
+      "site_says": "The Spine, 2 Paddington Village, Liverpool",
+      "extractor_says": "The Spine, Liverpool, United Kingdom",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Site shows 19 cards over 3 pages; 17 emitted: one past event (3rd ICOPLAST 2025) dropped, and the Cvent link 'BAPRAS Congress 2026 - 80th Anniversary' dropped as a duplicate of the congress's own page (same dates). AEC 6.1 Lower Limb Reconstruction (Cvent, 8-9 Oct 2026) is included but ends today; Cvent pages are JS-rendered so its detail is thin.",
+    "Six events have no fee on bapras.org.uk but the page links to an organiser site that does (verified by hand: capras876.com shows USD passes 29/40/68, nstcsurg.org shows GBP 625, healthcareconferencesuk.co.uk shows BADS pricing, BAPRAS Congress and PLASTA are Cvent). organiser_url is set so the explorer follows it; the harness flags these as PRICE_EXTERNAL_LINK, which is expected. Hands-on Microsurgery (Lahore) gives only a phone contact: no fee exists. Surgical Research Society: external site only.",
+    "Melanoma page link text says 2026 but its href points at the 2025 URL; the visible URL is stored as organiser_url.",
+    "Site typos copied faithfully: tier label 'June 2025 Course' on the June 2027 course; 'Data:' for 'Date:' on the melanoma page. The 'Hands-on Microsurgery' card says 2-6 Nov but its page says '02 - 60 November': listing dates kept.",
+    "Venue city is left empty where the page names only a venue (RCS England, Newcastle Surgical Training Centre, RVI Culture Centre): no city on the page, none invented. CAPRAS (Jamaica per capras876.com) gives only 'Ocean Coral Springs, Trelawny'.",
+    "Sitefinity wraps every page in one <form>, so the base's chrome stripping removes the whole body; handled in the subclass by renaming form tags. A base option to keep <form> content would remove this override.",
+    "Coverage checklist: (1) multi-day: listing ranges kept as end_date; (2) external fee links: organiser_url set from the Register/Visit link; (3) image fee tables: none seen; (4) same-site registration sub-pages: see per-source note; (5) two-hop: organiser_url handed to explorer; (6) poster competitions: none; (7) call-for-papers/portals left to the merge step (harness coverage shows SUBMISSION_NO_DEADLINE as expected); (8) no CTA text in tier labels."
+  ]
+}

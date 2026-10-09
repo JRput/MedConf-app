@@ -1,0 +1,66 @@
+{
+  "source_id": 0,
+  "slug": "esicm",
+  "class_name": "EsicmExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/esicm.py",
+  "source_row": {
+    "source_name": "ESICM Congresses and Events",
+    "society": "ESICM",
+    "base_url": "https://www.esicm.org/congresses-events/",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "One page with a 'Next events' card grid (upcoming) followed by a 'Past events' grid that loads more by admin-ajax infinite scroll; the Past grid is irrelevant, so the page is cut at that heading and no paging is needed (no ?page= or REST alternative exposes dates). Detail pages (/events/<slug>/) open with 'LIVES, Month D-D, YYYY, City (Venue)' and sometimes a venue line; the annual congress page has three fee grids (member / non-member rows x early / standard / late / one-day columns)."
+  },
+  "registry_comment": "ESICM events: 'Next events' grid only; bespoke header (city/venue) and fee-grid parsing",
+  "probe_results": {
+    "shells": 6,
+    "shells_forced_fallback": 6,
+    "details_tested": 6,
+    "with_date": 6,
+    "with_pricing": 1,
+    "with_venue": 4,
+    "with_description": 6,
+    "with_specialty": 6
+  },
+  "test_urls": [
+    "https://www.esicm.org/events/39th-annual-congress-lisbon/",
+    "https://www.esicm.org/events/intensive-care-innovation2027/",
+    "https://www.esicm.org/events/lives-physiology-transbiology/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.esicm.org/events/39th-annual-congress-lisbon/",
+      "field": "fee grid",
+      "site_says": "Core Congress ESICM member Physician: early 630, standard 730, late 830, one day 450 (EUR)",
+      "extractor_says": "four tiers 630/730/830/450 EUR, early deadline 2026-08-20",
+      "match": true
+    },
+    {
+      "url": "https://www.esicm.org/events/39th-annual-congress-lisbon/",
+      "field": "venue",
+      "site_says": "CCL, Lisboa Congress Centre, 1300-307 Lisbon, Portugal",
+      "extractor_says": "Lisboa Congress Centre, Lisbon, Portugal",
+      "match": true
+    },
+    {
+      "url": "https://www.esicm.org/events/intensive-care-innovation2027/",
+      "field": "venue/dates",
+      "site_says": "February 04-05, 2027, Milan; Humanitas Congress Center",
+      "extractor_says": "2027-02-04..05, Humanitas Congress Center, Milan",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Site's 'Next events' shows 6 upcoming; the Past grid (52 entries, sorted newest first) was checked and has no future-dated entry. Recon's 'infinite scroll' applies only to the Past grid.",
+    "Fees: only the Lisbon congress page has fee grids (52 tiers over three tables, EUR, excl. 23% VAT). Copenhagen 2027, Euro-Brazil, Euro-Japan and LIVES Physiology show no registration yet (LIVES Physiology says 'Registrations Details: Opening end of November 2026'). Intensive Care Innovation 2027 registers on humanitasedu.it, which does list fees (checked: Member 350, Non-member 560, N&AHP 150): organiser_url is set for the explorer.",
+    "Country is only stated on the Lisbon page; other events have city only (no country invented). Euro-Brazil header has a stray 'l' after the city, trimmed.",
+    "Calls for abstracts (Innovation 2027 portal, LIVES Physiology 'Opening end of November 2026') are left to the merge step; harness shows SUBMISSION_NO_DEADLINE as expected.",
+    "Base CPD regex read 'November 2026 CME Credits' as 2026 points: guarded in the subclass (values above 100 or equal to a year dropped). Base should reject year-like values.",
+    "Coverage checklist: (1) multi-day: listing ranges kept as end_date; (2) external fee links: organiser_url set from the Register/Visit link; (3) image fee tables: none seen; (4) same-site registration sub-pages: see per-source note; (5) two-hop: organiser_url handed to explorer; (6) poster competitions: none; (7) call-for-papers/portals left to the merge step (harness coverage shows SUBMISSION_NO_DEADLINE as expected); (8) no CTA text in tier labels."
+  ]
+}

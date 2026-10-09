@@ -1,0 +1,74 @@
+{
+  "source_id": 0,
+  "slug": "era",
+  "class_name": "EraExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/era.py",
+  "source_row": {
+    "source_name": "ERA Events (other events, Congress, Education, CME)",
+    "society": "ERA",
+    "base_url": "https://www.era-online.org/events/other-events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "era-online.org has no single event archive. Shells come from four places: (A) /events/other-events/ blocks (title, 'Month D - D, YYYY<br>City, Country', VISIT THE EVENT WEBSITE = third-party endorsed meetings whose booking_url is the organiser's own site); (B) ERA Congress pages /events/<city>-<year>/ linked from that page; (C) 'will take place' entries on /events/era-education-meetings/; (D) /cme-courses/ own pages (dd/mm/yyyy range, Venue:, fee lines) plus the Registry epidemiology course. For (A) dates and place come from the ERA block and the external site is not scraped for fees. Invitation-only ERA Science Meetings are skipped."
+  },
+  "registry_comment": "ERA events: multi-source shells (endorsed events, Congress, Education Meetings, CME courses); external sites left to the explorer",
+  "probe_results": {
+    "shells": 15,
+    "shells_forced_fallback": 15,
+    "details_tested": 15,
+    "with_date": 15,
+    "with_pricing": 3,
+    "with_venue": 5,
+    "with_description": 9,
+    "with_specialty": 15
+  },
+  "test_urls": [
+    "https://www.era-online.org/cme-courses/2026-iwg-cme-course/",
+    "https://www.era-online.org/events/rotterdam-2027/",
+    "https://www.era-online.org/events/era-education-meetings/era-education-cairo-2027/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.era-online.org/cme-courses/2026-iwg-cme-course/",
+      "field": "fees/dates/venue",
+      "site_says": "16/10/2026 - 17/10/2026; Hotel Ambasador Premium, Lodz, Poland; Non-ERA EUR 150, ERA 100, Young Nephrologists 50",
+      "extractor_says": "2026-10-16..17; same venue; 150/100/50 EUR; 7.5 CME credits",
+      "match": true
+    },
+    {
+      "url": "https://www.era-online.org/events/rotterdam-2027/",
+      "field": "dates/venue",
+      "site_says": "64th ERA Congress, Rotterdam & Virtual, June 3-6, 2027; Congress venue Rotterdam Ahoy",
+      "extractor_says": "2027-06-03..06, Rotterdam Ahoy, Rotterdam, hybrid",
+      "match": true
+    },
+    {
+      "url": "https://www.era-online.org/events/era-education-meetings/era-education-cairo-2027/",
+      "field": "dates/venue",
+      "site_says": "March 23-24, 2027, Cairo, Egypt; InterContinental Citystars Cairo",
+      "extractor_says": "2027-03-23..24, Cairo, Egypt, InterContinental Citystars Cairo",
+      "match": true
+    },
+    {
+      "url": "https://www.irriv.com/",
+      "field": "dates/place",
+      "site_says": "ERA block: October 7 - 9, 2026, Rome, Italy",
+      "extractor_says": "2026-10-07..09, Rome, Italy",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "status partial: the 9 third-party endorsed events are built from ERA's own block (title, dates, city/country) and their sites are NOT parsed for venue or fees. Four of those sites show fees (npsevents.it EUR 300 / 100, ulisboa.pt EUR 175, mircim.one, and the ISA site has a registration sub-page); the explorer must pick them up from organiser_url. mircim.one still shows last year's (May 7-9, 2026) fees and description, so scraping them would have been wrong; a year guard drops descriptions naming another year.",
+    "ce.mayo.edu (Nephrogenetics Update) returns a Cloudflare challenge that does not clear in headless Chromium; that row keeps the listing data only.",
+    "ERA Congress 2027 (Rotterdam) and 2028 (Berlin) are save-the-date pages: no fees, registration not open (the /registration/ URL redirects to the 2023 page), so tiers are empty. Region is empty for them because the page names no country next to the venue. The ERA Registry epidemiology course shows 'Registration is free, ERA members only' (one EUR 0 tier) and opens registration on 10 Dec 2026; its page does not name a venue.",
+    "Skipped: ERA Science Meeting (invitation only, no date), 10th EUROD Winter Meeting (cme-courses entry pointing to eurod.net, no date on ERA's page), and past editions. Education Meeting is typed conference; CME courses are typed course.",
+    "Discovery of Congress pages relies on links in the other-events page (/events/<city>-<year>/); a new congress year not linked there would be missed until the page links it.",
+    "Page loads for ERA: ~30 per run (listing, 2 congress, education, CME x3, registry, 15 details); the harness forced-fallback run (Playwright) also returned 15 shells.",
+    "Coverage checklist: (1) multi-day ranges kept from listing blocks; (2)/(5) fees on other organisers' sites: organiser_url set so the explorer follows it; (3) no image fee tables seen; (4) ERA-hosted CME pages carry their own fee lines; (6) none; (7) abstract/CFP left to the merge step; (8) no CTA text in labels."
+  ]
+}
