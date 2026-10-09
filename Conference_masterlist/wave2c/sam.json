@@ -1,0 +1,65 @@
+{
+  "source_id": 0,
+  "slug": "sam",
+  "class_name": "SamExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/sam.py",
+  "source_row": {
+    "source_name": "SAM events",
+    "society": "SAM",
+    "base_url": "https://www.acutemedicine.org.uk/sam-events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Events Manager. /sam-events/ shows only 7 featured events; the full list (24 upcoming, mostly FAMUS/FUSIC/PoCUS courses) is on /events/categories/famus/ and /events/categories/other-events/, so the listing unions the three. Listing-card dates are split into spans and wrong; each event page's H1 ('FAMUS Course, 9 October 2026, Wirral') and its 'dd/mm/yyyy @ All Day' line give title and dates. Fees are free text ('Cost: GBP 350', 'Costs / Day 1: ...', 'Fees: ... (NNUH) ... External')."
+  },
+  "registry_comment": "Society for Acute Medicine - Events Manager, three listing URLs unioned, per-page H1 + date line (family subclass + overrides)",
+  "probe_results": {
+    "shells": 24,
+    "shells_forced_fallback": 24,
+    "details_tested": 24,
+    "with_date": 24,
+    "with_pricing": 22,
+    "with_venue": 20,
+    "with_description": 24,
+    "with_specialty": 24
+  },
+  "test_urls": [
+    "https://www.acutemedicine.org.uk/sam-events/famus-course-9-october-2026-wirral/",
+    "https://www.acutemedicine.org.uk/sam-events/fusic-heart-famus-courses-21-22-october-2026-plymouth/",
+    "https://www.acutemedicine.org.uk/sam-events/famus-fusic-course-25-26-november-2026-reading/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.acutemedicine.org.uk/sam-events/famus-course-9-october-2026-wirral/",
+      "field": "date/fee",
+      "site_says": "09/10/2026 @ All Day; Cost: GBP 250",
+      "extractor_says": "2026-10-09; Cost GBP 250 (the listing card said 10 Oct)",
+      "match": true
+    },
+    {
+      "url": "https://www.acutemedicine.org.uk/sam-events/fusic-heart-famus-courses-21-22-october-2026-plymouth/",
+      "field": "dates/fees/venue",
+      "site_says": "21 & 22 Oct 2026; 1 day GBP 350, 2 days GBP 630; Postgraduate Medical Centre, Derriford Hospital, Plymouth",
+      "extractor_says": "2026-10-21..2026-10-22; Cost 1 day 350, 2 days 630; same venue, Plymouth",
+      "match": true
+    },
+    {
+      "url": "https://www.acutemedicine.org.uk/sam-events/famus-fusic-course-25-26-november-2026-reading/",
+      "field": "fees/venue",
+      "site_says": "Cost: GBP 350 for each course, or GBP 600 when purchased together; Thames Lido, Napier Rd, Reading",
+      "extractor_says": "each course 350, purchased together 600; Thames Lido / Reading",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Cloudflare passive beacon: every real page contains /cdn-cgi/challenge-platform/.../jsd/main.js, which http_fetch._CHALLENGE_MARKERS treats as a challenge, so fetch_html returns None for all SAM URLs (even with a browser, it waits 20 s then gives up). Needed base/shared change: match challenge markers only on short bodies or on real interstitial strings (the 'challenge-platform' marker alone is not proof). Worked around in SamExtractor._fetch by reading the browser's own page.",
+    "Fees: 22 of 24 events have parsed tiers. The two without are the Bangladesh conference (page only links 'Conference website and registration details' to amcccon.accpfb.com) and the GIRFT national webinar (registration on events.england.nhs.uk); the harness fires PRICE_EXTERNAL_LINK for exactly these two. External sites are not followed by this extractor and organiser_url is not set (the explorer finds the link from the booking page). Level 1 Echocardiography is parsed as early bird 550 until 15 Oct 2026 then 600. No image fee tables, no registration sub-pages and no call-for-papers on any SAM page checked.",
+    "The SAM Annual Scientific Meeting (SAMGlasgow, 8-9 Oct 2026) is not in any list on the site any more, so it is not extracted. Two typos in source URLs ('october-206') are handled because the date comes from the 'dd/mm/yyyy' line.",
+    "Date precedence: the listing override sets start/end from the event page, so the merge uses them. Titles are the page H1, which embeds date and place; that keeps rows distinct (many FAMUS courses share a name). Prices differ per day/package: tier labels 'Cost . Day 1', 'Cost . Both days', 'Cost . SAM members', 'Cost . NNUH'/'External'.",
+    "24 shells need 27 page loads in the listing (3 index pages + 24 event pages) plus 24 detail loads; at 1 s gaps that is about 1 minute. Forced-fallback is moot: the extractor is browser-first."
+  ]
+}

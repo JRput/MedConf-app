@@ -1,0 +1,64 @@
+{
+  "source_id": 0,
+  "slug": "eusem",
+  "class_name": "EusemExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/eusem.py",
+  "source_row": {
+    "source_name": "EUSEM courses & events",
+    "society": "EUSEM",
+    "base_url": "https://eusem.org/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "eusem.org is Joomla/K2 with no structured events list: /events is a news feed and the RSEvents calendar is empty. The listing override reads the home-page menu links to /education/courses-traineeships/<slug>, loads each article and keeps those stating an upcoming date (Date(s) label, else first non-deadline line with a full date). Detail is prose: fee rows under a bare 'Fee' heading, venue under a 'Venue' label. The Congress (eusemcongress.org) is a separate site and the 2026 edition is over."
+  },
+  "registry_comment": "European Society for Emergency Medicine - Joomla course articles, home-menu walk (family subclass + listing override)",
+  "probe_results": {
+    "shells": 3,
+    "shells_forced_fallback": 3,
+    "details_tested": 3,
+    "with_date": 3,
+    "with_pricing": 1,
+    "with_venue": 3,
+    "with_description": 3,
+    "with_specialty": 3
+  },
+  "test_urls": [
+    "https://eusem.org/education/courses-traineeships/trauma-27",
+    "https://eusem.org/education/courses-traineeships/empower-advanced-paediatric-emergency-medicine-course",
+    "https://eusem.org/education/courses-traineeships/paediatric-emergency-medicine-course"
+  ],
+  "spot_check": [
+    {
+      "url": "https://eusem.org/education/courses-traineeships/trauma-27",
+      "field": "dates/venue/fees",
+      "site_says": "Bilbao, 10-12 March 2027; Bilbao Exhibition Centre; 650 EUR (EUSEM and SEMES members), 475 EUR (EUSEM CREC members)",
+      "extractor_says": "2027-03-10..2027-03-12; BILBAO EXHIBITION CENTRE, Bilbao, Spain; EUR 650 and EUR 475",
+      "match": true
+    },
+    {
+      "url": "https://eusem.org/education/courses-traineeships/empower-advanced-paediatric-emergency-medicine-course",
+      "field": "dates/venue/sold out",
+      "site_says": "26-27 November 2026; NH Trieste, Corso Cavour 7; EMPOWER course is FULLY BOOKED",
+      "extractor_says": "2026-11-26..2026-11-27; NH Trieste, Corso Cavour / Trieste / Italy; shell is_sold_out True",
+      "match": true
+    },
+    {
+      "url": "https://eusem.org/education/courses-traineeships/paediatric-emergency-medicine-course",
+      "field": "dates/venue/fees",
+      "site_says": "17-19 June 2027; Hotel Park, Bled, Slovenia; course fees TBC",
+      "extractor_says": "2027-06-17..2027-06-19; Hotel Park / Bled / Slovenia; pricing_tiers []",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Only 3 upcoming events exist on the site today; the volume is small and each page is free prose, so a re-worded page can drop an event (undated or deadline-first pages are skipped, never guessed). Not covered: Basic Emergency Care Course 2026 (250 EUR) states no date; eCourses / refresher / EM Monthly have no dates; the EUSEM Congress site has no 2027 edition yet.",
+    "Coverage: fees checked on page; EMPOWER (fully booked) states no fee, its two 'here' links are a brochure flip-book (no fee text) and a waiting-list form, so [] is justified; Crash Course says 'TBC'. No image fee tables, no registration sub-page, no call for papers on any of the 3. Harness COVERAGE flags PRICE_EXTERNAL_LINK on EMPOWER only, for the reason above.",
+    "Venue is parsed from a 'Venue - ...' line or a 'Venue' label in the extractor (the base class does not); city prefers the intro sentence over the page's own typo ('Bilboa').",
+    "Shared-file note: llm_agent._merge_shell_and_detail reads is_sold_out from the shell only, so a detail-level is_sold_out (set by wordpress_generic.detail_from_html) is dropped for every family subclass. I set it on the shell in the listing override for EUSEM, SAM and Derma. Base class should do the same."
+  ]
+}

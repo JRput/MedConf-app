@@ -1,0 +1,65 @@
+{
+  "source_id": 0,
+  "slug": "biasp",
+  "class_name": "BiaspExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/biasp.py",
+  "source_row": {
+    "source_name": "BIASP events",
+    "society": "BIASP",
+    "base_url": "https://biasp.org/events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "biasp.org/events/ is ONE Elementor page of free-form blocks 'Title / Date(s): / Location: / CLICK HERE (Fitwise or organiser link)', mixing BIASP meetings with third-party stroke events. No per-event pages: each block becomes a shell keyed by /events/#<slug>, with detail built from the block (the scraper's load of the booking page is ignored). Year-less dates ('13 October') resolve to the next occurrence. Fees are never on the page; the unwrapped registration link is kept as organiser_url / booking_url."
+  },
+  "registry_comment": "British and Irish Association of Stroke Physicians - single free-form events page, block parser (BaseExtractor, bespoke)",
+  "probe_results": {
+    "shells": 10,
+    "shells_forced_fallback": 10,
+    "details_tested": 5,
+    "with_date": 5,
+    "with_pricing": 0,
+    "with_venue": 4,
+    "with_description": 2,
+    "with_specialty": 5
+  },
+  "test_urls": [
+    "https://biasp.org/events/#stroke-neuroimaging-course",
+    "https://biasp.org/events/#uksf-2026",
+    "https://biasp.org/events/#sharp-scottish-lipid-annual-forum"
+  ],
+  "spot_check": [
+    {
+      "url": "https://biasp.org/events/",
+      "field": "Stroke Neuroimaging Course",
+      "site_says": "Date(s): 13 October, 08:30 - 1700; Location: Regus, Victoria Way, Dartford",
+      "extractor_says": "2026-10-13..2026-10-13; Regus, Victoria Way / Dartford",
+      "match": true
+    },
+    {
+      "url": "https://biasp.org/events/",
+      "field": "UKSF 2026",
+      "site_says": "Date(s): 2-4 December 2026; Location: Convention Centre, Liverpool",
+      "extractor_says": "2026-12-02..2026-12-04; Convention Centre / Liverpool",
+      "match": true
+    },
+    {
+      "url": "https://biasp.org/events/",
+      "field": "SHARP & Scottish Lipid Annual Forum",
+      "site_says": "12-13 November 2026; Crieff Hydro Hotel, Perthshire, Scotland",
+      "extractor_says": "2026-11-12..2026-11-13; Crieff Hydro Hotel / Perthshire / Scotland",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Skipped: un-labelled promo banners with no event title: the free online IMT careers webinar on Saturday 10 October 2026 (09:30-13:15) and a 'Save the Date 18-19 March 2027' banner with a call for abstracts closing 15 January 2027 (event unnamed on the page). The first is a real BIASP event and is tomorrow; if the owner wants it, add it by hand or a title rule, I would not invent a title.",
+    "The page is a hand-edited list: a layout change (a missing 'Date(s):' label) silently drops that block. A 'Date(s)' label count check against the shell count is the safe guard: today 10 labels = 10 shells.",
+    "Fees are not on the page for any event (links go to Fitwise / EventsAir / society sites); pricing_tiers is [] and the registration link is stored as organiser_url for the explorer's two-hop follow. Harness COVERAGE therefore fires PRICE_EXTERNAL_LINK / SUBMISSION_NO_DEADLINE / SINGLE_DAY_SUSPECT on every event, but those are page-level checks on a page that hosts all 10 events (the 'multi-day' evidence '18-19 March 2027' belongs to the skipped banner), not per-event misses. No fee image tables, no sub-page, no call-for-papers PDFs checked for the events themselves; Registration Closed is shown for the World Stroke Congress and the event is still listed.",
+    "Mixed ownership: roughly half the blocks are third-party events (World Stroke Congress Seoul, ESOC Vienna, ELASF Krakow, SBNS, SHARP), kept because BIASP lists them as stroke-community events. Specialty is fixed to Neurology (the site taxonomy has no stroke entry).",
+    "booking_url in the detail is the external registration link, source_url (from the shell) stays the /events/#slug key. fetch_html with the default headers is 403 from some IPs (curl without a User-Agent also gets 403); the extractor falls back to the browser's own page."
+  ]
+}

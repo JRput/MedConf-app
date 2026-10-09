@@ -1,0 +1,64 @@
+{
+  "source_id": 0,
+  "slug": "bia",
+  "class_name": "BiaExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/bia.py",
+  "source_row": {
+    "source_name": "BIA infection events",
+    "society": "BIA",
+    "base_url": "https://www.britishinfection.org/education-events/infection-events",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "concrete5 'event_list' block: 8 server-rendered cards (title link ?occurrenceID=N, date '18 Nov 2026 - 22 Nov 2026'), 20 per load; the Load more control is empty because 8 < 20. Handled by the family listing walker with no override. Event pages are prose: venue/format come from sentences or a 'Title | date | time | venue' line (extractor overrides); registration and fees are on external Fitwise/EventsAir or society sites (kept as organiser_url)."
+  },
+  "registry_comment": "British Infection Association - concrete5 event_list cards, family subclass + prose venue parsing",
+  "probe_results": {
+    "shells": 8,
+    "shells_forced_fallback": 8,
+    "details_tested": 5,
+    "with_date": 5,
+    "with_pricing": 0,
+    "with_venue": 3,
+    "with_description": 5,
+    "with_specialty": 5
+  },
+  "test_urls": [
+    "https://www.britishinfection.org/education-events/infection-events/bia-dilemmas-day-2027-virology-hiv?occurrenceID=441",
+    "https://www.britishinfection.org/education-events/infection-events/encephalitis-2026?occurrenceID=438",
+    "https://www.britishinfection.org/education-events/infection-events/fis-international-2026?occurrenceID=436"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.britishinfection.org/education-events/infection-events/bia-dilemmas-day-2027-virology-hiv?occurrenceID=441",
+      "field": "date/venue",
+      "site_says": "Tuesday 26 January 2027 at Millennium Point in Birmingham",
+      "extractor_says": "2027-01-26; Millennium Point / Birmingham / United Kingdom",
+      "match": true
+    },
+    {
+      "url": "https://www.britishinfection.org/education-events/infection-events/encephalitis-2026?occurrenceID=438",
+      "field": "date/venue/format",
+      "site_says": "7th-8th December; London, Royal College of Physicians; In-person and virtual attendance",
+      "extractor_says": "2026-12-07..2026-12-08; Royal College of Physicians / London; hybrid",
+      "match": true
+    },
+    {
+      "url": "https://www.britishinfection.org/education-events/infection-events/fis-international-2026?occurrenceID=436",
+      "field": "date/venue",
+      "site_says": "24-26 November at the SEC, Glasgow, UK",
+      "extractor_says": "2026-11-24..2026-11-26; SEC / Glasgow / United Kingdom",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Load more: no ?page= or /page/N/ needed today: the control is empty and all 8 events are in the first response (8 shells = 8 cards on the site). If the list passes 20 items concrete5 fetches more by JS and this extractor would stop at 20; recheck then. The family walker would not see it.",
+    "Prose parsing is regex on the first lines of each page: venue/city found for 6 of 8 events (not found: BTS MDR-TB webinar, which is online, and BIA Autumn Trainees Meeting, also online; ASTMH gives Gaylord Harbor, Maryland USA with no city). Region is set to United Kingdom only for a short list of UK cities.",
+    "Fees: none on BIA pages. Registration goes to Fitwise EventsAir sites (FIS shows a full fee table at fitwise.eventsair.com/fis-2026/registration-and-fees; the Autumn Trainees and Dilemmas Day sites are JS apps). pricing_tiers is [] on BIA's own pages and the external site is stored as organiser_url so the explorer can follow it (checklist rows 2 and 5). Coverage: PRICE_EXTERNAL_LINK fires by design on 5 of 5; SUBMISSION_NO_DEADLINE on FIS and BSAC (abstract deadline is on the external site).",
+    "Several listed events are third-party (ASTMH, FIS, BSAC, Encephalitis Society, Central Sterilising Club, BTS webinar); BIA's calendar is a community calendar. The Dilemmas Day and Autumn Trainees Meeting are BIA's own. Recon expected 'BIA Spring Meeting': not listed now."
+  ]
+}

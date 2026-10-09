@@ -1,0 +1,66 @@
+{
+  "source_id": 0,
+  "slug": "dermamedical",
+  "class_name": "DermamedicalExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/dermamedical.py",
+  "source_row": {
+    "source_name": "Derma Medical courses",
+    "society": "Derma Medical",
+    "base_url": "https://dermamedical.co.uk/all-courses/",
+    "default_event_type": "course",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "WooCommerce shop behind Cloudflare: plain httpx with the default headers gets 403 and http_fetch's fresh-context fallback receives a 80 kB challenge page with no marker, so every fetch uses the browser's own page. /all-courses/ links /product/<slug>/ pages; each single-course page carries data-product_variations JSON listing every (location, date) pair, which becomes one course parent plus one course_sessions row per pair. Fee = p.price ('From:' prefix on variable-price courses). Multi-form packages and undated products are skipped."
+  },
+  "registry_comment": "Derma Medical UK aesthetic-medicine courses - WooCommerce variation JSON -> course + sessions (family subclass + override)",
+  "probe_results": {
+    "shells": 10,
+    "shells_forced_fallback": 10,
+    "details_tested": 5,
+    "with_date": 5,
+    "with_pricing": 5,
+    "with_venue": 3,
+    "with_description": 5,
+    "with_specialty": 5
+  },
+  "test_urls": [
+    "https://dermamedical.co.uk/product/foundation-course/",
+    "https://dermamedical.co.uk/product/chemical-peel-training/",
+    "https://dermamedical.co.uk/product/sculptra-face-course/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://dermamedical.co.uk/product/foundation-course/",
+      "field": "fee/sessions",
+      "site_says": "GBP 1106.00 (incl. VAT); Date select lists 16 dates x up to 5 cities (Birmingham, Edinburgh, London, Manchester, Newcastle)",
+      "extractor_says": "Course fee GBP 1106; 28 sessions (location x date), first 2026-10-17 Birmingham",
+      "match": true
+    },
+    {
+      "url": "https://dermamedical.co.uk/product/chemical-peel-training/",
+      "field": "fee/date",
+      "site_says": "GBP 1080.00; one date 15 Nov 2026, London",
+      "extractor_says": "Course fee GBP 1080; 1 session 2026-11-15 London",
+      "match": true
+    },
+    {
+      "url": "https://dermamedical.co.uk/product/non-surgical-rhinoplasty-masterclass/",
+      "field": "fee/dates",
+      "site_says": "From: GBP 1730.00; 21 Nov 2026 and 16 Jan 2027, London",
+      "extractor_says": "Course fee . From GBP 1730; 2 sessions",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Skipped by design: 11 of 21 linked products. Multi-component packages with more than one dated form (Skin Expert, Complete Clinician, Confident Injector, Combined, Fellowship, Facial Contouring) because their dates belong to different components; products with no dated variation (starter kit, open evening, 1:1 training, PDO thread lift, ultrasound, PRP/PRF, business boot camp). If the owner wants packages, they need a per-component session model.",
+    "Sessions carry start dates only: the site gives no end date or start time, so end_date is the start date (single-day courses by the course descriptions; not verified for every product). Venue is the JSON-LD clinic name only when all sessions share one city; multi-city courses have no venue and the parent city is the earliest session's city.",
+    "Fee: the site shows one GBP price incl. VAT per course; variation prices are 0 inside bundles and the JSON-LD offer is stale (1074 vs 1106 shown), so p.price is used. 'From:' courses get a 'Course fee . From' label. cpd_points comes from the JSON-LD numberOfCredits (8 on Foundation) where present; all courses are advertised as CPD certified.",
+    "Coverage: no image fee tables, no call for papers, fees are on the product page itself (no external link needed). Harness coverage clean on all 10 shells tested (5 details after the location fix; LOCATION_ON_PAGE resolved by setting parent city).",
+    "Shared-file concern: http_fetch._fetch_via_browser returns a Cloudflare challenge page (about 80 kB, no 'Just a moment' marker) as if it were real HTML for this host. A minimum-length or title check would catch it. Cloud behaviour from GitHub runners is UNTESTED: locally the browser's own page clears the check; on a runner it may not.",
+    "Shells are re-fetched once each in the listing (about 22 page loads at 1/s) because the dated sessions only exist on product pages."
+  ]
+}
