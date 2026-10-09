@@ -77,6 +77,11 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   IHI: { short: 'IHI', name: 'Institute for Healthcare Improvement', kind: 'international', country: 'US' },
   BSH: { short: 'BSH', name: 'British Society for Haematology', kind: 'specialist', country: 'UK' },
   ACEP: { short: 'ACEP', name: 'American College of Emergency Physicians', kind: 'international', country: 'US' },
+  ERS: { short: 'ERS', name: 'European Respiratory Society', kind: 'international', country: 'EU' },
+  BSGE: { short: 'BSGE', name: 'British Society for Gynaecological Endoscopy', kind: 'specialist', country: 'UK' },
+  BCIS: { short: 'BCIS', name: 'British Cardiovascular Intervention Society', kind: 'specialist', country: 'UK' },
+  FDI: { short: 'FDI', name: 'FDI World Dental Federation', kind: 'international', country: 'International' },
+  ECCO: { short: 'ECCO', name: "European Crohn's and Colitis Organisation", kind: 'international', country: 'EU' },
 }
 
 export function societyInfo(short: string | null | undefined): SocietyInfo | null {

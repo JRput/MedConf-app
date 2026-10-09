@@ -1,0 +1,93 @@
+[
+  {
+    "domain": "biasp.org",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "js_required": false,
+    "listing_url": "https://biasp.org/events/",
+    "api_url": "",
+    "bot_protection": "none",
+    "event_type_mix": "conference",
+    "detail_topology": "on_event_page",
+    "pagination": "none",
+    "volume_estimate": 10,
+    "expected_found": [
+      "UK Stroke Forum"
+    ],
+    "notes": "BIASP events page displays upcoming conferences and courses with parseable dates. Primary event (UKSF 2026 / UK Stroke Forum, 2-4 Dec 2026, Liverpool) confirmed with active registration. Static HTML, no API. Registration routed to external providers (eventsair, Fitwise). Yoast SEO + Elementor stack.",
+    "batch": 2
+  },
+  {
+    "domain": "britishinfection.org",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "listing_url": "https://www.britishinfection.org/education-events/infection-events",
+    "js_required": false,
+    "api_url": "https://fitwise.eventsair.com (external registrar)",
+    "bot_protection": "none",
+    "event_type_mix": "conference",
+    "detail_topology": "on_event_page",
+    "pagination": "load_more",
+    "volume_estimate": 8,
+    "expected_found": [
+      "BIA Autumn Trainees Meeting 2026",
+      "BIA Dilemmas Day 2027"
+    ],
+    "notes": "Concrete5-based site with EventsAir external registrar. Event listing page shows 8+ dated conferences with venue/date details. \"BIA Spring Meeting\" not found in current listings; instead found Autumn Trainees Meeting and Dilemmas Day events. Details appear on individual event pages accessed via occurrence ID links.",
+    "batch": 2
+  },
+  {
+    "domain": "acutemedicine.org.uk",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "js_required": false,
+    "listing_url": "https://www.acutemedicine.org.uk/sam-events/",
+    "api_url": "",
+    "event_type_mix": "conference",
+    "detail_topology": "on_event_page",
+    "volume_estimate": 8,
+    "pagination": "none",
+    "bot_protection": "none",
+    "expected_found": [
+      "SAM Annual Scientific Meeting"
+    ],
+    "notes": "Events Manager plugin (v7.4.5) powers a curated list of 8+ upcoming dated events. SAMGlasgow 8-9 Oct 2026 is described as \"20th annual International conference.\" Details (fees, venue, CPD points, registration) appear on individual event pages. No API restriction for public listing observed.",
+    "batch": 2
+  },
+  {
+    "domain": "eusem.org",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "listing_url": "https://eusem.org/events",
+    "js_required": false,
+    "event_type_mix": "mixed",
+    "detail_topology": "on_event_page",
+    "pagination": "query_param",
+    "bot_protection": "none",
+    "api_url": "",
+    "volume_estimate": 12,
+    "expected_found": [
+      "EUSEM Congress"
+    ],
+    "notes": "Main organization site (eusem.org) runs Joomla K2 and lists events/courses at /events. The flagship EUSEM Congress 2026 (Sept 23-27, Paris) is hosted on separate WordPress subdomain eusemcongress.org but linked from main site. Mixed event types: annual flagship congress + educational courses + endorsed events. Details appear inline on event pages.",
+    "batch": 2
+  },
+  {
+    "domain": "dermamedical.co.uk",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "listing_url": "https://dermamedical.co.uk/all-courses/",
+    "js_required": false,
+    "event_type_mix": "course",
+    "detail_topology": "on_event_page",
+    "pagination": "query_param",
+    "volume_estimate": 12,
+    "bot_protection": "cloudflare",
+    "api_url": "",
+    "expected_found": [
+      "Aesthetic medicine training"
+    ],
+    "notes": "Derma Medical UK (EducationalOrganization) offers Botox, filler, and aesthetic medicine training courses. Root domain blocked with 403, but individual product pages load with proper User-Agent. WooCommerce-based course shop with dated sessions. Foundation course shows multiple June-July 2026 dates at GBP 1106 per session. All courses CPD-accredited. Matches expected offering perfectly.",
+    "batch": 2
+  }
+]

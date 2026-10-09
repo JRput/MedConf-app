@@ -76,6 +76,11 @@ from .isuog import IsuogExtractor
 from .ihi import IhiExtractor
 from .b_s_h import BSHExtractor
 from .acep import AcepExtractor
+from .ersnet import ErsnetExtractor
+from .bsge import BsgeExtractor
+from .bcis import BcisExtractor
+from .fdi import FdiExtractor
+from .ecco_ibd import EccoIbdExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -139,6 +144,11 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     57: IhiExtractor,                       # IHI — dated course/certification runs from /learn/courses cards + ConferenceEvent JSON-LD from /connect/events; USD
     58: BSHExtractor,                       # British Society for Haematology (events listing, server-rendered)
     59: AcepExtractor,                      # 59: ACEP — American College of Emergency Physicians event calendar (JSON API listing, USD, no fees published)
+    60: ErsnetExtractor,                     # 60: European Respiratory Society - WordPress generic family (constants only)
+    61: BsgeExtractor,                       # 61: British Society for Gynaecological Endoscopy - WordPress generic family (constants only)
+    62: BcisExtractor,                       # 62: British Cardiovascular Intervention Society - WordPress generic family (constants only)
+    63: FdiExtractor,                        # 63: FDI World Dental Federation - family extractor on Drupal archive (constants only)
+    64: EccoIbdExtractor,                    # 64: ECCO - family extractor on Joomla calendar (constants only)
 }
 
 

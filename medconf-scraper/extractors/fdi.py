@@ -10,7 +10,7 @@ from .wordpress_generic import WordPressGenericExtractor
 
 class FdiExtractor(WordPressGenericExtractor):
     LISTING_URL = "https://www.fdiworlddental.org/all-events"
-    SOCIETY = "FDI World Dental Federation"
+    SOCIETY = "FDI"
     DEFAULT_SPECIALTY = "Dentistry"
     PREFER_DEFAULT_SPECIALTY = True
     DEFAULT_CURRENCY = "EUR"

@@ -1,0 +1,89 @@
+[
+  {
+    "domain": "bapras.org.uk",
+    "status": "resolved",
+    "listing_url": "https://www.bapras.org.uk/professionals/training-and-education/courses-meetings-and-events",
+    "platform": "wordpress_other",
+    "js_required": false,
+    "bot_protection": "none",
+    "volume_estimate": 20,
+    "pagination": "query_param",
+    "detail_topology": "on_event_page",
+    "event_type_mix": "mixed",
+    "expected_found": [
+      "BAPRAS Congress"
+    ],
+    "notes": "Sitefinity CMS (ASP.NET; version 13.3.7644.0 SE), server-side rendered. Listing page at /professionals/training-and-education/courses-meetings-and-events has 3 paginated pages (~8 items/page). BAPRAS Congress 2026 (2\u20134 December 2026) confirmed on page 2. Event details (dates, venue) appear on individual event pages. No API endpoint detected; filterable interface with date and category filters.",
+    "batch": 2
+  },
+  {
+    "domain": "apmonline.org",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "js_required": false,
+    "listing_url": "https://apmonline.org/events/",
+    "notes": "WordPress site using Modern Events Calendar plugin (v7.12.0). Events listing page has 9+ upcoming dated events with pricing visible. Expected event \"APM Supportive & Palliative Care Conference\" matches APMJ Conference listed for 27 Sep 2026.",
+    "event_type_mix": "conference",
+    "volume_estimate": 12,
+    "pagination": "load_more",
+    "detail_topology": "on_event_page",
+    "bot_protection": "none",
+    "expected_found": [
+      "APMJ Conference"
+    ],
+    "api_url": "https://apmonline.org/wp-json/mec/v1/events",
+    "batch": 2
+  },
+  {
+    "domain": "easl.eu",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "js_required": false,
+    "listing_url": "https://easl.eu/what-we-do/events/",
+    "event_type_mix": "conference",
+    "pagination": "query_param",
+    "detail_topology": "on_event_page",
+    "volume_estimate": 24,
+    "expected_found": [
+      "EASL Congress"
+    ],
+    "bot_protection": "none",
+    "notes": "WordPress + Elementor + Search Filter Pro. EASL Congress 2027 found with full dates (16-19 June 2027). Events paginated across 3 pages, all upcoming events have ISO dates. Detail topology confirmed by verifying EASL Congress event page carries all event info including dates.",
+    "batch": 2
+  },
+  {
+    "domain": "esicm.org",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "js_required": false,
+    "notes": "WordPress site with custom events post type. Listing page at /congresses-events/ displays upcoming dated conferences and congresses including the flagship ESICM LIVES annual congress. Event details (venue, registration, fees) appear on individual event pages.",
+    "listing_url": "https://www.esicm.org/congresses-events/",
+    "api_url": "",
+    "bot_protection": "none",
+    "volume_estimate": 18,
+    "pagination": "infinite_scroll",
+    "event_type_mix": "conference",
+    "detail_topology": "on_event_page",
+    "expected_found": [
+      "ESICM LIVES"
+    ],
+    "batch": 2
+  },
+  {
+    "domain": "era-online.org",
+    "status": "resolved",
+    "platform": "wordpress_other",
+    "js_required": false,
+    "listing_url": "https://www.era-online.org/events/other-events/",
+    "event_type_mix": "mixed",
+    "detail_topology": "on_event_page",
+    "pagination": "none",
+    "volume_estimate": 12,
+    "bot_protection": "none",
+    "expected_found": [
+      "ERA Congress"
+    ],
+    "notes": "WordPress site with main flagship ERA Congress events (Glasgow 2026, Rotterdam 2027, Berlin 2028) plus endorsed external conferences and CME courses. /events/other-events/ is the consolidated listing of approved upcoming events. Individual event pages have full details, venue, and external registration links.",
+    "batch": 2
+  }
+]

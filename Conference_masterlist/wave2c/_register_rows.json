@@ -1,0 +1,67 @@
+[
+  {
+    "source_name": "ERS - European Respiratory Society events",
+    "society": "European Respiratory Society",
+    "base_url": "https://www.ersnet.org/events/",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.ersnet.org/events/page/{n}/",
+    "max_pages_hint": 6,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "/events/page/N/ (rel=next); cards .card__preview with .subheading, .h5 title, .date, .venue; detail header 'D-D Month, YYYY | City, Country' + Fees tab (label/amount lines).",
+    "id": 60
+  },
+  {
+    "source_name": "BSGE events",
+    "society": "British Society for Gynaecological Endoscopy",
+    "base_url": "https://www.bsge.org.uk/event/",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.bsge.org.uk/event/page/{n}/",
+    "max_pages_hint": 6,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "/event/page/N/ (rel=next, 2 pages); cards .greybg with Start Date / End Date (dd/mm/yyyy) and Location; detail has Price block (label + amount, duplicated for mobile).",
+    "id": 61
+  },
+  {
+    "source_name": "BCIS events",
+    "society": "British Cardiovascular Intervention Society",
+    "base_url": "https://www.bcis.org.uk/event/",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.bcis.org.uk/event/page/{n}/",
+    "max_pages_hint": 6,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "/event/page/N/ (rel=next); archive shows full posts; dates like 'Tuesday 10 November' have NO year (resolved from weekday); fees live on external Millbrook registration sites.",
+    "id": 62
+  },
+  {
+    "source_name": "FDI World Dental Federation events",
+    "society": "FDI World Dental Federation",
+    "base_url": "https://www.fdiworlddental.org/all-events",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.fdiworlddental.org/all-events?page={n}",
+    "max_pages_hint": 6,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Drupal 10 (not WordPress). /all-events lists <article class='node--type-event'> teasers (10 per page, ?page=N 0-based pager with rel=next); date range in <time> tags, CE-programme teasers also carry a 'City, Country' line; event pages are root-level slugs.",
+    "id": 63
+  },
+  {
+    "source_name": "ECCO event calendar",
+    "society": "European Crohn's and Colitis Organisation",
+    "base_url": "https://ecco-ibd.eu/congress-events/event-calendar",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Joomla/YOOtheme (not WordPress). Single page of el-item cards (h4 title, Date/Location/Organiser h5 blocks, 'Visit website' link); links point at other organisers' sites, which are the detail pages. Cards with no link are dropped.",
+    "id": 64
+  }
+]
