@@ -402,3 +402,26 @@ if __name__ == "__main__":
             print(f"FAIL  {t.__name__}: {e}")
     print(f"\n{len(ALL_TESTS) - failures}/{len(ALL_TESTS)} passed")
     sys.exit(1 if failures else 0)
+
+
+TURNSTILE_FORM_PAGE = (
+    "<html><head><title>Our Aesthetic Courses | Interface Aesthetics UK</title></head><body>"
+    + "".join(f'<a href="/courses/c{i}/">Course {i}</a>' for i in range(12))
+    + '<form><div id="field_1_5" class="gfield gfield--type-turnstile"><div class="cf-turnstile">'
+    '<iframe id="cf-chl-widget-k3x9f" src="https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/if/ov2/av0/rcv/k3x9f/0x4AAAA/light/fbE/new/normal/auto/"></iframe>'
+    '</div></div></form></body></html>'
+)
+
+
+def test_rendered_turnstile_contact_form_is_not_a_challenge():
+    """Runner probe 2026-10-13: a real page whose contact form embeds a Turnstile widget
+    (iframe id cf-chl-widget-*) must not read as an interstitial."""
+    from browser import looks_like_challenge, has_content_shape
+    assert not looks_like_challenge(TURNSTILE_FORM_PAGE, 200)
+    assert has_content_shape(TURNSTILE_FORM_PAGE)
+
+
+def test_interstitial_markers_still_detected_after_widget_exclusion():
+    from browser import looks_like_challenge
+    assert looks_like_challenge('<html><head><title>Just a moment...</title></head><body><script>window._cf_chl_opt={}</script></body></html>', 200)
+    assert looks_like_challenge('<html><body><a href="/a">a</a><a href="/b">b</a><input name="cf-chl-bypass"></body></html>', 200)

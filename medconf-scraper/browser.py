@@ -15,7 +15,10 @@ _CHALLENGE_TITLE_RE = re.compile(r"<title>\s*(?:just a moment|attention required
 # Strong markers: only ever present on a real interstitial (never on a page that
 # merely embeds Cloudflare's passive /cdn-cgi/challenge-platform/ script).
 _CHALLENGE_STRONG_RE = re.compile(
-    r"sgcaptcha|cf-chl|cf_chl_opt|__cf_chl_rt_tk|cf-browser-verification|"
+    # `cf-chl-widget-*` is the id of an embedded Turnstile iframe (contact-form
+    # captcha on an otherwise real page, e.g. interfaceaesthetics.co.uk) — not a
+    # marker; the interstitial itself carries cf-chl-bypass / cf_chl_opt.
+    r"sgcaptcha|cf-chl(?!-widget)|cf_chl_opt|__cf_chl_rt_tk|cf-browser-verification|"
     r"checking your browser|aws-waf-token",
     re.I,
 )
