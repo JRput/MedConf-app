@@ -1,0 +1,95 @@
+[
+ {
+  "domain": "crf.org",
+  "status": "resolved",
+  "listing_url": "https://www.crf.org/crf/news-and-events/events-calendar",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "event_type_mix": "conference",
+  "detail_topology": "on_event_page",
+  "pagination": "none",
+  "volume_estimate": 6,
+  "expected_found": [
+   "TCT Conference"
+  ],
+  "bot_protection": "none",
+  "api_url": "",
+  "notes": "CRF Events Calendar lists major conferences including TCT series (flagship annual meeting with variants for Middle East/Africa). Events show dates, locations, and link to external registrar pages for registration. No login wall; publicly accessible listing.",
+  "batch": 3,
+  "source_id": 80
+ },
+ {
+  "domain": "eadv.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "listing_url": "https://www.eadv.org/events/calendar/",
+  "js_required": false,
+  "api_url": "",
+  "event_type_mix": "conference",
+  "pagination": "none",
+  "bot_protection": "none",
+  "detail_topology": "on_event_page",
+  "volume_estimate": 6,
+  "expected_found": [
+   "EADV Congress"
+  ],
+  "notes": "EADV operates a two-tiered event model: two major annual events (Congress in autumn, Spring Symposium) with dedicated pages (/congress/, /symposium/) plus a calendar listing at /events/calendar/. EADV Congress 2026 (Vienna, Sept 30-Oct 3) is the primary upcoming event. Static WordPress site with Elementor builder; no JS required to view event dates and descriptions.",
+  "batch": 3,
+  "source_id": 81
+ },
+ {
+  "domain": "ataccgroup.com",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "listing_url": "https://www.ataccgroup.com/product-category/atacc-course/",
+  "bot_protection": "cloudflare",
+  "event_type_mix": "course",
+  "detail_topology": "on_event_page",
+  "volume_estimate": 6,
+  "pagination": "none",
+  "expected_found": [
+   "Anaesthesia Trauma and Critical Care course"
+  ],
+  "notes": "WordPress + WooCommerce site with ATACC (Advanced Trauma and Critical Care) courses listed as products. Main events page at /eventsconferences/ is marked \"Coming Soon\" but courses are accessible via product category. ~6 upcoming courses in 2027 (March, June, July, September). Cloudflare protection on root domain. All dates in HTML; JavaScript not required for listing visibility.",
+  "batch": 3,
+  "source_id": 82
+ },
+ {
+  "domain": "interfaceaesthetics.co.uk",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "listing_url": "https://interfaceaesthetics.co.uk/courses/",
+  "event_type_mix": "course",
+  "detail_topology": "on_event_page",
+  "pagination": "unknown",
+  "bot_protection": "none",
+  "volume_estimate": 6,
+  "expected_found": [
+   "Aesthetics courses"
+  ],
+  "api_url": "",
+  "notes": "WordPress site with Yoast SEO and Gravity Forms. Level 7 Diploma in Injectables has upcoming sessions: 10/10/2026, 07/11/2026, 05/12/2026, 12/12/2026. Course pages display session schedules in tables with location and date.",
+  "batch": 3,
+  "source_id": 83
+ },
+ {
+  "domain": "bdiap.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "listing_url": "https://bdiap.org/events/future_bdiap_meetings.aspx",
+  "js_required": false,
+  "event_type_mix": "conference",
+  "detail_topology": "on_event_page",
+  "pagination": "none",
+  "volume_estimate": 5,
+  "bot_protection": "none",
+  "expected_found": [
+   "BDIAP Symposium"
+  ],
+  "notes": "Convio-based CMS (lmsitestarterduke generator). Primary listing at /events/future_bdiap_meetings.aspx shows dated future events (2026 symposium & IAP Congress) with direct links to detail pages. No JS required; HTML server-rendered. Found expected \"BDIAP Symposium\" as \"Symposium on Gynaecological Pathology\" (4-5 Dec 2026).",
+  "batch": 3,
+  "source_id": 84
+ }
+]

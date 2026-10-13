@@ -1,0 +1,96 @@
+[
+ {
+  "domain": "aaos.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "listing_url": "https://www.aaos.org/annual/",
+  "js_required": false,
+  "api_url": "",
+  "bot_protection": "none",
+  "event_type_mix": "conference",
+  "detail_topology": "tabs",
+  "pagination": "query_param",
+  "volume_estimate": 35,
+  "expected_found": [
+   "AAOS Annual Meeting"
+  ],
+  "notes": "AAOS 2027 Annual Meeting confirmed March 3-6, 2027 on schedule page. Optimizely CMS platform. Education courses also available at /education/courses/ but Annual Meeting is primary flagship event. Registration via xpressreg.net external partner.",
+  "batch": 3,
+  "source_id": 75
+ },
+ {
+  "domain": "theultrasoundsite.co.uk",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "listing_url": "https://theultrasoundsite.co.uk/shop/",
+  "js_required": false,
+  "bot_protection": "none",
+  "event_type_mix": "course",
+  "detail_topology": "on_event_page",
+  "pagination": "query_param",
+  "volume_estimate": 31,
+  "expected_found": [
+   "POCUS and ultrasound courses"
+  ],
+  "api_url": "",
+  "notes": "The Ultrasound Site is a WordPress+WooCommerce MSK (musculoskeletal) ultrasound course provider. Shop listing at /shop/ displays individual course products with dates in titles (e.g., \"27th February 2027 - Advanced MSK Ultrasound course - Day 1 Upper limb\"). 31 course products found via sitemap, all with 2027 dates (future sessions). Details, pricing, and booking via individual WooCommerce product pages. Matches expectation for ultrasound courses.",
+  "batch": 3,
+  "source_id": 76
+ },
+ {
+  "domain": "endocrine.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "listing_url": "https://www.endocrine.org/meetings-and-events",
+  "js_required": false,
+  "volume_estimate": 8,
+  "pagination": "none",
+  "event_type_mix": "conference",
+  "detail_topology": "on_event_page",
+  "bot_protection": "cloudflare",
+  "expected_found": [
+   "ENDO"
+  ],
+  "notes": "Endocrine Society flagship ENDO annual meeting (June dates) and Clinical Endocrinology Update (CEU) courses visible on main meetings page. External registration via EventScribe. Main page is WordPress; bot protection only hits event-specific registrar subdomains.",
+  "batch": 3,
+  "source_id": 77
+ },
+ {
+  "domain": "arrs.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "listing_url": "https://www.arrs.org/ARRSLIVE/ARRSLIVE/Education/upcoming_events.aspx",
+  "bot_protection": "none",
+  "pagination": "none",
+  "detail_topology": "on_event_page",
+  "event_type_mix": "conference",
+  "volume_estimate": 8,
+  "api_url": "",
+  "expected_found": [
+   "ARRS Annual Meeting"
+  ],
+  "notes": "American Roentgen Ray Society (ARRS) events listing page. ARRS 2027 Annual Meeting (May 2\u20135, Denver), 2028 (April 30\u2013May 3, Austin), 2029 (April 30\u2013May 3, Honolulu) all visible with full dates and venues. Additional upcoming webinars and longitudinal courses in September-October 2026 also listed. Server-side rendered ASP.NET application.",
+  "batch": 3,
+  "source_id": 78
+ },
+ {
+  "domain": "bsccp.org.uk",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "listing_url": "https://www.bsccp.org.uk/events",
+  "js_required": false,
+  "api_url": "",
+  "event_type_mix": "mixed",
+  "detail_topology": "on_event_page",
+  "pagination": "query_param",
+  "volume_estimate": 7,
+  "bot_protection": "none",
+  "expected_found": [
+   "BSCCP Annual Scientific Meeting"
+  ],
+  "notes": "Craft CMS platform (not WordPress; confirmed via X-Powered-By header). Events listing shows dated conferences, courses, study days, and training workshops. BSCCP 2027 Annual Scientific Meeting (19-21 April 2027, London) found and matches expected name. Event details (dates, descriptions, registration info) appear on individual event pages. Pagination uses URL path (/events/p2 pattern).",
+  "batch": 3,
+  "source_id": 79
+ }
+]

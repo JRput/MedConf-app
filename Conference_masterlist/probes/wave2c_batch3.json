@@ -1,0 +1,72 @@
+[
+ {
+  "domain": "aaos.org",
+  "candidate_urls": [
+   "https://www.aaos.org/annual/",
+   "https://aaos.org/"
+  ]
+ },
+ {
+  "domain": "theultrasoundsite.co.uk",
+  "candidate_urls": [
+   "https://theultrasoundsite.co.uk/shop/",
+   "https://theultrasoundsite.co.uk/"
+  ]
+ },
+ {
+  "domain": "endocrine.org",
+  "candidate_urls": [
+   "https://www.endocrine.org/meetings-and-events",
+   "https://endocrine.org/"
+  ]
+ },
+ {
+  "domain": "arrs.org",
+  "candidate_urls": [
+   "https://www.arrs.org/ARRSLIVE/ARRSLIVE/Education/upcoming_events.aspx",
+   "https://arrs.org/"
+  ]
+ },
+ {
+  "domain": "bsccp.org.uk",
+  "candidate_urls": [
+   "https://www.bsccp.org.uk/events",
+   "https://bsccp.org.uk/"
+  ]
+ },
+ {
+  "domain": "crf.org",
+  "candidate_urls": [
+   "https://www.crf.org/crf/news-and-events/events-calendar",
+   "https://crf.org/"
+  ]
+ },
+ {
+  "domain": "eadv.org",
+  "candidate_urls": [
+   "https://www.eadv.org/events/calendar/",
+   "https://eadv.org/"
+  ]
+ },
+ {
+  "domain": "ataccgroup.com",
+  "candidate_urls": [
+   "https://www.ataccgroup.com/product-category/atacc-course/",
+   "https://ataccgroup.com/"
+  ]
+ },
+ {
+  "domain": "interfaceaesthetics.co.uk",
+  "candidate_urls": [
+   "https://interfaceaesthetics.co.uk/courses/",
+   "https://interfaceaesthetics.co.uk/"
+  ]
+ },
+ {
+  "domain": "bdiap.org",
+  "candidate_urls": [
+   "https://bdiap.org/events/future_bdiap_meetings.aspx",
+   "https://bdiap.org/"
+  ]
+ }
+]
