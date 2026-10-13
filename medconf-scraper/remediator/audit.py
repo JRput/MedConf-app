@@ -519,7 +519,12 @@ def check_pricing(row, page_text, page_html, source, pricing_tiers,
     # Loads /registration, /fees, /rates via a real browser and checks
     # for currency symbols in body.innerText. Targeted escalation only
     # when the other checks were negative.
-    hydrated = _hydrated_registration_probe(row.get("source_url") or "", cache)
+    hydrated = _hydrated_registration_probe(row.get("source_url") or "", cache,
+                                            start_date=row.get("start_date"))
+    if hydrated and hydrated.get("stale"):
+        return FieldVerdict("pricing_tiers", "GENUINELY_ABSENT", "0 tiers",
+                            page_evidence=f"{hydrated['url']}: {hydrated['evidence']}",
+                            reason=f"Previous-edition fees only — {hydrated['stale']}")
     if hydrated:
         return FieldVerdict("pricing_tiers", "MISSING", "0 tiers",
                             page_evidence=hydrated["evidence"],
@@ -531,12 +536,57 @@ def check_pricing(row, page_text, page_html, source, pricing_tiers,
                         reason="No pricing content on page")
 
 
+_MONTH_RE = (r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|"
+             r"Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)")
+_RATE_DATE_RE = re.compile(
+    rf"(?:{_MONTH_RE})\.?\s+\d{{1,2}},?\s+(20\d\d)|\d{{1,2}}\s+(?:{_MONTH_RE})\.?,?\s+(20\d\d)", re.I)
+_RATE_DATE_FULL_RE = re.compile(
+    rf"({_MONTH_RE})\.?\s+(\d{{1,2}}),?\s+(20\d\d)|(\d{{1,2}})\s+({_MONTH_RE})\.?,?\s+(20\d\d)", re.I)
+_MONTHS = {m: i + 1 for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"])}
+
+
+def stale_edition_fees(body_text: str, start_date: Optional[str], today: Optional[date] = None) -> Optional[str]:
+    """Reason string when the fee text on a page belongs to a PREVIOUS edition
+    of the event, else None. Seen on EADV, BDIAP and CRF (2026-10-13): the
+    organiser's /register page still shows last year's rate grid while the
+    stored row is next year's congress. Stale = every year mentioned in the
+    fee window is before the event's start year AND every dated deadline in it
+    has already passed (so a Jan-2027 event with Dec-2026 early-bird dates is
+    NOT stale). Pure; no network."""
+    if not body_text or not start_date:
+        return None
+    try:
+        start_year = int(str(start_date)[:4])
+    except ValueError:
+        return None
+    today = today or date.today()
+    # Window: from the first fee-ish heading or first price to the end note.
+    m = re.search(r"(?i)registration\s+(?:rates|fees)|[£$€]\s*[\d,]{2,7}|R\$\s*[\d.]{2,9}", body_text)
+    if not m:
+        return None
+    window = body_text[max(0, m.start() - 300): m.start() + 4000]
+    years = [int(y) for y in re.findall(r"\b(20\d\d)\b", window)]
+    if not years or max(years) >= start_year:
+        return None
+    deadlines = []
+    for g in _RATE_DATE_FULL_RE.finditer(window):
+        mon, day, year = (g.group(1), g.group(2), g.group(3)) if g.group(1) else (g.group(5), g.group(4), g.group(6))
+        try:
+            deadlines.append(date(int(year), _MONTHS[mon[:3].lower()], int(day)))
+        except (KeyError, ValueError):
+            continue
+    if deadlines and max(deadlines) >= today:
+        return None
+    return (f"fees on page are for a previous edition (latest year {max(years)} < event year {start_year}"
+            + (f", last rate deadline {max(deadlines).isoformat()}" if deadlines else "") + ")")
+
+
 # Cache Playwright probe results per audit run to avoid re-fetching the
 # same registration URL for multiple events under one source.
 _HYDRATED_CACHE: Dict[str, Optional[dict]] = {}
 
 
-def _hydrated_registration_probe(source_url: str, cache=None) -> Optional[dict]:
+def _hydrated_registration_probe(source_url: str, cache=None, start_date: Optional[str] = None) -> Optional[dict]:
     """Load likely registration sub-pages in Playwright, hydrate 8 s,
     then count $/£/€ symbols in body.innerText. Returns None if no
     prices found — meaning we're genuinely absent, not hydrated-missed.
@@ -590,6 +640,7 @@ def _hydrated_registration_probe(source_url: str, cache=None) -> Optional[dict]:
                         "url": u,
                         "count": len(prices),
                         "evidence": ", ".join(prices[:5]),
+                        "stale": stale_edition_fees(body, start_date),
                     }
                     _HYDRATED_CACHE[source_url] = result
                     return result
