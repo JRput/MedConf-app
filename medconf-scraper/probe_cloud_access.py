@@ -23,8 +23,12 @@ for c in cands:
         try:
             b.navigate(url)
             html = b.page.content()
-            ok = not looks_like_challenge(html, 200) and has_content_shape(html) and len(html) > 5000
-            rec["results"].append({"url": url, "cleared": ok, "secs": round(time.time() - t, 1), "title": b.page.title()[:60], "len": len(html)})
+            why = ("challenge" if looks_like_challenge(html, 200) else "no-content-shape" if not has_content_shape(html)
+                   else "too-short" if len(html) <= 5000 else "")
+            ok = not why
+            m = re.search(r"(?i)(just a moment|attention required|verif\w+ (?:you are )?human|security verification|access denied|cf-chl|challenge-platform|turnstile|captcha)", html)
+            rec["results"].append({"url": url, "cleared": ok, "secs": round(time.time() - t, 1), "title": b.page.title()[:60], "len": len(html),
+                                   "reason": why, "marker": html[max(0, m.start() - 80): m.end() + 80] if m else ""})
         except Exception as e:
             rec["results"].append({"url": url, "cleared": False, "secs": round(time.time() - t, 1), "error": str(e)[:100]})
         if rec["results"][-1]["cleared"]:
