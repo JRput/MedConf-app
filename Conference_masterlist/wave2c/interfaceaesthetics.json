@@ -1,0 +1,66 @@
+{
+ "source_id": 83,
+ "slug": "interfaceaesthetics",
+ "class_name": "InterfaceAestheticsExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/interfaceaesthetics.py",
+ "source_row": {
+  "source_name": "Interface Aesthetics Courses",
+  "society": "Interface Aesthetics",
+  "base_url": "https://interfaceaesthetics.co.uk/courses/",
+  "default_event_type": "course",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Listing links to ~12 course pages; the listing shows no dates, so each course page is read and only courses with upcoming 'Location/Date' rows are kept. Course page: Upcoming Dates rows (city dd/mm/yyyy, availability FULL or N places, From price), duplicated for mobile/desktop. One parent per course with sessions[]; CPD points in the course bullets."
+ },
+ "registry_comment": "Interface Aesthetics (UK injectables training): /courses/ links -> course pages; one parent per course with sessions[] from the Upcoming Dates rows (family subclass)",
+ "probe_results": {
+  "shells": 10,
+  "shells_forced_fallback": 10,
+  "details_tested": 10,
+  "with_date": 10,
+  "with_pricing": 10,
+  "with_venue": 0,
+  "with_description": 10,
+  "with_specialty": 10
+ },
+ "test_urls": [
+  "https://interfaceaesthetics.co.uk/courses/level-7-diploma-in-injectables/",
+  "https://interfaceaesthetics.co.uk/courses/skin-boosters-course/",
+  "https://interfaceaesthetics.co.uk/courses/foundation-course-in-injectables/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://interfaceaesthetics.co.uk/courses/level-7-diploma-in-injectables/",
+   "field": "sessions/price/CPD",
+   "site_says": "London 07/11/2026, 05/12/2026, 12/12/2026; 4 places each; From GBP 8,890.00; 60 CPD points",
+   "extractor_says": "3 sessions London 2026-11-07/12-05/12-12, spots 4, 8890.0, cpd 60",
+   "match": true
+  },
+  {
+   "url": "https://interfaceaesthetics.co.uk/courses/skin-boosters-course/",
+   "field": "sessions/availability",
+   "site_says": "London 14/11/2026 FULL, then 16/01/2027, 20/03/2027 ... 4 places; From GBP 949; 8 CPD points",
+   "extractor_says": "7 sessions, first sold_out, rest 4 spots, 949.0, cpd 8",
+   "match": true
+  },
+  {
+   "url": "https://interfaceaesthetics.co.uk/courses/foundation-course-in-injectables/",
+   "field": "multi-city sessions",
+   "site_says": "London 17/10/2026 (1 place), 07/11/2026, Manchester 28/11/2026 ...; GBP 990",
+   "extractor_says": "27 sessions incl. Manchester 2026-11-28; parent city None because sessions span cities; price 990",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "No street address anywhere on the course pages, only the city in each date row, so venue_name is empty (city per session; parent city set only when all sessions share one).",
+  "Prices are shown as 'From GBP x' (course may have variants); stored as 'Course fee \u00b7 From' per session. If a course page has a differently priced session the per-session _price_gbp carries it.",
+  "Courses without dates (complications masterclass, 1-to-1 training, entry-level mentorship, RPEL diploma) are skipped; the listing shows no dates so the extractor reads each of the ~12 course pages (1 s gap) in list_shells_override.",
+  "Parent start_date is the earliest upcoming session even if that session is FULL (as alsg.py does); sessions carry the sold_out status.",
+  "Related dated conference pages on the same site (ace-conference-exhibition, interface-expo, bcam, baman, wigmore-presents) are not under /courses/ and were not onboarded.",
+  "Coverage checklist: multi-day ranges n/a (all one-day or per-date starts; Level 7 is 7 face-to-face days but dated per start); fees are on the same page (no external 'here' link, no image tables, no PDF); no same-site Registration sub-page (Buy Now goes to cart); CPD points read from the 'N CPD points' bullet."
+ ]
+}

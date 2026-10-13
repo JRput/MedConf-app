@@ -1,0 +1,66 @@
+{
+ "source_id": 82,
+ "slug": "ataccgroup",
+ "class_name": "AtaccExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/ataccgroup.py",
+ "source_row": {
+  "source_name": "ATACC Group Courses",
+  "society": "ATACC Group",
+  "base_url": "https://www.ataccgroup.com/product-category/atacc-course/",
+  "default_event_type": "course",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "WooCommerce product grid, one product per dated course; date and group (ATACC Course vs ATACC Ireland) come from the product title, price from the grid, stock from the li class. Products are grouped into one course parent with sessions[]; venue, description and CPD come from /tag-training/atacc/."
+ },
+ "registry_comment": "ATACC Group: WooCommerce product grid of dated trauma/critical-care courses -> one course parent per group (ATACC Course, ATACC Ireland) with sessions[] (family subclass)",
+ "probe_results": {
+  "shells": 2,
+  "shells_forced_fallback": 2,
+  "details_tested": 2,
+  "with_date": 2,
+  "with_pricing": 2,
+  "with_venue": 1,
+  "with_description": 2,
+  "with_specialty": 2
+ },
+ "test_urls": [
+  "https://www.ataccgroup.com/product-category/atacc-course/",
+  "https://www.ataccgroup.com/product/1st-4th-july-2027-atacc-course/",
+  "https://www.ataccgroup.com/tag-training/atacc/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.ataccgroup.com/product-category/atacc-course/",
+   "field": "products/price",
+   "site_says": "5 dated products: 12th-14th March, 21st-23rd May, 2nd-4th July, 24th-26th September 2027 (ATACC Course) and 17-19th June 2027 (ATACC Ireland); each GBP 1,450.00",
+   "extractor_says": "UK parent 4 sessions (2027-03-12, 05-21, 07-02, 09-24) at 1450.0; Ireland parent 1 session 2027-06-17..19 at 1450.0",
+   "match": true
+  },
+  {
+   "url": "https://www.ataccgroup.com/tag-training/atacc/",
+   "field": "venue/time/CPD",
+   "site_says": "LOCATION: Lincolnshire Fire & Rescue Training Facility | LN5 9FG. START TIME: 08:00; held just outside Lincoln; RCS worth up to a maximum of 23.5 CPD points; GBP 1,208.34 + VAT (1,450 total)",
+   "extractor_says": "venue Lincolnshire Fire & Rescue Training Facility, city Lincoln, start_time 08:00, cpd 23.5, fee 1450 (inc. VAT)",
+   "match": true
+  },
+  {
+   "url": "https://www.ataccgroup.com/product/1st-4th-july-2027-atacc-course/",
+   "field": "date",
+   "site_says": "product name '2nd-4th July 2027 - ATACC Course' (slug says 1st-4th)",
+   "extractor_says": "2027-07-02..2027-07-04 (from title)",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Cloudflare: httpx gets 429 from the listing and the info page; fetch_html falls back to the browser, which clears the challenge here ('switched to alternate browser profile'). Same result with --force-fallback. Status stays done but a runner-IP block is possible.",
+  "Product slugs are copy-pasted and disagree with the titles (e.g. slug 1st-4th-july vs title 2nd-4th July); the product title is treated as the source of truth. The product pages themselves carry no venue or extra detail.",
+  "Venue, CPD (RCS 'up to a maximum of 23.5 CPD points'), start time and description come from the shared /tag-training/atacc/ page and are applied to the UK group only; the Ireland course has no venue/city/CPD (region Ireland only).",
+  "Parent URLs are the category page (UK) and category#atacc-ireland (Ireland) because there is no per-course page; both are stable as dates roll off. If the site later adds another suffix (e.g. 'ATACC Scotland') it becomes another parent automatically.",
+  "Fee is the product price, which is GBP 1,450 inc. VAT per the info page (1,208.34 + VAT). The category listing is not paginated (5 products).",
+  "Coverage checklist: multi-day ranges parsed from titles (12-14 Mar etc.); price is on the grid (no external 'here' link, no image or PDF fee table, no Registration sub-page); no abstracts/call for papers (a course)."
+ ]
+}

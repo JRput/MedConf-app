@@ -1,0 +1,73 @@
+{
+ "source_id": 80,
+ "slug": "crf",
+ "class_name": "CrfExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/crf.py",
+ "source_row": {
+  "source_name": "CRF Events Calendar",
+  "society": "CRF",
+  "base_url": "https://www.crf.org/crf/news-and-events/events-calendar",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "One flat page of event cards (title, tagline, date range, venue, city) with an external REGISTER / SAVE THE DATE link to each meeting's own site; no detail pages on crf.org. Cards go ~5 years out so only the next ~18 months are kept; the Pulse Gala is a fundraiser and skipped. Fees are read from the meeting site's registration page when it has a rate grid (USD)."
+ },
+ "registry_comment": "CRF events calendar: one flat page of cards (dates/venue on the card) linking to each meeting's own site; fees read from the meeting's USD rate grid (family subclass, list_shells_override)",
+ "probe_results": {
+  "shells": 9,
+  "shells_forced_fallback": 9,
+  "details_tested": 9,
+  "with_date": 9,
+  "with_pricing": 4,
+  "with_venue": 9,
+  "with_description": 9,
+  "with_specialty": 9
+ },
+ "test_urls": [
+  "https://www.crf.org/crf/news-and-events/events-calendar",
+  "https://www.tctconference.com/register",
+  "https://www.tctplusafrica.com/register"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.crf.org/crf/news-and-events/events-calendar",
+   "field": "TCT 2026 card",
+   "site_says": "October 31-November 3, 2026; San Diego Convention Center; San Diego, CA",
+   "extractor_says": "2026-10-31..2026-11-03; San Diego Convention Center; San Diego; United States",
+   "match": true
+  },
+  {
+   "url": "https://www.crf.org/crf/news-and-events/events-calendar",
+   "field": "TCT Plus Africa 2027 card",
+   "site_says": "January 28-30, 2027; Radisson Blu Hotel & Convention Center, Tunis / Tunis, Tunisia",
+   "extractor_says": "2027-01-28..2027-01-30; venue 'Radisson Blu Hotel & Convention Center, Tunis'; city Tunis; region Tunisia",
+   "match": true
+  },
+  {
+   "url": "https://www.tctconference.com/register",
+   "field": "fees",
+   "site_says": "Full Access physician USD 1,399 early / 1,499 standard / 1,699 late / 799 one-day; allied health 349/399/499/299; industry 1,899/2,099/2,299/999; fellows free; US government 175/175/175/99",
+   "extractor_says": "16 tiers 'Full Access \u00b7 <type> \u00b7 Early bird|Standard|Late|One-Day Access' in USD with the same figures",
+   "match": true
+  },
+  {
+   "url": "https://www.tctplusafrica.com/register",
+   "field": "fees",
+   "site_says": "Physician 150/200/250, allied health 100/125/150, industry 250/350/500, fellow/resident/student Free (US$, incl. VAT)",
+   "extractor_says": "12 tiers incl. the single 'Free' value applied to all three columns",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "No detail pages on crf.org: every shell is complete from the card. 5 of 9 shells have no external link yet (TCT 2027, NY Valves 2027, THT 2028, Fellows 2028 ...) and use <listing>#<slug> as the URL; the scraper's navigation to that URL just reloads the calendar page.",
+  "Cards run to 2031; MAX_FUTURE_DAYS=550 keeps the next ~18 months (9 events). The Pulse of the City Gala (fundraiser) is skipped on purpose. A future 'Annual Pulse Gala'-style card with a different name would need the skip regex widened.",
+  "Fees: 4 meetings published a rate grid (TCT 2026, Complex Coronary Summit, TCT Plus Africa, THT 2027). TCT Plus LATAM Valves and the Fellows Course are 'Save the date' with no registration link or fee text (checked both sites for registration/fee links and $ amounts); NY Valves 2027 / TCT 2027 / THT 2028 have no link at all. Empty pricing is therefore justified. Early-bird windows already past for TCT 2026 are still stored with is_early_bird=true (no deadline year on the page).",
+  "The rate grids are CSS div grids, not <table>s, and on the Africa/THT sites only appear after JS render (static HTML lacks them): the parser needs the browser DOM that extract_detail gets. If the meeting site is Cloudflare-blocked on runners the shell still stores full dates/venue and sets organiser_url so the explorer can retry.",
+  "Description is the meeting site's og/meta description when present, else 'Title: tagline. Organised by CRF' built from the card; no LLM used. CME credit text was not found on the register pages (cpd_points empty).",
+  "Coverage checklist: multi-day ranges (Oct 31-Nov 3 spanning months) parsed; fees via external meeting site (followed, since booking_url is that site); rate grid is not an image; no PDFs; abstracts/late-breaking submissions not on the register pages checked; tier labels have no CTA text."
+ ]
+}

@@ -1,0 +1,73 @@
+{
+ "source_id": 81,
+ "slug": "eadv",
+ "class_name": "EadvExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/eadv.py",
+ "source_row": {
+  "source_name": "EADV Events Calendar",
+  "society": "EADV",
+  "base_url": "https://www.eadv.org/events/calendar/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Flat Elementor page of partner-congress cards (image link to the partner site, title, 'City, Country' and a date range), repeated in hidden responsive variants and including past years. Cards are complete shells; booking_url is the partner site. EADV's own Symposium and Congress come from /symposium/ and /congress/ page titles when upcoming; the UEMS exam card is skipped."
+ },
+ "registry_comment": "EADV events calendar: flat page of partner-congress cards (complete shells, external booking URL) plus EADV's own Symposium/Congress from their page titles (family subclass, list_shells_override)",
+ "probe_results": {
+  "shells": 9,
+  "shells_forced_fallback": 9,
+  "details_tested": 9,
+  "with_date": 9,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 9,
+  "with_specialty": 9
+ },
+ "test_urls": [
+  "https://www.eadv.org/events/calendar/",
+  "https://eadv.org/symposium/",
+  "https://eadv.org/symposium/registration/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.eadv.org/events/calendar/",
+   "field": "IUSTI card",
+   "site_says": "27th IUSTI World Congress, Prague, Czech Republic, 14-17 October 2026",
+   "extractor_says": "2026-10-14..2026-10-17; city Prague; region Czech Republic",
+   "match": true
+  },
+  {
+   "url": "https://www.eadv.org/events/calendar/",
+   "field": "IFPA card (no year on the card)",
+   "site_says": "8th World Psoriasis & Psoriatic Arthritis Conference, Stockholm, Sweden, 20-22 May (link ends /ifpa-conference-2027)",
+   "extractor_says": "2027-05-20..2027-05-22 (year taken from the link slug)",
+   "match": true
+  },
+  {
+   "url": "https://eadv.org/symposium/",
+   "field": "own event + venue",
+   "site_says": "<title> 'EADV Symposium | Dresden 20-22 May 2027'; venue page: Messe Dresden, Messering 6, 01067 Dresden",
+   "extractor_says": "EADV Symposium 2027, 2027-05-20..22, venue Messe Dresden, city Dresden, region Germany",
+   "match": true
+  },
+  {
+   "url": "https://eadv.org/symposium/registration/",
+   "field": "fees",
+   "site_says": "'INFORMATION ABOUT THE SYMPOSIUM 2027 WILL BE PUBLISHED SOON'; fee table shown is for 2026 (early bird 18 Feb 2026, EADV member 300/450/500 EUR)",
+   "extractor_says": "no pricing_tiers (stale 2026 rates not stored)",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "The calendar page lists PARTNER congresses (IUSTI, CILAD, World Congress of Dermatology, ...), not EADV's own; they have no page on eadv.org, so booking_url is the partner site and organiser_url is set so the explorer can look for fees. Venue names are not on the cards (city + country only), so with_venue is 1 of 9 (the Symposium).",
+  "EADV's own Congress: /congress/ still shows Vienna 2026 (past), so it is correctly skipped; once the 2027 title is published the same title regex picks it up (needs 'EADV Congress 2027 | City d-d Mon yyyy' or a year in the title).",
+  "EADV Symposium 2027 fees: registration page says 2027 information is coming and only shows 2026 rates, so empty pricing is deliberate. Re-check after the Symposium registration opens (the fee table on /symposium/registration/ is plain text lines, EUR, member categories x early/mid/full).",
+  "The UEMS diploma exam card is skipped (exam, not an education event); 26 cards include hidden responsive duplicates, deduped by title+start; MAX_FUTURE_DAYS=600 keeps the Rare Skin Diseases congress (April 2028).",
+  "Partner descriptions are the partner site's meta description when usable, else a one-line 'Title in City. Dermatology meeting listed on the EADV events calendar'; some partner meta text is shouty or sparse (e.g. the Psoriasis G2C one).",
+  "Coverage checklist: multi-day ranges parsed (incl. year-less card); fees via external 'here' links not applicable on cards (partner site stored as organiser_url, not followed); same-site Registration sub-page checked for the Symposium (stale); image fee tables, PDFs, call-for-papers not present on the checked pages."
+ ]
+}

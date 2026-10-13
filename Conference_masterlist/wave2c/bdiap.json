@@ -1,0 +1,71 @@
+{
+ "source_id": 84,
+ "slug": "bdiap",
+ "class_name": "BdiapExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/bdiap.py",
+ "source_row": {
+  "source_name": "BDIAP Meetings",
+  "society": "BDIAP",
+  "base_url": "https://bdiap.org/events/future_bdiap_meetings.aspx",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Single .aspx page with a bullet list of future meetings; each item links to a detail page and carries its date in the item text. Undated 'to be announced' items are skipped."
+ },
+ "registry_comment": "BDIAP (pathology) future meetings: .aspx bullet list -> detail pages; venue from ./location.aspx, fees from ./registration.aspx tables (family subclass)",
+ "probe_results": {
+  "shells": 5,
+  "shells_forced_fallback": 5,
+  "details_tested": 5,
+  "with_date": 5,
+  "with_pricing": 1,
+  "with_venue": 4,
+  "with_description": 5,
+  "with_specialty": 5
+ },
+ "test_urls": [
+  "https://bdiap.org/events/284/joint_bdiapbagp_symposium_on_gynaecological_pathology",
+  "https://bdiap.org/study_days/approach_to_cut_up/default.aspx",
+  "https://bdiap.org/events/291/belfast_pathology_2027"
+ ],
+ "spot_check": [
+  {
+   "url": "https://bdiap.org/annual_symposium/location.aspx",
+   "field": "venue",
+   "site_says": "10 Union Street, London, SE1 1SZ",
+   "extractor_says": "10 Union Street / London",
+   "match": true
+  },
+  {
+   "url": "https://bdiap.org/annual_symposium/registration.aspx",
+   "field": "fees",
+   "site_says": "IAP/BAGP member consultant 200 early / 250 standard; non-member 300/350; trainee 75/100 and 120/145; early bird until 30.09.2026",
+   "extractor_says": "12 tiers, member/non-member x delegate type x Early bird/Standard, early_bird_deadline 2026-09-30",
+   "match": true
+  },
+  {
+   "url": "https://bdiap.org/study_days/approach_to_cut_up/default.aspx",
+   "field": "date/venue/fees",
+   "site_says": "20 September 2027; Royal College of Pathologists, 6 Alie Street; registration page shows only 2026 fees, '2027 registration will be announced soon'",
+   "extractor_says": "2027-09-20; Royal College of Pathologists, London; no tiers (stale 2026 table dropped)",
+   "match": true
+  },
+  {
+   "url": "https://bdiap.org/events/291/belfast_pathology_2027",
+   "field": "date/venue",
+   "site_says": "Tue 22 Jun 8:00AM - Thu 24 Jun 5:00PM 2027, ICC Belfast; registration TBA",
+   "extractor_says": "2027-06-22..24, 08:00, ICC Belfast / Belfast; no tiers",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "IAP Biennial Congress (Fukuoka, 8-13 Oct 2026) ends today (2026-10-13); the family keeps it because end_date >= today. Fees are on the congress website; organiser_url is set for the explorer. Only city/region are known (no venue name).",
+  "Coverage checklist verified: same-site Registration and Location sub-pages (fetched, relative to the post-redirect URL; /events/284 redirects to /annual_symposium/default.aspx); stale-year fee tables (Registration Fees (2026) on 2027 events) deliberately dropped, so Molecular Pathology and Approach to Cut-Up have empty pricing until 2027 fees are published; membership-dues table ignored; external Eventbrite register link not followed (fees already on same-site page); multi-day ranges parsed (4-5 Dec, 1-2 Mar, 22-24 Jun); no image fee tables, PDFs or call-for-papers on these pages.",
+  "BDIAP Bitesize Virtual Workshop has no date ('more details to be announced soon') and is skipped. The family also fetches one undated card per run (a past 'Manchester Pathology 2026' link) and drops it as past.",
+  "Description cleanup strips the 'Use this area to add quick shortcuts to your favourite pages' site chrome that the family's paragraph picker otherwise returns."
+ ]
+}
