@@ -33,6 +33,29 @@ def _txt(frag: str) -> str:
     return re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", frag))).replace("\xa0", " ").strip()
 
 
+_VENUE_WORD_RE = re.compile(r"(?i)\b(?:congress|convention|conference|exhibition)\s+cent(?:re|er)|\bcent(?:re|er)\b|\bhotel\b|\bpalais\b|\bmesse\b|\barena\b|\bauditorium\b|\buniversity\b|\bhall\b|\bcampus\b|\bresort\b")
+
+
+def partner_venue(html: str, place: str) -> Optional[str]:
+    """Venue name on a partner congress site: the short line just above the
+    card's own 'City, Country' line (IFPA 2027: 'May 20-22, 2027' /
+    'Waterfront Congress Centre' / 'Stockholm, Sweden'), else the first short
+    line naming a venue-type building that also mentions the city."""
+    lines = html_to_lines(re.sub(r"(?is)<(script|style|svg|noscript|nav|header|footer|template)\b.*?</\1\s*>", " ", html))
+    city = place.split(",")[0].strip().lower()
+    norm = re.sub(r"\s+", " ", place).strip().lower()
+    for i, l in enumerate(lines):
+        if re.sub(r"\s+", " ", l).strip().lower() == norm and i > 0:
+            prev = lines[i - 1].strip()
+            if 4 <= len(prev) <= 80 and not re.search(r"\d{4}", prev) and _VENUE_WORD_RE.search(prev):
+                return prev
+    for l in lines:
+        t = l.strip()
+        if len(t) <= 80 and _VENUE_WORD_RE.search(t) and city in t.lower() and not re.search(r"\d{4}|[.!?]$", t):
+            return t
+    return None
+
+
 class EadvExtractor(WordPressGenericExtractor):
     LISTING_URL = "https://www.eadv.org/events/calendar/"
     SOCIETY = "EADV"
@@ -150,6 +173,8 @@ class EadvExtractor(WordPressGenericExtractor):
             out["event_format"] = "hybrid" if shell.get("_remote") else "in_person"
         elif shell.get("_remote"):
             out["event_format"] = "online"
+        if not venue and html and shell.get("_partner") and place:
+            venue = partner_venue(html, place)
         if venue:
             out["venue_name"] = venue
         if not out.get("description"):

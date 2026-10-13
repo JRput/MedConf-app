@@ -61,3 +61,12 @@ def test_check_pricing_keeps_missing_for_current_edition(monkeypatch):
     v = audit.check_pricing({"source_url": "https://www.tct2026.com/", "start_date": "2026-10-24"},
                             "TCT 2026.", "<html></html>", {}, [])
     assert v.status == "MISSING"
+
+
+def test_cpd_number_must_be_standalone_token():
+    """'#BDIAPAnnualSymposium2026 / CPD credits sought' is not 26 CPD credits."""
+    v = audit.check_cpd_points({"cpd_points": None},
+                               "#BDIAPAnnualSymposium2026\nCPD credits sought from The Royal College of Pathologists", "", {})
+    assert v.status == "GENUINELY_ABSENT"
+    v2 = audit.check_cpd_points({"cpd_points": None}, "This course awards 6 CPD credits.", "", {})
+    assert v2.status == "MISSING" and v2.page_evidence.startswith("6")

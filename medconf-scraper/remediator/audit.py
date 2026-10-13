@@ -361,7 +361,9 @@ def check_cpd_points(row, page_text, page_html, source) -> FieldVerdict:
     if v is not None and v > 0:
         return FieldVerdict("cpd_points", "OK", v)
     # Look for CPD digits on page
-    m = re.search(r"(\d{1,3})\s*CPD\s*(?:credits?|points?|hours?)", page_text or "", re.I)
+    # The number must be its own token: '#Symposium2026\nCPD credits sought'
+    # (BDIAP, 2026-10-13) is a hashtag year, not '026 CPD credits'.
+    m = re.search(r"(?<![\w#.])(\d{1,3}(?:\.\d)?)\s*CPD\s*(?:credits?|points?|hours?)", page_text or "", re.I)
     if m:
         return FieldVerdict("cpd_points", "MISSING", v,
                             page_evidence=m.group(0),

@@ -137,7 +137,10 @@ class InterfaceAestheticsExtractor(WordPressGenericExtractor):
             first = sessions[0]
             cities = {s["city"] for s in sessions}
             out["start_date"] = out["end_date"] = first["start_date"]
-            out["city"] = first["city"] if len(cities) == 1 else None
+            # The parent row dates from its first upcoming session, so it is
+            # placed there too (audit 2026-10-13: a London course with one
+            # Manchester date had no city at all). Sessions keep their own city.
+            out["city"] = first["city"]
             out["region"] = "United Kingdom"
             out["sessions"] = [{"_idx": i, "start_date": s["start_date"], "end_date": None, "start_time": None,
                                 "duration_text": None, "availability_status": s["availability_status"], "spots_left": s["spots_left"],
