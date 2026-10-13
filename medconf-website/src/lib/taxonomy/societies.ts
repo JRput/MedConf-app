@@ -92,6 +92,17 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   BIASP: { short: 'BIASP', name: 'British and Irish Association of Stroke Physicians', kind: 'specialist', country: 'UK' },
   BIA: { short: 'BIA', name: 'British Infection Association', kind: 'specialist', country: 'UK' },
   SAM: { short: 'SAM', name: 'Society for Acute Medicine', kind: 'specialist', country: 'UK' },
+  // Wave 2c batch 3 (2026-10-13)
+  AAOS: { short: 'AAOS', name: 'American Academy of Orthopaedic Surgeons', kind: 'international', country: 'US' },
+  'The Ultrasound Site': { short: 'The Ultrasound Site', name: 'The Ultrasound Site (point-of-care ultrasound training)', kind: 'other', country: 'UK' },
+  'Endocrine Society': { short: 'Endocrine Society', name: 'Endocrine Society', kind: 'international', country: 'US' },
+  ARRS: { short: 'ARRS', name: 'American Roentgen Ray Society', kind: 'international', country: 'US' },
+  BSCCP: { short: 'BSCCP', name: 'British Society for Colposcopy and Cervical Pathology', kind: 'specialist', country: 'UK' },
+  CRF: { short: 'CRF', name: 'Cardiovascular Research Foundation', kind: 'international', country: 'US' },
+  EADV: { short: 'EADV', name: 'European Academy of Dermatology and Venereology', kind: 'international', country: 'EU' },
+  'ATACC Group': { short: 'ATACC Group', name: 'ATACC Group (Anaesthesia Trauma and Critical Care)', kind: 'other', country: 'UK' },
+  'Interface Aesthetics': { short: 'Interface Aesthetics', name: 'Interface Aesthetics (aesthetic medicine training)', kind: 'other', country: 'UK' },
+  BDIAP: { short: 'BDIAP', name: 'British Division of the International Academy of Pathology', kind: 'specialist', country: 'UK' },
 }
 
 export function societyInfo(short: string | null | undefined): SocietyInfo | null {
