@@ -241,13 +241,54 @@ def _classify_specialty(title: str) -> str:
     return "Radiation Oncology"
 
 
+# 2026-10-12: estro.org moved to a Power Pages portal. /Congresses is now
+# filled client-side from this Dataverse endpoint (captured from the page's
+# own XHR); eventtype 100000001 = Congress, publishstatus 100000003 = Live.
+# The HTML walker above is kept for when congresses are republished; the API
+# is the ground truth for "is there anything to list at all".
+EVENTS_API = (
+    "https://www.estro.org/_api/msevtmgt_events"
+    "?$select=msevtmgt_name,msevtmgt_eventstartdate,msevtmgt_eventenddate,msevtmgt_publishstatus"
+    "&$filter=statecode eq 0 and msevtmgt_publishstatus eq 100000003"
+    " and msevtmgt_eventtype eq 100000001 and msevtmgt_eventstartdate ge {today}T00:00:00.000Z"
+    "&$orderby=msevtmgt_eventstartdate asc&$top=50"
+)
+
+
+def _published_congresses_via_api() -> Optional[List[Dict[str, Any]]]:
+    """Live upcoming congresses per the site's own events API; None if the API
+    itself could not be read (so an empty HTML listing stays a failure)."""
+    url = EVENTS_API.format(today=date.today().isoformat())
+    try:
+        r = httpx.get(url, headers={"User-Agent": "Mozilla/5.0", "Accept": "application/json"},
+                      timeout=25, follow_redirects=True)
+        if r.status_code != 200:
+            logger.warning(f"ESTRO: events API HTTP {r.status_code}")
+            return None
+        data = r.json()
+        value = data.get("value")
+        return value if isinstance(value, list) else None
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"ESTRO: events API unreadable: {e}")
+        return None
+
+
 class ESTROExtractor(BaseExtractor):
-    """Source 19: ESTRO congresses (server-rendered custom CMS)."""
+    """Source 19: ESTRO congresses (Power Pages portal; HTML cards when published)."""
 
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
+        self.verified_empty = None
         shells = _walk_listing()
         if not shells:
             logger.warning("ESTRO: 0 shells from listing")
+            live = _published_congresses_via_api()
+            if live is not None and len(live) == 0:
+                self.verified_empty = "estro.org events API lists no published upcoming congresses"
+                logger.warning(f"ESTRO: {self.verified_empty}")
+                return []
+            if live:
+                logger.error(f"ESTRO: API lists {len(live)} live congress(es) "
+                             f"({live[0].get('msevtmgt_name')!r}) but the HTML walker found none — markup changed")
             return None
         logger.info(f"ESTRO: {len(shells)} congresses on listing")
         return shells

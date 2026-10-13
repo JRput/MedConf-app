@@ -120,6 +120,15 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
                 )
                 logger.warning(f"Source {source['id']} ({source.get('source_name')}): "
                                f"UNREACHABLE ({where}), no cards extracted")
+            elif getattr(getattr(agent, "extractor", None), "verified_empty", None):
+                # The extractor proved from the site's own payload that there
+                # is nothing to list (ESTRO 2026-10-12: events API returns no
+                # published upcoming congresses). A real result, not a miss.
+                why = agent.extractor.verified_empty
+                summary["status"] = "success"
+                summary["error_details"] = f"listing verified empty: {why}"
+                logger.warning(f"Source {source['id']} ({source.get('source_name')}): "
+                               f"listing verified EMPTY ({why}); 0 events is the site's answer")
             else:
                 summary["status"] = "failed"
                 summary["error_details"] = "No event cards extracted from listing"

@@ -10,6 +10,12 @@ class BaseExtractor(ABC):
     """
     Abstract interface every per-source extractor implements.
 
+    `verified_empty`: an extractor may set this to a short reason string when
+    its listing is PROVEN empty from the site's own payload (e.g. the events
+    API answered 200 with zero published upcoming events). scrape_source then
+    records a `success` with 0 found instead of `failed`. A merely empty HTML
+    parse is never proof (HQ lesson #12).
+
     The contract:
       - The Browser has already navigated to a single event's detail URL.
       - extract_detail() reads structured data from that page and returns a
@@ -17,6 +23,8 @@ class BaseExtractor(ABC):
       - Soft fields (description, specialty) may use llm_call() for the
         small fraction of work that genuinely needs reasoning.
     """
+
+    verified_empty: Optional[str] = None
 
     def __init__(self, source: Dict[str, Any]):
         self.source = source

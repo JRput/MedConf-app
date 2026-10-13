@@ -209,3 +209,37 @@ def test_mixed_blocked_unreachable_streak_goes_red(monkeypatch, caplog):
         assert _run_single(monkeypatch, "blocked", ["unreachable", "blocked"]) == 1
     assert any("3 consecutive runs" in r.message for r in caplog.records)
     assert _run_single(monkeypatch, "unreachable", ["blocked", "failed"]) == 2
+
+
+class FakeExtractor:
+    verified_empty = None
+
+
+def test_verified_empty_listing_is_success(monkeypatch, caplog):
+    """An extractor that proves the site lists nothing (ESTRO API, 2026-10-12)
+    yields success with 0 found, not failed."""
+    class Agent(FakeAgent):
+        def __init__(self, source):
+            super().__init__(source)
+            self.extractor = FakeExtractor()
+            self.extractor.verified_empty = "events API lists no published upcoming congresses"
+    FakeAgent.challenged = False
+    FakeAgent.shells = []
+    monkeypatch.setattr(scraper, "AgentLoop", Agent)
+    with caplog.at_level(logging.WARNING):
+        summary = scraper.scrape_source(SRC)
+    assert summary["status"] == "success"
+    assert summary["conferences_found"] == 0
+    assert "verified empty" in summary["error_details"]
+    assert any("verified EMPTY" in r.message for r in caplog.records)
+
+
+def test_unproven_empty_listing_is_still_failed(monkeypatch):
+    class Agent(FakeAgent):
+        def __init__(self, source):
+            super().__init__(source)
+            self.extractor = FakeExtractor()
+    FakeAgent.challenged = False
+    FakeAgent.shells = []
+    monkeypatch.setattr(scraper, "AgentLoop", Agent)
+    assert scraper.scrape_source(SRC)["status"] == "failed"
