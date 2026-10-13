@@ -1,0 +1,73 @@
+{
+ "source_id": 78,
+ "slug": "arrs",
+ "class_name": "ArrsExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/arrs.py",
+ "source_row": {
+  "source_name": "ARRS Meetings & Courses",
+  "society": "ARRS",
+  "base_url": "https://www.arrs.org/ARRSLIVE/ARRSLIVE/Education/upcoming_events.aspx",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "ASP.NET page with one server-rendered table (tr.type-symposium|longitudinal|ajr|annual): event name, year-less date for near-term rows or a full range for Annual Meetings, location, 'Learn more' link. Longitudinal course rows are sessions of two courses (rows sharing one link) and become one parent course with sessions. Symposium and course pages list fees as 'label / $amount' line pairs (In Training FREE/$0); Annual Meeting pages have no fees yet; AJR Live webinars show no fee. USD."
+ },
+ "registry_comment": "ARRS: server-rendered events table; longitudinal rows grouped into parent courses with sessions; symposium/course fees from page tables (USD)",
+ "probe_results": {
+  "shells": 6,
+  "shells_forced_fallback": 6,
+  "details_tested": 6,
+  "with_date": 6,
+  "with_pricing": 2,
+  "with_venue": 3,
+  "with_description": 4,
+  "with_specialty": 6
+ },
+ "test_urls": [
+  "https://arrs.org/ARRSLIVE/Education/Meetings/LC26/mystery-mastery-longitudinal-course-review.aspx",
+  "https://arrs.org/ARRSLIVE/Education/Meetings/LC26/mastering-genitourinary-imaging-interventions-longitudinal-course.aspx",
+  "https://arrs.org/am27"
+ ],
+ "spot_check": [
+  {
+   "url": "https://arrs.org/ARRSLIVE/Education/Meetings/LC26/mystery-mastery-longitudinal-course-review.aspx",
+   "field": "fees/CME",
+   "site_says": "In Training $0, Member $695, Non-Member $945; 28 CME Credits; Tuesdays & Fridays @ 12:00 PM ET",
+   "extractor_says": "3 USD tiers 0/695/945, cpd 28, start_time 12:00",
+   "match": true
+  },
+  {
+   "url": "https://arrs.org/ARRSLIVE/Education/Meetings/LC26/mastering-genitourinary-imaging-interventions-longitudinal-course.aspx",
+   "field": "fees",
+   "site_says": "Registration Information: ARRS Member $525, In-Training $199, Nonmember $999",
+   "extractor_says": "525/199/999 USD",
+   "match": true
+  },
+  {
+   "url": "https://arrs.org/am27",
+   "field": "dates/venue",
+   "site_says": "May 2-5, 2027; Sheraton Denver Downtown Hotel, Denver, CO (listing table)",
+   "extractor_says": "2027-05-02..05, Sheraton Denver Downtown Hotel, Denver, hybrid",
+   "match": true
+  },
+  {
+   "url": "https://arrs.org/ARRSLIVE/ARRSLIVE/Events/Event_display.aspx?EventKey=ZW261014",
+   "field": "date/time",
+   "site_says": "When 10/14/2026 12:00 PM - 1:00 PM EDT",
+   "extractor_says": "2026-10-14, 12:00, online",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Listing rows with year-less dates ('October 15') are given the current year (next year only if more than 90 days past); the page still lists ended near-term sessions, which are dropped by date.",
+  "Longitudinal courses: only the next sessions shown in the events table become course_sessions (6 of 28 for Case Review, 1 of 9 for Mastering GU); the full session calendar is not parsed. Session rows carry topic text in notes, no per-session prices.",
+  "No fees for the Annual Meetings (arrs.org/am27 / www2.arrs.org/am27 shows no pricing yet; 2028/2029 have no page) or for AJR Live webinars (sign-in registration, fee not shown): justified empty. 2028/2029 meetings use fragment URLs on the listing page.",
+  "The page sits behind a rotating site-wide banner (maintenance, email outage, cookie notice); description extraction filters those, but a new banner wording could leak into a description.",
+  "Coverage checklist: fee tables read from <table> and label/amount lines; multi-day ranges ok (2027-05-02..05); no image fee tables, PDFs or external two-hop pages seen; poster/abstract competitions for AM27 not on the page yet.",
+  "Forced-fallback gave the same 6 shells."
+ ]
+}

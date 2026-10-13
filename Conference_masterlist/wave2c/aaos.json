@@ -1,0 +1,75 @@
+{
+ "source_id": 75,
+ "slug": "aaos",
+ "class_name": "AaosExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/aaos.py",
+ "source_row": {
+  "source_name": "AAOS Annual Meeting & Courses",
+  "society": "AAOS",
+  "base_url": "https://www.aaos.org/education/courses/",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Courses: three category pages (/education/courses/virtual-courses/, /skills-courses/, /seminars/) hold card--basic links with a super-title date ('Nov. 5-7, 2026'), unioned by URL; fees sit on the same-site <course>/registration/ sub-page ('label' then '$2,599'). Annual Meeting: /annual/attend/future-meetings/ lists the next two meetings (city\u2014year, date range, venue); registration/fees open months ahead so no tiers until then. USD."
+ },
+ "registry_comment": "AAOS: 3 course category pages + future-meetings Annual Meetings; fees from same-site /registration/ sub-page (USD)",
+ "probe_results": {
+  "shells": 8,
+  "shells_forced_fallback": 8,
+  "details_tested": 8,
+  "with_date": 8,
+  "with_pricing": 6,
+  "with_venue": 5,
+  "with_description": 7,
+  "with_specialty": 8
+ },
+ "test_urls": [
+  "https://www.aaos.org/education/courses/2603040/",
+  "https://www.aaos.org/education/courses/2703385/",
+  "https://www.aaos.org/annual/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.aaos.org/education/courses/2603040/",
+   "field": "dates/city",
+   "site_says": "Dec. 4-5, 2026, Rosemont, IL",
+   "extractor_says": "2026-12-04..2026-12-05, Rosemont, United States",
+   "match": true
+  },
+  {
+   "url": "https://www.aaos.org/education/courses/2603040/registration/",
+   "field": "fees",
+   "site_says": "Member $2,599; Resident $1,999; PA Member $1,199; Non-member surgeon $3,099; Non-member PA $1,399",
+   "extractor_says": "5 USD tiers with those amounts",
+   "match": true
+  },
+  {
+   "url": "https://www.aaos.org/education/courses/2703385/",
+   "field": "dates/venue/fee",
+   "site_says": "January 24-27, 2027 | Park City, UT; AAOS member $1,924",
+   "extractor_says": "2027-01-24..27, Park City; first tier 1924 USD",
+   "match": true
+  },
+  {
+   "url": "https://www.aaos.org/annual/attend/future-meetings/",
+   "field": "annual meeting",
+   "site_says": "Wednesday, March 3 - Saturday, March 6 | Venetian Convention & Expo Center, Las Vegas, Nevada, 2027",
+   "extractor_says": "2027-03-03..06, Venetian Convention & Expo Center, Las Vegas",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Annual Meeting 2027 and 2028 have no pricing_tiers: the registration page says registration opens 2026-11-02 (early-bird ends 2026-12-06). Justified empty; the remediator picks fees up once published (checked /annual/attend/registration/).",
+  "Annual Meeting 2028 uses a fragment URL (/annual/attend/future-meetings/#2028) as booking/source URL because the site has no per-meeting page for it; description deliberately dropped.",
+  "Course fees come from one extra request to <course>/registration/ (same-site Registration sub-page, checklist item verified). Course 2603056 bundles Workers' Comp + half-day Expert Witness on one page; stored as one row with both fee sections (Course Fees / Half Day Expert Witness Course Fees). 'Courses OnDemand add-on' lines are not parsed as tiers.",
+  "Course venue name (e.g. Eaglewood Resort, OLC Education Center) is not stored: only city is on the header line; venue_name is None for courses. Virtual courses stored event_format=online without venue.",
+  "Coverage checklist: multi-day ranges verified (Oct 19 & 21 -> 2026-10-21 end; Nov 5-7); fees via same-site Registration sub-page verified; no image fee tables, PDFs, poster competitions or external two-hop pages found; call-for-papers (late-breaking abstracts for AM27) not extracted. The 'Oct. 8-9' infectious-disease course is past and dropped.",
+  "Category pages are the source of truth for listing (the /education/courses/ hub list omits the board-prep course and uses year-less dates). A new category page would need adding to _CATEGORY_PAGES.",
+  "Forced-fallback run (Playwright path) gave the same 8 shells. httpx got 403 on www.aaos.org registration under force-fallback only; normal run via httpx works from this machine, so runner behaviour is unproven.",
+  "Specialty fixed to Orthopaedics (PREFER_DEFAULT_SPECIALTY) since every event is orthopaedic."
+ ]
+}

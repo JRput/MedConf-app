@@ -85,6 +85,9 @@ jobs:
           - group: G
             source_ids: "60,61,62,63,64,65,66,67,68,69,70,71,73,74"
             source_names: "ERS BSGE BCIS FDI ECCO EASL BAPRAS ESICM APM ERA EUSEM DermaMedical BIA SAM"
+          - group: H
+            source_ids: "75,76,77,78,79,80,81,82,83,84"
+            source_names: "AAOS UltrasoundSite Endocrine ARRS BSCCP CRF EADV ATACC InterfaceAesthetics BDIAP"
 
     steps:
       - name: Check out repository

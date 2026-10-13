@@ -1,0 +1,73 @@
+{
+ "source_id": 76,
+ "slug": "theultrasoundsite",
+ "class_name": "TheUltrasoundSiteExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/theultrasoundsite.py",
+ "source_row": {
+  "source_name": "The Ultrasound Site Courses",
+  "society": "The Ultrasound Site",
+  "base_url": "https://theultrasoundsite.co.uk/shop/",
+  "default_event_type": "course",
+  "pagination_type": "page_query",
+  "pagination_template": "https://theultrasoundsite.co.uk/shop/page/{page}/",
+  "max_pages_hint": 4,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "WooCommerce shop (9 products per page, /shop/page/N/). Every course date is three products: a two-day 'DD/DD Month YYYY - Course' product (both days) plus a 'Day 1' and 'Day 2' single-day product. Grouped into ONE event per two-day product, with the day products as extra fee tiers; dates come from the title, times from the FooEvents 'Event Details' tab (first day). Past dates (2025) are listed and dropped. Venue is only stated for the cadaveric course (Queen Mary University, London, in the meta description)."
+ },
+ "registry_comment": "The Ultrasound Site: WooCommerce shop; one course row per two-day product, day-only products folded into fee tiers (GBP)",
+ "probe_results": {
+  "shells": 9,
+  "shells_forced_fallback": 9,
+  "details_tested": 9,
+  "with_date": 9,
+  "with_pricing": 9,
+  "with_venue": 1,
+  "with_description": 9,
+  "with_specialty": 9
+ },
+ "test_urls": [
+  "https://theultrasoundsite.co.uk/product/26-27-october-2026-cadaveric-msk-ultrasound-guided-injection-course/",
+  "https://theultrasoundsite.co.uk/product/21-22-november-2026-advanced-msk-ultrasound-course/",
+  "https://theultrasoundsite.co.uk/product/12-13-june-2027-introduction-to-msk-ultrasound-course/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://theultrasoundsite.co.uk/product/26-27-october-2026-cadaveric-msk-ultrasound-guided-injection-course/",
+   "field": "dates/time/price",
+   "site_says": "26/27 October 2026; Date October 26, 2026; Start 09:00; GBP 999.00",
+   "extractor_says": "2026-10-26..2026-10-27, 09:00, Both days 999",
+   "match": true
+  },
+  {
+   "url": "https://theultrasoundsite.co.uk/product/26-27-october-2026-cadaveric-msk-ultrasound-guided-injection-course/",
+   "field": "day-only tiers",
+   "site_says": "Day 1 only (Lower limb) 520; Day 2 only (Upper limb) 520 (shop listing)",
+   "extractor_says": "Day 1 only (Lower limb) 520; Day 2 only (Upper limb) 520",
+   "match": true
+  },
+  {
+   "url": "https://theultrasoundsite.co.uk/product/21-22-november-2026-advanced-msk-ultrasound-course/",
+   "field": "time/price",
+   "site_says": "Start 09:00 End 16:30; 599.00; 12 in stock",
+   "extractor_says": "09:00, Both days 599, Day 1 340, Day 2 340, not sold out",
+   "match": true
+  },
+  {
+   "url": "https://theultrasoundsite.co.uk/product/26-27-october-2026-cadaveric-msk-ultrasound-guided-injection-course/",
+   "field": "venue",
+   "site_says": "meta description: facilities of Queen Mary University, London",
+   "extractor_says": "Queen Mary University, London",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Each course date is 3 WooCommerce products (two-day + Day 1 + Day 2). Folded into ONE row per two-day product with day-only prices as extra tiers; a date with no two-day product would store the day products as separate rows. One row per date (not a parent with sessions) because the product URLs are the only stable identity.",
+  "Venue is only known for the cadaveric injection course (Queen Mary University, London, from the meta description). Introduction/Advanced MSK course pages and the category page name no venue, so venue_name/city are None for 8 of 9 rows; event_format left None for them. Do not guess.",
+  "Event end dates and times: end date from the title ('21/22 November'), start time from the FooEvents tab (first day); end time not stored. Prices are VAT inclusive per category page.",
+  "Coverage checklist: shop pages 1-4 walked (30 products, 9 upcoming course dates, the 2025 trio dropped as past); no external fee links, PDFs or image fee tables; /ultrasound-training-courses/ category page repeats the same prices and has no venues; the PG Cert and 'Virtual MSK ultrasound mentor' pages are not dated events and were not onboarded.",
+  "Shop listing marks stock via the outofstock CSS class (3 products on page 2, all the 2025 past trio): sold-out flag implemented from the listing class and the product page, no upcoming date is sold out today.",
+  "Forced-fallback gave the same 9 shells."
+ ]
+}

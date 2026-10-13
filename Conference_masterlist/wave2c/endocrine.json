@@ -1,0 +1,73 @@
+{
+ "source_id": 77,
+ "slug": "endocrine",
+ "class_name": "EndocrineExtractor",
+ "status": "partial",
+ "file_written": "medconf-scraper/extractors/endocrine.py",
+ "source_row": {
+  "source_name": "Endocrine Society Meetings",
+  "society": "Endocrine Society",
+  "base_url": "https://www.endocrine.org/meetings-and-events",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "No event cards: the hub page names the next CEU meeting in a sentence ('Clinical Endocrinology Update (CEU) 2026, taking place online October 22-24'), /endo-future-meetings lists ENDO 2027-2029 (title, date range, city) and /keystone-conference lists Endocrine Society x Keystone Symposia joint meetings as '(Feb 1-4, 2027 | Keystone, Colo.)' with links to keystonesymposia.org, whose /meeting/pricing/<CODE> page holds the USD fee grid. CEU lives on ceu2026.endocrine.org (EventScribe, Cloudflare 403): shell values only."
+ },
+ "registry_comment": "Endocrine Society: hub CEU sentence + ENDO future meetings + Keystone joint meetings; Keystone fees from pricing page (USD)",
+ "probe_results": {
+  "shells": 6,
+  "shells_forced_fallback": 6,
+  "details_tested": 6,
+  "with_date": 6,
+  "with_pricing": 2,
+  "with_venue": 5,
+  "with_description": 6,
+  "with_specialty": 6
+ },
+ "test_urls": [
+  "https://www.endocrine.org/meetings-and-events/endo-future-meetings",
+  "https://www.keystonesymposia.org/conferences/conference-listing/meeting/a32027",
+  "https://www.endocrine.org/meetings-and-events"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.endocrine.org/meetings-and-events/endo-future-meetings",
+   "field": "ENDO 2027",
+   "site_says": "June 5-7, 2027, Toronto, ON, Canada",
+   "extractor_says": "2027-06-05..2027-06-07, Toronto, Canada",
+   "match": true
+  },
+  {
+   "url": "https://www.endocrine.org/meetings-and-events",
+   "field": "CEU 2026",
+   "site_says": "taking place online October 22-24",
+   "extractor_says": "2026-10-22..2026-10-24, online",
+   "match": true
+  },
+  {
+   "url": "https://www.keystonesymposia.org/conferences/conference-listing/meeting/a32027",
+   "field": "dates/venue",
+   "site_says": "Feb 01-04, 2027 | Keystone Resort, Keystone, CO, United States",
+   "extractor_says": "2027-02-01..04, Keystone Resort, Keystone, United States, hybrid",
+   "match": true
+  },
+  {
+   "url": "https://www.keystonesymposia.org/conferences/conference-listing/meeting/pricing/A32027",
+   "field": "fees",
+   "site_says": "In Person early $1145 (to Dec 2, 2026), student $845, regular $1395; Livestream $400/$550; On Demand $180/$330",
+   "extractor_says": "same amounts in USD, early tier deadline 2026-12-02",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "status partial: the CEU 2026 meeting site (ceu2026.endocrine.org, EventScribe) is behind Cloudflare and returns 403 / unresolvable challenge to both curl and the production Playwright browser, so CEU keeps hub-sentence values only (dates, online, a generic description, no fees). ENDO 2027-2029 have no fees published yet (justified empty).",
+  "No event cards on the hub: listing is hand-built from three pages (hub sentence regex for CEU, /endo-future-meetings blocks, /keystone-conference links). A reworded hub sentence or page layout silently drops the event. ENDO 2027-2029 use fragment URLs (#endo-2027 etc.) on the future-meetings page as booking/source URL.",
+  "The Society Calendar (/meetings-and-events/calendar) is JS-rendered and was not parsed; it may list further third-party endocrine events.",
+  "Keystone joint meetings (Endocrine Society x Keystone Symposia) are included as the society lists them; the Oct 5-8, 2026 one is past/dropped. Keystone fee grid: student rates in the grid are 'until early deadline' per the summary table but the registration list shows no deadline for them, stored as plain student tiers; only the non-student In Person early rate carries is_early_bird. Multiproduct on-demand add-on ($100) is not stored.",
+  "Coverage checklist: external registration microsites followed once for Keystone (two-hop, pricing page); multi-day ranges fine; abstract deadlines present on Keystone pages (short talk Oct 20 2026, poster Jan 11 2027) not extracted here, left to the merge step; ENDO 2026 microsite (endo2026.endocrine.org) is past and irrelevant.",
+  "Forced-fallback gave the same 6 shells."
+ ]
+}

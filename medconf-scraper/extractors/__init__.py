@@ -91,6 +91,16 @@ from .dermamedical import DermamedicalExtractor
 from .biasp import BiaspExtractor
 from .bia import BiaExtractor
 from .sam import SamExtractor
+from .aaos import AaosExtractor
+from .theultrasoundsite import TheUltrasoundSiteExtractor
+from .endocrine import EndocrineExtractor
+from .arrs import ArrsExtractor
+from .bsccp import BsccpExtractor
+from .crf import CrfExtractor
+from .eadv import EadvExtractor
+from .ataccgroup import AtaccExtractor
+from .interfaceaesthetics import InterfaceAestheticsExtractor
+from .bdiap import BdiapExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -169,6 +179,16 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     72: BiaspExtractor,                      # 72: British and Irish Association of Stroke Physicians - single free-form events page, block parser (BaseExtractor, bespoke)
     73: BiaExtractor,                        # 73: British Infection Association - concrete5 event_list cards, family subclass + prose venue parsing
     74: SamExtractor,                        # 74: Society for Acute Medicine - Events Manager, three listing URLs unioned, per-page H1 + date line (family subclass + overrides)
+    75: AaosExtractor,                       # 75: AAOS: 3 course category pages + future-meetings Annual Meetings; fees from same-site /registration/ sub-page (USD)
+    76: TheUltrasoundSiteExtractor,          # 76: The Ultrasound Site: WooCommerce shop; one course row per two-day product, day-only products folded into fee tiers (GBP)
+    77: EndocrineExtractor,                  # 77: Endocrine Society: hub CEU sentence + ENDO future meetings + Keystone joint meetings; Keystone fees from pricing page (USD)
+    78: ArrsExtractor,                       # 78: ARRS: server-rendered events table; longitudinal rows grouped into parent courses with sessions; symposium/course fees from page tables (USD)
+    79: BsccpExtractor,                      # 79: BSCCP: Craft CMS /events card list (page 1 only); Register button kept as organiser_url; trainee OSCE exam skipped
+    80: CrfExtractor,                        # 80: CRF events calendar: one flat page of cards (dates/venue on the card) linking to each meeting's own site; fees read from the meeting's USD rate grid (family subclass, list_shells_override)
+    81: EadvExtractor,                       # 81: EADV events calendar: flat page of partner-congress cards (complete shells, external booking URL) plus EADV's own Symposium/Congress from their page titles (family subclass, list_shells_override)
+    82: AtaccExtractor,                      # 82: ATACC Group: WooCommerce product grid of dated trauma/critical-care courses -> one course parent per group (ATACC Course, ATACC Ireland) with sessions[] (family subclass)
+    83: InterfaceAestheticsExtractor,        # 83: Interface Aesthetics (UK injectables training): /courses/ links -> course pages; one parent per course with sessions[] from the Upcoming Dates rows (family subclass)
+    84: BdiapExtractor,                      # 84: BDIAP (pathology) future meetings: .aspx bullet list -> detail pages; venue from ./location.aspx, fees from ./registration.aspx tables (family subclass)
 }
 
 

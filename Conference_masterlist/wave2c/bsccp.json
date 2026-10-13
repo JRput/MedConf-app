@@ -1,0 +1,65 @@
+{
+ "source_id": 79,
+ "slug": "bsccp",
+ "class_name": "BsccpExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/bsccp.py",
+ "source_row": {
+  "source_name": "BSCCP Events",
+  "society": "BSCCP",
+  "base_url": "https://www.bsccp.org.uk/events",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Craft CMS card list (li.card-three: heading, date line, category chips); only /events holds live events, /events/p2 and later are archive lists of undated 'last three years' pages and must not be walked. Some cards carry no date (online Basic/Advanced Colposcopy courses) and are dated from their detail page or dropped. Detail pages are free prose with fees/venue in text."
+ },
+ "registry_comment": "BSCCP: Craft CMS /events card list (page 1 only); Register button kept as organiser_url; trainee OSCE exam skipped",
+ "probe_results": {
+  "shells": 5,
+  "shells_forced_fallback": 5,
+  "details_tested": 5,
+  "with_date": 5,
+  "with_pricing": 0,
+  "with_venue": 2,
+  "with_description": 5,
+  "with_specialty": 5
+ },
+ "test_urls": [
+  "https://www.bsccp.org.uk/events/bsccp-annual-scientific-meeting-19th-21st-april-2027-london",
+  "https://www.bsccp.org.uk/events/south-west-colposcopy-study-day-virtual",
+  "https://www.bsccp.org.uk/events/11th-efc-european-congress"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.bsccp.org.uk/events/bsccp-annual-scientific-meeting-19th-21st-april-2027-london",
+   "field": "dates/venue",
+   "site_says": "London, QEII Centre from 19th-21st April 2027",
+   "extractor_says": "2027-04-19..21, QEII Centre, London, United Kingdom",
+   "match": true
+  },
+  {
+   "url": "https://www.bsccp.org.uk/events/south-west-colposcopy-study-day-virtual",
+   "field": "date/format/registration",
+   "site_says": "16th October 2026, Virtual; Register -> medcpduk.com",
+   "extractor_says": "2026-10-16, online, organiser_url medcpduk",
+   "match": true
+  },
+  {
+   "url": "https://www.bsccp.org.uk/events/11th-efc-european-congress",
+   "field": "dates/location",
+   "site_says": "Bucharest, Romania; 14-17 October 2026",
+   "extractor_says": "2026-10-14..17, Bucharest, Romania",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "No fees stored: BSCCP pages carry no fees; each Register button goes to Eventbrite / medcpduk.com / lrctc.org.uk / the EFC congress site, kept as organiser_url for the explorer to follow (Eventbrite may not be readable). Only the trainee OSCE exam (GBP 350) states a fee, and it is skipped as an exam, not a CPD event.",
+  "Skipped by design: 'BSCCP Online Colposcopy OSCE 2027' (exam sitting) and the two undated on-demand 'ONLINE Basic/Advanced Colposcopy Course' pages (external colposcopycourses.com). The 2026 Cork annual meeting is past. /events/p2+ are undated 'last three years' archive lists, hence MAX_PAGES=1; if BSCCP ever fills page 1 and moves live events to p2 the cap must change.",
+  "The annual meeting detail page still opens with 2026 boilerplate ('finalising arrangements for the 2026 Annual Scientific Meeting'); the description is taken from the 2027 paragraph instead. Venue/city for it come from prose ('in London , QEII Centre').",
+  "Coverage checklist: multi-day ranges ok ('19th - 21st April 2027', '14-17 October 2026'); external Register links captured; no PDFs or image fee tables; 'suitable for reaccreditation' text is not stored as CPD points.",
+  "Forced-fallback gave the same 5 shells."
+ ]
+}
