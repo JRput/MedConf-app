@@ -543,7 +543,7 @@ _MONTH_RE = (r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|Jul
 _RATE_DATE_RE = re.compile(
     rf"(?:{_MONTH_RE})\.?\s+\d{{1,2}},?\s+(20\d\d)|\d{{1,2}}\s+(?:{_MONTH_RE})\.?,?\s+(20\d\d)", re.I)
 _RATE_DATE_FULL_RE = re.compile(
-    rf"({_MONTH_RE})\.?\s+(\d{{1,2}}),?\s+(20\d\d)|(\d{{1,2}})\s+({_MONTH_RE})\.?,?\s+(20\d\d)", re.I)
+    rf"({_MONTH_RE})\.?\s+(\d{{1,2}})(?:st|nd|rd|th)?,?\s+(20\d\d)|(\d{{1,2}})(?:st|nd|rd|th)?\s+({_MONTH_RE})\.?,?\s+(20\d\d)", re.I)
 _MONTHS = {m: i + 1 for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"])}
 
 
@@ -568,7 +568,13 @@ def stale_edition_fees(body_text: str, start_date: Optional[str], today: Optiona
         return None
     window = body_text[max(0, m.start() - 300): m.start() + 4000]
     years = [int(y) for y in re.findall(r"\b(20\d\d)\b", window)]
-    if not years or max(years) >= start_year:
+    # "Registration rates for ... 2027 will be announced in due course" above
+    # last edition's grid (Psoriasis G2C): the organiser says the shown fees
+    # are not this edition's, whatever years the window mentions.
+    announced_later = re.search(
+        r"(?i)(?:rates?|fees?|pricing|registration)\b[^.\n]{0,80}?\b(?:will|to)\s+be\s+(?:announced|confirmed|published|released)"
+        r"|(?:rates?|fees?|pricing)\b[^.\n]{0,40}?\b(?:coming soon|in due course|tbc|to be confirmed)", window)
+    if not years or (max(years) >= start_year and not announced_later):
         return None
     deadlines = []
     for g in _RATE_DATE_FULL_RE.finditer(window):
@@ -579,6 +585,8 @@ def stale_edition_fees(body_text: str, start_date: Optional[str], today: Optiona
             continue
     if deadlines and max(deadlines) >= today:
         return None
+    if announced_later and not deadlines:
+        return f"fees on page are for a previous edition (organiser says this edition's rates {announced_later.group(0)[-30:].strip()!r})"
     return (f"fees on page are for a previous edition (latest year {max(years)} < event year {start_year}"
             + (f", last rate deadline {max(deadlines).isoformat()}" if deadlines else "") + ")")
 

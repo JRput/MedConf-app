@@ -42,6 +42,14 @@ def test_heading_year_alone_is_enough_when_no_deadlines():
     assert stale_edition_fees(text, "2027-03-17", today=TODAY)
 
 
+def test_announced_later_phrase_makes_old_grid_stale_even_with_event_year_present():
+    text = ("Registration Rates\nRegistration rates for Psoriasis: from Gene to Clinic 2027 will be announced in due course.\n"
+            "CATEGORY EARLY RATE STANDARD RATE\n(Up to 9th September 2024) (Up to 21st November 2024)\n"
+            "Delegate \u2013 Clinician / Scientist * \u00a3495 \u00a3595 \u00a3695\nResearch Fellows \u00a3325 \u00a3395 \u00a3475")
+    why = stale_edition_fees(text, "2027-12-02", today=TODAY)
+    assert why and "2024-11-21" in why
+
+
 def test_no_years_means_unknown_not_stale():
     assert stale_edition_fees("Physician $599 $799 $999 $299 $175", "2027-05-13", today=TODAY) is None
 
