@@ -120,14 +120,41 @@ def _parse_price(cell: str) -> Optional[float]:
 
 def _detect_currency(context: str, default: str = "GBP") -> str:
     """Given a section heading + nearby text, guess the currency."""
+    found = _currency_hint(context)
+    return found or default
+
+
+def _currency_hint(context: str) -> Optional[str]:
     if not context:
-        return default
+        return None
     ctx_lower = context.lower()
     for hint, curr in _CURRENCY_HINTS:
         # Case-insensitive match, but require word-ish boundary
         if re.search(rf"\b{re.escape(hint.lower())}\b", ctx_lower) or hint in context:
             return curr
-    return default
+    return None
+
+
+_CELL_CURRENCY_RE = re.compile(r"(?i)(?:^|\s)([£$€]|EUR|GBP|USD|CHF|SGD|HKD|BRL)\s*\d|\d\s*([£$€]|EUR|GBP|USD|CHF|SGD|HKD|BRL)(?:\s|$|[*+†])")
+_SYMBOL_TO_CODE = {"£": "GBP", "$": "USD", "€": "EUR"}
+
+
+def _cells_currency(cell_texts: List[str]) -> Optional[str]:
+    """Currency written in the price cells themselves ('550 EUR', '£120',
+    '$1,295'), by majority. IUSTI 2026 (2026-10-14): the only EUR marker on
+    the page was the cell suffix, beyond the heading/first-800-chars window,
+    so the remediator dropped a complete 16-tier grid as 'unknown currency'."""
+    votes: Dict[str, int] = {}
+    for t in cell_texts:
+        m = _CELL_CURRENCY_RE.search(t or "")
+        if not m:
+            continue
+        tok = (m.group(1) or m.group(2)).upper()
+        code = _SYMBOL_TO_CODE.get(tok, tok)
+        votes[code] = votes.get(code, 0) + 1
+    if not votes:
+        return None
+    return max(votes, key=votes.get)
 
 
 def _preceding_heading(html: str, table_start: int) -> Optional[str]:
@@ -156,6 +183,46 @@ def _table_has_fee_header_row(table_html: str) -> bool:
     ))
 
 
+_COL_HEADER_RE = re.compile(
+    r"(?i)\b(?:early|regular|standard|late|on-?site|advance|member|non-?member|until|from|before|after|"
+    r"deadline|student|resident|trainee|delegate|bird|rate|fee|price|virtual|in-?person|online|day)\b")
+_MONTH_NAME_RE = (r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|"
+                  r"Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)")
+_COL_DEADLINE_RE = re.compile(
+    rf"(?i)(?:until|by|before|through|up to|ends?|closes?)\s+(\d{{1,2}})(?:st|nd|rd|th)?\s+({_MONTH_NAME_RE})\.?,?\s+(20\d\d)"
+    rf"|(?:until|by|before|through|up to|ends?|closes?)\s+({_MONTH_NAME_RE})\.?\s+(\d{{1,2}})(?:st|nd|rd|th)?,?\s+(20\d\d)")
+_MONTH_NUM = {m: i + 1 for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"])}
+
+
+def _fee_columns(row_cells: List[List[str]]) -> Dict[int, Dict[str, Any]]:
+    """{cell_index: {name, early, deadline}} when the first row is a header of
+    >= 2 fee-timeframe / category columns and no price; else {}."""
+    if not row_cells:
+        return {}
+    header = row_cells[0]
+    if len(header) < 3 or any(_parse_price(c) is not None for c in header[1:] if c):
+        return {}
+    cols: Dict[int, Dict[str, Any]] = {}
+    for k, text in enumerate(header):
+        if k == 0 or not text or not _COL_HEADER_RE.search(text):
+            continue
+        name = re.split(r"(?i)\s+(?:until|from|by|before|through|up to|after|starting)\b", text, 1)[0]
+        name = re.sub(r"\s*\(.*?\)\s*$", "", name).strip(" :-–")[:40] or text[:40]
+        deadline = None
+        m = _COL_DEADLINE_RE.search(text)
+        if m:
+            try:
+                if m.group(1):
+                    deadline = f"{int(m.group(3))}-{_MONTH_NUM[m.group(2)[:3].lower()]:02d}-{int(m.group(1)):02d}"
+                else:
+                    deadline = f"{int(m.group(6))}-{_MONTH_NUM[m.group(4)[:3].lower()]:02d}-{int(m.group(5)):02d}"
+            except (KeyError, ValueError):
+                deadline = None
+        cols[k] = {"name": name.title() if name.isupper() else name,
+                   "early": bool(re.search(r"(?i)early|advance", text)), "deadline": deadline}
+    return cols if len(cols) >= 2 else {}
+
+
 def parse_pricing_tables(
     html: str,
     *,
@@ -180,23 +247,51 @@ def parse_pricing_tables(
         heading = _preceding_heading(html, m.start())
         if not heading and not _table_has_fee_header_row(table_html):
             continue
-        # Detect currency from heading + first 500 chars of table (may
-        # contain "(EUR)" after column header)
-        currency_ctx = (heading or "") + " " + table_html[:800]
-        currency = _detect_currency(currency_ctx, default_currency)
-
         rows = re.findall(r"<tr[^>]*>(.*?)</tr>", table_html, re.DOTALL)
-        for row in rows:
-            cells = re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", row, re.DOTALL)
+        row_cells = [[_clean(c) for c in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", row, re.DOTALL)] for row in rows]
+
+        # Detect currency from heading + first 800 chars of table (may
+        # contain "(EUR)" after column header), else from the cells.
+        currency_ctx = (heading or "") + " " + table_html[:800]
+        currency = (_currency_hint(currency_ctx)
+                    or _cells_currency([c for cells in row_cells for c in cells[1:]])
+                    or default_currency)
+
+        # Column headers of a fee GRID (Early / Regular / Late, Member /
+        # Non-member ...): one tier per price cell, labelled with its column,
+        # early-bird flag + deadline from the column text. A table with a
+        # single price column keeps the old last-cell behaviour.
+        columns = _fee_columns(row_cells)
+
+        for cells in row_cells:
             if len(cells) < 2:
                 continue
-            label = _clean(cells[0])
+            label = cells[0]
             if not label:
+                continue
+            # Skip label-only rows (header row is: "Category | Rate")
+            if label.lower() in {"category", "type", "rate", "amount",
+                                  "price", "cost", "fee"}:
+                continue
+            section = f"{heading} · {label}"[:120] if heading else label[:120]
+            if columns:
+                for k, col in columns.items():
+                    if k >= len(cells):
+                        continue
+                    p = _parse_price(cells[k]) if cells[k] else None
+                    if p is None:
+                        continue
+                    tiers.append({
+                        "tier_label": f"{section} · {col['name']}"[:120],
+                        "price_gbp": p,
+                        "currency": currency,
+                        "is_early_bird": col["early"] or bool(re.search(r"(?i)early[- ]?bird|super early", label)),
+                        "early_bird_deadline": col["deadline"],
+                    })
                 continue
             # Try LAST cell first (typical price column), then walk left
             price: Optional[float] = None
-            for cell_html in reversed(cells[1:]):
-                cell_text = _clean(cell_html)
+            for cell_text in reversed(cells[1:]):
                 if not cell_text:
                     continue
                 p = _parse_price(cell_text)
@@ -205,13 +300,8 @@ def parse_pricing_tables(
                     break
             if price is None:
                 continue
-            # Skip label-only rows (header row is: "Category | Rate")
-            if label.lower() in {"category", "type", "rate", "amount",
-                                  "price", "cost", "fee"}:
-                continue
-            tier_label = f"{heading} · {label}"[:120] if heading else label[:120]
             tiers.append({
-                "tier_label": tier_label,
+                "tier_label": section,
                 "price_gbp": price,
                 "currency": currency,
                 "is_early_bird": bool(re.search(
