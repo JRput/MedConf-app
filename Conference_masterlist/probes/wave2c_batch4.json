@@ -1,0 +1,128 @@
+[
+ {
+  "domain": "esaic.org",
+  "candidate_urls": [
+   "https://esaic.org/events/",
+   "https://esaic.org/"
+  ]
+ },
+ {
+  "domain": "euretina.org",
+  "candidate_urls": [
+   "https://euretina.org/future-meetings/",
+   "https://euretina.org/"
+  ]
+ },
+ {
+  "domain": "aasld.org",
+  "candidate_urls": [
+   "https://www.aasld.org/events-and-webinars",
+   "https://aasld.org/"
+  ]
+ },
+ {
+  "domain": "bess.ac.uk",
+  "candidate_urls": [
+   "https://bess.ac.uk/courses-and-events/",
+   "https://bess.ac.uk/"
+  ]
+ },
+ {
+  "domain": "ukio.org.uk",
+  "candidate_urls": [
+   "https://www.ukio.org.uk/ukio-2025/",
+   "https://ukio.org.uk/"
+  ]
+ },
+ {
+  "domain": "ddw.org",
+  "candidate_urls": [
+   "https://ddw.org",
+   "https://ddw.org/"
+  ]
+ },
+ {
+  "domain": "ectrims.eu",
+  "candidate_urls": [
+   "https://ectrims.eu/events/",
+   "https://ectrims.eu/"
+  ]
+ },
+ {
+  "domain": "efort.org",
+  "candidate_urls": [
+   "https://congress.efort.org/",
+   "https://efort.org/"
+  ]
+ },
+ {
+  "domain": "eaps.kenes.com",
+  "candidate_urls": [
+   "https://eaps.kenes.com",
+   "https://eaps.kenes.com/"
+  ]
+ },
+ {
+  "domain": "espidmeeting.org",
+  "candidate_urls": [
+   "https://espidmeeting.org/welcome-to-espid-2027/",
+   "https://espidmeeting.org/"
+  ]
+ },
+ {
+  "domain": "pas-meeting.org",
+  "candidate_urls": [
+   "https://www.pas-meeting.org/pediatric-meetings/",
+   "https://pas-meeting.org/"
+  ]
+ },
+ {
+  "domain": "acog.org",
+  "candidate_urls": [
+   "https://annualmeeting.acog.org/",
+   "https://acog.org/"
+  ]
+ },
+ {
+  "domain": "escmid.org",
+  "candidate_urls": [
+   "https://www.escmid.org/congress-events/escmid-global/",
+   "https://escmid.org/"
+  ]
+ },
+ {
+  "domain": "croiconference.org",
+  "candidate_urls": [
+   "https://www.croiconference.org/preliminary-agenda-2027/",
+   "https://croiconference.org/"
+  ]
+ },
+ {
+  "domain": "myesr.org",
+  "candidate_urls": [
+   "https://www.myesr.org/congress/",
+   "https://myesr.org/"
+  ]
+ },
+ {
+  "domain": "ccrlondon.com",
+  "candidate_urls": [
+   "https://www.ccrlondon.com",
+   "https://ccrlondon.com/"
+  ]
+ },
+ {
+  "domain": "nhsconfedexpo.org",
+  "candidate_urls": [
+   "https://www.nhsconfedexpo.org",
+   "https://nhsconfedexpo.org/"
+  ]
+ },
+ {
+  "domain": "viveevent.com",
+  "candidate_urls": [
+   "https://hlth.com/events/vive/",
+   "https://viveevent.com/"
+  ]
+ }
+]

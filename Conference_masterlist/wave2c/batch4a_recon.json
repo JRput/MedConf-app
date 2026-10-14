@@ -1,0 +1,77 @@
+[
+ {
+  "domain": "esaic.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": true,
+  "listing_url": "https://esaic.org/events/",
+  "api_url": "https://esaic.org/wp-json/wp/v2/event",
+  "volume_estimate": 25,
+  "pagination": "query_param",
+  "event_type_mix": "mixed",
+  "detail_topology": "on_event_page",
+  "bot_protection": "none",
+  "expected_found": [
+   "Euroanaesthesia"
+  ],
+  "notes": "ESAIC maintains a WordPress event directory at /events/ with 25 total events accessible via WP-JSON API at /wp-json/wp/v2/event. Expected event Euroanaesthesia found (3 versions: 2027, 2028, 2029 with dates May 29-31, hosted on external euroanaesthesia.org subdomain). Mixed event type mix includes conferences and course-type sessions. Individual event pages display dates/location; JavaScript required for frontend listing.",
+  "batch": 4,
+  "source_id": 85
+ },
+ {
+  "domain": "euretina.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "listing_url": "https://euretina.org/future-meetings/",
+  "js_required": true,
+  "detail_topology": "on_event_page",
+  "pagination": "none",
+  "event_type_mix": "conference",
+  "volume_estimate": 6,
+  "expected_found": [
+   "EURETINA Congress"
+  ],
+  "bot_protection": "none",
+  "notes": "WordPress + Elementor + MemberPress. EURETINA is the flagship annual congress for retinal specialists. Multiple upcoming events published: Vienna 2026 Congress, Innovation Spotlight 2026, Special Focus Meetings 2026-2027. Event details available on dedicated subpages.",
+  "batch": 4,
+  "source_id": 86
+ },
+ {
+  "domain": "aasld.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "listing_url": "https://www.aasld.org/events-and-webinars",
+  "js_required": true,
+  "api_url": "",
+  "bot_protection": "none",
+  "event_type_mix": "mixed",
+  "detail_topology": "on_event_page",
+  "pagination": "load_more",
+  "volume_estimate": 5,
+  "expected_found": [
+   "AASLD The Liver Meeting"
+  ],
+  "notes": "Drupal 10 site with flagship annual conference (The Liver Meeting 2026: Nov 5-9) plus regular webinars. Events listed on /events-and-webinars page (JS-rendered) with details on individual event pages. Verified future events with proper ISO dates.",
+  "batch": 4,
+  "source_id": 87
+ },
+ {
+  "domain": "bess.ac.uk",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": true,
+  "listing_url": "https://bess.ac.uk/courses-and-events/",
+  "notes": "British Elbow and Shoulder Society (BESS) hosts events on a WordPress.com site. One upcoming dated event found: \"International Congress on Shoulder and Elbow Surgery (ICSES)\" scheduled 22-24 September 2026, matching the expected \"BESS Annual Scientific Meeting.\" The /courses-and-events/ page uses CoBlocks event carousel (requires JS), but individual event posts are accessible via archive URLs (e.g., /2026/01/25/international-congress-on-shoulder-and-elbow-surgery-icses/). Root domain has Cloudflare challenge; subdirectories and API accessible.",
+  "api_url": "https://bess.ac.uk/wp-json/wp/v2/posts",
+  "bot_protection": "cloudflare",
+  "detail_topology": "on_event_page",
+  "event_type_mix": "conference",
+  "volume_estimate": 1,
+  "pagination": "none",
+  "expected_found": [
+   "BESS Annual Scientific Meeting"
+  ],
+  "batch": 4,
+  "source_id": 88
+ }
+]

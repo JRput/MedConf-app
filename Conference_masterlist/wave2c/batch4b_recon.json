@@ -1,0 +1,266 @@
+[
+ {
+  "domain": "ukio.org.uk",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "listing_url": "https://www.ukio.org.uk/ukio-2025/",
+  "event_type_mix": "conference",
+  "volume_estimate": 1,
+  "pagination": "none",
+  "detail_topology": "on_event_page",
+  "bot_protection": "none",
+  "expected_found": [
+   "UKIO Annual Congress"
+  ],
+  "notes": "Single-flagship-congress site. UKIO 2026 held 8-10 June in Liverpool. WordPress + Elementor. External registration via EventsAir. All event details (dates, venue, CPD, pricing tiers, programme) on main congress page. No separate events listing; one annual congress per year.",
+  "batch": 4,
+  "source_id": 89
+ },
+ {
+  "domain": "ddw.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": true,
+  "listing_url": "https://ddw.org",
+  "event_type_mix": "conference",
+  "detail_topology": "on_event_page",
+  "bot_protection": "none",
+  "pagination": "none",
+  "volume_estimate": 1,
+  "api_url": "",
+  "expected_found": [
+   "Digestive Disease Week (DDW)"
+  ],
+  "notes": "Single-flagship-conference site for annual Digestive Disease Week. Homepage carries complete event details: Digestive Disease Week 2027, May 15-18, 2027, Washington D.C. & Online. Registration via external registrar (Experient). Built on WordPress + Elementor.",
+  "batch": 4,
+  "source_id": 90
+ },
+ {
+  "domain": "ectrims.eu",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "listing_url": "https://ectrims.eu/events/",
+  "js_required": true,
+  "event_type_mix": "conference",
+  "pagination": "load_more",
+  "detail_topology": "on_event_page",
+  "volume_estimate": 1,
+  "expected_found": [
+   "ECTRIMS Congress"
+  ],
+  "bot_protection": "none",
+  "notes": "WordPress 7.1 site with custom Tribe Events post type. Primary upcoming event is MSToronto2026 (21-23 October 2026) \u2014 the 10th Joint ACTRIMS-ECTRIMS Global Meeting in Toronto. Events load via Ajax Load More plugin. Details link to external registrar domains per conference.",
+  "api_url": "",
+  "batch": 4,
+  "source_id": 91
+ },
+ {
+  "domain": "efort.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": true,
+  "listing_url": "https://congress.efort.org/",
+  "api_url": "",
+  "bot_protection": "none",
+  "event_type_mix": "conference",
+  "detail_topology": "on_event_page",
+  "pagination": "none",
+  "volume_estimate": 1,
+  "expected_found": [
+   "EFORT Congress"
+  ],
+  "notes": "EFORT is the largest pan-European orthopaedic & trauma platform. Primary listing is congress.efort.org (28th EFORT Annual Congress, May 19-21, 2027 in Athens). Secondary resources: orthopaedic event calendar at /events-calendar/orthopaedic-event-calendar/ and EFORT events directory. WordPress Events Manager plugin enables event listings and submissions.",
+  "batch": 4,
+  "source_id": 92
+ },
+ {
+  "domain": "eaps.kenes.com",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "listing_url": "https://eaps.kenes.com",
+  "event_type_mix": "conference",
+  "volume_estimate": 1,
+  "pagination": "none",
+  "detail_topology": "on_event_page",
+  "expected_found": [
+   "EAPS Congress"
+  ],
+  "bot_protection": "none",
+  "api_url": "",
+  "notes": "Single flagship annual conference site: EAPS 2026 (24-27 September 2026, Athens & Online). WordPress with Kenes conference management platform. No multiple event listings; all event details on homepage.",
+  "batch": 4,
+  "source_id": 93
+ },
+ {
+  "domain": "espidmeeting.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "listing_url": "https://espidmeeting.org/welcome-to-espid-2027/",
+  "api_url": "",
+  "event_type_mix": "conference",
+  "detail_topology": "on_event_page",
+  "pagination": "none",
+  "bot_protection": "none",
+  "volume_estimate": 1,
+  "expected_found": [
+   "ESPID 2027"
+  ],
+  "notes": "Single flagship annual conference site. ESPID 2027 (45th Annual Meeting) is the primary dated event on 31 May-4 June 2027. WordPress with Kenes backend for registration. Event details shown directly on homepage/welcome page. Additional supporting pages for previous meetings, hotels, prospectus, and 2026 summer school. No separate events listing page needed \u2014 site is dedicated to the annual meeting.",
+  "batch": 4,
+  "source_id": 94
+ },
+ {
+  "domain": "pas-meeting.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "listing_url": "https://www.pas-meeting.org/pediatric-meetings/",
+  "api_url": "",
+  "bot_protection": "none",
+  "event_type_mix": "conference",
+  "detail_topology": "tabs",
+  "pagination": "none",
+  "volume_estimate": 1,
+  "expected_found": [
+   "PAS Meeting"
+  ],
+  "notes": "PAS Meeting (Pediatric Academic Societies) is a single flagship annual conference. Primary event: PAS 2027 on April 30 - May 3, 2027. The site is WordPress-based (Enfold theme) and structures content around yearly meetings with dedicated subpages for program details, abstracts, workshops, and ancillary events. Main listing page shows related pediatric meetings from other organizations. No Tribe Events API detected.",
+  "batch": 4,
+  "source_id": 95
+ },
+ {
+  "domain": "acog.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "listing_url": "https://annualmeeting.acog.org/",
+  "api_url": "",
+  "bot_protection": "none",
+  "volume_estimate": 1,
+  "detail_topology": "on_event_page",
+  "pagination": "none",
+  "event_type_mix": "conference",
+  "expected_found": [
+   "ACOG Annual Clinical & Scientific Meeting"
+  ],
+  "notes": "Single flagship annual conference (ACOG Annual Clinical & Scientific Meeting) on dedicated WordPress subdomain. Upcoming event: May 21-23, 2027 in Los Angeles, CA. Registration and all event details hosted on annualmeeting.acog.org.",
+  "batch": 4,
+  "source_id": 96
+ },
+ {
+  "domain": "escmid.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "listing_url": "https://www.escmid.org/congress-events/escmid-global/",
+  "api_url": "",
+  "bot_protection": "none",
+  "event_type_mix": "conference",
+  "detail_topology": "on_event_page",
+  "pagination": "none",
+  "volume_estimate": 1,
+  "expected_found": [
+   "ESCMID Global"
+  ],
+  "notes": "TYPO3-powered medical society site showing flagship ESCMID Global 2027 conference (09-13 April, Stockholm) with dated content in static HTML. Also offers courses and educational programs via separate listing pages.",
+  "batch": 4,
+  "source_id": 97
+ },
+ {
+  "domain": "croiconference.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "listing_url": "https://www.croiconference.org/preliminary-agenda-2027/",
+  "notes": "Single flagship annual medical conference (CROI). Next event is CROI 2027 (March 21-24, 2027 in San Diego). Full program and registration deadlines published. WordPress site with Yoast SEO.",
+  "event_type_mix": "conference",
+  "volume_estimate": 1,
+  "pagination": "none",
+  "detail_topology": "on_event_page",
+  "bot_protection": "none",
+  "expected_found": [
+   "CROI"
+  ],
+  "api_url": "",
+  "batch": 4,
+  "source_id": 98
+ },
+ {
+  "domain": "myesr.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": false,
+  "listing_url": "https://www.myesr.org/congress/",
+  "event_type_mix": "conference",
+  "volume_estimate": 1,
+  "pagination": "none",
+  "detail_topology": "on_event_page",
+  "expected_found": [
+   "European Congress of Radiology (ECR)"
+  ],
+  "bot_protection": "none",
+  "notes": "ESR hosts a single flagship annual congress, ECR 2027 (March 3-7 in Vienna). The /congress/ landing page contains full event details, timeline (abstract deadlines, registration), and keynote speakers. WordPress 7.1 with EventON v4.9.10 plugin; no Tribe Events API.",
+  "batch": 4,
+  "source_id": 99
+ },
+ {
+  "domain": "ccrlondon.com",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "listing_url": "https://www.ccrlondon.com",
+  "js_required": false,
+  "event_type_mix": "conference",
+  "detail_topology": "on_event_page",
+  "api_url": "",
+  "bot_protection": "none",
+  "volume_estimate": 1,
+  "pagination": "none",
+  "expected_found": [
+   "CCR London"
+  ],
+  "notes": "Single flagship conference (CCR London, 2026-10-01 to 2026-10-02) hosted on Easyfairs' WordPress infrastructure. Event details visible in homepage schema. No additional upcoming events listed; site focused entirely on this one annual conference.",
+  "batch": 4,
+  "source_id": 100
+ },
+ {
+  "domain": "nhsconfedexpo.org",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "js_required": true,
+  "listing_url": "https://www.nhsconfedexpo.org",
+  "api_url": "",
+  "bot_protection": "none",
+  "event_type_mix": "conference",
+  "detail_topology": "on_event_page",
+  "pagination": "none",
+  "volume_estimate": 1,
+  "expected_found": [
+   "NHS ConfedExpo"
+  ],
+  "notes": "Single flagship conference site (NHS ConfedExpo 2027, June 16-17). Marketing hub at main domain, detailed agenda/sessions at subdomain (agenda.nhsconfedexpo.org) via React SPA. ASP.events platform (SHOWOFF). No multiple events listing; conference-centric with exhibitors, speakers, sponsors, on-demand content.",
+  "batch": 4,
+  "source_id": 101
+ },
+ {
+  "domain": "viveevent.com",
+  "status": "resolved",
+  "platform": "wordpress_other",
+  "listing_url": "https://hlth.com/events/vive/",
+  "js_required": false,
+  "event_type_mix": "conference",
+  "detail_topology": "on_event_page",
+  "api_url": "",
+  "bot_protection": "none",
+  "pagination": "none",
+  "volume_estimate": 1,
+  "expected_found": [
+   "ViVE"
+  ],
+  "notes": "viveevent.com redirects to hlth.com/events/vive/. Single flagship conference: ViVE 2027 (Mar 14-17, Nashville). Co-hosted by HLTH and CHIME. WordPress + Elementor. Event details and registration links on event page; no separate listing directory.",
+  "batch": 4,
+  "source_id": 102
+ }
+]
