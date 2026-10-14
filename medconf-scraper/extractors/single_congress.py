@@ -37,7 +37,7 @@ from .base import BaseExtractor
 from .http_fetch import fetch_html
 from .pricing_tables import parse_pricing_tables
 from .specialty_classifier import classify_specialty
-from .tribe_events import clip_venue, html_to_lines, pick_description
+from .tribe_events import clip_venue, html_to_lines, pick_description, sane_venue
 from .wordpress_generic import (
     _DETAIL_CHROME_RE, _meta, dedupe_consecutive, find_dates, json_ld_events,
     location_from_ld, split_location, _COUNTRIES, _VENUE_KW_RE, tiers_from_offers,
@@ -693,7 +693,7 @@ class SingleCongressExtractor(BaseExtractor):
                         break
                 if city:
                     break
-        venue = clip_venue(venue)
+        venue = sane_venue(venue)
         if venue:
             out["venue_name"] = venue
         if city:

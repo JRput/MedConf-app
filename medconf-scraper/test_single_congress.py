@@ -164,3 +164,12 @@ def test_detail_end_to_end_without_network():
     assert out["start_date"] == "2027-06-07" and out["end_date"] == "2027-06-09"
     assert "pricing_tiers" not in out                       # nothing invented when no fee page is reachable
     assert "UKIO 2026" not in out.get("description", "")    # previous edition's prose never becomes the description
+
+
+def test_sane_venue_rejects_office_footers_and_keeps_names():
+    from extractors.single_congress import sane_venue
+    assert sane_venue("131 Steuart Street, Suite 500, San Francisco, CA 94105 | Office : 415-544-9400 Facebook X Linkedin") is None
+    assert sane_venue("Moscone Center | Office : 415-544-9400") == "Moscone Center"
+    assert sane_venue("Bella Center Copenhagen") == "Bella Center Copenhagen"
+    assert sane_venue("Stockholmsmässan, Älvsjö") == "Stockholmsmässan, Älvsjö"
+    assert sane_venue("Copenhagen, Denmark Official Website: euroanaesthesia.org/2027/") == "Copenhagen, Denmark"

@@ -50,6 +50,7 @@ def _run_single(monkeypatch, status, history):
     monkeypatch.setattr(main, "get_active_sources", lambda: [SRC])
     monkeypatch.setattr(main, "scrape_source", lambda src: {"source_id": 42, "status": status})
     monkeypatch.setattr(main, "get_recent_log_statuses", lambda sid, n: history[:n])
+    monkeypatch.setattr(main, "get_last_success_at", lambda sid: None)
     monkeypatch.setattr(main, "log_scrape_run", lambda s: logged.append(s))
     monkeypatch.setattr(main, "update_source_last_full_walk", lambda sid: None)
     for fn in ("archive_expired_conferences", "archive_undated_past_conferences",
@@ -252,3 +253,18 @@ def test_note_unreachable_registers_navigation_timeout():
     assert http_fetch.last_fetch_problem["unreachable"] == 1
     assert not http_fetch.note_unreachable("https://x", ValueError("bad markup"))
     http_fetch.reset_blocks()
+
+
+def test_streak_tolerated_when_source_succeeded_this_week(monkeypatch, caplog):
+    """ARVO 2026-10-14: blocked x3 in one day after a success the day before — intermittent, stays green."""
+    from datetime import datetime, timedelta, timezone
+    FakeAgent.challenged, FakeAgent.shells = True, []
+    monkeypatch.setattr(scraper, "AgentLoop", FakeAgent)
+    monkeypatch.setattr(main, "get_recent_log_statuses", lambda sid, n: ["blocked", "blocked"][:n])
+    monkeypatch.setattr(main, "get_last_success_at", lambda sid: datetime.now(timezone.utc) - timedelta(days=1))
+    with caplog.at_level(logging.WARNING, logger="medconf-scraper"):
+        rc = main.run_single_source(42)
+    assert rc == 2
+    assert any("intermittent, tolerated" in r.message for r in caplog.records)
+    monkeypatch.setattr(main, "get_last_success_at", lambda sid: datetime.now(timezone.utc) - timedelta(days=9))
+    assert main.run_single_source(42) == 1

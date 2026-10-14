@@ -15,7 +15,9 @@ import argparse
 import sys
 
 from config import validate_config
+from datetime import datetime, timezone
 from database import (
+    get_last_success_at,
     get_active_sources,
     get_recent_log_statuses,
     archive_expired_conferences,
@@ -29,6 +31,7 @@ from scheduler import run_all_sources, start_scheduler
 from scraper import scrape_source
 
 
+RECENT_SUCCESS_DAYS = 7
 BLOCKED_STREAK_LIMIT = 3
 # Non-success outcomes tolerated individually; N in a row go red.
 TOLERATED_STATUSES = ("blocked", "unreachable")
@@ -46,7 +49,21 @@ def blocked_streak_reached(source_id: int, limit: int = BLOCKED_STREAK_LIMIT) ->
     except Exception as e:
         logger.warning(f"Source {source_id}: blocked-streak lookup failed: {e}")
         return False
-    return len(prior) == limit - 1 and all(st in TOLERATED_STATUSES for st in prior)
+    if not (len(prior) == limit - 1 and all(st in TOLERATED_STATUSES for st in prior)):
+        return False
+    # An intermittently challenged source (ARVO: success 13 Oct, blocked x3 on
+    # 14 Oct) is a WARNING, not an outage: only a streak with no success in the
+    # last RECENT_SUCCESS_DAYS turns the group red.
+    try:
+        last_ok = get_last_success_at(source_id)
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"Source {source_id}: last-success lookup failed: {e}")
+        last_ok = None
+    if last_ok and (datetime.now(timezone.utc) - last_ok).days < RECENT_SUCCESS_DAYS:
+        logger.warning(f"Source {source_id}: {limit} consecutive blocked/unreachable runs but a success "
+                       f"on {last_ok.date()} — intermittent, tolerated")
+        return False
+    return True
 
 
 def run_single_source(source_id: int) -> int:

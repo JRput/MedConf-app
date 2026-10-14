@@ -25,7 +25,7 @@ from logger import logger
 
 from .http_fetch import fetch_html
 from .pricing_tables import parse_pricing_tables
-from .tribe_events import html_to_lines
+from .tribe_events import clip_venue, html_to_lines, sane_venue
 from .wordpress_generic import WordPressGenericExtractor, classify_event_type, find_dates, split_location
 
 _API = "https://esaic.org/wp-json/wp/v2/event?per_page=100&_fields=link,title,acf,class_list"
@@ -122,11 +122,24 @@ class EsaicExtractor(WordPressGenericExtractor):
         desc = self._event_details(lines)
         if desc:
             out["description"] = desc
+        # The page's own "Venue" block names the venue ("Venue" / "Bella Center
+        # Copenhagen"); the family's generic pick can run the Location line,
+        # website line and address into one 200-char blob (audit 2026-10-14).
+        for i, ln in enumerate(lines):
+            if re.match(r"(?i)^venue\s*:?\s*$", ln) and i + 1 < len(lines):
+                nxt = lines[i + 1].strip()
+                if 3 <= len(nxt) <= 90 and not re.match(r"(?i)^(overview|learn more|official website)", nxt):
+                    out["venue_name"] = nxt
+                    break
         if not out.get("venue_name"):
             for i, ln in enumerate(lines):
                 if re.search(r"will take place at\s*:?\s*$", ln, re.I) and i + 1 < len(lines):
-                    out["venue_name"] = lines[i + 1].strip()[:120]
+                    out["venue_name"] = lines[i + 1].strip()[:90]
                     break
+        if out.get("venue_name") and len(out["venue_name"]) > 90:
+            out["venue_name"] = clip_venue(re.split(r"(?i)\s+official website\s*:", out["venue_name"])[0])
+        if not out.get("event_format"):
+            out["event_format"] = "online" if re.search(r"(?i)\b(online|virtual|webinar)\b", shell.get("title") or "") else "in_person"
         return out
 
     def _fee_rows(self, lines: List[str]) -> List[Dict[str, Any]]:
@@ -190,6 +203,15 @@ class EsaicExtractor(WordPressGenericExtractor):
             parts = [p.strip() for p in raw.split(",") if p.strip()]
             c = parts[0] if parts else None
             k = parts[-1] if len(parts) > 1 else k
+        if not v and page is not None:                              # landed on the congress site: its own "Venue" block names the hall
+            try:
+                plines = html_to_lines(re.sub(r"(?is)<(script|style|svg|noscript|template)\b.*?</\1\s*>", " ", page.content()))
+                for i, ln in enumerate(plines):
+                    if re.match(r"(?i)^venue\s*:?\s*$", ln) and i + 1 < len(plines):
+                        v = sane_venue(plines[i + 1])
+                        break
+            except Exception:  # noqa: BLE001
+                pass
         if v:
             out["venue_name"] = v
         if c:
@@ -198,6 +220,8 @@ class EsaicExtractor(WordPressGenericExtractor):
             out["region"] = k
         if v or c:
             out["event_format"] = "in_person"
+        else:                                                       # the API gave no place (AINS St. Anton): a dated meeting is in person unless it says otherwise
+            out["event_format"] = "online" if re.search(r"(?i)\b(online|virtual|webinar)\b", title) else "in_person"
         out["specialty"] = self.DEFAULT_SPECIALTY
         desc = self._page_description(page)
         who = "an anaesthesiology and intensive care meeting listed in the ESAIC events calendar" if (shell.get("esaic_kind") or "") in _EXTERNAL_KINDS \

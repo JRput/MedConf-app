@@ -126,6 +126,29 @@ def clip_venue(venue: Optional[str], limit: int = 80) -> Optional[str]:
     return venue or None
 
 
+_OFFICE_RE = re.compile(r"(?i)\boffice\b\s*:|\b(?:tel|phone|fax)\b|\+?\d[\d\s().-]{8,}\d|\b(?:facebook|twitter|linkedin|instagram|x\b)|material available|all rights reserved|\bsuite\s+\d+")
+_STREET_RE = re.compile(r"^\d{1,5}\s+[A-Z][\w.'-]*\s+(?:street|st\.?|avenue|ave\.?|road|rd\.?|boulevard|blvd\.?|drive|dr\.?|lane|way|place)\b", re.I)
+
+
+_VENUE_WORD_RE = re.compile(r"(?i)\b(?:cent(?:re|er)|hall|hotel|convention|congress|arena|auditorium|university|college|campus|palais|messe|resort|theatre|theater|institute|academy|stadium|pavilion|expo|exhibition)\b")
+
+
+def sane_venue(venue: Optional[str]) -> Optional[str]:
+    """Keep a venue NAME, never a footer: cut at ' | ', drop office/phone/social
+    text and bare street addresses without a venue word, then clip. CROI 2027
+    (2026-10-14) stored IAS-USA's office footer as the venue."""
+    if not venue:
+        return None
+    v = re.split(r"\s*\|\s*", venue.strip())[0]
+    v = re.split(r"(?i)\s+(?:official website|website)\s*:", v)[0].strip(" ,;-")
+    if not v or _OFFICE_RE.search(v):
+        return None
+    if _STREET_RE.match(v) and not _VENUE_WORD_RE.search(v):
+        return None
+    return clip_venue(v)
+
+
+
 def clean_prose_venue(raw: Optional[str]) -> Optional[str]:
     """Reduce a prose-derived venue string to just the venue name: cut at the
     next label ("Sessions:", "Address:", "Accommodation:"...), drop literal escapes, then clip. Returns None when nothing sensible is left."""

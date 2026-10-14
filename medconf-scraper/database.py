@@ -27,6 +27,26 @@ def update_source_status(source_id: int, status: str) -> None:
     }).eq("id", source_id).execute()
 
 
+def get_last_success_at(source_id: int):
+    """Timestamp (aware UTC datetime) of the source's most recent successful run, or None."""
+    from datetime import datetime, timezone
+    rows = (
+        supabase.table("scraper_logs")
+        .select("run_started_at")
+        .eq("source_id", source_id)
+        .eq("status", "success")
+        .order("run_started_at", desc=True)
+        .limit(1)
+        .execute()
+        .data
+        or []
+    )
+    if not rows or not rows[0].get("run_started_at"):
+        return None
+    ts = datetime.fromisoformat(rows[0]["run_started_at"].replace("Z", "+00:00"))
+    return ts if ts.tzinfo else ts.replace(tzinfo=timezone.utc)
+
+
 def get_recent_log_statuses(source_id: int, limit: int = 2) -> List[str]:
     """Statuses of a source's most recent scraper_logs rows, newest first."""
     rows = (

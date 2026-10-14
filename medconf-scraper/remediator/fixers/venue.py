@@ -71,7 +71,10 @@ def fix_venue(
     # Heuristic first
     h = _heuristic_venue(page_text)
     if h:
-        return h, "heuristic_prefix"
+        from extractors.tribe_events import sane_venue
+        h = sane_venue(h)                 # never a footer / address blob (CROI, Euroanaesthesia 2026-10-14)
+        if h:
+            return h, "heuristic_prefix"
 
     # LLM with strict prompt
     title = row.get("conference_name") or ""
