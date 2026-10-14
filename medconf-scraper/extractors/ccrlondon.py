@@ -15,7 +15,10 @@ class CcrLondonExtractor(SingleCongressExtractor):
     DEFAULT_SPECIALTY = "Aesthetic & Cosmetic Medicine"
     DEFAULT_CURRENCY = "GBP"
     ACCEPT_PLACE_RE = re.compile(r"^excel london$", re.I)
-    FREE_PATTERN = re.compile(r"free[\s-]to[\s-]attend", re.I)
+    # 2026-10-14: "free-to-attend" appears only in marketing copy / meta text,
+    # not on the registration page, and not per visitor type — so no £0 tier is
+    # asserted; the row points at the organiser's registration instead.
+    FREE_PATTERN = None
 
     def parse_place(self, raw):
         if re.match(r"(?i)^excel london$", (raw or "").strip()):
