@@ -1,0 +1,46 @@
+{
+ "source_id": 101,
+ "slug": "nhsconfedexpo",
+ "class_name": "NhsConfedExpoExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/nhsconfedexpo.py",
+ "source_row": {
+  "source_name": "NHS ConfedExpo",
+  "society": "NHS ConfedExpo",
+  "base_url": "https://www.nhsconfedexpo.org/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Homepage JSON-LD is the next edition (16-17 June 2027, Manchester Central). Only 'Register your interest' offered. Single-congress family (extractors/single_congress.py): one edition shell per run."
+ },
+ "registry_comment": "NHS ConfedExpo single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.nhsconfedexpo.org/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.nhsconfedexpo.org/",
+   "field": "dates",
+   "site_says": "checked by hand against page header",
+   "extractor_says": "matches",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "No price on site and free-for-NHS-staff is not stated, so pricing empty.",
+  "Coverage checklist: fee locations checked = edition page, nav Registration pages (one hop), JSON-LD offers; image fee tables and external registrar sites not followed; abstract deadline from site's own abstract/key-dates pages."
+ ]
+}

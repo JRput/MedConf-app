@@ -1,0 +1,47 @@
+{
+ "source_id": 95,
+ "slug": "pas_meeting",
+ "class_name": "PasExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/pas_meeting.py",
+ "source_row": {
+  "source_name": "PAS Meeting",
+  "society": "PAS",
+  "base_url": "https://www.pas-meeting.org/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Homepage dates are in images; extractor follows the Key Dates page ('PAS 2027 - Minneapolis, Minnesota / April 30 - May 3, 2027') and reads the Call for Abstracts window (closes 2 Nov 2026). Single-congress family (extractors/single_congress.py): one edition shell per run."
+ },
+ "registry_comment": "PAS single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 0,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.pas-meeting.org/",
+  "https://www.pas-meeting.org/2027-key-dates/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.pas-meeting.org/",
+   "field": "dates",
+   "site_says": "checked by hand against page header",
+   "extractor_says": "matches",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Registration opens Nov 2026 so no fees. No description text on key-dates page. Venue name not published.",
+  "Coverage checklist: fee locations checked = edition page, nav Registration pages (one hop), JSON-LD offers; image fee tables and external registrar sites not followed; abstract deadline from site's own abstract/key-dates pages."
+ ]
+}

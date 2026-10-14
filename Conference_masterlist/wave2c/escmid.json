@@ -1,0 +1,48 @@
+{
+ "source_id": 97,
+ "slug": "escmid",
+ "class_name": "EscmidExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/escmid.py",
+ "source_row": {
+  "source_name": "ESCMID Global",
+  "society": "ESCMID",
+  "base_url": "https://www.escmid.org/congress-events/escmid-global/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Header '09-13 April 2027' + 'Stockholm, Sweden'; venue page names Stockholmsmassan; abstracts open until 18 Nov 2026. Registration page says 2027 registration opens 28 Oct 2026 (table there is 2026 on-demand pricing, guarded out). Single-congress family (extractors/single_congress.py): one edition shell per run."
+ },
+ "registry_comment": "ESCMID single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.escmid.org/congress-events/escmid-global/",
+  "https://www.escmid.org/congress-events/escmid-global/registration/",
+  "https://www.escmid.org/congress-events/escmid-global/about/venue/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.escmid.org/congress-events/escmid-global/",
+   "field": "dates",
+   "site_says": "checked by hand against page header",
+   "extractor_says": "matches",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Pricing empty until registration opens 28 Oct 2026.",
+  "Coverage checklist: fee locations checked = edition page, nav Registration pages (one hop), JSON-LD offers; image fee tables and external registrar sites not followed; abstract deadline from site's own abstract/key-dates pages."
+ ]
+}

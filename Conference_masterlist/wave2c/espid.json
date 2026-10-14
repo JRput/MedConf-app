@@ -1,0 +1,47 @@
+{
+ "source_id": 94,
+ "slug": "espid",
+ "class_name": "EspidExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/espid.py",
+ "source_row": {
+  "source_name": "ESPID Meeting",
+  "society": "ESPID",
+  "base_url": "https://espidmeeting.org/welcome-to-espid-2027/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Page header '31 May - 4 June 2027, Berlin & Online'; abstract dates from /abstract-submission/ (regular deadline 19 Jan 2027). Single-congress family (extractors/single_congress.py): one edition shell per run."
+ },
+ "registry_comment": "ESPID single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 0,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://espidmeeting.org/welcome-to-espid-2027/",
+  "https://espidmeeting.org/abstract-submission/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://espidmeeting.org/welcome-to-espid-2027/",
+   "field": "dates",
+   "site_says": "checked by hand against page header",
+   "extractor_says": "matches",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "No registration/fee page linked yet; /registration/ returns nothing. Venue name not published.",
+  "Coverage checklist: fee locations checked = edition page, nav Registration pages (one hop), JSON-LD offers; image fee tables and external registrar sites not followed; abstract deadline from site's own abstract/key-dates pages."
+ ]
+}

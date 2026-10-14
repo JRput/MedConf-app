@@ -1,0 +1,47 @@
+{
+ "source_id": 92,
+ "slug": "efort",
+ "class_name": "EfortExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/efort.py",
+ "source_row": {
+  "source_name": "EFORT Congress",
+  "society": "EFORT",
+  "base_url": "https://congress.efort.org/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Homepage header 'EFORT is IMPACT ... | 19-21 May 2027 | Athens, Greece'; venue from the-venue page; abstract deadline 15 Nov 2026 from homepage. Single-congress family (extractors/single_congress.py): one edition shell per run."
+ },
+ "registry_comment": "EFORT single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://congress.efort.org/",
+  "https://congress.efort.org/congress-information/the-venue/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://congress.efort.org/",
+   "field": "dates",
+   "site_says": "checked by hand against page header",
+   "extractor_says": "matches",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Registration page has no fee amounts (checked text); pricing empty.",
+  "Coverage checklist: fee locations checked = edition page, nav Registration pages (one hop), JSON-LD offers; image fee tables and external registrar sites not followed; abstract deadline from site's own abstract/key-dates pages."
+ ]
+}

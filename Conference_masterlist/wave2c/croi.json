@@ -1,0 +1,47 @@
+{
+ "source_id": 98,
+ "slug": "croi",
+ "class_name": "CroiExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/croi.py",
+ "source_row": {
+  "source_name": "CROI",
+  "society": "CROI",
+  "base_url": "https://www.croiconference.org/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Homepage line 'CROI 2027 from March 21 to 24, 2027 in San Diego, California'; Important Dates table gives late-breaking deadline 19 Jan 2027. Single-congress family (extractors/single_congress.py): one edition shell per run."
+ },
+ "registry_comment": "CROI single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 0,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.croiconference.org/",
+  "https://www.croiconference.org/about/croi-2027-preliminary-important-dates-and-deadlines/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.croiconference.org/",
+   "field": "dates",
+   "site_says": "checked by hand against page header",
+   "extractor_says": "matches",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "No fee amounts on the registration page; venue name not published.",
+  "Coverage checklist: fee locations checked = edition page, nav Registration pages (one hop), JSON-LD offers; image fee tables and external registrar sites not followed; abstract deadline from site's own abstract/key-dates pages."
+ ]
+}
