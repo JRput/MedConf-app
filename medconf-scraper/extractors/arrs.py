@@ -19,7 +19,8 @@ from .pricing_tables import parse_pricing_tables
 from .tribe_events import html_to_lines
 from .wordpress_generic import WordPressGenericExtractor, dedupe_consecutive, _iso, _mon
 
-_ROW_RE = re.compile(r'(?is)<tr class="type-(\w+)">(.*?)</tr>')
+# 2026-10-14: rows gained a data-end="YYYY-MM-DD" attribute (<tr class="type-ajr" data-end="2026-10-14">)
+_ROW_RE = re.compile(r'(?is)<tr class="type-(\w+)"[^>]*>(.*?)</tr>')
 _MONTH = r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"
 _YEARLESS_RE = re.compile(rf"^({_MONTH})\.?\s+(\d{{1,2}})$")
 _RANGE_RE = re.compile(rf"^({_MONTH})\.?\s+(\d{{1,2}})\s*[–-]\s*(?:({_MONTH})\.?\s+)?(\d{{1,2}}),\s*(\d{{4}})$")

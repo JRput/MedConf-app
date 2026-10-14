@@ -63,6 +63,18 @@ def reset_blocks() -> None:
     last_fetch_problem["url"] = {}
 
 
+def note_unreachable(url: str, exc: BaseException, browser: Any = None) -> bool:
+    """For extractors that drive the Playwright page themselves: register a
+    navigation timeout / connection failure so a 0-card listing is reported as
+    `unreachable` (tolerated) instead of `failed`. CoSRH 2026-10-14: a 30 s
+    Page.goto timeout on the runner turned group D red. Returns True if noted."""
+    msg = f"{type(exc).__name__}: {exc}"
+    if re.search(r"(?i)timeout|net::ERR_|ECONNRESET|ECONNREFUSED|ENOTFOUND|getaddrinfo|Name or service|navigation", msg):
+        _record_problem("unreachable", url, browser)
+        return True
+    return False
+
+
 def _record_problem(kind: str, url: str, browser: Any) -> None:
     last_fetch_problem[kind] += 1
     last_fetch_problem["url"][kind] = url

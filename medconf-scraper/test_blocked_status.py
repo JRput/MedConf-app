@@ -243,3 +243,12 @@ def test_unproven_empty_listing_is_still_failed(monkeypatch):
     FakeAgent.shells = []
     monkeypatch.setattr(scraper, "AgentLoop", Agent)
     assert scraper.scrape_source(SRC)["status"] == "failed"
+
+
+def test_note_unreachable_registers_navigation_timeout():
+    from extractors import http_fetch
+    http_fetch.reset_blocks()
+    assert http_fetch.note_unreachable("https://www.cosrh.org/Public/Events", TimeoutError("Page.goto: Timeout 30000ms exceeded."))
+    assert http_fetch.last_fetch_problem["unreachable"] == 1
+    assert not http_fetch.note_unreachable("https://x", ValueError("bad markup"))
+    http_fetch.reset_blocks()

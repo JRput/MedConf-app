@@ -155,6 +155,8 @@ class CoSRHExtractor(BaseExtractor):
             html = page.content()
         except Exception as e:
             logger.warning(f"CoSRH: listing navigation failed: {e}")
+            from .http_fetch import note_unreachable
+            note_unreachable(LISTING_URL, e, getattr(self, "browser", None))
             return None
 
         cards = re.findall(
