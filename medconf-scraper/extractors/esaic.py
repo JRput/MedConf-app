@@ -212,6 +212,10 @@ class EsaicExtractor(WordPressGenericExtractor):
                         break
             except Exception:  # noqa: BLE001
                 pass
+        if not c:                                                   # "46th International AINS Symposium in St. Anton am Arlberg"
+            mt = re.search(r"\b(?:in|at)\s+((?:St\.\s+)?[A-Z][\w'\u2019-]*(?:\s+(?:am|an|der|de|del|la|le|on|upon|[A-Z][\w'\u2019-]*)){0,3})\s*$", title)
+            if mt and not re.search(r"(?i)\b(online|virtual|webinar|anaesthesia|medicine|care)\b", mt.group(1)):
+                c = mt.group(1).strip()
         if v:
             out["venue_name"] = v
         if c:
