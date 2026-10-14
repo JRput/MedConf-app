@@ -1,0 +1,66 @@
+{
+  "source_id": 86,
+  "slug": "euretina",
+  "class_name": "EuretinaExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/euretina.py",
+  "source_row": {
+    "source_name": "EURETINA future meetings",
+    "society": "EURETINA",
+    "base_url": "https://euretina.org/future-meetings/",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Elementor page with a 'Schedule Of Upcoming Meetings' table (title, date range, 'Venue, City, Country', optional Information link to a microsite). The page repeats the rows in a mobile layout and lists past meetings below; read the first block only and dedupe. Rows without a link (Innovation Spotlight, later congresses) have no page and are built from the row. 2027 microsites publish no fee table yet."
+  },
+  "registry_comment": "EURETINA - future-meetings table parsed from the rendered Elementor page (first schedule block, deduped); rows without a microsite link get a listing#slug URL",
+  "probe_results": {
+    "shells": 6,
+    "shells_forced_fallback": 6,
+    "details_tested": 6,
+    "with_date": 6,
+    "with_pricing": 0,
+    "with_venue": 4,
+    "with_description": 6,
+    "with_specialty": 6
+  },
+  "test_urls": [
+    "https://euretina.org/sfm-2027/",
+    "https://euretina.org/euretinai-2027/",
+    "https://euretina.org/copenhagen-27/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://euretina.org/sfm-2027/",
+      "field": "dates/place",
+      "site_says": "26-27 February 2027, Ljubljana, Slovenia; registration 'coming soon'",
+      "extractor_says": "2027-02-26..27, Ljubljana, Slovenia, no tiers",
+      "match": true
+    },
+    {
+      "url": "https://euretina.org/copenhagen-27/",
+      "field": "dates/venue",
+      "site_says": "27th Congress, Bella Center, Copenhagen, 16-19 Sep 2027",
+      "extractor_says": "2027-09-16..19, Bella Center, Copenhagen, Denmark",
+      "match": true
+    },
+    {
+      "url": "https://euretina.org/euretinai-2027/",
+      "field": "dates/place",
+      "site_says": "9-10 April 2027, London (venue TBC)",
+      "extractor_says": "2027-04-09..10, London, United Kingdom",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Listing path: DOM (rendered table). The page makes no XHR/REST call for the table; the only requests are analytics. Static in curl too, so no JS dependency in practice.",
+    "Only 6 upcoming rows exist: Vienna 2026 congress, EIS 2026 and SFM 2026 are already past ('Post-Event Hub'). Status is partial because the source is tiny and early-stage, not because of extractor gaps.",
+    "pricing_tiers are empty for all 6: 2027 microsites say registration is coming soon and /copenhagen-27/registration/ and /sfm-2027/registration/ do not exist. The Copenhagen page shows a stale 'Early Registration Fees available until 30 July' banner with no amounts. Re-check when registration opens.",
+    "3 rows have no microsite (Innovation Spotlight 2027, 28th and 29th Congress): booking_url is euretina.org/future-meetings/#<slug>-<year>, detail built from the table row; venue is blank for the 28th/29th (listed 'Venue and Information TBC'). The 29th (Sep 2029) is within the family 1100-day cap.",
+    "Coverage checklist verified: same-site registration pages (404/absent), PDFs and image fee tables (none on the 2027 pages), CTA text in labels (n/a). SINGLE_DAY_SUSPECT fired once in the harness for the Innovation Spotlight row: false positive, its 'page' is the listing which shows the SFM's 26-27 Feb range.",
+    "Shell count identical (6) across runs."
+  ]
+}

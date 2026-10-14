@@ -1,0 +1,67 @@
+{
+  "source_id": 87,
+  "slug": "aasld",
+  "class_name": "AasldExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/aasld.py",
+  "source_row": {
+    "source_name": "AASLD events",
+    "society": "AASLD",
+    "base_url": "https://www.aasld.org/events-and-webinars",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Drupal 10. The events page is JS-rendered from /jsonapi/index/events (field_event_start/end, field_location, field_link, path alias); the listing reads that JSON in the browser. The flagship The Liver Meeting is NOT in the index: it lives on the /tlm-NN/home microsite (found via the nav link) with fees on /tlm-NN/event-registration. Application-only programmes are skipped; webinars are included when dated (fee read from the LiverLearning page)."
+  },
+  "registry_comment": "AASLD - Drupal JSON:API /jsonapi/index/events (browser), plus The Liver Meeting microsite (/tlm-NN/home + /event-registration) which the index omits",
+  "probe_results": {
+    "shells": 4,
+    "shells_forced_fallback": 4,
+    "details_tested": 4,
+    "with_date": 4,
+    "with_pricing": 4,
+    "with_venue": 3,
+    "with_description": 4,
+    "with_specialty": 4
+  },
+  "test_urls": [
+    "https://www.aasld.org/tlm-26/home",
+    "https://www.aasld.org/liver-care-frontline-clinicians-denver",
+    "https://www.aasld.org/save-date-2027-spring-emerging-topic-conference"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.aasld.org/tlm-26/home",
+      "field": "dates/venue/fees",
+      "site_says": "5-9 Nov 2026, Colorado Convention Center, Denver; Regular & International $1,810 non-member / $710 member; Student $185/$105; Patient advocate $50",
+      "extractor_says": "2026-11-05..09, same venue, 9 USD tiers across 5 categories",
+      "match": true
+    },
+    {
+      "url": "https://www.aasld.org/liver-care-frontline-clinicians-denver",
+      "field": "fees/credits",
+      "site_says": "Physician $250, Resident $100, Associates $100, Student $50, Industry $450; max 7.0 AMA PRA Cat 1",
+      "extractor_says": "5 USD tiers, cpd_points 7.0",
+      "match": true
+    },
+    {
+      "url": "https://www.aasld.org/save-date-2027-spring-emerging-topic-conference",
+      "field": "fees",
+      "site_says": "Early Bird (1/6) vs Regular, 9 categories",
+      "extractor_says": "18 USD tiers, early_bird_deadline 2027-01-06",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Listing path: Drupal JSON:API the events page itself calls (found by watching XHR); the page's 'load more' pages that call, extractor walks offset in 50s. The index only lists UPCOMING items (4 now).",
+    "The Liver Meeting is NOT in the index (own microsite, nav link on the events page, found by regex). Its dates are parsed from home-page prose ('begin ... Thursday, November 5 ... conclude on Monday, November 9') and venue from 'will be held at the X in City, State'; if either parse fails the shell is dropped with a warning (no invented values). A new year's microsite (tlm-27) would be picked up if the nav link points to it.",
+    "TLM fee grid: the rendered DOM keeps only the default category tab, so fees are read from the server HTML via fetch_html (all 5 category blocks), with the browser as fallback. Trainee and Associate happen to share prices ($900/$470) on the site. Regular registration deadline (7 Oct) has passed; the page still shows these rates and no late/onsite rate, so none is stored. TLM CE credit count is on a separate page (not read), cpd_points None.",
+    "Skipped: '2027 AGA-AASLD Academic Skills Workshop' (application-only, applications closed 5 Oct 2026, no register link; detected by the page text). Included: the LEAN MASLD webinar (27 Oct, online, workshop, $0.00 read from the LiverLearning page, registration required).",
+    "Coverage checklist verified: same-site registration page (TLM, followed), external registration (my.aasld.org/compusystems are login/Salesforce portals, not parsed, fees were on aasld.org), PDFs (Abstract Supplement only), CTA text (booking_url stays the aasld.org page; register link not used). Spring ETC says the junior-investigator call for abstracts 'will be announced soon': stored as abstract_deadline_note.",
+    "Possible shared change: wordpress_generic.location_from_ld raises on a list-valued JSON-LD location name (AttributeError); aasld.py retries without ld+json. Fix in the family would be a one-liner.",
+    "Shell count identical (4) across runs."
+  ]
+}

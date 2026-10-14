@@ -581,8 +581,13 @@ def location_from_ld(ev: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], 
         if "VirtualLocation" in str(l.get("@type")):
             virtual = True
             continue
-        name = (l.get("name") or "").strip()
+        name = l.get("name") or ""
+        if isinstance(name, list):                                     # AASLD: "name": ["Hyatt Regency", "Denver"]
+            name = ", ".join(str(x) for x in name if x)
+        name = str(name).strip()
         addr = l.get("address")
+        if isinstance(addr, list):
+            addr = next((a for a in addr if isinstance(a, dict)), None) or (addr[0] if addr else None)
         if isinstance(addr, dict):
             city = city or (addr.get("addressLocality") or "").strip() or None
             c = addr.get("addressCountry")

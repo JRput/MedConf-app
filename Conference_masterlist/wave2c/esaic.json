@@ -1,0 +1,68 @@
+{
+  "source_id": 85,
+  "slug": "esaic",
+  "class_name": "EsaicExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/esaic.py",
+  "source_row": {
+    "source_name": "ESAIC events",
+    "society": "ESAIC",
+    "base_url": "https://esaic.org/events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "JS calendar backed by the public WP REST post type /wp-json/wp/v2/event (acf.start_date/end_date YYYYMMDD, place, city, external_url). Listing reads that API; webinars (academy.esaic.org) and EDAIC exams are skipped. Own events (congress/course/masterclass) have an esaic.org page with an EUR fee table; endorsed/external events redirect to the organiser site and are built from the API record only."
+  },
+  "registry_comment": "ESAIC - WP REST /wp-json/wp/v2/event (ACF dates/place); own events parsed from esaic.org pages, endorsed events from the API record, congress fee grids from the organiser registration page",
+  "probe_results": {
+    "shells": 14,
+    "shells_forced_fallback": 14,
+    "details_tested": 14,
+    "with_date": 14,
+    "with_pricing": 3,
+    "with_venue": 12,
+    "with_description": 14,
+    "with_specialty": 14
+  },
+  "test_urls": [
+    "https://esaic.org/events/patient-safety-and-quality-masterclass-2026/",
+    "https://esaic.org/events/train-the-trainer-course-part-ii-2026/",
+    "https://euroanaesthesia.org/2027/registration/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://esaic.org/events/patient-safety-and-quality-masterclass-2026/",
+      "field": "dates/venue/fees",
+      "site_says": "2-4 Nov 2026, University Hospital Centre Sestre Milosrdnice, Zagreb; EUR 595/450/350/350/695",
+      "extractor_says": "2026-11-02..04, same venue, 5 EUR tiers (Active/Affiliate, Reduced Fee Countries, Trainee, Allied, Individual Society/Non Member)",
+      "match": true
+    },
+    {
+      "url": "https://esaic.org/events/train-the-trainer-course-part-ii-2026/",
+      "field": "sold out/fees",
+      "site_says": "26-30 Oct, Porto, fully booked, fees emailed to eligible Part I participants",
+      "extractor_says": "2026-10-26..30, Porto, is_sold_out true, no tiers",
+      "match": true
+    },
+    {
+      "url": "https://euroanaesthesia.org/2027/registration/",
+      "field": "fees",
+      "site_says": "Early/Late/Desk x 5 categories, EUR, early to 17 Feb 2027, excl. 25% Danish VAT",
+      "extractor_says": "15 EUR tiers, early_bird_deadline 2027-02-17",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Listing path: WP REST API (browser navigate to the JSON, httpx fallback, 3-try retry). Not DOM scraping. 24 records; 14 kept (10 dropped: 5 past, 5 webinars/exams).",
+    "Skipped on purpose: webinars (academy.esaic.org, a JS learning platform, no fee/venue data) and EDAIC Part II exam sittings. Both have dates in the API; if wanted, they could be added as online workshops from the API record alone.",
+    "Endorsed/external events (9) redirect from esaic.org straight to the organiser site, so they are built from the API record (dates, place). booking_url in the detail is the organiser site; source_url stays the esaic.org URL. Their fees are NOT parsed: a trial parse of one third-party congress turned 'registration includes' bullets into tiers, so pricing is [] and the remediator's external-site hop is relied on (coverage warnings PRICE_SAME_SITE_LINK for KoreAnesthesia and PRICE_TEXT_ON_PAGE for the EEG Bootcamp are these).",
+    "Coverage checklist: same-site registration sub-page verified for Euroanaesthesia (grid at /2027/registration/, read via one fetch_html hop); fee pages for own masterclasses are on the esaic.org page; image/PDF fee tables, poster competitions and CFP PDFs not seen on the ESAIC-owned pages. Euroanaesthesia fees are excl. 25% Danish VAT (stated on the page, not in the tier label). Euroanaesthesia 2028/2029 pages are 'mark your calendars' only.",
+    "SUBMISSION_NO_DEADLINE fires in the harness for Euroanaesthesia 2027 and KoreAnesthesia (call for abstracts on page, opening Nov 2026 / no date); the pipeline's _ensure_submission_info covers it on the loaded page. Family detail_from_html leaves submissions to that step by design.",
+    "Specialty is forced to 'Anaesthetics' for every row (PREFER_DEFAULT_SPECIALTY) because the title classifier mislabelled an airway congress as Leadership & Management.",
+    "Shell count identical (14) across two runs; harness --force-fallback not meaningful (browser-first).",
+    "Possible shared change: wordpress_generic.location_from_ld crashes when JSON-LD location.name is a list (hit on aasld.org, worked around in aasld.py with a retry that strips ld+json)."
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "source_id": 88,
+  "slug": "bess",
+  "class_name": "BessExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/bess.py",
+  "source_row": {
+    "source_name": "BESS courses and events",
+    "society": "BESS",
+    "base_url": "https://bess.ac.uk/courses-and-events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "CoBlocks Events carousel (JS-rendered) with two blocks: BESS events and third-party events. Slides carry day/month/year spans (ranges like 30-2 / June - July), title, a description span holding the event link, time and location. Slides without a link have no page. Fees for BESS courses sit on a WooCommerce /product/<slug>/ page linked from the event page (price plus Out of stock flag)."
+  },
+  "registry_comment": "BESS - CoBlocks events carousel read from the rendered listing; links to event pages, partner (ORUK) pages and WooCommerce product pages followed",
+  "probe_results": {
+    "shells": 3,
+    "shells_forced_fallback": 3,
+    "details_tested": 3,
+    "with_date": 3,
+    "with_pricing": 2,
+    "with_venue": 3,
+    "with_description": 3,
+    "with_specialty": 3
+  },
+  "test_urls": [
+    "https://bess.ac.uk/elevate-from-fellow-to-consultant/",
+    "https://oruk.org/upcoming-events/pathways-to-performance-navigating-challenges-and-controversies-in-shoulder-and-elbow-surgery-2026/",
+    "https://bess.ac.uk/product/elevate/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://bess.ac.uk/elevate-from-fellow-to-consultant/",
+      "field": "dates/fee/stock",
+      "site_says": "13-14 Oct 2026, Newbury, Berkshire; product page GBP 125.00, Out of stock",
+      "extractor_says": "2026-10-13..14, Newbury, 1 GBP tier 125, is_sold_out true",
+      "match": true
+    },
+    {
+      "url": "https://oruk.org/upcoming-events/pathways-to-performance-navigating-challenges-and-controversies-in-shoulder-and-elbow-surgery-2026/",
+      "field": "venue/fees/CPD",
+      "site_says": "18 Nov 2026, IET Birmingham: Austin Court; early bird AHP 70, Trainee 89, Consultant 99, Industry 250; 5 CPD credits (applied for)",
+      "extractor_says": "same venue, 4 GBP early-bird tiers, cpd_points 5.0, cpd_accredited false",
+      "match": true
+    },
+    {
+      "url": "https://bess.ac.uk/courses-and-events/",
+      "field": "dates",
+      "site_says": "BESS 2027 Manchester: 30-2 / June - July / 2027, Coming soon!",
+      "extractor_says": "2027-06-30..2027-07-02, Manchester, no tiers",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Listing path: DOM (CoBlocks event-item slides, JS-rendered swiper). The posts REST endpoint holds news, not events; no events API exists. Only 3 slides are not past: this is a small society with few dated events, hence partial.",
+    "Elevate (13-14 Oct) is in progress today and out of stock; it is kept because end_date >= today (family rule). It is archived by tomorrow's run anyway. The brief said start_date >= today; this one would be dropped under that stricter reading.",
+    "BESS-ORUK (18 Nov) is hosted on oruk.org: the detail is read from that partner page (venue line, 4 early-bird tiers, CPD 'applied for' stored as cpd_accredited false). BESS 2027 Manchester has no page ('Coming soon!'); it uses a listing#slug URL and slide data only.",
+    "Coverage checklist verified: same-site registration page (WooCommerce /product/<slug>/ followed via fetch_html for price and Out of stock), external partner registration (ORUK ticket list parsed), image/PDF fee tables and CFP (none seen). BESS 2026 (Newcastle, 24-26 June) and the Elbow Updates Symposium (Mar 2026) are past; the 'Other Courses and Events' block (SECEC, BOA, ICSES) is all past today, but upcoming third-party slides would be ingested as events with the external link.",
+    "Cloudflare: bess.ac.uk answered the headless browser and httpx without a challenge during development.",
+    "Shell count identical (3) across runs."
+  ]
+}

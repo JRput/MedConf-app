@@ -372,3 +372,11 @@ def test_cpd_rejects_year_like_values():
     assert "cpd_points" not in run("0 CPD points")
     assert run("This meeting carries 6 CPD points.")["cpd_points"] == 6.0
     assert run("CME credits: 12.5")["cpd_points"] == 12.5
+
+
+def test_location_from_ld_tolerates_list_name_and_address():
+    from extractors.wordpress_generic import location_from_ld
+    ev = {"location": {"@type": "Place", "name": ["Hyatt Regency", "Denver"],
+                       "address": [{"@type": "PostalAddress", "addressLocality": "Denver", "addressCountry": "US"}]}}
+    out = location_from_ld(ev)
+    assert out and "Hyatt Regency" in str(out)

@@ -101,6 +101,24 @@ from .eadv import EadvExtractor
 from .ataccgroup import AtaccExtractor
 from .interfaceaesthetics import InterfaceAestheticsExtractor
 from .bdiap import BdiapExtractor
+from .esaic import EsaicExtractor
+from .euretina import EuretinaExtractor
+from .aasld import AasldExtractor
+from .bess import BessExtractor
+from .ukio import UkioExtractor
+from .ddw import DdwExtractor
+from .ectrims import EctrimsExtractor
+from .efort import EfortExtractor
+from .eaps_kenes import EapsExtractor
+from .espid import EspidExtractor
+from .pas_meeting import PasExtractor
+from .acog import AcogExtractor
+from .escmid import EscmidExtractor
+from .croi import CroiExtractor
+from .myesr import MyesrExtractor
+from .ccrlondon import CcrLondonExtractor
+from .nhsconfedexpo import NhsConfedExpoExtractor
+from .viveevent import ViveExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -189,6 +207,24 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     82: AtaccExtractor,                      # 82: ATACC Group: WooCommerce product grid of dated trauma/critical-care courses -> one course parent per group (ATACC Course, ATACC Ireland) with sessions[] (family subclass)
     83: InterfaceAestheticsExtractor,        # 83: Interface Aesthetics (UK injectables training): /courses/ links -> course pages; one parent per course with sessions[] from the Upcoming Dates rows (family subclass)
     84: BdiapExtractor,                      # 84: BDIAP (pathology) future meetings: .aspx bullet list -> detail pages; venue from ./location.aspx, fees from ./registration.aspx tables (family subclass)
+    85: EsaicExtractor,                      # 85: ESAIC - WP REST /wp-json/wp/v2/event (ACF dates/place); own events parsed from esaic.org pages, endorsed events from the API record, congress fee grids from the organiser registration page
+    86: EuretinaExtractor,                   # 86: EURETINA - future-meetings table parsed from the rendered Elementor page (first schedule block, deduped); rows without a microsite link get a listing#slug URL
+    87: AasldExtractor,                      # 87: AASLD - Drupal JSON:API /jsonapi/index/events (browser), plus The Liver Meeting microsite (/tlm-NN/home + /event-registration) which the index omits
+    88: BessExtractor,                       # 88: BESS - CoBlocks events carousel read from the rendered listing; links to event pages, partner (ORUK) pages and WooCommerce product pages followed
+    89: UkioExtractor,                       # 89: UKIO single-congress site (one upcoming edition) - single_congress family
+    90: DdwExtractor,                        # 90: DDW single-congress site (one upcoming edition) - single_congress family
+    91: EctrimsExtractor,                    # 91: ECTRIMS single-congress site (one upcoming edition) - single_congress family
+    92: EfortExtractor,                      # 92: EFORT single-congress site (one upcoming edition) - single_congress family
+    93: EapsExtractor,                       # 93: EAPS single-congress site (one upcoming edition) - single_congress family
+    94: EspidExtractor,                      # 94: ESPID single-congress site (one upcoming edition) - single_congress family
+    95: PasExtractor,                        # 95: PAS single-congress site (one upcoming edition) - single_congress family
+    96: AcogExtractor,                       # 96: ACOG single-congress site (one upcoming edition) - single_congress family
+    97: EscmidExtractor,                     # 97: ESCMID single-congress site (one upcoming edition) - single_congress family
+    98: CroiExtractor,                       # 98: CROI single-congress site (one upcoming edition) - single_congress family
+    99: MyesrExtractor,                      # 99: ESR single-congress site (one upcoming edition) - single_congress family
+    100: CcrLondonExtractor,                  # 100: CCR London single-congress site (one upcoming edition) - single_congress family
+    101: NhsConfedExpoExtractor,              # 101: NHS ConfedExpo single-congress site (one upcoming edition) - single_congress family
+    102: ViveExtractor,                       # 102: ViVE single-congress site (one upcoming edition) - single_congress family
 }
 
 
