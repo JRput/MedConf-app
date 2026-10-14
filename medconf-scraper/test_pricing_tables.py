@@ -45,3 +45,12 @@ def test_cells_currency_vote():
     assert _cells_currency(["550 EUR", "600 EUR", "£5 booking fee"]) == "EUR"
     assert _cells_currency(["$1,295", "$1,495"]) == "USD"
     assert _cells_currency(["500", "600"]) is None
+
+
+def test_comma_thousands_without_decimals():
+    from extractors.pricing_tables import _parse_price
+    assert _parse_price("EUR 1,125") == 1125.0
+    assert _parse_price("12,500") == 12500.0
+    assert _parse_price("1200,50") == 1200.5
+    assert _parse_price("1 200,00") == 1200.0
+    assert _parse_price("1.130 EUR") == 1130.0

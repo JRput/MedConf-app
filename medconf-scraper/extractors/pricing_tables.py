@@ -100,6 +100,10 @@ def _parse_price(cell: str) -> Optional[float]:
     if "," in s and "." in s:
         # Both — US style with thousands (1,200.50)
         s = s.replace(",", "")
+    elif re.match(r"^\d{1,3}(?:,\d{3})+$", s.replace(" ", "")):
+        # 1,125 / 12,500 — comma thousands with no decimals (ESP 'EUR 1,125'
+        # was read as 1.125 → 1.13 before 2026-10-14)
+        s = s.replace(" ", "").replace(",", "")
     elif "," in s:
         # European decimal (1 200,00 or 1200,50)
         s = s.replace(" ", "").replace(",", ".")

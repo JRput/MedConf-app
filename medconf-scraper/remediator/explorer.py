@@ -240,6 +240,37 @@ def find_external_event_links(
     return (explicit + contextual)[:limit]
 
 
+def outside_event_path(base_url: str, url: str) -> bool:
+    """True when `url` is a same-site page that lives OUTSIDE the event page's
+    own section. An event detail page sits at depth >= 3 (e.g. rcpsych.ac.uk/
+    events/conferences/detail/2026/10/15/<slug>); a registration page of a
+    different event (/events/congress/international-congress-2026/registration)
+    shares the host but not the parent directory. Homepage-level events
+    (depth < 3) scope the whole site, so nothing is 'outside' for them."""
+    try:
+        b, u = urlparse(base_url), urlparse(url)
+    except Exception:  # noqa: BLE001
+        return False
+    if b.netloc.lower() != u.netloc.lower():
+        return False
+    bparts = [x for x in b.path.split("/") if x]
+    if len(bparts) < 3:
+        return False
+    parent = "/" + "/".join(bparts[:-1]) + "/"
+    return not (u.path.rstrip("/") + "/").startswith(parent)
+
+
+def identity_match_strength(identity_tokens: set, text: str) -> tuple:
+    """(matched_tokens, strong) — strong when >= 2 tokens match and one of
+    them is distinctive (>= 7 letters). Used instead of the LLM for pages
+    outside the event's own path: 2026-10-14 a free RCPsych webinar received
+    the International Congress fee grid from /events/congress/.../registration."""
+    tl = (text or "").lower()
+    matched = [t for t in identity_tokens if t in tl]
+    strong = len(matched) >= 2 and any(len(t) >= 7 for t in matched)
+    return matched, strong
+
+
 def find_same_domain_anchors(html: str, base_url: str, limit: int = 25) -> list[str]:
     """Extract candidate same-domain URLs from HTML that LOOK relevant.
 
@@ -1326,6 +1357,14 @@ def _explore_for_pricing(
             if not matched:
                 trail.notes.append(f"skipped_unrelated_zero_tokens: {url}")
                 return False
+            if outside_event_path(base_url, url):
+                # Another section of the same site: no LLM benefit of the
+                # doubt — the text itself must name this event distinctly.
+                _m, strong = identity_match_strength(identity_tokens, sub_text)
+                if not strong:
+                    trail.notes.append(f"skipped_outside_event_path: {url} (matched={matched})")
+                    return False
+                return True
             # If most identity tokens match, accept without LLM call
             if len(matched) >= max(2, len(identity_tokens) // 2):
                 return True
