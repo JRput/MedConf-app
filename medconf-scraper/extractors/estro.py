@@ -179,6 +179,15 @@ def _extract_abstract_deadline_raw(txt: str) -> Optional[str]:
     )
     if m:
         return m.group(1)
+    # Portal record: "Important deadlines Abstract submission : 11 November 2026
+    # Late-breaking abstract submission: 17-31 March 2027"
+    m = re.search(
+        r"(?i)(?<!late-breaking )Abstract\s+submission\s*:\s*"
+        r"(\d{1,2}\s+[A-Za-z]+\s+20\d{2})",
+        txt,
+    )
+    if m:
+        return m.group(1)
     return None
 
 
@@ -196,6 +205,7 @@ def _extract_description(txt: str) -> Optional[str]:
     # 'welcome to', 'welcome letter'. Pick the EARLIEST hit.
     start_markers = [
         "it is with great pleasure",
+        "it is my great pleasure",
         "it is our pleasure",
         "we are pleased to invite",
         "we are looking forward",
@@ -246,13 +256,65 @@ def _classify_specialty(title: str) -> str:
 # own XHR); eventtype 100000001 = Congress, publishstatus 100000003 = Live.
 # The HTML walker above is kept for when congresses are republished; the API
 # is the ground truth for "is there anything to list at all".
+# 2026-10-16: the portal renders /Congresses client-side from this same API
+# (card link = /Congresses/<msevtmgt_readableeventid>), so when the HTML
+# walker sees nothing but the API lists live congresses, the shells and the
+# detail text (overview / deadlines / venue / fees sections) come from the
+# API record itself. `_FMT` is the OData display-value annotation that
+# carries the city and country names for the lookup columns.
+_API_TEXT_FIELDS = (
+    ("Overview", "est_eventoverview"),
+    ("Important deadlines", "est_eventformatandparticipation"),
+    ("Venue", "est_eventvenueandaccomodation"),
+    ("Registration", "est_eventregistrationandfees"),
+    ("Practical information", "est_eventpracticalinformation"),
+)
+_FMT = "@OData.Community.Display.V1.FormattedValue"
 EVENTS_API = (
     "https://www.estro.org/_api/msevtmgt_events"
-    "?$select=msevtmgt_name,msevtmgt_eventstartdate,msevtmgt_eventenddate,msevtmgt_publishstatus"
+    "?$select=msevtmgt_name,msevtmgt_readableeventid,msevtmgt_eventstartdate,msevtmgt_eventenddate,"
+    "msevtmgt_publishstatus,_est_cityid_value,_est_countryid_value,"
+    + ",".join(f for _, f in _API_TEXT_FIELDS) +
     "&$filter=statecode eq 0 and msevtmgt_publishstatus eq 100000003"
     " and msevtmgt_eventtype eq 100000001 and msevtmgt_eventstartdate ge {today}T00:00:00.000Z"
     "&$orderby=msevtmgt_eventstartdate asc&$top=50"
 )
+
+
+def _uk_date(iso: str) -> str:
+    """'2027-05-21T06:00:00Z' -> '21 May 2027' (the listing's own format)."""
+    d = date.fromisoformat(iso[:10])
+    return f"{d.day} {d.strftime('%B')} {d.year}"
+
+
+def _shells_from_api(live: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Build listing shells from the portal's event records."""
+    shells: List[Dict[str, Any]] = []
+    for ev in live:
+        name = _clean(ev.get("msevtmgt_name") or "")
+        rid = ev.get("msevtmgt_readableeventid")
+        start = ev.get("msevtmgt_eventstartdate") or ""
+        if not (name and rid and start):
+            continue
+        end = ev.get("msevtmgt_eventenddate") or start
+        url = f"{BASE_HOST}/Congresses/{rid}"
+        city = ev.get("_est_cityid_value" + _FMT) or ""
+        country = ev.get("_est_countryid_value" + _FMT) or ""
+        parts = []
+        for label, field in _API_TEXT_FIELDS:
+            body = _clean(ev.get(field) or "")
+            if body:
+                parts.append(f"{label} {body}")
+        shells.append({
+            "title": name,
+            "booking_url": url,
+            "source_url": url,
+            "date_raw": f"{_uk_date(start)} - {_uk_date(end)}",
+            "location_raw": ", ".join(p for p in (city, country) if p),
+            "summary_raw": "",
+            "api_text": " ".join(parts),
+        })
+    return shells
 
 
 def _published_congresses_via_api() -> Optional[List[Dict[str, Any]]]:
@@ -260,7 +322,8 @@ def _published_congresses_via_api() -> Optional[List[Dict[str, Any]]]:
     itself could not be read (so an empty HTML listing stays a failure)."""
     url = EVENTS_API.format(today=date.today().isoformat())
     try:
-        r = httpx.get(url, headers={"User-Agent": "Mozilla/5.0", "Accept": "application/json"},
+        r = httpx.get(url, headers={"User-Agent": "Mozilla/5.0", "Accept": "application/json",
+                                    "Prefer": 'odata.include-annotations="OData.Community.Display.V1.FormattedValue"'},
                       timeout=25, follow_redirects=True)
         if r.status_code != 200:
             logger.warning(f"ESTRO: events API HTTP {r.status_code}")
@@ -287,8 +350,13 @@ class ESTROExtractor(BaseExtractor):
                 logger.warning(f"ESTRO: {self.verified_empty}")
                 return []
             if live:
+                shells = _shells_from_api(live)
+                if shells:
+                    logger.info(f"ESTRO: {len(shells)} congress(es) from the events API "
+                                f"(portal renders the listing client-side)")
+                    return shells
                 logger.error(f"ESTRO: API lists {len(live)} live congress(es) "
-                             f"({live[0].get('msevtmgt_name')!r}) but the HTML walker found none — markup changed")
+                             f"({live[0].get('msevtmgt_name')!r}) but none had a name/id/start date")
             return None
         logger.info(f"ESTRO: {len(shells)} congresses on listing")
         return shells
@@ -328,10 +396,13 @@ class ESTROExtractor(BaseExtractor):
         # 5. Flagship — both congresses are ESTRO's main events
         out["is_flagship"] = True
 
-        # 6. Fetch detail page for description, venue, abstract deadline
-        detail_html = _fetch(url)
-        if detail_html:
-            txt = _clean(detail_html)
+        # 6. Description, venue, abstract deadline — from the API record's
+        #    text sections when the shell came from the API, else the page.
+        txt = shell.get("api_text") or ""
+        if not txt:
+            detail_html = _fetch(url)
+            txt = _clean(detail_html) if detail_html else ""
+        if txt:
 
             venue = _extract_venue(txt)
             if venue:

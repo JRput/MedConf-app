@@ -103,6 +103,25 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   'ATACC Group': { short: 'ATACC Group', name: 'ATACC Group (Anaesthesia Trauma and Critical Care)', kind: 'other', country: 'UK' },
   'Interface Aesthetics': { short: 'Interface Aesthetics', name: 'Interface Aesthetics (aesthetic medicine training)', kind: 'other', country: 'UK' },
   BDIAP: { short: 'BDIAP', name: 'British Division of the International Academy of Pathology', kind: 'specialist', country: 'UK' },
+  // Wave 2c batch 4 (sources 85-102, 2026-10-14)
+  ESAIC: { short: 'ESAIC', name: 'European Society of Anaesthesiology and Intensive Care', kind: 'international', country: 'EU' },
+  EURETINA: { short: 'EURETINA', name: 'European Society of Retina Specialists', kind: 'international', country: 'EU' },
+  AASLD: { short: 'AASLD', name: 'American Association for the Study of Liver Diseases', kind: 'international', country: 'US' },
+  BESS: { short: 'BESS', name: 'British Elbow and Shoulder Society', kind: 'specialist', country: 'UK' },
+  UKIO: { short: 'UKIO', name: 'UK Imaging and Oncology Congress', kind: 'specialist', country: 'UK' },
+  DDW: { short: 'DDW', name: 'Digestive Disease Week', kind: 'international', country: 'US' },
+  ECTRIMS: { short: 'ECTRIMS', name: 'European Committee for Treatment and Research in Multiple Sclerosis', kind: 'international', country: 'EU' },
+  EFORT: { short: 'EFORT', name: 'European Federation of National Associations of Orthopaedics and Traumatology', kind: 'international', country: 'EU' },
+  EAPS: { short: 'EAPS', name: 'European Academy of Paediatric Societies', kind: 'international', country: 'EU' },
+  ESPID: { short: 'ESPID', name: 'European Society for Paediatric Infectious Diseases', kind: 'international', country: 'EU' },
+  PAS: { short: 'PAS', name: 'Pediatric Academic Societies', kind: 'international', country: 'US' },
+  ACOG: { short: 'ACOG', name: 'American College of Obstetricians and Gynecologists', kind: 'international', country: 'US' },
+  ESCMID: { short: 'ESCMID', name: 'European Society of Clinical Microbiology and Infectious Diseases', kind: 'international', country: 'EU' },
+  CROI: { short: 'CROI', name: 'Conference on Retroviruses and Opportunistic Infections', kind: 'international', country: 'US' },
+  ESR: { short: 'ESR', name: 'European Society of Radiology (ECR)', kind: 'international', country: 'EU' },
+  'CCR London': { short: 'CCR London', name: 'CCR London (clinical, cosmetic and regenerative medicine congress)', kind: 'other', country: 'UK' },
+  'NHS ConfedExpo': { short: 'NHS ConfedExpo', name: 'NHS ConfedExpo (NHS Confederation and NHS England)', kind: 'other', country: 'UK' },
+  ViVE: { short: 'ViVE', name: 'ViVE (digital health event)', kind: 'other', country: 'US' },
 }
 
 export function societyInfo(short: string | null | undefined): SocietyInfo | null {

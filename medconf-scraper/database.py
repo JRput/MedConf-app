@@ -182,16 +182,30 @@ def archive_stale_conferences(stale_days: int = 14) -> int:
     # Identify sources with at least one successful scrape in the window.
     # NB: only status == 'success' counts as healthy, so 'failed' and
     # 'blocked' (anti-bot) runs never vouch for a source.
-    healthy_logs = (
-        supabase.table("scraper_logs")
-        .select("source_id")
-        .eq("status", "success")
-        .gte("run_started_at", threshold)
-        .execute()
-        .data
-        or []
-    )
-    healthy_source_ids = {row["source_id"] for row in healthy_logs}
+    # Page through the window: PostgREST returns at most 1000 rows per
+    # request, and with 100 sources x 14 days the success log is ~1400 rows.
+    # On 2026-10-16 the single select stopped at 1000 rows / 86 sources, so
+    # the 14 newest (batch 4) were reported "no success in 14 days" and their
+    # stale rows were never archived.
+    healthy_source_ids: set = set()
+    page_size = 1000
+    offset = 0
+    while True:
+        batch = (
+            supabase.table("scraper_logs")
+            .select("source_id")
+            .eq("status", "success")
+            .gte("run_started_at", threshold)
+            .order("run_started_at")
+            .range(offset, offset + page_size - 1)
+            .execute()
+            .data
+            or []
+        )
+        healthy_source_ids.update(row["source_id"] for row in batch)
+        if len(batch) < page_size:
+            break
+        offset += page_size
 
     if not healthy_source_ids:
         logger.warning(

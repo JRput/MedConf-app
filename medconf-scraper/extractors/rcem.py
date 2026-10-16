@@ -155,6 +155,13 @@ class RCEMExtractor(BaseExtractor):
                 f"RCEM source {self.source_id}: listing fetch failed after 5 "
                 f"attempts: {last_err}"
             )
+            # 2026-10-16: five straight timeouts (plus the Playwright fallback
+            # timing out too) turned group A red while rcem.ac.uk answered
+            # fine from elsewhere. Register it so a 0-card listing is logged
+            # as `unreachable` (tolerated) rather than `failed`.
+            from .http_fetch import note_unreachable
+            if last_err is not None:
+                note_unreachable(listing_url, last_err)
             return None
 
         seen: set = set()
