@@ -54,6 +54,7 @@ from datetime import date, datetime, timedelta
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
+import httpx
 from playwright.sync_api import Page
 
 from .base import BaseExtractor
@@ -161,6 +162,24 @@ def _parse_json_body(body: Optional[str]) -> Optional[Any]:
         return None
 
 
+def _api_get(url: str) -> Tuple[bool, Optional[str]]:
+    """(past_end, body). past_end is True for WordPress's HTTP 400
+    rest_post_invalid_page_number; body is the JSON text on a 200, else None."""
+    try:
+        r = httpx.get(url, headers={"User-Agent": "Mozilla/5.0", "Accept": "application/json"},
+                      timeout=30, follow_redirects=True)
+    except Exception as e:  # noqa: BLE001
+        logger.warning(f"EANM: API transport error: {e}")
+        return False, None
+    if r.status_code == 400:
+        data = _parse_json_body(r.text)
+        if isinstance(data, dict) and data.get("code") == "rest_post_invalid_page_number":
+            return True, None
+    if r.status_code == 200:
+        return False, r.text
+    return False, None
+
+
 class EanmExtractor(BaseExtractor):
     """European Association of Nuclear Medicine — Calendar of Events (Stec REST API)."""
 
@@ -173,11 +192,21 @@ class EanmExtractor(BaseExtractor):
         on persistent failure. 3 tries, polite delay between attempts."""
         url = f"{API_URL}?per_page={PER_PAGE}&page={page_no}"
         for attempt in range(1, FETCH_TRIES + 1):
-            body = fetch_html(
-                url,
-                browser=getattr(self, "browser", None),
-                headers={"Accept": "application/json"},
-            )
+            # 2026-10-16: the catalogue hit exactly 500 events = 5 full pages,
+            # so page 6 was requested and WordPress answered HTTP 400
+            # rest_post_invalid_page_number. fetch_html drops any 4xx before
+            # the parser can read the code, so the walk aborted and the
+            # source went red. Read the API directly first; fall back to
+            # fetch_html (browser retry) only when that gives nothing.
+            past_end, body = _api_get(url)
+            if past_end:
+                return []
+            if body is None:
+                body = fetch_html(
+                    url,
+                    browser=getattr(self, "browser", None),
+                    headers={"Accept": "application/json"},
+                )
             data = _parse_json_body(body)
             if isinstance(data, list):
                 return data
