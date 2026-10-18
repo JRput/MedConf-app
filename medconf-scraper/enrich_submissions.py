@@ -22,9 +22,12 @@ Usage:
   python enrich_submissions.py --dry-run       # no writes, prints what would happen
   python enrich_submissions.py --id <uuid>     # one submission (any state)
 
-Safety: every hop of the organiser URL's redirect chain is SSRF-checked before
-PageCache sees the final URL, and the browser fallback is disabled for these
-user-submitted URLs, so JS-only organiser pages come back as 'blocked' and are
+Safety: every hop of the organiser URL's redirect chain is SSRF-checked while the page
+is fetched ONCE (GET, no auto-redirects, 2 MB cap); that validated body seeds
+PageCache, which is never allowed to fetch the submitted URL itself. Promoted
+learned-pattern sub-pages are NOT used in v1. The pricing fixer may still make
+its own same-site fee-page requests.
+The browser fallback is disabled too, so JS-only organiser pages come back as 'blocked' and are
 reviewed on the user's data alone. Residual TOCTOU (DNS rebinding between the
 check and the fetch) is accepted: the job runs on an ephemeral GitHub runner
 and moderators only ever see structured fixer outputs.
@@ -33,10 +36,12 @@ Exit code: 0 even when some submissions fail; 1 only on config errors.
 """
 
 import argparse
+import html as _html
 import ipaddress
 import json
 import logging
 import os
+import re
 import socket
 import sys
 import time
@@ -49,7 +54,6 @@ import httpx
 BATCH_LIMIT = 25
 MIN_AGE_MINUTES = 2
 RUN_BUDGET_S = 10 * 60
-MAX_FETCHES_PER_SUBMISSION = 3
 
 logger = logging.getLogger("enrich_submissions")
 
@@ -109,11 +113,28 @@ _REDIRECT_STATUSES = (301, 302, 303, 307, 308)
 _UA = "Mozilla/5.0 (compatible; MedConfBot/1.0; +enrichment)"
 
 
+MAX_BODY_BYTES = 2 * 1024 * 1024
+
+
+def html_to_text(html: str) -> str:
+    """Same stripping as remediator.fetcher.PageCache._fetch_httpx."""
+    t = re.sub(r"<(script|style|noscript)\b(?![^>]*ld\+json)[^>]*>.*?</\1\s*>",
+               " ", html, flags=re.S | re.I)
+    t = re.sub(r"<[^>]+>", " ", t)
+    t = _html.unescape(t)
+    t = re.sub(r"\s+", " ", t).strip()
+    return t[:200000]
+
+
 def resolve_redirect_chain(url: str, url_check: Callable, max_hops: int = 5,
                            client: Optional[httpx.Client] = None) -> tuple:
-    """Follow redirects manually, SSRF-checking every hop.
+    """GET the URL hop by hop (no automatic redirects), SSRF-checking each hop.
 
-    Returns ('ok', final_url) or ('rejected', offending_url_or_reason).
+    Returns (verdict, final_url, html):
+      ('ok', final_url, html)        final 2xx response, body capped at 2 MB
+      ('blocked', final_url, '')     final response was not 2xx
+      ('rejected', reason, '')       a hop failed the check / too many hops / error
+    The body comes from this validated response; callers must never re-fetch.
     """
     own = client is None
     if own:
@@ -121,33 +142,38 @@ def resolve_redirect_chain(url: str, url_check: Callable, max_hops: int = 5,
                               headers={"User-Agent": _UA})
     try:
         current = url
-        for _ in range(max_hops + 1):
+        for hop in range(max_hops + 1):
             if not url_check(current)[0]:
-                return "rejected", current
-            status, location = _probe(client, current)
-            if status not in _REDIRECT_STATUSES or not location:
-                return "ok", current
-            if _ >= max_hops:
-                break
-            current = urljoin(current, location)
-        return "rejected", "too many redirects"
+                return "rejected", current, ""
+            with client.stream("GET", current) as r:
+                location = r.headers.get("location")
+                if r.status_code in _REDIRECT_STATUSES and location:
+                    if hop >= max_hops:
+                        break
+                    current = urljoin(current, location)
+                    continue
+                if not 200 <= r.status_code < 300:
+                    return "blocked", current, ""
+                body = bytearray()
+                for chunk in r.iter_bytes():
+                    body.extend(chunk)
+                    if len(body) >= MAX_BODY_BYTES:
+                        break
+                enc = r.encoding or "utf-8"
+            return "ok", current, bytes(body[:MAX_BODY_BYTES]).decode(enc, errors="replace")
+        return "rejected", "too many redirects", ""
     except Exception as e:  # noqa: BLE001
-        return "rejected", f"redirect probe failed: {type(e).__name__}"
+        return "rejected", f"fetch failed: {type(e).__name__}", ""
     finally:
         if own:
             client.close()
 
 
-def _probe(client, url: str) -> tuple:
-    """(status, Location) via HEAD, falling back to a streamed GET."""
-    try:
-        r = client.head(url)
-        if r.status_code not in (405, 501, 403):
-            return r.status_code, r.headers.get("location")
-    except httpx.HTTPError:
-        pass
-    with client.stream("GET", url) as r:
-        return r.status_code, r.headers.get("location")
+def seed_cache(cache, urls, text: str, html: str) -> None:
+    """Pre-fill PageCache so it never fetches an untrusted URL itself."""
+    for u in urls:
+        cache._cache[u] = text
+        cache._html_cache[u] = html
 
 
 # ------------------------------------------------------------ row building
@@ -236,20 +262,6 @@ def _json_safe(v: Any) -> Any:
 
 # -------------------------------------------------------------- enrichment
 
-class _FetchBudget:
-    def __init__(self, cache, limit: int):
-        self.cache, self.limit, self.used = cache, limit, 0
-
-    def can(self) -> bool:
-        return self.used < self.limit
-
-    def text(self, url: str) -> Optional[str]:
-        if not self.can():
-            return None
-        self.used += 1
-        return self.cache.get(url)
-
-
 def enrich_one(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
                fixers: dict, challenge_check: Callable,
                url_check: Callable = check_url_safe,
@@ -260,22 +272,19 @@ def enrich_one(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
     if not ok:
         return "skipped", {"_error": "url rejected"}
     try:
-        verdict, final = resolver(url, url_check)
-        if verdict != "ok":
+        verdict, final, html = resolver(url, url_check)
+        if verdict == "rejected":
             return "skipped", {"_error": "url rejected"}
-        url = final
-        row["source_url"] = url
-        budget = _FetchBudget(cache, MAX_FETCHES_PER_SUBMISSION)
-        text = budget.text(url)
-        html = cache.get_html(url)
-        if not text or not text.strip() or challenge_check(html):
+        if verdict == "blocked":
+            return "blocked", {"_error": "page blocked or empty"}
+        text = html_to_text(html)
+        seed_cache(cache, {url, final}, text, html)
+        row["source_url"] = final
+        if not text.strip() or challenge_check(html):
             return "blocked", {"_error": "page blocked or empty"}
         enrichment: dict = {}
         for field, fixer in fixers.items():
             value, method = _run_fixer(field, fixer, row, text, llm_call)
-            if value is None:
-                value, method = _try_promoted(field, fixer, row, url, budget,
-                                              llm_call, url_check)
             if value is None:
                 continue
             safe = _json_safe(value)
@@ -294,30 +303,6 @@ def _run_fixer(field, fixer, row, text, llm_call):
     except Exception as e:  # noqa: BLE001
         logger.warning("fixer %s crashed: %s", field, e)
         return None, None
-
-
-def _try_promoted(field, fixer, row, url, budget, llm_call, url_check):
-    """Optional: replay learned sub-page patterns, within the fetch cap."""
-    try:
-        from remediator.learned_patterns import get_promoted_patterns
-        for p in get_promoted_patterns(url, field):
-            if not budget.can():
-                break
-            sub = p.get("subpage_path")
-            if not sub:
-                continue
-            sub_url = url.rstrip("/") + sub
-            if not url_check(sub_url)[0]:
-                continue
-            sub_text = budget.text(sub_url)
-            if not sub_text:
-                continue
-            v, _m = _run_fixer(field, fixer, row, sub_text, llm_call)
-            if v is not None:
-                return v, f"promoted:{p.get('method')}:{sub}"
-    except Exception as e:  # noqa: BLE001
-        logger.debug("promoted-pattern replay failed: %s", e)
-    return None, None
 
 
 # --------------------------------------------------------------------- IO

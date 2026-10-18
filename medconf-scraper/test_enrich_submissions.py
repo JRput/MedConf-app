@@ -5,17 +5,21 @@ import enrich_submissions as es
 
 
 class FakeCache:
-    def __init__(self, text="Fees: lots", html="<html><a href=1><a href=2></html>"):
-        self.text, self.html, self.gets = text, html, []
+    """Mimics PageCache's cache attributes; any real fetch is a test failure."""
+    def __init__(self):
+        self._cache, self._html_cache, self.fetches = {}, {}, []
 
     def __enter__(self): return self
     def __exit__(self, *a): pass
 
     def get(self, url):
-        self.gets.append(url)
-        return self.text
+        if url not in self._cache:
+            self.fetches.append(url)
+            raise AssertionError(f"PageCache fetched {url}")
+        return self._cache[url]
 
-    def get_html(self, url): return self.html
+    def get_html(self, url):
+        return self._html_cache[url]
 
 
 class FakeQuery:
@@ -39,7 +43,9 @@ class FakeSB:
 def ok_url(url): return True, ""
 no_challenge = lambda html: False
 llm = lambda prompt, **kw: None
-passthru = lambda u, c: ("ok", u)
+GOOD = "<html><a href=1>x</a><a href=2>y</a><p>Fees and venue details</p></html>"
+passthru = lambda u, c: ("ok", u, GOOD)
+def res(html, verdict="ok"): return lambda u, c: (verdict, u, html)
 
 
 def submission(**payload):
@@ -84,7 +90,7 @@ def test_agrees_true_false_null():
 
 
 def test_blocked_page():
-    status, enr = es.enrich_one(submission(), None, FakeCache(text=""), llm, {}, no_challenge, ok_url, passthru)
+    status, enr = es.enrich_one(submission(), None, FakeCache(), llm, {}, no_challenge, ok_url, res("<html></html>"))
     assert status == "blocked" and "_error" in enr
     status, _ = es.enrich_one(submission(), None, FakeCache(), llm, {}, lambda h: True, ok_url, passthru)
     assert status == "blocked"
@@ -105,8 +111,10 @@ def test_add_info_uses_conference_url():
     sub = {"id": "u2", "kind": "add_info", "conference_id": 7,
            "payload": {"fields": {"city": "Leeds"}}}
     cache = FakeCache()
-    status, enr = es.enrich_one(sub, conf, cache, llm, fixers, no_challenge, ok_url, passthru)
-    assert cache.gets[0] == "https://book.example.org/b"
+    seen_urls = []
+    resolver = lambda u, c: (seen_urls.append(u) or ("ok", u, GOOD))
+    status, enr = es.enrich_one(sub, conf, cache, llm, fixers, no_challenge, ok_url, resolver)
+    assert seen_urls == ["https://book.example.org/b"]
     assert seen["row"]["source_url"] == "https://book.example.org/b"
     assert enr["city"]["agrees"] is True
 
@@ -141,7 +149,7 @@ def _client(routes):
         loc = routes.get(str(req.url))
         if loc:
             return httpx.Response(302, headers={"location": loc})
-        return httpx.Response(200)
+        return httpx.Response(200, text=GOOD)
     return httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=False)
 
 
@@ -151,7 +159,7 @@ def _public_only(u):
 
 def test_redirect_to_metadata_rejected():
     c = _client({"https://a.org/": "http://169.254.169.254/"})
-    v, hop = es.resolve_redirect_chain("https://a.org/", _public_only, client=c)
+    v, hop, _ = es.resolve_redirect_chain("https://a.org/", _public_only, client=c)
     assert v == "rejected" and "169.254" in hop
 
 
@@ -161,13 +169,25 @@ def test_redirect_to_public_host_accepted_and_final_fetched():
     cache = FakeCache()
     status, _ = es.enrich_one(submission(organiser_url="https://a.org/"), None, cache,
                               llm, {}, no_challenge, _public_only, resolver)
-    assert status == "fetched" and cache.gets == ["https://b.org/event"]
+    assert status == "fetched" and cache.fetches == []
+    assert "https://b.org/event" in cache._cache and "https://a.org/" in cache._cache
 
 
 def test_too_many_hops_rejected():
     routes = {f"https://h{i}.org/": f"https://h{i+1}.org/" for i in range(10)}
-    v, _ = es.resolve_redirect_chain("https://h0.org/", ok_url, max_hops=5, client=_client(routes))
+    v, _, _ = es.resolve_redirect_chain("https://h0.org/", ok_url, max_hops=5, client=_client(routes))
     assert v == "rejected"
+
+
+def test_resolver_returns_validated_body():
+    c = _client({"https://a.org/": "https://b.org/event"})
+    v, final, html = es.resolve_redirect_chain("https://a.org/", ok_url, client=c)
+    assert (v, final) == ("ok", "https://b.org/event")
+    assert html == GOOD
+
+
+def test_html_to_text_strips_scripts():
+    assert es.html_to_text("<script>var a=1</script><p>Hi &amp; bye</p>") == "Hi & bye"
 
 
 def test_browser_fallback_disabled():
