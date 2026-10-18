@@ -68,6 +68,22 @@ with sync_playwright() as p:
     R.check(r4.get("status") == "hidden" and arch["archived"] is True and arch["source_id"] == 1000, f"hide archives the community row -> {arch}")
     pg.goto(f"{BASE}/conferences/{cid}"); R.check("not found" in pg.content().lower(), "hidden event no longer served")
 
+    # hide -> resubmit same URL -> approve -> re-published (same conference row)
+    again = svc.table("community_contributions").insert({"user_id": sub["user_id"], "kind": "new_event", "payload": {**pl, "conference_name": f"E2E Oncology Symposium {RUN_TS} (republished)"}}).execute().data[0]
+    err = rpc_err(lambda: svc.rpc("moderate_contribution", {"p_id": again["id"], "p_action": "approve"}).execute())
+    R.check(err and "safety-checked" in err, "re-approve of hidden URL without override still refused while waiting")
+    r5 = svc.rpc("moderate_contribution", {"p_id": again["id"], "p_action": "approve", "p_final": {**pl, "conference_name": f"E2E Oncology Symposium {RUN_TS} (republished)", "approve_unchecked": True}}).execute().data
+    c5 = svc.table("conferences").select("archived,source_id,conference_name").eq("id", cid).execute().data[0]
+    R.check(r5.get("ok") is True and r5.get("conference_id") == cid and c5["archived"] is False, f"hide -> resubmit same URL -> approve re-publishes row {cid}: {r5} archived={c5['archived']}")
+    pg.goto(f"{BASE}/conferences/{cid}"); pg.wait_for_load_state("networkidle")
+    R.check("republished" in pg.content(), "re-published event is served again")
+    # rejected organiser URL stripped server-side
+    rej = svc.table("community_contributions").insert({"user_id": sub["user_id"], "kind": "new_event", "payload": {**pl, "organiser_url": f"{URL}-rej", "conference_name": "Rejected URL test"}}).execute().data[0]
+    svc.table("community_contributions").update({"enrichment": {"_rejected_urls": [f"{URL}-rej"]}, "enrichment_status": "fetched"}).eq("id", rej["id"]).execute()
+    err = rpc_err(lambda: svc.rpc("moderate_contribution", {"p_id": rej["id"], "p_action": "approve", "p_final": {**pl, "organiser_url": f"{URL}-rej", "approve_unchecked": True}}).execute())
+    R.check(err is not None, f"approve with a rejected organiser URL refused: {(err or 'NOT REFUSED')[:80]}")
+    svc.table("community_contributions").delete().eq("id", rej["id"]).execute()
+
     # B) realistic pending submission left for moderation/digest flows
     fill_form(pg, f"Test submission - North West Cancer Research Day {RUN_TS}", f"{URL}-pending", "2027-05-20",
               "Test submission for moderation practice: a one-day regional oncology meeting with trainee abstract prizes.", "95")
