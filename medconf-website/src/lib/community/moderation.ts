@@ -93,6 +93,28 @@ export function userFields(payload: unknown): Payload {
   return out
 }
 
+/**
+ * The review shape comes from the row's `kind`, never from the payload. A
+ * payload of the other shape (a resubmit can send anything) is reduced to the
+ * kind's own keys and flagged, so approval can only publish what that kind
+ * allows: add_info -> fields / fees / note / evidence_url, new_event -> the
+ * flat keys (a nested `fields` object is ignored).
+ */
+export function normalizePayload(kind: Contribution['kind'], payload: unknown): { payload: Payload; mismatch: boolean } {
+  const p = isRecord(payload) ? payload : {}
+  const hasFields = isRecord(p.fields)
+  if (kind === 'add_info') {
+    const out: Payload = { fields: hasFields ? p.fields : {} }
+    if (isRecord(p.fees)) out.fees = p.fees
+    if (typeof p.note === 'string') out.note = p.note
+    if (typeof p.evidence_url === 'string') out.evidence_url = p.evidence_url
+    return { payload: out, mismatch: !hasFields }
+  }
+  const { fields: _ignored, ...flat } = p
+  void _ignored
+  return { payload: flat, mismatch: hasFields }
+}
+
 export function isAddInfo(payload: unknown): boolean {
   return isRecord(payload) && isRecord(payload.fields)
 }

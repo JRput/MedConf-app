@@ -11,6 +11,7 @@ import {
   finalProblems,
   flattenEnrichment,
   needsOverride,
+  normalizePayload,
   rejectedUrls,
   foundTiers,
   significantWords,
@@ -312,5 +313,37 @@ describe('domainSignals', () => {
     expect(domainLabel('esmo.org')).toBe('esmo')
     expect(domainLabel('tickets.example.com')).toBe('example')
     expect(domainLabel(null)).toBeNull()
+  })
+})
+
+describe('normalizePayload (shape comes from kind)', () => {
+  it('passes a well-formed add_info and new_event unchanged in shape', () => {
+    const a = normalizePayload('add_info', { fields: { city: 'Leeds' }, note: 'n', evidence_url: 'https://e.org' })
+    expect(a).toEqual({ payload: { fields: { city: 'Leeds' }, note: 'n', evidence_url: 'https://e.org' }, mismatch: false })
+    expect(normalizePayload('new_event', newEvent).mismatch).toBe(false)
+  })
+  it('add_info row with a flat new-event payload: flagged, flat keys ignored, nothing publishable', () => {
+    const r = normalizePayload('add_info', newEvent)
+    expect(r.mismatch).toBe(true)
+    expect(r.payload).toEqual({ fields: {} })
+    const built = buildFinalPayload(r.payload, null).final
+    expect(built).toEqual({ fields: {} })
+    expect(finalProblems(r.payload, built).length).toBe(1)
+  })
+  it('add_info keeps only fields/fees/note/evidence_url even alongside flat keys', () => {
+    const r = normalizePayload('add_info', { ...newEvent, fields: { city: 'York' } })
+    expect(r.mismatch).toBe(false)
+    expect(Object.keys(r.payload)).toEqual(['fields'])
+    expect(buildFinalPayload(r.payload, null).final).toEqual({ fields: { city: 'York' } })
+  })
+  it('new_event row with an add_info-shaped payload is flagged and the nested fields ignored', () => {
+    const r = normalizePayload('new_event', { fields: { city: 'York' }, conference_name: 'X' })
+    expect(r.mismatch).toBe(true)
+    expect(r.payload).toEqual({ conference_name: 'X' })
+    expect(buildFinalPayload(r.payload, null).final.fields).toBeUndefined()
+  })
+  it('garbage payloads normalise to empty', () => {
+    expect(normalizePayload('add_info', null)).toEqual({ payload: { fields: {} }, mismatch: true })
+    expect(normalizePayload('new_event', 'x')).toEqual({ payload: {}, mismatch: false })
   })
 })

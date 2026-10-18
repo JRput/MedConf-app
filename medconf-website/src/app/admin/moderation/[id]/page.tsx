@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
-import { ArrowLeft, ExternalLink } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, ExternalLink } from 'lucide-react'
 import { AccountContainer, AccountEmptyState } from '@/components/account/AccountPageHeader'
 import { ActionBar } from '@/components/moderation/ActionBar'
 import { DomainSignals } from '@/components/moderation/DomainSignals'
@@ -27,7 +27,7 @@ import {
   disagreementFields,
   feesPayloadToDraft,
   finalProblems,
-  isAddInfo,
+  normalizePayload,
   needsOverride,
   rejectedUrls,
   safeHref,
@@ -122,9 +122,14 @@ function ExtLink({ href, children }: { href: string | null; children: React.Reac
 function Review({ item, refresh }: { item: QueueItem; refresh: () => void }) {
   const { run, busy } = useModerate()
   const open = item.status === 'pending' || item.status === 'needs_info'
-  const addInfo = isAddInfo(item.payload)
+  const addInfo = item.kind === 'add_info'
   // Closed items show what was actually approved when we have it.
-  const source = open ? item.payload : item.final_payload ?? item.payload
+  const shape = useMemo(
+    () => normalizePayload(item.kind, open ? item.payload : item.final_payload ?? item.payload),
+    [item.kind, item.payload, item.final_payload, open]
+  )
+  const source = shape.payload
+  const userShape = useMemo(() => normalizePayload(item.kind, item.payload).payload, [item.kind, item.payload])
 
   const [fieldEdits, setFieldEdits] = useState<EditMap>({})
   const initialFees = useMemo(
@@ -162,13 +167,13 @@ function Review({ item, refresh }: { item: QueueItem; refresh: () => void }) {
   const finalOrganiser = (addInfo ? (built.final.fields as Record<string, unknown> | undefined)?.organiser_url : built.final.organiser_url) as string | undefined
   const override = needsOverride(item, finalOrganiser)
   const differs = useMemo(() => disagreementFields(item.enrichment, userFields(source)), [item.enrichment, source])
-  const user = userFields(item.payload)
-  const userFeesPayload = (item.payload as unknown as { fees?: FeesPayload }).fees
+  const user = userFields(userShape)
+  const userFeesPayload = (userShape as { fees?: FeesPayload }).fees
   const feesPrefilled = open && !feesTouched && built.prefilled.includes('fees')
 
   const organiserHref = safeHref(user.organiser_url)
-  const evidenceHref = safeHref(item.evidence_url ?? (item.payload as unknown as { evidence_url?: string }).evidence_url)
-  const submitterNote = item.note ?? (item.payload as unknown as { note?: string }).note
+  const evidenceHref = safeHref(item.evidence_url ?? (userShape as { evidence_url?: string }).evidence_url)
+  const submitterNote = item.note ?? (userShape as { note?: string }).note
 
   const act = async (
     action: ModerationAction,
@@ -276,6 +281,13 @@ function Review({ item, refresh }: { item: QueueItem; refresh: () => void }) {
           </div>
         )}
 
+        {shape.mismatch && (
+          <div role="alert" className="flex items-start gap-2 rounded-lg border border-warn-border bg-warn-subtle px-4 py-3 type-small text-warn-text">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
+            Payload shape does not match this item&apos;s kind — review carefully. Only the {addInfo ? 'fields, fees and note' : 'event'} entries are used.
+          </div>
+        )}
+
         {open && <DomainSignals finalPayload={built.final} />}
 
         {open && differs.length > 0 && (
@@ -326,7 +338,7 @@ function Review({ item, refresh }: { item: QueueItem; refresh: () => void }) {
 
         {open && item.kind === 'new_event' && (
           <DuplicatesPanel
-            payload={item.payload}
+            payload={userShape}
             disabled={busy}
             onMerge={(row) => {
               setMergePre(row)
