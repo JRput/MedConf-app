@@ -566,6 +566,12 @@ CREATE INDEX IF NOT EXISTS idx_community_tiers_conf_published ON community_tiers
 --   needs_info -> pending; facts/tiers SELECT where is_published or admin;
 --   no client writes on facts/tiers.
 -- Seed: scraper_sources id 1000 'Community submissions' (active FALSE, society 'Community').
+-- Hardening (20261018000001): community_url_ok()/community_validate_payload()
+--   enforce http(s) URLs, length caps and <= 12 tiers on insert, resubmit,
+--   approve, merge and publish_facts; the insert trigger takes a per-user
+--   advisory lock so the pending cap cannot be raced; policy "Admins can view
+--   profiles" on user_profiles; moderate_contribution() also accepts the
+--   service role (automation / end-to-end tests).
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
