@@ -136,8 +136,9 @@ def test_dry_run_writes_nothing():
 
 def test_real_run_writes():
     rc, sb = _run(False)
-    assert rc == 0 and len(sb.updates) == 1
-    assert sb.updates[0][1]["enrichment_status"] == "fetched"
+    assert rc == 0 and len(sb.updates) == 2
+    assert sb.updates[0][1]["enrichment"] == {"_error": "in progress"}
+    assert sb.updates[1][1]["enrichment_status"] == "fetched"
 
 
 # ---- redirect chain
@@ -241,3 +242,51 @@ def test_rejected_extra_urls_listed():
     sub = submission(booking_url="http://10.0.0.1/book", evidence_url="https://ok.org/e")
     status, enr = es.enrich_one(sub, None, FakeCache(), llm, {}, no_challenge, url_check, passthru)
     assert status == "fetched" and enr["_rejected_urls"] == ["http://10.0.0.1/book"]
+
+
+# ---- starvation guards
+import time
+
+
+def test_oversized_hostile_html_is_fast():
+    for bomb in ("<script " * 400_000, "<" * 3_000_000, "<p>x</p>" * 400_000):
+        t0 = time.time()
+        es.html_to_text(bomb)
+        assert time.time() - t0 < 2
+
+
+def test_html_to_text_matches_old_behaviour_on_normal_pages():
+    h = '<style>a{}</style><p>Fee &pound;50</p><script type="application/ld+json">{"a":1}</script><script>x()</script>'
+    assert es.html_to_text(h) == 'Fee £50 {"a":1}'
+
+
+def test_slow_stream_trips_deadline_and_marks_failed():
+    def slow():
+        for _ in range(100):
+            time.sleep(0.05)
+            yield b"x"
+    c = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200, content=slow())),
+                     follow_redirects=False)
+    v, _, _ = es.resolve_redirect_chain("https://a.org/", ok_url, client=c,
+                                        deadline=time.monotonic() + 0.2)
+    assert v == "timeout"
+    resolver = lambda u, uc: ("timeout", u, "")
+    status, enr = es.enrich_one(submission(), None, FakeCache(), llm, {}, no_challenge, ok_url, resolver)
+    assert status == "failed" and enr["_error"] == "timeout"
+
+
+def test_fixer_loop_respects_deadline():
+    status, enr = es.enrich_one(submission(), None, FakeCache(), llm,
+                                {"city": lambda r, t, l: ("x", "m")}, no_challenge, ok_url,
+                                passthru, deadline_s=-1)
+    assert status == "failed" and enr["_error"] == "timeout"
+
+
+def test_premark_happens_before_fetch():
+    sb = FakeSB({"community_contributions": [submission()]})
+    seen = []
+    resolver = lambda u, c: (seen.append(list(sb.updates)) or ("ok", u, GOOD))
+    es.run(argparse.Namespace(dry_run=False, id=None), sb=sb, cache_factory=FakeCache,
+           llm_call=llm, fixers={}, challenge_check=no_challenge, url_check=ok_url,
+           resolver=resolver)
+    assert len(seen[0]) == 1 and seen[0][0][1]["enrichment_status"] == "failed"

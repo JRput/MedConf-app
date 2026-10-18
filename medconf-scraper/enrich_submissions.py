@@ -122,35 +122,65 @@ _UA = "Mozilla/5.0 (compatible; MedConfBot/1.0; +enrichment)"
 
 
 MAX_BODY_BYTES = 2 * 1024 * 1024
+PER_SUBMISSION_S = 90.0
+_DROP_TAG_RE = re.compile(r"(script|style|noscript)(?![a-z0-9])")
 
 
 def html_to_text(html: str) -> str:
-    """Same stripping as remediator.fetcher.PageCache._fetch_httpx."""
-    t = re.sub(r"<(script|style|noscript)\b(?![^>]*ld\+json)[^>]*>.*?</\1\s*>",
-               " ", html, flags=re.S | re.I)
-    t = re.sub(r"<[^>]+>", " ", t)
-    t = _html.unescape(t)
-    t = re.sub(r"\s+", " ", t).strip()
-    return t[:200000]
+    """Same output as remediator.fetcher.PageCache._fetch_httpx, but a single
+    linear pass (no regex backtracking on hostile input). Input capped at 2 MB.
+    script/style/noscript bodies are dropped (JSON-LD kept); an unclosed
+    opener drops the rest, as browsers do."""
+    html = html[:MAX_BODY_BYTES]
+    low = html.lower()
+    n, i, out = len(html), 0, []
+    while i < n:
+        j = html.find("<", i)
+        if j < 0:
+            out.append(html[i:])
+            break
+        out.append(html[i:j])
+        k = html.find(">", j)
+        if k < 0:
+            break
+        tag = low[j + 1:k]
+        m = _DROP_TAG_RE.match(tag)
+        if m and "ld+json" not in tag:
+            close = low.find("</" + m.group(1), k)
+            if close < 0:
+                break
+            k2 = html.find(">", close)
+            out.append(" ")
+            i = n if k2 < 0 else k2 + 1
+            continue
+        out.append(" ")
+        i = k + 1
+    t = _html.unescape("".join(out))
+    return re.sub(r"\s+", " ", t).strip()[:200000]
 
 
 def resolve_redirect_chain(url: str, url_check: Callable, max_hops: int = 5,
-                           client: Optional[httpx.Client] = None) -> tuple:
+                           client: Optional[httpx.Client] = None,
+                           deadline: Optional[float] = None) -> tuple:
     """GET the URL hop by hop (no automatic redirects), SSRF-checking each hop.
 
     Returns (verdict, final_url, html):
       ('ok', final_url, html)        final 2xx response, body capped at 2 MB
       ('blocked', final_url, '')     final response was not 2xx
       ('rejected', reason, '')       a hop failed the check / too many hops / error
+      ('timeout', url, '')           monotonic `deadline` passed (slow-drip server)
     The body comes from this validated response; callers must never re-fetch.
     """
     own = client is None
     if own:
-        client = httpx.Client(follow_redirects=False, timeout=15,
+        client = httpx.Client(follow_redirects=False,
+                              timeout=httpx.Timeout(connect=10, read=15, write=10, pool=10),
                               headers={"User-Agent": _UA})
     try:
         current = url
         for hop in range(max_hops + 1):
+            if deadline is not None and time.monotonic() > deadline:
+                return "timeout", current, ""
             if not url_check(current)[0]:
                 return "rejected", current, ""
             with client.stream("GET", current) as r:
@@ -164,6 +194,8 @@ def resolve_redirect_chain(url: str, url_check: Callable, max_hops: int = 5,
                     return "blocked", current, ""
                 body = bytearray()
                 for chunk in r.iter_bytes():
+                    if deadline is not None and time.monotonic() > deadline:
+                        return "timeout", current, ""
                     body.extend(chunk)
                     if len(body) >= MAX_BODY_BYTES:
                         break
@@ -301,14 +333,21 @@ def _json_safe(v: Any) -> Any:
 def _enrich_core(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
                fixers: dict, challenge_check: Callable,
                url_check: Callable = check_url_safe,
-               resolver: Callable = resolve_redirect_chain) -> tuple:
+               resolver: Callable = resolve_redirect_chain,
+               deadline_s: float = PER_SUBMISSION_S) -> tuple:
+    deadline = time.monotonic() + deadline_s
     """Return (enrichment_status, enrichment_dict). Never raises."""
     row, user, url = build_row(sub, conference)
     ok, reason = url_check(url)
     if not ok:
         return "skipped", {"_error": "url rejected"}, url, None
     try:
-        verdict, final, html = resolver(url, url_check)
+        if resolver is resolve_redirect_chain:
+            verdict, final, html = resolve_redirect_chain(url, url_check, deadline=deadline)
+        else:
+            verdict, final, html = resolver(url, url_check)
+        if verdict == "timeout":
+            return "failed", {"_error": "timeout"}, url, None
         if verdict == "rejected":
             return "skipped", {"_error": "url rejected"}, url, None
         if verdict == "blocked":
@@ -319,9 +358,12 @@ def _enrich_core(sub: dict, conference: Optional[dict], cache, llm_call: Callabl
         if not text.strip() or challenge_check(html):
             return "blocked", {"_error": "page blocked or empty"}, url, final
         enrichment: dict = {}
+        results = {}
         with no_network():
-            results = {f: _run_fixer(f, fx, row, text, llm_call)
-                       for f, fx in fixers.items()}
+            for f, fx in fixers.items():
+                if time.monotonic() > deadline:
+                    return "failed", {"_error": "timeout"}, url, final
+                results[f] = _run_fixer(f, fx, row, text, llm_call)
         for field, (value, method) in results.items():
             if value is None:
                 continue
@@ -348,7 +390,8 @@ def _extra_urls(sub: dict) -> list:
 def enrich_one(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
                fixers: dict, challenge_check: Callable,
                url_check: Callable = check_url_safe,
-               resolver: Callable = resolve_redirect_chain) -> tuple:
+               resolver: Callable = resolve_redirect_chain,
+               deadline_s: float = PER_SUBMISSION_S) -> tuple:
     """Return (enrichment_status, enrichment_dict). Never raises.
 
     The dict always carries _submitted_url / _checked_url (the moderation RPC
@@ -356,7 +399,7 @@ def enrich_one(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
     the address check; they are never fetched).
     """
     status, enrichment, submitted, checked = _enrich_core(
-        sub, conference, cache, llm_call, fixers, challenge_check, url_check, resolver)
+        sub, conference, cache, llm_call, fixers, challenge_check, url_check, resolver, deadline_s)
     rejected = []
     for u in _extra_urls(sub):
         try:
@@ -448,6 +491,17 @@ def run(args, sb=None, cache_factory=None, llm_call=None, fixers=None,
             if time.time() - started > RUN_BUDGET_S:
                 print("budget exceeded; stopping cleanly")
                 break
+            if not args.dry_run:
+                # Mark first: a crash/timeout leaves 'failed', never 'waiting',
+                # so one poison row cannot starve every later run.
+                try:
+                    sb.table("community_contributions").update({
+                        "enrichment_status": "failed",
+                        "enrichment": {"_error": "in progress"},
+                    }).eq("id", sub["id"]).execute()
+                except Exception as e:  # noqa: BLE001
+                    print(f"  pre-mark failed for {sub.get('id')}: {e}")
+                    continue
             try:
                 conf = (fetch_conference(sb, sub.get("conference_id"))
                         if sub.get("kind") == "add_info" else None)
