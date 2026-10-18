@@ -39,6 +39,7 @@ class FakeSB:
 def ok_url(url): return True, ""
 no_challenge = lambda html: False
 llm = lambda prompt, **kw: None
+passthru = lambda u, c: ("ok", u)
 
 
 def submission(**payload):
@@ -73,7 +74,7 @@ def test_agrees_true_false_null():
         "description": lambda r, t, l: (None, None),
     }
     sub = submission(fees={"tiers": [{"label": "Std", "price": 100}]})
-    status, enr = es.enrich_one(sub, None, FakeCache(), llm, fixers, no_challenge, ok_url)
+    status, enr = es.enrich_one(sub, None, FakeCache(), llm, fixers, no_challenge, ok_url, passthru)
     assert status == "fetched"
     assert enr["city"]["agrees"] is True
     assert enr["cpd_points"]["agrees"] is False
@@ -83,16 +84,16 @@ def test_agrees_true_false_null():
 
 
 def test_blocked_page():
-    status, enr = es.enrich_one(submission(), None, FakeCache(text=""), llm, {}, no_challenge, ok_url)
+    status, enr = es.enrich_one(submission(), None, FakeCache(text=""), llm, {}, no_challenge, ok_url, passthru)
     assert status == "blocked" and "_error" in enr
-    status, _ = es.enrich_one(submission(), None, FakeCache(), llm, {}, lambda h: True, ok_url)
+    status, _ = es.enrich_one(submission(), None, FakeCache(), llm, {}, lambda h: True, ok_url, passthru)
     assert status == "blocked"
 
 
 def test_rejected_url_skipped():
     status, enr = es.enrich_one(submission(organiser_url="http://localhost/"), None,
                                 FakeCache(), llm, {}, no_challenge,
-                                lambda u: (False, "localhost"))
+                                lambda u: (False, "localhost"), passthru)
     assert (status, enr) == ("skipped", {"_error": "url rejected"})
 
 
@@ -104,7 +105,7 @@ def test_add_info_uses_conference_url():
     sub = {"id": "u2", "kind": "add_info", "conference_id": 7,
            "payload": {"fields": {"city": "Leeds"}}}
     cache = FakeCache()
-    status, enr = es.enrich_one(sub, conf, cache, llm, fixers, no_challenge, ok_url)
+    status, enr = es.enrich_one(sub, conf, cache, llm, fixers, no_challenge, ok_url, passthru)
     assert cache.gets[0] == "https://book.example.org/b"
     assert seen["row"]["source_url"] == "https://book.example.org/b"
     assert enr["city"]["agrees"] is True
@@ -116,7 +117,7 @@ def _run(dry):
     rc = es.run(argparse.Namespace(dry_run=dry, id=None), sb=sb,
                 cache_factory=FakeCache, llm_call=llm,
                 fixers={"city": lambda r, t, l: ("Leeds", "text")},
-                challenge_check=no_challenge, url_check=ok_url)
+                challenge_check=no_challenge, url_check=ok_url, resolver=passthru)
     return rc, sb
 
 
@@ -129,3 +130,54 @@ def test_real_run_writes():
     rc, sb = _run(False)
     assert rc == 0 and len(sb.updates) == 1
     assert sb.updates[0][1]["enrichment_status"] == "fetched"
+
+
+# ---- redirect chain
+import httpx
+
+
+def _client(routes):
+    def handler(req):
+        loc = routes.get(str(req.url))
+        if loc:
+            return httpx.Response(302, headers={"location": loc})
+        return httpx.Response(200)
+    return httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=False)
+
+
+def _public_only(u):
+    return ("169.254" not in u and "localhost" not in u, "")
+
+
+def test_redirect_to_metadata_rejected():
+    c = _client({"https://a.org/": "http://169.254.169.254/"})
+    v, hop = es.resolve_redirect_chain("https://a.org/", _public_only, client=c)
+    assert v == "rejected" and "169.254" in hop
+
+
+def test_redirect_to_public_host_accepted_and_final_fetched():
+    c = _client({"https://a.org/": "https://b.org/event"})
+    resolver = lambda u, uc: es.resolve_redirect_chain(u, uc, client=c)
+    cache = FakeCache()
+    status, _ = es.enrich_one(submission(organiser_url="https://a.org/"), None, cache,
+                              llm, {}, no_challenge, _public_only, resolver)
+    assert status == "fetched" and cache.gets == ["https://b.org/event"]
+
+
+def test_too_many_hops_rejected():
+    routes = {f"https://h{i}.org/": f"https://h{i+1}.org/" for i in range(10)}
+    v, _ = es.resolve_redirect_chain("https://h0.org/", ok_url, max_hops=5, client=_client(routes))
+    assert v == "rejected"
+
+
+def test_browser_fallback_disabled():
+    created = []
+
+    class C(FakeCache):
+        def __init__(self):
+            super().__init__(); self._fetch_browser = "orig"; created.append(self)
+
+    sb = FakeSB({"community_contributions": [submission()]})
+    es.run(argparse.Namespace(dry_run=True, id=None), sb=sb, cache_factory=C, llm_call=llm,
+           fixers={}, challenge_check=no_challenge, url_check=ok_url, resolver=passthru)
+    assert created[0]._fetch_browser("https://x.org") is None

@@ -37,10 +37,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # PageCache falls back to Playwright for WAF-blocked and SPA pages.
-      - name: Install Playwright Chromium
-        run: python -m playwright install --with-deps chromium
-
       - name: Enrich submissions
         working-directory: medconf-scraper
         env:

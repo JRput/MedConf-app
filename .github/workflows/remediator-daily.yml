@@ -125,6 +125,7 @@ jobs:
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
 
+      # Control: these URLs were approved by a moderator first, and the moderation UI refuses to approve a submission whose enrichment_status is 'skipped' (url rejected).
       - name: Run remediator on community source 1000
         working-directory: medconf-scraper
         env:

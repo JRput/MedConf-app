@@ -22,6 +22,13 @@ Usage:
   python enrich_submissions.py --dry-run       # no writes, prints what would happen
   python enrich_submissions.py --id <uuid>     # one submission (any state)
 
+Safety: every hop of the organiser URL's redirect chain is SSRF-checked before
+PageCache sees the final URL, and the browser fallback is disabled for these
+user-submitted URLs, so JS-only organiser pages come back as 'blocked' and are
+reviewed on the user's data alone. Residual TOCTOU (DNS rebinding between the
+check and the fetch) is accepted: the job runs on an ephemeral GitHub runner
+and moderators only ever see structured fixer outputs.
+
 Exit code: 0 even when some submissions fail; 1 only on config errors.
 """
 
@@ -35,7 +42,9 @@ import sys
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable, Optional
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
+
+import httpx
 
 BATCH_LIMIT = 25
 MIN_AGE_MINUTES = 2
@@ -94,6 +103,51 @@ def check_url_safe(url: Optional[str]) -> tuple:
         if _ip_is_blocked(ip):
             return False, "non-public address"
     return True, ""
+
+
+_REDIRECT_STATUSES = (301, 302, 303, 307, 308)
+_UA = "Mozilla/5.0 (compatible; MedConfBot/1.0; +enrichment)"
+
+
+def resolve_redirect_chain(url: str, url_check: Callable, max_hops: int = 5,
+                           client: Optional[httpx.Client] = None) -> tuple:
+    """Follow redirects manually, SSRF-checking every hop.
+
+    Returns ('ok', final_url) or ('rejected', offending_url_or_reason).
+    """
+    own = client is None
+    if own:
+        client = httpx.Client(follow_redirects=False, timeout=15,
+                              headers={"User-Agent": _UA})
+    try:
+        current = url
+        for _ in range(max_hops + 1):
+            if not url_check(current)[0]:
+                return "rejected", current
+            status, location = _probe(client, current)
+            if status not in _REDIRECT_STATUSES or not location:
+                return "ok", current
+            if _ >= max_hops:
+                break
+            current = urljoin(current, location)
+        return "rejected", "too many redirects"
+    except Exception as e:  # noqa: BLE001
+        return "rejected", f"redirect probe failed: {type(e).__name__}"
+    finally:
+        if own:
+            client.close()
+
+
+def _probe(client, url: str) -> tuple:
+    """(status, Location) via HEAD, falling back to a streamed GET."""
+    try:
+        r = client.head(url)
+        if r.status_code not in (405, 501, 403):
+            return r.status_code, r.headers.get("location")
+    except httpx.HTTPError:
+        pass
+    with client.stream("GET", url) as r:
+        return r.status_code, r.headers.get("location")
 
 
 # ------------------------------------------------------------ row building
@@ -198,13 +252,19 @@ class _FetchBudget:
 
 def enrich_one(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
                fixers: dict, challenge_check: Callable,
-               url_check: Callable = check_url_safe) -> tuple:
+               url_check: Callable = check_url_safe,
+               resolver: Callable = resolve_redirect_chain) -> tuple:
     """Return (enrichment_status, enrichment_dict). Never raises."""
     row, user, url = build_row(sub, conference)
     ok, reason = url_check(url)
     if not ok:
         return "skipped", {"_error": "url rejected"}
     try:
+        verdict, final = resolver(url, url_check)
+        if verdict != "ok":
+            return "skipped", {"_error": "url rejected"}
+        url = final
+        row["source_url"] = url
         budget = _FetchBudget(cache, MAX_FETCHES_PER_SUBMISSION)
         text = budget.text(url)
         html = cache.get_html(url)
@@ -293,7 +353,8 @@ def _default_llm_call():
 
 
 def run(args, sb=None, cache_factory=None, llm_call=None, fixers=None,
-        challenge_check=None, url_check=check_url_safe) -> int:
+        challenge_check=None, url_check=check_url_safe,
+        resolver=resolve_redirect_chain) -> int:
     from dotenv import load_dotenv
     load_dotenv()
     if sb is None:
@@ -321,6 +382,8 @@ def run(args, sb=None, cache_factory=None, llm_call=None, fixers=None,
     started = time.time()
     totals: dict = {}
     with cache_factory() as cache:
+        # User-submitted URLs must not drive a headless browser on the runner.
+        cache._fetch_browser = lambda url: None
         for sub in subs:
             if time.time() - started > RUN_BUDGET_S:
                 print("budget exceeded; stopping cleanly")
@@ -329,7 +392,7 @@ def run(args, sb=None, cache_factory=None, llm_call=None, fixers=None,
                 conf = (fetch_conference(sb, sub.get("conference_id"))
                         if sub.get("kind") == "add_info" else None)
                 status, enrichment = enrich_one(sub, conf, cache, llm_call, fixers,
-                                                challenge_check, url_check)
+                                                challenge_check, url_check, resolver)
             except Exception as e:  # noqa: BLE001
                 status, enrichment = "failed", {"_error": f"{type(e).__name__}: {e}"[:300]}
             totals[status] = totals.get(status, 0) + 1
