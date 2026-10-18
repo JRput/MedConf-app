@@ -30,7 +30,7 @@ export function Navbar() {
             <span className="type-h3 text-fg-strong">MedConf</span>
           </Link>
 
-          <div className="hidden items-center gap-1 md:flex">
+          <div className="hidden items-center gap-1 xl:flex">
             <ThemeToggle />
             <NavLink href="/conferences" icon={<Calendar className="size-4" />}>
               Directory
@@ -81,7 +81,7 @@ export function Navbar() {
 
           <button
             onClick={() => setIsMenuOpen((o) => !o)}
-            className="rounded-md p-2 text-fg-muted hover:bg-surface-hover hover:text-fg md:hidden"
+            className="rounded-md p-2 text-fg-muted hover:bg-surface-hover hover:text-fg xl:hidden"
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
             {isMenuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
@@ -90,7 +90,7 @@ export function Navbar() {
       </div>
 
       {isMenuOpen && (
-        <div className="border-t border-border bg-bg md:hidden">
+        <div className="border-t border-border bg-bg xl:hidden">
           <div className="space-y-1 px-4 py-4">
             <MobileNavLink href="/conferences" onClick={() => setIsMenuOpen(false)}>
               Directory
@@ -174,7 +174,7 @@ function NavLink({ href, children, icon }: { href: string; children: React.React
     <Link
       href={href}
       className={cn(
-        'flex items-center gap-2 rounded-md px-3 py-2 text-[0.8125rem] font-medium text-fg-muted',
+        'flex items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-[0.8125rem] font-medium text-fg-muted',
         'transition-colors duration-150 hover:bg-surface-hover hover:text-fg'
       )}
     >
