@@ -1,0 +1,53 @@
+name: Enrich submissions
+
+# Every 6 hours: runs the remediator's quick fixers against the organiser
+# page of each pending community submission (enrichment_status='waiting')
+# so moderators see "found on organiser site" next to what the user typed.
+# Idempotent: processed rows flip to fetched/blocked/failed/skipped.
+# Offset to :15 so it never lines up with the 02/03/04/08 UTC crons.
+on:
+  schedule:
+    - cron: '15 */6 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: enrich-submissions
+  cancel-in-progress: false
+
+jobs:
+  enrich:
+    name: Enrich pending submissions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: medconf-scraper/requirements.txt
+
+      - name: Install Python dependencies
+        working-directory: medconf-scraper
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # PageCache falls back to Playwright for WAF-blocked and SPA pages.
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: Enrich submissions
+        working-directory: medconf-scraper
+        env:
+          KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+          KIMI_BASE_URL: https://integrate.api.nvidia.com/v1
+          KIMI_MODEL_CHAIN: "nvidia/nemotron-3-super-120b-a12b,meta/muse-glimmer-30b,openai/gpt-oss-20b"
+          KIMI_VISION_MODEL_CHAIN: "meta/muse-glimmer-30b,meta/llama-3.2-11b-vision-instruct"
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python enrich_submissions.py
