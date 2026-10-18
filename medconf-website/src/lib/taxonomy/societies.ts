@@ -121,6 +121,9 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   ESR: { short: 'ESR', name: 'European Society of Radiology (ECR)', kind: 'international', country: 'EU' },
   'CCR London': { short: 'CCR London', name: 'CCR London (clinical, cosmetic and regenerative medicine congress)', kind: 'other', country: 'UK' },
   'NHS ConfedExpo': { short: 'NHS ConfedExpo', name: 'NHS ConfedExpo (NHS Confederation and NHS England)', kind: 'other', country: 'UK' },
+  // Pseudo-society for user-submitted events (source 1000). Stays a directory
+  // filter chip; excluded from the /societies listing.
+  Community: { short: 'Community', name: 'Community submissions', kind: 'other', country: 'International' },
   ViVE: { short: 'ViVE', name: 'ViVE (digital health event)', kind: 'other', country: 'US' },
 }
 

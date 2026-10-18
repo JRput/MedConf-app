@@ -5,10 +5,18 @@ import { useMemo, useState } from 'react'
 import type { PricingTier } from '@/lib/types'
 import { Clock, ChevronDown, ChevronRight, ArrowUpRight } from 'lucide-react'
 import { currencySymbol } from '@/lib/conference-helpers'
+import type { Conference } from '@/lib/types'
+import { AddInfoTrigger } from '@/components/community/AddInfoTrigger'
+import { CommunityTag } from '@/components/community/CommunityTag'
 import { cn } from '@/lib/utils'
 
+/** A tier as displayed: scraped, or mapped from a published community tier. */
+type DisplayTier = PricingTier & { fromCommunity?: boolean }
+
 interface PricingTableProps {
-  tiers: PricingTier[]
+  tiers: DisplayTier[]
+  /** When given (and the event is not a course), an empty table offers "Know the fees? Add them". */
+  conference?: Conference
   /** Organiser's site; powers the "Visit organiser site" prompts. */
   organiserUrl?: string | null
 }
@@ -45,7 +53,8 @@ function isAddOn(label: string): boolean {
   return ADD_ON_TOKEN_RE.test(label)
 }
 
-export function PricingTable({ tiers, organiserUrl }: PricingTableProps) {
+export function PricingTable({ tiers, organiserUrl, conference }: PricingTableProps) {
+  const fromCommunity = tiers.length > 0 && tiers.every((t) => t.fromCommunity)
   // Separate optional add-ons (lunch, dinner, workshop) from core
   // registration tiers. Only bucket if there are >=2 add-ons — a single
   // one is noise not worth its own section.
@@ -114,6 +123,13 @@ export function PricingTable({ tiers, organiserUrl }: PricingTableProps) {
         ) : (
           <p className="text-fg-subtle">Visit the organiser&apos;s site to register.</p>
         )}
+        {conference && conference.event_type !== 'course' && (
+          <div className="border-t border-border-subtle pt-1">
+            <AddInfoTrigger conference={conference} tiers={tiers} section="fees" variant="link">
+              Know the fees? Add them
+            </AddInfoTrigger>
+          </div>
+        )}
       </div>
     )
   }
@@ -132,6 +148,12 @@ export function PricingTable({ tiers, organiserUrl }: PricingTableProps) {
 
   return (
     <div className="space-y-3">
+      {fromCommunity && (
+        <p className="flex items-center gap-2 type-caption text-fg-muted">
+          <CommunityTag /> Fees added by the community
+        </p>
+      )}
+
       {/* Band tabs — only rendered when grouping kicks in */}
       {useTabs && groups.length > 1 && (
         <div className="flex flex-wrap gap-1.5">
@@ -255,7 +277,9 @@ export function PricingTable({ tiers, organiserUrl }: PricingTableProps) {
       )}
 
       <p className="type-caption text-fg-subtle">
-        Fees are taken from the organiser&apos;s site and may change — confirm before booking.
+        {fromCommunity
+          ? 'Reported by MedConf members and not yet confirmed by the organiser — check before booking.'
+          : "Fees are taken from the organiser's site and may change — confirm before booking."}
         {organiserUrl && <> <OrganiserLink href={organiserUrl} className="type-caption" /></>}
       </p>
     </div>

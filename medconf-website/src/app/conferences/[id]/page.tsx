@@ -11,6 +11,8 @@ import { resolveDirectory, wantsFixture } from '@/lib/directory-source'
 import { expandSpecialtyFilter, type DirectoryFilters } from '@/lib/directory-query'
 import { canonicalSpecialty } from '@/lib/taxonomy/specialties'
 import type { Conference, PricingTier, CourseSession, SourceSummary } from '@/lib/types'
+import type { CommunityFact, CommunityTier } from '@/lib/community/types'
+import { overlayConference, pickTiers } from '@/lib/community/overlay'
 import { hasAbstractInfo } from '@/lib/conference-helpers'
 import { formatDateRange } from '@/lib/format'
 
@@ -26,6 +28,8 @@ import { SocietyChip } from '@/components/domain/SocietyChip'
 import { PricingTable } from '@/components/conferences/PricingTable'
 import { SessionsTable } from '@/components/conferences/SessionsTable'
 import { ReminderPanel } from '@/components/conferences/ReminderPanel'
+import { CommunityNotes } from '@/components/community/CommunityNotes'
+import { AddInfoTrigger } from '@/components/community/AddInfoTrigger'
 
 async function fetchConferenceData(id: number) {
   const supabase = createSupabaseServerClient()
@@ -52,7 +56,23 @@ async function fetchConferenceData(id: number) {
     society = data?.society ?? null
   }
 
-  return { conference, tiers, sessions, society }
+  // Community layer: published facts/tiers only (RLS exposes nothing else to
+  // anon, and we filter explicitly). A missing table or any error must never
+  // break the page, so failures degrade to "no community data".
+  let facts: CommunityFact[] = []
+  let communityTiers: CommunityTier[] = []
+  try {
+    const [f, t] = await Promise.all([
+      supabase.from('community_facts').select('*').eq('conference_id', id).eq('is_published', true),
+      supabase.from('community_tiers').select('*').eq('conference_id', id).eq('is_published', true),
+    ])
+    if (!f.error) facts = (f.data ?? []) as CommunityFact[]
+    if (!t.error) communityTiers = (t.data ?? []) as CommunityTier[]
+  } catch {
+    // ignore
+  }
+
+  return { conference, tiers, sessions, society, facts, communityTiers }
 }
 
 async function fetchRelatedEvents(conference: Conference) {
@@ -121,8 +141,13 @@ export default async function ConferenceDetailPage({ params }: { params: Promise
   const data = await fetchConferenceData(Number(id))
   if (!data) notFound()
 
-  const { conference: c, tiers, sessions, society } = data
+  const { conference: scraped, tiers: scrapedTiers, sessions, society, facts, communityTiers } = data
+  // Scraped data always wins; community values only fill what is empty.
+  const { conference: c, communityFields } = overlayConference(scraped, facts)
+  const tiers = pickTiers(scrapedTiers, communityTiers)
+  const communityFieldList = [...communityFields]
   const related = await fetchRelatedEvents(c)
+  const abstractsMissing = !hasAbstractInfo(c) && c.event_type !== 'course' && !c.is_on_demand
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-bg">
@@ -130,7 +155,7 @@ export default async function ConferenceDetailPage({ params }: { params: Promise
         <Breadcrumb specialty={c.specialty} title={c.conference_name} />
 
         {/* Mobile summary card sits above the fold, before the body content */}
-        <EventSidebar conference={c} tiers={tiers} className="mb-6 lg:hidden" />
+        <EventSidebar conference={c} tiers={tiers} communityFields={communityFieldList} className="mb-6 lg:hidden" />
 
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <main className="min-w-0 space-y-8">
@@ -167,20 +192,38 @@ export default async function ConferenceDetailPage({ params }: { params: Promise
             ) : (
               <section className="space-y-3">
                 <h2 className="type-h3 text-fg-strong">Fees</h2>
-                <PricingTable tiers={tiers} organiserUrl={c.organiser_url ?? c.booking_url} />
+                <PricingTable tiers={tiers} organiserUrl={c.organiser_url ?? c.booking_url} conference={c} />
               </section>
             )}
 
-            {hasAbstractInfo(c) && <AbstractsBlock conference={c} />}
+            {hasAbstractInfo(c) ? (
+              <AbstractsBlock conference={c} communityFields={communityFieldList} />
+            ) : (
+              abstractsMissing && (
+                <div className="flex flex-wrap items-center justify-between gap-x-4 rounded-lg border border-dashed border-border px-4 py-1.5">
+                  <p className="type-small text-fg-muted">No abstract submission details listed.</p>
+                  <AddInfoTrigger conference={c} tiers={tiers} section="abstracts" variant="link">
+                    Know the abstract deadline? Add it
+                  </AddInfoTrigger>
+                </div>
+              )
+            )}
 
             <OrganiserBlock conference={c} society={society} />
+
+            <CommunityNotes facts={facts} hasDescription={!!c.description} />
 
             <ReminderPanel conference={c} sessions={sessions} />
 
             <RelatedEvents events={related} />
           </main>
 
-          <EventSidebar conference={c} tiers={tiers} className="hidden self-start lg:sticky lg:top-6 lg:block" />
+          <EventSidebar
+            conference={c}
+            tiers={tiers}
+            communityFields={communityFieldList}
+            className="hidden self-start lg:sticky lg:top-6 lg:block"
+          />
         </div>
 
         <div className="mt-8 border-t border-border-subtle pt-4">

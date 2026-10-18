@@ -52,7 +52,10 @@ export default async function SocietiesPage({
     getSocietyNextDates(supabase, { fixture }),
   ])
 
-  const grouped = societiesByKind()
+  // 'Community' (user-submitted events) is a directory chip, not a society.
+  const grouped = Object.fromEntries(
+    Object.entries(societiesByKind()).map(([kind, list]) => [kind, list.filter((s) => s.short !== 'Community')])
+  ) as ReturnType<typeof societiesByKind>
 
   return (
     <div className="mx-auto max-w-[1180px] px-4 pb-20 sm:px-6">

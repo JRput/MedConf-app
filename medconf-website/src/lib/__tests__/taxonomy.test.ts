@@ -49,6 +49,14 @@ describe('specialty taxonomy', () => {
     expect(new Set(coveredByReverse)).toEqual(new Set(allMapped))
   })
 
+  it('every parent label canonicalises to its own slug (G1: stored label must round-trip)', () => {
+    for (const p of SPECIALTY_PARENTS) {
+      expect(RAW_TO_CANONICAL[p.label], p.label).toBe(p.slug)
+      expect(canonicalSpecialty(p.label).parent, p.label).toBe(p.slug)
+      expect(rawValuesForParent(p.slug)).toContain(p.label)
+    }
+  })
+
   it('every value in RAW_TO_CANONICAL points at a real parent slug', () => {
     const validSlugs = new Set(SPECIALTY_PARENTS.map((p) => p.slug))
     for (const parent of Object.values(RAW_TO_CANONICAL)) {
@@ -93,9 +101,18 @@ describe('societies taxonomy', () => {
     expect(info?.kind).toBe('other')
   })
 
-  it('every entry has a non-empty full name distinct from its short code', () => {
-    for (const info of Object.values(SOCIETIES)) {
-      expect(info.name.length).toBeGreaterThan(info.short.length)
+  it('every entry has a non-empty full name that is never shorter than its short code', () => {
+    // A single-word society (e.g. "Endocrine Society") legitimately has
+    // name === short, so equality is allowed; only an empty or truncated
+    // name is a data error.
+    for (const [key, info] of Object.entries(SOCIETIES)) {
+      expect(info.name.trim().length, key).toBeGreaterThan(0)
+      expect(info.name.length, key).toBeGreaterThanOrEqual(info.short.length)
+      expect(info.short, key).toBe(key)
     }
+  })
+
+  it('has a Community pseudo-society for user-submitted events', () => {
+    expect(societyInfo('Community')?.name).toBe('Community submissions')
   })
 })

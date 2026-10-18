@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button'
 import { CpdLabel } from '@/components/domain/CpdLabel'
 import { PriceLabel } from '@/components/domain/PriceLabel'
 import type { Conference, PricingTier } from '@/lib/types'
+import type { FactField } from '@/lib/community/types'
+import { CommunityTag } from '@/components/community/CommunityTag'
+import { AddInfoTrigger } from '@/components/community/AddInfoTrigger'
 import { formatDateRange } from '@/lib/format'
 import { downloadIcs } from '@/lib/ics'
 import { useAuth } from '@/hooks/useAuth'
@@ -21,13 +24,18 @@ import { cn } from '@/lib/utils'
 export function EventSidebar({
   conference,
   tiers,
+  communityFields = [],
   className,
 }: {
   conference: Conference
-  tiers: PricingTier[]
+  tiers: (PricingTier & { fromCommunity?: boolean })[]
+  /** Fields whose displayed value came from the community overlay. */
+  communityFields?: readonly FactField[]
   className?: string
 }) {
   const c = conference
+  const fromCommunity = (...fields: FactField[]) => fields.some((f) => communityFields.includes(f))
+  const priceFromCommunity = tiers.length > 0 && tiers.every((t) => t.fromCommunity)
   const { user } = useAuth()
   const { isSaved, toggleSave } = useSaved()
   const saved = isSaved(c.id)
@@ -55,6 +63,7 @@ export function EventSidebar({
         <div>
           <p className="type-body font-medium text-fg-strong">
             {formatDateRange(c.start_date, c.end_date)}
+            {fromCommunity('start_date', 'end_date') && <CommunityTag className="ml-2" />}
           </p>
           {c.start_time && (
             <p className="type-small text-fg-muted">
@@ -70,11 +79,15 @@ export function EventSidebar({
         <FormatIcon format={c.event_format} />
         <div className="min-w-0">
           {c.event_format === 'online' ? (
-            <p className="type-body font-medium text-fg-strong">Online</p>
+            <p className="type-body font-medium text-fg-strong">
+              Online
+              {fromCommunity('event_format') && <CommunityTag className="ml-2" />}
+            </p>
           ) : (c.venue_name || c.city) ? (
             <>
               <p className="type-body font-medium text-fg-strong">
                 {[c.venue_name, c.city].filter(Boolean).join(', ')}
+                {fromCommunity('venue_name', 'city', 'region') && <CommunityTag className="ml-2" />}
               </p>
               {c.region && <p className="type-small text-fg-muted">{c.region}</p>}
               {mapHref && (
@@ -89,7 +102,12 @@ export function EventSidebar({
               )}
             </>
           ) : (
-            <p className="type-body text-fg-subtle italic">Location TBC</p>
+            <div>
+              <p className="type-body text-fg-subtle italic">Location TBC</p>
+              <AddInfoTrigger conference={c} tiers={tiers} section="venue" variant="link">
+                Know the venue? Add it
+              </AddInfoTrigger>
+            </div>
           )}
         </div>
       </div>
@@ -97,8 +115,14 @@ export function EventSidebar({
       {/* CPD + price */}
       {(c.cpd_accredited || priceMin !== null) && (
         <div className="flex items-center justify-between gap-3 border-t border-border-subtle pt-4">
-          <CpdLabel accredited={c.cpd_accredited} points={c.cpd_points} size="md" />
-          <PriceLabel min={priceMin} max={priceMax} currency={currency} href={c.organiser_url ?? c.booking_url} size="md" />
+          <span className="inline-flex items-center gap-1.5">
+            <CpdLabel accredited={c.cpd_accredited} points={c.cpd_points} size="md" />
+            {fromCommunity('cpd_accredited', 'cpd_points') && <CommunityTag />}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <PriceLabel min={priceMin} max={priceMax} currency={currency} href={c.organiser_url ?? c.booking_url} size="md" />
+            {priceFromCommunity && <CommunityTag />}
+          </span>
         </div>
       )}
 
@@ -134,6 +158,7 @@ export function EventSidebar({
           <CalendarButton conference={c} />
         </div>
         <ShareButton conference={c} />
+        <AddInfoTrigger conference={c} tiers={tiers} />
       </div>
     </aside>
   )

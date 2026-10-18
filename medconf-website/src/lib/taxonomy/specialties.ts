@@ -265,6 +265,16 @@ export const RAW_TO_CANONICAL: Record<string, string> = {
   'None': 'other',
 }
 
+// G1 (community contributions): the submit wizard stores the parent LABEL in
+// `conferences.specialty`, and every directory filter / specialty alert
+// expands a parent slug to the raw values in this map. A label that is not a
+// key here would silently fall to "other" and never match its own filter.
+// 18 of 31 labels were missing; this loop guarantees the invariant for any
+// parent added later. Existing explicit entries are never overridden.
+for (const p of SPECIALTY_PARENTS) {
+  if (!(p.label in RAW_TO_CANONICAL)) RAW_TO_CANONICAL[p.label] = p.slug
+}
+
 export interface CanonicalSpecialty {
   parent: string
   label: string

@@ -17,7 +17,11 @@ import { createServerClient } from '@supabase/ssr'
 //
 // /calendar is personal by design — it shows only the signed-in user's saved
 // events, so there is no useful signed-out rendering of it to leave public.
-const PROTECTED_PATHS = ['/saved', '/settings', '/dashboard', '/onboarding', '/calendar']
+//
+// /submit (community event submissions) needs a signed-in user; /admin is
+// additionally restricted to user_profiles.is_admin below.
+const PROTECTED_PATHS = ['/saved', '/settings', '/dashboard', '/onboarding', '/calendar', '/submit', '/admin']
+const ADMIN_PATHS = ['/admin']
 const AUTH_PATHS = ['/auth/login', '/auth/signup']
 
 function isUnder(path: string, candidates: string[]) {
@@ -74,14 +78,32 @@ export async function middleware(request: NextRequest) {
   }
 
   if (isUnder(path, PROTECTED_PATHS)) {
-    const { data: profile } = await supabase
+    // One lookup serves both gates. If the is_admin column is not there yet
+    // (migration not applied), retry without it so every protected page
+    // keeps working instead of bouncing everyone to /onboarding.
+    let profile: { profile_completed_at: string | null; is_admin?: boolean | null } | null = null
+    const full = await supabase
       .from('user_profiles')
-      .select('profile_completed_at')
+      .select('profile_completed_at, is_admin')
       .eq('id', user.id)
       .maybeSingle()
+    if (full.error) {
+      const fallback = await supabase
+        .from('user_profiles')
+        .select('profile_completed_at')
+        .eq('id', user.id)
+        .maybeSingle()
+      profile = fallback.data
+    } else {
+      profile = full.data
+    }
 
     if (!profile?.profile_completed_at) {
       return NextResponse.redirect(new URL('/onboarding', request.url))
+    }
+
+    if (isUnder(path, ADMIN_PATHS) && profile.is_admin !== true) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
 

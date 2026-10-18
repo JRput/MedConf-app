@@ -25,6 +25,7 @@ export function Footer() {
             <ul className="space-y-2.5">
               <FooterLink href="/conferences">Directory</FooterLink>
               <FooterLink href="/societies">Societies</FooterLink>
+              <FooterLink href="/submit">Submit an event</FooterLink>
               <FooterLink href="/saved">Saved events</FooterLink>
               <FooterLink href="/settings">Notifications</FooterLink>
             </ul>

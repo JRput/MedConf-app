@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-02",
+  "generatedAt": "2026-10-18",
   "generatedBy": "scripts/export-taxonomy.ts (npm run taxonomy:export) — do not hand-edit",
   "parents": [
     {
@@ -293,6 +293,26 @@
     "Pharmaceutical Medicine": "research-digital-health",
     "Nursing": "allied-health-nursing",
     "Podiatry": "allied-health-nursing",
-    "None": "other"
+    "None": "other",
+    "General & Internal Medicine": "medicine-general",
+    "General & Minor Surgery": "surgery-general",
+    "Anaesthetics & Critical Care": "anaesthetics-critical-care",
+    "Radiology & Imaging": "radiology-imaging",
+    "Psychiatry & Mental Health": "psychiatry-mental-health",
+    "Obstetrics, Gynaecology & Women's Health": "obgyn-womens-health",
+    "Musculoskeletal, Trauma & Orthopaedics": "msk-trauma-orthopaedics",
+    "Pathology & Laboratory Medicine": "pathology-laboratory-medicine",
+    "Neurology & Neurosurgery": "neurology-neurosurgery",
+    "Endocrinology & Diabetes": "endocrinology-diabetes",
+    "ENT / Otolaryngology": "ent-otolaryngology",
+    "Dentistry & Oral-Maxillofacial": "dentistry-oral-maxillofacial",
+    "Palliative Care & Rehabilitation": "palliative-rehabilitation",
+    "Infectious Disease & Immunology": "infectious-disease-immunology",
+    "Public Health & Occupational Medicine": "public-health",
+    "Leadership, Management & Professional Practice": "leadership-management",
+    "Medical Education & Exams": "medical-education",
+    "Research & Digital Health": "research-digital-health",
+    "Nursing & Allied Health": "allied-health-nursing",
+    "Other": "other"
   }
 }

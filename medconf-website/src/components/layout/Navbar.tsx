@@ -2,9 +2,10 @@
 'use client'
 
 import { useAuth } from '@/hooks/useAuth'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Menu, X, Calendar, CalendarDays, Bookmark, Settings, LogOut, LayoutDashboard, Building2 } from 'lucide-react'
+import { Menu, X, Calendar, CalendarDays, Bookmark, Settings, LogOut, LayoutDashboard, Building2, PlusCircle, ShieldCheck } from 'lucide-react'
 import { NotificationBell } from './NotificationBell'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Button } from '@/components/ui/button'
@@ -12,6 +13,7 @@ import { cn } from '@/lib/utils'
 
 export function Navbar() {
   const { user, signOut, loading } = useAuth()
+  const isAdmin = useIsAdmin()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
@@ -47,6 +49,14 @@ export function Navbar() {
                 <NavLink href="/settings" icon={<Settings className="size-4" />}>
                   Settings
                 </NavLink>
+                <NavLink href="/submit" icon={<PlusCircle className="size-4" />}>
+                  Submit an event
+                </NavLink>
+                {isAdmin === true && (
+                  <NavLink href="/admin/moderation" icon={<ShieldCheck className="size-4" />}>
+                    Moderation
+                  </NavLink>
+                )}
                 <NotificationBell />
                 <Button variant="ghost" size="sm" onClick={signOut}>
                   <LogOut className="size-4" />
@@ -98,6 +108,20 @@ export function Navbar() {
                 <MobileNavLink href="/settings" onClick={() => setIsMenuOpen(false)}>
                   Settings
                 </MobileNavLink>
+                <MobileNavLink href="/submit" onClick={() => setIsMenuOpen(false)}>
+                  <span className="flex items-center gap-2">
+                    <PlusCircle className="size-4" aria-hidden />
+                    Submit an event
+                  </span>
+                </MobileNavLink>
+                {isAdmin === true && (
+                  <MobileNavLink href="/admin/moderation" onClick={() => setIsMenuOpen(false)}>
+                    <span className="flex items-center gap-2">
+                      <ShieldCheck className="size-4" aria-hidden />
+                      Moderation
+                    </span>
+                  </MobileNavLink>
+                )}
                 <button
                   onClick={() => {
                     signOut()
