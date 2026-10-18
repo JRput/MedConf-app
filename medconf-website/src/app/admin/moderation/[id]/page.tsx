@@ -10,6 +10,7 @@ import { ActionBar } from '@/components/moderation/ActionBar'
 import { DuplicatesPanel } from '@/components/moderation/DuplicatesPanel'
 import { EnrichmentChip } from '@/components/moderation/EnrichmentChip'
 import { FieldReviewTable } from '@/components/moderation/FieldReviewTable'
+import { UncheckedConfirm } from '@/components/moderation/UncheckedConfirm'
 import { MergePicker } from '@/components/moderation/MergePicker'
 import { SubmitterCell } from '@/components/moderation/SubmitterCell'
 import { TierReviewTable } from '@/components/moderation/TierReviewTable'
@@ -26,6 +27,8 @@ import {
   feesPayloadToDraft,
   finalProblems,
   isAddInfo,
+  needsOverride,
+  rejectedUrls,
   safeHref,
   userFields,
   type DuplicateRow,
@@ -134,6 +137,8 @@ function Review({ item, refresh }: { item: QueueItem; refresh: () => void }) {
   const [outcome, setOutcome] = useState<{ label: string; conferenceId: number | null } | null>(null)
   const [mergeOpen, setMergeOpen] = useState(false)
   const [mergePre, setMergePre] = useState<DuplicateRow | null>(null)
+  // An approve/merge waiting for the "unchecked link" confirmation.
+  const [confirmUnchecked, setConfirmUnchecked] = useState<{ verb: 'Approve' | 'Merge'; run: () => Promise<boolean> } | null>(null)
 
   // Fees edit: untouched = whatever buildFinalPayload defaults to; empty draft = no fees.
   const feesCheck = useMemo(() => {
@@ -152,6 +157,9 @@ function Review({ item, refresh }: { item: QueueItem; refresh: () => void }) {
     return p
   }, [source, built, feesCheck.invalid])
   const check = canApprove(item)
+  const rejected = useMemo(() => rejectedUrls(item.enrichment), [item.enrichment])
+  const finalOrganiser = (addInfo ? (built.final.fields as Record<string, unknown> | undefined)?.organiser_url : built.final.organiser_url) as string | undefined
+  const override = needsOverride(item, finalOrganiser)
   const differs = useMemo(() => disagreementFields(item.enrichment, userFields(source)), [item.enrichment, source])
   const user = userFields(item.payload)
   const userFeesPayload = (item.payload as unknown as { fees?: FeesPayload }).fees
@@ -183,10 +191,26 @@ function Review({ item, refresh }: { item: QueueItem; refresh: () => void }) {
     return false
   }
 
-  const mergeInto = (conferenceId: number) =>
-    act('merge', { final: { ...built.final, merge_into_conference_id: conferenceId } }, `Merged into #${conferenceId}`).then((ok) => {
+  const doApprove = (unchecked: boolean) =>
+    act('approve', { final: unchecked ? { ...built.final, approve_unchecked: true } : built.final }, 'Approved and published')
+
+  const doMerge = (conferenceId: number, unchecked: boolean) =>
+    act(
+      'merge',
+      { final: { ...built.final, merge_into_conference_id: conferenceId, ...(unchecked ? { approve_unchecked: true } : {}) } },
+      `Merged into #${conferenceId}`
+    ).then((ok) => {
       if (ok) setMergeOpen(false)
+      return ok
     })
+
+  const mergeInto = (conferenceId: number) => {
+    if (override.needed) {
+      setConfirmUnchecked({ verb: 'Merge', run: () => doMerge(conferenceId, true) })
+      return Promise.resolve(false)
+    }
+    return doMerge(conferenceId, false)
+  }
 
   const searchSeed = typeof user.conference_name === 'string' ? user.conference_name : item.eventName
 
@@ -311,11 +335,16 @@ function Review({ item, refresh }: { item: QueueItem; refresh: () => void }) {
         <ActionBar
           item={item}
           check={check}
+          override={override}
+          rejected={rejected}
           problems={open ? problems : []}
           busy={busy}
           error={error}
           duplicateOf={duplicateOf}
-          onApprove={() => void act('approve', { final: built.final }, 'Approved and published')}
+          onApprove={() => {
+            if (override.needed) setConfirmUnchecked({ verb: 'Approve', run: () => doApprove(true) })
+            else void doApprove(false)
+          }}
           onReason={(action, reason) =>
             act(action, { note: reason }, action === 'needs_info' ? 'Information requested' : action === 'reject' ? 'Rejected' : 'Hidden')
           }
@@ -326,6 +355,20 @@ function Review({ item, refresh }: { item: QueueItem; refresh: () => void }) {
           onMergeInto={(cid) => void mergeInto(cid)}
         />
       </div>
+
+      <UncheckedConfirm
+        open={confirmUnchecked !== null}
+        onOpenChange={(o) => !o && setConfirmUnchecked(null)}
+        reason={override.reason}
+        verb={confirmUnchecked?.verb ?? 'Approve'}
+        busy={busy}
+        onConfirm={async () => {
+          const pending = confirmUnchecked
+          if (!pending) return
+          await pending.run()
+          setConfirmUnchecked(null)
+        }}
+      />
 
       <MergePicker
         open={mergeOpen}

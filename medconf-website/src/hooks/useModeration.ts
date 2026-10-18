@@ -159,8 +159,10 @@ export type ModerationResult =
   | { ok: false; code: 'error'; message: string }
 
 /** Friendly text for the errors the RPC can raise. */
-export function moderationErrorMessage(message: string | undefined): string {
+export function moderationErrorMessage(message: string | undefined, code?: string): string {
   const m = message ?? ''
+  // 22023: the database publish gate (unsafe URL, unchecked URL, changed URL). Its text is written for moderators.
+  if (code === '22023' && m) return m
   if (/admin only/i.test(m)) return 'Only admins can do this. Your account is not flagged as an admin.'
   if (/only pending items/i.test(m) || /only published items/i.test(m)) return 'Someone already handled this item. Refresh to see its current status.'
   if (/not found/i.test(m)) return 'The item or the listing it points to no longer exists.'
@@ -190,7 +192,7 @@ export function useModerate() {
           p_note: opts.note?.trim() || null,
           p_final: opts.final ?? null,
         })
-        if (error) return { ok: false, code: 'error', message: moderationErrorMessage(error.message) }
+        if (error) return { ok: false, code: 'error', message: moderationErrorMessage(error.message, error.code) }
         const res = (data ?? {}) as { ok?: boolean; code?: string; status?: string; conference_id?: number | null }
         if (res.ok === false && res.code === 'duplicate' && typeof res.conference_id === 'number') {
           return { ok: false, code: 'duplicate', conferenceId: res.conference_id }

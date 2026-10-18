@@ -253,11 +253,27 @@ export function buildFieldRows(
   })
 }
 
+/** URLs the enrichment safety check rejected (`_rejected_urls`: strings or `{url}` objects). Normalised. */
+export function rejectedUrls(enrichment: EnrichmentInput): string[] {
+  const raw = enrichment?._rejected_urls
+  if (!Array.isArray(raw)) return []
+  const out: string[] = []
+  for (const r of raw) {
+    const u = typeof r === 'string' ? r : isRecord(r) && typeof r.url === 'string' ? r.url : null
+    if (!u) continue
+    const n = normalizeUrl(u) ?? u.trim()
+    if (n && !out.includes(n)) out.push(n)
+  }
+  return out
+}
+
 export interface FinalResult {
   /** Payload to send as p_final (same shape as the submission). */
   final: Payload
   /** Fields whose final value came from the organiser site, not the submitter. */
   prefilled: string[]
+  /** URL fields removed because the safety check rejected the link. */
+  stripped: string[]
 }
 
 /**
@@ -270,11 +286,20 @@ export interface FinalResult {
 export function buildFinalPayload(payload: unknown, enrichment: EnrichmentInput, edits: EditMap = {}): FinalResult {
   const rows = buildFieldRows(payload, enrichment, edits)
   const prefilled: string[] = []
+  const stripped: string[] = []
+  const rejected = new Set(rejectedUrls(enrichment))
   const flat: Payload = {}
   for (const r of rows) {
     if (r.final === undefined || r.final === '') continue
     let v = r.final
-    if (fieldMeta(r.field).kind === 'url' && typeof v === 'string') v = normalizeUrl(v) ?? v
+    if (fieldMeta(r.field).kind === 'url' && typeof v === 'string') {
+      v = normalizeUrl(v) ?? v
+      // Never publish a link the safety check rejected.
+      if (rejected.has(v as string)) {
+        stripped.push(r.field)
+        continue
+      }
+    }
     flat[r.field] = v
     if (r.fromEnrichment) prefilled.push(r.field)
   }
@@ -297,17 +322,17 @@ export function buildFinalPayload(payload: unknown, enrichment: EnrichmentInput,
 
   const base = isRecord(payload) ? payload : {}
   const extras: Payload = {}
-  if (!isBlank(base.evidence_url)) extras.evidence_url = base.evidence_url
+  if (!isBlank(base.evidence_url) && !rejected.has(normalizeUrl(String(base.evidence_url)) ?? String(base.evidence_url))) extras.evidence_url = base.evidence_url
 
   if (isAddInfo(payload)) {
     const out: Payload = { fields: flat }
     if (hasFees) out.fees = fees
     if (!isBlank(base.note)) out.note = base.note
-    return { final: { ...out, ...extras }, prefilled }
+    return { final: { ...out, ...extras }, prefilled, stripped }
   }
   const out: Payload = { ...flat }
   if (hasFees) out.fees = fees
-  return { final: { ...out, ...extras }, prefilled }
+  return { final: { ...out, ...extras }, prefilled, stripped }
 }
 
 /** Problems that would make the RPC insert fail or list a broken event. Empty = fine. */
@@ -381,6 +406,42 @@ export function canApprove(c: Pick<Contribution, 'status' | 'enrichment_status'>
   if (es === 'failed') return { ok: true, warning: 'The automatic check failed. Verify the details by hand before approving.' }
   if (es === 'waiting') return { ok: true, warning: 'The automatic check has not run yet. Verify the details by hand, or wait for it.' }
   return { ok: true }
+}
+
+// ---------------------------------------------------------------- unchecked override
+
+export interface OverrideCheck {
+  needed: boolean
+  reason?: string
+}
+
+function sameUrl(a: string, b: string): boolean {
+  return (normalizeUrl(a) ?? a.trim()) === (normalizeUrl(b) ?? b.trim())
+}
+
+/**
+ * Mirrors the database publish gate (migration 20261018000004). Approving or
+ * merging needs an explicit `approve_unchecked` confirmation when the
+ * enrichment job has not run (`waiting`), or when the organiser URL being
+ * published differs from both URLs the job checked. `skipped` is never
+ * overridable (canApprove refuses it), so it reports not-needed here.
+ */
+export function needsOverride(
+  c: { enrichment_status: EnrichmentStatus; enrichment?: EnrichmentInput },
+  finalOrganiserUrl: string | null | undefined
+): OverrideCheck {
+  if (c.enrichment_status === 'skipped') return { needed: false }
+  if (c.enrichment_status === 'waiting') {
+    return { needed: true, reason: 'This organiser link has not been safety-checked yet.' }
+  }
+  const checked = typeof c.enrichment?._checked_url === 'string' ? c.enrichment._checked_url : null
+  const submitted = typeof c.enrichment?._submitted_url === 'string' ? c.enrichment._submitted_url : null
+  if ((checked || submitted) && !isBlank(finalOrganiserUrl)) {
+    const url = String(finalOrganiserUrl)
+    const matches = (checked && sameUrl(url, checked)) || (submitted && sameUrl(url, submitted))
+    if (!matches) return { needed: true, reason: 'The organiser link was changed after the safety check, so the new link has not been checked.' }
+  }
+  return { needed: false }
 }
 
 // ---------------------------------------------------------------- duplicates

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import {
@@ -23,9 +23,17 @@ import { useAuth } from '@/hooks/useAuth'
 import { useSubmitContribution, friendlySubmitError } from '@/hooks/useCommunity'
 import { createSupabaseClient } from '@/lib/supabase'
 import { feesPayloadToDraft } from '@/lib/community/moderation'
+import {
+  EMPTY_VALUES,
+  buildAddInfoRaw,
+  buildResubmitPatch,
+  sectionsFromPayload,
+  valuesFromPayload,
+  type AddInfoValues,
+} from '@/lib/community/add-info-form'
 import { emptySections } from '@/lib/community/overlay'
 import { makeAddInfoSchema, todayUtc } from '@/lib/community/schema'
-import { emptyFeesDraft, feesDraftToRaw, isFeesDraftEmpty, validateFeesDraft, type FeesDraft } from '@/lib/community/fees-draft'
+import { emptyFeesDraft, isFeesDraftEmpty, validateFeesDraft, type FeesDraft } from '@/lib/community/fees-draft'
 import type { AddInfoPayload, AddInfoSection } from '@/lib/community/types'
 import type { Conference, PricingTier } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -47,90 +55,7 @@ const control = 'h-11'
 const textarea =
   'w-full min-w-0 rounded-md border border-border bg-surface px-3 py-2.5 text-base md:text-sm text-fg shadow-xs placeholder:text-fg-subtle outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-ring/35 aria-invalid:border-danger'
 
-interface Values {
-  start_date: string
-  end_date: string
-  start_time: string
-  event_format: '' | 'in_person' | 'online' | 'hybrid'
-  venue_name: string
-  city: string
-  region: string
-  abstract_open: boolean
-  abstract_deadline: string
-  abstract_deadline_note: string
-  cpd_accredited: boolean
-  cpd_points: string
-  organiser_url: string
-  booking_url: string
-  description: string
-  note: string
-  evidence_url: string
-  moderator_note: string
-}
-
-const EMPTY: Values = {
-  start_date: '',
-  end_date: '',
-  start_time: '',
-  event_format: '',
-  venue_name: '',
-  city: '',
-  region: '',
-  abstract_open: true,
-  abstract_deadline: '',
-  abstract_deadline_note: '',
-  cpd_accredited: false,
-  cpd_points: '',
-  organiser_url: '',
-  booking_url: '',
-  description: '',
-  note: '',
-  evidence_url: '',
-  moderator_note: '',
-}
-
-/** Form values from an earlier payload (resubmit mode); empty otherwise. */
-function valuesFromPayload(p: AddInfoPayload | undefined): Values {
-  if (!p) return EMPTY
-  const f = (p.fields ?? {}) as Record<string, unknown>
-  const str = (k: string) => (f[k] === undefined || f[k] === null ? '' : String(f[k]))
-  return {
-    ...EMPTY,
-    start_date: str('start_date'),
-    end_date: str('end_date'),
-    start_time: str('start_time'),
-    event_format: (['in_person', 'online', 'hybrid'].includes(str('event_format')) ? str('event_format') : '') as Values['event_format'],
-    venue_name: str('venue_name'),
-    city: str('city'),
-    region: str('region'),
-    abstract_open: f.abstract_open === undefined ? true : f.abstract_open === true,
-    abstract_deadline: str('abstract_deadline'),
-    abstract_deadline_note: str('abstract_deadline_note'),
-    cpd_accredited: f.cpd_accredited === true,
-    cpd_points: str('cpd_points'),
-    organiser_url: str('organiser_url'),
-    booking_url: str('booking_url'),
-    description: str('description'),
-    note: str('note'),
-    evidence_url: p.evidence_url ?? '',
-    moderator_note: p.note ?? '',
-  }
-}
-
-/** Which sections an earlier payload filled in (so resubmit reopens them). */
-function sectionsFromPayload(p: AddInfoPayload): AddInfoSection[] {
-  const f = (p.fields ?? {}) as Record<string, unknown>
-  const has = (...ks: string[]) => ks.some((k) => f[k] !== undefined && f[k] !== null && f[k] !== '')
-  const out: AddInfoSection[] = []
-  if (has('start_date', 'end_date', 'start_time')) out.push('dates')
-  if (has('event_format', 'venue_name', 'city', 'region')) out.push('venue')
-  if (p.fees) out.push('fees')
-  if (has('abstract_deadline', 'abstract_deadline_note')) out.push('abstracts')
-  if (has('cpd_accredited', 'cpd_points')) out.push('cpd')
-  if (has('organiser_url', 'booking_url')) out.push('links')
-  if (has('note', 'description')) out.push('note')
-  return out
-}
+type Values = AddInfoValues
 
 export interface AddInfoDialogProps {
   /** The listing, ideally the community-overlaid one so already-filled fields are not re-offered. */
@@ -221,7 +146,13 @@ function AddInfoForm({
   onDone: () => void
   onCancel: () => void
 }) {
-  const sections = useMemo(() => emptySections(conference, tiers), [conference, tiers])
+  // On resubmit, keep every section the member already filled even if the listing has since gained that
+  // field, otherwise their answers silently vanish from the form.
+  const sections = useMemo(() => {
+    const base = emptySections(conference, tiers)
+    if (!initialPayload) return base
+    return [...base, ...sectionsFromPayload(initialPayload).filter((s) => !base.includes(s))]
+  }, [conference, tiers, initialPayload])
   const { submit, submitting } = useSubmitContribution()
   const [values, setValues] = useState<Values>(() => valuesFromPayload(initialPayload))
   const [fees, setFees] = useState<FeesDraft>(() =>
@@ -235,6 +166,8 @@ function AddInfoForm({
   const [touched, setTouched] = useState<Set<string>>(new Set())
   const [attempted, setAttempted] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const formRef = useRef<HTMLFormElement>(null)
 
   const set = <K extends keyof Values>(k: K, v: Values[K]) => setValues((p) => ({ ...p, [k]: v }))
   const touch = (key: string) => setTouched((p) => (p.has(key) ? p : new Set(p).add(key)))
@@ -248,50 +181,10 @@ function AddInfoForm({
     })
 
   // Build the raw payload from whatever sections are open and filled.
-  const raw = useMemo(() => {
-    const v = values
-    const fields: Record<string, string | number | boolean> = {}
-    const put = (k: string, val: string) => {
-      if (val.trim() !== '') fields[k] = val.trim()
-    }
-    if (openSections.has('dates')) {
-      put('start_date', v.start_date)
-      put('end_date', v.end_date)
-      put('start_time', v.start_time)
-    }
-    if (openSections.has('venue')) {
-      if (v.event_format) fields.event_format = v.event_format
-      if (v.event_format !== 'online') {
-        put('venue_name', v.venue_name)
-        put('city', v.city)
-        put('region', v.region)
-      }
-    }
-    if (openSections.has('abstracts')) {
-      put('abstract_deadline', v.abstract_deadline)
-      put('abstract_deadline_note', v.abstract_deadline_note)
-      if (v.abstract_deadline.trim() || v.abstract_deadline_note.trim()) fields.abstract_open = v.abstract_open
-    }
-    if (openSections.has('cpd')) {
-      if (v.cpd_points.trim() !== '') {
-        fields.cpd_points = Number(v.cpd_points)
-        fields.cpd_accredited = true
-      } else if (v.cpd_accredited) fields.cpd_accredited = true
-    }
-    if (openSections.has('links')) {
-      put('organiser_url', v.organiser_url)
-      put('booking_url', v.booking_url)
-    }
-    if (openSections.has('note')) {
-      put('note', v.note)
-      if (!conference.description) put('description', v.description)
-    }
-    const payload: Record<string, unknown> = { fields }
-    if (openSections.has('fees') && !isFeesDraftEmpty(fees)) payload.fees = feesDraftToRaw(fees)
-    if (v.moderator_note.trim()) payload.note = v.moderator_note.trim()
-    if (v.evidence_url.trim()) payload.evidence_url = v.evidence_url.trim()
-    return payload
-  }, [values, fees, openSections, conference.description])
+  const raw = useMemo(
+    () => buildAddInfoRaw(values, fees, openSections, !!conference.description),
+    [values, fees, openSections, conference.description]
+  )
 
   const schema = useMemo(
     () => makeAddInfoSchema({ startDate: conference.start_date, endDate: conference.end_date }),
@@ -339,33 +232,39 @@ function AddInfoForm({
     e.preventDefault()
     setAttempted(true)
     setServerError(null)
-    if (!parsed.success) return
-    if (openSections.has('fees') && !isFeesDraftEmpty(fees) && !validateFeesDraft(fees).payload) return
+    const feesBlocked = openSections.has('fees') && !isFeesDraftEmpty(fees) && !validateFeesDraft(fees).payload
+    if (!parsed.success || feesBlocked) {
+      // Never fail silently: the offending field may be scrolled out of view inside the dialog.
+      requestAnimationFrame(() =>
+        formRef.current?.querySelector('[aria-invalid="true"], [role="alert"]')?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      )
+      return
+    }
 
     const data = parsed.data
     if (contributionId) {
       // Resubmit after "needs info": RLS only lets the owner flip needs_info -> pending.
+      setSaving(true)
       try {
         const { data: updated, error: updError } = await createSupabaseClient()
           .from('community_contributions')
-          .update({
-            payload: data as AddInfoPayload,
-            note: data.note?.trim() || null,
-            evidence_url: data.evidence_url?.trim() || null,
-            status: 'pending',
-          })
+          .update(buildResubmitPatch(data))
           .eq('id', contributionId)
-          .select('id')
+          .select('id, status')
         if (updError) {
           setServerError(friendlySubmitError(updError))
         } else if (!updated || updated.length === 0) {
           setServerError('This contribution can no longer be edited. Refresh the page to see its current status.')
+        } else if ((updated[0] as { status?: string }).status !== 'pending') {
+          setServerError('The resubmit was not applied. Please try again.')
         } else {
           toast.success('Resubmitted. A moderator will review it again.')
           onDone()
         }
       } catch (e) {
         setServerError(friendlySubmitError({ message: e instanceof Error ? e.message : String(e) }))
+      } finally {
+        setSaving(false)
       }
       return
     }
@@ -388,7 +287,7 @@ function AddInfoForm({
   const today = todayUtc()
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-5">
+    <form ref={formRef} onSubmit={handleSubmit} noValidate className="space-y-5">
       <div>
         <p className="mb-2 type-caption font-medium text-fg-muted" id="addinfo-chips-label">
           What can you add? Only missing details are listed.
@@ -584,14 +483,20 @@ function AddInfoForm({
         <Alert>{formError}</Alert>
       )}
       {attempted && openSections.size === 0 && <Alert>Pick at least one section and fill it in before sending.</Alert>}
+      {attempted && openSections.size > 0 && (!parsed.success || showFeesErrors) && (
+        <Alert>
+          Some details need fixing before this can be sent. Check the fields marked in red
+          {!parsed.success && parsed.error.issues[0] ? ` (${parsed.error.issues[0].message})` : ''}.
+        </Alert>
+      )}
       {serverError && <Alert>{serverError}</Alert>}
 
       <DialogFooter className="gap-2 sm:items-center">
-        <Button type="button" variant="ghost" size="lg" className={PRESS} onClick={onCancel} disabled={submitting}>
+        <Button type="button" variant="ghost" size="lg" className={PRESS} onClick={onCancel} disabled={submitting || saving}>
           Cancel
         </Button>
-        <Button type="submit" size="lg" className={PRESS} disabled={submitting} aria-busy={submitting}>
-          {submitting ? (
+        <Button type="submit" size="lg" className={PRESS} disabled={submitting || saving} aria-busy={submitting || saving}>
+          {submitting || saving ? (
             <>
               <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden />
               Sending…

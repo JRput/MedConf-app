@@ -8,6 +8,8 @@ import {
   duplicateCandidates,
   finalProblems,
   flattenEnrichment,
+  needsOverride,
+  rejectedUrls,
   foundTiers,
   significantWords,
   validReason,
@@ -230,5 +232,53 @@ describe('helpers', () => {
     expect(ageLabel('2026-10-18T11:58:00Z', now)).toBe('2 min')
     expect(ageLabel('2026-10-18T07:00:00Z', now)).toBe('5 h')
     expect(ageLabel('2026-10-10T12:00:00Z', now)).toBe('8 d')
+  })
+})
+
+describe('needsOverride (mirrors the database publish gate)', () => {
+  const checked = { _checked_url: 'https://example.org/nsos', _submitted_url: 'https://example.org/nsos?utm_source=x' }
+  it('is needed while enrichment is waiting', () => {
+    const r = needsOverride({ enrichment_status: 'waiting', enrichment: null }, 'https://example.org/nsos')
+    expect(r.needed).toBe(true)
+    expect(r.reason).toMatch(/not been safety-checked/)
+  })
+  it('is not needed for a fetched row whose URL matches the checked or submitted URL', () => {
+    expect(needsOverride({ enrichment_status: 'fetched', enrichment: checked }, 'https://example.org/nsos').needed).toBe(false)
+    expect(needsOverride({ enrichment_status: 'fetched', enrichment: checked }, 'https://EXAMPLE.org/nsos/?utm_medium=y').needed).toBe(false)
+  })
+  it('is needed when the moderator changed the URL to an unchecked one', () => {
+    const r = needsOverride({ enrichment_status: 'fetched', enrichment: checked }, 'https://other.org/page')
+    expect(r.needed).toBe(true)
+    expect(r.reason).toMatch(/changed/)
+  })
+  it('does not check the URL when the job recorded none, or the final has none', () => {
+    expect(needsOverride({ enrichment_status: 'fetched', enrichment: {} }, 'https://other.org').needed).toBe(false)
+    expect(needsOverride({ enrichment_status: 'fetched', enrichment: checked }, undefined).needed).toBe(false)
+  })
+  it('skipped is never overridable, and blocked/failed need no override', () => {
+    expect(needsOverride({ enrichment_status: 'skipped', enrichment: null }, 'https://x.org').needed).toBe(false)
+    expect(needsOverride({ enrichment_status: 'blocked', enrichment: null }, 'https://x.org').needed).toBe(false)
+  })
+})
+
+describe('rejected links', () => {
+  const enr = { ...enrichment, _rejected_urls: ['https://bad.example/evil?utm_source=a', { url: 'http://10.0.0.1/x' }, 42] }
+  it('lists normalised rejected URLs', () => {
+    expect(rejectedUrls(enr)).toEqual(['https://bad.example/evil', 'http://10.0.0.1/x'])
+    expect(rejectedUrls({})).toEqual([])
+    expect(rejectedUrls(null)).toEqual([])
+  })
+  it('strips rejected URLs from the final payload', () => {
+    const p = { ...newEvent, booking_url: 'https://bad.example/evil', evidence_url: 'http://10.0.0.1/x' }
+    const r = buildFinalPayload(p, enr)
+    expect(r.final.booking_url).toBeUndefined()
+    expect(r.final.evidence_url).toBeUndefined()
+    expect(r.stripped).toEqual(['booking_url'])
+    expect(r.final.organiser_url).toBe('https://www.example.org/nsos')
+  })
+  it('strips a rejected organiser URL, which then blocks approval', () => {
+    const r = buildFinalPayload(newEvent, { ...enrichment, _rejected_urls: ['https://www.example.org/nsos'] })
+    expect(r.final.organiser_url).toBeUndefined()
+    expect(finalProblems(newEvent, r.final).join(' ')).toMatch(/organiser URL/)
   })
 })

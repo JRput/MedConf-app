@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { AlertCircle, AlertTriangle, Check, EyeOff, GitMerge, Loader2, MessageCircleQuestion, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { QueueItem } from '@/hooks/useModeration'
-import type { ApprovalCheck } from '@/lib/community/moderation'
+import type { ApprovalCheck, OverrideCheck } from '@/lib/community/moderation'
 import { ReasonDialog } from './ReasonDialog'
 
 type Pending = 'needs_info' | 'reject' | 'hide' | null
@@ -34,6 +34,8 @@ const COPY: Record<Exclude<Pending, null>, { title: string; description: string;
 export function ActionBar({
   item,
   check,
+  override,
+  rejected,
   problems,
   busy,
   error,
@@ -45,6 +47,9 @@ export function ActionBar({
 }: {
   item: QueueItem
   check: ApprovalCheck
+  override: OverrideCheck
+  /** URLs the safety check rejected; they are removed from what gets published. */
+  rejected: string[]
   problems: string[]
   busy: boolean
   error: string | null
@@ -77,7 +82,24 @@ export function ActionBar({
             {check.reason}
           </Notice>
         )}
-        {open && check.ok && check.warning && (
+        {open && rejected.length > 0 && (
+          <Notice tone="warn" icon={<AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />}>
+            <span>
+              These links were rejected by the safety check and will not be published:
+              <ul className="mt-1 list-disc space-y-0.5 pl-5 break-all font-mono text-xs">
+                {rejected.map((u) => (
+                  <li key={u}>{u}</li>
+                ))}
+              </ul>
+            </span>
+          </Notice>
+        )}
+        {open && check.ok && override.needed && (
+          <Notice tone="warn" icon={<AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />}>
+            {override.reason} Approving now publishes it unchecked.
+          </Notice>
+        )}
+        {open && check.ok && !override.needed && check.warning && (
           <Notice tone="warn" icon={<AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />}>
             {check.warning}
           </Notice>
@@ -109,7 +131,7 @@ export function ActionBar({
           <>
             <Button type="button" size="lg" disabled={busy || approveBlocked} aria-busy={busy} onClick={onApprove}>
               {busy ? <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden /> : <Check aria-hidden />}
-              Approve
+              {override.needed ? 'Approve anyway…' : 'Approve'}
             </Button>
             <Button type="button" size="lg" variant="outline" disabled={busy} onClick={() => setPending('needs_info')}>
               <MessageCircleQuestion aria-hidden />
