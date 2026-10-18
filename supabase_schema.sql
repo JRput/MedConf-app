@@ -492,6 +492,10 @@ ON CONFLICT (base_url) DO NOTHING;
 -- matches an ARCHIVED source-1000 row (a hidden community event) updates and
 -- un-archives that row and rebuilds its pricing_tiers instead of returning
 -- 'duplicate'. Any other existing row with that source_url is still a duplicate.
+-- Dates (20261018000006): community_validate_payload() requires real YYYY-MM-DD dates
+-- (community_safe_date) and end >= start; expiry uses the safe cast. Hiding archives
+-- the conferences row only for a 'published' new_event whose source_url this
+-- contribution created; 'merged' items never archive their target.
 -- ============================================
 
 -- One row per user submission. kind='add_info' targets an existing

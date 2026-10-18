@@ -1,0 +1,6 @@
+SELECT public.community_safe_date('2026-02-31') IS NULL AS ok
+SELECT public.community_safe_date('2026-02-28') = DATE '2026-02-28' AS ok
+SELECT public.community_safe_date('') IS NULL AS ok
+SELECT public.community_validate_payload('{"start_date":"2026-05-01","fees":{"tiers":[{"early_bird_deadline":"2026-04-01"}]}}'::jsonb) IS NULL AS ok
+SELECT prosrc LIKE '%community_safe_date%' AS ok FROM pg_proc WHERE proname='expire_stale_contributions'
+SELECT prosrc LIKE '%c.status = ''published'' AND c.conference_id%' AS ok FROM pg_proc WHERE proname='moderate_contribution'
