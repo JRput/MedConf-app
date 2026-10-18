@@ -140,6 +140,18 @@ describe('addInfoPayloadSchema', () => {
     expect(addInfoPayloadSchema.safeParse({ fields: { start_date: day(10), end_date: day(9) } }).success).toBe(false)
     expect(addInfoPayloadSchema.safeParse({ fields: { start_date: day(10), end_date: day(11) } }).success).toBe(true)
   })
+  it('cpd_points must be a whole number from 0 to 500', () => {
+    const ok = (n: number) => addInfoPayloadSchema.safeParse({ fields: { cpd_points: n, cpd_accredited: true } }).success
+    expect(ok(0)).toBe(true)
+    expect(ok(500)).toBe(true)
+    expect(ok(6.5)).toBe(false)
+    expect(ok(501)).toBe(false)
+    expect(ok(-1)).toBe(false)
+    const r = addInfoPayloadSchema.safeParse({ fields: { cpd_points: 6.5 } })
+    expect(JSON.stringify(r.error?.issues)).toContain('Whole number of CPD points, up to 500')
+    expect(newEventPayloadSchema.safeParse({ ...validEvent(), cpd_points: 2.5 }).success).toBe(false)
+    expect(newEventPayloadSchema.safeParse({ ...validEvent(), cpd_points: 501 }).success).toBe(false)
+  })
   it('rejects a note over 1000 characters', () => {
     expect(addInfoPayloadSchema.safeParse({ fields: { note: 'x'.repeat(1001) } }).success).toBe(false)
   })

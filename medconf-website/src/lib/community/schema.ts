@@ -81,6 +81,13 @@ export const feesSchema = z.object({
 
 /* ------------------------------------------------------------ add_info */
 
+/** conferences.cpd_points is an INTEGER column; the overlay enforces the same range. */
+const cpdPoints = z
+  .number({ error: 'Whole number of CPD points, up to 500' })
+  .int('Whole number of CPD points, up to 500')
+  .min(0, 'Points cannot be negative')
+  .max(500, 'Whole number of CPD points, up to 500')
+
 function addInfoFieldsObject() {
   return z.strictObject({
     start_date: futureDate,
@@ -94,7 +101,7 @@ function addInfoFieldsObject() {
     abstract_open: z.boolean(),
     abstract_deadline_note: trimmed(LIMITS.short, 'Note'),
     cpd_accredited: z.boolean(),
-    cpd_points: z.number().min(0, 'Points cannot be negative').max(1000, 'Points look too high'),
+    cpd_points: cpdPoints,
     organiser_url: urlString,
     booking_url: urlString,
     description: trimmed(LIMITS.description, 'Description'),
@@ -170,7 +177,7 @@ export const newEventPayloadSchema = z
     organiser_url: urlString,
     booking_url: urlString.optional(),
     cpd_accredited: z.boolean(),
-    cpd_points: z.number().min(0).max(1000).optional(),
+    cpd_points: cpdPoints.optional(),
     abstract_open: z.boolean(),
     abstract_deadline: futureDate.optional(),
     abstract_deadline_note: z.string().trim().max(LIMITS.short).optional(),
