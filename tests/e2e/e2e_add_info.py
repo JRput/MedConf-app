@@ -40,6 +40,9 @@ with sync_playwright() as p:
     st = svc.table("community_contributions").select("status").eq("id", fees["id"]).execute().data[0]["status"]
     R.check(st == "pending", f"refused approve left the row pending ({st})")
 
+    svc.table("community_contributions").update({"enrichment_status": "failed", "enrichment": {"_error": "in progress"}}).eq("id", fees["id"]).execute()
+    err = rpc_err(lambda: svc.rpc("moderate_contribution", {"p_id": fees["id"], "p_action": "approve", "p_note": "no check record"}).execute())
+    R.check(err and "no completed safety check" in err, f"approve WITHOUT flag refused when check record missing (failed + _error): {(err or 'NOT REFUSED')[:90]}")
     res = svc.rpc("moderate_contribution", {"p_id": fees["id"], "p_action": "approve", "p_note": "e2e approve", "p_final": {**fees["payload"], "approve_unchecked": True}}).execute().data
     R.check(isinstance(res, dict) and res.get("ok") is True and res.get("status") == "published", f"approve with override -> {res}")
     tiers = an.table("community_tiers").select("tier_label,price,currency,is_published").eq("conference_id", CONF).execute().data
