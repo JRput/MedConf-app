@@ -4,3 +4,7 @@ SELECT public.community_safe_date('') IS NULL AS ok
 SELECT public.community_validate_payload('{"start_date":"2026-05-01","fees":{"tiers":[{"early_bird_deadline":"2026-04-01"}]}}'::jsonb) IS NULL AS ok
 SELECT prosrc LIKE '%community_safe_date%' AS ok FROM pg_proc WHERE proname='expire_stale_contributions'
 SELECT prosrc LIKE '%c.status = ''published'' AND c.conference_id%' AS ok FROM pg_proc WHERE proname='moderate_contribution'
+SELECT prosrc LIKE '%Conference not available%' AS ok FROM pg_proc WHERE proname='community_contributions_before_insert'
+SELECT NOT has_function_privilege('authenticated', 'public.community_publish_facts(uuid,integer,jsonb)', 'EXECUTE') AND NOT has_function_privilege('anon', 'public.community_to_fact_payload(jsonb)', 'EXECUTE') AND NOT has_function_privilege('authenticated', 'public.community_upsert_tiers(integer,jsonb)', 'EXECUTE') AND NOT has_function_privilege('authenticated', 'public.community_strip_rejected(jsonb,jsonb)', 'EXECUTE') AS ok
+SELECT has_function_privilege('authenticated', 'public.community_validate_payload(jsonb)', 'EXECUTE') AND has_function_privilege('authenticated', 'public.community_safe_date(text)', 'EXECUTE') AS ok
+SELECT public.community_validate_payload('{"event_type":"course","venue_name":"x","cpd_points":"12","fees":{"currency":"GBP","tiers":[{"price":"10.50","label":"Std"}]}}'::jsonb) IS NULL AS ok

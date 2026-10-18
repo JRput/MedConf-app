@@ -10,6 +10,9 @@
 --   * moderate_contribution('hide'): archives the conferences row only for a
 --     'published' new_event whose source_url is the one this contribution
 --     created (never for 'merged' items)
+--   * payload rules mirror the client schema (currency list, price range, text
+--     lengths, cpd_points, event_type/format); add_info inserts need a public
+--     (non-archived) conference; internal helpers revoked from anon/authenticated
 -- Idempotent. moderate_contribution body otherwise identical to 20261018000005.
 -- ============================================================
 
@@ -34,6 +37,7 @@ DECLARE
   tier JSONB;
   sd DATE;
   ed DATE;
+  amt TEXT;
 BEGIN
   IF p IS NULL OR jsonb_typeof(p) <> 'object' THEN
     RAISE EXCEPTION 'payload must be a JSON object';
@@ -54,6 +58,54 @@ BEGIN
   END IF;
   IF jsonb_typeof(p -> 'fees' -> 'tiers') = 'array' AND jsonb_array_length(p -> 'fees' -> 'tiers') > 12 THEN
     RAISE EXCEPTION 'Too many fee tiers';
+  END IF;
+
+  -- Field rules (mirror the client schema), top level and under fields
+  FOREACH scope IN ARRAY ARRAY[p, p -> 'fields'] LOOP
+    IF scope IS NULL OR jsonb_typeof(scope) <> 'object' THEN
+      CONTINUE;
+    END IF;
+    IF length(COALESCE(scope ->> 'venue_name', '')) > 120 THEN RAISE EXCEPTION 'Venue too long (max 120)'; END IF;
+    IF length(COALESCE(scope ->> 'city', '')) > 120 THEN RAISE EXCEPTION 'City too long (max 120)'; END IF;
+    IF length(COALESCE(scope ->> 'region', '')) > 120 THEN RAISE EXCEPTION 'Region too long (max 120)'; END IF;
+    IF length(COALESCE(scope ->> 'abstract_deadline_note', '')) > 200 THEN RAISE EXCEPTION 'Deadline note too long (max 200)'; END IF;
+    IF length(COALESCE(scope ->> 'specialty', '')) > 80 THEN RAISE EXCEPTION 'Specialty too long (max 80)'; END IF;
+    IF length(COALESCE(scope ->> 'evidence_url', '')) > 2048 THEN RAISE EXCEPTION 'Evidence URL too long'; END IF;
+    IF COALESCE(scope ->> 'cpd_points', '') <> '' THEN
+      IF scope ->> 'cpd_points' !~ '^\d{1,3}$' OR (scope ->> 'cpd_points')::integer > 500 THEN
+        RAISE EXCEPTION 'CPD points must be a whole number from 0 to 500';
+      END IF;
+    END IF;
+    IF COALESCE(scope ->> 'event_type', '') <> '' AND scope ->> 'event_type' NOT IN ('conference', 'workshop', 'course') THEN
+      RAISE EXCEPTION 'Invalid event type';
+    END IF;
+    IF COALESCE(scope ->> 'event_format', '') <> '' AND scope ->> 'event_format' NOT IN ('in_person', 'online', 'hybrid') THEN
+      RAISE EXCEPTION 'Invalid event format';
+    END IF;
+  END LOOP;
+  IF jsonb_typeof(p -> 'fees') = 'object' THEN
+    IF COALESCE(p -> 'fees' ->> 'currency', '') <> ''
+       AND p -> 'fees' ->> 'currency' NOT IN ('GBP', 'USD', 'EUR', 'AUD', 'CAD', 'INR', 'CHF', 'HKD', 'SGD') THEN
+      RAISE EXCEPTION 'Unsupported currency';
+    END IF;
+    amt := p -> 'fees' ->> 'from_price';
+    IF COALESCE(amt, '') <> '' AND (amt !~ '^\d{1,6}(\.\d{1,4})?$' OR amt::numeric > 100000) THEN
+      RAISE EXCEPTION 'Price must be a number from 0 to 100000';
+    END IF;
+    IF jsonb_typeof(p -> 'fees' -> 'tiers') = 'array' THEN
+      FOR tier IN SELECT * FROM jsonb_array_elements(p -> 'fees' -> 'tiers') LOOP
+        IF jsonb_typeof(tier) <> 'object' THEN
+          RAISE EXCEPTION 'Invalid fee tier';
+        END IF;
+        amt := tier ->> 'price';
+        IF COALESCE(amt, '') <> '' AND (amt !~ '^\d{1,6}(\.\d{1,4})?$' OR amt::numeric > 100000) THEN
+          RAISE EXCEPTION 'Price must be a number from 0 to 100000';
+        END IF;
+        IF length(COALESCE(tier ->> 'label', '')) > 40 THEN
+          RAISE EXCEPTION 'Tier label too long (max 40)';
+        END IF;
+      END LOOP;
+    END IF;
   END IF;
 
   -- Dates: top level and under fields
@@ -348,6 +400,69 @@ BEGIN
 END $$;
 
 
+CREATE OR REPLACE FUNCTION public.community_contributions_before_insert()
+RETURNS trigger LANGUAGE plpgsql AS $$
+DECLARE
+  pending_count INTEGER;
+BEGIN
+  IF public.is_privileged_caller() THEN
+    IF NEW.user_id IS NULL THEN
+      RAISE EXCEPTION 'user_id is required';
+    END IF;
+  ELSE
+    IF auth.uid() IS NULL THEN
+      RAISE EXCEPTION 'Sign in to contribute' USING ERRCODE = '42501';
+    END IF;
+    NEW.user_id := auth.uid();
+  END IF;
+
+  -- Serialise per user so two concurrent inserts cannot both pass the cap.
+  PERFORM pg_advisory_xact_lock(hashtext(NEW.user_id::text));
+  PERFORM public.community_validate_payload(NEW.payload);
+  IF NOT public.community_url_ok(NEW.evidence_url) THEN
+    RAISE EXCEPTION 'URLs must start with http:// or https://';
+  END IF;
+
+  -- Runs as the caller, so the SELECT only sees public rows. One message for
+  -- missing and archived alike: the insert is not an existence oracle.
+  IF NEW.kind = 'add_info' THEN
+    IF NEW.conference_id IS NULL
+       OR NOT EXISTS (SELECT 1 FROM conferences WHERE id = NEW.conference_id AND archived = FALSE) THEN
+      RAISE EXCEPTION 'Conference not available';
+    END IF;
+  END IF;
+
+  NEW.status := 'pending';
+  NEW.enrichment := NULL;
+  NEW.enrichment_status := 'waiting';
+  NEW.enriched_at := NULL;
+  NEW.final_payload := NULL;
+  NEW.moderator_id := NULL;
+  NEW.moderator_note := NULL;
+  NEW.reviewed_at := NULL;
+  NEW.created_at := NOW();
+  NEW.updated_at := NOW();
+
+  IF pg_column_size(NEW.payload) > 32768 THEN
+    RAISE EXCEPTION 'Contribution too large';
+  END IF;
+
+  SELECT count(*) INTO pending_count
+  FROM community_contributions
+  WHERE user_id = NEW.user_id AND status IN ('pending', 'needs_info');
+  IF pending_count >= 10 THEN
+    RAISE EXCEPTION 'Too many pending contributions';
+  END IF;
+
+  RETURN NEW;
+END $$;
+
+REVOKE EXECUTE ON FUNCTION public.community_publish_facts(UUID, INTEGER, JSONB) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.community_to_fact_payload(JSONB) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.community_upsert_tiers(INTEGER, JSONB) FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.community_strip_rejected(JSONB, JSONB) FROM PUBLIC, anon, authenticated;
+
+
 -- Self-test (apply_migration.py cannot fetch from DO blocks, so the rejection
 -- checks run here; any failure rolls the whole migration back).
 DO $$
@@ -367,6 +482,18 @@ BEGIN
   BEGIN
     PERFORM public.community_validate_payload('{"fees":{"tiers":[{"early_bird_deadline":"2026-13-01"}]}}'::jsonb);
     RAISE EXCEPTION 'selftest: bad early-bird date accepted';
+  EXCEPTION WHEN others THEN
+    IF SQLERRM LIKE 'selftest:%' THEN RAISE; END IF;
+  END;
+  BEGIN
+    PERFORM public.community_validate_payload('{"fees":{"currency":"XXX"}}'::jsonb);
+    RAISE EXCEPTION 'selftest: bad currency accepted';
+  EXCEPTION WHEN others THEN
+    IF SQLERRM LIKE 'selftest:%' THEN RAISE; END IF;
+  END;
+  BEGIN
+    PERFORM public.community_validate_payload('{"fees":{"tiers":[{"price":"-5"}]}}'::jsonb);
+    RAISE EXCEPTION 'selftest: negative price accepted';
   EXCEPTION WHEN others THEN
     IF SQLERRM LIKE 'selftest:%' THEN RAISE; END IF;
   END;

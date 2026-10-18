@@ -25,7 +25,7 @@ const isEmpty = (v: unknown) => v === null || v === undefined || v === ''
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/
 // eslint-disable-next-line no-control-regex
-const CONTROL_RE = /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g
+const CONTROL_RE = /[\u0000-\u001f\u007f-\u009f  ​-‏‪-‮⁠⁦-⁩﻿]/g
 
 function cleanText(v: unknown, max: number, keepNewlines = false): string | null {
   if (typeof v !== 'string') return null

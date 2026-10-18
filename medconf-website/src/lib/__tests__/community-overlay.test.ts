@@ -208,6 +208,16 @@ describe('overlayConference re-validates community values at render time', () =>
     expect(r.communityFields.has('region')).toBe(false)
   })
 
+  it('strips bidi overrides and zero-width characters from text and tier labels', () => {
+    const r = overlayConference(base, [fact('venue_name', 'Ho\u202Etel\u200B Roy\u2066al\uFEFF')])
+    expect(r.conference.venue_name).toBe('Hotel Royal')
+    const [t] = pickTiers([], [
+      { id: 'u', contribution_id: 'c', conference_id: 1, tier_label: 'Mem\u202Eber\u200B', price: 5, currency: 'GBP', is_early_bird: false, early_bird_deadline: null, is_published: true, created_at: '' },
+    ])
+    expect(t.tier_label).toBe('Member')
+    expect(overlayConference(base, [fact('city', '\u202E\u200B')]).conference.city).toBeNull()
+  })
+
   it('caps the abstract note and ignores non-string notes', () => {
     const r = overlayConference(base, [fact('abstract_deadline_note', 'n'.repeat(900))])
     expect(r.conference.abstract_deadline_note).toHaveLength(200)
