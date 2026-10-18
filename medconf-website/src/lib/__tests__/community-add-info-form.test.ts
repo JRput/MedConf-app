@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildAddInfoRaw, buildResubmitPatch, sectionsFromPayload, valuesFromPayload } from '../community/add-info-form'
+import { buildAddInfoRaw, buildResubmitPatch, resolveSections, sectionsFromPayload, valuesFromPayload } from '../community/add-info-form'
 import { feesPayloadToDraft } from '../community/moderation'
 import { makeAddInfoSchema } from '../community/schema'
 import type { AddInfoPayload } from '../community/types'
@@ -57,5 +57,35 @@ describe('buildResubmitPatch', () => {
   })
   it('nulls blank note and evidence', () => {
     expect(buildResubmitPatch({ fields: {} } as never)).toMatchObject({ note: null, evidence_url: null, status: 'pending' })
+  })
+})
+
+describe('resolveSections', () => {
+  // Listing 819: venue hidden (e.g. online format), fees/abstracts/cpd/note empty.
+  const base = ['fees', 'abstracts', 'cpd', 'note'] as const
+  it('activates and offers the venue section for a city-only payload even if the listing hides it', () => {
+    const r = resolveSections([...base], { fields: { city: 'Leeds' } })
+    expect(r.active).toEqual(['venue'])
+    expect(r.offered).toEqual(['fees', 'abstracts', 'cpd', 'note', 'venue'])
+  })
+  it('prefills the city for that payload', () => {
+    expect(valuesFromPayload({ fields: { city: 'Leeds' } }).city).toBe('Leeds')
+  })
+  it('does not duplicate sections the listing still offers', () => {
+    const r = resolveSections(['venue', 'note'], { fields: { city: 'Leeds', note: 'x' } })
+    expect(r.offered).toEqual(['venue', 'note'])
+    expect(r.active.sort()).toEqual(['note', 'venue'])
+  })
+  it('without a payload offers the base and opens only a valid initialSection', () => {
+    expect(resolveSections([...base], undefined, 'fees')).toEqual({ offered: [...base], active: ['fees'] })
+    expect(resolveSections([...base], undefined, 'venue').active).toEqual([])
+  })
+  it('a city-only payload builds a valid resubmit payload', () => {
+    const p = { fields: { city: 'Leeds' } }
+    const open = new Set(resolveSections([...base], p).active)
+    const raw = buildAddInfoRaw(valuesFromPayload(p), feesPayloadToDraft(undefined), open, false)
+    const parsed = makeAddInfoSchema({}).safeParse(raw)
+    expect(parsed.success).toBe(true)
+    if (parsed.success) expect(parsed.data).toEqual(p)
   })
 })

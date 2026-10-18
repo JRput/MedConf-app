@@ -90,6 +90,25 @@ export function sectionsFromPayload(p: AddInfoPayload): AddInfoSection[] {
   return out
 }
 
+/**
+ * Sections to offer and to pre-activate. `offered` = the listing's empty
+ * sections plus every section the earlier payload filled (so a section the
+ * member already completed stays editable even when the listing has since
+ * gained that field). `active` = the payload's sections, or `initialSection`
+ * when there is no payload.
+ */
+export function resolveSections(
+  base: AddInfoSection[],
+  initialPayload?: AddInfoPayload | null,
+  initialSection?: AddInfoSection
+): { offered: AddInfoSection[]; active: AddInfoSection[] } {
+  if (!initialPayload) {
+    return { offered: base, active: initialSection && base.includes(initialSection) ? [initialSection] : [] }
+  }
+  const filled = sectionsFromPayload(initialPayload)
+  return { offered: [...base, ...filled.filter((s) => !base.includes(s))], active: filled }
+}
+
 /** The raw (pre-zod) payload for whatever sections are open and filled. */
 export function buildAddInfoRaw(
   v: AddInfoValues,

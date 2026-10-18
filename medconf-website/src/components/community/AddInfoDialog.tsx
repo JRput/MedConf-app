@@ -26,7 +26,7 @@ import { feesPayloadToDraft } from '@/lib/community/moderation'
 import {
   buildAddInfoRaw,
   buildResubmitPatch,
-  sectionsFromPayload,
+  resolveSections,
   valuesFromPayload,
   type AddInfoValues,
 } from '@/lib/community/add-info-form'
@@ -147,21 +147,17 @@ function AddInfoForm({
 }) {
   // On resubmit, keep every section the member already filled even if the listing has since gained that
   // field, otherwise their answers silently vanish from the form.
-  const sections = useMemo(() => {
-    const base = emptySections(conference, tiers)
-    if (!initialPayload) return base
-    return [...base, ...sectionsFromPayload(initialPayload).filter((s) => !base.includes(s))]
-  }, [conference, tiers, initialPayload])
+  const resolved = useMemo(
+    () => resolveSections(emptySections(conference, tiers), initialPayload, initialSection),
+    [conference, tiers, initialPayload, initialSection]
+  )
+  const sections = resolved.offered
   const { submit, submitting } = useSubmitContribution()
   const [values, setValues] = useState<Values>(() => valuesFromPayload(initialPayload))
   const [fees, setFees] = useState<FeesDraft>(() =>
     initialPayload?.fees ? feesPayloadToDraft(initialPayload.fees) : emptyFeesDraft(tiers.find((t) => t.currency)?.currency ?? 'GBP')
   )
-  const [openSections, setOpenSections] = useState<Set<AddInfoSection>>(() =>
-    initialPayload
-      ? new Set(sectionsFromPayload(initialPayload).filter((s) => sections.includes(s)))
-      : new Set(initialSection && sections.includes(initialSection) ? [initialSection] : [])
-  )
+  const [openSections, setOpenSections] = useState<Set<AddInfoSection>>(() => new Set(resolved.active))
   const [touched, setTouched] = useState<Set<string>>(new Set())
   const [attempted, setAttempted] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
