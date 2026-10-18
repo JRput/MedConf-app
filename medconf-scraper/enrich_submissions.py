@@ -59,154 +59,20 @@ from urllib.parse import urljoin, urlparse
 
 import httpx
 
+from safe_fetch import (  # noqa: F401 - re-exported for callers/tests
+    MAX_BODY_BYTES, check_url_safe, html_to_text, resolve_redirect_chain,
+)
+
 BATCH_LIMIT = 25
 MIN_AGE_MINUTES = 2
 RUN_BUDGET_S = 10 * 60
+PER_SUBMISSION_S = 90.0
 
 logger = logging.getLogger("enrich_submissions")
 
 # Payload fields that map one-to-one onto a conferences column / fixer name.
 _SIMPLE_FIELDS = ("description", "venue_name", "city", "event_format",
                   "cpd_points", "specialty")
-
-
-# ---------------------------------------------------------------- SSRF guard
-
-def _ip_is_blocked(ip: "ipaddress._BaseAddress") -> bool:
-    if isinstance(ip, ipaddress.IPv6Address) and ip.ipv4_mapped:
-        ip = ip.ipv4_mapped
-    # not is_global covers loopback, RFC1918, link-local, 0.0.0.0/8, CGNAT,
-    # fc00::/7, fe80::/10, ::1, reserved ranges.
-    return (not ip.is_global) or ip.is_multicast or ip.is_unspecified
-
-
-def check_url_safe(url: Optional[str]) -> tuple:
-    """Return (ok, reason). Never fetches anything itself."""
-    if not url or not isinstance(url, str):
-        return False, "no url"
-    try:
-        p = urlparse(url.strip())
-    except Exception:
-        return False, "unparseable url"
-    if p.scheme not in ("http", "https"):
-        return False, "scheme not http/https"
-    host = (p.hostname or "").strip().lower().rstrip(".")
-    if not host:
-        return False, "no hostname"
-    if host == "localhost" or host.endswith(".localhost"):
-        return False, "localhost"
-    try:
-        ipaddress.ip_address(host)
-        return False, "ip literal"
-    except ValueError:
-        pass
-    try:
-        infos = socket.getaddrinfo(host, p.port or (443 if p.scheme == "https" else 80),
-                                   type=socket.SOCK_STREAM)
-    except Exception:
-        return False, "unresolvable host"
-    if not infos:
-        return False, "unresolvable host"
-    for info in infos:
-        try:
-            ip = ipaddress.ip_address(info[4][0].split("%")[0])
-        except ValueError:
-            return False, "bad address"
-        if _ip_is_blocked(ip):
-            return False, "non-public address"
-    return True, ""
-
-
-_REDIRECT_STATUSES = (301, 302, 303, 307, 308)
-_UA = "Mozilla/5.0 (compatible; MedConfBot/1.0; +enrichment)"
-
-
-MAX_BODY_BYTES = 2 * 1024 * 1024
-PER_SUBMISSION_S = 90.0
-_DROP_TAG_RE = re.compile(r"(script|style|noscript)(?![a-z0-9])")
-
-
-def html_to_text(html: str) -> str:
-    """Same output as remediator.fetcher.PageCache._fetch_httpx, but a single
-    linear pass (no regex backtracking on hostile input). Input capped at 2 MB.
-    script/style/noscript bodies are dropped (JSON-LD kept); an unclosed
-    opener drops the rest, as browsers do."""
-    html = html[:MAX_BODY_BYTES]
-    low = html.lower()
-    n, i, out = len(html), 0, []
-    while i < n:
-        j = html.find("<", i)
-        if j < 0:
-            out.append(html[i:])
-            break
-        out.append(html[i:j])
-        k = html.find(">", j)
-        if k < 0:
-            break
-        tag = low[j + 1:k]
-        m = _DROP_TAG_RE.match(tag)
-        if m and "ld+json" not in tag:
-            close = low.find("</" + m.group(1), k)
-            if close < 0:
-                break
-            k2 = html.find(">", close)
-            out.append(" ")
-            i = n if k2 < 0 else k2 + 1
-            continue
-        out.append(" ")
-        i = k + 1
-    t = _html.unescape("".join(out))
-    return re.sub(r"\s+", " ", t).strip()[:200000]
-
-
-def resolve_redirect_chain(url: str, url_check: Callable, max_hops: int = 5,
-                           client: Optional[httpx.Client] = None,
-                           deadline: Optional[float] = None) -> tuple:
-    """GET the URL hop by hop (no automatic redirects), SSRF-checking each hop.
-
-    Returns (verdict, final_url, html):
-      ('ok', final_url, html)        final 2xx response, body capped at 2 MB
-      ('blocked', final_url, '')     final response was not 2xx
-      ('rejected', reason, '')       a hop failed the check / too many hops / error
-      ('timeout', url, '')           monotonic `deadline` passed (slow-drip server)
-    The body comes from this validated response; callers must never re-fetch.
-    """
-    own = client is None
-    if own:
-        client = httpx.Client(follow_redirects=False,
-                              timeout=httpx.Timeout(connect=10, read=15, write=10, pool=10),
-                              headers={"User-Agent": _UA})
-    try:
-        current = url
-        for hop in range(max_hops + 1):
-            if deadline is not None and time.monotonic() > deadline:
-                return "timeout", current, ""
-            if not url_check(current)[0]:
-                return "rejected", current, ""
-            with client.stream("GET", current) as r:
-                location = r.headers.get("location")
-                if r.status_code in _REDIRECT_STATUSES and location:
-                    if hop >= max_hops:
-                        break
-                    current = urljoin(current, location)
-                    continue
-                if not 200 <= r.status_code < 300:
-                    return "blocked", current, ""
-                body = bytearray()
-                for chunk in r.iter_bytes():
-                    if deadline is not None and time.monotonic() > deadline:
-                        return "timeout", current, ""
-                    body.extend(chunk)
-                    if len(body) >= MAX_BODY_BYTES:
-                        break
-                enc = r.encoding or "utf-8"
-            return "ok", current, bytes(body[:MAX_BODY_BYTES]).decode(enc, errors="replace")
-        return "rejected", "too many redirects", ""
-    except Exception as e:  # noqa: BLE001
-        return "rejected", f"fetch failed: {type(e).__name__}", ""
-    finally:
-        if own:
-            client.close()
 
 
 # (module, attribute, replacement) for every outbound call the fixers can make.
