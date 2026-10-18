@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { AlertTriangle, SearchX } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -65,6 +66,9 @@ export function ResultsList({
             </Button>
           )}
         </div>
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/submit">Can&apos;t find it? Submit an event</Link>
+        </Button>
       </div>
     )
   }
