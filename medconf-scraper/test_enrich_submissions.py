@@ -201,3 +201,26 @@ def test_browser_fallback_disabled():
     es.run(argparse.Namespace(dry_run=True, id=None), sb=sb, cache_factory=C, llm_call=llm,
            fixers={}, challenge_check=no_challenge, url_check=ok_url, resolver=passthru)
     assert created[0]._fetch_browser("https://x.org") is None
+
+
+def test_fixers_cannot_reach_network(monkeypatch):
+    import remediator.explorer as ex
+    import extractors.http_fetch as hf
+    called = []
+    monkeypatch.setattr(ex, "fetch_page_text_and_html", lambda *a, **k: called.append("ex") or ("x", "y"))
+    monkeypatch.setattr(hf, "fetch_html", lambda *a, **k: called.append("hf") or "<html/>")
+
+    def fixer(row, text, l):
+        import remediator.explorer as e2
+        import extractors.http_fetch as h2
+        e2.fetch_page_text_and_html("https://x.org/fees")
+        h2.fetch_html("https://x.org/")
+        return "v", "m"
+
+    status, enr = es.enrich_one(submission(), None, FakeCache(), llm, {"city": fixer},
+                                no_challenge, ok_url, passthru)
+    assert status == "fetched" and enr["city"]["value"] == "v"
+    assert called == []
+    # patches restored afterwards: the sentinels are active again
+    ex.fetch_page_text_and_html("u")
+    assert called == ["ex"]

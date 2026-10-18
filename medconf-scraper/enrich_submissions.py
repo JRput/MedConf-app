@@ -32,10 +32,18 @@ reviewed on the user's data alone. Residual TOCTOU (DNS rebinding between the
 check and the fetch) is accepted: the job runs on an ephemeral GitHub runner
 and moderators only ever see structured fixer outputs.
 
+Enrichment is single-page and offline beyond the validated fetch; richer
+exploration happens after approval via remediator --source 1000 on
+moderator-approved URLs. While fixers run, every outbound entry point they use
+(explorer page fetch, http_fetch, call-for-papers follow, vision image
+fetches) is patched to return nothing; see no_network().
+
 Exit code: 0 even when some submissions fail; 1 only on config errors.
 """
 
 import argparse
+import contextlib
+import importlib
 import html as _html
 import ipaddress
 import json
@@ -169,6 +177,34 @@ def resolve_redirect_chain(url: str, url_check: Callable, max_hops: int = 5,
             client.close()
 
 
+# (module, attribute, replacement) for every outbound call the fixers can make.
+_NETWORK_ENTRY_POINTS = (
+    ("remediator.explorer", "fetch_page_text_and_html", lambda *a, **k: (None, None)),
+    ("extractors.http_fetch", "fetch_html", lambda *a, **k: None),
+    ("extractors.abstract_classifier", "_default_fetcher", lambda *a, **k: None),
+    ("vision", "extract_pricing_from_images", lambda *a, **k: []),
+)
+
+
+@contextlib.contextmanager
+def no_network():
+    """Disable the fixers' own network helpers for the duration of the block."""
+    saved = []
+    try:
+        for mod_name, attr, repl in _NETWORK_ENTRY_POINTS:
+            try:
+                mod = importlib.import_module(mod_name)
+            except Exception:  # noqa: BLE001 - module not importable: nothing to patch
+                continue
+            if hasattr(mod, attr):
+                saved.append((mod, attr, getattr(mod, attr)))
+                setattr(mod, attr, repl)
+        yield
+    finally:
+        for mod, attr, orig in reversed(saved):
+            setattr(mod, attr, orig)
+
+
 def seed_cache(cache, urls, text: str, html: str) -> None:
     """Pre-fill PageCache so it never fetches an untrusted URL itself."""
     for u in urls:
@@ -283,8 +319,10 @@ def enrich_one(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
         if not text.strip() or challenge_check(html):
             return "blocked", {"_error": "page blocked or empty"}
         enrichment: dict = {}
-        for field, fixer in fixers.items():
-            value, method = _run_fixer(field, fixer, row, text, llm_call)
+        with no_network():
+            results = {f: _run_fixer(f, fx, row, text, llm_call)
+                       for f, fx in fixers.items()}
+        for field, (value, method) in results.items():
             if value is None:
                 continue
             safe = _json_safe(value)
