@@ -3,6 +3,8 @@
 
 import { useAuth } from '@/hooks/useAuth'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
+import { usePendingCount } from '@/hooks/useModeration'
+import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { useState } from 'react'
 import { Menu, X, Calendar, CalendarDays, Bookmark, Settings, LogOut, LayoutDashboard, Building2, PlusCircle, ShieldCheck } from 'lucide-react'
@@ -14,6 +16,7 @@ import { cn } from '@/lib/utils'
 export function Navbar() {
   const { user, signOut, loading } = useAuth()
   const isAdmin = useIsAdmin()
+  const pendingCount = usePendingCount(isAdmin === true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
@@ -55,6 +58,7 @@ export function Navbar() {
                 {isAdmin === true && (
                   <NavLink href="/admin/moderation" icon={<ShieldCheck className="size-4" />}>
                     Moderation
+                    <PendingBadge count={pendingCount} />
                   </NavLink>
                 )}
                 <NotificationBell />
@@ -119,6 +123,7 @@ export function Navbar() {
                     <span className="flex items-center gap-2">
                       <ShieldCheck className="size-4" aria-hidden />
                       Moderation
+                      <PendingBadge count={pendingCount} />
                     </span>
                   </MobileNavLink>
                 )}
@@ -150,6 +155,17 @@ export function Navbar() {
         </div>
       )}
     </nav>
+  )
+}
+
+/** Pending-review count next to the admin Moderation link. Hidden at zero or while loading. */
+function PendingBadge({ count }: { count: number | null }) {
+  if (!count) return null
+  return (
+    <Badge variant="warning" className="font-mono">
+      {count > 99 ? '99+' : count}
+      <span className="sr-only"> pending review</span>
+    </Badge>
   )
 }
 

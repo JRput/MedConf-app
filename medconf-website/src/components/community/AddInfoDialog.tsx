@@ -20,7 +20,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAuth } from '@/hooks/useAuth'
-import { useSubmitContribution } from '@/hooks/useCommunity'
+import { useSubmitContribution, friendlySubmitError } from '@/hooks/useCommunity'
+import { createSupabaseClient } from '@/lib/supabase'
+import { feesPayloadToDraft } from '@/lib/community/moderation'
 import { emptySections } from '@/lib/community/overlay'
 import { makeAddInfoSchema, todayUtc } from '@/lib/community/schema'
 import { emptyFeesDraft, feesDraftToRaw, isFeesDraftEmpty, validateFeesDraft, type FeesDraft } from '@/lib/community/fees-draft'
@@ -87,6 +89,49 @@ const EMPTY: Values = {
   moderator_note: '',
 }
 
+/** Form values from an earlier payload (resubmit mode); empty otherwise. */
+function valuesFromPayload(p: AddInfoPayload | undefined): Values {
+  if (!p) return EMPTY
+  const f = (p.fields ?? {}) as Record<string, unknown>
+  const str = (k: string) => (f[k] === undefined || f[k] === null ? '' : String(f[k]))
+  return {
+    ...EMPTY,
+    start_date: str('start_date'),
+    end_date: str('end_date'),
+    start_time: str('start_time'),
+    event_format: (['in_person', 'online', 'hybrid'].includes(str('event_format')) ? str('event_format') : '') as Values['event_format'],
+    venue_name: str('venue_name'),
+    city: str('city'),
+    region: str('region'),
+    abstract_open: f.abstract_open === undefined ? true : f.abstract_open === true,
+    abstract_deadline: str('abstract_deadline'),
+    abstract_deadline_note: str('abstract_deadline_note'),
+    cpd_accredited: f.cpd_accredited === true,
+    cpd_points: str('cpd_points'),
+    organiser_url: str('organiser_url'),
+    booking_url: str('booking_url'),
+    description: str('description'),
+    note: str('note'),
+    evidence_url: p.evidence_url ?? '',
+    moderator_note: p.note ?? '',
+  }
+}
+
+/** Which sections an earlier payload filled in (so resubmit reopens them). */
+function sectionsFromPayload(p: AddInfoPayload): AddInfoSection[] {
+  const f = (p.fields ?? {}) as Record<string, unknown>
+  const has = (...ks: string[]) => ks.some((k) => f[k] !== undefined && f[k] !== null && f[k] !== '')
+  const out: AddInfoSection[] = []
+  if (has('start_date', 'end_date', 'start_time')) out.push('dates')
+  if (has('event_format', 'venue_name', 'city', 'region')) out.push('venue')
+  if (p.fees) out.push('fees')
+  if (has('abstract_deadline', 'abstract_deadline_note')) out.push('abstracts')
+  if (has('cpd_accredited', 'cpd_points')) out.push('cpd')
+  if (has('organiser_url', 'booking_url')) out.push('links')
+  if (has('note', 'description')) out.push('note')
+  return out
+}
+
 export interface AddInfoDialogProps {
   /** The listing, ideally the community-overlaid one so already-filled fields are not re-offered. */
   conference: Conference
@@ -96,9 +141,13 @@ export interface AddInfoDialogProps {
   onOpenChange: (open: boolean) => void
   /** Pre-expands one section (used by the inline "Know the fees? Add them" prompts). */
   initialSection?: AddInfoSection
+  /** Resubmit mode: prefill from an earlier payload (a `needs_info` contribution). */
+  initialPayload?: AddInfoPayload
+  /** Resubmit mode: UPDATE this contribution (payload, note, evidence, status='pending') instead of inserting. */
+  contributionId?: string
 }
 
-export function AddInfoDialog({ conference, tiers, open, onOpenChange, initialSection }: AddInfoDialogProps) {
+export function AddInfoDialog({ conference, tiers, open, onOpenChange, initialSection, initialPayload, contributionId }: AddInfoDialogProps) {
   const { user, loading } = useAuth()
 
   return (
@@ -128,6 +177,8 @@ export function AddInfoDialog({ conference, tiers, open, onOpenChange, initialSe
             conference={conference}
             tiers={tiers}
             initialSection={initialSection}
+            initialPayload={initialPayload}
+            contributionId={contributionId}
             onDone={() => onOpenChange(false)}
             onCancel={() => onOpenChange(false)}
           />
@@ -157,21 +208,29 @@ function AddInfoForm({
   conference,
   tiers,
   initialSection,
+  initialPayload,
+  contributionId,
   onDone,
   onCancel,
 }: {
   conference: Conference
   tiers: PricingTier[]
   initialSection?: AddInfoSection
+  initialPayload?: AddInfoPayload
+  contributionId?: string
   onDone: () => void
   onCancel: () => void
 }) {
   const sections = useMemo(() => emptySections(conference, tiers), [conference, tiers])
   const { submit, submitting } = useSubmitContribution()
-  const [values, setValues] = useState<Values>(EMPTY)
-  const [fees, setFees] = useState<FeesDraft>(() => emptyFeesDraft(tiers.find((t) => t.currency)?.currency ?? 'GBP'))
-  const [openSections, setOpenSections] = useState<Set<AddInfoSection>>(
-    () => new Set(initialSection && sections.includes(initialSection) ? [initialSection] : [])
+  const [values, setValues] = useState<Values>(() => valuesFromPayload(initialPayload))
+  const [fees, setFees] = useState<FeesDraft>(() =>
+    initialPayload?.fees ? feesPayloadToDraft(initialPayload.fees) : emptyFeesDraft(tiers.find((t) => t.currency)?.currency ?? 'GBP')
+  )
+  const [openSections, setOpenSections] = useState<Set<AddInfoSection>>(() =>
+    initialPayload
+      ? new Set(sectionsFromPayload(initialPayload).filter((s) => sections.includes(s)))
+      : new Set(initialSection && sections.includes(initialSection) ? [initialSection] : [])
   )
   const [touched, setTouched] = useState<Set<string>>(new Set())
   const [attempted, setAttempted] = useState(false)
@@ -284,6 +343,32 @@ function AddInfoForm({
     if (openSections.has('fees') && !isFeesDraftEmpty(fees) && !validateFeesDraft(fees).payload) return
 
     const data = parsed.data
+    if (contributionId) {
+      // Resubmit after "needs info": RLS only lets the owner flip needs_info -> pending.
+      try {
+        const { data: updated, error: updError } = await createSupabaseClient()
+          .from('community_contributions')
+          .update({
+            payload: data as AddInfoPayload,
+            note: data.note?.trim() || null,
+            evidence_url: data.evidence_url?.trim() || null,
+            status: 'pending',
+          })
+          .eq('id', contributionId)
+          .select('id')
+        if (updError) {
+          setServerError(friendlySubmitError(updError))
+        } else if (!updated || updated.length === 0) {
+          setServerError('This contribution can no longer be edited. Refresh the page to see its current status.')
+        } else {
+          toast.success('Resubmitted. A moderator will review it again.')
+          onDone()
+        }
+      } catch (e) {
+        setServerError(friendlySubmitError({ message: e instanceof Error ? e.message : String(e) }))
+      }
+      return
+    }
     const res = await submit({
       kind: 'add_info',
       conference_id: conference.id,
@@ -512,7 +597,7 @@ function AddInfoForm({
               Sending…
             </>
           ) : (
-            'Send for review'
+            contributionId ? 'Resubmit for review' : 'Send for review'
           )}
         </Button>
       </DialogFooter>

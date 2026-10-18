@@ -175,6 +175,15 @@ export default function DashboardPage() {
           </AccountSection>
         )}
 
+        <AccountSection title="Your contributions">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3">
+            <p className="type-small text-fg-muted">Track details you added to events and events you submitted, and see what moderators decided.</p>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/dashboard/contributions">View your contributions</Link>
+            </Button>
+          </div>
+        </AccountSection>
+
         <CalendarLinkCard events={saved} />
       </div>
     </AccountContainer>
