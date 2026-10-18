@@ -157,6 +157,83 @@ describe('overlayConference', () => {
   })
 })
 
+describe('overlayConference re-validates community values at render time', () => {
+  const ignored = (field: FactField, value: unknown) => {
+    const r = overlayConference(base, [fact(field, value)])
+    expect(r.communityFields.has(field), `${field}=${String(value)}`).toBe(false)
+    return r.conference
+  }
+
+  it('rejects non-http(s) and malformed urls, normalises good ones', () => {
+    for (const f of ['organiser_url', 'booking_url'] as const) {
+      expect(ignored(f, 'javascript:alert(1)')[f]).toBeNull()
+      expect(ignored(f, 'data:text/html,x')[f]).toBeNull()
+      expect(ignored(f, 'not a url')[f]).toBeNull()
+      expect(ignored(f, 42)[f]).toBeNull()
+    }
+    const r = overlayConference(base, [fact('organiser_url', 'HTTPS://Example.org/e/?utm_source=x#f')])
+    expect(r.conference.organiser_url).toBe('https://example.org/e')
+  })
+
+  it('accepts only HH:MM or HH:MM:SS start times and stores HH:MM:SS', () => {
+    expect(ignored('start_time', '25:00').start_time).toBeNull()
+    expect(ignored('start_time', '9:30').start_time).toBeNull()
+    expect(ignored('start_time', '09:30:99').start_time).toBeNull()
+    expect(ignored('start_time', '<b>x</b>').start_time).toBeNull()
+    expect(overlayConference(base, [fact('start_time', '09:30')]).conference.start_time).toBe('09:30:00')
+    expect(overlayConference(base, [fact('start_time', '14:05:07')]).conference.start_time).toBe('14:05:07')
+  })
+
+  it('rejects malformed and impossible dates', () => {
+    for (const f of ['start_date', 'end_date'] as const) {
+      expect(ignored(f, '2027-02-30')[f]).toBeNull()
+      expect(ignored(f, '2027-2-3')[f]).toBeNull()
+      expect(ignored(f, '2027-03-01T00:00:00Z')[f]).toBeNull()
+      expect(ignored(f, 20270301)[f]).toBeNull()
+    }
+    const r = overlayConference(base, [fact('abstract_deadline', '2027-13-01')])
+    expect(r.conference.abstract_deadline).toBeNull()
+    expect(r.communityFields.size).toBe(0)
+  })
+
+  it('trims, strips control characters and caps string lengths', () => {
+    const r = overlayConference(base, [
+      fact('venue_name', '  Town\u0000 Hall\u0007\n '),
+      fact('city', 'x'.repeat(500)),
+      fact('region', '   '),
+    ])
+    expect(r.conference.venue_name).toBe('Town  Hall')
+    expect(r.conference.city).toHaveLength(120)
+    expect(r.conference.region).toBeNull()
+    expect(r.communityFields.has('region')).toBe(false)
+  })
+
+  it('caps the abstract note and ignores non-string notes', () => {
+    const r = overlayConference(base, [fact('abstract_deadline_note', 'n'.repeat(900))])
+    expect(r.conference.abstract_deadline_note).toHaveLength(200)
+    const r2 = overlayConference(base, [fact('abstract_deadline_note', { a: 1 })])
+    expect(r2.conference.abstract_deadline_note).toBeNull()
+  })
+
+  it('accepts only the right JSON type for booleans and numbers', () => {
+    expect(ignored('cpd_accredited', 'true').cpd_accredited).toBe(false)
+    expect(ignored('cpd_accredited', 1).cpd_accredited).toBe(false)
+    const r = overlayConference(base, [fact('abstract_deadline', '2027-02-01'), fact('abstract_open', 'yes')])
+    expect(r.communityFields.has('abstract_open')).toBe(false)
+    expect(r.conference.abstract_open).toBe(true) // default for a deadline, not the bad value
+  })
+
+  it('accepts cpd_points only as an integer 0-500', () => {
+    for (const bad of ['6', 6.5, -1, 501, NaN, Infinity, null]) {
+      const c = ignored('cpd_points', bad)
+      expect(c.cpd_points).toBeNull()
+      expect(c.cpd_accredited).toBe(false)
+    }
+    expect(overlayConference(base, [fact('cpd_points', 0)]).conference.cpd_points).toBe(0)
+    expect(overlayConference(base, [fact('cpd_points', 500)]).conference.cpd_points).toBe(500)
+  })
+})
+
 describe('pickTiers', () => {
   const ct: CommunityTier = {
     id: 'uuid-1',
@@ -186,6 +263,30 @@ describe('pickTiers', () => {
       fromCommunity: true,
     })
     expect(t.id).toBeLessThan(0)
+  })
+  it('drops tiers with a bad price, currency or label', () => {
+    const bad: CommunityTier[] = [
+      { ...ct, id: 'a', price: -5 },
+      { ...ct, id: 'b', price: 'abc' },
+      { ...ct, id: 'c', price: '' },
+      { ...ct, id: 'd', price: Number.POSITIVE_INFINITY },
+      { ...ct, id: 'e', currency: 'JPY' },
+      { ...ct, id: 'f', currency: '<script>' },
+      { ...ct, id: 'g', tier_label: '   ' },
+    ]
+    expect(pickTiers([], bad)).toEqual([])
+  })
+  it('keeps valid tiers, caps labels at 40 chars, free tier allowed, ids stay sequential', () => {
+    const out = pickTiers([], [
+      { ...ct, id: 'x', price: 'nope' },
+      { ...ct, id: 'y', tier_label: 'L'.repeat(80), price: 0 },
+      { ...ct, id: 'z', early_bird_deadline: 'garbage' },
+    ])
+    expect(out).toHaveLength(2)
+    expect(out[0].tier_label).toHaveLength(40)
+    expect(out[0].price_gbp).toBe(0)
+    expect(out[1].early_bird_deadline).toBeNull()
+    expect(out.map((t) => t.id)).toEqual([-1, -2])
   })
   it('skips unpublished community tiers', () => {
     expect(pickTiers([], [{ ...ct, is_published: false }])).toEqual([])
