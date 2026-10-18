@@ -488,6 +488,10 @@ ON CONFLICT (base_url) DO NOTHING;
 -- is missing. New community events are ordinary conferences rows under
 -- the inactive source 1000 ('Community submissions', society 'Community'),
 -- enriched by `python -m remediator --source 1000`, never scraped.
+-- Re-publish rule (20261018000005): approving a new_event whose organiser URL
+-- matches an ARCHIVED source-1000 row (a hidden community event) updates and
+-- un-archives that row and rebuilds its pricing_tiers instead of returning
+-- 'duplicate'. Any other existing row with that source_url is still a duplicate.
 -- ============================================
 
 -- One row per user submission. kind='add_info' targets an existing

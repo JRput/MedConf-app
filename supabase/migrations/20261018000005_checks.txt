@@ -1,0 +1,6 @@
+SELECT prosrc LIKE '%republish%' AS ok FROM pg_proc WHERE proname='moderate_contribution'
+SELECT prosrc LIKE '%community_upsert_tiers%' AS ok FROM pg_proc WHERE proname='moderate_contribution'
+SELECT count(*) = 1 AS ok FROM pg_proc WHERE proname='community_upsert_tiers'
+SELECT NOT has_function_privilege('anon','public.community_upsert_tiers(integer,jsonb)','EXECUTE') AS ok
+SELECT public.community_strip_rejected('{"booking_url":"https://10.0.0.1/x","fields":{"booking_url":"https://10.0.0.1/x","city":"Leeds"}}'::jsonb, '["https://10.0.0.1/x"]'::jsonb) = '{"fields":{"city":"Leeds"}}'::jsonb AS ok
+SELECT prosrc LIKE '%_rejected_urls%' AS ok FROM pg_proc WHERE proname='moderate_contribution'
