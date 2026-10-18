@@ -100,7 +100,7 @@ def test_rejected_url_skipped():
     status, enr = es.enrich_one(submission(organiser_url="http://localhost/"), None,
                                 FakeCache(), llm, {}, no_challenge,
                                 lambda u: (False, "localhost"), passthru)
-    assert (status, enr) == ("skipped", {"_error": "url rejected"})
+    assert status == "skipped" and enr["_error"] == "url rejected" and enr["_checked_url"] is None
 
 
 def test_add_info_uses_conference_url():
@@ -224,3 +224,20 @@ def test_fixers_cannot_reach_network(monkeypatch):
     # patches restored afterwards: the sentinels are active again
     ex.fetch_page_text_and_html("u")
     assert called == ["ex"]
+
+
+def test_submitted_and_checked_urls_recorded():
+    c = _client({"https://a.org/": "https://b.org/event"})
+    resolver = lambda u, uc: es.resolve_redirect_chain(u, uc, client=c)
+    status, enr = es.enrich_one(submission(organiser_url="https://a.org/"), None, FakeCache(),
+                                llm, {}, no_challenge, _public_only, resolver)
+    assert enr["_submitted_url"] == "https://a.org/"
+    assert enr["_checked_url"] == "https://b.org/event"
+    assert enr["_rejected_urls"] == []
+
+
+def test_rejected_extra_urls_listed():
+    url_check = lambda u: ("10.0.0.1" not in u, "")
+    sub = submission(booking_url="http://10.0.0.1/book", evidence_url="https://ok.org/e")
+    status, enr = es.enrich_one(sub, None, FakeCache(), llm, {}, no_challenge, url_check, passthru)
+    assert status == "fetched" and enr["_rejected_urls"] == ["http://10.0.0.1/book"]

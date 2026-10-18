@@ -298,7 +298,7 @@ def _json_safe(v: Any) -> Any:
 
 # -------------------------------------------------------------- enrichment
 
-def enrich_one(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
+def _enrich_core(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
                fixers: dict, challenge_check: Callable,
                url_check: Callable = check_url_safe,
                resolver: Callable = resolve_redirect_chain) -> tuple:
@@ -306,18 +306,18 @@ def enrich_one(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
     row, user, url = build_row(sub, conference)
     ok, reason = url_check(url)
     if not ok:
-        return "skipped", {"_error": "url rejected"}
+        return "skipped", {"_error": "url rejected"}, url, None
     try:
         verdict, final, html = resolver(url, url_check)
         if verdict == "rejected":
-            return "skipped", {"_error": "url rejected"}
+            return "skipped", {"_error": "url rejected"}, url, None
         if verdict == "blocked":
-            return "blocked", {"_error": "page blocked or empty"}
+            return "blocked", {"_error": "page blocked or empty"}, url, final
         text = html_to_text(html)
         seed_cache(cache, {url, final}, text, html)
         row["source_url"] = final
         if not text.strip() or challenge_check(html):
-            return "blocked", {"_error": "page blocked or empty"}
+            return "blocked", {"_error": "page blocked or empty"}, url, final
         enrichment: dict = {}
         with no_network():
             results = {f: _run_fixer(f, fx, row, text, llm_call)
@@ -328,9 +328,46 @@ def enrich_one(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
             safe = _json_safe(value)
             enrichment[field] = {"value": safe, "method": method,
                                  "agrees": compute_agrees(field, safe, user)}
-        return "fetched", enrichment
+        return "fetched", enrichment, url, final
     except Exception as e:  # noqa: BLE001 - one bad submission must not stop the run
-        return "failed", {"_error": f"{type(e).__name__}: {e}"[:300]}
+        return "failed", {"_error": f"{type(e).__name__}: {e}"[:300]}, url, None
+
+
+def _extra_urls(sub: dict) -> list:
+    payload = sub.get("payload") or {}
+    urls = [payload.get("booking_url"), payload.get("evidence_url"), sub.get("evidence_url")]
+    fields = payload.get("fields") or {}
+    urls += [v for k, v in fields.items() if str(k).endswith("_url")]
+    out = []
+    for u in urls:
+        if isinstance(u, str) and u.strip() and u not in out:
+            out.append(u)
+    return out
+
+
+def enrich_one(sub: dict, conference: Optional[dict], cache, llm_call: Callable,
+               fixers: dict, challenge_check: Callable,
+               url_check: Callable = check_url_safe,
+               resolver: Callable = resolve_redirect_chain) -> tuple:
+    """Return (enrichment_status, enrichment_dict). Never raises.
+
+    The dict always carries _submitted_url / _checked_url (the moderation RPC
+    binds approval to them) and _rejected_urls (other URL fields that failed
+    the address check; they are never fetched).
+    """
+    status, enrichment, submitted, checked = _enrich_core(
+        sub, conference, cache, llm_call, fixers, challenge_check, url_check, resolver)
+    rejected = []
+    for u in _extra_urls(sub):
+        try:
+            if not url_check(u)[0]:
+                rejected.append(u)
+        except Exception:  # noqa: BLE001
+            rejected.append(u)
+    enrichment["_submitted_url"] = submitted
+    enrichment["_checked_url"] = checked
+    enrichment["_rejected_urls"] = rejected
+    return status, enrichment
 
 
 def _run_fixer(field, fixer, row, text, llm_call):
