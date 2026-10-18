@@ -24,7 +24,6 @@ import { useSubmitContribution, friendlySubmitError } from '@/hooks/useCommunity
 import { createSupabaseClient } from '@/lib/supabase'
 import { feesPayloadToDraft } from '@/lib/community/moderation'
 import {
-  EMPTY_VALUES,
   buildAddInfoRaw,
   buildResubmitPatch,
   sectionsFromPayload,
