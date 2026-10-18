@@ -24,14 +24,17 @@ const isEmpty = (v: unknown) => v === null || v === undefined || v === ''
 // here at render time. Each cleaner returns a safe value or null (= ignore).
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/
-// eslint-disable-next-line no-control-regex
-const CONTROL_RE = /[\u0000-\u001f\u007f-\u009f  ​-‏‪-‮⁠⁦-⁩﻿]/g
+// Invisible characters (zero-width, bidi overrides/isolates, BOM) are removed
+// outright: they can visually spoof prices or venue names.
+const INVISIBLE_RE = /[\u200b-\u200f\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g
+const CONTROL_RE = /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g
 
 function cleanText(v: unknown, max: number, keepNewlines = false): string | null {
   if (typeof v !== 'string') return null
+  const noInvisible = v.replace(INVISIBLE_RE, '')
   const stripped = keepNewlines
-    ? v.replace(/\r\n?/g, '\n').replace(/[^\S\n]/g, ' ').replace(CONTROL_RE, (c) => (c === '\n' ? c : ''))
-    : v.replace(CONTROL_RE, ' ')
+    ? noInvisible.replace(/\r\n?/g, '\n').replace(/[^\S\n]/g, ' ').replace(CONTROL_RE, (c) => (c === '\n' ? c : ''))
+    : noInvisible.replace(CONTROL_RE, ' ')
   const t = stripped.trim().slice(0, max).trim()
   return t === '' ? null : t
 }
