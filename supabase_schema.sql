@@ -196,6 +196,10 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     -- users only get alerted about events added after they joined
     -- (rather than every match in the catalogue).
     last_specialty_alert_at TIMESTAMPTZ,
+    -- Moderator flag for /admin/moderation. Only the service role / DB
+    -- owner may set it (trg_user_profiles_guard_is_admin); clients that
+    -- try are rejected. See COMMUNITY CONTRIBUTIONS below.
+    is_admin BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -255,7 +259,9 @@ CREATE INDEX IF NOT EXISTS idx_user_reminders_scheduled ON user_reminders(schedu
 CREATE TABLE IF NOT EXISTS notifications (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    type TEXT NOT NULL CHECK (type IN ('reminder','new_in_specialty','conference_change','system')),
+    -- 'contribution_update' = to a submitter about their community contribution;
+    -- 'moderation' = daily pending-count digest to admins.
+    type TEXT NOT NULL CHECK (type IN ('reminder','new_in_specialty','conference_change','system','contribution_update','moderation')),
     title TEXT NOT NULL,
     body TEXT,
     conference_id INTEGER REFERENCES conferences(id) ON DELETE CASCADE,
@@ -473,6 +479,94 @@ ON CONFLICT (base_url) DO NOTHING;
 -- ============================================
 
 -- Function to automatically update updated_at timestamp
+-- ============================================
+-- COMMUNITY CONTRIBUTIONS (2026-10-18)
+-- Full definitions (triggers, RLS, RPC bodies) live in
+-- supabase/migrations/20261018000000_community_contributions.sql.
+-- Rule: scraped columns are never written by the community path for
+-- scraped rows; community data is overlaid only where the scraped value
+-- is missing. New community events are ordinary conferences rows under
+-- the inactive source 1000 ('Community submissions', society 'Community'),
+-- enriched by `python -m remediator --source 1000`, never scraped.
+-- ============================================
+
+-- One row per user submission. kind='add_info' targets an existing
+-- conference; kind='new_event' gets conference_id on approval.
+CREATE TABLE IF NOT EXISTS community_contributions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    kind TEXT NOT NULL CHECK (kind IN ('new_event','add_info')),
+    conference_id INTEGER REFERENCES conferences(id) ON DELETE CASCADE,
+    status TEXT NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending','needs_info','published','rejected','merged','expired','hidden')),
+    payload JSONB NOT NULL,            -- user-entered; shapes in medconf-website/src/lib/community/schema.ts
+    enrichment JSONB,                  -- {field: {value, method, agrees}} from enrich_submissions.py
+    enrichment_status TEXT NOT NULL DEFAULT 'waiting'
+        CHECK (enrichment_status IN ('waiting','fetched','blocked','failed','skipped')),
+    enriched_at TIMESTAMPTZ,
+    evidence_url TEXT,                 -- private, for the moderator
+    note TEXT,                         -- private, for the moderator
+    final_payload JSONB,               -- what the moderator approved
+    moderator_id UUID REFERENCES auth.users(id),
+    moderator_note TEXT,
+    reviewed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CHECK (kind <> 'add_info' OR conference_id IS NOT NULL)
+);
+CREATE INDEX IF NOT EXISTS idx_community_contributions_status ON community_contributions (status, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_community_contributions_user ON community_contributions (user_id);
+CREATE INDEX IF NOT EXISTS idx_community_contributions_conf ON community_contributions (conference_id);
+
+-- Published overlay values for a scraped conference (shown only where the
+-- scraped column is empty). Written by moderate_contribution() only.
+CREATE TABLE IF NOT EXISTS community_facts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    contribution_id UUID NOT NULL REFERENCES community_contributions(id) ON DELETE CASCADE,
+    conference_id INTEGER NOT NULL REFERENCES conferences(id) ON DELETE CASCADE,
+    field TEXT NOT NULL CHECK (field IN ('start_date','end_date','start_time','venue_name','city','region','event_format',
+        'abstract_deadline','abstract_open','abstract_deadline_note','cpd_accredited','cpd_points',
+        'organiser_url','booking_url','description','note')),
+    value JSONB NOT NULL,
+    is_published BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_community_facts_conf_published ON community_facts (conference_id) WHERE is_published;
+
+-- Community-provided fee tiers for a scraped conference (used when it has
+-- no pricing_tiers). Never attached to course sessions.
+CREATE TABLE IF NOT EXISTS community_tiers (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    contribution_id UUID NOT NULL REFERENCES community_contributions(id) ON DELETE CASCADE,
+    conference_id INTEGER NOT NULL REFERENCES conferences(id) ON DELETE CASCADE,
+    tier_label TEXT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    currency TEXT NOT NULL DEFAULT 'GBP',
+    is_early_bird BOOLEAN DEFAULT FALSE,
+    early_bird_deadline DATE,
+    is_published BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_community_tiers_conf_published ON community_tiers (conference_id) WHERE is_published;
+
+-- Functions (bodies in the migration):
+--   is_privileged_caller()  service role or DB owner
+--   is_admin()              SECURITY DEFINER read of user_profiles.is_admin for auth.uid()
+--   moderate_contribution(p_id, p_action, p_note, p_final) -> jsonb   admin only;
+--       actions approve | needs_info | reject | merge | hide; approve of a
+--       new_event inserts conferences (source_id 1000) + pricing_tiers and
+--       returns {ok:false, code:'duplicate', conference_id} on a source_url clash
+--   expire_stale_contributions() -> int   admin or service role; closes pending
+--       items whose event date has passed
+-- Triggers: trg_user_profiles_guard_is_admin (clients cannot set is_admin),
+--   trg_community_contributions_before_insert (owner = auth.uid(), status pending,
+--   max 10 pending per user, 32 KB payload cap),
+--   trg_community_contributions_before_update (owner may only resubmit).
+-- RLS: contributions SELECT owner or admin, INSERT owner, UPDATE owner only
+--   needs_info -> pending; facts/tiers SELECT where is_published or admin;
+--   no client writes on facts/tiers.
+-- Seed: scraper_sources id 1000 'Community submissions' (active FALSE, society 'Community').
+
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN

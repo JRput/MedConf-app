@@ -5,6 +5,8 @@
 > `Conference_masterlist/Medical_Courses_Conferences_Master_Comprehensive_v1(Master list).csv`
 > autonomously, keep the MedConf site up to date, with accuracy and nothing missing.
 
+> **Sibling board (2026-10-18):** [MISSION_BOARD_CONTRIBUTIONS.md](MISSION_BOARD_CONTRIBUTIONS.md) — community corrections + new-event submissions with moderation. Status: PLANNING, awaiting owner approval. Wave 2d/2e stay parked behind it.
+
 ## 1. Brief & ground truth
 
 - Masterlist: 396 rows · 202 unique domains · 85 rows already covered by the 23 active sources.
