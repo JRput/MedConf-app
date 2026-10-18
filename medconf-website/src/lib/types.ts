@@ -134,7 +134,7 @@ export interface UserReminder {
   updated_at: string
 }
 
-export type NotificationType = 'reminder' | 'new_in_specialty' | 'conference_change' | 'system'
+export type NotificationType = 'reminder' | 'new_in_specialty' | 'conference_change' | 'system' | 'contribution_update' | 'moderation'
 
 export interface NotificationItem {
   id: string

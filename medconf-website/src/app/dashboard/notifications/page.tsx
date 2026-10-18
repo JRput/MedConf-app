@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import { AlertCircle, Check, ChevronLeft, Clock, Info, Loader2, Sparkles } from 'lucide-react'
+import { AlertCircle, Check, ChevronLeft, Clock, Info, Loader2, MessageSquareText, ShieldCheck, Sparkles } from 'lucide-react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import type { NotificationItem } from '@/lib/types'
@@ -131,13 +131,19 @@ const TYPE_STYLE = {
   new_in_specialty: { icon: Sparkles, color: 'text-brand-text' },
   conference_change: { icon: AlertCircle, color: 'text-danger-text' },
   system: { icon: Info, color: 'text-fg-muted' },
+  contribution_update: { icon: MessageSquareText, color: 'text-brand-text' },
+  moderation: { icon: ShieldCheck, color: 'text-warn-text' },
 } as const
 
 function Row({ item, onClick }: { item: NotificationItem; onClick: () => void }) {
   const unread = !item.read_at
   const style = TYPE_STYLE[item.type] ?? TYPE_STYLE.system
   const Icon = style.icon
-  const href = item.conference_id
+  const href = item.type === 'contribution_update'
+    ? '/dashboard/contributions'
+    : item.type === 'moderation'
+      ? '/admin/moderation'
+      : item.conference_id
     ? `/conferences/${item.conference_id}`
     : item.type === 'new_in_specialty'
       ? `/conferences?specialty=${encodeURIComponent(extractSpecialtyFromTitle(item.title))}&sort=recently_added`

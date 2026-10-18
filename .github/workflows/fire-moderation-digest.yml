@@ -1,0 +1,39 @@
+name: Fire moderation digest
+
+# Runs daily at 09:00 UTC: expires stale community contributions, leaves one
+# unread 'moderation' notification per admin when items await review, and
+# logs the placeholder moderator email. Idempotent per day.
+on:
+  schedule:
+    - cron: '0 9 * * *'   # 09:00 UTC daily
+  workflow_dispatch:       # manual trigger from GitHub UI
+
+jobs:
+  fire:
+    name: Moderation digest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: medconf-scraper/requirements.txt
+
+      - name: Install Python dependencies
+        working-directory: medconf-scraper
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run moderation digest
+        working-directory: medconf-scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          MODERATION_NOTIFY_EMAIL: moderation@medconf.example
+        run: python fire_moderation_digest.py
