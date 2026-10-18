@@ -38,14 +38,27 @@ def main() -> int:
         for s in active:
             try:
                 summary = remediate_source(s["id"])
-                print_summary(Path(summary["report_path"]))
+                _print_result(summary)
             except Exception as e:
                 print(f"Source {s['id']} failed: {e}", file=sys.stderr)
         return 0
 
     summary = remediate_source(args.source)
-    print_summary(Path(summary["report_path"]))
+    _print_result(summary)
     return 0
+
+
+def _print_result(summary: dict) -> None:
+    """A source with no live rows returns a short summary and writes no
+    report (runner.remediate_source early return) — print that instead of
+    crashing on the missing report_path (seen first on community source 1000
+    before any event had been approved; also hit every verified-empty source)."""
+    report_path = summary.get("report_path")
+    if report_path:
+        print_summary(Path(report_path))
+    else:
+        print(f"Source {summary.get('source_id')}: no live rows to remediate "
+              f"(events_scraped={summary.get('events_scraped', 0)})")
 
 
 if __name__ == "__main__":
