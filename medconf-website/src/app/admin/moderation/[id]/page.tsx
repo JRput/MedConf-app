@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import { AccountContainer, AccountEmptyState } from '@/components/account/AccountPageHeader'
 import { ActionBar } from '@/components/moderation/ActionBar'
+import { DomainSignals } from '@/components/moderation/DomainSignals'
 import { DuplicatesPanel } from '@/components/moderation/DuplicatesPanel'
 import { EnrichmentChip } from '@/components/moderation/EnrichmentChip'
 import { FieldReviewTable } from '@/components/moderation/FieldReviewTable'
@@ -274,6 +275,8 @@ function Review({ item, refresh }: { item: QueueItem; refresh: () => void }) {
             )}
           </div>
         )}
+
+        {open && <DomainSignals finalPayload={built.final} />}
 
         {open && differs.length > 0 && (
           <p className="type-small text-warn-text">

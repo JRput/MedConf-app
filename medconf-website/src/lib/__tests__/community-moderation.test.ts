@@ -5,6 +5,8 @@ import {
   buildFinalPayload,
   canApprove,
   disagreementFields,
+  domainLabel,
+  domainSignals,
   duplicateCandidates,
   finalProblems,
   flattenEnrichment,
@@ -280,5 +282,35 @@ describe('rejected links', () => {
     const r = buildFinalPayload(newEvent, { ...enrichment, _rejected_urls: ['https://www.example.org/nsos'] })
     expect(r.final.organiser_url).toBeUndefined()
     expect(finalProblems(newEvent, r.final).join(' ')).toMatch(/organiser URL/)
+  })
+})
+
+describe('domainSignals', () => {
+  const rows: DuplicateRow[] = [{ id: 1, name: 'x', startDate: null, organiserUrl: 'https://www.esmo.org/meeting-calendar/a' }]
+  it('extracts domains without www', () => {
+    const s = domainSignals({ organiser_url: 'https://www.Example.org/a', booking_url: 'https://tickets.example.org/b' }, null)
+    expect(s.organiserDomain).toBe('example.org')
+    expect(s.bookingDomain).toBe('tickets.example.org')
+  })
+  it('flags a booking domain that differs from the organiser domain', () => {
+    expect(domainSignals({ organiser_url: 'https://a.org', booking_url: 'https://b.com' }, null).mismatch).toBe(true)
+    expect(domainSignals({ organiser_url: 'https://www.a.org', booking_url: 'https://a.org/x' }, null).mismatch).toBe(false)
+    expect(domainSignals({ organiser_url: 'https://a.org' }, null).mismatch).toBe(false)
+  })
+  it('unseen: null until rows load, true when no row shares the domain, false when one does', () => {
+    expect(domainSignals({ organiser_url: 'https://esmo.org/x' }, null).unseen).toBeNull()
+    expect(domainSignals({ organiser_url: 'https://new-site.org/x' }, rows).unseen).toBe(true)
+    expect(domainSignals({ organiser_url: 'https://esmo.org/other' }, rows).unseen).toBe(false)
+    expect(domainSignals({ organiser_url: 'https://esmo.org/x' }, []).unseen).toBe(true)
+  })
+  it('reads add_info fields and ignores invalid urls', () => {
+    expect(domainSignals({ fields: { organiser_url: 'https://a.org' } }, null).organiserDomain).toBe('a.org')
+    expect(domainSignals({ organiser_url: 'javascript:alert(1)' }, rows)).toEqual({ organiserDomain: null, bookingDomain: null, mismatch: false, unseen: null })
+  })
+  it('domainLabel picks the registrable label', () => {
+    expect(domainLabel('www.rcseng.ac.uk')).toBe('rcseng')
+    expect(domainLabel('esmo.org')).toBe('esmo')
+    expect(domainLabel('tickets.example.com')).toBe('example')
+    expect(domainLabel(null)).toBeNull()
   })
 })

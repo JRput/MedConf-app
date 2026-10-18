@@ -444,6 +444,52 @@ export function needsOverride(
   return { needed: false }
 }
 
+// ---------------------------------------------------------------- domain signals
+
+export interface DomainSignals {
+  organiserDomain: string | null
+  bookingDomain: string | null
+  /** Booking and organiser domains are both present and differ. */
+  mismatch: boolean
+  /** No existing listing shares the organiser domain. null = could not tell (directory not searched yet or failed). */
+  unseen: boolean | null
+}
+
+export function hostnameOf(url: unknown): string | null {
+  const n = typeof url === 'string' ? normalizeUrl(url) : null
+  return n ? new URL(n).hostname.toLowerCase().replace(/^www\./, '') : null
+}
+
+const SECOND_LEVEL = new Set(['co', 'ac', 'org', 'nhs', 'gov', 'com', 'net', 'edu', 'sch'])
+
+/** Registrable label to search the directory by: "www.rcseng.ac.uk" -> "rcseng", "esmo.org" -> "esmo". */
+export function domainLabel(host: string | null): string | null {
+  if (!host) return null
+  const parts = host.split('.')
+  if (parts.length < 2) return parts[0] || null
+  const tld = parts[parts.length - 1]
+  const sld = parts[parts.length - 2]
+  if (parts.length >= 3 && tld.length === 2 && SECOND_LEVEL.has(sld)) return parts[parts.length - 3]
+  return sld
+}
+
+/**
+ * Provenance hints for the organiser/booking links in the final payload.
+ * Heuristic: `rows` are directory search hits for the organiser domain label,
+ * so "unseen" means no hit shares the domain, not proof the domain is new.
+ */
+export function domainSignals(finalPayload: unknown, rows: DuplicateRow[] | null): DomainSignals {
+  const f = userFields(finalPayload)
+  const organiserDomain = hostnameOf(f.organiser_url)
+  const bookingDomain = hostnameOf(f.booking_url)
+  const mismatch = !!organiserDomain && !!bookingDomain && organiserDomain !== bookingDomain
+  let unseen: boolean | null = null
+  if (organiserDomain && rows) {
+    unseen = !rows.some((r) => !!r.organiserUrl && sameDomain(r.organiserUrl, `https://${organiserDomain}`))
+  }
+  return { organiserDomain, bookingDomain, mismatch, unseen }
+}
+
 // ---------------------------------------------------------------- duplicates
 
 /** Normalised candidate row (the shape /api/directory returns, trimmed). */
