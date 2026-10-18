@@ -125,7 +125,7 @@ python -m remediator.audit --source 20                   # gate check for SABCS
 - `fire-reminders.yml` — **08:00 UTC** — fires saved-event reminders users scheduled from the detail page.
 - `fire-moderation-digest.yml` — **09:00 UTC** — expires stale community contributions, leaves one unread `moderation` notification per admin when items await review, logs the placeholder moderator email (`MODERATION_NOTIFY_EMAIL`).
 - `enrich-submissions.yml` — every 6 hours (cron `15 */6 * * *`) — fetches the organiser page of each pending community submission (`enrichment_status='waiting'`).
-- `remediator-daily.yml` also has a community step that runs source 1000 (inactive, so skipped by the matrix) explicitly; `continue-on-error`.
+- `remediator-daily.yml` has a community step that would run source 1000 (inactive, so skipped by the matrix) explicitly, but it is **disabled (`if: false`, 2026-10-18) pending safe-fetch mode** (`REMEDIATOR_SAFE_FETCH`) in the shared fetchers; community rows are enriched only by `enrich-submissions.yml` until then.
 
 ---
 

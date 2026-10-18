@@ -96,7 +96,9 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+  # Disabled 2026-10-18 pending safe-fetch mode (REMEDIATOR_SAFE_FETCH) in remediator/fetcher.py, remediator/explorer.py, extractors/http_fetch.py and extractors/abstract_classifier.py - owner approval required for those shared files. Until then community rows are enriched only by the hop-validated pre-moderation job.
   remediate-community:
+    if: false
     name: Remediator community rows (source 1000)
     runs-on: ubuntu-latest
     timeout-minutes: 30
