@@ -108,10 +108,43 @@ def html_to_text(html: str) -> str:
     return re.sub(r"\s+", " ", t).strip()[:200000]
 
 
+def pin_address(host: str, port: int) -> Optional[str]:
+    """Resolve once and return the first allowed address (None if none is)."""
+    try:
+        infos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
+    except Exception:
+        return None
+    for info in infos:
+        try:
+            ip = ipaddress.ip_address(info[4][0].split("%")[0])
+        except ValueError:
+            continue
+        if not _ip_is_blocked(ip):
+            return str(ip)
+    return None
+
+
+def _pinned_request(url: str) -> Optional[tuple]:
+    """(pinned_url, headers, extensions): connect to the validated IP while
+    keeping the hostname for Host header, SNI and certificate verification."""
+    p = urlparse(url)
+    host = p.hostname or ""
+    port = p.port or (443 if p.scheme == "https" else 80)
+    ip = pin_address(host, port)
+    if ip is None:
+        return None
+    ip_host = f"[{ip}]" if ":" in ip else ip
+    netloc = f"{ip_host}:{p.port}" if p.port else ip_host
+    pinned = p._replace(netloc=netloc).geturl()
+    host_hdr = f"{host}:{p.port}" if p.port else host
+    return pinned, {"Host": host_hdr}, {"sni_hostname": host}
+
+
 def fetch_validated(url: str, url_check: Callable = check_url_safe, max_hops: int = 5,
                     client: Optional[httpx.Client] = None,
                     deadline: Optional[float] = None,
-                    max_bytes: int = MAX_BODY_BYTES) -> tuple:
+                    max_bytes: int = MAX_BODY_BYTES,
+                    pin: Optional[bool] = None) -> tuple:
     """GET hop by hop (no automatic redirects), SSRF-checking every hop.
 
     Returns (verdict, final_url, body_bytes, encoding, status):
@@ -120,6 +153,10 @@ def fetch_validated(url: str, url_check: Callable = check_url_safe, max_hops: in
       rejected  a hop failed the check / too many hops / transport error
       timeout   monotonic `deadline` passed (slow-drip server)
     """
+    # DNS-rebinding defence: connect to the address we validated (pin=True).
+    # Default: on whenever the real address check is in use.
+    if pin is None:
+        pin = url_check is check_url_safe
     own = client is None
     if own:
         client = httpx.Client(follow_redirects=False,
@@ -132,7 +169,13 @@ def fetch_validated(url: str, url_check: Callable = check_url_safe, max_hops: in
                 return "timeout", current, b"", "utf-8", 0
             if not url_check(current)[0]:
                 return "rejected", current, b"", "utf-8", 0
-            with client.stream("GET", current) as r:
+            target, hdrs, exts = current, None, None
+            if pin:
+                pr = _pinned_request(current)
+                if pr is None:
+                    return "rejected", current, b"", "utf-8", 0
+                target, hdrs, exts = pr
+            with client.stream("GET", target, headers=hdrs, extensions=exts) as r:
                 location = r.headers.get("location")
                 if r.status_code in _REDIRECT_STATUSES and location:
                     if hop >= max_hops:
@@ -161,10 +204,11 @@ def fetch_validated(url: str, url_check: Callable = check_url_safe, max_hops: in
 
 def resolve_redirect_chain(url: str, url_check: Callable, max_hops: int = 5,
                            client: Optional[httpx.Client] = None,
-                           deadline: Optional[float] = None) -> tuple:
+                           deadline: Optional[float] = None,
+                           pin: Optional[bool] = None) -> tuple:
     """Return (verdict, final_url, html) - see fetch_validated for verdicts.
     The body comes from this validated response; callers must never re-fetch."""
-    verdict, final, body, enc, _ = fetch_validated(url, url_check, max_hops, client, deadline)
+    verdict, final, body, enc, _ = fetch_validated(url, url_check, max_hops, client, deadline, pin=pin)
     if verdict != "ok":
         return verdict, final, ""
     return "ok", final, body.decode(enc, errors="replace")

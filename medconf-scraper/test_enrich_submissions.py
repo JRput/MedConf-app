@@ -290,3 +290,38 @@ def test_premark_happens_before_fetch():
            llm_call=llm, fixers={}, challenge_check=no_challenge, url_check=ok_url,
            resolver=resolver)
     assert len(seen[0]) == 1 and seen[0][0][1]["enrichment_status"] == "failed"
+
+
+# ---- IP pinning (DNS rebinding)
+def test_request_is_pinned_to_validated_ip(monkeypatch):
+    import safe_fetch
+    monkeypatch.setattr(safe_fetch.socket, "getaddrinfo",
+                        lambda *a, **k: [(2, 1, 6, "", ("93.184.216.34", 443))])
+    seen = []
+
+    def handler(req):
+        seen.append(req)
+        return httpx.Response(200, text=GOOD)
+
+    c = httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=False)
+    v, final, _ = es.resolve_redirect_chain("https://example.org/p?q=1", safe_fetch.check_url_safe, client=c)
+    assert v == "ok" and final == "https://example.org/p?q=1"
+    r = seen[0]
+    assert r.url.host == "93.184.216.34" and r.url.path == "/p"
+    assert r.headers["host"] == "example.org"
+    assert r.extensions["sni_hostname"] == "example.org"
+
+
+def test_pin_rejects_when_rebinding_to_private(monkeypatch):
+    import safe_fetch
+    answers = iter([[(2, 1, 6, "", ("93.184.216.34", 443))], [(2, 1, 6, "", ("127.0.0.1", 443))]])
+    monkeypatch.setattr(safe_fetch.socket, "getaddrinfo", lambda *a, **k: next(answers))
+    c = httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(200, text=GOOD)))
+    v, _, _ = es.resolve_redirect_chain("https://example.org/", safe_fetch.check_url_safe, client=c)
+    assert v == "rejected"
+
+
+def test_httpcore_uses_sni_hostname_for_tls():
+    import inspect, httpcore._sync.connection as m
+    src = inspect.getsource(m)
+    assert 'sni_hostname' in src and 'server_hostname' in src
