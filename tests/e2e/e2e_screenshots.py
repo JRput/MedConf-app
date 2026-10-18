@@ -6,7 +6,7 @@ from helpers import *
 os.makedirs(SHOTS, exist_ok=True); svc = service(); R = Results("screenshots")
 pend = svc.table("community_contributions").select("id").in_("status", ["pending", "needs_info"]).limit(1).execute().data
 item_id = pend[0]["id"] if pend else None
-VIEWS = {"375": {"width": 375, "height": 800}, "768": {"width": 768, "height": 1024}}
+VIEWS = {"375": {"width": 375, "height": 800}, "768": {"width": 768, "height": 1024}, "1024": {"width": 1024, "height": 768}, "1280": {"width": 1280, "height": 800}}
 JS = """() => { const de = document.documentElement; const out = {hscroll: de.scrollWidth - de.clientWidth, wide: []};
   for (const el of document.querySelectorAll('body *')) { const r = el.getBoundingClientRect(); if (r.width && r.right > de.clientWidth + 1 && getComputedStyle(el).position !== 'fixed') {
     let p = el.parentElement, clipped = false; while (p) { const o = getComputedStyle(p).overflowX; if (o === 'auto' || o === 'scroll' || o === 'hidden') { clipped = true; break; } p = p.parentElement; }

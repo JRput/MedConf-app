@@ -57,4 +57,19 @@ R.check(err and "http" in err, f"javascript: URL rejected server-side: {(err or 
 err = rpc_err(lambda: user.table("community_contributions").insert({"kind": "add_info", "conference_id": CONF, "payload": {"fields": {"city": "Leeds"}}, "status": "published"}).execute())
 row = svc.table("community_contributions").select("status").eq("user_id", sub["user_id"]).eq("conference_id", CONF).order("created_at", desc=True).limit(1).execute().data[0]
 R.check(err is None and row["status"] == "pending", f"client-set status forced back to pending (got {row['status']}, err={err})")
+
+# negative checks (migration 000006): direct member inserts
+def ins(conf, fields=None, fees=None):
+    pl = {"fields": fields or {"city": "Leeds"}}
+    if fees: pl["fees"] = fees
+    return rpc_err(lambda: user.table("community_contributions").insert({"kind": "add_info", "conference_id": conf, "payload": pl}).execute())
+err = ins(CONF, fees={"currency": "XXX", "from_price": 10, "tiers": []})
+R.check(err is not None, f"bad currency 'XXX' refused: {(err or 'ACCEPTED')[:80]}")
+err = ins(CONF, fields={"start_date": "2026-02-31"})
+R.check(err is not None, f"invalid date '2026-02-31' refused: {(err or 'ACCEPTED')[:80]}")
+arch = svc.table("conferences").select("id").eq("archived", True).limit(1).execute().data
+R.check(bool(arch), "found an archived conference id")
+if arch:
+    err = ins(arch[0]["id"])
+    R.check(err is not None and "Conference not available" in err, f"add_info on archived conference {arch[0]['id']} refused: {(err or 'ACCEPTED')[:80]}")
 sys.exit(R.finish())
