@@ -1,0 +1,3 @@
+SELECT prosrc LIKE '%no completed safety check%' AS ok FROM pg_proc WHERE proname='moderate_contribution'
+SELECT prosrc LIKE '%rejected as unsafe%' AND prosrc LIKE '%not been safety-checked yet%' AS ok FROM pg_proc WHERE proname='moderate_contribution'
+SELECT prosrc LIKE '%community_strip_rejected%' AND prosrc LIKE '%community_upsert_tiers%' AND prosrc LIKE '%c.status = ''published'' AND c.conference_id%' AS ok FROM pg_proc WHERE proname='moderate_contribution'

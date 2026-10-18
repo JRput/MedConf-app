@@ -496,6 +496,7 @@ ON CONFLICT (base_url) DO NOTHING;
 -- (community_safe_date) and end >= start; expiry uses the safe cast. Hiding archives
 -- the conferences row only for a 'published' new_event whose source_url this
 -- contribution created; 'merged' items never archive their target.
+-- Publish gate (20261018000007): approve/merge need enrichment->>'_submitted_url' (proof the address check ran) unless overridden.
 -- ============================================
 
 -- One row per user submission. kind='add_info' targets an existing
