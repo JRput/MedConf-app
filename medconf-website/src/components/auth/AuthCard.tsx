@@ -48,15 +48,30 @@ export function AuthField({
   label,
   hint,
   error,
+  labelAction,
   ...inputProps
-}: React.ComponentProps<'input'> & { id: string; label: string; hint?: string; error?: string }) {
+}: React.ComponentProps<'input'> & {
+  id: string
+  label: string
+  hint?: string
+  error?: string
+  /** Optional right-aligned link on the label row, e.g. "Forgot password?". */
+  labelAction?: React.ReactNode
+}) {
   const describedBy = [error ? `${id}-error` : null, !error && hint ? `${id}-hint` : null].filter(Boolean).join(' ')
 
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-[0.8125rem] font-medium text-fg">
-        {label}
-      </label>
+      <div className="mb-1.5 flex items-baseline justify-between gap-3">
+        <label htmlFor={id} className="block text-[0.8125rem] font-medium text-fg">
+          {label}
+        </label>
+        {labelAction && (
+          <span className="text-[0.8125rem] text-fg-muted [&_a]:hover:text-fg [&_a]:hover:underline">
+            {labelAction}
+          </span>
+        )}
+      </div>
       <Input
         id={id}
         aria-invalid={error ? true : undefined}

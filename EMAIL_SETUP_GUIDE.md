@@ -174,6 +174,24 @@ Before deploying to production:
 3. Check Supabase allowed redirect URLs in dashboard
 4. Verify the verification link hasn't expired (default: 1 hour)
 
+## 🔑 Password reset
+
+**Flow.** Sign in page → "Forgot password?" → `/auth/forgot-password` (email form; always shows the same "If an account exists…" message, so it cannot be used to find out who has an account) → Supabase emails a recovery link → `/auth/callback` verifies it, writes the session cookies and redirects to `/auth/reset-password` → new password + confirm (at least 8 characters) → "Password updated" → dashboard. An expired or already-used link lands on `/auth/forgot-password?error=expired`.
+
+**Owner steps in the Supabase dashboard** (cannot be done from the repo):
+
+1. Authentication → URL Configuration → Redirect URLs: add `http://localhost:3000/**`. An exact `/auth/callback` entry does not match the `?next=` query string, so use the wildcard. Add the production origin the same way once deployed.
+2. Optional: paste `supabase/templates/recovery.html` into Authentication → Email Templates → Reset Password. (`supabase/config.toml` already points the local stack at it.)
+3. The built-in email sender is rate-limited to a few emails per hour until custom SMTP (Resend, above) is configured. The forgot-password page shows "Too many reset emails have been sent recently" when that limit is hit.
+
+**Cross-device note.** The default template's link uses PKCE, so it must be opened in the same browser that requested it. To make it work from any device, change the hosted Reset Password template link to:
+
+```
+{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery&next=/auth/reset-password
+```
+
+The callback already accepts `token_hash` + `type`, so no code change is needed. Set Site URL (Authentication → URL Configuration) to the origin users reach the app on.
+
 ## 📱 Testing Checklist
 
 Test these scenarios before going live:

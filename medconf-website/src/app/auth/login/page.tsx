@@ -1,9 +1,9 @@
 // src/app/auth/login/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { AuthCard, AuthError, AuthField, AuthTerms } from '@/components/auth/AuthCard'
@@ -14,12 +14,25 @@ import { AuthCard, AuthError, AuthField, AuthTerms } from '@/components/auth/Aut
 // per-field validation messages in place of the single "Please fill in all
 // fields" banner.
 export default function LoginPage() {
+  // useSearchParams needs a Suspense boundary for static prerender.
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginForm() {
   const { signIn } = useAuth()
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
-  const [error, setError] = useState('')
+  // /auth/callback sends failures here as ?error=<message>.
+  const urlError = useSearchParams().get('error') ?? ''
+  const [localError, setLocalError] = useState<string | null>(null)
+  const error = localError ?? urlError
+  const setError = (m: string) => setLocalError(m)
   const [loading, setLoading] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -72,6 +85,7 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => {
             setEmail(e.target.value)
+            if (error) setError('')
             if (fieldErrors.email) setFieldErrors((f) => ({ ...f, email: undefined }))
           }}
           error={fieldErrors.email}
@@ -82,9 +96,11 @@ export default function LoginPage() {
           label="Password"
           type="password"
           autoComplete="current-password"
+          labelAction={<Link href="/auth/forgot-password">Forgot password?</Link>}
           value={password}
           onChange={(e) => {
             setPassword(e.target.value)
+            if (error) setError('')
             if (fieldErrors.password) setFieldErrors((f) => ({ ...f, password: undefined }))
           }}
           error={fieldErrors.password}

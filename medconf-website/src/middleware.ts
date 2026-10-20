@@ -2,6 +2,8 @@
 // Route guard for the whole app.
 // - Unauthenticated users hitting a protected route → /auth/login
 // - Signed-in users on /auth/{login,signup} → /dashboard
+// - /auth/forgot-password and /auth/reset-password are reachable signed-out
+//   (and signed-in: a recovery link creates a session before the reset page)
 // - Signed-in users on a protected route with profile_completed_at = NULL
 //   → /onboarding (the 3-step wizard must be finished before reaching
 //     the dashboard or any other authenticated surface)
@@ -22,6 +24,10 @@ import { createServerClient } from '@supabase/ssr'
 // additionally restricted to user_profiles.is_admin below.
 const PROTECTED_PATHS = ['/saved', '/settings', '/dashboard', '/onboarding', '/calendar', '/submit', '/admin']
 const ADMIN_PATHS = ['/admin']
+// Only the sign-in entry pages bounce a signed-in user. /auth/forgot-password
+// and /auth/reset-password are intentionally NOT listed: they are reachable
+// signed-out, and a signed-in user may still land on reset-password from a
+// recovery link (which signs them in first).
 const AUTH_PATHS = ['/auth/login', '/auth/signup']
 
 function isUnder(path: string, candidates: string[]) {

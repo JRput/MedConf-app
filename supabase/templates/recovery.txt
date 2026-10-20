@@ -1,0 +1,16 @@
+
+MedConf - Reset Your Password
+=============================
+
+Someone asked to reset the password for your MedConf account. If that was you, follow the link below to choose a new password. If it wasn't, you can ignore this email — your password stays the same.
+
+{{ .ConfirmationURL }}
+
+If the link doesn't work, copy and paste it into your browser. The link expires after an hour.
+
+Kind regards,
+MedConf Team
+
+---
+
+If you didn't ask to reset your password, you can safely ignore this email.

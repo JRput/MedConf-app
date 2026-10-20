@@ -77,7 +77,7 @@ Authoritative documents:
 
 ### 2.2 `medconf-website/` — Next.js 16 frontend
 - **Stack:** Next 16.1.6, React 19.2.3, Tailwind v4, `@supabase/ssr` 0.8 + `@supabase/supabase-js` 2.95, `lucide-react` icons.
-- **Routes:** `/` home, `/conferences` list+filters (**public — no login required**), `/conferences/[id]` detail (public), `/dashboard`, `/dashboard/notifications`, `/saved`, `/settings`, `/onboarding` (all protected), `/auth/{login,signup,verify,setup-profile,callback}`.
+- **Routes:** `/` home, `/conferences` list+filters (**public — no login required**), `/conferences/[id]` detail (public), `/dashboard`, `/dashboard/notifications`, `/saved`, `/settings`, `/onboarding` (all protected), `/auth/{login,signup,verify,setup-profile,callback,forgot-password,reset-password}`.
 - **Route guard:** `src/middleware.ts` — `PROTECTED_PATHS = ['/saved','/settings','/dashboard','/onboarding']`. Directory is intentionally public to match RLS + SEO.
 - **Hooks:** [useConferences.ts](medconf-website/src/hooks/useConferences.ts), [useSaved.ts](medconf-website/src/hooks/useSaved.ts), [useAuth.ts](medconf-website/src/hooks/useAuth.ts).
 - **Lib:** [supabase.ts](medconf-website/src/lib/supabase.ts), [types.ts](medconf-website/src/lib/types.ts).
