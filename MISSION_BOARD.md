@@ -5,7 +5,7 @@
 > `Conference_masterlist/Medical_Courses_Conferences_Master_Comprehensive_v1(Master list).csv`
 > autonomously, keep the MedConf site up to date, with accuracy and nothing missing.
 
-> **Sibling board (2026-10-18):** [MISSION_BOARD_CONTRIBUTIONS.md](MISSION_BOARD_CONTRIBUTIONS.md) — community corrections + new-event submissions with moderation. Status: PLANNING, awaiting owner approval. Wave 2d/2e stay parked behind it.
+> **Sibling boards:** [MISSION_BOARD_CONTRIBUTIONS.md](MISSION_BOARD_CONTRIBUTIONS.md) — community corrections + new-event submissions with moderation. Status: DELIVERED 2026-10-18. · [MISSION_BOARD_AUTH.md](MISSION_BOARD_AUTH.md) — password reset flow + callback session-cookie fix. Opened 2026-10-20. Wave 2d/2e stay parked behind these.
 
 ## 1. Brief & ground truth
 
