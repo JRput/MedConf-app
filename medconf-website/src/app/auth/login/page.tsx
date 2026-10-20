@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { authErrorMessage } from '@/lib/auth/errors'
 import { AuthCard, AuthError, AuthField, AuthTerms } from '@/components/auth/AuthCard'
 
 // Auth behaviour is unchanged from the pre-W5 page: useAuth().signIn, the
@@ -28,8 +29,8 @@ function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
-  // /auth/callback sends failures here as ?error=<message>.
-  const urlError = useSearchParams().get('error') ?? ''
+  // /auth/callback sends failures here as ?error=<code>; unknown codes render nothing.
+  const urlError = authErrorMessage(useSearchParams().get('error')) ?? ''
   const [localError, setLocalError] = useState<string | null>(null)
   const error = localError ?? urlError
   const setError = (m: string) => setLocalError(m)

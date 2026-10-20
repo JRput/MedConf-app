@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { Mail } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
+import { authErrorMessage } from '@/lib/auth/errors'
 import { AuthCard, AuthError, AuthField } from '@/components/auth/AuthCard'
 
 // Always shows the same "sent" state whether or not the account exists, so the
@@ -30,7 +31,7 @@ function ForgotPasswordForm() {
   const [fieldError, setFieldError] = useState('')
   const [error, setError] = useState('')
   const [dismissed, setDismissed] = useState(false)
-  const expired = useSearchParams().get('error') === 'expired' && !dismissed
+  const expired = authErrorMessage(useSearchParams().get('error')) === authErrorMessage('expired') && !dismissed
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -116,7 +117,7 @@ function ForgotPasswordForm() {
     >
       <form onSubmit={handleSubmit} noValidate className="space-y-4">
         {expired && !error && (
-          <AuthError message="That reset link has expired or was already used. Request a new one below." />
+          <AuthError message={authErrorMessage('expired')!} />
         )}
 
         <AuthField

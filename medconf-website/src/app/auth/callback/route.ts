@@ -1,6 +1,6 @@
 // src/app/auth/callback/route.ts
 // Supabase auth callback for email links: sign-up verification, password
-// recovery, magic links and OAuth-style redirects.
+// recovery and email-change confirmation.
 //
 // Two entry shapes are supported:
 //   ?code=...                      PKCE flow (default Supabase template). The
@@ -19,15 +19,18 @@
 // Session cookies are buffered in setAll and written onto the redirect
 // response. Writing them only to request.cookies (the old behaviour) never
 // reached the browser, so verified users were not actually signed in.
-// Recovery failures go to /auth/forgot-password?error=expired; every other
-// failure goes to /auth/login?error=<message>.
+// Failures redirect with short codes only, never free text (see
+// lib/auth/errors.ts): recovery -> /auth/forgot-password?error=expired,
+// everything else -> /auth/login?error=verify_failed. Details are logged
+// server-side. Accepted OTP types are the four the app uses: signup, email,
+// recovery, email_change (no magiclink or invite).
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { safeNextPath } from '@/lib/auth/password'
 
-const OTP_TYPES: readonly EmailOtpType[] = ['signup', 'recovery', 'email', 'magiclink', 'invite', 'email_change']
+const OTP_TYPES: readonly EmailOtpType[] = ['signup', 'email', 'recovery', 'email_change']
 
 type CookieToSet = { name: string; value: string; options?: Parameters<NextResponse['cookies']['set']>[2] }
 
@@ -44,17 +47,14 @@ export async function GET(request: NextRequest) {
   const isRecovery = rawType === 'recovery'
   const next = safeNextPath(params.get('next'), isRecovery ? '/auth/reset-password' : '/onboarding')
 
-  const failure = (message: string) =>
+  const failure = () =>
     NextResponse.redirect(
-      new URL(
-        isRecovery ? '/auth/forgot-password?error=expired' : `/auth/login?error=${encodeURIComponent(message)}`,
-        requestUrl
-      )
+      new URL(isRecovery ? '/auth/forgot-password?error=expired' : '/auth/login?error=verify_failed', requestUrl)
     )
 
   if (error) {
     console.error('Auth callback error:', error, errorDescription)
-    return failure(errorDescription || 'Verification failed')
+    return failure()
   }
 
   if (!code && !(tokenHash && type)) {
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
     if (!isRecovery && next === '/auth/reset-password') {
       return NextResponse.redirect(new URL('/auth/forgot-password?error=expired', requestUrl))
     }
-    return failure('Failed to verify email. Please try again.')
+    return failure()
   }
 
   const response = NextResponse.redirect(new URL(next, requestUrl))
