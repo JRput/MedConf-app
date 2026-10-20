@@ -14,6 +14,8 @@ cd medconf-scraper && ./.venv/bin/python ../tests/e2e/e2e_screenshots.py   # 375
 ```
 Each script prints PASS/FAIL per check and exits non-zero on failure. They are idempotent: each starts by deleting the submitter's contributions and leftover `https://example.org/e2e*` community events, and uses a timestamped organiser URL.
 
+- `e2e_password_reset.py` (needs the service role): runs tsc/lint/vitest, the forgot and reset pages, token_hash recovery, replay, open-redirect fallbacks, signup verification and the redirect-allowlist probe, and writes `pwreset_*` screenshots. It temporarily changes the submitter's password and always restores it, and creates then deletes one throwaway signup user.
+
 ## Notes
 - The digest flow is real, not a dry run: it replaces the unread 'moderation' notice for every admin.
 - Service-role approvals pass `approve_unchecked: true`; the suite also asserts approval without it is refused while enrichment is 'waiting'.
