@@ -218,6 +218,34 @@ with sync_playwright() as pw:
                 except Exception as e:
                     R.check(False, f"failed to delete throwaway user: {type(e).__name__}")
 
+        # ------------------------------------------------------------ 7b. error codes and OTP-type allowlist
+        from urllib.parse import quote
+        ctx = fresh(br); pg = ctx.new_page()
+
+        def alert_text(url):
+            pg.goto(url); pg.wait_for_timeout(1500)
+            a = pg.locator('[role="alert"]:not(#__next-route-announcer__)')  # Next's empty route announcer is not an app alert
+            return a.first.inner_text() if a.count() else None
+
+        t = alert_text(f"{BASE}/auth/login?error=verify_failed")
+        R.check(t is not None and "We couldn't verify that link" in t, "login ?error=verify_failed shows the fixed message")
+        evil = "<b>Click here</b> to win"
+        t = alert_text(f"{BASE}/auth/login?error={quote(evil)}")
+        body = pg.locator("body").inner_text()  # page.content() also holds Next's escaped RSC payload, which is not rendered
+        R.check(t is None and "Click here" not in body and "to win" not in body and pg.locator("main b, body > div b").count() == 0, "login ?error=<html text> renders no alert and no reflected text")
+        t = alert_text(f"{BASE}/auth/login?error=totally_unknown")
+        R.check(t is None, "login ?error=totally_unknown renders no alert")
+        t = alert_text(f"{BASE}/auth/forgot-password?error=expired")
+        R.check(t is not None and "expired" in t.lower(), "forgot-password ?error=expired still shows the expired alert")
+        pg.goto(f"{BASE}/auth/callback?token_hash=abc&type=magiclink"); pg.wait_for_timeout(1500)
+        u = urlparse(pg.url)
+        R.check(u.path == "/auth/login" and not u.query, f"callback type=magiclink (outside allowlist) -> plain /auth/login (got {u.path}?{u.query})")
+        pg.goto(f"{BASE}/auth/callback?error=access_denied&error_description={quote('Evil text')}"); pg.wait_for_timeout(1500)
+        u = urlparse(pg.url)
+        R.check(u.path == "/auth/login" and u.query == "error=verify_failed", f"callback ?error=... -> /auth/login?error=verify_failed (got {u.path}?{u.query})")
+        R.check("Evil text" not in pg.locator("body").inner_text() and "Evil text" not in pg.content(), "error_description text appears nowhere on the page")
+        ctx.close()
+
         # ------------------------------------------------------------ 8. allowlist probe
         want = f"{BASE}/auth/callback?next=/auth/reset-password"
         r = svc.auth.admin.generate_link({"type": "recovery", "email": EMAIL, "options": {"redirect_to": want}})
