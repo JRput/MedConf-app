@@ -1,0 +1,65 @@
+{
+ "source_id": 105,
+ "slug": "auanet",
+ "class_name": "AuanetExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/auanet.py",
+ "source_row": {
+  "source_name": "AUA Annual Meeting",
+  "society": "AUA",
+  "base_url": "https://www.auanet.org/AUA2027",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Cold Fusion site, www.auanet.org/AUA2027. No dated body line: the only date is the meta description ('May 21 - 24, 2027 in San Diego,CA'). Nav links are relative to /AUA2027/ but the URL has no trailing slash, so sub-pages are given explicitly (key-dates). Registration opens 2 Dec 2026; no fees yet. Site notice forbids feeding AUA content to AI tools, so description is a deterministic meta sentence and no LLM call is made."
+ },
+ "registry_comment": "AUA single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.auanet.org/AUA2027",
+  "https://www.auanet.org/AUA2027/key-dates",
+  "https://www.auanet.org/AUA2027/register/join-and-save"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.auanet.org/AUA2027/key-dates",
+   "field": "dates",
+   "site_says": "Friday, May 21-Monday, May 24, 2027",
+   "extractor_says": "2027-05-21 / 2027-05-24",
+   "match": true
+  },
+  {
+   "url": "https://www.auanet.org/AUA2027/key-dates",
+   "field": "abstract deadline",
+   "site_says": "Abstract Submissions Due Monday, November 2, 2026",
+   "extractor_says": "2026-11-02, open True",
+   "match": true
+  },
+  {
+   "url": "https://www.auanet.org/AUA2027",
+   "field": "city",
+   "site_says": "meta: San Diego, CA",
+   "extractor_says": "San Diego / United States",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Reverse case: home-IP curl gets 403 but the GitHub runner cleared (probe 2026-10-21); fetch_html works locally. Status stays done.",
+  "Venue name not published on any page read; city only.",
+  "Hooks: _edition_from (meta description fallback), list_shells_override (venue_raw), detail_from_html (description), REG/ABSTRACT URLs explicit. Family gaps: relative-link discovery breaks when a congress lives under /AUA2027 without trailing slash; list path ignores meta description although the detail path reads it.",
+  "Fees: registration opens 2 Dec 2026; join-and-save page lists member savings and dues, not registration fees, so deliberately not parsed. curl gets 403 from a home IP but fetch_html works; confirm cloud probe.",
+  "Coverage checklist: fees: key-dates + join-and-save + nav checked; no image/PDF/external fee page."
+ ]
+}

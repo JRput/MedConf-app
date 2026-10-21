@@ -1,0 +1,63 @@
+{
+ "source_id": 111,
+ "slug": "acc",
+ "class_name": "AccExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/acc.py",
+ "source_row": {
+  "source_name": "ACC Scientific Session",
+  "society": "ACC",
+  "base_url": "https://accscientificsession.acc.org/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Dedicated Sitecore event site accscientificsession.acc.org. Home: 'ACC.27-WCC ... April 10 - 12, 2027 in Houston, TX'. Venue from the Travel page ('will take place at the George R. Brown Convention Center'). Fees: four <h2>+<table> packages (PLUS, in-person, @Home virtual, Expo only) on Registration Rates & Dates. Abstract state from the Late-Breaking Clinical Trials page."
+ },
+ "registry_comment": "ACC single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://accscientificsession.acc.org/",
+  "https://accscientificsession.acc.org/Registration-and-Hotels/Registration-Rates-and-Dates",
+  "https://accscientificsession.acc.org/Submit-Your-Science/Late-Breaking-Clinical-Trials"
+ ],
+ "spot_check": [
+  {
+   "url": "home",
+   "field": "dates",
+   "site_says": "April 10 - 12, 2027, Houston",
+   "extractor_says": "2027-04-10 / 2027-04-12",
+   "match": true
+  },
+  {
+   "url": "Registration Rates",
+   "field": "PLUS ACC Physician Member early",
+   "site_says": "$1,399 until Dec. 2",
+   "extractor_says": "1399 USD, deadline 2026-12-02",
+   "match": true
+  },
+  {
+   "url": "Late-Breaking page",
+   "field": "deadline",
+   "site_says": "Oct. 20 - Dec. 1 at 1 p.m. ET",
+   "extractor_says": "open True, 2026-12-01",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Abstracts and cases closed 8 Oct 2026; abstract_open/deadline report the still-open late-breaking trial call, with a note.",
+  "Member registration is open now; general early bird opens 28 Oct (already public rates). Low-income virtual rate stored as listed.",
+  "Coverage checklist: fees via same-site rates page verified; registration happens on registration.experientevent.com (external, not read)."
+ ]
+}

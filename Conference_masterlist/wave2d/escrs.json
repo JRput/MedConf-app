@@ -1,0 +1,67 @@
+{
+  "source_id": 132,
+  "slug": "escrs",
+  "class_name": "EscrsExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/escrs.py",
+  "source_row": {
+    "source_name": "ESCRS Meetings & Events",
+    "society": "ESCRS",
+    "base_url": "https://www.escrs.org/meetings-and-events/event-search",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": true,
+    "active": true,
+    "extraction_instructions": "Umbraco event-search: cards are server-rendered (default filter = upcoming); date lines have no year for this year's events (year from URL slug or next occurrence). Load-more only appears above ~96 cards. Annual events (Winter Meeting, Congress) are empty shells on escrs.org: details come from the wintermeeting/congress microsites when they name the same year. Education events (Vision to Venture) reach public EUR ticket prices via /v2v/ page -> members.escrs.org/event/. Affiliated events link to the organiser (Outlook SafeLink unwrapped)."
+  },
+  "registry_comment": "132: ESCRS meetings & events: Umbraco event-search cards (plain HTTP), year-less dates resolved from URL/next occurrence, annual events enriched from the wintermeeting/congress microsites, Vision to Venture fees via members.escrs.org tickets",
+  "probe_results": {
+    "shells": 5,
+    "shells_forced_fallback": 5,
+    "details_tested": 5,
+    "with_date": 5,
+    "with_pricing": 1,
+    "with_venue": 4,
+    "with_description": 5,
+    "with_specialty": 5
+  },
+  "test_urls": [
+    "https://www.escrs.org/education-events/vision-to-venture-weekend-1-business-planning-start-to-finish-30-october-2026",
+    "https://www.escrs.org/escrs-annual-events/31st-escrs-winter-meeting",
+    "https://www.escrs.org/escrs-annual-events/45th-congress-of-the-escrs"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.escrs.org/education-events/vision-to-venture-weekend-1-business-planning-start-to-finish-30-october-2026",
+      "field": "dates / venue / fees",
+      "site_says": "30th October - 1st November, Marriott Hotel Budapest; members.escrs.org tickets EUR 700 standard, EUR 500 Bring a Colleague, EUR 700 group ticket",
+      "extractor_says": "2026-10-30..2026-11-01, Budapest, 3 EUR tiers 700/500/700",
+      "match": true
+    },
+    {
+      "url": "https://www.escrs.org/escrs-annual-events/31st-escrs-winter-meeting",
+      "field": "dates / venue / abstracts",
+      "site_says": "17 to 20 March 2027, InterContinental CityStars, Cairo, Egypt (card says 'Eygpt'); Submit your abstract by 1 November; registration opens December 2026",
+      "extractor_says": "2027-03-17..2027-03-20, Cairo, Egypt, abstract_deadline 2026-11-01, no fees",
+      "match": true
+    },
+    {
+      "url": "https://www.escrs.org/escrs-annual-events/45th-congress-of-the-escrs",
+      "field": "dates / venue",
+      "site_says": "15-19 October 2027, IFEMA, Madrid, Spain (congress.escrs.org calendar link 20271015-20271020)",
+      "extractor_says": "2027-10-15..2027-10-19, IFEMA, Madrid, Spain, instructional-course deadline 2026-10-23",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Recon said JS load-more; the default 'upcoming' result set is server-rendered into the HTML (7 cards) and the load-more button is only emitted above ~96 cards (seen with ?DateRange=All). The browser click-through for that case is written but UNPROVEN: there is nothing to click for upcoming events today. Forced-fallback run (httpx 403) returned the same 5 shells via the browser.",
+    "Scope kept: shells beyond 800 days are dropped (47th/48th Congress, 2029/2030, date-only placeholders); the 46th Congress (6-10 Oct 2028) is kept with a generated one-line blurb and no venue.",
+    "Annual-event pages on escrs.org are empty shells (no text even in the browser); content comes from wintermeeting.escrs.org / congress.escrs.org, used only when the microsite text names the same year. No fees: winter meeting registration 'will open in December 2026', congress.escrs.org has no registration page (404). Instructional Course submission deadline (23 Oct 2026) is stored as abstract_deadline for the Congress; this is a course-proposal call, not an abstract call.",
+    "Affiliated Events (Hellenic congress) are listing-only: the card link (Outlook SafeLink, unwrapped) is kept as booking_url/organiser_url; the organiser page was not read. Its fees are not captured.",
+    "Vision to Venture: two-hop fee discovery (education page -> /v2v/vision-to-venture-budapest -> members.escrs.org/event/..., Tribe Tickets items). The group ticket row's EUR 700 is a list price; the page says eligible ESCRS members get EUR 500 at checkout (login). Members' fees behind login.",
+    "Card text has typos copied as-is where no microsite exists ('Marriot Hotel'); the Cairo 'Eygpt' typo is corrected from the microsite welcome text.",
+    "Event type: congress/meeting -> conference; education-events path or weekend/course words -> course. Vision to Venture Weekend 1 is typed course."
+  ]
+}

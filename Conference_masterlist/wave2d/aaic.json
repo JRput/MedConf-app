@@ -1,0 +1,63 @@
+{
+ "source_id": 104,
+ "slug": "aaic",
+ "class_name": "AaicExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/aaic.py",
+ "source_row": {
+  "source_name": "AAIC",
+  "society": "AAIC",
+  "base_url": "https://aaic.alz.org/overview.asp",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Custom ASP.NET microsite; header lines give 'July 18-21, 2027 | Chicago, United States, and Online'; the title line carries the organiser, not a place. Venue (McCormick Place) from the 'Conference Location' block. Abstract dates: /abstracts/overview.asp Important Dates table is Date | Event; <tr> cells are read directly. General abstract deadline 11 Jan 2027 (ISTAART deadline 18 Jan is a different row); submission opening is 'Mid November 2026' (vague, so abstract_open false, no date invented)."
+ },
+ "registry_comment": "AAIC single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://aaic.alz.org/overview.asp",
+  "https://aaic.alz.org/abstracts/overview.asp",
+  "https://aaic.alz.org/registration.asp"
+ ],
+ "spot_check": [
+  {
+   "url": "https://aaic.alz.org/overview.asp",
+   "field": "dates",
+   "site_says": "July 18-21, 2027",
+   "extractor_says": "2027-07-18 / 2027-07-21",
+   "match": true
+  },
+  {
+   "url": "https://aaic.alz.org/overview.asp",
+   "field": "venue/city",
+   "site_says": "McCormick Place, Chicago (+ Online)",
+   "extractor_says": "McCormick Place / Chicago / hybrid",
+   "match": true
+  },
+  {
+   "url": "https://aaic.alz.org/abstracts/overview.asp",
+   "field": "abstract deadline / open",
+   "site_says": "Jan. 11, 2027 closes (general deadline); opens Mid November 2026",
+   "extractor_says": "deadline 2027-01-11, abstract_open False",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "No fees: registration.asp redirects to the home page and the 'Get Registration Details' link (alz.org/aaic/registration.asp) also lands on the home page; 2027 fees not published yet (coverage PRICE_EXTERNAL_LINK warning is that link).",
+  "Hooks: list_shells_override/parse_place (place), apply_abstracts (reads <tr> cells of the Date | Event table; vague opening text means not open).",
+  "Coverage checklist: fees: edition page, same-site and alz.org registration links checked, nothing published; abstracts sub-page verified."
+ ]
+}

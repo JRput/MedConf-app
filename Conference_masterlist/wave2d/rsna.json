@@ -1,0 +1,63 @@
+{
+ "source_id": 107,
+ "slug": "rsna",
+ "class_name": "RsnaExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/rsna.py",
+ "source_row": {
+  "source_name": "RSNA Annual Meeting",
+  "society": "RSNA",
+  "base_url": "https://www.rsna.org/annual-meeting",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Sitecore site. Annual-meeting page header 'Annual Meeting: Nov. 29 - Dec. 3, 2026'; place from the pricing page (McCormick Place, Chicago). Pricing page /annual-meeting/attendee-resources/pricing-and-registration has three matrices (member packages as text, select member categories and non-member registrant types as HTML tables) parsed from raw <table> cells."
+ },
+ "registry_comment": "RSNA single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.rsna.org/annual-meeting",
+  "https://www.rsna.org/annual-meeting/attendee-resources/pricing-and-registration"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.rsna.org/annual-meeting",
+   "field": "dates",
+   "site_says": "Nov. 29 - Dec. 3, 2026",
+   "extractor_says": "2026-11-29 / 2026-12-03",
+   "match": true
+  },
+  {
+   "url": "pricing-and-registration",
+   "field": "Non-member physician in person & virtual",
+   "site_says": "$2,525",
+   "extractor_says": "2525 USD",
+   "match": true
+  },
+  {
+   "url": "pricing-and-registration",
+   "field": "Standard member",
+   "site_says": "$600 / $600 virtual",
+   "extractor_says": "600 / 600",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Recon said Dec 4; the page says Dec 3 and the extractor follows the page.",
+  "Hook: fees_from_pages (generic parser mislabels the matrices); raw tables are used because the line view drops repeated consecutive cells ($600 | $600).",
+  "Member rates are public numbers; any logged-in pricing not read. Abstract submission page not parsed (2026 call closed, abstract_open False, no deadline).",
+  "Coverage checklist: fees via same-site pricing page verified; JSON-LD on the page is the stale 2025 Event and is ignored."
+ ]
+}

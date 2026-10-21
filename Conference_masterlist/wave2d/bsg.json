@@ -1,0 +1,73 @@
+{
+  "source_id": 130,
+  "slug": "bsg",
+  "class_name": "BsgExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/bsg.py",
+  "source_row": {
+    "source_name": "British Society of Gastroenterology (BSG)",
+    "society": "British Society of Gastroenterology",
+    "base_url": "https://www.bsg.org.uk/events",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.bsg.org.uk/events?page={n}&start={today}",
+    "max_pages_hint": 3,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Kentico + Blazor; cards are server-prerendered. Walk /events?page=N&start=<today> (the start param is required for page 2, else the unfiltered 100-event archive is returned) until the pager total is reached. Cards give title, dd-mm-yyyy @ hh:mm range and location; event type comes from the title. Detail has a Registration fees block of 'label:' / '£amount' lines."
+  },
+  "registry_comment": "130: BSG events: Kentico/Blazor prerendered cards, walk ?page=N&start=<today> to the pager total; fees from the 'Registration fees' block; event type from title",
+  "probe_results": {
+    "shells": 19,
+    "shells_forced_fallback": 19,
+    "details_tested": 19,
+    "with_date": 19,
+    "with_pricing": 12,
+    "with_venue": 14,
+    "with_description": 19,
+    "with_specialty": 19
+  },
+  "test_urls": [
+    "https://www.bsg.org.uk/events/clinical-endoscopist-conference-2026",
+    "https://www.bsg.org.uk/events/bsg-gut-microbiota-for-health-conference-2027",
+    "https://www.bsg.org.uk/events/endorsed-event-online-upper-gi"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.bsg.org.uk/events/clinical-endoscopist-conference-2026",
+      "field": "dates / venue",
+      "site_says": "09-11-2026 @ 08:00 - 09-11-2026 @ 16:30, The Birmingham Conferences and Events Centre, Hill Street, Birmingham, B5 4EW",
+      "extractor_says": "2026-11-09..2026-11-09, venue The Birmingham Conferences and Events Centre, city Birmingham",
+      "match": true
+    },
+    {
+      "url": "https://www.bsg.org.uk/events/clinical-endoscopist-conference-2026",
+      "field": "fees",
+      "site_says": "In-person BSG members £50, non-members £50, virtual £25",
+      "extractor_says": "In-person · BSG members 50, In-person · Non-members 50, Virtual ticket 25 (GBP)",
+      "match": true
+    },
+    {
+      "url": "https://www.bsg.org.uk/events/bsg-gut-microbiota-for-health-conference-2027",
+      "field": "dates / fees",
+      "site_says": "01-03-2027 - 02-03-2027, BSG members £50, non-members £100",
+      "extractor_says": "2027-03-01..2027-03-02, BSG members 50, Non-members 100",
+      "match": true
+    },
+    {
+      "url": "https://www.bsg.org.uk/events/endorsed-event-online-upper-gi",
+      "field": "fee / CPD",
+      "site_says": "Course Fee: £1,750.00; Approved for 30 RCP External CPD points",
+      "extractor_says": "Standard 1750 GBP, cpd_points 30",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "The recon said Blazor client-rendering; in fact the cards are prerendered server-side, so Phase A uses fetch_html (httpx first, browser fallback) and is NOT browser-first. Forced-fallback run (httpx 403 on every call) returned the same 19 shells via the browser.",
+    "Page 2 only exists as /events?page=2&start=<today>. Without the start param the server returns the unfiltered 100-event archive (mostly past). Walk stops at the pager's 'Showing X to Y of T results' total; a warning is logged if cards read != T.",
+    "Coverage checklist: multi-day ranges read from both ends of 'dd-mm-yyyy @ hh:mm - dd-mm-yyyy @ hh:mm' (capsule course 5 Oct-14 Dec, ESEGH masterclass 16-17 Nov); fees: in-page 'Registration fees' block, 'Course Fee:' line, 'Registrations' block and prose ('free for everyone', 'non-member rate is £75') handled; registration sub-pages are on external booking platforms behind a 'Register' button and were not followed. No image fee tables seen. 7 of 19 events have no public fee (webinars, Project 90 free-for-members sessions that say nothing about non-members, courses whose registration is not open) so pricing_tiers is [] for them; Ulster Project 90 meeting only states a refundable £50 deposit, deliberately not stored as a fee.",
+    "Prose fee parsing is deliberately narrow (only 'free for ... members|everyone' and 'non-member ... £N'); a page worded differently yields no tier rather than a guess.",
+    "Event type comes from title keywords only (cards show no category). Specialty is fixed to 'Gastroenterology & Hepatology' as in EASL.",
+    "The UK place->region map (_UK_PLACES) is imported from ems_calendar.py."
+  ]
+}

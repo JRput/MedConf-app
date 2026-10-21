@@ -1,0 +1,63 @@
+{
+ "source_id": 110,
+ "slug": "bpna",
+ "class_name": "BpnaExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/bpna.py",
+ "source_row": {
+  "source_name": "BPNA Conference",
+  "society": "BPNA",
+  "base_url": "https://bpna.org.uk/conference/2027/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Custom PHP site, /conference/2027/. Header: '...will take place on 6-8 January 2027 as a hybrid event at:' then venue, street, city, postcode. Fees on the 'Booking Details' page (index.php?contentid=N, id changes yearly; found from the nav link) as one-cell-per-line tables for full, day, social and virtual rates, three price columns (early/standard/late)."
+ },
+ "registry_comment": "BPNA single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://bpna.org.uk/conference/2027/",
+  "https://bpna.org.uk/conference/2027/index.php?contentid=1381",
+  "https://bpna.org.uk/?page=courses-conferences"
+ ],
+ "spot_check": [
+  {
+   "url": "conference/2027/",
+   "field": "dates",
+   "site_says": "6-8 January 2027",
+   "extractor_says": "2027-01-06 / 2027-01-08",
+   "match": true
+  },
+  {
+   "url": "contentid=1381",
+   "field": "Physician HIC member early",
+   "site_says": "GBP 561",
+   "extractor_says": "561 GBP early, deadline 2026-11-02",
+   "match": true
+  },
+  {
+   "url": "contentid=1381",
+   "field": "CPD",
+   "site_says": "18 CPD points (full conference)",
+   "extractor_says": "18.0",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Hooks: list_shells_override/parse_place (address block; region England from a small city list else United Kingdom), fees_from_pages (bespoke walker), detail_from_html (booking page link, CPD, description).",
+  "Booking itself is login-gated (booking01.php says closed); only the public rate tables are read.",
+  "Coverage checklist: fees via same-site Booking Details page verified; abstracts closed 7 Sept 2026 (abstract_open False); EDITION_URLS points at courses-conferences so 2028 is followed next year (untested)."
+ ]
+}

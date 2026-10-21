@@ -1,0 +1,63 @@
+{
+ "source_id": 112,
+ "slug": "asn_online",
+ "class_name": "AsnOnlineExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/asn_online.py",
+ "source_row": {
+  "source_name": "ASN Kidney Week",
+  "society": "ASN",
+  "base_url": "https://www.asn-online.org/education/kidneyweek/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "ASP.NET site. Kidney Week 2026 (Denver, 21-25 Oct) landing page; year-specific sub-pages register-overview.aspx and important-dates.aspx are linked from it. Fees are <h4>program + table (Early/Standard/Onsite) blocks; Important Dates lists the date line before its label."
+ },
+ "registry_comment": "ASN single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.asn-online.org/education/kidneyweek/",
+  "https://www.asn-online.org/education/kidneyweek/2026/register-overview.aspx",
+  "https://www.asn-online.org/education/kidneyweek/2026/important-dates.aspx"
+ ],
+ "spot_check": [
+  {
+   "url": "landing",
+   "field": "dates",
+   "site_says": "October 21-25 (early programs 21st, meeting 22-25)",
+   "extractor_says": "2026-10-21 / 2026-10-25",
+   "match": true
+  },
+  {
+   "url": "register-overview",
+   "field": "annual meeting ASN member early",
+   "site_says": "$595",
+   "extractor_says": "595 USD, deadline 2026-09-09",
+   "match": true
+  },
+  {
+   "url": "important-dates",
+   "field": "abstract close",
+   "site_says": "Late-Breaking closes Sept 2",
+   "extractor_says": "closed, 2026-09-02",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Meeting is in progress today and ends 25 Oct; the page will go stale after that and 2027 info must appear on the same URL (not verified).",
+  "Hooks: fees_from_pages, apply_abstracts (date-before-label table), sub-page links read per run. Family abstract reader returned the wrong date (9 Sept, the early registration end).",
+  "Coverage checklist: fees via same-site register-overview verified; no external fee pages."
+ ]
+}

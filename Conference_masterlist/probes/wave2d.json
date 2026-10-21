@@ -1,0 +1,689 @@
+[
+ {
+  "domain": "ean.org",
+  "results": [
+   {
+    "url": "https://www.ean.org/congress2027",
+    "cleared": true,
+    "secs": 4.0,
+    "title": "13th Congress of the European Academy of Neurology - Gothenb",
+    "len": 129556,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "aaic.alz.org",
+  "results": [
+   {
+    "url": "https://aaic.alz.org/overview.asp",
+    "cleared": true,
+    "secs": 3.9,
+    "title": "AAIC | July 18-21, 2027 | Alzheimer's Association",
+    "len": 384564,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "auanet.org",
+  "results": [
+   {
+    "url": "https://www.auanet.org/AUA2027",
+    "cleared": true,
+    "secs": 4.7,
+    "title": "Home - AUA Annual Meeting",
+    "len": 794972,
+    "reason": "",
+    "marker": " type=\"text/javascript\" async=\"\" charset=\"utf-8\" src=\"https://www.gstatic.com/recaptcha/releases/4EDjxXf4knsx6UBM1L2V6cv8/recaptcha__en.js\" crossorigin=\"anonymous\" int"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "aao.org",
+  "results": [
+   {
+    "url": "https://www.aao.org/annual-meeting",
+    "cleared": false,
+    "secs": 2.3,
+    "title": "403 Forbidden",
+    "len": 117,
+    "reason": "no-content-shape",
+    "marker": ""
+   },
+   {
+    "url": "https://aao.org/",
+    "cleared": false,
+    "secs": 2.2,
+    "title": "403 Forbidden",
+    "len": 117,
+    "reason": "no-content-shape",
+    "marker": ""
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "rsna.org",
+  "results": [
+   {
+    "url": "https://www.rsna.org/annual-meeting",
+    "cleared": true,
+    "secs": 4.1,
+    "title": "Radiology Conference & Annual Meeting | RSNA",
+    "len": 122871,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "chestnet.org",
+  "results": [
+   {
+    "url": "https://www.chestnet.org/learning-and-events/events/chest-annual-meeting",
+    "cleared": true,
+    "secs": 7.0,
+    "title": "CHEST Annual Meeting | events - American College of Chest Ph",
+    "len": 500086,
+    "reason": "",
+    "marker": "dden; position: absolute;\"></iframe></div><iframe src=\"https://www.google.com/recaptcha/api2/aframe\" width=\"0\" height=\"0\" style=\"display: none;\"></iframe></body><ifram"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "bofas.org.uk",
+  "results": [
+   {
+    "url": "https://www.bofas.org.uk/annual-meeting",
+    "cleared": true,
+    "secs": 4.0,
+    "title": "BOFAS > Annual Meeting > Home",
+    "len": 27519,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "bpna.org.uk",
+  "results": [
+   {
+    "url": "https://bpna.org.uk/conference/2027/",
+    "cleared": true,
+    "secs": 3.1,
+    "title": "British Paediatric Neurology Association",
+    "len": 16192,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "acc.org",
+  "results": [
+   {
+    "url": "https://accscientificsession.acc.org/",
+    "cleared": true,
+    "secs": 4.6,
+    "title": "ACC.27-WCC in Houston, TX | ACC Annual Scientific Session",
+    "len": 709857,
+    "reason": "",
+    "marker": "2417249464 go3967842156\">\n  </div>\n</div>\n<iframe src=\"https://www.google.com/recaptcha/api2/aframe\" width=\"0\" height=\"0\" style=\"display: none;\"></iframe></body></html"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "asn-online.org",
+  "results": [
+   {
+    "url": "https://www.asn-online.org/education/kidneyweek/",
+    "cleared": true,
+    "secs": 4.5,
+    "title": "American Society of Nephrology | Kidney Week - Home",
+    "len": 100563,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "asahq.org",
+  "results": [
+   {
+    "url": "https://www.asahq.org/annualmeeting",
+    "cleared": true,
+    "secs": 7.1,
+    "title": "ANESTHESIOLOGY annual meeting",
+    "len": 147208,
+    "reason": "",
+    "marker": ");\n                }\n            }());\n        </script>\n\n<script src=\"/cdn-cgi/challenge-platform/scripts/precursor/main.js\"></script><style type=\"text/css\" data-eqcss-read=\"tru"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "ueg.eu",
+  "results": [
+   {
+    "url": "https://ueg.eu/week",
+    "cleared": true,
+    "secs": 4.6,
+    "title": "Week | UEG - United European Gastroenterology",
+    "len": 83265,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "baaps.org.uk",
+  "results": [
+   {
+    "url": "https://baaps.org.uk/about/events/",
+    "cleared": true,
+    "secs": 3.6,
+    "title": "Events in 2026 | The British Association of Aesthetic Plasti",
+    "len": 89862,
+    "reason": "",
+    "marker": " type=\"text/javascript\" async=\"\" charset=\"utf-8\" src=\"https://www.gstatic.com/recaptcha/releases/4EDjxXf4knsx6UBM1L2V6cv8/recaptcha__en.js\" crossorigin=\"anonymous\" int"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "bssh.ac.uk",
+  "results": [
+   {
+    "url": "https://www.bssh.ac.uk/about/events",
+    "cleared": true,
+    "secs": 4.8,
+    "title": "Events in 2026 | The British Society for Surgery of the Hand",
+    "len": 160129,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "vascularsociety.org.uk",
+  "results": [
+   {
+    "url": "https://www.vascularsociety.org.uk/events/",
+    "cleared": true,
+    "secs": 4.2,
+    "title": "Events in 2026 | Vascular Society",
+    "len": 52697,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "baus.org.uk",
+  "results": [
+   {
+    "url": "https://www.baus.org.uk/professionals/events/",
+    "cleared": true,
+    "secs": 6.3,
+    "title": "Events in October 2026 | The British Association of Urologic",
+    "len": 214329,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "his.org.uk",
+  "results": [
+   {
+    "url": "https://www.his.org.uk/training-events/events-diary/",
+    "cleared": true,
+    "secs": 4.1,
+    "title": "Events Diary | Healthcare Infection Society - Healthcare Inf",
+    "len": 275508,
+    "reason": "",
+    "marker": "okiebotDialogDetailBodyContentCookieInfoTitle\" role=\"heading\" aria-level=\"4\">cf.turnstile.u</strong><span class=\"CybotCookiebotDialogDetailBodyContentCookieInfoDescripti"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "bbts.org.uk",
+  "results": [
+   {
+    "url": "https://www.bbts.org.uk/events/",
+    "cleared": true,
+    "secs": 3.7,
+    "title": "British Blood Transfusion Society - Events",
+    "len": 36311,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "associationofbreastsurgery.org.uk",
+  "results": [
+   {
+    "url": "https://associationofbreastsurgery.org.uk/courses-events/abs-courses-events-calendar/",
+    "cleared": true,
+    "secs": 3.9,
+    "title": "Courses & Events Calendar | Association of Breast Surgery",
+    "len": 97920,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "basl.org.uk",
+  "results": [
+   {
+    "url": "https://www.basl.org.uk/index.cfm/events/list/cid/16",
+    "cleared": true,
+    "secs": 4.6,
+    "title": "BASL",
+    "len": 75678,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "endocrinology.org",
+  "results": [
+   {
+    "url": "https://www.endocrinology.org/events/",
+    "cleared": false,
+    "secs": 19.3,
+    "title": "Just a moment...",
+    "len": 28608,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html lang=\"en-us\" dir=\"ltr\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><m"
+   },
+   {
+    "url": "https://endocrinology.org/",
+    "cleared": false,
+    "secs": 19.2,
+    "title": "Just a moment...",
+    "len": 28577,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html lang=\"en-us\" dir=\"ltr\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><m"
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "bsir.org",
+  "results": [
+   {
+    "url": "https://www.bsir.org/events/",
+    "cleared": true,
+    "secs": 3.2,
+    "title": "Events | BSIR",
+    "len": 45624,
+    "reason": "",
+    "marker": " type=\"text/javascript\" async=\"\" charset=\"utf-8\" src=\"https://www.gstatic.com/recaptcha/releases/4EDjxXf4knsx6UBM1L2V6cv8/recaptcha__en.js\" crossorigin=\"anonymous\" int"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "bmfms.org.uk",
+  "results": [
+   {
+    "url": "https://www.bmfms.org.uk/professionals/events",
+    "cleared": true,
+    "secs": 3.5,
+    "title": "Events in 2026 | British Maternal & Fetal Medicine Society -",
+    "len": 75780,
+    "reason": "",
+    "marker": " type=\"text/javascript\" async=\"\" charset=\"utf-8\" src=\"https://www.gstatic.com/recaptcha/releases/4EDjxXf4knsx6UBM1L2V6cv8/recaptcha__en.js\" crossorigin=\"anonymous\" int"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "brit-thoracic.org.uk",
+  "results": [
+   {
+    "url": "https://www.brit-thoracic.org.uk/education-and-events/",
+    "cleared": true,
+    "secs": 4.7,
+    "title": "Education and events | British Thoracic Society",
+    "len": 283070,
+    "reason": "",
+    "marker": ".</div></li></ul><ul class=\"cky-cookie-des-table\"><li><div>Cookie</div><div>_GRECAPTCHA</div></li><li><div>Duration</div><div>6 months</div></li><li><div>Description</"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "rheumatology.org.uk",
+  "results": [
+   {
+    "url": "https://www.rheumatology.org.uk/events-learning/conferences",
+    "cleared": true,
+    "secs": 3.8,
+    "title": "Conferences | British Society for Rheumatology",
+    "len": 105392,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "bapm.org",
+  "results": [
+   {
+    "url": "https://www.bapm.org/pages/190-meetings-and-events",
+    "cleared": true,
+    "secs": 12.9,
+    "title": "Meetings and Events | British Association of Perinatal Medic",
+    "len": 30562,
+    "reason": "",
+    "marker": "d',t:'MTc5MjYxNTY2OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);\";"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "sbns.org.uk",
+  "results": [
+   {
+    "url": "https://www.sbns.org.uk/event-calendar.html",
+    "cleared": true,
+    "secs": 3.6,
+    "title": "Events",
+    "len": 75709,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "bsg.org.uk",
+  "results": [
+   {
+    "url": "https://www.bsg.org.uk/events",
+    "cleared": true,
+    "secs": 4.2,
+    "title": "The British Society Of Gastroenterology Conferences & Events",
+    "len": 232855,
+    "reason": "",
+    "marker": " type=\"text/javascript\" async=\"\" charset=\"utf-8\" src=\"https://www.gstatic.com/recaptcha/releases/4EDjxXf4knsx6UBM1L2V6cv8/recaptcha__en.js\" crossorigin=\"anonymous\" int"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "boa.ac.uk",
+  "results": [
+   {
+    "url": "https://www.boa.ac.uk/learning-and-events/ems-event-calendar.html",
+    "cleared": true,
+    "secs": 4.1,
+    "title": "Event & Course Calendar",
+    "len": 189355,
+    "reason": "",
+    "marker": "okiebotDialogDetailBodyContentCookieInfoTitle\" role=\"heading\" aria-level=\"4\">cf.turnstile.u</strong><span class=\"CybotCookiebotDialogDetailBodyContentCookieInfoDescripti"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "escrs.org",
+  "results": [
+   {
+    "url": "https://www.escrs.org/meetings-and-events/event-search",
+    "cleared": true,
+    "secs": 4.3,
+    "title": "ESCRS - Event Search",
+    "len": 86238,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "ics.ac.uk",
+  "results": [
+   {
+    "url": "https://ics.ac.uk/events/calendar.html",
+    "cleared": true,
+    "secs": 4.4,
+    "title": "Intensive Care Society | Events",
+    "len": 169402,
+    "reason": "",
+    "marker": "okiebotDialogDetailBodyContentCookieInfoTitle\" role=\"heading\" aria-level=\"4\">cf.turnstile.u</strong><span class=\"CybotCookiebotDialogDetailBodyContentCookieInfoDescripti"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "eular.org",
+  "results": [
+   {
+    "url": "https://eular.org/event",
+    "cleared": true,
+    "secs": 4.1,
+    "title": "Events | EULAR",
+    "len": 95664,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "pcronline.com",
+  "results": [
+   {
+    "url": "https://www.pcronline.com/Courses",
+    "cleared": true,
+    "secs": 4.3,
+    "title": "Courses",
+    "len": 114576,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "siu-urology.org",
+  "results": [
+   {
+    "url": "https://www.siu-urology.org/events",
+    "cleared": true,
+    "secs": 4.0,
+    "title": "SIU Events | Soci\u00e9t\u00e9 Internationale d'Urologie",
+    "len": 94142,
+    "reason": "",
+    "marker": "  display: inline-block;\n      width: 20px;\n      height: 20px;\n    }\n\n    .g-recaptcha {\n    transform: scale(1);\n    -webkit-transform: scale(1);\n    transform-origi"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "eshre.eu",
+  "results": [
+   {
+    "url": "https://www.eshre.eu/en/Education/Calendar-Campus-events",
+    "cleared": true,
+    "secs": 6.9,
+    "title": "Calendar Campus events",
+    "len": 95014,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "nihr.ac.uk",
+  "results": [
+   {
+    "url": "https://www.nihr.ac.uk/events",
+    "cleared": false,
+    "secs": 2.2,
+    "title": "ERROR: The request could not be satisfied",
+    "len": 923,
+    "reason": "no-content-shape",
+    "marker": ""
+   },
+   {
+    "url": "https://nihr.ac.uk/",
+    "cleared": false,
+    "secs": 137.7,
+    "title": "",
+    "len": 39,
+    "reason": "no-content-shape",
+    "marker": ""
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "hematology.org",
+  "results": [
+   {
+    "url": "https://www.hematology.org/meetings",
+    "cleared": true,
+    "secs": 2.8,
+    "title": "Meetings - Hematology.org",
+    "len": 164550,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "aan.com",
+  "results": [
+   {
+    "url": "https://www.aan.com/events/upcoming-events",
+    "cleared": true,
+    "secs": 3.4,
+    "title": "Upcoming AAN Conference Dates and Locations | AAN",
+    "len": 201405,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "aad.org",
+  "results": [
+   {
+    "url": "https://www.aad.org/member/meetings/events/locations",
+    "cleared": true,
+    "secs": 3.7,
+    "title": "Academy meeting locations and dates",
+    "len": 219739,
+    "reason": "",
+    "marker": "get=ie11\" style=\"display: none;\"></iframe><iframe src=\"https://www.google.com/recaptcha/api2/aframe\" width=\"0\" height=\"0\" style=\"display: none;\"></iframe></body><ifram"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "cns.org",
+  "results": [
+   {
+    "url": "https://www.cns.org/meetings/calendar",
+    "cleared": true,
+    "secs": 3.8,
+    "title": "CNS Meetings Calendar \u2013 Upcoming Events - Congress of Neurol",
+    "len": 137029,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "augis.org",
+  "results": [
+   {
+    "url": "https://www.augis.org/Events",
+    "cleared": true,
+    "secs": 4.8,
+    "title": "AUGIS > Events",
+    "len": 76789,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "iscmedical.co.uk",
+  "results": [
+   {
+    "url": "https://www.iscmedical.co.uk/category/professional-development",
+    "cleared": true,
+    "secs": 5.0,
+    "title": "Healthcare Professional Development Courses | ISC Medical",
+    "len": 510148,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "medical-interviews.co.uk",
+  "results": [
+   {
+    "url": "https://www.medical-interviews.co.uk/category/professional-development",
+    "cleared": true,
+    "secs": 3.0,
+    "title": "Healthcare Professional Development Courses | ISC Medical",
+    "len": 510148,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "pastest.com",
+  "results": [
+   {
+    "url": "https://www.pastest.com/products/paces-in-person",
+    "cleared": true,
+    "secs": 5.9,
+    "title": "PACES In-Person Course & Exam Preparation Resources | PACES ",
+    "len": 611848,
+    "reason": "",
+    "marker": ">\n<script>window.ShopifyPaypalV4VisibilityTracking = true;</script>\n<script id=\"captcha-bootstrap\">!function(){'use strict';const t='contact',e='account',n='new_commen"
+   }
+  ],
+  "cleared": true
+ }
+]

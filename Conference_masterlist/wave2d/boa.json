@@ -1,0 +1,74 @@
+{
+  "source_id": 131,
+  "slug": "boa",
+  "class_name": "BoaExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/boa.py",
+  "source_row": {
+    "source_name": "British Orthopaedic Association (BOA)",
+    "society": "British Orthopaedic Association",
+    "base_url": "https://www.boa.ac.uk/learning-and-events/ems-event-calendar.html",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Eventfolio (Preside) calendar; listing comes from the public JSON endpoint /ems/eventCalendar/ajaxResults/ (offset/page_size), same card HTML. Detail pages have a structured header (.event-date/.event-venue/.event-pricing) and a Booking widget. External/Non-BOA rows are stubs; the Go-to-event-website link is kept as organiser_url. Booking pages are login-walled. 2027 Annual Congress is read from the future-congresses page."
+  },
+  "registry_comment": "131: BOA event & course calendar: Eventfolio JSON endpoint via ems_calendar.EmsCalendarExtractor; third-party rows kept only if orthopaedic/surgical; 2027 Annual Congress from future-congresses page",
+  "probe_results": {
+    "shells": 33,
+    "shells_forced_fallback": 33,
+    "details_tested": 33,
+    "with_date": 33,
+    "with_pricing": 9,
+    "with_venue": 25,
+    "with_description": 25,
+    "with_specialty": 33
+  },
+  "test_urls": [
+    "https://www.boa.ac.uk/learning-and-events/ems-event-calendar/boa-new-consultants-course.html",
+    "https://www.boa.ac.uk/learning-and-events/ems-event-calendar/february-2027-casting-course-1.html",
+    "https://www.boa.ac.uk/learning-and-events/ems-event-calendar/ortho-update-2027.html"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.boa.ac.uk/learning-and-events/ems-event-calendar/boa-new-consultants-course.html",
+      "field": "dates / venue / fee",
+      "site_says": "13 – 14 November 2026, London, Smith & Nephew plc, BOA Member - £100",
+      "extractor_says": "2026-11-13..2026-11-14, city London, venue Smith & Nephew plc, Registration · BOA Member 100 GBP",
+      "match": true
+    },
+    {
+      "url": "https://www.boa.ac.uk/learning-and-events/ems-event-calendar/february-2027-casting-course-1.html",
+      "field": "dates / fees",
+      "site_says": "9 February – 19 March 2027, RNOH London, UK & IE £4,250.00, International £4,275.00",
+      "extractor_says": "2027-02-09..2027-03-19, two tiers 4250 / 4275 GBP",
+      "match": true
+    },
+    {
+      "url": "https://www.boa.ac.uk/learning-and-events/ems-event-calendar/ortho-update-2027.html",
+      "field": "date / CPD / city",
+      "site_says": "Saturday 9th January 2027, Manchester, up to 5.5 CPD points",
+      "extractor_says": "2027-01-09, Manchester, cpd_points 5.5",
+      "match": true
+    },
+    {
+      "url": "https://www.boa.ac.uk/boa-annual-congress-2026/future-congresses.html",
+      "field": "2027 congress",
+      "site_says": "2027 - 14th - 17th September, ACC Liverpool",
+      "extractor_says": "BOA Annual Congress 2027, 2027-09-14..2027-09-17, ACC Liverpool",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Recon said JS-only; the 'Show more events' button calls a public JSON endpoint (/ems/eventCalendar/ajaxResults/?offset&page_size) returning the same card HTML. Phase A reads it with fetch_html (httpx, browser fallback with expect_selector body). Fallback if the endpoint fails: the 10 server-rendered cards (partial, logged). Forced-fallback run (httpx 403) gave the same 35 shells.",
+    "2 third-party rows dropped as off-topic (Global Forum on Cardiology, 16th World Probiotics conference). Filter: specialty classifier = Musculoskeletal & Trauma, or title/category/teaser matches one relevance regex (orthopaedics, trauma, MSK, spine, hand, foot/ankle, arthroplasty, fracture, bone, sports, surgery, joints, casting, plus orthogeriatric terms: falls, deconditioning, prehab, osteoporosis, frailty, rehabilitation, amputee, limb). BOA's own rows always pass. Every dropped title is logged at INFO. Counts are measured over all 33 shells (venue 25 counts venue or city; the other 8 are online/no place).",
+    "Skipped on purpose: 'BOA Annual Congress 2026 - Digital Access Only' (live congress 22-25 Sep 2026 is over, rest is a recordings product whose end date is not stated as an access deadline). The 2027 Annual Congress (not a calendar card) is read from the Future Congresses page as one extra shell with no fees yet.",
+    "Fees: the booking pages (/ems-event-booking-page.html) are behind a login, so fees are only the header .event-pricing line, a booking-widget list or a 'Course fees' block. External rows link to the organiser ('Go to event website'); that link is stored as organiser_url for the fee explorer (two-hop, checklist 5), not followed here. Members' fees behind login. BOA New Consultants Course header says £100 but prose says a £95 fee: header kept.",
+    "Coverage checklist: date ranges parsed from both ends (casting courses span weeks, FSL runs 30 Aug-10 Nov); no image fee tables or CFP seen; abstracts left to the merge step.",
+    "Digital-access/on-demand cards and 'Cancelled/Postponed' titles are skipped via skip_card().",
+    "Shared base now lives in extractors/ems_calendar.py (EmsCalendarExtractor + helpers, used by boa.py and ics.py); bsg.py imports only the _UK_PLACES map from it. ems_calendar.py must ship with the boa and ics registrations. Tests: medconf-scraper/test_ems_calendar.py (9)."
+  ]
+}

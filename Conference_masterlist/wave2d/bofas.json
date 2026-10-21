@@ -1,0 +1,65 @@
+{
+ "source_id": 109,
+ "slug": "bofas",
+ "class_name": "BofasExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/bofas.py",
+ "source_row": {
+  "source_name": "BOFAS Annual Scientific Meeting",
+  "society": "BOFAS",
+  "base_url": "https://www.bofas.org.uk/annual-meeting",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "DNN site, /annual-meeting redirects to /annual-meeting/home. Home text 'BOFAS 2026 will be held in Wales from 4th to 6th of November'. Venue and city from /annual-meeting/venue. Fees are a PDF ('2026 Registration Rates Newport.pdf') linked from /annual-meeting/registration, read with pypdf."
+ },
+ "registry_comment": "BOFAS single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.bofas.org.uk/annual-meeting/home",
+  "https://www.bofas.org.uk/annual-meeting/venue",
+  "https://www.bofas.org.uk/Portals/0/Annual%20Meeting/Annual%20Meeting%202026/2026%20Registration%20Rates%20Newport.pdf"
+ ],
+ "spot_check": [
+  {
+   "url": "home",
+   "field": "dates",
+   "site_says": "4th to 6th of November (2026)",
+   "extractor_says": "2026-11-04 / 2026-11-06",
+   "match": true
+  },
+  {
+   "url": "venue",
+   "field": "venue/city",
+   "site_says": "International Convention Centre Wales, Newport",
+   "extractor_says": "same, region Wales",
+   "match": true
+  },
+  {
+   "url": "rates PDF",
+   "field": "Full member standard / late",
+   "site_says": "GBP 420 / 504",
+   "extractor_says": "420 / 504",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Fees come from a PDF fetched through abstract_classifier._default_fetcher (httpx for .pdf, same as the shared call-for-papers follower); if the PDF host blocks runners the extractor returns no tiers rather than failing.",
+  "Standard-rate tiers are expired (31 Aug) but still listed, as on the PDF. Conference dinner prices not stored. Members-only links are emailed (no member rate behind login beyond the PDF).",
+  "Abstracts closed 1 June 2026 (abstract_open False).",
+  "Future dates (2027 Harrogate 3-5 Nov etc.) are on /venue/future-congress-dates; the extractor will pick up 2027 only after the home page flips.",
+  "Coverage checklist: fees via linked PDF verified; abstracts sub-page verified."
+ ]
+}

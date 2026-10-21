@@ -1,0 +1,66 @@
+{
+  "source_id": 133,
+  "slug": "ics",
+  "class_name": "IcsExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/ics.py",
+  "source_row": {
+    "source_name": "Intensive Care Society (ICS)",
+    "society": "Intensive Care Society",
+    "base_url": "https://ics.ac.uk/events/calendar.html",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Eventfolio (Preside) calendar, same platform as boa.ac.uk; listing from the public JSON endpoint /ems/eventCalendar/ajaxResults/ (card HTML). Detail header has .event-date/.event-time/.event-venue; fees only in the Booking widget (booking pages are login-walled). The SOA congress card is a stub: real info and image-only fee tables are on /events/soaNN.html and /events/soaNN/tickets.html (vision). On-demand rows skipped."
+  },
+  "registry_comment": "133: Intensive Care Society events calendar: Eventfolio JSON endpoint via ems_calendar.EmsCalendarExtractor, SOA congress enriched from /events/soaNN.html, fee images left to the remediator",
+  "probe_results": {
+    "shells": 13,
+    "shells_forced_fallback": 13,
+    "details_tested": 13,
+    "with_date": 13,
+    "with_pricing": 7,
+    "with_venue": 4,
+    "with_description": 13,
+    "with_specialty": 13
+  },
+  "test_urls": [
+    "https://ics.ac.uk/events/calendar/leadership-programme-2026-systems-leadership.html",
+    "https://ics.ac.uk/events/calendar/inside-intensive-care-follow-up-from-the-icu.html",
+    "https://ics.ac.uk/events/calendar/soa-congress-2027-soa27.html"
+  ],
+  "spot_check": [
+    {
+      "url": "https://ics.ac.uk/events/calendar/leadership-programme-2026-systems-leadership.html",
+      "field": "date / venue / fees",
+      "site_says": "11 November 2026, 9.30am - 5pm, London, Intensive Care Society; ICS members £215, Non-Members £315",
+      "extractor_says": "2026-11-11, London, venue Intensive Care Society, tiers 215 / 315 GBP",
+      "match": true
+    },
+    {
+      "url": "https://ics.ac.uk/events/calendar/inside-intensive-care-follow-up-from-the-icu.html",
+      "field": "date / fees",
+      "site_says": "1 December 2026, 6.30pm - 8pm; Free for ICS members, £30 for non-members",
+      "extractor_says": "2026-12-01, online, ICS members 0, non-members 30 GBP",
+      "match": true
+    },
+    {
+      "url": "https://ics.ac.uk/events/soa27.html",
+      "field": "congress dates / venue / abstracts",
+      "site_says": "29 June - 1 July 2027, ICC Birmingham; abstract submission opens 15 October 2026, closes 15 February 2027",
+      "extractor_says": "2027-06-29..2027-07-01, ICC Birmingham, abstract_open True, abstract_deadline 2027-02-15",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Same Eventfolio platform as boa.ac.uk; Phase A reuses EmsCalendarExtractor from ems_calendar.py (JSON endpoint, fetch_html with browser fallback). Recon's 'JS required' was wrong for the listing: the cards are in the HTML and the load-more button is hidden (14 cards < page size 21). Forced-fallback run gave the same 13 shells.",
+    "SOA27 fee tables are IMAGES on /events/soa27/tickets.html (and the 3-day image file is named SOA26-3-day-price-table, so it may be last year's table). A trial through vision.py timed out on two of three images and returned broken JSON on the third, so NO fee row is stored for the congress (a wrong price is worse than none). tickets.html is exposed as organiser_url so the remediator's explorer (image fee tables, checklist 3) can pick it up. Viewed by hand: 3-day in-person table lists member/non-member early-bird and regular prices (e.g. consultant member 540 early bird, 600 regular, exclusive of VAT).",
+    "Booking pages (/learning/booking.html) are behind a login: fees are only those in the Booking widget. 6 of 13 rows show none (Updates in Medicine for Intensive Care, Optimising Respiratory Care, MARCH webinar, FUSIC HD assessment, UK Shock 26, SOA27), so pricing_tiers is [] for them; members' fees behind login.",
+    "Skipped: 'SOA26 On Demand Box Set' (on-demand, single date 31 Dec 2026 whose meaning (access deadline vs listing date) is not stated). Today's MARCH Trial webinar (21 Oct 2026) is kept as upcoming.",
+    "Webinar and virtual-study-day cards have no venue span and are marked event_format online from the card category; event_type: webinar/study day/assessment -> workshop, congress/conference -> conference.",
+    "Specialty fixed to 'Intensive Care Medicine' (every event is critical care). Coverage checklist: single-day and multi-day dates parsed (UK Shock 4-5 Dec, SOA 29 Jun-1 Jul); abstract window read from the SOA microsite; no CTA text in tier labels."
+  ]
+}

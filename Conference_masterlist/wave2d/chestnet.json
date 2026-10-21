@@ -1,0 +1,63 @@
+{
+ "source_id": 108,
+ "slug": "chestnet",
+ "class_name": "ChestnetExtractor",
+ "status": "partial",
+ "file_written": "medconf-scraper/extractors/chestnet.py",
+ "source_row": {
+  "source_name": "CHEST Annual Meeting",
+  "society": "CHEST",
+  "base_url": "https://www.chestnet.org/learning-and-events/events/chest-annual-meeting",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "CHEST event page shows the current edition as year-less header lines ('October 18 to 21 | CHEST Annual Meeting', 'CHEST 2026') and a 'save the dates' list ('2027: October 24-27 | Vancouver, BC, Canada'). Bespoke edition parser: header edition while it has not ended, otherwise the next entry of the list. Fees are not parsed."
+ },
+ "registry_comment": "CHEST single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.chestnet.org/learning-and-events/events/chest-annual-meeting",
+  "https://www.chestnet.org/learning-and-events/events/chest-annual-meeting/registration-information"
+ ],
+ "spot_check": [
+  {
+   "url": "event page",
+   "field": "dates (header)",
+   "site_says": "October 18 to 21 | CHEST Annual Meeting",
+   "extractor_says": "2026-10-18 / 2026-10-21",
+   "match": true
+  },
+  {
+   "url": "event page",
+   "field": "place",
+   "site_says": "CHEST 2026 in Phoenix, Arizona",
+   "extractor_says": "Phoenix / United States",
+   "match": true
+  },
+  {
+   "url": "event page",
+   "field": "save-the-dates (tested with date set to 23 Oct 2026)",
+   "site_says": "2027: October 24-27 | Vancouver, BC, Canada",
+   "extractor_says": "2027-10-24 / 2027-10-27 Vancouver",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Partial: the 2026 edition ends today (21 Oct 2026); from tomorrow the row becomes CHEST 2027 (Vancouver, 24-27 Oct 2027) with dates and place only (no fees, abstracts or CPD). The save-the-dates path was exercised with a patched date, not live.",
+  "Fees deliberately empty: /registration-information stacks the 2025 and 2026 blocks and the generic parser mislabelled them ('$689 Registration Only (Nonmember) · Member Rate'). Needs a bespoke table parser once the 2027 fee table is live.",
+  "Page is server-rendered (no browser needed). Registration itself is on registration.expologic.com (external, not read).",
+  "Coverage checklist: fees: registration sub-page and external registrar link seen; not parsed (reason above)."
+ ]
+}

@@ -1,0 +1,62 @@
+{
+ "source_id": 114,
+ "slug": "ueg",
+ "class_name": "UegExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/ueg.py",
+ "source_row": {
+  "source_name": "UEG Week",
+  "society": "UEG",
+  "base_url": "https://ueg.eu/week",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "ueg.eu/week shows the current congress (UEG Week 2026, Barcelona 17-20 Oct, just finished) and ends with a 'UEG Week 2027 / October 16 - 19, 2027 / Bella Center Copenhagen, Denmark' block for the next edition. Family finds the 2027 block; hooks add the city and keep 2026 blurbs, fee pages, CME and abstract text out of the 2027 row."
+ },
+ "registry_comment": "UEG single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://ueg.eu/week",
+  "https://ueg.eu/week/attendance"
+ ],
+ "spot_check": [
+  {
+   "url": "ueg.eu/week",
+   "field": "dates",
+   "site_says": "October 16 - 19, 2027",
+   "extractor_says": "2027-10-16 / 2027-10-19",
+   "match": true
+  },
+  {
+   "url": "ueg.eu/week",
+   "field": "venue",
+   "site_says": "Bella Center Copenhagen, Denmark",
+   "extractor_says": "Bella Center Copenhagen / Copenhagen / Denmark",
+   "match": true
+  },
+  {
+   "url": "ueg.eu/week",
+   "field": "description",
+   "site_says": "UEG Week is our 4-day annual congress...",
+   "extractor_says": "first sentence only",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "No fees/abstract/CPD for 2027 yet: attendance and CME pages describe 2026 (hook only passes pages that name the 2027 edition).",
+  "City is derived from the last word of the venue name (Bella Center Copenhagen) because the page gives no separate city.",
+  "Coverage checklist: fees: attendance page checked (2026), no 2027 fee table. Event Calendar listing for UEG's other events (Masterclass, Summer School) not in scope for this source."
+ ]
+}

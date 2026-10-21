@@ -1,0 +1,63 @@
+{
+ "source_id": 106,
+ "slug": "aao",
+ "class_name": "AaoExtractor",
+ "status": "blocked",
+ "file_written": "medconf-scraper/extractors/aao.py",
+ "source_row": {
+  "source_name": "AAO Annual Meeting",
+  "society": "AAO",
+  "base_url": "https://www.aao.org/annual-meeting",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": false,
+  "extraction_instructions": "aao.org/annual-meeting is the finished AAO 2026 page. The next edition is listed on /annual-meeting/past-and-future-meetings under 'Future Meetings' as three lines: 'AAO 2027' / 'Las Vegas, Venetian Expo & Hotel' / 'Nov. 12-15: AAO 2027'. Bespoke edition parser; no fees or abstracts published yet."
+ },
+ "registry_comment": "AAO single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.aao.org/annual-meeting/past-and-future-meetings",
+  "https://www.aao.org/annual-meeting"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.aao.org/annual-meeting/past-and-future-meetings",
+   "field": "dates",
+   "site_says": "Nov. 12-15: AAO 2027",
+   "extractor_says": "2027-11-12 / 2027-11-15",
+   "match": true
+  },
+  {
+   "url": "https://www.aao.org/annual-meeting/past-and-future-meetings",
+   "field": "venue",
+   "site_says": "Las Vegas, Venetian Expo & Hotel",
+   "extractor_says": "Venetian Expo & Hotel / Las Vegas",
+   "match": true
+  },
+  {
+   "url": "https://www.aao.org/annual-meeting",
+   "field": "state",
+   "site_says": "Thank you for joining us at AAO 2026",
+   "extractor_says": "2026 page correctly ignored",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "403 Forbidden from GitHub runner (probe 2026-10-21; both https://www.aao.org/annual-meeting and https://aao.org/, 117-byte body, no challenge page); home IP clears - register inactive, retry from runner later.",
+  "booking_url is the schedule page (the meeting page is still about 2026). Description is a factual one-liner built from dates and venue.",
+  "No fees/abstracts/CPD for 2027 yet; revisit when /annual-meeting flips to AAO 2027 (extractor then still reads the Future Meetings list; consider switching HOME_URL).",
+  "Coverage checklist: fees: 2026 pages describe the finished edition, no 2027 fee page exists yet."
+ ]
+}

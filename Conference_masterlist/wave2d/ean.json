@@ -1,0 +1,63 @@
+{
+ "source_id": 103,
+ "slug": "ean",
+ "class_name": "EanExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/ean.py",
+ "source_row": {
+  "source_name": "EAN Congress",
+  "society": "EAN",
+  "base_url": "https://www.ean.org/congress2027",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "TYPO3 landing page /congress2027. Congress dates (12-15 June 2027) only appear in the meta description; the body lists session dates first (13 June), so a synthetic header line from og:description is used. Place from 'takes place at <Venue>, <City>, <Country>'. Fees on /congress2027/register/registration (table, EUR, early/regular/late/virtual per category). Abstract key dates on /abstracts/public-submission-instructions."
+ },
+ "registry_comment": "EAN single-congress site (one upcoming edition) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.ean.org/congress2027",
+  "https://www.ean.org/congress2027/register/registration",
+  "https://www.ean.org/congress2027/abstracts/public-submission-instructions"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.ean.org/congress2027",
+   "field": "start/end",
+   "site_says": "meta: 12-15 June 2027, Gothenburg",
+   "extractor_says": "2027-06-12 / 2027-06-15",
+   "match": true
+  },
+  {
+   "url": "https://www.ean.org/congress2027/register/registration",
+   "field": "Non-Member (high income) early",
+   "site_says": "EUR 999 early by 14 April 2027",
+   "extractor_says": "999 EUR early",
+   "match": true
+  },
+  {
+   "url": "https://www.ean.org/congress2027/abstracts/public-submission-instructions",
+   "field": "abstract deadline",
+   "site_says": "opening 29 Oct 2026, deadline 14 Jan 2027",
+   "extractor_says": "open False, deadline 2027-01-14",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Hooks: _edition_from (meta description date), list_shells_override + parse_place (Venue, City, Country), apply_abstracts (family read 'Submission Opening' as a deadline).",
+  "Early-bird deadline text is inside the tier label only; early_bird_deadline left None.",
+  "Coverage checklist: fees via same-site register sub-page verified; abstract key dates sub-page verified; no image/PDF/external fee pages seen. Family gap: parse_place drops venue+city for 'Venue, City, Country'."
+ ]
+}

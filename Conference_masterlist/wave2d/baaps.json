@@ -1,0 +1,65 @@
+{
+ "source_id": 115,
+ "slug": "baaps",
+ "class_name": "BaapsExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/baaps.py",
+ "source_row": {
+  "source_name": "BAAPS Annual Conference",
+  "society": "BAAPS",
+  "base_url": "https://baaps.org.uk/about/events/",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "BAAPS /about/events is a calendar of many events, not one congress, so this is a bespoke extractor on the rcpath.py pattern (single_congress family does not fit). Walks /about/events/date/<YYYY>/ for this year and the next two (div.date_row cards), keeps unfinished events whose page is plastic/aesthetic-surgery related or organised by BAAPS (the calendar also carries unrelated nursing/healthcare promoter listings), then reads each detail page. Fees come from the organiser's own site JSON-LD where linked; BAAPS-booked events are behind login."
+ },
+ "registry_comment": "BAAPS events calendar (bespoke, plastic/aesthetic-surgery events only)",
+ "probe_results": {
+  "shells": 4,
+  "shells_forced_fallback": 4,
+  "details_tested": 4,
+  "with_date": 4,
+  "with_pricing": 1,
+  "with_venue": 2,
+  "with_description": 4,
+  "with_specialty": 4
+ },
+ "test_urls": [
+  "https://baaps.org.uk/about/events/2063/london_rhinoplasty_course",
+  "https://baaps.org.uk/about/events/2081/residents_day_with_baaps_council_2027",
+  "https://baaps.org.uk/about/events/2155/using_ai_in_your_aesthetic_practice"
+ ],
+ "spot_check": [
+  {
+   "url": "2063 london_rhinoplasty_course",
+   "field": "dates/venue",
+   "site_says": "5 Nov - 7 Nov 2026, Royal Society of Medicine in London",
+   "extractor_says": "2026-11-05 / 2026-11-07, Royal Society of Medicine, London",
+   "match": true
+  },
+  {
+   "url": "londonrhinoplastycourse.co.uk JSON-LD",
+   "field": "On the Day ticket",
+   "site_says": "GBP 750",
+   "extractor_says": "750 GBP",
+   "match": true
+  },
+  {
+   "url": "2081 residents_day",
+   "field": "venue/time",
+   "site_says": "Bloomsbury Hotel, 8 Jan 2027 9:00AM",
+   "extractor_says": "The Bloomsbury Hotel / London / 09:00",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Family did not fit: bespoke list_shells_override + extract_detail (default_event_type mixed; course / workshop / conference from title keywords and 'webinar' text).",
+  "Relevance gate Commander-approved 2026-10-21; drops promoter listings unrelated to plastic/aesthetic surgery. Skipped today: 'World Congress on Nursing and Health Care' (Singapore, 2027-04-05) and '20th International Healthcare, Hospital Management, Nursing and Patient Safety Conference' (Dubai, 2027-06-23). No borderline general-surgery events are upcoming today; earlier calendar entries such as 'Future of Surgery Festival' and '6th World Congress on Surgery' would be skipped by the gate.",
+  "Fees: BAAPS-booked events need a BAAPS login ('members' fees behind login'), so those rows have no tiers; the rhinoplasty course reads its organiser site offers (sold-out tier marked; gala dinner skipped).",
+  "BAAPS & ESAPS annual conference (1-3 Oct 2026) already past, so no annual conference row today. Only 4 upcoming rows now; listing volume is low.",
+  "Coverage checklist: fees: same-site /book pages (login wall) and external organiser JSON-LD checked. Region uses the rcpath UK region map (London etc.)."
+ ]
+}
