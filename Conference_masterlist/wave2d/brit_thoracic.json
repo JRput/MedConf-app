@@ -1,0 +1,69 @@
+{
+  "source_id": 126,
+  "slug": "brit_thoracic",
+  "class_name": "BritThoracicExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/brit_thoracic.py",
+  "source_row": {
+    "source_name": "BTS Education and Events",
+    "society": "BTS",
+    "base_url": "https://www.brit-thoracic.org.uk/education-and-events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Four server-rendered listings merged: short-course carousel cards, Winter/Summer meeting pages found from the hub (fees on /booking-rates/), the 'Upcoming webinars' bullet list and the third-party 'Other respiratory courses' table. Future meetings (next 18 months) come from the meeting-dates page. Course pages have a Fees block."
+  },
+  "registry_comment": "BTS (respiratory): short courses + Winter/Summer meetings + webinars + third-party courses; fees in a Fees block / booking-rates table",
+  "probe_results": {
+    "shells": 25,
+    "shells_forced_fallback": 25,
+    "details_tested": 25,
+    "with_date": 25,
+    "with_pricing": 10,
+    "with_venue": 11,
+    "with_description": 25,
+    "with_specialty": 25
+  },
+  "test_urls": [
+    "https://www.brit-thoracic.org.uk/education-and-events/bts-short-courses/practical-ntm-management/",
+    "https://www.brit-thoracic.org.uk/education-and-events/winter-meeting-2026/",
+    "https://www.brit-thoracic.org.uk/education-and-events/bts-webinars/advanced-knowledge-of-tb-management-of-complex-tb-and-setting-up-a-service/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.brit-thoracic.org.uk/education-and-events/bts-short-courses/practical-ntm-management/",
+      "field": "date + fees",
+      "site_says": "13 NOVEMBER 2026, Online; BTS Members: £190 Non-members: £380",
+      "extractor_says": "2026-11-13, online, tiers 190.0 / 380.0",
+      "match": true
+    },
+    {
+      "url": "https://www.brit-thoracic.org.uk/education-and-events/winter-meeting-2026/booking-rates/",
+      "field": "fee",
+      "site_says": "BTS member standard rate £175 (daily rate)",
+      "extractor_says": "tier 'Winter Meeting rates · BTS member standard rate · Daily rate' 175.0",
+      "match": true
+    },
+    {
+      "url": "https://www.brit-thoracic.org.uk/education-and-events/meeting-dates-and-programmes/",
+      "field": "future meeting",
+      "site_says": "2027: Summer Meeting 24 - 25 June, Newcastle",
+      "extractor_says": "'BTS Summer Meeting 2027' 2027-06-24..2027-06-25, Newcastle",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Four listings merged (short courses, Winter/Summer meeting pages from the hub, webinars bullet list, third-party 'Other respiratory courses' table). Hub carousel duplicates the short courses.",
+    "Courses booked as 'Open shortly' carry no fee on the page yet (2027 courses): tiers [] justified, the self-healing re-fetch picks them up when published. Respiratory Clinical Research Training Day: delegate fees funded by BTS with a refundable £50 deposit, stored as one £0 tier.",
+    "Future Summer/Winter 2027 meetings come from the dates page (no page of their own): dates + city only, 18-month horizon (2028/2029 'dates for your diary' are not emitted). Third-party rows with only a mailto link get a '<listing>#<slug>' URL and are built from the table row.",
+    "Browser-rendered pages put a JS cookie banner before the content; the meeting date block is therefore searched over the whole page (this fixed a normal/forced-fallback shell mismatch, now 25/25).",
+    "BTS webinars are free to attend (the index page says so) but 'not CPD-accredited'; cpd fields dropped. Webinars/meetings cpd points are not published as numbers.",
+    "Winter Meeting booking-rates group table is parsed too (charities £135 / other organisations £280 per person per day).",
+    "Sold-out flag set for 'Fully booked - waiting list open' courses.",
+    "Coverage checklist: multi-day ranges (end_date) checked against the page on every source; no fee-table images were seen on the tested pages; SINGLE_DAY_SUSPECT warnings from the harness --coverage run were false positives (related-event lists / unrelated '4 days' wording on the same page).",
+    "remediator.audit not run (needs the database); harness --coverage was run instead."
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "source_id": 129,
+  "slug": "sbns",
+  "class_name": "SbnsExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/sbns.py",
+  "source_row": {
+    "source_name": "SBNS Event Calendar",
+    "society": "SBNS",
+    "base_url": "https://www.sbns.org.uk/event-calendar.html",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Preside/Eventfolio site; the calendar lists every upcoming event as article.eventfolio-calendar-event (date range, title link, type badge, city, CPD, Free/External badges); filters and result counter are JS-only and there is no pagination. Detail pages have an event-header block (date, venue lines), a ticket-price widget and a Book Now link to the organiser. Flagship meeting fees are in a PDF on a sub-page."
+  },
+  "registry_comment": "SBNS (neurosurgery) event calendar: Eventfolio cards -> event pages; society meetings plus external courses; fee widget + organiser Book Now link",
+  "probe_results": {
+    "shells": 10,
+    "shells_forced_fallback": 10,
+    "details_tested": 10,
+    "with_date": 11,
+    "with_pricing": 0,
+    "with_venue": 10,
+    "with_description": 11,
+    "with_specialty": 11
+  },
+  "test_urls": [
+    "https://www.sbns.org.uk/event-calendar/neuroradiology-workshop-for-neurosurgeons-november-2026.html",
+    "https://www.sbns.org.uk/event-calendar/sbns-glasgow.html",
+    "https://www.sbns.org.uk/event-calendar/pituitary-surgery-course.html"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.sbns.org.uk/event-calendar/neuroradiology-workshop-for-neurosurgeons-november-2026.html",
+      "field": "date/venue/fee",
+      "site_says": "10 – 11 November 2026; Royal College of Surgeons, Edinburgh; ticket price Free; 12 CPD",
+      "extractor_says": "2026-11-10..2026-11-11, venue 'Royal College of Surgeons', Edinburgh, tier Free, 12.0 CPD",
+      "match": true
+    },
+    {
+      "url": "https://www.sbns.org.uk/event-calendar/sbns-glasgow.html",
+      "field": "dates + venue",
+      "site_says": "27-30th April 2027 at The DoubleTree by Hilton, Glasgow Central",
+      "extractor_says": "2027-04-27..2027-04-30, 'Double Tree by Hilton', Glasgow",
+      "match": true
+    },
+    {
+      "url": "https://www.sbns.org.uk/event-calendar/pituitary-surgery-course.html",
+      "field": "time + venue",
+      "site_says": "12pm – 5pm, UCLH Education Centre, London; 25 November 2026",
+      "extractor_says": "2026-11-25 12:00, UCLH Education Centre, London",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Flagship fees: detail_from_html follows event page -> '<folder>/registration-and-accommodation.html' (folder must match the page slug, as the nav lists other years' meetings) -> the '/asset/<id>/' PDF (no .pdf suffix, fetched with httpx, text via abstract_classifier.pdf_bytes_to_text) -> fee_tiers_from_pdf_text. Verified live on SBNS 100: 54 tiers, GBP, e.g. 'Full Meeting Attendance (4 days) · SBNS Full Members & International HIC Consultants · Early until 1 August' 650.0 (early bird, deadline 2026-08-01) and '... · Standard until 14 September' 760.0. SBNS 100 itself ended 2026-10-16 so it is not among the 11 shells; the path is unit-tested on it, and is exercised for Glasgow 2027 only once that meeting publishes a Registration sub-page with a PDF. Image-only or table-less PDFs yield tiers [].",
+    "Listing filters/result counter are JS-only but all upcoming cards are in the server HTML (11 after dropping SBNS 100); no pagination.",
+    "A second venue span on some pages is an unrelated address (De Vere Beaumont Estate on the Edinburgh workshop); only the first line of the last venue span is used.",
+    "Coverage checklist: multi-day ranges (end_date) checked against the page on every source; no fee-table images were seen on the tested pages; SINGLE_DAY_SUSPECT warnings from the harness --coverage run were false positives (related-event lists / unrelated '4 days' wording on the same page). The two SINGLE_DAY_SUSPECT hits are other events' date ranges in the page's Related events block.",
+    "remediator.audit not run (needs the database); harness --coverage was run instead.",
+    "Review fixes: (a) the Neuroradiology Workshop's SBNS widget says Free but its external Book Now page (RCSEd) charges, so a Free-only widget is no longer stored when the booking link is external: tiers [] and organiser_url set for the explorer. (b) The fee-PDF fetch streams and caps at 5 MB. (c) Promoter gate: titles like '<ordinal> International/World/Global ... Conference/Congress/Summit' are dropped and logged at INFO; this removed the '6th International Neurosurgery and Neurological Surgeons Conference' (Kuala Lumpur), leaving 10 shells. The gate is title-only and could in principle drop a genuine numbered international congress; none is listed today."
+  ]
+}

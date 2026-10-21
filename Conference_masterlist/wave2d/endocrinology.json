@@ -1,0 +1,39 @@
+{
+  "source_id": 123,
+  "slug": "endocrinology",
+  "class_name": "EndocrinologyExtractor",
+  "status": "blocked",
+  "file_written": "medconf-scraper/extractors/endocrinology.py",
+  "source_row": {
+    "source_name": "Society for Endocrinology Events",
+    "society": "Society for Endocrinology",
+    "base_url": "https://www.endocrinology.org/events/",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": false,
+    "extraction_instructions": "UNVERIFIED: the site is behind a Cloudflare managed challenge and no HTML was ever seen. Recon says /events/ is a static Bootstrap page of ~11 event links with registration on Bioscientifica / Cvent. Constants-only family subclass; do not register until tested against real HTML."
+  },
+  "registry_comment": "Society for Endocrinology: BLOCKED by Cloudflare managed challenge, placeholder constants only",
+  "probe_results": {
+    "shells": 0,
+    "shells_forced_fallback": 0,
+    "details_tested": 0,
+    "with_date": 0,
+    "with_pricing": 0,
+    "with_venue": 0,
+    "with_description": 0,
+    "with_specialty": 0
+  },
+  "test_urls": [],
+  "spot_check": [],
+  "concerns": [
+    "Cloudflare challenge on GitHub runner (probe 2026-10-21, 19 s, did not clear) — register inactive, retry from runner later",
+    "BLOCKED: every URL on endocrinology.org (/events/, /, sitemap.xml) returns HTTP 403 with 'cf-mitigated: challenge' (Cloudflare managed challenge) to curl; robots.txt alone answers 200. Headless Chromium via fetch_html and via BrowserController.navigate() (context rotation) stayed on 'Just a moment...' for a 60 s poll from a home IP; the page size never changed from 28716 bytes. No bypass was attempted.",
+    "The recon's 'no bot protection' is wrong for this domain. No listing or detail HTML was seen, so extractors/endocrinology.py is a constants-only, UNTESTED placeholder; do not register it. Retry only if the Commander's GitHub-runner probe shows the challenge clearing there.",
+    "Not the US Endocrine Society (source 77).",
+    "Local home-IP retry also failed: navigate() with context rotation stayed on 'Just a moment...' for 60 s, so nothing could be built or tested."
+  ]
+}

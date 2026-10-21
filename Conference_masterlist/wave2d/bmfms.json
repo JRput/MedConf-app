@@ -1,0 +1,68 @@
+{
+  "source_id": 125,
+  "slug": "bmfms",
+  "class_name": "BmfmsExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/bmfms.py",
+  "source_row": {
+    "source_name": "BMFMS Events",
+    "society": "BMFMS",
+    "base_url": "https://www.bmfms.org.uk/professionals/events",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Server-rendered calendar shows one year at a time as date_row rows (dates, title link, location); the extractor reads the current view plus the next two /date/<YYYY>/ pages. Rows are BMFMS, RCOG and third-party meetings. Detail pages are thin (date, place, prose); fees are on the external organiser site linked from 'Further details' / 'Book online'."
+  },
+  "registry_comment": "BMFMS (maternal & fetal medicine) events calendar: year-view date_row rows, current + next 2 year pages; fees on external organiser sites",
+  "probe_results": {
+    "shells": 12,
+    "shells_forced_fallback": 12,
+    "details_tested": 12,
+    "with_date": 14,
+    "with_pricing": 3,
+    "with_venue": 7,
+    "with_description": 14,
+    "with_specialty": 14
+  },
+  "test_urls": [
+    "https://www.bmfms.org.uk/professionals/events/1180/beyond_the_ctg_an_advanced_intrapartum_fetal_monitoring_workshop",
+    "https://www.bmfms.org.uk/professionals/events/1198/perinatal_symposium_current_and_future_management_of_perinatal_group_b_streptococcus_in_the_uk",
+    "https://www.bmfms.org.uk/professionals/events/1170/bmfms_annual_conference_2027"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.bmfms.org.uk/professionals/events/1180/beyond_the_ctg_an_advanced_intrapartum_fetal_monitoring_workshop",
+      "field": "dates",
+      "site_says": "21 Nov 8:30AM – 22 Nov 5:00PM 2026",
+      "extractor_says": "2026-11-21 08:30 .. 2026-11-22",
+      "match": true
+    },
+    {
+      "url": "https://www.bmfms.org.uk/professionals/events/1198/perinatal_symposium_current_and_future_management_of_perinatal_group_b_streptococcus_in_the_uk",
+      "field": "fee",
+      "site_says": "Tickets are £10, charged as a donation to St George's",
+      "extractor_says": "tier 'Ticket · Standard' 10.0",
+      "match": true
+    },
+    {
+      "url": "https://www.bmfms.org.uk/professionals/events/1170/bmfms_annual_conference_2027",
+      "field": "dates + place",
+      "site_says": "5 May 1:00PM – 7 May 5:00PM 2027, Edinburgh",
+      "extractor_says": "2027-05-05 13:00 .. 2027-05-07, Edinburgh",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Recon's '?page=' pagination does not exist: the site shows one year at a time; the extractor reads the current view plus the next two /date/<YYYY>/ pages (3 requests).",
+    "Fees live on external organiser sites linked from 'Further details' / 'Book online' (stored as organiser_url, PRICE_EXTERNAL_LINK in --coverage). Tiers only where the BMFMS page itself states a fee (Perinatal Symposium £10; webinar series 'free webinars for members'). Members' fees behind login are not recorded.",
+    "The recurring 'BMFMS Webinar series' reuses one URL for several dates: each date is a separate row via a '#<date>' fragment on booking_url/source_url.",
+    "Two rows titled 'Recognising & Responding to Maternal Deterioration' share a date (10 Dec, one virtual with a time, one without); only the first is kept (title+date dedupe).",
+    "Addresses with a street but no town ('..., Blackshaw Road, SW17 0QT') leave city null (self-healing re-fetch) instead of a wrong city.",
+    "Coverage checklist: multi-day ranges (end_date) checked against the page on every source; no fee-table images were seen on the tested pages; SINGLE_DAY_SUSPECT warnings from the harness --coverage run were false positives (related-event lists / unrelated '4 days' wording on the same page).",
+    "remediator.audit not run (needs the database); harness --coverage was run instead.",
+    "Review fix: promoter gate drops '5th International Conference on Primary Care and Global Healthcare' and '5th International Conference on Gynecology and Obstetrics' (both Paris, 19-23 Apr 2027). Both link to scientexconference.com subdomains (primarycare. and gynaecology.scientexconference.com), the same commercial conference organiser, so both go even though the second is on-topic; dropped titles are logged at INFO. 12 shells."
+  ]
+}

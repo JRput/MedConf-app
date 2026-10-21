@@ -1,0 +1,69 @@
+{
+  "source_id": 128,
+  "slug": "bapm",
+  "class_name": "BapmExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/bapm.py",
+  "source_row": {
+    "source_name": "BAPM Meetings and Events",
+    "society": "BAPM",
+    "base_url": "https://www.bapm.org/pages/190-meetings-and-events",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Single Hubble-CMS page of div.teaser cards (title link, one-line intro such as 'A two day in person event', start date + time). No pagination. Event pages give Date:/Location: lines and a 'More details'/'Book now' link; BAPM's own conference registers on a public CFS/EventsAir page whose fee list is parsed. Mixed BAPM and external events."
+  },
+  "registry_comment": "BAPM (perinatal medicine) meetings and events: teaser cards -> event pages; end date from Date line or intro duration; EventsAir fees for BAPM's own conference",
+  "probe_results": {
+    "shells": 15,
+    "shells_forced_fallback": 15,
+    "details_tested": 15,
+    "with_date": 15,
+    "with_pricing": 4,
+    "with_venue": 11,
+    "with_description": 15,
+    "with_specialty": 15
+  },
+  "test_urls": [
+    "https://www.bapm.org/events/bapm-spring-conference-2027",
+    "https://www.bapm.org/events/bayley4-",
+    "https://www.bapm.org/events/neofocus-uk-introduction-to-neonatal-haemodynamics"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.bapm.org/events/bapm-spring-conference-2027",
+      "field": "dates + venue",
+      "site_says": "9 Mar 2027 9:00am to 10 Mar 2027 5:00pm; Mercure Northampton; Northampton and Online",
+      "extractor_says": "2027-03-09 09:00..2027-03-10, venue Mercure Northampton, hybrid",
+      "match": true
+    },
+    {
+      "url": "https://cfsevents.eventsair.com/742---bapm-spring-conference-2027/registrations",
+      "field": "fee",
+      "site_says": "BAPM Member Early Bird: Consultant In-Person GBP 204.00",
+      "extractor_says": "tier 'In-person · BAPM Member Consultant · Early bird' 204.0, deadline 2027-01-31",
+      "match": true
+    },
+    {
+      "url": "https://www.bapm.org/events/neofocus-uk-introduction-to-neonatal-haemodynamics",
+      "field": "dates + fee",
+      "site_says": "Date: 13-14 November 2026; Location: In person - Salford; £250 per day",
+      "extractor_says": "2026-11-13..2026-11-14, Salford, two tiers 250.0",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Listing gives the START only; the end date comes from the detail header range, the 'Date:' line, or the card's 'two day' wording, in that order. Verified on Bayley4 (3-4 Nov), Neonatal Update (23-26 Nov), Spring Conference (9-10 Mar).",
+    "Most events are external (Imperial, Eventbrite, UCLH, Healthcare Conferences UK): booking is on those sites, stored as organiser_url (PRICE_EXTERNAL_LINK in --coverage). Only the BAPM Spring Conference (public CFS/EventsAir registration page, second hop, 15 tiers incl. member early/late bird and virtual) and two pages that print fees (NeoFOCUS £250/day, Neonatal Palliative course '= £500 / £50') yield tiers. Members-only conference: the fee grid is published publicly and recorded as shown.",
+    "Hubble CMS listing shows all upcoming events in one page, no pagination; the 'BAPM Events' category is a subset of the same list.",
+    "Specialty is the family default 'Neonatology' (BAPM is perinatal medicine); the shared classifier has no neonatal rule.",
+    "Spring Conference abstract deadline (6 December 2026) is on the page but left to the merge-step classifier (harness --coverage prints SUBMISSION_NO_DEADLINE because it does not run the merge).",
+    "Towns outside the small UK dictionary (Salford, Prescot, Chertsey, Gateshead) get a city but no region.",
+    "Coverage checklist: multi-day ranges (end_date) checked against the page on every source; no fee-table images were seen on the tested pages; SINGLE_DAY_SUSPECT warnings from the harness --coverage run were false positives (related-event lists / unrelated '4 days' wording on the same page).",
+    "remediator.audit not run (needs the database); harness --coverage was run instead.",
+    "Review fix: tiers whose label matches quiz/dinner/drinks/social/gala are dropped unless the amount is above 0 (removed 'Virtual · BAPM Pub Quiz' £0 from the Spring Conference)."
+  ]
+}

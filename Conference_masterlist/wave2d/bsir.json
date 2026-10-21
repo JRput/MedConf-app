@@ -1,0 +1,69 @@
+{
+  "source_id": 124,
+  "slug": "bsir",
+  "class_name": "BsirExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/bsir.py",
+  "source_row": {
+    "source_name": "BSIR Events",
+    "society": "BSIR",
+    "base_url": "https://www.bsir.org/events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "The /events/ hub is an index of ~13 event-series pages, not a dated list. Each series page holds the current year's event as prose with the date in a sentence (ordinal days, weekday lists, often no year); some series have one level of sub-pages (IR Juniors -> NIRS/RiiSE, Webinars -> Upcoming webinars). The extractor crawls hub -> series -> sub-pages, takes the first non-deadline date line per page and fees from the page's Register link (BSIR page or the CIRSE meeting site)."
+  },
+  "registry_comment": "BSIR (interventional radiology): crawl of /events/ series pages for the dated prose line; fees from the Register link (VITALS two-column page, ASM CIRSE grid)",
+  "probe_results": {
+    "shells": 6,
+    "shells_forced_fallback": 6,
+    "details_tested": 6,
+    "with_date": 6,
+    "with_pricing": 2,
+    "with_venue": 4,
+    "with_description": 6,
+    "with_specialty": 6
+  },
+  "test_urls": [
+    "https://www.bsir.org/events/VITALS/",
+    "https://www.bsir.org/events/bsir-asm/",
+    "https://www.bsir.org/events/bsir-iouk-annual-meeting/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.bsir.org/events/VITALS/",
+      "field": "dates + venue",
+      "site_says": "VITALS 2027 : Thursday 11th - Friday 12th March, Sopwell Hosue, St Albans",
+      "extractor_says": "2027-03-11..2027-03-12, venue 'Sopwell Hosue', St Albans",
+      "match": true
+    },
+    {
+      "url": "https://www.bsir.org/events/VITALS/vitals-2027-registration/",
+      "field": "fee",
+      "site_says": "BSIR Consultant Member £330 (Type/Fee columns)",
+      "extractor_says": "tier 'Registration · BSIR Consultant Member' 330.0",
+      "match": true
+    },
+    {
+      "url": "https://www.bsirmeeting.org/attend/registration/",
+      "field": "fee",
+      "site_says": "BSIR Member £450 early until 17 September, £510 regular",
+      "extractor_says": "two tiers 450.0 (early bird, deadline 2026-09-17) and 510.0",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "/events/ is an index of series pages, not a dated list: the extractor reads one prose date line per page (first line that is not a deadline/opening notice). A page that words its date unusually will be missed; unit-level logic is in events_from_page().",
+    "IOUK 2027 page says 'Thursday 10th and Friday 12th June' (the 12th is a Saturday): only 2027-06-10 is stored, end_date = start_date, deliberately not guessed.",
+    "VITALS venue is published as 'Sopwell Hosue' (typo for Sopwell House) and stored as published.",
+    "ASM 2026 city is Birmingham but the venue name is only on the CIRSE-built bsirmeeting.org venue page (not fetched); fees there are parsed from the public grid (Early / Regular). ASC 2027 and IOUK 2027 fees are 'open in the New Year', webinar and VASIG registrations are free MS Teams links: tiers [] justified.",
+    "VASIG-UK 2026 ends 2026-10-21 (today) and drops out tomorrow. NIRS26, RiiSE26, Basic Skills 2026, Paediatric IR 2026 and the Registrar Study Day are already past and are skipped by date; next year's pages will appear when the society edits them.",
+    "Members-only page 'BSIR 2026: what's in store' (Access Denied) is skipped; fees shown are public ones only.",
+    "Coverage checklist: multi-day ranges (end_date) checked against the page on every source; no fee-table images were seen on the tested pages; SINGLE_DAY_SUSPECT warnings from the harness --coverage run were false positives (related-event lists / unrelated '4 days' wording on the same page).",
+    "remediator.audit not run (needs the database); harness --coverage was run instead.",
+    "Review fix: region is now the UK nation from a local city table (England / Scotland / Wales / Northern Ireland) instead of 'United Kingdom'; cities outside the table get no region."
+  ]
+}

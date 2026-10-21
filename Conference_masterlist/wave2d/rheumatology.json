@@ -1,0 +1,67 @@
+{
+  "source_id": 127,
+  "slug": "rheumatology",
+  "class_name": "RheumatologyExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/rheumatology.py",
+  "source_row": {
+    "source_name": "BSR Conferences, Courses and Webinars",
+    "society": "BSR",
+    "base_url": "https://www.rheumatology.org.uk/events-learning/conferences",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "DNN site; three server-rendered listing modules (conferences, courses, webinars) whose div.article blocks hold title, link and a date footer ('Loading more' is vestigial, TotalCount equals the blocks present). Stale or missing card dates (Annual Conference, undated webinar) are re-read from the detail page's Date line; on-demand courses are skipped. Detail pages: Date / Venue / CPD labels plus a Members / Non-members pricing tab (ex VAT)."
+  },
+  "registry_comment": "BSR (rheumatology): DNN listings for conferences, courses, webinars; detail Date/Venue/CPD labels + Members/Non-members pricing tabs",
+  "probe_results": {
+    "shells": 7,
+    "shells_forced_fallback": 7,
+    "details_tested": 7,
+    "with_date": 7,
+    "with_pricing": 5,
+    "with_venue": 3,
+    "with_description": 7,
+    "with_specialty": 7
+  },
+  "test_urls": [
+    "https://www.rheumatology.org.uk/events-learning/conferences/case-based-conference",
+    "https://www.rheumatology.org.uk/events-learning/conferences/annual-conference",
+    "https://www.rheumatology.org.uk/events-learning/courses/core-skills-rheumatology"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.rheumatology.org.uk/events-learning/conferences/case-based-conference",
+      "field": "date/venue/fee",
+      "site_says": "3-4 November 2026, Southampton Novotel, 12 credits, Members Level 1 £314 +VAT",
+      "extractor_says": "2026-11-03..2026-11-04, Southampton Novotel, 12.0 CPD, 'Members · Level 1 · ...' 314.0",
+      "match": true
+    },
+    {
+      "url": "https://www.rheumatology.org.uk/events-learning/conferences/annual-conference",
+      "field": "date (listing was stale)",
+      "site_says": "listing: 28-30 April 2026; detail Date: 28-30 April 2027, Liverpool Experience Campus and Online, 22 credits",
+      "extractor_says": "2027-04-28..2027-04-30, hybrid, Liverpool, 22.0 CPD",
+      "match": true
+    },
+    {
+      "url": "https://www.rheumatology.org.uk/events-learning/courses/core-skills-rheumatology",
+      "field": "fee",
+      "site_says": "Members Level 1 £320 +VAT, Non-members Level 1 £495 +VAT",
+      "extractor_says": "tiers 320.0 and 495.0 (labelled ex VAT), online, 11 CPD",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Scope widened beyond the brief's 'conferences' to the site's courses and webinars listings (same layout, same fee tabs): event_type conference / course / workshop respectively.",
+    "Recon said the listing needs JS; it does not: the 'Loading more' button is vestigial and the module JSON TotalCount equals the blocks already in the HTML (2 + 5 + 3).",
+    "Annual Conference card still shows the 2026 dates; the detail page's Date line (2027) is authoritative. Stale or undated cards are re-read from the detail page; the undated HPP webinar resolves to the next 30 November. On-demand courses (3) are skipped.",
+    "Fees are ex VAT (labels end 'ex VAT'); the member tab shows member prices publicly, no login was used. The Annual Conference shows 'Register your interest' and no fee yet: tiers [] justified. The sponsored HPP webinar states no fee.",
+    "The Annual Conference listing link is '/Events-Learning/Conferences/Annual-Conference' which redirects to '/annualconference'; the lower-cased listing URL is used as the stable key.",
+    "Coverage checklist: multi-day ranges (end_date) checked against the page on every source; no fee-table images were seen on the tested pages; SINGLE_DAY_SUSPECT warnings from the harness --coverage run were false positives (related-event lists / unrelated '4 days' wording on the same page).",
+    "remediator.audit not run (needs the database); harness --coverage was run instead."
+  ]
+}
