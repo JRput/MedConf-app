@@ -85,6 +85,7 @@
     "specialty_classifier.classify_specialty is deliberately NOT used as the backstop: on single-specialty societies it returned wrong labels (Cardiology/Oncology/GP Training for hepatology webinars). The backstop is the society's own specialty constant when the LLM returns None.",
     "Shared-helper wishes (not changed, per rules): pricing_tables.parse_pricing_tables keeps only the LAST price column when the header names are not timeframes (BSSH Scientific Meeting 'Full meeting | One day' lost the full-meeting rates), drops the category column of [Ticket | Category | Price] tables (BAUS), and can take a nearby sentence as the section name ('Registration fees do not include'). Each extractor carries a small local table helper instead (matrix_tiers / ticket_tiers / rowspan_tiers / external_fee_hop, duplicated inline per file).",
     "coverage_checks SINGLE_DAY_SUSPECT / PRICE_TEXT_ON_PAGE warnings that remain in the harness are explained per source below; none is a missed fee or date on the event's own page.",
-    "2026-10-21 hardening: external hops (bookwhen/EventsAir/organiser sites) use safe_fetch.fetch_validated (30 s deadline, 2 MB cap), no browser fallback; host checks use urlparse().hostname. Society-own pages keep fetch_html."
+    "2026-10-21 hardening: external hops (bookwhen/EventsAir/organiser sites) use safe_fetch.fetch_validated (30 s deadline, 2 MB cap), no browser fallback; host checks use urlparse().hostname. Society-own pages keep fetch_html.",
+    "2026-10-22 safe_fetch recheck: fisconference.org -> fitwise.eventsair.com hop verdict ok, FIS 2026 yields 9 tiers."
   ]
 }
