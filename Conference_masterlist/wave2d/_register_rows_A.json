@@ -1,0 +1,93 @@
+[
+  {
+    "source_name": "BSSH",
+    "society": "British Society for Surgery of the Hand",
+    "base_url": "https://www.bssh.ac.uk/about/events",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "LightMedia CMS (same family as Vascular Society and BAUS), server-rendered. /about/events is a YEAR view of div.date_row rows (dates | title link | location) whose classes give the category (scientific_meeting, instructional_course, bssh_event, badged_event, date_passed); list_shells_override walks the current year plus /about/events/date/<YYYY>/ for two more years and keeps upcoming rows. Detail pages have header h1 + two bold lines (dates, venue) and tab panes; the Scientific Meeting page has a full-meeting/one-day fee matrix, numbered pre-congress workshops with 'Course Registration fee: £N' and a 'VENUE:' block, courses state fees as prose ('Early Bird Registration - £250 - Book before 1/9/26') or on an external bookwhen.com page (fees and '2 days' duration read there). Gotcha: header venue is often just a city, so the VENUE block / 'at <place>, <postcode>' prose is used to upgrade it.",
+    "id": 116
+  },
+  {
+    "source_name": "Vascular Society",
+    "society": "Vascular Society of Great Britain & Ireland",
+    "base_url": "https://www.vascularsociety.org.uk/events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "LightMedia CMS, server-rendered. /events/ shows 'Only Upcoming' for the current year as div.date_row rows (dates | title link | location); later years are /events/calendar/date/<YYYY>/ and are walked for two more years (there is no ?page= pagination). The list mixes the Society's own events (ASM, ASPIRE courses) with promoted external congresses (LINC Leipzig, Paris Vascular Insights, Munich MAC, Zurich cardiology conference). Detail pages: h1.module_article_title, two p.module_article_metadata lines (dates, venue) and Event/Prices/Terms tab panes. Fees appear as a refundable-DEPOSIT table (ASPIRE), a [Ticket | Price] table, prose rate lines ('Early-bird rate: £310 (until midnight on 27 September)') or only on the organiser's site (one hop followed). The ASM page links to /annual-meeting/registration whose fee grid is an IMAGE.",
+    "id": 117
+  },
+  {
+    "source_name": "BAUS",
+    "society": "British Association of Urological Surgeons",
+    "base_url": "https://www.baus.org.uk/professionals/events/?view=year",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "LightMedia CMS, ASP.NET. The default /professionals/events/ is a month calendar; ?view=year returns the whole current year as a.date_row cards (span.event_date | h5 title | div.event_location). The next-year route /events/date/<YYYY>/?view=year answers Cloudflare 502 (origin error) for every /date/ URL on 2026-10-21, so the extractor tries it twice per year and otherwise falls back to sitemap.xml: event ids not in the year view and newer than (oldest listed id - 500) are fetched one by one (cap 60) and dated from the detail page's add-to-calendar-button JSON. Detail: h3.module_article_title, p.module_article_location, add-to-calendar-button dates='[{startDate,endDate,startTime}]' (reliable dates), tab-content with a [Ticket | Category | Price] table, 'free to attend' or deposit prose. Child items (dinners, accommodation, receptions) are skipped.",
+    "id": 118
+  },
+  {
+    "source_name": "HIS",
+    "society": "Healthcare Infection Society",
+    "base_url": "https://www.his.org.uk/training-events/events-diary/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": true,
+    "active": true,
+    "extraction_instructions": "Umbraco, server-rendered. The Events Diary is ONE page of ~20 div.linkbox cards (datetype + location-tag, title, More link); ?page=N returns the same page, and past items are listed too, so rows before today are dropped. 'SOLD OUT - ' / 'COURSE FULL - ' title prefixes become is_sold_out; month-only cards (Foundation course 'March 2027') take their dates from the page's 'Live online sessions' line. The flagship HISCON (not in the diary) is added from /training-events/our-conferences/. Detail pages have a side menu of real sub-pages; the one named Registration / Fees and payment holds the fees (vertical Early Bird/Standard list with rowspan table, or 'HIS members: £600' prose). FIS 2026 only links out: fisconference.org -> fitwise.eventsair.com/fis-2026 -> /registration-and-fees (two hops, fee table read).",
+    "id": 119
+  },
+  {
+    "source_name": "BBTS",
+    "society": "British Blood Transfusion Society",
+    "base_url": "https://www.bbts.org.uk/events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Bespoke Svelte-SSR CMS (Duo), server-rendered. /events/ is a news-style feed mixing events, blog posts, council profiles and certificate pages; only hrefs under /events/bbts_events/ are events, and the <small> date on each feed item is the event's first day (checked against three event bodies). The feed has no pagination but links ?month=YYYY-MM archives, so current/future months are fetched too. Event pages are tiny free-text pages ('Virtual two half day event on 25th and 26th Nov 2026', 'Dates: October 21 (Wed) – 23 (Fri), 2026 / Venue: …'); the range and venue are parsed from the body. Fees are not published (REGISTER HERE goes to the organiser; one hop is read for fee tables).",
+    "id": 120
+  },
+  {
+    "source_name": "ABS",
+    "society": "Association of Breast Surgery",
+    "base_url": "https://associationofbreastsurgery.org.uk/courses-events/abs-courses-events-calendar/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": true,
+    "active": true,
+    "extraction_instructions": "Umbraco (101 Ltd), server-rendered. The calendar page is one list of a.card.eventCard cards (title, date line, location, 'N Days' badge); GOTCHA: the card date is the LAST day of the event (OOPS card '26 January 2027' vs detail '25 January 2027 - 26 January 2027'), so the ~9 detail pages are read in the listing phase and their header range becomes the shell date. Course sub-pages (Registration, Registration & Fees, Course information) sit in the side menu; fees are a grid of div.bg-pale rows (label | small 'Members' qualifier | price) on the registration page, 'free to attend' prose on some. The flagship ABS Conference 2027 (10-11 May 2027, Wales) is not on the calendar and is added from its own page, with its Abstracts & Bursaries sub-page giving abstract status and deadline.",
+    "id": 121
+  },
+  {
+    "source_name": "BASL",
+    "society": "British Association for the Study of the Liver",
+    "base_url": "https://www.basl.org.uk/index.cfm/events/list/cid/16/eid/999",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Bespoke ColdFusion (index.cfm), server-rendered. eid/999 ('All Events') lists BASL, endorsed and other societies' events on ONE page: <h2>November 2026</h2> month headings (the date cells carry no year) followed by div.eventItemArea blocks with a date cell ('06 / Nov', '20 Nov - 21 Nov'), the title and the full write-up in a collapsed div#eventContentNNN - there are no per-event detail pages. Each shell's booking_url is the listing URL + #eventContentNNN; extract_detail parses the stashed write-up (Venue/Location/Date/Time lines, prose fees, registration link -> organiser_url). Status suffixes ('- Registration now open', '- Save the Date') are stripped; 'Postponed' / cancelled items are skipped.",
+    "id": 122
+  }
+]

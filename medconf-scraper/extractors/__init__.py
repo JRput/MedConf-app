@@ -142,6 +142,13 @@ from .brit_thoracic import BritThoracicExtractor
 from .bsir import BsirExtractor
 from .rheumatology import RheumatologyExtractor
 from .sbns import SbnsExtractor
+from .associationofbreastsurgery import AssociationOfBreastSurgeryExtractor
+from .basl import BASLExtractor
+from .baus import BAUSExtractor
+from .bbts import BBTSExtractor
+from .bssh import BSSHExtractor
+from .his import HISExtractor
+from .vascularsociety import VascularSocietyExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -265,6 +272,13 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     131: BoaExtractor,                        # 131: BOA event & course calendar: Eventfolio JSON endpoint via ems_calendar.EmsCalendarExtractor; third-party rows kept only if orthopaedic/surgical; 2027 Annual Congress from future-congresses page
     132: EscrsExtractor,                      # 132: ESCRS meetings & events: Umbraco event-search cards (plain HTTP), year-less dates resolved from URL/next occurrence, annual events enriched from the wintermeeting/congress microsites, Vision to Venture fees via members.escrs.org tickets
     133: IcsExtractor,                        # 133: Intensive Care Society events calendar: Eventfolio JSON endpoint via ems_calendar.EmsCalendarExtractor, SOA congress enriched from /events/soaNN.html, fee images left to the remediator
+    116: BSSHExtractor,                       # 116: BSSH events: LightMedia year-view listing (current + 2 years), bespoke fee-matrix/prose/bookwhen fee parsing, 3-way event_type from row class
+    117: VascularSocietyExtractor,            # 117: Vascular Society events: LightMedia current-year + calendar/date/<YYYY> listing; deposit/ticket/prose/external-hop fee parsing; ASM fee image read via vision
+    118: BAUSExtractor,                       # 118: BAUS events: LightMedia ?view=year listing + sitemap fallback for next-year events (date routes 502), dates from add-to-calendar JSON, ticket-table fees
+    119: HISExtractor,                        # 119: HIS events: Umbraco events-diary card list (+HISCON from conferences page), side-menu registration sub-page fees, two-hop FIS fees, event_type from URL section
+    120: BBTSExtractor,                       # 120: BBTS events: Svelte-SSR news-style feed filtered to /events/bbts_events/, month archives, free-text date/venue parsing; sparse (2 upcoming)
+    121: AssociationOfBreastSurgeryExtractor, # 121: ABS courses & events: Umbraco calendar cards (card date = last day, so details read in listing), registration sub-page fee grid, ABS Conference page + abstracts sub-page
+    122: BASLExtractor,                       # 122: BASL events: ColdFusion single-page list (eid/999) with month headings and inline write-ups, fragment booking URLs, prose fee parsing
     124: BsirExtractor,                       # 124: BSIR (interventional radiology): crawl of /events/ series pages for the dated prose line; fees from the Register link (VITALS two-column page, ASM CIRSE grid)
     125: BmfmsExtractor,                      # 125: BMFMS (maternal & fetal medicine) events calendar: year-view date_row rows, current + next 2 year pages; fees on external organiser sites
     126: BritThoracicExtractor,               # 126: BTS (respiratory): short courses + Winter/Summer meetings + webinars + third-party courses; fees in a Fees block / booking-rates table
