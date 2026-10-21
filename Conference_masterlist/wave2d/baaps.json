@@ -14,7 +14,7 @@
   "max_pages_hint": 1,
   "detail_is_multipage": false,
   "active": true,
-  "extraction_instructions": "BAAPS /about/events is a calendar of many events, not one congress, so this is a bespoke extractor on the rcpath.py pattern (single_congress family does not fit). Walks /about/events/date/<YYYY>/ for this year and the next two (div.date_row cards), keeps unfinished events whose page is plastic/aesthetic-surgery related or organised by BAAPS (the calendar also carries unrelated nursing/healthcare promoter listings), then reads each detail page. Fees come from the organiser's own site JSON-LD where linked; BAAPS-booked events are behind login. Organiser fees: only the anchors labelled 'Book online for this event' / 'Further details about this event' are followed (never the first external href), URL checked with safe_fetch.check_url_safe, JSON-LD offers sanity-checked (0-10000, GBP/EUR/USD, label <=120 chars)."
+  "extraction_instructions": "BAAPS /about/events is a calendar of many events, not one congress, so this is a bespoke extractor on the rcpath.py pattern (single_congress family does not fit). Walks /about/events/date/<YYYY>/ for this year and the next two (div.date_row cards), keeps unfinished events whose page is plastic/aesthetic-surgery related or organised by BAAPS (the calendar also carries unrelated nursing/healthcare promoter listings), then reads each detail page. Fees come from the organiser's own site JSON-LD where linked; BAAPS-booked events are behind login. Organiser fees: only the anchors labelled 'Book online for this event' / 'Further details about this event' are followed (never the first external href), URL checked with safe_fetch.check_url_safe and fetched with safe_fetch.fetch_validated (every redirect re-checked, no browser), JSON-LD offers sanity-checked (0-10000, GBP/EUR/USD, label <=120 chars)."
  },
  "registry_comment": "BAAPS events calendar (bespoke, plastic/aesthetic-surgery events only)",
  "probe_results": {
@@ -61,6 +61,6 @@
   "Fees: BAAPS-booked events need a BAAPS login ('members' fees behind login'), so those rows have no tiers; the rhinoplasty course reads its organiser site offers (sold-out tier marked; gala dinner skipped).",
   "BAAPS & ESAPS annual conference (1-3 Oct 2026) already past, so no annual conference row today. Only 4 upcoming rows now; listing volume is low.",
   "Coverage checklist: fees: same-site /book pages (login wall) and external organiser JSON-LD checked. Region uses the rcpath UK region map (London etc.).",
-  "external organiser link: labelled anchor only, safe_fetch-checked, tiers sanity-checked (security review 2026-10-21)"
+  "external organiser link: labelled anchor only, safe_fetch-checked, tiers sanity-checked (security review 2026-10-21); organiser hop via safe_fetch.fetch_validated (hop-validated, no browser)"
  ]
 }

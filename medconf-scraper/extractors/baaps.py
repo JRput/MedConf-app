@@ -22,7 +22,7 @@ from playwright.sync_api import Page
 
 from logger import logger
 
-from safe_fetch import check_url_safe
+from safe_fetch import check_url_safe, fetch_validated
 
 from .base import BaseExtractor
 from .http_fetch import fetch_html
@@ -209,8 +209,14 @@ class BaapsExtractor(BaseExtractor):
             if not ok:
                 logger.info(f"BAAPS: external link refused ({reason}): {link}")
                 continue
-            body = self._get(link)
-            if body and json_ld_events(body):
+            # hop-validated GET (every redirect re-checked, IP pinned, 2 MB cap), no browser fallback
+            verdict, final, raw, enc, status = fetch_validated(link)
+            if verdict != "ok":
+                logger.info(f"BAAPS: organiser fetch {verdict} ({status}) for {link} -> {final}")
+                body = None
+                continue
+            body = raw.decode(enc or "utf-8", errors="replace")
+            if json_ld_events(body):
                 break
         if not body:
             return []
