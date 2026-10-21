@@ -90,3 +90,6 @@ medconf-scraper/supabase
 reports/website-audit/02-conferences-desktop.png
 reports/website-audit/08-conferences-mobile.png
 tests/e2e/screenshots/
+
+# Local notes / credentials never belong in the repo
+*.rtf
