@@ -216,6 +216,9 @@ def _enrich_core(sub: dict, conference: Optional[dict], cache, llm_call: Callabl
             return "failed", {"_error": "timeout"}, url, None
         if verdict == "rejected":
             return "skipped", {"_error": "url rejected"}, url, None
+        if verdict in ("unreachable", "tls_error"):
+            # Transport/certificate failure, not a policy refusal; still a failed enrichment.
+            return "failed", {"_error": verdict}, url, None
         if verdict == "blocked":
             return "blocked", {"_error": "page blocked or empty"}, url, final
         text = html_to_text(html)

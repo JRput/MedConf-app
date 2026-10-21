@@ -15,6 +15,7 @@ import ipaddress
 import os
 import re
 import socket
+import ssl
 import time
 from typing import Callable, Optional
 from urllib.parse import urljoin, urlparse
@@ -108,36 +109,72 @@ def html_to_text(html: str) -> str:
     return re.sub(r"\s+", " ", t).strip()[:200000]
 
 
-def pin_address(host: str, port: int) -> Optional[str]:
-    """Resolve once and return the first allowed address (None if none is)."""
+def pin_addresses(host: str, port: int) -> Optional[list]:
+    """Resolve once; return every address (IPv4 first, then IPv6) or None.
+
+    None if resolution fails or if ANY resolved address is blocked: a host
+    that answers with even one private address is refused outright, so the
+    DNS-rebinding posture is the same as check_url_safe."""
     try:
         infos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
     except Exception:
         return None
+    v4, v6 = [], []
     for info in infos:
         try:
             ip = ipaddress.ip_address(info[4][0].split("%")[0])
         except ValueError:
-            continue
-        if not _ip_is_blocked(ip):
-            return str(ip)
-    return None
+            return None
+        if _ip_is_blocked(ip):
+            return None
+        bucket = v4 if ip.version == 4 else v6
+        if str(ip) not in bucket:
+            bucket.append(str(ip))
+    # IPv4 first: many hosts publish AAAA records that are unreachable from
+    # CI runners and home networks; every address is still tried in turn.
+    return (v4 + v6) or None
 
 
-def _pinned_request(url: str) -> Optional[tuple]:
-    """(pinned_url, headers, extensions): connect to the validated IP while
-    keeping the hostname for Host header, SNI and certificate verification."""
+def pin_address(host: str, port: int) -> Optional[str]:
+    """First validated address (kept for callers/tests)."""
+    addrs = pin_addresses(host, port)
+    return addrs[0] if addrs else None
+
+
+def _pinned_requests(url: str) -> Optional[list]:
+    """[(pinned_url, headers, extensions), ...] one per validated address.
+    Each connects to the validated IP while keeping the hostname for the Host
+    header, SNI and certificate verification."""
     p = urlparse(url)
     host = p.hostname or ""
     port = p.port or (443 if p.scheme == "https" else 80)
-    ip = pin_address(host, port)
-    if ip is None:
+    addrs = pin_addresses(host, port)
+    if not addrs:
         return None
-    ip_host = f"[{ip}]" if ":" in ip else ip
-    netloc = f"{ip_host}:{p.port}" if p.port else ip_host
-    pinned = p._replace(netloc=netloc).geturl()
     host_hdr = f"{host}:{p.port}" if p.port else host
-    return pinned, {"Host": host_hdr}, {"sni_hostname": host}
+    out = []
+    for ip in addrs:
+        ip_host = f"[{ip}]" if ":" in ip else ip
+        netloc = f"{ip_host}:{p.port}" if p.port else ip_host
+        out.append((p._replace(netloc=netloc).geturl(), {"Host": host_hdr},
+                    {"sni_hostname": host}))
+    return out
+
+
+def _pinned_request(url: str) -> Optional[tuple]:
+    """First pinned request (kept for callers/tests)."""
+    reqs = _pinned_requests(url)
+    return reqs[0] if reqs else None
+
+
+def _is_tls_error(exc: BaseException) -> bool:
+    seen = set()
+    while exc is not None and id(exc) not in seen:
+        seen.add(id(exc))
+        if isinstance(exc, ssl.SSLError) or "CERTIFICATE_VERIFY_FAILED" in str(exc):
+            return True
+        exc = exc.__cause__ or exc.__context__
+    return False
 
 
 def fetch_validated(url: str, url_check: Callable = check_url_safe, max_hops: int = 5,
@@ -148,10 +185,16 @@ def fetch_validated(url: str, url_check: Callable = check_url_safe, max_hops: in
     """GET hop by hop (no automatic redirects), SSRF-checking every hop.
 
     Returns (verdict, final_url, body_bytes, encoding, status):
-      ok        final 2xx response, body capped at max_bytes
-      blocked   final response was not 2xx (status says which)
-      rejected  a hop failed the check / too many hops / transport error
-      timeout   monotonic `deadline` passed (slow-drip server)
+      ok          final 2xx response, body capped at max_bytes
+      blocked     final response was not 2xx (status says which)
+      rejected    policy refusal: a hop failed the check (scheme, blocked or
+                  unresolvable address), too many hops, or unexpected error
+      unreachable transport failure (connect/network/timeout) on every
+                  validated address of a hop
+      tls_error   certificate / TLS handshake failure (never retried or bypassed)
+      timeout     monotonic `deadline` passed (slow-drip server)
+    With pinning, all addresses (IPv4 first, then IPv6) are validated and
+    tried in order on transport errors; any blocked address refuses the host.
     """
     # DNS-rebinding defence: connect to the address we validated (pin=True).
     # Default: on whenever the real address check is in use.
@@ -169,31 +212,45 @@ def fetch_validated(url: str, url_check: Callable = check_url_safe, max_hops: in
                 return "timeout", current, b"", "utf-8", 0
             if not url_check(current)[0]:
                 return "rejected", current, b"", "utf-8", 0
-            target, hdrs, exts = current, None, None
+            attempts = [(current, None, None)]
             if pin:
-                pr = _pinned_request(current)
-                if pr is None:
+                attempts = _pinned_requests(current)
+                if attempts is None:
                     return "rejected", current, b"", "utf-8", 0
-                target, hdrs, exts = pr
-            with client.stream("GET", target, headers=hdrs, extensions=exts) as r:
-                location = r.headers.get("location")
-                if r.status_code in _REDIRECT_STATUSES and location:
-                    if hop >= max_hops:
-                        break
-                    current = urljoin(current, location)
-                    continue
-                if not 200 <= r.status_code < 300:
-                    return "blocked", current, b"", "utf-8", r.status_code
-                body = bytearray()
-                for chunk in r.iter_bytes():
-                    if deadline is not None and time.monotonic() > deadline:
-                        return "timeout", current, b"", "utf-8", 0
-                    body.extend(chunk)
-                    if len(body) >= max_bytes:
-                        break
-                enc = r.encoding or "utf-8"
-                status = r.status_code
-            return "ok", current, bytes(body[:max_bytes]), enc, status
+            redirected = False
+            last_err = "no attempt"
+            for target, hdrs, exts in attempts:
+                if deadline is not None and time.monotonic() > deadline:
+                    return "timeout", current, b"", "utf-8", 0
+                try:
+                    with client.stream("GET", target, headers=hdrs, extensions=exts) as r:
+                        location = r.headers.get("location")
+                        if r.status_code in _REDIRECT_STATUSES and location:
+                            if hop >= max_hops:
+                                return "rejected", "too many redirects", b"", "utf-8", 0
+                            current = urljoin(current, location)
+                            redirected = True
+                            break
+                        if not 200 <= r.status_code < 300:
+                            return "blocked", current, b"", "utf-8", r.status_code
+                        body = bytearray()
+                        for chunk in r.iter_bytes():
+                            if deadline is not None and time.monotonic() > deadline:
+                                return "timeout", current, b"", "utf-8", 0
+                            body.extend(chunk)
+                            if len(body) >= max_bytes:
+                                break
+                        enc = r.encoding or "utf-8"
+                        status = r.status_code
+                    return "ok", current, bytes(body[:max_bytes]), enc, status
+                except httpx.TransportError as e:
+                    if _is_tls_error(e):
+                        return "tls_error", current, b"", "utf-8", 0
+                    last_err = type(e).__name__
+                    continue  # next validated address
+            if redirected:
+                continue
+            return "unreachable", f"{current} ({last_err})", b"", "utf-8", 0
         return "rejected", "too many redirects", b"", "utf-8", 0
     except Exception as e:  # noqa: BLE001
         return "rejected", f"fetch failed: {type(e).__name__}", b"", "utf-8", 0
