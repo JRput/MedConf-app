@@ -5,7 +5,7 @@
 > `Conference_masterlist/Medical_Courses_Conferences_Master_Comprehensive_v1(Master list).csv`
 > autonomously, keep the MedConf site up to date, with accuracy and nothing missing.
 
-> **Sibling boards:** [MISSION_BOARD_CONTRIBUTIONS.md](MISSION_BOARD_CONTRIBUTIONS.md) — community corrections + new-event submissions with moderation. Status: DELIVERED 2026-10-18. · [MISSION_BOARD_AUTH.md](MISSION_BOARD_AUTH.md) — password reset flow + callback session-cookie fix. Opened 2026-10-20. Wave 2d/2e stay parked behind these.
+> **Sibling boards:** [MISSION_BOARD_CONTRIBUTIONS.md](MISSION_BOARD_CONTRIBUTIONS.md) — community corrections + new-event submissions with moderation. Status: DELIVERED 2026-10-18. · [MISSION_BOARD_AUTH.md](MISSION_BOARD_AUTH.md) — password reset flow + callback session-cookie fix. Delivered 2026-10-20. **Wave 2d started 2026-10-21** — see §7 and `Conference_masterlist/wave2d/PLAN.md`.
 
 ## 1. Brief & ground truth
 
@@ -162,6 +162,8 @@ Order by value ÷ effort, gating each sub-wave in the cloud early (RCoA/ARVO les
 - **2e — SPA / external registrar (≈17):** browser-first; external registrars (BCS, BSPED, Rewired, Medical Protection) may be out of scope if the org hosts nothing itself.
 
 Gate per sub-wave: harness twice → first scrape → remediator → audit (advisory: title-token and load-more checks) → null-audit < 10 % → cloud run green. Matrix: add a 6th/7th group as needed (≤ 10 sources per job).
+
+**2d started 2026-10-21** (password-reset mission closed 2026-10-20, see MISSION_BOARD_AUTH.md). Pool recomputed against the live `scraper_sources` table: 46 static_html/unknown domains remain (recon duplicates and RCSEd removed; jpmorgan + HEE programmes excluded as out of scope). Plan, ids 103–146 and batches in `Conference_masterlist/wave2d/plan.json` / `PLAN.md`; brief delta `wave2d/BRIEF.md`. First wave of agents (sonnet): `w2d-S` 13 one-event congress sites as `single_congress` subclasses (103–115), `w2d-A` 7 high-volume UK society static sites (116–122), `w2d-B` 7 lower-volume UK sites (123–129), `w2d-D` 4 JS/browser-first (130–133). Cloud probe dispatched on `wave2d/candidates.json`. C1/C2 international (134–143) follow the first gate; E (commercial course shops 144–146) awaits the owner's call.
 
 ---
 

@@ -1,0 +1,310 @@
+[
+ {
+  "domain": "ean.org",
+  "candidate_urls": [
+   "https://www.ean.org/congress2027",
+   "https://ean.org/"
+  ]
+ },
+ {
+  "domain": "aaic.alz.org",
+  "candidate_urls": [
+   "https://aaic.alz.org/overview.asp",
+   "https://aaic.alz.org/"
+  ]
+ },
+ {
+  "domain": "auanet.org",
+  "candidate_urls": [
+   "https://www.auanet.org/AUA2027",
+   "https://auanet.org/"
+  ]
+ },
+ {
+  "domain": "aao.org",
+  "candidate_urls": [
+   "https://www.aao.org/annual-meeting",
+   "https://aao.org/"
+  ]
+ },
+ {
+  "domain": "rsna.org",
+  "candidate_urls": [
+   "https://www.rsna.org/annual-meeting",
+   "https://rsna.org/"
+  ]
+ },
+ {
+  "domain": "chestnet.org",
+  "candidate_urls": [
+   "https://www.chestnet.org/learning-and-events/events/chest-annual-meeting",
+   "https://chestnet.org/"
+  ]
+ },
+ {
+  "domain": "bofas.org.uk",
+  "candidate_urls": [
+   "https://www.bofas.org.uk/annual-meeting",
+   "https://bofas.org.uk/"
+  ]
+ },
+ {
+  "domain": "bpna.org.uk",
+  "candidate_urls": [
+   "https://bpna.org.uk/conference/2027/",
+   "https://bpna.org.uk/"
+  ]
+ },
+ {
+  "domain": "acc.org",
+  "candidate_urls": [
+   "https://accscientificsession.acc.org/",
+   "https://acc.org/"
+  ]
+ },
+ {
+  "domain": "asn-online.org",
+  "candidate_urls": [
+   "https://www.asn-online.org/education/kidneyweek/",
+   "https://asn-online.org/"
+  ]
+ },
+ {
+  "domain": "asahq.org",
+  "candidate_urls": [
+   "https://www.asahq.org/annualmeeting",
+   "https://asahq.org/"
+  ]
+ },
+ {
+  "domain": "ueg.eu",
+  "candidate_urls": [
+   "https://ueg.eu/week",
+   "https://ueg.eu/"
+  ]
+ },
+ {
+  "domain": "baaps.org.uk",
+  "candidate_urls": [
+   "https://baaps.org.uk/about/events/",
+   "https://baaps.org.uk/"
+  ]
+ },
+ {
+  "domain": "bssh.ac.uk",
+  "candidate_urls": [
+   "https://www.bssh.ac.uk/about/events",
+   "https://bssh.ac.uk/"
+  ]
+ },
+ {
+  "domain": "vascularsociety.org.uk",
+  "candidate_urls": [
+   "https://www.vascularsociety.org.uk/events/",
+   "https://vascularsociety.org.uk/"
+  ]
+ },
+ {
+  "domain": "baus.org.uk",
+  "candidate_urls": [
+   "https://www.baus.org.uk/professionals/events/",
+   "https://baus.org.uk/"
+  ]
+ },
+ {
+  "domain": "his.org.uk",
+  "candidate_urls": [
+   "https://www.his.org.uk/training-events/events-diary/",
+   "https://his.org.uk/"
+  ]
+ },
+ {
+  "domain": "bbts.org.uk",
+  "candidate_urls": [
+   "https://www.bbts.org.uk/events/",
+   "https://bbts.org.uk/"
+  ]
+ },
+ {
+  "domain": "associationofbreastsurgery.org.uk",
+  "candidate_urls": [
+   "https://associationofbreastsurgery.org.uk/courses-events/abs-courses-events-calendar/",
+   "https://associationofbreastsurgery.org.uk/"
+  ]
+ },
+ {
+  "domain": "basl.org.uk",
+  "candidate_urls": [
+   "https://www.basl.org.uk/index.cfm/events/list/cid/16",
+   "https://basl.org.uk/"
+  ]
+ },
+ {
+  "domain": "endocrinology.org",
+  "candidate_urls": [
+   "https://www.endocrinology.org/events/",
+   "https://endocrinology.org/"
+  ]
+ },
+ {
+  "domain": "bsir.org",
+  "candidate_urls": [
+   "https://www.bsir.org/events/",
+   "https://bsir.org/"
+  ]
+ },
+ {
+  "domain": "bmfms.org.uk",
+  "candidate_urls": [
+   "https://www.bmfms.org.uk/professionals/events",
+   "https://bmfms.org.uk/"
+  ]
+ },
+ {
+  "domain": "brit-thoracic.org.uk",
+  "candidate_urls": [
+   "https://www.brit-thoracic.org.uk/education-and-events/",
+   "https://brit-thoracic.org.uk/"
+  ]
+ },
+ {
+  "domain": "rheumatology.org.uk",
+  "candidate_urls": [
+   "https://www.rheumatology.org.uk/events-learning/conferences",
+   "https://rheumatology.org.uk/"
+  ]
+ },
+ {
+  "domain": "bapm.org",
+  "candidate_urls": [
+   "https://www.bapm.org/pages/190-meetings-and-events",
+   "https://bapm.org/"
+  ]
+ },
+ {
+  "domain": "sbns.org.uk",
+  "candidate_urls": [
+   "https://www.sbns.org.uk/event-calendar.html",
+   "https://sbns.org.uk/"
+  ]
+ },
+ {
+  "domain": "bsg.org.uk",
+  "candidate_urls": [
+   "https://www.bsg.org.uk/events",
+   "https://bsg.org.uk/"
+  ]
+ },
+ {
+  "domain": "boa.ac.uk",
+  "candidate_urls": [
+   "https://www.boa.ac.uk/learning-and-events/ems-event-calendar.html",
+   "https://boa.ac.uk/"
+  ]
+ },
+ {
+  "domain": "escrs.org",
+  "candidate_urls": [
+   "https://www.escrs.org/meetings-and-events/event-search",
+   "https://escrs.org/"
+  ]
+ },
+ {
+  "domain": "ics.ac.uk",
+  "candidate_urls": [
+   "https://ics.ac.uk/events/calendar.html",
+   "https://ics.ac.uk/"
+  ]
+ },
+ {
+  "domain": "eular.org",
+  "candidate_urls": [
+   "https://eular.org/event",
+   "https://eular.org/"
+  ]
+ },
+ {
+  "domain": "pcronline.com",
+  "candidate_urls": [
+   "https://www.pcronline.com/Courses",
+   "https://pcronline.com/"
+  ]
+ },
+ {
+  "domain": "siu-urology.org",
+  "candidate_urls": [
+   "https://www.siu-urology.org/events",
+   "https://siu-urology.org/"
+  ]
+ },
+ {
+  "domain": "eshre.eu",
+  "candidate_urls": [
+   "https://www.eshre.eu/en/Education/Calendar-Campus-events",
+   "https://eshre.eu/"
+  ]
+ },
+ {
+  "domain": "nihr.ac.uk",
+  "candidate_urls": [
+   "https://www.nihr.ac.uk/events",
+   "https://nihr.ac.uk/"
+  ]
+ },
+ {
+  "domain": "hematology.org",
+  "candidate_urls": [
+   "https://www.hematology.org/meetings",
+   "https://hematology.org/"
+  ]
+ },
+ {
+  "domain": "aan.com",
+  "candidate_urls": [
+   "https://www.aan.com/events/upcoming-events",
+   "https://aan.com/"
+  ]
+ },
+ {
+  "domain": "aad.org",
+  "candidate_urls": [
+   "https://www.aad.org/member/meetings/events/locations",
+   "https://aad.org/"
+  ]
+ },
+ {
+  "domain": "cns.org",
+  "candidate_urls": [
+   "https://www.cns.org/meetings/calendar",
+   "https://cns.org/"
+  ]
+ },
+ {
+  "domain": "augis.org",
+  "candidate_urls": [
+   "https://www.augis.org/Events",
+   "https://augis.org/"
+  ]
+ },
+ {
+  "domain": "iscmedical.co.uk",
+  "candidate_urls": [
+   "https://www.iscmedical.co.uk/category/professional-development",
+   "https://iscmedical.co.uk/"
+  ]
+ },
+ {
+  "domain": "medical-interviews.co.uk",
+  "candidate_urls": [
+   "https://www.medical-interviews.co.uk/category/professional-development",
+   "https://medical-interviews.co.uk/"
+  ]
+ },
+ {
+  "domain": "pastest.com",
+  "candidate_urls": [
+   "https://www.pastest.com/products/paces-in-person",
+   "https://pastest.com/"
+  ]
+ }
+]
