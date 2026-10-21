@@ -22,6 +22,8 @@ from playwright.sync_api import Page
 
 from logger import logger
 
+from safe_fetch import check_url_safe
+
 from .base import BaseExtractor
 from .http_fetch import fetch_html
 from .single_congress import html_lines
@@ -192,11 +194,24 @@ class BaapsExtractor(BaseExtractor):
     def _external_offers(self, html: str) -> List[Dict[str, Any]]:
         """Organiser-run events link to their own site ("Further details about this event"); its JSON-LD Event.offers are the fees.
         Events booked through the BAAPS account system (members' / account holders' fees behind login) publish none."""
+        # Only anchors carrying the event labels BAAPS uses ("Book online for this event", "Further details about
+        # this event") are followed; never the first external href (sponsor / social links).
         skip = re.compile(r"facebook|twitter|x\.com|linkedin|instagram|youtube|baaps\.org\.uk|mailto:|tel:|google|login", re.I)
-        link = next((h for h in re.findall(r'(?is)<a [^>]*href="(https?://[^"]+)"', html) if not skip.search(h)), None)
-        if not link:
-            return []
-        body = self._get(link)
+        links: List[str] = []
+        for label in (r"book online for this event", r"further details about this event"):
+            for m in re.finditer(r'(?is)<a [^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>', html):
+                text = re.sub(r"<[^>]+>|\s+", " ", m.group(2)).strip().lower()
+                if re.fullmatch(label, text) and not skip.search(m.group(1)) and m.group(1) not in links:
+                    links.append(m.group(1))
+        body = None
+        for link in links[:2]:
+            ok, reason = check_url_safe(link)
+            if not ok:
+                logger.info(f"BAAPS: external link refused ({reason}): {link}")
+                continue
+            body = self._get(link)
+            if body and json_ld_events(body):
+                break
         if not body:
             return []
         tiers: List[Dict[str, Any]] = []
@@ -213,9 +228,12 @@ class BaapsExtractor(BaseExtractor):
                     price = float(str(o["price"]).replace(",", ""))
                 except ValueError:
                     continue
+                cur = str(o.get("priceCurrency") or "GBP").upper()
+                if not (0 <= price <= 10000) or cur not in ("GBP", "EUR", "USD") or not name or len(name) > 90:
+                    continue
                 sold_out = "SoldOut" in str(o.get("availability") or "")
                 tiers.append({"tier_label": f"Registration \u00b7 {name}" + (" \u00b7 Sold out" if sold_out else ""), "price_gbp": price,
-                              "currency": o.get("priceCurrency") or "GBP", "is_early_bird": False, "early_bird_deadline": None})
+                              "currency": cur, "is_early_bird": False, "early_bird_deadline": None})
             if tiers:
                 break
         return tiers
