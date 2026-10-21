@@ -9,8 +9,8 @@ Source of truth for ids/slugs/recon: `plan.json`. Probe input: `candidates.json`
 | 2d-A uk_static_hi | 116–122 | bssh, vascularsociety, baus, his, bbts, associationofbreastsurgery, basl | `w2d-A` | building |
 | 2d-B uk_static_lo | 123–129 | endocrinology (Society for Endocrinology), bsir, bmfms, brit-thoracic, rheumatology, bapm, sbns | `w2d-B` | reviewed · registered pending first scrape (CI group M = 124–129); endocrinology 123 blocked (Cloudflare runner + home) — not registered, id reserved |
 | 2d-D js_browser_first | 130–133 | bsg, boa, escrs, ics | `w2d-D` | first scrape clean, remediator running |
-| 2d-C1 intl_multi | 134–138 | eular, pcronline, siu-urology, eshre, nihr | — | queued (after first gate) |
-| 2d-C2 intl_multi | 139–143 | hematology (ASH), aan, aad, cns, augis | — | queued |
+| 2d-C1 intl_multi | 134–138 | eular, pcronline, siu-urology, eshre, nihr (CloudFront-blocked on runner → inactive) | `w2d-C1` | building (started 2026-10-21 23:30) |
+| 2d-C2 intl_multi | 139–143 | hematology (ASH), aan, aad, cns, augis | `w2d-C2` | building (started 2026-10-21 23:30) |
 | 2d-E commercial | 144–146 | iscmedical, medical-interviews, pastest | — | **EXCLUDED by owner 2026-10-21** ("exclude commercial ones for now"); ids reserved, not built |
 
 Excluded: rcsed.ac.uk (already source 28) · jpmorgan.com (investor conference, not CPD) ·
@@ -29,6 +29,8 @@ CI groups (actual, S+D): K = 103–105,107–113 · L = 114,115,130–133 (aao 1
 - **UK region map consolidation:** a dozen extractors carry their own place→region table (`_UK_REGIONS` / `_UK_PLACES`); create a neutral `extractors/uk_regions.py` and migrate. Per-source modules never import each other (review found baaps→rcpath and bsg→ems_calendar; both replaced with local copies during the wave).
 - **Relevance gates:** BOA and BAAPS calendars list third-party promoter events; both now drop off-topic rows (Commander-approved 2026-10-21) and log dropped titles. Watch CI logs for false drops.
 - **Cross-source duplicates:** BMFMS (125) and BAPM (128) both list "Beyond the CTG", the Perinatal Symposium and the BICS conference under different URLs; `source_url` is the only dedupe key, so both rows publish. Needs a general design (title+date match across sources in the directory view or a scraper-side canonical key), not a per-source hack. Likely already affects older society pairs.
+- **Shared-helper gaps reported by batch A (not changed during the wave):** `pricing_tables.parse_pricing_tables` keeps only the last price column when headers are not timeframes (lost BSSH full-meeting rates) and drops the Category column of Ticket/Category/Price tables (collapsed BAUS tiers), sometimes takes a nearby sentence as the section name; `abstract_classifier` reads "once the abstract deadline has passed…" as a closed call (ABS conference open until 23 Nov 2026 came back closed); `http_fetch.fetch_html` treats Chromium's XML viewer as a challenge page unless `expect_selector` is set (sitemap.xml). `classify_specialty` returned Cardiology/Oncology for hepatology events on single-specialty societies — builders fell back to the society constant.
+- **LLM chain rotation 2026-10-21:** nemotron-3-super-120b and muse-glimmer-30b returned 404 during batch A; agent `model-rotation` dispatched (runbook: memory/project_kimi_eol.md).
 - **Reviews on disk:** `_review_S.md`, `_review_D.md` (reviewer agents, fresh eyes, pre-registration).
 
 ## Gate log
