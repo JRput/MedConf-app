@@ -4,7 +4,10 @@
  "excluded": {
   "rcsed.ac.uk": "already built (source 28)",
   "jpmorgan.com": "investor conference, not CPD \u2014 out of scope",
-  "digital-transformation.hee.nhs.uk": "programmes, not dated events \u2014 out of scope"
+  "digital-transformation.hee.nhs.uk": "programmes, not dated events \u2014 out of scope",
+  "iscmedical.co.uk": "commercial course shop \u2014 excluded by owner 2026-10-21",
+  "medical-interviews.co.uk": "commercial course shop \u2014 excluded by owner 2026-10-21",
+  "pastest.com": "commercial course shop \u2014 excluded by owner 2026-10-21"
  },
  "batches": {
   "2d-S single_congress": [
@@ -957,7 +960,7 @@
     }
    }
   ],
-  "2d-E commercial_hold": [
+  "2d-E commercial_hold EXCLUDED": [
    {
     "domain": "iscmedical.co.uk",
     "source_id": 144,

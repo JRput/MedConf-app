@@ -11,7 +11,7 @@ Source of truth for ids/slugs/recon: `plan.json`. Probe input: `candidates.json`
 | 2d-D js_browser_first | 130–133 | bsg, boa, escrs, ics | `w2d-D` | first scrape clean, remediator running |
 | 2d-C1 intl_multi | 134–138 | eular, pcronline, siu-urology, eshre, nihr | — | queued (after first gate) |
 | 2d-C2 intl_multi | 139–143 | hematology (ASH), aan, aad, cns, augis | — | queued |
-| 2d-E commercial_hold | 144–146 | iscmedical, medical-interviews, pastest | — | owner call: commercial course shops |
+| 2d-E commercial | 144–146 | iscmedical, medical-interviews, pastest | — | **EXCLUDED by owner 2026-10-21** ("exclude commercial ones for now"); ids reserved, not built |
 
 Excluded: rcsed.ac.uk (already source 28) · jpmorgan.com (investor conference, not CPD) ·
 digital-transformation.hee.nhs.uk (programmes, not dated events).
