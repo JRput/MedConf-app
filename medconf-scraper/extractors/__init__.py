@@ -119,6 +119,23 @@ from .myesr import MyesrExtractor
 from .ccrlondon import CcrLondonExtractor
 from .nhsconfedexpo import NhsConfedExpoExtractor
 from .viveevent import ViveExtractor
+from .aaic import AaicExtractor
+from .aao import AaoExtractor
+from .acc import AccExtractor
+from .asahq import AsahqExtractor
+from .asn_online import AsnOnlineExtractor
+from .auanet import AuanetExtractor
+from .baaps import BaapsExtractor
+from .boa import BoaExtractor
+from .bofas import BofasExtractor
+from .bpna import BpnaExtractor
+from .bsg import BsgExtractor
+from .chestnet import ChestnetExtractor
+from .ean import EanExtractor
+from .escrs import EscrsExtractor
+from .ics import IcsExtractor
+from .rsna import RsnaExtractor
+from .ueg import UegExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -225,6 +242,23 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     100: CcrLondonExtractor,                  # 100: CCR London single-congress site (one upcoming edition) - single_congress family
     101: NhsConfedExpoExtractor,              # 101: NHS ConfedExpo single-congress site (one upcoming edition) - single_congress family
     102: ViveExtractor,                       # 102: ViVE single-congress site (one upcoming edition) - single_congress family
+    103: EanExtractor,                        # 103: EAN single-congress site (one upcoming edition) - single_congress family
+    104: AaicExtractor,                       # 104: AAIC single-congress site (one upcoming edition) - single_congress family
+    105: AuanetExtractor,                     # 105: AUA single-congress site (one upcoming edition) - single_congress family
+    106: AaoExtractor,                        # 106: AAO single-congress site (one upcoming edition) - single_congress family
+    107: RsnaExtractor,                       # 107: RSNA single-congress site (one upcoming edition) - single_congress family
+    108: ChestnetExtractor,                   # 108: CHEST single-congress site (one upcoming edition) - single_congress family
+    109: BofasExtractor,                      # 109: BOFAS single-congress site (one upcoming edition) - single_congress family
+    110: BpnaExtractor,                       # 110: BPNA single-congress site (one upcoming edition) - single_congress family
+    111: AccExtractor,                        # 111: ACC single-congress site (one upcoming edition) - single_congress family
+    112: AsnOnlineExtractor,                  # 112: ASN single-congress site (one upcoming edition) - single_congress family
+    113: AsahqExtractor,                      # 113: ASA single-congress site (one upcoming edition) - single_congress family
+    114: UegExtractor,                        # 114: UEG single-congress site (one upcoming edition) - single_congress family
+    115: BaapsExtractor,                      # 115: BAAPS events calendar (bespoke, plastic/aesthetic-surgery events only)
+    130: BsgExtractor,                        # 130: BSG events: Kentico/Blazor prerendered cards, walk ?page=N&start=<today> to the pager total; fees from the 'Registration fees' block; event type from title
+    131: BoaExtractor,                        # 131: BOA event & course calendar: Eventfolio JSON endpoint via ems_calendar.EmsCalendarExtractor; third-party rows kept only if orthopaedic/surgical; 2027 Annual Congress from future-congresses page
+    132: EscrsExtractor,                      # 132: ESCRS meetings & events: Umbraco event-search cards (plain HTTP), year-less dates resolved from URL/next occurrence, annual events enriched from the wintermeeting/congress microsites, Vision to Venture fees via members.escrs.org tickets
+    133: IcsExtractor,                        # 133: Intensive Care Society events calendar: Eventfolio JSON endpoint via ems_calendar.EmsCalendarExtractor, SOA congress enriched from /events/soaNN.html, fee images left to the remediator
 }
 
 

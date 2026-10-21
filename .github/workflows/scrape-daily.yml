@@ -94,6 +94,12 @@ jobs:
           - group: J
             source_ids: "95,96,97,98,99,100,101,102"
             source_names: "PAS ACOG ESCMID CROI ECR CCRLondon NHSConfedExpo ViVE"
+          - group: K
+            source_ids: "103,104,105,107,108,109,110,111,112,113"
+            source_names: "EAN AAIC AUA RSNA CHEST BOFAS BPNA ACC ASN ASA"
+          - group: L
+            source_ids: "114,115,130,131,132,133"
+            source_names: "UEG BAAPS BSG BOA ESCRS ICS"
 
     steps:
       - name: Check out repository

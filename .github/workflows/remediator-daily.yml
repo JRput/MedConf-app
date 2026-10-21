@@ -51,6 +51,10 @@ jobs:
             source_ids: "85,86,87,88,89,90,91,92,93,94"
           - group: J
             source_ids: "95,96,97,98,99,100,101,102"
+          - group: K
+            source_ids: "103,104,105,107,108,109,110,111,112,113"
+          - group: L
+            source_ids: "114,115,130,131,132,133"
 
     steps:
       - name: Check out repository
