@@ -1,0 +1,80 @@
+[
+  {
+    "source_name": "BSIR Events",
+    "society": "BSIR",
+    "base_url": "https://www.bsir.org/events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "The /events/ hub is an index of ~13 event-series pages, not a dated list. Each series page holds the current year's event as prose with the date in a sentence (ordinal days, weekday lists, often no year); some series have one level of sub-pages (IR Juniors -> NIRS/RiiSE, Webinars -> Upcoming webinars). The extractor crawls hub -> series -> sub-pages, takes the first non-deadline date line per page and fees from the page's Register link (BSIR page or the CIRSE meeting site).",
+    "id": 124
+  },
+  {
+    "source_name": "BMFMS Events",
+    "society": "BMFMS",
+    "base_url": "https://www.bmfms.org.uk/professionals/events",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Server-rendered calendar shows one year at a time as date_row rows (dates, title link, location); the extractor reads the current view plus the next two /date/<YYYY>/ pages. Rows are BMFMS, RCOG and third-party meetings. Detail pages are thin (date, place, prose); fees are on the external organiser site linked from 'Further details' / 'Book online'.",
+    "id": 125
+  },
+  {
+    "source_name": "BTS Education and Events",
+    "society": "BTS",
+    "base_url": "https://www.brit-thoracic.org.uk/education-and-events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Four server-rendered listings merged: short-course carousel cards, Winter/Summer meeting pages found from the hub (fees on /booking-rates/), the 'Upcoming webinars' bullet list and the third-party 'Other respiratory courses' table. Future meetings (next 18 months) come from the meeting-dates page. Course pages have a Fees block.",
+    "id": 126
+  },
+  {
+    "source_name": "BSR Conferences, Courses and Webinars",
+    "society": "BSR",
+    "base_url": "https://www.rheumatology.org.uk/events-learning/conferences",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "DNN site; three server-rendered listing modules (conferences, courses, webinars) whose div.article blocks hold title, link and a date footer ('Loading more' is vestigial, TotalCount equals the blocks present). Stale or missing card dates (Annual Conference, undated webinar) are re-read from the detail page's Date line; on-demand courses are skipped. Detail pages: Date / Venue / CPD labels plus a Members / Non-members pricing tab (ex VAT).",
+    "id": 127
+  },
+  {
+    "source_name": "BAPM Meetings and Events",
+    "society": "BAPM",
+    "base_url": "https://www.bapm.org/pages/190-meetings-and-events",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Single Hubble-CMS page of div.teaser cards (title link, one-line intro such as 'A two day in person event', start date + time). No pagination. Event pages give Date:/Location: lines and a 'More details'/'Book now' link; BAPM's own conference registers on a public CFS/EventsAir page whose fee list is parsed. Mixed BAPM and external events.",
+    "id": 128
+  },
+  {
+    "source_name": "SBNS Event Calendar",
+    "society": "SBNS",
+    "base_url": "https://www.sbns.org.uk/event-calendar.html",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Preside/Eventfolio site; the calendar lists every upcoming event as article.eventfolio-calendar-event (date range, title link, type badge, city, CPD, Free/External badges); filters and result counter are JS-only and there is no pagination. Detail pages have an event-header block (date, venue lines), a ticket-price widget and a Book Now link to the organiser. Flagship meeting fees are in a PDF on a sub-page.",
+    "id": 129
+  }
+]

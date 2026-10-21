@@ -136,6 +136,12 @@ from .escrs import EscrsExtractor
 from .ics import IcsExtractor
 from .rsna import RsnaExtractor
 from .ueg import UegExtractor
+from .bapm import BapmExtractor
+from .bmfms import BmfmsExtractor
+from .brit_thoracic import BritThoracicExtractor
+from .bsir import BsirExtractor
+from .rheumatology import RheumatologyExtractor
+from .sbns import SbnsExtractor
 
 # source_id → extractor class
 # IDs come from the scraper_sources table (see Supabase).
@@ -259,6 +265,12 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     131: BoaExtractor,                        # 131: BOA event & course calendar: Eventfolio JSON endpoint via ems_calendar.EmsCalendarExtractor; third-party rows kept only if orthopaedic/surgical; 2027 Annual Congress from future-congresses page
     132: EscrsExtractor,                      # 132: ESCRS meetings & events: Umbraco event-search cards (plain HTTP), year-less dates resolved from URL/next occurrence, annual events enriched from the wintermeeting/congress microsites, Vision to Venture fees via members.escrs.org tickets
     133: IcsExtractor,                        # 133: Intensive Care Society events calendar: Eventfolio JSON endpoint via ems_calendar.EmsCalendarExtractor, SOA congress enriched from /events/soaNN.html, fee images left to the remediator
+    124: BsirExtractor,                       # 124: BSIR (interventional radiology): crawl of /events/ series pages for the dated prose line; fees from the Register link (VITALS two-column page, ASM CIRSE grid)
+    125: BmfmsExtractor,                      # 125: BMFMS (maternal & fetal medicine) events calendar: year-view date_row rows, current + next 2 year pages; fees on external organiser sites
+    126: BritThoracicExtractor,               # 126: BTS (respiratory): short courses + Winter/Summer meetings + webinars + third-party courses; fees in a Fees block / booking-rates table
+    127: RheumatologyExtractor,               # 127: BSR (rheumatology): DNN listings for conferences, courses, webinars; detail Date/Venue/CPD labels + Members/Non-members pricing tabs
+    128: BapmExtractor,                       # 128: BAPM (perinatal medicine) meetings and events: teaser cards -> event pages; end date from Date line or intro duration; EventsAir fees for BAPM's own conference
+    129: SbnsExtractor,                       # 129: SBNS (neurosurgery) event calendar: Eventfolio cards -> event pages; society meetings plus external courses; fee widget + organiser Book Now link
 }
 
 
