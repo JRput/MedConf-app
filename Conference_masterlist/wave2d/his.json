@@ -1,0 +1,90 @@
+{
+  "source_id": 119,
+  "slug": "his",
+  "class_name": "HISExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/his.py",
+  "source_row": {
+    "source_name": "HIS",
+    "society": "Healthcare Infection Society",
+    "base_url": "https://www.his.org.uk/training-events/events-diary/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": true,
+    "active": true,
+    "extraction_instructions": "Umbraco, server-rendered. The Events Diary is ONE page of ~20 div.linkbox cards (datetype + location-tag, title, More link); ?page=N returns the same page, and past items are listed too, so rows before today are dropped. 'SOLD OUT - ' / 'COURSE FULL - ' title prefixes become is_sold_out; month-only cards (Foundation course 'March 2027') take their dates from the page's 'Live online sessions' line. The flagship HISCON (not in the diary) is added from /training-events/our-conferences/. Detail pages have a side menu of real sub-pages; the one named Registration / Fees and payment holds the fees (vertical Early Bird/Standard list with rowspan table, or 'HIS members: £600' prose). FIS 2026 only links out: fisconference.org -> fitwise.eventsair.com/fis-2026 -> /registration-and-fees (two hops, fee table read)."
+  },
+  "registry_comment": "HIS events: Umbraco events-diary card list (+HISCON from conferences page), side-menu registration sub-page fees, two-hop FIS fees, event_type from URL section",
+  "probe_results": {
+    "shells": 11,
+    "shells_forced_fallback": 11,
+    "details_tested": 11,
+    "with_date": 11,
+    "with_pricing": 8,
+    "with_venue": 4,
+    "with_description": 11,
+    "with_specialty": 11,
+    "shell_event_types": {
+      "workshop": 5,
+      "course": 3,
+      "conference": 3
+    },
+    "detail_event_types": {
+      "workshop": 5,
+      "course": 3,
+      "conference": 3
+    },
+    "shells_with_end_date": 3,
+    "forced_fallback_details_tested": 2,
+    "coverage_run": "harness --coverage; remaining PRICE_*/SUBMISSION_*/SINGLE_DAY warnings explained in concerns"
+  },
+  "test_urls": [
+    "https://www.his.org.uk/training-events/building-safer-hospitals-2026/",
+    "https://www.his.org.uk/training-events/fis-his/fis-2026/",
+    "https://www.his.org.uk/training-events/annual-conference/his-annual-conference-2027/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.his.org.uk/training-events/building-safer-hospitals-2026/registration/",
+      "field": "fees",
+      "site_says": "Early Bird (available until 31 August 2026): HIS Members £125, Non members £250; Standard: HIS Members £200, Non Members £400",
+      "extractor_says": "Registration · Early Bird · HIS Members 125 / Non members 250 (early_bird_deadline 2026-08-31); Registration · Standard · HIS Members 200 / Non Members 400",
+      "match": true
+    },
+    {
+      "url": "https://www.his.org.uk/training-events/annual-conference/his-annual-conference-2027/",
+      "field": "dates",
+      "site_says": "header '08 June 2027 - 09 June 2026' (typo); text 'returns to London on 8-9 June 2027'",
+      "extractor_says": "2027-06-08 .. 2027-06-09, RCP London",
+      "match": true
+    },
+    {
+      "url": "https://www.his.org.uk/training-events/fis-his/fis-2026/",
+      "field": "fees (two hops)",
+      "site_says": "fitwise.eventsair.com/fis-2026/registration-and-fees: FIS society member - full conference £724.00, two days £600.00, one day £300.00; Non-member full £858.00",
+      "extractor_says": "9 tiers incl. FIS society member - full conference 724.0, Non-member - full conference 858.0; organiser_url fitwise.eventsair.com/fis-2026",
+      "match": true
+    },
+    {
+      "url": "https://www.his.org.uk/training-events/hisukhsa-foundation-course/2027/hisukhsa-foundation-course-in-ipc-mar-2027/",
+      "field": "dates/fees/CPD",
+      "site_says": "'15-19 March 2027 - Live online sessions'; HIS members £600, Non-members £750; 49 CPD points",
+      "extractor_says": "2027-03-15 .. 2027-03-19; Delegate fees · HIS members 600.0 / Non-members 750.0; cpd_points 49",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Coverage checklist: #1 ranges parsed, HISCON end-year typo repaired from the page's own sentence; #2/#5 FIS 2026 fees reached through two external hops (fisconference.org -> fitwise.eventsair.com -> registration-and-fees); #4 registration sub-pages from the side menu followed (Building Safer Hospitals, Outbreaks course, Water safety, IPC leaders' course, Training Day); #3 none seen; #6/#7 Building Safer Hospitals has an abstract-submission sub-page - SUBMISSION_NO_DEADLINE warning left to the pipeline merge step.",
+    "pricing_tiers = [] for the three Insight Webinars / Innovation Forum / GENOTIPE meeting: the pages show no fee and register through Microsoft Teams / Zoom (one links 'is free to attend' and gets a £0 tier). HISCON 2027 says 'Registration to be released in due course'.",
+    "coverage_checks prints SINGLE_DAY_SUSPECT ('7 days') on almost every HIS page in the browser-rendered text; it is not on the curl-fetched HTML (cookie/consent boilerplate rendered by JavaScript) and no HIS page has a multi-day range other than FIS/HISCON/Foundation, which are stored as ranges.",
+    "The diary also lists third-party webinars (Webber Training, MACE Consult) - they are kept when upcoming (all were past on 2026-10-21). Several diary items are before today and are dropped.",
+    "ACCURACY NOTE: the FIS 2026 page title still reads 'FIS 2025' in <title>; the on-page header (24-26 Nov 2026, Glasgow) is used.",
+    "Text-LLM chain on 2026-10-21: nvidia/nemotron-3-super-120b-a12b and meta/muse-glimmer-30b both answered 404 'gone', so the harness descriptions/specialties came from openai/gpt-oss-20b. Descriptions and specialty have deterministic backstops (first real paragraph; per-society default specialty), so extraction does not depend on the LLM. The probe_models job will go red until the chain is rotated.",
+    "specialty_classifier.classify_specialty is deliberately NOT used as the backstop: on single-specialty societies it returned wrong labels (Cardiology/Oncology/GP Training for hepatology webinars). The backstop is the society's own specialty constant when the LLM returns None.",
+    "Shared-helper wishes (not changed, per rules): pricing_tables.parse_pricing_tables keeps only the LAST price column when the header names are not timeframes (BSSH Scientific Meeting 'Full meeting | One day' lost the full-meeting rates), drops the category column of [Ticket | Category | Price] tables (BAUS), and can take a nearby sentence as the section name ('Registration fees do not include'). Each extractor carries a small local table helper instead (matrix_tiers / ticket_tiers / rowspan_tiers / external_fee_hop, duplicated inline per file).",
+    "coverage_checks SINGLE_DAY_SUSPECT / PRICE_TEXT_ON_PAGE warnings that remain in the harness are explained per source below; none is a missed fee or date on the event's own page.",
+    "2026-10-21 hardening: external hops (bookwhen/EventsAir/organiser sites) use safe_fetch.fetch_validated (30 s deadline, 2 MB cap), no browser fallback; host checks use urlparse().hostname. Society-own pages keep fetch_html."
+  ]
+}

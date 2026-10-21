@@ -1,0 +1,79 @@
+{
+  "source_id": 120,
+  "slug": "bbts",
+  "class_name": "BBTSExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/bbts.py",
+  "source_row": {
+    "source_name": "BBTS",
+    "society": "British Blood Transfusion Society",
+    "base_url": "https://www.bbts.org.uk/events/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Bespoke Svelte-SSR CMS (Duo), server-rendered. /events/ is a news-style feed mixing events, blog posts, council profiles and certificate pages; only hrefs under /events/bbts_events/ are events, and the <small> date on each feed item is the event's first day (checked against three event bodies). The feed has no pagination but links ?month=YYYY-MM archives, so current/future months are fetched too. Event pages are tiny free-text pages ('Virtual two half day event on 25th and 26th Nov 2026', 'Dates: October 21 (Wed) – 23 (Fri), 2026 / Venue: …'); the range and venue are parsed from the body. Fees are not published (REGISTER HERE goes to the organiser; one hop is read for fee tables)."
+  },
+  "registry_comment": "BBTS events: Svelte-SSR news-style feed filtered to /events/bbts_events/, month archives, free-text date/venue parsing; sparse (2 upcoming)",
+  "probe_results": {
+    "shells": 2,
+    "shells_forced_fallback": 2,
+    "details_tested": 2,
+    "with_date": 2,
+    "with_pricing": 0,
+    "with_venue": 1,
+    "with_description": 2,
+    "with_specialty": 2,
+    "shell_event_types": {
+      "conference": 2
+    },
+    "detail_event_types": {
+      "conference": 2
+    },
+    "shells_with_end_date": 0,
+    "forced_fallback_details_tested": 2,
+    "coverage_run": "harness --coverage; remaining PRICE_*/SUBMISSION_*/SINGLE_DAY warnings explained in concerns"
+  },
+  "test_urls": [
+    "https://www.bbts.org.uk/events/bbts_events/lmce-2026-laboratory-medicine-congress-exhibition-kslm-67th-annual-meeting/",
+    "https://www.bbts.org.uk/events/bbts_events/rcpath-shot-advances-in-transfusion-symposium/",
+    "https://www.bbts.org.uk/events/bbts_events/scotblood-2026/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.bbts.org.uk/events/bbts_events/lmce-2026-laboratory-medicine-congress-exhibition-kslm-67th-annual-meeting/",
+      "field": "dates/venue",
+      "site_says": "Dates: October 21 (Wed) – 23 (Fri), 2026; Venue: Grand Walkerhill Seoul, Korea",
+      "extractor_says": "2026-10-21 .. 2026-10-23, Grand Walkerhill, Seoul, international",
+      "match": true
+    },
+    {
+      "url": "https://www.bbts.org.uk/events/bbts_events/rcpath-shot-advances-in-transfusion-symposium/",
+      "field": "dates/format",
+      "site_says": "Virtual two half day event on 25th and 26th Nov 2026",
+      "extractor_says": "2026-11-25 .. 2026-11-26, event_format online",
+      "match": true
+    },
+    {
+      "url": "https://www.bbts.org.uk/events/bbts_events/scotblood-2026/",
+      "field": "feed date = event first day",
+      "site_says": "feed item dated 28 May 2026; body 'confirmed as the 28th and 29th of May'",
+      "extractor_says": "(past, correctly skipped) - confirms the feed date is the first day",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Only TWO upcoming events exist on the site today (LMCE 2026 in Seoul, starting 2026-10-21, and the RCPath & SHOT symposium 25-26 Nov); that is the site's real answer, not a parse miss (the feed shows 12 items, 6 of them under /events/bbts_events/, 4 already past). The BBTS Annual Conference 2026 (15-17 Sept, Glasgow SEC) is already past and no 2027 edition is announced.",
+    "UNPROVEN: the code that turns /whoweare/whatwedo/annualconference/ ('The BBTS Annual Conference YYYY will take place at X from D to D Month.') into a shell only fired on a past edition; it is covered by regex logic, not by a live future example.",
+    "pricing_tiers = [] for both: no fees on bbts.org.uk, the RCPath REGISTER HERE page (one hop followed) shows no fees, LMCE is a Korean congress with no register link. coverage_checks prints PRICE_TEXT_ON_PAGE '£ 0.00' (site chrome) and PRICE_EXTERNAL_LINK (the RCPath page, read).",
+    "Pages are very short, so when no real paragraph exists the description is the page's own short lines joined (never invented). The feed date is the event start only as far as the three events checked by hand.",
+    "BBTS pages carry no CPD statement; event_type comes from the title (Symposium/Congress -> conference).",
+    "Text-LLM chain on 2026-10-21: nvidia/nemotron-3-super-120b-a12b and meta/muse-glimmer-30b both answered 404 'gone', so the harness descriptions/specialties came from openai/gpt-oss-20b. Descriptions and specialty have deterministic backstops (first real paragraph; per-society default specialty), so extraction does not depend on the LLM. The probe_models job will go red until the chain is rotated.",
+    "specialty_classifier.classify_specialty is deliberately NOT used as the backstop: on single-specialty societies it returned wrong labels (Cardiology/Oncology/GP Training for hepatology webinars). The backstop is the society's own specialty constant when the LLM returns None.",
+    "Shared-helper wishes (not changed, per rules): pricing_tables.parse_pricing_tables keeps only the LAST price column when the header names are not timeframes (BSSH Scientific Meeting 'Full meeting | One day' lost the full-meeting rates), drops the category column of [Ticket | Category | Price] tables (BAUS), and can take a nearby sentence as the section name ('Registration fees do not include'). Each extractor carries a small local table helper instead (matrix_tiers / ticket_tiers / rowspan_tiers / external_fee_hop, duplicated inline per file).",
+    "coverage_checks SINGLE_DAY_SUSPECT / PRICE_TEXT_ON_PAGE warnings that remain in the harness are explained per source below; none is a missed fee or date on the event's own page.",
+    "2026-10-21 hardening: external hops (bookwhen/EventsAir/organiser sites) use safe_fetch.fetch_validated (30 s deadline, 2 MB cap), no browser fallback; host checks use urlparse().hostname. Society-own pages keep fetch_html."
+  ]
+}

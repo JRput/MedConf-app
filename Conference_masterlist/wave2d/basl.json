@@ -1,0 +1,87 @@
+{
+  "source_id": 122,
+  "slug": "basl",
+  "class_name": "BASLExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/basl.py",
+  "source_row": {
+    "source_name": "BASL",
+    "society": "British Association for the Study of the Liver",
+    "base_url": "https://www.basl.org.uk/index.cfm/events/list/cid/16/eid/999",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Bespoke ColdFusion (index.cfm), server-rendered. eid/999 ('All Events') lists BASL, endorsed and other societies' events on ONE page: <h2>November 2026</h2> month headings (the date cells carry no year) followed by div.eventItemArea blocks with a date cell ('06 / Nov', '20 Nov - 21 Nov'), the title and the full write-up in a collapsed div#eventContentNNN - there are no per-event detail pages. Each shell's booking_url is the listing URL + #eventContentNNN; extract_detail parses the stashed write-up (Venue/Location/Date/Time lines, prose fees, registration link -> organiser_url). Status suffixes ('- Registration now open', '- Save the Date') are stripped; 'Postponed' / cancelled items are skipped."
+  },
+  "registry_comment": "BASL events: ColdFusion single-page list (eid/999) with month headings and inline write-ups, fragment booking URLs, prose fee parsing",
+  "probe_results": {
+    "shells": 10,
+    "shells_forced_fallback": 10,
+    "details_tested": 10,
+    "with_date": 10,
+    "with_pricing": 4,
+    "with_venue": 6,
+    "with_description": 8,
+    "with_specialty": 10,
+    "shell_event_types": {
+      "conference": 6,
+      "workshop": 4
+    },
+    "detail_event_types": {
+      "conference": 6,
+      "workshop": 4
+    },
+    "shells_with_end_date": 3,
+    "forced_fallback_details_tested": 2,
+    "coverage_run": "harness --coverage; remaining PRICE_*/SUBMISSION_*/SINGLE_DAY warnings explained in concerns"
+  },
+  "test_urls": [
+    "https://www.basl.org.uk/index.cfm/events/list/cid/16/eid/999#eventContent807",
+    "https://www.basl.org.uk/index.cfm/events/list/cid/16/eid/999#eventContent795",
+    "https://www.basl.org.uk/index.cfm/events/list/cid/16/eid/999#eventContent794"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.basl.org.uk/index.cfm/events/list/cid/16/eid/999#eventContent807",
+      "field": "dates/venue",
+      "site_says": "Friday 20th November and Saturday 21st November 2026; Venue: The Hallam Conference Centre London",
+      "extractor_says": "2026-11-20 .. 2026-11-21, The Hallam Conference Centre, London",
+      "match": true
+    },
+    {
+      "url": "https://www.basl.org.uk/index.cfm/events/list/cid/16/eid/999#eventContent807",
+      "field": "fees",
+      "site_says": "BASL Members - Day Registration £95; Trainees/Nurses/AHP's - One Day Registration £75; Non Members - One Day Registration £135 (+ 20th and 21st November rates £110/£80/£150)",
+      "extractor_says": "6 tiers: Registration · BASL Members · Attendance on 20th and 21st November 110 / Day Registration 95 …",
+      "match": true
+    },
+    {
+      "url": "https://www.basl.org.uk/index.cfm/events/list/cid/16/eid/999#eventContent795",
+      "field": "venue/fees",
+      "site_says": "Venue: The ISH venue, Regents Park, London W1W 5PN; free for members with a £46 refundable deposit; Non- members £70 non-refundable",
+      "extractor_says": "The ISH venue, Regents Park, London; Refundable deposit 46 / Registration · BASL/BHPG/BAAL/BLNA members 0 / Registration · Non-members 70",
+      "match": true
+    },
+    {
+      "url": "https://www.basl.org.uk/index.cfm/events/list/cid/16/eid/999#eventContent794",
+      "field": "venue/fees",
+      "site_says": "face to face at The Exchange Building in central Birmingham on Friday 6th November 2026; FREE for trainee members (£40 refundable deposit); non-member rate £75",
+      "extractor_says": "The Exchange Building, Birmingham; Refundable deposit 40 / Registration · BASL & BSG Trainee Members 0 / Registration · Non-member 75",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "No per-event URL exists: booking_url is '<listing>#eventContentNNN'. The id is the CMS record id (stable); if BASL ever renumbers, rows would be re-created. All events share one page, so coverage_checks reads page-wide links and prints PRICE_EXTERNAL_LINK for every fee-less event (zoom / execbs.eventsair.com registration links, not fee tables).",
+    "Coverage checklist: #1 ranges from the date cell and a 'Date:' line; #2/#5 registration is on execbs.eventsair.com (JavaScript app, fees not read; kept as organiser_url) and Zoom registration for webinars - events whose write-up states no fee have pricing_tiers = []; #3 none; #4 n/a; #6 the Basic Science Retreat mentions abstracts (left to the pipeline merge step).",
+    "eid/999 includes endorsed and third-party items (e.g. BSG HPB Trainee Symposium); they are kept as BASL lists them. Items marked Postponed (BASL/BSG Research Webinar 12 Nov) have no date and are skipped.",
+    "The Palliative Hepatology SIG meeting offers in-person plus virtual registration, stored as hybrid. 'Meeting Times: 09:30-10:00 - Registration' puts start_time at the registration time for the Introduction to Hepatology meeting.",
+    "Members-only fees: BASL prints member and non-member rates publicly; nothing is behind a login.",
+    "Text-LLM chain on 2026-10-21: nvidia/nemotron-3-super-120b-a12b and meta/muse-glimmer-30b both answered 404 'gone', so the harness descriptions/specialties came from openai/gpt-oss-20b. Descriptions and specialty have deterministic backstops (first real paragraph; per-society default specialty), so extraction does not depend on the LLM. The probe_models job will go red until the chain is rotated.",
+    "specialty_classifier.classify_specialty is deliberately NOT used as the backstop: on single-specialty societies it returned wrong labels (Cardiology/Oncology/GP Training for hepatology webinars). The backstop is the society's own specialty constant when the LLM returns None.",
+    "Shared-helper wishes (not changed, per rules): pricing_tables.parse_pricing_tables keeps only the LAST price column when the header names are not timeframes (BSSH Scientific Meeting 'Full meeting | One day' lost the full-meeting rates), drops the category column of [Ticket | Category | Price] tables (BAUS), and can take a nearby sentence as the section name ('Registration fees do not include'). Each extractor carries a small local table helper instead (matrix_tiers / ticket_tiers / rowspan_tiers / external_fee_hop, duplicated inline per file).",
+    "coverage_checks SINGLE_DAY_SUSPECT / PRICE_TEXT_ON_PAGE warnings that remain in the harness are explained per source below; none is a missed fee or date on the event's own page."
+  ]
+}

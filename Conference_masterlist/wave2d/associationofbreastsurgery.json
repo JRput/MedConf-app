@@ -1,0 +1,86 @@
+{
+  "source_id": 121,
+  "slug": "associationofbreastsurgery",
+  "class_name": "AssociationOfBreastSurgeryExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/associationofbreastsurgery.py",
+  "source_row": {
+    "source_name": "ABS",
+    "society": "Association of Breast Surgery",
+    "base_url": "https://associationofbreastsurgery.org.uk/courses-events/abs-courses-events-calendar/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": true,
+    "active": true,
+    "extraction_instructions": "Umbraco (101 Ltd), server-rendered. The calendar page is one list of a.card.eventCard cards (title, date line, location, 'N Days' badge); GOTCHA: the card date is the LAST day of the event (OOPS card '26 January 2027' vs detail '25 January 2027 - 26 January 2027'), so the ~9 detail pages are read in the listing phase and their header range becomes the shell date. Course sub-pages (Registration, Registration & Fees, Course information) sit in the side menu; fees are a grid of div.bg-pale rows (label | small 'Members' qualifier | price) on the registration page, 'free to attend' prose on some. The flagship ABS Conference 2027 (10-11 May 2027, Wales) is not on the calendar and is added from its own page, with its Abstracts & Bursaries sub-page giving abstract status and deadline."
+  },
+  "registry_comment": "ABS courses & events: Umbraco calendar cards (card date = last day, so details read in listing), registration sub-page fee grid, ABS Conference page + abstracts sub-page",
+  "probe_results": {
+    "shells": 10,
+    "shells_forced_fallback": 10,
+    "details_tested": 10,
+    "with_date": 10,
+    "with_pricing": 6,
+    "with_venue": 9,
+    "with_description": 10,
+    "with_specialty": 10,
+    "shell_event_types": {
+      "course": 5,
+      "conference": 5
+    },
+    "detail_event_types": {
+      "course": 5,
+      "conference": 5
+    },
+    "shells_with_end_date": 4,
+    "forced_fallback_details_tested": 2,
+    "coverage_run": "harness --coverage; remaining PRICE_*/SUBMISSION_*/SINGLE_DAY warnings explained in concerns"
+  },
+  "test_urls": [
+    "https://associationofbreastsurgery.org.uk/courses-events/abs-courses-events-calendar/abs-oops-oxford-oncoplastic-breast-surgery-course/",
+    "https://associationofbreastsurgery.org.uk/abs-conference/abs-conference-2027/",
+    "https://associationofbreastsurgery.org.uk/courses-events/abs-courses-events-calendar/introduction-to-minimally-invasive-breast-surgery/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://associationofbreastsurgery.org.uk/courses-events/abs-courses-events-calendar/abs-oops-oxford-oncoplastic-breast-surgery-course/",
+      "field": "dates (card vs detail)",
+      "site_says": "detail '25 January 2027 - 26 January 2027' (calendar card shows only 26 January 2027)",
+      "extractor_says": "2027-01-25 .. 2027-01-26",
+      "match": true
+    },
+    {
+      "url": "https://associationofbreastsurgery.org.uk/courses-events/abs-courses-events-calendar/abs-oops-oxford-oncoplastic-breast-surgery-course/registration/",
+      "field": "fees",
+      "site_says": "Early rate - Consultants & SAS Doctors registration (Members) £900; Early rate - Trainees £600; Early Rate - Overseas £1100; Nurses £200",
+      "extractor_says": "Delegate fees · Consultants & SAS Doctors · Members · Early rate 900 / Trainees · Early rate 600 / Overseas · Early rate 1100 / Nurses 200",
+      "match": true
+    },
+    {
+      "url": "https://associationofbreastsurgery.org.uk/abs-conference/abs-conference-2027/",
+      "field": "dates/region/abstracts",
+      "site_says": "'on 10-11 May 2027' in Wales; Abstracts page: 'now open', deadline '12pm on Monday 23 November 2026'",
+      "extractor_says": "2027-05-10 .. 2027-05-11, region Wales, abstract_open True, abstract_deadline 2026-11-23",
+      "match": true
+    },
+    {
+      "url": "https://associationofbreastsurgery.org.uk/courses-events/abs-courses-events-calendar/introduction-to-minimally-invasive-breast-surgery/registration-fees/",
+      "field": "fees/venue",
+      "site_says": "Member £250, Non-Member £300; Law Society, London; 5 November 2026",
+      "extractor_says": "Delegate fees · Member · Members 250 / Non-Member 300; Law Society, London; 2026-11-05",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Coverage checklist: #1 verified (card date is the last day; detail range used); #4 registration sub-pages followed through the side menu (paths differ: /registration/ vs /registration-fees/); #6/#7 ABS Conference abstract status and deadline read from its Abstracts & Bursaries sub-page - NOTE the shared abstract_classifier returned open=False for this page ('Once the abstract deadline has passed, it will not be possible to make alterations…' reads as a closed call), so the extractor sets open=True when a FUTURE deadline and explicit 'now open' wording coexist (a shared-classifier false negative worth fixing); #2/#5 West Midlands Chapter Meeting registers through a Google Form (fee unknown) and the IBCC Dublin page only has a 'keep me informed' EventsAir link; #3 none seen.",
+    "Advanced Skills in Breast Disease Management (Cambridge): the calendar card lists TWO dates (21 April 2027 '3 Days' and 11 May 2027 '2 Days', 'Coming soon') but the detail page gives only 19-21 April 2027 and no fees; only the verified range is emitted, no second session is invented. Fees not yet published (registration sub-page 404).",
+    "The ABS Conference 2027 venue is only 'Wales' (no city); fees 'More information will be available in due course'. ABS South East Central Regional Meeting is free to attend (one £0 tier from the registration page). Members/non-member qualifiers are kept in the tier label.",
+    "The calendar page is read plus each detail page in the listing phase (<= 20 fetches) and one registration sub-page per event during detail extraction. 'Royal College of Surgeons of England' venues are mapped to London (the ABS's own address) because the page gives no city.",
+    "Text-LLM chain on 2026-10-21: nvidia/nemotron-3-super-120b-a12b and meta/muse-glimmer-30b both answered 404 'gone', so the harness descriptions/specialties came from openai/gpt-oss-20b. Descriptions and specialty have deterministic backstops (first real paragraph; per-society default specialty), so extraction does not depend on the LLM. The probe_models job will go red until the chain is rotated.",
+    "specialty_classifier.classify_specialty is deliberately NOT used as the backstop: on single-specialty societies it returned wrong labels (Cardiology/Oncology/GP Training for hepatology webinars). The backstop is the society's own specialty constant when the LLM returns None.",
+    "Shared-helper wishes (not changed, per rules): pricing_tables.parse_pricing_tables keeps only the LAST price column when the header names are not timeframes (BSSH Scientific Meeting 'Full meeting | One day' lost the full-meeting rates), drops the category column of [Ticket | Category | Price] tables (BAUS), and can take a nearby sentence as the section name ('Registration fees do not include'). Each extractor carries a small local table helper instead (matrix_tiers / ticket_tiers / rowspan_tiers / external_fee_hop, duplicated inline per file).",
+    "coverage_checks SINGLE_DAY_SUSPECT / PRICE_TEXT_ON_PAGE warnings that remain in the harness are explained per source below; none is a missed fee or date on the event's own page."
+  ]
+}

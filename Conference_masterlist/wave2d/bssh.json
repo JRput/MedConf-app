@@ -1,0 +1,95 @@
+{
+  "source_id": 116,
+  "slug": "bssh",
+  "class_name": "BSSHExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/bssh.py",
+  "source_row": {
+    "source_name": "BSSH",
+    "society": "British Society for Surgery of the Hand",
+    "base_url": "https://www.bssh.ac.uk/about/events",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "LightMedia CMS (same family as Vascular Society and BAUS), server-rendered. /about/events is a YEAR view of div.date_row rows (dates | title link | location) whose classes give the category (scientific_meeting, instructional_course, bssh_event, badged_event, date_passed); list_shells_override walks the current year plus /about/events/date/<YYYY>/ for two more years and keeps upcoming rows. Detail pages have header h1 + two bold lines (dates, venue) and tab panes; the Scientific Meeting page has a full-meeting/one-day fee matrix, numbered pre-congress workshops with 'Course Registration fee: £N' and a 'VENUE:' block, courses state fees as prose ('Early Bird Registration - £250 - Book before 1/9/26') or on an external bookwhen.com page (fees and '2 days' duration read there). Gotcha: header venue is often just a city, so the VENUE block / 'at <place>, <postcode>' prose is used to upgrade it."
+  },
+  "registry_comment": "BSSH events: LightMedia year-view listing (current + 2 years), bespoke fee-matrix/prose/bookwhen fee parsing, 3-way event_type from row class",
+  "probe_results": {
+    "shells": 7,
+    "shells_forced_fallback": 7,
+    "details_tested": 7,
+    "with_date": 7,
+    "with_pricing": 4,
+    "with_venue": 6,
+    "with_description": 7,
+    "with_specialty": 7,
+    "shell_event_types": {
+      "conference": 2,
+      "course": 5
+    },
+    "detail_event_types": {
+      "conference": 2,
+      "course": 5
+    },
+    "shells_with_end_date": 5,
+    "forced_fallback_details_tested": 2,
+    "coverage_run": "harness --coverage; remaining PRICE_*/SUBMISSION_*/SINGLE_DAY warnings explained in concerns"
+  },
+  "test_urls": [
+    "https://www.bssh.ac.uk/about/events/4828/leicester_hand_fracture_management_course",
+    "https://www.bssh.ac.uk/about/events/4760/bssh_scientific_meeting_2026",
+    "https://www.bssh.ac.uk/about/events/4855/pulvertaft_fracture_fixation_course_2027"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.bssh.ac.uk/about/events/4828/leicester_hand_fracture_management_course",
+      "field": "start/end date",
+      "site_says": "16 November 2026 08:30 - 17 November 2026 17:00",
+      "extractor_says": "2026-11-16 .. 2026-11-17, start_time 08:30",
+      "match": true
+    },
+    {
+      "url": "https://www.bssh.ac.uk/about/events/4828/leicester_hand_fracture_management_course",
+      "field": "fee",
+      "site_says": "Early Bird Registration - £250 - Book before 1/9/26",
+      "extractor_says": "Registration · Early bird 250.0, early_bird_deadline 2026-09-01",
+      "match": true
+    },
+    {
+      "url": "https://www.bssh.ac.uk/about/events/4760/bssh_scientific_meeting_2026",
+      "field": "cpd_points",
+      "site_says": "CME credits 6+6+6 per day, 'Full Meeting - 18 points'",
+      "extractor_says": "18 (accredited)",
+      "match": true
+    },
+    {
+      "url": "https://www.bssh.ac.uk/about/events/4760/bssh_scientific_meeting_2026",
+      "field": "fee (full meeting, Fellow member)",
+      "site_says": "Standard Rate: BSSH Fellow members/AAHS Consultants, Full Meeting (3 days) £750, One day £415",
+      "extractor_says": "Standard Rate · BSSH Fellow members/AAHS Consultants … · Full Meeting (3 days) 750.0 and … One day 415.0",
+      "match": true
+    },
+    {
+      "url": "https://www.bssh.ac.uk/about/events/4855/pulvertaft_fracture_fixation_course_2027",
+      "field": "end_date + fees",
+      "site_says": "bookwhen: 'Wednesday, 17 March '27  2 days'; 2-day course £580.00; 3-day combined £740.00 (BSSH header shows only 17 Mar 2027)",
+      "extractor_says": "end_date 2027-03-18; tiers 580.0 and 740.0",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Coverage checklist: #1 multi-day ranges parsed from header/listing (incl. 'D Mon YYYY HH:MM - D Mon YYYY HH:MM'); #2/#5 fees on the organiser's bookwhen.com page followed one hop (Pulvertaft course: £580/£740 and the real '2 days' duration, which the BSSH header omits); #3 no fee images seen; #4 no same-site registration sub-pages exist; #6/#7 abstract submission is left to the pipeline merge step (Scientific Meeting says 'Abstract submission has now closed').",
+    "Fees are empty for BSSH Instructional Course Nerve and Tendon (Feb 2027), Hand & Wrist Arthroplasty Course (May 2027, Manchester) and the Autumn Scientific Meeting 2027 (Manchester Central): the pages say 'More information will be available later'. Justified against page text, side links and external links (none for these three).",
+    "Pulvertaft Wrist Fracture Fixation Course page (19 Mar 2027) says 'followed by' / '2-day' about the sister course, so coverage_checks prints a SINGLE_DAY_SUSPECT false positive; the wrist course really is 1 day (bookwhen: '1 day').",
+    "The Scientific Meeting pre-congress workshops are emitted as extra fee tiers on the parent row ('Pre-Congress Workshop · <name>'); closed/sold-out workshops are skipped. Dinner/golf extras are not emitted. Registration pages are on bssh.eventsair.com (JavaScript) and were not read; the public fee matrix on bssh.ac.uk is the source.",
+    "Only members' rates that bssh.ac.uk itself prints are stored; nothing is behind a login.",
+    "Text-LLM chain on 2026-10-21: nvidia/nemotron-3-super-120b-a12b and meta/muse-glimmer-30b both answered 404 'gone', so the harness descriptions/specialties came from openai/gpt-oss-20b. Descriptions and specialty have deterministic backstops (first real paragraph; per-society default specialty), so extraction does not depend on the LLM. The probe_models job will go red until the chain is rotated.",
+    "specialty_classifier.classify_specialty is deliberately NOT used as the backstop: on single-specialty societies it returned wrong labels (Cardiology/Oncology/GP Training for hepatology webinars). The backstop is the society's own specialty constant when the LLM returns None.",
+    "Shared-helper wishes (not changed, per rules): pricing_tables.parse_pricing_tables keeps only the LAST price column when the header names are not timeframes (BSSH Scientific Meeting 'Full meeting | One day' lost the full-meeting rates), drops the category column of [Ticket | Category | Price] tables (BAUS), and can take a nearby sentence as the section name ('Registration fees do not include'). Each extractor carries a small local table helper instead (matrix_tiers / ticket_tiers / rowspan_tiers / external_fee_hop, duplicated inline per file).",
+    "coverage_checks SINGLE_DAY_SUSPECT / PRICE_TEXT_ON_PAGE warnings that remain in the harness are explained per source below; none is a missed fee or date on the event's own page.",
+    "2026-10-21 hardening: external hops (bookwhen/EventsAir/organiser sites) use safe_fetch.fetch_validated (30 s deadline, 2 MB cap), no browser fallback; host checks use urlparse().hostname. Society-own pages keep fetch_html."
+  ]
+}

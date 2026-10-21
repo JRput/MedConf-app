@@ -1,0 +1,90 @@
+{
+  "source_id": 118,
+  "slug": "baus",
+  "class_name": "BAUSExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/baus.py",
+  "source_row": {
+    "source_name": "BAUS",
+    "society": "British Association of Urological Surgeons",
+    "base_url": "https://www.baus.org.uk/professionals/events/?view=year",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "LightMedia CMS, ASP.NET. The default /professionals/events/ is a month calendar; ?view=year returns the whole current year as a.date_row cards (span.event_date | h5 title | div.event_location). The next-year route /events/date/<YYYY>/?view=year answers Cloudflare 502 (origin error) for every /date/ URL on 2026-10-21, so the extractor tries it twice per year and otherwise falls back to sitemap.xml: event ids not in the year view and newer than (oldest listed id - 500) are fetched one by one (cap 60) and dated from the detail page's add-to-calendar-button JSON. Detail: h3.module_article_title, p.module_article_location, add-to-calendar-button dates='[{startDate,endDate,startTime}]' (reliable dates), tab-content with a [Ticket | Category | Price] table, 'free to attend' or deposit prose. Child items (dinners, accommodation, receptions) are skipped."
+  },
+  "registry_comment": "BAUS events: LightMedia ?view=year listing + sitemap fallback for next-year events (date routes 502), dates from add-to-calendar JSON, ticket-table fees",
+  "probe_results": {
+    "shells": 25,
+    "shells_forced_fallback": 25,
+    "details_tested": 10,
+    "with_date": 10,
+    "with_pricing": 6,
+    "with_venue": 8,
+    "with_description": 10,
+    "with_specialty": 10,
+    "shell_event_types": {
+      "conference": 15,
+      "workshop": 6,
+      "course": 4
+    },
+    "detail_event_types": {
+      "conference": 6,
+      "course": 2,
+      "workshop": 2
+    },
+    "shells_with_end_date": 14,
+    "forced_fallback_details_tested": 2,
+    "coverage_run": "harness --coverage; remaining PRICE_*/SUBMISSION_*/SINGLE_DAY warnings explained in concerns"
+  },
+  "test_urls": [
+    "https://www.baus.org.uk/professionals/events/4699/essic_2026_international_conference",
+    "https://www.baus.org.uk/professionals/events/4720/baus_karl_storz_endoscopic_skills_course",
+    "https://www.baus.org.uk/professionals/events/4685/baus_section_of_oncology_annual_meeting"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.baus.org.uk/professionals/events/4699/essic_2026_international_conference",
+      "field": "dates/venue",
+      "site_says": "add-to-calendar startDate 2026-10-22 13:00, endDate 2026-10-24; location 'The Royal Society of Medicine, London'",
+      "extractor_says": "2026-10-22 .. 2026-10-24, start_time 13:00, The Royal Society of Medicine, London",
+      "match": true
+    },
+    {
+      "url": "https://www.baus.org.uk/professionals/events/4720/baus_karl_storz_endoscopic_skills_course",
+      "field": "fees",
+      "site_says": "Ticket table: Registration Fee | Non-member | £175.00 and Registration Fee | Non-member | £225.00 (both rows labelled Non-member on the site)",
+      "extractor_says": "Registration Fee · Non-member 175.0 and 225.0",
+      "match": true
+    },
+    {
+      "url": "https://www.baus.org.uk/professionals/events/4685/baus_section_of_oncology_annual_meeting",
+      "field": "dates/venue/fee",
+      "site_says": "19-20 Nov 2026, Edgbaston Stadium, Edgbaston Rd, Birmingham B5 7QU; Day 1 Registration | Urology Trainee | £144.00",
+      "extractor_says": "2026-11-19 .. 2026-11-20, Edgbaston Stadium, Birmingham; Day 1 Registration · Urology Trainee 144.0 (30 tiers in total)",
+      "match": true
+    },
+    {
+      "url": "https://www.baus.org.uk/professionals/events/4752/15th_technourology_meeting",
+      "field": "date/venue (sitemap path)",
+      "site_says": "add-to-calendar 2027-01-28 .. 2027-01-29; location 'Turin, Italy'",
+      "extractor_says": "2027-01-28 .. 2027-01-29, city Turin, region international",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "UNPROVEN / FRAGILE: every /professionals/events/date/... URL (year, month, week, day) returns a Cloudflare 502 for curl AND Playwright on 2026-10-21, so 2027 events are found through the sitemap fallback (25 upcoming shells: 17 from the 2026 year view, 8 from the sitemap). If the date routes recover the extractor uses them automatically; if sitemap.xml stops listing event URLs the extractor will see only the current year. The fallback costs up to ~45 detail fetches during the listing phase (cached, reused by extract_detail). Ask the Commander to check cloud access to sitemap.xml.",
+    "The forced-fallback run first lost the sitemap (Chromium's XML viewer failed the default 'page links to >1 place' check, fixed with expect_selector='loc') and the detail dates (Playwright serialises the add-to-calendar-button attribute with double quotes, fixed); shell counts now match (25 / 25).",
+    "Coverage checklist: #1 dates from add-to-calendar JSON; #2/#5 events whose fees are only on an organiser platform (ESSIC essicmeeting.eu Wix grid in EUR, Eventbrite, Arlo, FEDRA Congressi) are stored with pricing_tiers = [] after a one-hop attempt - JavaScript/Wix div grids are not parseable without a browser; #3 none seen; #4 BAUS pages have their ticket table in a 'Prices' tab on the same page (read); #6/#7 SUBMISSION_NO_DEADLINE warnings (PCUS, ESSIC) are left to the pipeline merge step.",
+    "BAUS Karl Storz Endoscopic Skills Course lists two rows both labelled 'Non-member' (£175 and £225) on the site itself (one is presumably the member rate); stored as printed. Refundable deposits (£49 registration deposit) are emitted as 'Refundable deposit' tiers when no fee table exists. 'Free to attend' pages get one £0 tier.",
+    "event_type uses title cues, then the first lines of the page (course / hands-on / FRCS -> course|workshop); webinars are 'workshop'. A few third-party events (LA Live Pre-AUA 2027 in Glendale CA, Techno-urology Turin, ESSIC London) are kept as BAUS lists them. Child events (dinners, accommodation) are skipped.",
+    "Text-LLM chain on 2026-10-21: nvidia/nemotron-3-super-120b-a12b and meta/muse-glimmer-30b both answered 404 'gone', so the harness descriptions/specialties came from openai/gpt-oss-20b. Descriptions and specialty have deterministic backstops (first real paragraph; per-society default specialty), so extraction does not depend on the LLM. The probe_models job will go red until the chain is rotated.",
+    "specialty_classifier.classify_specialty is deliberately NOT used as the backstop: on single-specialty societies it returned wrong labels (Cardiology/Oncology/GP Training for hepatology webinars). The backstop is the society's own specialty constant when the LLM returns None.",
+    "Shared-helper wishes (not changed, per rules): pricing_tables.parse_pricing_tables keeps only the LAST price column when the header names are not timeframes (BSSH Scientific Meeting 'Full meeting | One day' lost the full-meeting rates), drops the category column of [Ticket | Category | Price] tables (BAUS), and can take a nearby sentence as the section name ('Registration fees do not include'). Each extractor carries a small local table helper instead (matrix_tiers / ticket_tiers / rowspan_tiers / external_fee_hop, duplicated inline per file).",
+    "coverage_checks SINGLE_DAY_SUSPECT / PRICE_TEXT_ON_PAGE warnings that remain in the harness are explained per source below; none is a missed fee or date on the event's own page.",
+    "2026-10-21 hardening: external hops (bookwhen/EventsAir/organiser sites) use safe_fetch.fetch_validated (30 s deadline, 2 MB cap), no browser fallback; host checks use urlparse().hostname. Society-own pages keep fetch_html."
+  ]
+}
