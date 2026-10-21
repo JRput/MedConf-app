@@ -29,3 +29,6 @@ CI groups (actual, S+D): K = 103–105,107–113 · L = 114,115,130–133 (aao 1
 - **UK region map consolidation:** a dozen extractors carry their own place→region table (`_UK_REGIONS` / `_UK_PLACES`); create a neutral `extractors/uk_regions.py` and migrate. Per-source modules never import each other (review found baaps→rcpath and bsg→ems_calendar; both replaced with local copies during the wave).
 - **Relevance gates:** BOA and BAAPS calendars list third-party promoter events; both now drop off-topic rows (Commander-approved 2026-10-21) and log dropped titles. Watch CI logs for false drops.
 - **Reviews on disk:** `_review_S.md`, `_review_D.md` (reviewer agents, fresh eyes, pre-registration).
+
+## Gate log
+- 2026-10-21 S+D registered (`df28bad`), first scrape local: 16/16 success, 0 errors, 86 inserted (85 live). Null-audit: start_date 0 %, specialty 0 %, description 9.4 %, city 30.6 % (online rows), priced 36/85 with 328 tiers; event_type 40 conference / 24 course / 21 workshop. Remediator + audits running; cloud gate run after.
