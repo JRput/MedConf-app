@@ -29,7 +29,7 @@ from playwright.sync_api import Page
 
 from logger import logger
 
-from safe_fetch import check_url_safe
+from safe_fetch import check_url_safe, fetch_validated
 from .http_fetch import fetch_html
 from .pricing_tables import parse_pricing_tables
 from .tribe_events import html_to_lines
@@ -241,9 +241,12 @@ class BsirExtractor(WordPressGenericExtractor):
         if not ok:
             logger.warning(f"BSIR: register link refused ({why}): {target}")
             return []
-        reg = self._get(target)
-        if not reg:
+        time.sleep(self.REQUEST_GAP_S)
+        verdict, _final, body, enc, status = fetch_validated(target, deadline=time.monotonic() + 30, max_bytes=2_000_000)
+        if verdict != "ok" or not body:
+            logger.warning(f"BSIR: register page not used (verdict={verdict}, status={status}): {target}")
             return []
+        reg = body.decode(enc or "utf-8", errors="replace")
         body = re.sub(r"(?is)<(script|style|nav|footer|header)\b.*?</\1\s*>", " ", reg)
         return clean_tiers(two_column_tiers(body) or parse_pricing_tables(body, default_currency="GBP"))
 

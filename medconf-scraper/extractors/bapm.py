@@ -24,7 +24,7 @@ from playwright.sync_api import Page
 
 from logger import logger
 
-from safe_fetch import check_url_safe
+from safe_fetch import check_url_safe, fetch_validated
 from .http_fetch import fetch_html
 from .tribe_events import html_to_lines
 from .wordpress_generic import (WordPressGenericExtractor, classify_event_type, clip_venue, dedupe_consecutive,
@@ -253,7 +253,10 @@ class BapmExtractor(WordPressGenericExtractor):
                     reg = None
             if reg and not out.get("pricing_tiers"):
                 time.sleep(self.REQUEST_GAP_S)
-                page_html = fetch_html(reg, browser=getattr(self, "browser", None))
+                verdict, _final, body, enc, status = fetch_validated(reg, deadline=time.monotonic() + 30, max_bytes=2_000_000)
+                if verdict != "ok" or not body:
+                    logger.warning(f"BAPM: registration page not used (verdict={verdict}, status={status}): {reg}")
+                page_html = body.decode(enc or "utf-8", errors="replace") if verdict == "ok" and body else None
                 tiers = eventsair_tiers(page_html) if page_html else []
                 if tiers:
                     out["pricing_tiers"] = tiers
