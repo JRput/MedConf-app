@@ -31,7 +31,10 @@ logger = logging.getLogger(__name__)
 #   nemotron-3-super-120b-a12b — fine at 512.
 #   meta/muse-glimmer-30b      — empty at 512, needs >=1024.
 #   openai/gpt-oss-20b         — truncated at 512, fine at >=800.
+#   nvidia/nemotron-3.5-lightning-30b-a3b — reasoning model, truncated at
+#     256, partial at 512 (probed 2026-10-21); floor 1024.
 _MIN_MAX_TOKENS = {
+    "nvidia/nemotron-3.5-lightning-30b-a3b": 1024,
     "meta/muse-glimmer-30b": 1024,
     "openai/gpt-oss-20b": 800,
 }

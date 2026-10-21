@@ -34,6 +34,7 @@ from typing import Optional
 from openai import OpenAI
 
 from config import KIMI_API_KEY, KIMI_BASE_URL, KIMI_MODEL_CHAIN, KIMI_VISION_MODEL_CHAIN
+from llm_client import _MIN_MAX_TOKENS
 
 MAX_RETRIES = 3
 RETRY_BACKOFF_SECS = 2.0
@@ -76,7 +77,7 @@ def _probe_text(client: OpenAI, model: str) -> ProbeResult:
         try:
             resp = client.chat.completions.create(
                 model=model,
-                max_tokens=400,
+                max_tokens=max(400, _MIN_MAX_TOKENS.get(model, 0)),  # honour per-model floors (reasoning models)
                 temperature=0.0,
                 messages=[{"role": "user", "content": 'Reply with strict JSON only: {"word": "hello"}'}],
             )

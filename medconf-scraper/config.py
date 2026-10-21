@@ -38,8 +38,11 @@ def _parse_chain(env_value: Optional[str], default_list: List[str], override: Op
 # gpt-oss-20b (reasoning model — burns tokens on <thinking>, needs a
 # higher max_tokens floor too). llm_client.chat_completion() walks this
 # chain and advances past any model that 404s/410s.
+# 2026-10-21: nvidia/nemotron-3-super-120b-a12b returned 404 (retired);
+# replaced by nvidia/nemotron-3.5-lightning-30b-a3b (live, ~2s, reasoning
+# model so it gets a max_tokens floor in llm_client.py).
 _KIMI_MODEL_CHAIN_DEFAULT = [
-    "nvidia/nemotron-3-super-120b-a12b",
+    "nvidia/nemotron-3.5-lightning-30b-a3b",
     "meta/muse-glimmer-30b",
     "openai/gpt-oss-20b",
 ]
@@ -54,6 +57,7 @@ KIMI_MODEL = KIMI_MODEL_CHAIN[0]
 # faster and doesn't carry 11b's known column-collapse history).
 _KIMI_VISION_MODEL_CHAIN_DEFAULT = [
     "meta/muse-glimmer-30b",
+    "nvidia/nemotron-3.5-super-vl-120b-a12b",
     "meta/llama-3.2-11b-vision-instruct",
 ]
 KIMI_VISION_MODEL_CHAIN = _parse_chain(

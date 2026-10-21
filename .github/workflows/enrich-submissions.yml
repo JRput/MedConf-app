@@ -42,8 +42,8 @@ jobs:
         env:
           KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
           KIMI_BASE_URL: https://integrate.api.nvidia.com/v1
-          KIMI_MODEL_CHAIN: "nvidia/nemotron-3-super-120b-a12b,meta/muse-glimmer-30b,openai/gpt-oss-20b"
-          KIMI_VISION_MODEL_CHAIN: "meta/muse-glimmer-30b,meta/llama-3.2-11b-vision-instruct"
+          KIMI_MODEL_CHAIN: "nvidia/nemotron-3.5-lightning-30b-a3b,meta/muse-glimmer-30b,openai/gpt-oss-20b"
+          KIMI_VISION_MODEL_CHAIN: "meta/muse-glimmer-30b,nvidia/nemotron-3.5-super-vl-120b-a12b,meta/llama-3.2-11b-vision-instruct"
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python enrich_submissions.py

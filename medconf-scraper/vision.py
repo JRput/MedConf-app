@@ -53,6 +53,12 @@ ROTATION LOG:
   found today — re-verify the next time a source publishes an
   image-based fee table (RCR/ESTRO's next cycle, or a remediator run
   that logs a real fee-image URL) and update this log.
+
+  2026-10-21 rotation: added nvidia/nemotron-3.5-super-vl-120b-a12b as
+  the second vision entry (accepted a tiny image_url call, ~7s, replied
+  'Black'). Proven only on a 1x1 image, NOT on a fee table. muse-glimmer-30b
+  and llama-3.2-11b answered the same probe. llama-3.2-90b-vision and
+  gemma-4-31b-it timed out (100s) so were not adopted.
 """
 
 from __future__ import annotations
