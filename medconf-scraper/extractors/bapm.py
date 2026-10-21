@@ -17,12 +17,14 @@ import html as _html
 import re
 import time
 from datetime import date, timedelta
+from urllib.parse import urlparse
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from playwright.sync_api import Page
 
 from logger import logger
 
+from safe_fetch import check_url_safe
 from .http_fetch import fetch_html
 from .tribe_events import html_to_lines
 from .wordpress_generic import (WordPressGenericExtractor, classify_event_type, clip_venue, dedupe_consecutive,
@@ -155,6 +157,11 @@ class BapmExtractor(WordPressGenericExtractor):
 
     # ---- Phase B -----------------------------------------------------------
     @staticmethod
+    def _is_eventsair(url: str) -> bool:
+        host = (urlparse(url).hostname or "").lower().rstrip(".")
+        return host == "eventsair.com" or host.endswith(".eventsair.com")
+
+    @staticmethod
     def _place(lines: List[str], intro: str) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
         """(venue, city, region, format) from the `Location:` line, a "will take place at" sentence and the card intro."""
         loc = next((m.group(1).strip() for ln in lines for m in [re.match(r"(?i)^location\s*:\s*(.+)$", ln)] if m), None)
@@ -238,7 +245,12 @@ class BapmExtractor(WordPressGenericExtractor):
                 ext.append((label, href))
         if ext:
             out["organiser_url"] = next((h for l, h in ext if "more details" in l), ext[0][1])
-            reg = next((h for l, h in ext if "eventsair.com" in h and h.rstrip("/").endswith("registrations")), None)
+            reg = next((h for l, h in ext if self._is_eventsair(h) and h.rstrip("/").endswith("registrations")), None)
+            if reg:
+                ok, why = check_url_safe(reg)
+                if not ok:
+                    logger.warning(f"BAPM: registration link refused ({why}): {reg}")
+                    reg = None
             if reg and not out.get("pricing_tiers"):
                 time.sleep(self.REQUEST_GAP_S)
                 page_html = fetch_html(reg, browser=getattr(self, "browser", None))

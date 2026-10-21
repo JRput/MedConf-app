@@ -29,6 +29,7 @@ from playwright.sync_api import Page
 
 from logger import logger
 
+from safe_fetch import check_url_safe
 from .http_fetch import fetch_html
 from .pricing_tables import parse_pricing_tables
 from .tribe_events import html_to_lines
@@ -235,6 +236,10 @@ class BsirExtractor(WordPressGenericExtractor):
                 target = urljoin(page_url, href)
                 break
         if not target:
+            return []
+        ok, why = check_url_safe(target)
+        if not ok:
+            logger.warning(f"BSIR: register link refused ({why}): {target}")
             return []
         reg = self._get(target)
         if not reg:

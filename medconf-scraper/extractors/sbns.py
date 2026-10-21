@@ -24,6 +24,7 @@ from playwright.sync_api import Page
 
 from logger import logger
 
+from safe_fetch import fetch_validated
 from .abstract_classifier import pdf_bytes_to_text
 from .http_fetch import fetch_html
 from .tribe_events import html_to_lines
@@ -180,8 +181,13 @@ class SbnsExtractor(WordPressGenericExtractor):
     def _pdf_fees(self, html: str, shell: Dict[str, Any], out: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Flagship meetings: event page -> 'Registration and Accommodation' sub-page -> fee PDF (/asset/<id>/, no .pdf suffix)."""
         slug = urlparse(shell["booking_url"]).path.rsplit("/", 1)[-1].replace(".html", "")
-        m = next((x for x in re.finditer(r'href="(https?://[^"]*sbns\.org\.uk/event-calendar/([^"/]+)/registration[^"]*\.html)"', html)
-                  if x.group(2) == slug or slug.startswith(x.group(2)) or x.group(2).startswith(slug)), None)
+
+        def own_host(u: str) -> bool:
+            h = (urlparse(u).hostname or "").lower().rstrip(".")
+            return h == "www.sbns.org.uk" or h.endswith(".sbns.org.uk")
+
+        m = next((x for x in re.finditer(r'href="(https?://[^"]+/event-calendar/([^"/]+)/registration[^"]*\.html)"', html)
+                  if own_host(x.group(1)) and (x.group(2) == slug or slug.startswith(x.group(2)) or x.group(2).startswith(slug))), None)
         if not m:
             return []
         time.sleep(self.REQUEST_GAP_S)
@@ -189,21 +195,12 @@ class SbnsExtractor(WordPressGenericExtractor):
         a = re.search(r'(?is)<a[^>]*href="([^"]*/asset/[^"]+)"[^>]*>(?:(?!</a>).){0,200}PDF', sub or "")
         if not a:
             return []
-        try:
-            import httpx
-            data = b""
-            with httpx.stream("GET", urljoin(m.group(1), _html.unescape(a.group(1))), timeout=20, follow_redirects=True,
-                              headers={"User-Agent": "Mozilla/5.0 (MedConf scraper)"}) as r:
-                if r.status_code < 400 and int(r.headers.get("content-length") or 0) <= _MAX_PDF_BYTES:
-                    buf = bytearray()
-                    for chunk in r.iter_bytes():
-                        buf += chunk
-                        if len(buf) > _MAX_PDF_BYTES:
-                            buf = bytearray()
-                            break
-                    data = bytes(buf) if buf[:4] == b"%PDF" else b""
-        except Exception:                                   # noqa: BLE001
-            data = b""
+        asset = urljoin(m.group(1), _html.unescape(a.group(1)))
+        verdict, _final, body, _enc, status = fetch_validated(asset, deadline=time.monotonic() + 30, max_bytes=_MAX_PDF_BYTES)
+        if verdict != "ok" or not body or body[:4] != b"%PDF":
+            logger.info(f"SBNS: fee PDF not used (verdict={verdict}, status={status}): {asset}")
+            return []
+        data = body
         year = int((out.get("start_date") or shell.get("start_date") or str(date.today().year))[:4])
         return fee_tiers_from_pdf_text(pdf_bytes_to_text(data), year) if data else []
 
