@@ -14,6 +14,7 @@ DETAIL   /about/events/<id>/<slug>: title, date line, location line, "Event" des
 """
 import html as _html
 import re
+import time
 from datetime import date, datetime
 from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import urljoin
@@ -210,7 +211,7 @@ class BaapsExtractor(BaseExtractor):
                 logger.info(f"BAAPS: external link refused ({reason}): {link}")
                 continue
             # hop-validated GET (every redirect re-checked, IP pinned, 2 MB cap), no browser fallback
-            verdict, final, raw, enc, status = fetch_validated(link)
+            verdict, final, raw, enc, status = fetch_validated(link, deadline=time.monotonic() + 30, max_bytes=512_000)
             if verdict != "ok":
                 logger.info(f"BAAPS: organiser fetch {verdict} ({status}) for {link} -> {final}")
                 body = None
