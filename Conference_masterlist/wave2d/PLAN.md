@@ -33,3 +33,4 @@ CI groups (actual, S+D): K = 103–105,107–113 · L = 114,115,130–133 (aao 1
 
 ## Gate log
 - 2026-10-21 S+D registered (`df28bad`), first scrape local: 16/16 success, 0 errors, 86 inserted (85 live). Null-audit: start_date 0 %, specialty 0 %, description 9.4 %, city 30.6 % (online rows), priced 36/85 with 328 tiers; event_type 40 conference / 24 course / 21 workshop. Remediator + audits running; cloud gate run after.
+- 2026-10-21 B registered (`6c8533d`), first scrape local: 6/6 success, 0 errors, 75 inserted; promoter gates dropped 3 rows (2 scientexconference Paris rows on BMFMS, 1 on SBNS). Security hardening `38b6fb1` (+ hop-validated fetch round pending). Remediator + audits running.
