@@ -62,6 +62,7 @@
     "Fees are ex VAT (labels end 'ex VAT'); the member tab shows member prices publicly, no login was used. The Annual Conference shows 'Register your interest' and no fee yet: tiers [] justified. The sponsored HPP webinar states no fee.",
     "The Annual Conference listing link is '/Events-Learning/Conferences/Annual-Conference' which redirects to '/annualconference'; the lower-cased listing URL is used as the stable key.",
     "Coverage checklist: multi-day ranges (end_date) checked against the page on every source; no fee-table images were seen on the tested pages; SINGLE_DAY_SUSPECT warnings from the harness --coverage run were false positives (related-event lists / unrelated '4 days' wording on the same page).",
-    "remediator.audit not run (needs the database); harness --coverage was run instead."
+    "remediator.audit not run (needs the database); harness --coverage was run instead.",
+    "Audit fix (cookie junk row): browser-rendered BSR pages put an <h1> 'Your choice regarding cookies on this site' BEFORE the real title, and the extractor took the first <h1> as conference_name. Now the first non-cookie/consent h1 is used (helper _real_h1, same fix in sbns, brit_thoracic and bsir) and cookie|privacy|terms|accessibility|sitemap|login|search blocks are skipped in the listing. The junk row keeps the REAL event URL as source_url (only its title is wrong), so the title will only be corrected on a re-fetch of that URL."
   ]
 }

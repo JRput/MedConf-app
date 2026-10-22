@@ -59,6 +59,18 @@ def _txt(frag: str) -> str:
     return re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", frag))).replace("\xa0", " ").strip()
 
 
+
+_JUNK_H1 = re.compile(r"(?i)cookie|consent|privacy|your choice|we value your|accept all")
+
+
+def _real_h1(html: str) -> Optional[str]:
+    """First <h1> that is not a cookie/consent banner heading (browser-rendered pages put one before the title)."""
+    for m in re.finditer(r"(?is)<h1[^>]*>(.*?)</h1>", html or ""):
+        t = re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", m.group(1)))).strip()
+        if t and not _JUNK_H1.search(t):
+            return t
+    return None
+
 def _iso(y: int, m: int, d: int) -> Optional[str]:
     try:
         return date(y, m, d).isoformat()
@@ -98,7 +110,7 @@ def find_event_dates(line: str, today: date, year_hint: Optional[int] = None) ->
 
 def _main_lines(html: str) -> List[str]:
     """Lines of the page's main content: from the first <h1> to the footer/site menu."""
-    i = html.find("<h1")
+    i = next((m.start() for m in re.finditer(r"(?is)<h1[^>]*>(.*?)</h1>", html) if not _JUNK_H1.search(_txt(m.group(1)))), -1)
     body = html[i:] if i >= 0 else html
     body = re.split(r"(?i)<footer|<div class=\"footer|id=\"footer", body)[0]
     body = re.sub(r"(?is)<(script|style|svg|noscript|nav)\b.*?</\1\s*>", " ", body)
@@ -111,8 +123,8 @@ def events_from_page(html: str, url: str, today: date) -> List[Dict[str, Any]]:
         return []
     t = re.search(r"(?is)<title>(.*?)</title>", html)
     series = _txt(t.group(1)).split("|")[0].strip() if t else ""
-    h1 = re.search(r"(?is)<h1[^>]*>(.*?)</h1>", html)
-    series = _txt(h1.group(1)) if h1 and _txt(h1.group(1)) else series
+    h1 = _real_h1(html)
+    series = h1 or series
     lines = _main_lines(html)
     # drop the section-menu block that precedes the content ("In this section" list) when present
     if "In this section" in lines:
@@ -250,6 +262,29 @@ class BsirExtractor(WordPressGenericExtractor):
         body = re.sub(r"(?is)<(script|style|nav|footer|header)\b.*?</\1\s*>", " ", reg)
         return clean_tiers(two_column_tiers(body) or parse_pricing_tables(body, default_currency="GBP"))
 
+    @staticmethod
+    def _abstracts(html: str, shell: Dict[str, Any]) -> Dict[str, Any]:
+        """Abstract status from the page's own sentences. "Abstracts and Case Studies will open in the New Year" is NOT an open call
+        (the generic classifier reads it as one): a sentence announcing a future opening gives abstract_open False plus a note;
+        "will open on <date>" with a date that has passed gives open True (no deadline is published); no abstract wording gives {}."""
+        lines = dedupe_consecutive(html_to_lines(re.sub(r"(?is)<(script|style|svg|noscript|nav|footer)\b.*?</\1\s*>", " ", html)))
+        today = date.today()
+        for ln in lines:
+            if not re.search(r"(?i)\babstracts?\b|case stud", ln) or not re.search(r"(?i)\bopen", ln):
+                continue
+            if re.search(r"(?i)\b(?:now|are) open\b|submissions? (?:is|are) now open|open now", ln) and not re.search(r"(?i)will open", ln):
+                dm = re.search(r"(?i)(?:clos\w*|deadline)[^.]{0,40}?(\d{1,2}(?:st|nd|rd|th)?\s+[A-Za-z]+(?:\s+20\d\d)?)", ln)
+                d = find_event_dates(dm.group(1), today, int(shell["start_date"][:4])) if dm else None
+                return {"abstract_open": True, "abstract_deadline": d["start"] if d else None}
+            d = find_event_dates(ln, today, int(shell["start_date"][:4]))
+            if re.search(r"(?i)will open", ln) and d:
+                if d["start"] <= today.isoformat():
+                    return {"abstract_open": True, "abstract_deadline": None, "abstract_deadline_note": "Abstract submission open - see page for deadline"}
+                return {"abstract_open": False, "abstract_deadline": None, "abstract_deadline_note": f"Abstract submission opens {d['start']}"}
+            if re.search(r"(?i)will open|opens? (?:in|next)", ln):
+                return {"abstract_open": False, "abstract_deadline": None, "abstract_deadline_note": ln.strip()[:140]}
+        return {}
+
     def detail_from_html(self, html: str, shell: Dict[str, Any], llm_call: Callable[[str], Optional[str]]) -> Dict[str, Any]:
         out = super().detail_from_html(html, shell, llm_call)
         out["conference_name"] = shell["title"]
@@ -285,6 +320,7 @@ class BsirExtractor(WordPressGenericExtractor):
         tiers = self._fees(html, shell.get("page_url") or shell["booking_url"]) if not shell["booking_url"].count("#") else []
         if tiers:
             out["pricing_tiers"] = tiers
+        out.update(self._abstracts(html, shell))
         txt = " ".join(dedupe_consecutive(html_to_lines(re.sub(r"(?is)<(script|style|svg|noscript|nav|footer)\b.*?</\1\s*>", " ", html))))
         m = re.search(r"(?i)\b(\d+)\s+CPD points? (?:are )?available(?: for each day)?", txt)
         if m:

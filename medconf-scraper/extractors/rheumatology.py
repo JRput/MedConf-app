@@ -46,6 +46,21 @@ def _txt(frag: str) -> str:
     return re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", frag))).replace("\xa0", " ").strip()
 
 
+
+_JUNK_H1 = re.compile(r"(?i)cookie|consent|privacy|your choice|we value your|accept all")
+
+
+_JUNK_SHELL = re.compile(r"(?i)cookie|privacy|terms|accessibility|sitemap|login|search")
+
+
+def _real_h1(html: str) -> Optional[str]:
+    """First <h1> that is not a cookie/consent banner heading (browser-rendered pages put one before the title)."""
+    for m in re.finditer(r"(?is)<h1[^>]*>(.*?)</h1>", html or ""):
+        t = re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", m.group(1)))).strip()
+        if t and not _JUNK_H1.search(t):
+            return t
+    return None
+
 def _iso(y: int, m: int, d: int) -> Optional[str]:
     try:
         return date(y, m, d).isoformat()
@@ -161,6 +176,9 @@ class RheumatologyExtractor(WordPressGenericExtractor):
             for c in parse_listing(html):
                 if c["url"] in seen or c["on_demand"] or re.search(r"(?i)cancel", c["title"]):
                     continue
+                if _JUNK_SHELL.search(c["title"]) or _JUNK_SHELL.search(c["url"].rsplit("/", 1)[-1]):
+                    logger.info(f"BSR: skipped non-event block: {c['title']}")
+                    continue
                 seen.add(c["url"])
                 d = parse_bsr_date(c["footer"], today) if c["footer"] else None
                 if not d or d[1] < iso_today:                    # undated or stale card: the detail page is the authority
@@ -208,9 +226,9 @@ class RheumatologyExtractor(WordPressGenericExtractor):
         st = _start_time(dl or "") or shell.get("start_time")
         if st:
             out["start_time"] = st
-        h1 = re.search(r"(?is)<h1[^>]*>(.*?)</h1>", html)
-        if h1 and _txt(h1.group(1)):
-            out["conference_name"] = _txt(h1.group(1))
+        h1 = _real_h1(html)
+        if h1:
+            out["conference_name"] = h1
         out["event_type"] = shell.get("bsr_type") or out.get("event_type")
         for k in ("venue_name", "city", "region", "event_format"):
             out.pop(k, None)

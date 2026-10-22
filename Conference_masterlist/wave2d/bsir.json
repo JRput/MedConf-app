@@ -64,6 +64,8 @@
     "Members-only page 'BSIR 2026: what's in store' (Access Denied) is skipped; fees shown are public ones only.",
     "Coverage checklist: multi-day ranges (end_date) checked against the page on every source; no fee-table images were seen on the tested pages; SINGLE_DAY_SUSPECT warnings from the harness --coverage run were false positives (related-event lists / unrelated '4 days' wording on the same page).",
     "remediator.audit not run (needs the database); harness --coverage was run instead.",
-    "Review fix: region is now the UK nation from a local city table (England / Scotland / Wales / Northern Ireland) instead of 'United Kingdom'; cities outside the table get no region."
+    "Review fix: region is now the UK nation from a local city table (England / Scotland / Wales / Northern Ireland) instead of 'United Kingdom'; cities outside the table get no region.",
+    "Audit fix (IOUK abstract flag): abstract_open=True came from the merge-step classifier reading 'Abstracts and Case Studies will open in the New Year' as an open call. The extractor now supplies the status itself from the page's own sentences: future opening -> abstract_open False with a note (IOUK 2027), 'will open on <date>' with a date already passed -> True with no deadline and a note (VITALS 2027, opened 9 Oct). Provided only if the merge step lets the extractor value stand; if the merge re-derives it from page text the false positive can recur and needs a guard on 'will open' wording in abstract_classifier (shared file, not touched).",
+    "Also the h1-based crawl start now skips cookie/consent headings."
   ]
 }

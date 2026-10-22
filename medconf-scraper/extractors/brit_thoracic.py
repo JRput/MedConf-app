@@ -50,6 +50,18 @@ def _txt(frag: str) -> str:
     return re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", frag))).replace("\xa0", " ").strip()
 
 
+
+_JUNK_H1 = re.compile(r"(?i)cookie|consent|privacy|your choice|we value your|accept all")
+
+
+def _real_h1(html: str) -> Optional[str]:
+    """First <h1> that is not a cookie/consent banner heading (browser-rendered pages put one before the title)."""
+    for m in re.finditer(r"(?is)<h1[^>]*>(.*?)</h1>", html or ""):
+        t = re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", m.group(1)))).strip()
+        if t and not _JUNK_H1.search(t):
+            return t
+    return None
+
 def _iso(y: int, m: int, d: int) -> Optional[str]:
     try:
         return date(y, m, d).isoformat()
@@ -323,9 +335,9 @@ class BritThoracicExtractor(WordPressGenericExtractor):
             out["start_date"], out["end_date"] = shell["start_date"], shell.get("end_date") or shell["start_date"]
             if shell.get("start_time"):
                 out["start_time"] = shell["start_time"]
-            h1 = re.search(r"(?is)<h1[^>]*>(.*?)</h1>", html)
-            if h1 and _txt(h1.group(1)):
-                out["conference_name"] = _txt(h1.group(1))
+            h1 = _real_h1(html)
+            if h1:
+                out["conference_name"] = h1
             for k in ("venue_name", "city", "region", "event_format"):
                 out.pop(k, None)
             out.update(self._place(shell.get("venue_raw"), bool(shell.get("online_hint"))))

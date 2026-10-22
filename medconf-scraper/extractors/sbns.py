@@ -24,8 +24,8 @@ from playwright.sync_api import Page
 
 from logger import logger
 
-from safe_fetch import fetch_validated
-from .abstract_classifier import pdf_bytes_to_text
+from safe_fetch import check_url_safe, fetch_validated
+from .abstract_classifier import classify_page_submission, pdf_bytes_to_text
 from .http_fetch import fetch_html
 from .tribe_events import html_to_lines
 from .wordpress_generic import (WordPressGenericExtractor, classify_event_type, clip_venue, dedupe_consecutive, pick_event_dates,
@@ -49,6 +49,18 @@ _TYPE_MAP = {"conference": "conference", "training course": "course", "workshop"
 def _txt(frag: str) -> str:
     return re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", frag))).replace("\xa0", " ").strip()
 
+
+
+_JUNK_H1 = re.compile(r"(?i)cookie|consent|privacy|your choice|we value your|accept all")
+
+
+def _real_h1(html: str) -> Optional[str]:
+    """First <h1> that is not a cookie/consent banner heading (browser-rendered pages put one before the title)."""
+    for m in re.finditer(r"(?is)<h1[^>]*>(.*?)</h1>", html or ""):
+        t = re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", m.group(1)))).strip()
+        if t and not _JUNK_H1.search(t):
+            return t
+    return None
 
 def parse_listing(html: str) -> List[Dict[str, Any]]:
     """Listing HTML -> one dict per event card (pure)."""
@@ -204,13 +216,56 @@ class SbnsExtractor(WordPressGenericExtractor):
         year = int((out.get("start_date") or shell.get("start_date") or str(date.today().year))[:4])
         return fee_tiers_from_pdf_text(pdf_bytes_to_text(data), year) if data else []
 
+    @staticmethod
+    def _submission_fetch(link: str):
+        """Fetcher for classify_page_submission: ('pdf', bytes) | ('html', str) | None. Every hop is SSRF-checked, body-capped."""
+        ok, _why = check_url_safe(link)
+        if not ok:
+            return None
+        verdict, _final, body, enc, _status = fetch_validated(link, deadline=time.monotonic() + 30, max_bytes=_MAX_PDF_BYTES)
+        if verdict != "ok" or not body:
+            return None
+        return ("pdf", body) if body[:4] == b"%PDF" else ("html", body.decode(enc or "utf-8", errors="replace"))
+
+    def _submission(self, html: str, shell: Dict[str, Any], out: Dict[str, Any]) -> Dict[str, Any]:
+        """Abstract / call-for-papers status from the event's MAIN content only (the site nav lists other meetings'
+        'Abstract Submission' pages, which must not count), following one same-page call-for-papers link."""
+        i = html.find('class="eventfolio"')
+        main = html[i:] if i >= 0 else ""
+        j = main.find("Related events")
+        main = re.sub(r"(?is)<(script|style|svg|noscript)\b.*?</\1\s*>", " ", main[:j] if j > 0 else main)
+        text = re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", main))).strip()
+        try:
+            start = date.fromisoformat(out.get("start_date") or shell["start_date"])
+        except ValueError:
+            start = None
+        hit = classify_page_submission(text, main, shell["booking_url"], None, start, fetcher=self._submission_fetch)
+        if not hit and out.get("organiser_url"):                # the organiser's own site is where an external course/meeting runs its call
+            got = self._submission_fetch(out["organiser_url"])
+            if got and got[0] == "html":
+                otxt = re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"(?is)<(script|style|svg|noscript)\b.*?</\1\s*>", " ", got[1])))).strip()
+                hit = classify_page_submission(otxt, got[1], out["organiser_url"], None, start, fetcher=self._submission_fetch)
+        if not hit:
+            return {}
+        is_open, deadline, note, _src = hit
+        try:
+            end = date.fromisoformat(out.get("end_date") or shell.get("end_date") or shell["start_date"])
+        except ValueError:
+            end = None
+        if deadline and end and deadline > end:                 # a deadline after the event is next year's call, not this one's
+            return {}
+        res: Dict[str, Any] = {"abstract_open": bool(is_open), "abstract_deadline": deadline.isoformat() if deadline else None}
+        if note:
+            res["abstract_deadline_note"] = note
+        return res
+
     def detail_from_html(self, html: str, shell: Dict[str, Any], llm_call: Callable[[str], Optional[str]]) -> Dict[str, Any]:
         out = super().detail_from_html(html, shell, llm_call)
         header = re.search(r'(?is)<div class="event-header-post-meta">(.*?)</div>', html)
         hh = header.group(1) if header else ""
-        h1 = re.search(r"(?is)<h1[^>]*>(.*?)</h1>", html)
-        if h1 and _txt(h1.group(1)):
-            out["conference_name"] = _txt(h1.group(1))
+        h1 = _real_h1(html)
+        if h1:
+            out["conference_name"] = h1
         ed = re.search(r'(?is)class="event-date">(.*?)</span>', hh)
         d = pick_event_dates(_txt(ed.group(1))) if ed else None
         out["start_date"], out["end_date"] = d if d else (shell["start_date"], shell.get("end_date") or shell["start_date"])
@@ -277,6 +332,7 @@ class SbnsExtractor(WordPressGenericExtractor):
             pdf_tiers = self._pdf_fees(html, shell, out)
             if pdf_tiers:
                 out["pricing_tiers"] = pdf_tiers
+        out.update(self._submission(html, shell, out))
         cpd = re.search(r"(\d+(?:\.\d+)?)\s*CPD", shell.get("sbns_cpd") or "")
         if cpd:
             out["cpd_points"] = float(cpd.group(1))
