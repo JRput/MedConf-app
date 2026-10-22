@@ -263,7 +263,12 @@ class EscrsExtractor(WordPressGenericExtractor):
                 out["abstract_deadline"] = date(int(m.group(3)), _MONTHS[m.group(2)[:3].lower()], int(m.group(1))).isoformat()
                 out["abstract_open"] = out["abstract_deadline"] >= date.today().isoformat()
             else:
-                am = re.search(r"Submit your abstract by (\d{1,2}) " + _MON, micro_text)
+                sub = fetch_html(micro_url + "abstracts/abstract-submissions/", browser=getattr(self, "browser", None))
+                sm = re.search(r"Abstract Submission Deadline:?\s*(?:</strong>)?\s*(\d{1,2})\s+" + _MON + r"\s+(\d{4})", re.sub(r"<[^>]+>", " ", sub or "").replace("&nbsp;", " "))
+                if sm:                                     # dated call on the microsite's abstracts page
+                    out["abstract_deadline"] = date(int(sm.group(3)), _MONTHS[sm.group(2)[:3].lower()], int(sm.group(1))).isoformat()
+                    out["abstract_open"] = out["abstract_deadline"] >= date.today().isoformat()
+                am = None if sm else re.search(r"Submit your abstract by (\d{1,2}) " + _MON, micro_text)
                 if am:                                     # year-less: the next occurrence on/after today, before the event starts
                     d = parse_card_dates(f"{am.group(1)} {am.group(2)}", date.today())
                     if d and d[0] <= shell["start_date"]:

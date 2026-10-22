@@ -62,6 +62,7 @@
     "Affiliated Events (Hellenic congress) are listing-only: the card link (Outlook SafeLink, unwrapped) is kept as booking_url/organiser_url; the organiser page was not read. Its fees are not captured.",
     "Vision to Venture: two-hop fee discovery (education page -> /v2v/vision-to-venture-budapest -> members.escrs.org/event/..., Tribe Tickets items). The group ticket row's EUR 700 is a list price; the page says eligible ESCRS members get EUR 500 at checkout (login). Members' fees behind login.",
     "Card text has typos copied as-is where no microsite exists ('Marriot Hotel'); the Cairo 'Eygpt' typo is corrected from the microsite welcome text.",
-    "Event type: congress/meeting -> conference; education-events path or weekend/course words -> course. Vision to Venture Weekend 1 is typed course."
+    "Event type: congress/meeting -> conference; education-events path or weekend/course words -> course. Vision to Venture Weekend 1 is typed course.",
+    "Abstract fields verified live 2026-10-22: Winter Meeting microsite /abstracts/abstract-submissions/ states 'Abstract Submission Opening: October 2026, Deadline: 1 November 2026, 23:59 CET' (stored 2026-11-01, open). Congress 2027 microsite states 'Instructional Course Submission Deadline 23 October 2026, 23:59 CEST' (stored 2026-10-23, open): this is a call for instructional-course proposals (the page itself calls them course abstracts), not for free-paper abstracts. The audit flag comes from the escrs.org shell page having no abstract text; the dated calls are on the microsites."
   ]
 }
