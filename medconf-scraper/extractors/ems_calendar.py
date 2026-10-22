@@ -188,6 +188,20 @@ def ems_fee_tiers(lines: List[str], default_currency: str = "GBP") -> List[Dict[
     return tiers
 
 
+def ems_prose_fees(text: str, default_currency: str = "GBP") -> List[Dict[str, Any]]:
+    """Fees written as one sentence: 'A discounted course fee of £200 is available only for BOA members. (£300 for non-BOA members)'. Pure."""
+    tiers: List[Dict[str, Any]] = []
+    t = re.sub(r"\s+", " ", text or "")
+    pats = (rf"fee of {_AMOUNT}\s+is available\s+(?:only\s+)?(?:for|to)\s+([^.(]{{3,40}}?)\s*(?:[.(]|$)", rf"\(\s*{_AMOUNT}\s+for\s+([^)]{{3,40}})\)")
+    for pat in pats:
+        m = re.search(pat, t, re.I)
+        if m:
+            label = m.group(3).strip(" .")
+            tiers.append({"tier_label": f"Registration \u00b7 {label}", "price_gbp": float(m.group(2).replace(",", "")), "currency": _SYM[m.group(1)],
+                          "is_early_bird": False, "early_bird_deadline": None})
+    return tiers if len(tiers) else []
+
+
 def _split_widget_lines(widget_html: str) -> List[str]:
     return [l for l in html_to_lines(re.sub(r"(?is)<a\b[^>]*class=\"btn\".*?</a>", " ", widget_html or "")) if l.lower() != "booking"]
 
@@ -485,7 +499,7 @@ class EmsCalendarExtractor(WordPressGenericExtractor):
         cpd = float(cm.group(1)) if cm and 0.5 <= float(cm.group(1)) <= 100 else shell.get("cpd_points_listing")
         if cpd:
             out["cpd_points"], out["cpd_accredited"] = cpd, True
-        out["pricing_tiers"] = ems_fee_tiers(lines, self.DEFAULT_CURRENCY)
+        out["pricing_tiers"] = ems_fee_tiers(lines, self.DEFAULT_CURRENCY) or ems_prose_fees(text, self.DEFAULT_CURRENCY)
         desc = self._description("", body, shell)
         if desc:
             out["description"] = desc

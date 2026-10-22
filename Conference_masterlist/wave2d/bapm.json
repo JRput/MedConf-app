@@ -18,7 +18,7 @@
   },
   "registry_comment": "BAPM (perinatal medicine) meetings and events: teaser cards -> event pages; end date from Date line or intro duration; EventsAir fees for BAPM's own conference",
   "probe_results": {
-    "shells": 15,
+    "shells": 14,
     "shells_forced_fallback": 15,
     "details_tested": 15,
     "with_date": 15,
@@ -64,6 +64,7 @@
     "Towns outside the small UK dictionary (Salford, Prescot, Chertsey, Gateshead) get a city but no region.",
     "Coverage checklist: multi-day ranges (end_date) checked against the page on every source; no fee-table images were seen on the tested pages; SINGLE_DAY_SUSPECT warnings from the harness --coverage run were false positives (related-event lists / unrelated '4 days' wording on the same page).",
     "remediator.audit not run (needs the database); harness --coverage was run instead.",
-    "Review fix: tiers whose label matches quiz/dinner/drinks/social/gala are dropped unless the amount is above 0 (removed 'Virtual · BAPM Pub Quiz' £0 from the Spring Conference)."
+    "Review fix: tiers whose label matches quiz/dinner/drinks/social/gala are dropped unless the amount is above 0 (removed 'Virtual · BAPM Pub Quiz' £0 from the Spring Conference).",
+    "Audit fix (venue prose): the live row 'Efficient use of POCUS in NICU' stored venue_name 'In person - Chertsey. Hybrid available on Day 1' (the raw Location line; the other In-person rows hold 'In person - <city>'). The extractor now never emits that: venue_name only comes from a 'will take place at ...' sentence, is stripped of an 'In person -' prefix, passed through sane_venue, and dropped if it is longer than 8 words or sentence-shaped; the town goes to city (Chertsey). Harness venue_name is None for every row except Spring Conference ('Mercure Northampton'). I could not find where the stored raw Location text entered the DB from the current code (the merge step has no venue fallback), so it may come from an older scrape or another stage: re-scrape and re-audit to confirm. Shell count is 14 on 2026-10-22 because the 22 Oct Neonatal Inequalities event has left the society's listing."
   ]
 }

@@ -3,7 +3,7 @@ from datetime import date
 
 from extractors.boa import BoaExtractor, is_relevant, is_third_party, parse_future_congress
 from extractors.ems_calendar import (
-    _UK_PLACES, EmsCalendarExtractor, ems_dates, ems_event_type, ems_fee_tiers, ems_time, parse_ems_articles,
+    _UK_PLACES, EmsCalendarExtractor, ems_dates, ems_event_type, ems_fee_tiers, ems_prose_fees, ems_time, parse_ems_articles,
 )
 
 ARTICLE = """<article class="eventfolio-calendar-event article-list-item event-list-item ">
@@ -104,3 +104,9 @@ def test_boa_filter_keeps_orthogeriatric_rows():
     assert is_relevant("Falls Prevention Summit: Reducing Inpatient Falls", "")
     assert is_relevant("Preventing Hospital Acquired Deconditioning", "")
     assert not is_relevant("Global Forum on Cardiology", "Non-BOA Event")
+
+
+def test_prose_fee_sentence_gives_member_and_non_member_tiers():
+    t = ems_prose_fees("Course Fee A discounted course fee of \u00a3200 is available only for BOA members. (\u00a3300 for non-BOA members)")
+    assert [(x["tier_label"], x["price_gbp"]) for x in t] == [("Registration \u00b7 BOA members", 200.0), ("Registration \u00b7 non-BOA members", 300.0)]
+    assert ems_prose_fees("The course is free to attend.") == []

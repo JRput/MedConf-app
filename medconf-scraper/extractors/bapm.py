@@ -26,7 +26,7 @@ from logger import logger
 
 from safe_fetch import check_url_safe, fetch_validated
 from .http_fetch import fetch_html
-from .tribe_events import html_to_lines
+from .tribe_events import html_to_lines, sane_venue
 from .wordpress_generic import (WordPressGenericExtractor, classify_event_type, clip_venue, dedupe_consecutive,
                                 find_dates, pick_event_dates)
 
@@ -218,6 +218,10 @@ class BapmExtractor(WordPressGenericExtractor):
         for k in ("venue_name", "city", "region", "event_format"):
             out.pop(k, None)
         venue, city, region, fmt = self._place(lines, intro)
+        if venue:
+            venue = sane_venue(re.sub(r"(?i)^(?:in[- ]person|online|virtual|hybrid)\s*[-\u2013:]\s*", "", venue))
+            if venue and (len(venue.split()) > 8 or re.search(r"[.!?]\s+[A-Z]", venue)):
+                venue = None                                  # a venue is a short place name, never a sentence
         if venue:
             out["venue_name"] = venue
         if city:
