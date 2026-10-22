@@ -1,0 +1,74 @@
+{
+  "source_id": 141,
+  "slug": "aad",
+  "class_name": "AadExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/aad.py",
+  "source_row": {
+    "source_name": "AAD Meetings",
+    "society": "American Academy of Dermatology (AAD)",
+    "base_url": "https://www.aad.org/member/meetings/events",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "The recon URL (/member/meetings/events/locations) is only the dates page (Annual 2027/2028, summer meetings). The real listing is /member/meetings/events, a card deck: DermCatalyst (postponed, skipped), Hands-On: Cosmetics (own page with date line, venue and Rates), the 2027 Annual Meeting microsite (/member/meetings-education/am27, fees public at /registration/fees: Early bird / Standard grid). Editions without a page (Annual 2028, summer 2027) come from the dates page. Hands-On rates are shown publicly but only members can register. Nothing from this site is sent to llm_call (site forbids AI use); description and specialty are deterministic."
+  },
+  "registry_comment": "AAD (aad.org): Annual Meeting 2027/2028, summer educational meeting, Hands-On: Cosmetics course; USD; NO AI use allowed by site terms",
+  "probe_results": {
+    "shells": 4,
+    "shells_forced_fallback": 4,
+    "details_tested": 4,
+    "with_date": 4,
+    "with_pricing": 2,
+    "with_venue": 1,
+    "with_city": 4,
+    "with_description": 2,
+    "with_specialty": 4,
+    "with_end_date": 4,
+    "event_types": {
+      "course": 1,
+      "conference": 3
+    },
+    "currency": "USD",
+    "llm_calls": 0
+  },
+  "test_urls": [
+    "https://www.aad.org/member/meetings/events/hands-on-cosmetics",
+    "https://www.aad.org/member/meetings-education/am27/registration/fees",
+    "https://www.aad.org/member/meetings/events/locations"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.aad.org/member/meetings/events/hands-on-cosmetics",
+      "field": "dates/venue/rates/credits",
+      "site_says": "Oct. 24-25, 2026, Chicago IL, Palmer House Hilton; Standard $1,900, Resident $760; max 10 AMA PRA Category 1 Credits",
+      "extractor_says": "2026-10-24..25, Chicago, Palmer House Hilton, 1900/760 USD, cpd_points 10",
+      "match": true
+    },
+    {
+      "url": "https://www.aad.org/member/meetings-education/am27/registration/fees",
+      "field": "Physician member early bird / standard",
+      "site_says": "$1,135 / $1,365; early bird until Feb. 17, 2027",
+      "extractor_says": "1135 (early, deadline 2027-02-17) / 1365",
+      "match": true
+    },
+    {
+      "url": "https://www.aad.org/member/meetings/events/locations",
+      "field": "Annual 2028 and Summer 2027",
+      "site_says": "2028: Washington, D.C., March 17-21; July 22-25, 2027: Chicago, IL",
+      "extractor_says": "2028-03-17..21 Washington, DC; 2027-07-22..25 Chicago",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "AI TERMS: aad.org/terms-use forbids incorporating Academy content into any AI learning model without written permission. Extractor never calls llm_call (0 calls). The shared merge step / remediator could still send page text to the LLM: owner-level exclusion from LLM steps would be needed (shared files, not mine). Scraping itself is not forbidden in the terms I read (robots.txt has no AI block).",
+    "Members' fees behind login: Hands-On: Cosmetics rates are public but 'registration is open to AAD members only'; tier labels say '(AAD members only)'. The Annual Meeting grid covers all categories including non-members and is public.",
+    "Coverage checklist: multi-day ranges verified (all 4); fees on the site's own sub-page /registration/fees (same host); no image fee tables; no external event site. Harness --coverage: SUBMISSION_NO_DEADLINE on the Annual Meeting because the page advertises the abstract call, whose deadline (Sept 2, 2026) has already passed, so no deadline is stored.",
+    "Title inference: the summer meeting is listed only as 'summer educational meetings' on the dates page; the events page calls the series 'Innovation Academy'. Title kept to the page's wording ('AAD Summer Educational Meeting 2027'); no venue/fees exist for it. Summer 2028 (July 13-16, New York) is beyond the 18-month horizon. Annual 2028 row exists with no page behind it (dates + city only).",
+    "DermCatalyst: page says the 2026 event is postponed with no date: skipped (INFO log). career-launch-on-demand is on-demand content: skipped, not examined further (the rcem is_on_demand pattern may apply if the owner wants it).",
+    "Annual Meeting venue (convention centre) is not stated on the microsite pages I read, so venue_name is empty for it."
+  ]
+}

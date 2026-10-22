@@ -1,0 +1,38 @@
+{
+  "source_id": 138,
+  "slug": "nihr",
+  "class_name": "NihrExtractor",
+  "status": "blocked",
+  "file_written": "medconf-scraper/extractors/nihr.py",
+  "source_row": {
+    "source_name": "NIHR Events",
+    "society": "NIHR",
+    "base_url": "https://www.nihr.ac.uk/events",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": false,
+    "extraction_instructions": "UNVERIFIED: nihr.ac.uk answers 403 from CloudFront to curl, headless Chromium and the GitHub runner probe, so no HTML was ever seen. Recon says Drupal 10 with about 6 server-rendered events on /events. Constants-only family subclass; do not activate until tested against real HTML."
+  },
+  "registry_comment": "NIHR events: BLOCKED (CloudFront 403 from home IP and GitHub runner), placeholder constants only",
+  "probe_results": {
+    "shells": 0,
+    "shells_forced_fallback": 0,
+    "details_tested": 0,
+    "with_date": 0,
+    "with_pricing": 0,
+    "with_venue": 0,
+    "with_description": 0,
+    "with_specialty": 0
+  },
+  "test_urls": [],
+  "spot_check": [],
+  "concerns": [
+    "CloudFront refusal from GitHub runner (probe 2026-10-21) — register inactive, retry from runner later",
+    "Local check 2026-10-21 from a home IP: curl with a browser User-Agent and headless Chromium both got HTTP 403 'ERROR: The request could not be satisfied. Request blocked.' on https://www.nihr.ac.uk/events and on the home page (2 requests each). No challenge page, just a CloudFront block, so there is nothing to wait out. Did not try to evade it.",
+    "nihr.py is a constants-only WordPressGenericExtractor subclass with an untested EVENT_LINK_RE; the harness was not run (no HTML).",
+    "If NIHR later opens up, the recon (Drupal 10, server-rendered /events, about 6 events with venue/time on the event page) suggests a simple card walker is enough."
+  ]
+}

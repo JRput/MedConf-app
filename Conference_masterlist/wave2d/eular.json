@@ -1,0 +1,76 @@
+{
+  "source_id": 134,
+  "slug": "eular",
+  "class_name": "EularExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/eular.py",
+  "source_row": {
+    "source_name": "EULAR Events",
+    "society": "EULAR",
+    "base_url": "https://www.eular.org/event?search=&date=upcoming&tags=&type=all&country=all",
+    "default_event_type": "mixed",
+    "pagination_type": "page_query",
+    "pagination_template": "https://www.eular.org/event/page/{page}?search=&date=upcoming&tags=&type=all&country=all",
+    "max_pages_hint": 2,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Odoo events site. Listing walked by the extractor (page 1 /event?date=upcoming, then the /event/page/N link): one article per event with title, UTC start datetime (converted to Europe/Zurich), 'City, Country' or TBC/TBD, optional tag. Event page sidebar gives local start/end dates (a 00:00 end is exclusive) and a 'Go to website' organiser link; the page itself has no prose. edu.eular.org organiser links print 'Cost: EUR n'. Other organiser landing pages get ONE validated hop (check_url_safe + fetch_validated) for a description (meta/og or first real paragraph; text naming another year than the event is dropped) and fees (JSON-LD offers or fee table); if no fees there, ONE more hop to a registration/fees link on the same host. Cap 20 extra requests per run; otherwise a one-line template description from page fields."
+  },
+  "registry_comment": "EULAR events directory (Odoo): paginated cards -> event page dates/place; EUR fee from edu.eular.org Moodle page for EULAR-run courses",
+  "probe_results": {
+    "shells": 19,
+    "shells_forced_fallback": 19,
+    "details_tested": 19,
+    "with_date": 19,
+    "with_pricing": 12,
+    "with_venue": 15,
+    "with_description": 19,
+    "with_specialty": 19
+  },
+  "test_urls": [
+    "https://www.eular.org/event/6th-eular-autumn-course-days-2026-a-postgraduate-course-for-rheumatologists-170/register",
+    "https://www.eular.org/event/34th-eular-sonography-course-msus-advanced-2027-192/register",
+    "https://www.eular.org/event/central-eastern-european-congress-in-rheumatology-2026-cecr2026-207/register"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.eular.org/event/6th-eular-autumn-course-days-2026-a-postgraduate-course-for-rheumatologists-170/register",
+      "field": "dates + city",
+      "site_says": "Thursday 22 Oct 2026 to Saturday 24 Oct 2026 18:00, Vienna, Austria",
+      "extractor_says": "2026-10-22..2026-10-24, Vienna / Austria",
+      "match": true
+    },
+    {
+      "url": "https://edu.eular.org/enrol/index.php?id=811",
+      "field": "fee",
+      "site_says": "Cost: EUR 650 (registration closed)",
+      "extractor_says": "Registration · Standard 650 EUR",
+      "match": true
+    },
+    {
+      "url": "https://www.eular.org/event/34th-eular-sonography-course-msus-advanced-2027-192/register",
+      "field": "fee + dates",
+      "site_says": "Cost: EUR 1000, Berlin, 3 days from 5 June 2027 (registration opens January 2027)",
+      "extractor_says": "1000 EUR, 2027-06-05..2027-06-07, Berlin / Germany",
+      "match": true
+    },
+    {
+      "url": "https://www.eular.org/event/central-eastern-european-congress-in-rheumatology-2026-cecr2026-207/register",
+      "field": "dates",
+      "site_says": "calendar link 20261203T080000/20261205T183000, Budapest",
+      "extractor_says": "2026-12-03..2026-12-05 08:00, Budapest",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Listing start datetimes are UTC and can be a day off; the extractor converts to Europe/Zurich for the shell and the event page (local dates) overrides it. Verified on the 00:00 placeholder events (listing says 7 April 2027, page says Thursday 8 April).",
+    "Events stored 00:00 to 00:00 (placeholder dates, venue TBC/TBD: Epidemiology, Imaging, Postgraduate HP, Immunology 2027 courses) get end = end date minus 1 day; their dates are indicative only and the city is left empty.",
+    "The edu.eular.org price is a list price; for 2027 courses registration has not opened ('Registration will open in January 2027') but the Cost row is already shown, so it is stored.",
+    "The flagship EULAR Annual Congress (congress.eular.org, Berlin June 2027) is NOT in eular.org/event; it would need a separate single_congress source. Not built here.",
+    "event_type: congress/conference/symposium/meeting in title -> conference (2 rows), workshop/webinar/seminar -> workshop, else course (17).",
+    "Description: eular.org pages have no prose. Real descriptions come from organiser landing pages (3 of 19: Belgrade, CECR Budapest and SARD-ILD Antalya); the other 16 use a one-line template built only from page fields (tag, title, dates, place).",
+    "Athens conflict: both Athens courses (12th International MSUS Course, Intermediate and Basic level) are listed by EULAR for 18-20 Nov 2026, but the organiser page (mitoscourse2027.eventive.gr) names 2027. EULAR's listing date is kept; the organiser description is discarded because its year differs (template used) and no fees are taken from that site. Needs a human look; the dates may be stale on EULAR's side.",
+    "Fees: 12 of 19 priced. 9 EULAR-run events from edu.eular.org (EUR list price); Belgrade from its organiser page (Registration fee 850 EUR; the 1250 'fee & accommodation' option is dropped as accommodation); SARD-ILD Antalya only shows 'External Participation (1 day) 350 EUR' after dropping accommodation rows, so it is a partial fee set. CECR Budapest and Rome/Antalya Basic/Intermediate stay empty: CECR's fee tables repeat the same labels with different prices (category lost) and the early-bird date has passed, so they are dropped as ambiguous. Organiser tiers pass a 20..10000 amount and currency sanity check, early rates already over are dropped, labels are cut to the row label.",
+    "Request budget per scrape: 2 listing pages + 19 event pages + about 9 edu.eular.org pages + at most 20 organiser hops (landing + same-host fees link both count), 1 s gap; about 31 plus up to 20."
+  ]
+}

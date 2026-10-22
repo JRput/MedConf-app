@@ -1,0 +1,72 @@
+{
+  "source_id": 143,
+  "slug": "augis",
+  "class_name": "AugisExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/augis.py",
+  "source_row": {
+    "source_name": "AUGIS Events",
+    "society": "Association of Upper Gastrointestinal Surgeons of GB&I (AUGIS)",
+    "base_url": "https://www.augis.org/Events",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "/Events 'View as List' is a plain table (<time datetime>, link to /Events/Event-Booking/EventId/<n>, venue); no load-more exists, the list is complete. Booking pages only repeat title/date/venue and start a booking flow that asks members to log in, so no fee is public. Events with an /Our-Events/<slug> info page (left navigation) get a description; its Programme link is a Cvent summary read once via fetch_validated for start time, full venue name and city. The next Annual Scientific Meeting (2027, ICC Wales) is announced only as a home-page banner sentence and is added from it."
+  },
+  "registry_comment": "AUGIS (augis.org): upper GI surgery events table + ASM banner; booking behind member login so no fees; Cvent summary hop for time/venue",
+  "probe_results": {
+    "shells": 4,
+    "shells_forced_fallback": 4,
+    "details_tested": 4,
+    "with_date": 4,
+    "with_pricing": 0,
+    "with_venue": 4,
+    "with_city": 2,
+    "with_description": 1,
+    "with_specialty": 4,
+    "with_end_date": 1,
+    "event_types": {
+      "conference": 4
+    },
+    "currency": null,
+    "llm_calls": 0
+  },
+  "test_urls": [
+    "https://www.augis.org/Events",
+    "https://www.augis.org/Our-Events/Palliative-Care-Symposium",
+    "https://www.augis.org/Our-Events/CholeSafe-2"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.augis.org/Events",
+      "field": "Palliative Care Symposium",
+      "site_says": "27 Nov 2026, Holiday Inn London",
+      "extractor_says": "2026-11-27, venue Holiday Inn London - Gatwick Airport, city Horley (Cvent), start 08:30",
+      "match": true
+    },
+    {
+      "url": "https://web-eur.cvent.com/event/4aad7fee-296e-4f6a-894b-79c3387d55ff/summary",
+      "field": "CholeSafe 2 time/venue",
+      "site_says": "17 December 2026, 08:00-18:00, Royal College of Surgeons of England, London WC2A 3PE",
+      "extractor_says": "2026-12-17, 08:00, Royal College of Surgeons of England, London",
+      "match": true
+    },
+    {
+      "url": "https://www.augis.org/",
+      "field": "ASM 2027 banner",
+      "site_says": "AUGIS ASM 2027 will take place on 15-17 September at ICC Wales!",
+      "extractor_says": "2027-09-15..2027-09-17, ICC Wales, region Wales",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Members' fees behind login: every booking page says 'Notice to members: please log in before making any bookings' and starts a postback booking flow (not followed; no login attempted). Cvent registration is a script app with no fee text in the HTML. pricing_tiers [] on all 4 rows: checked the booking page, the /Our-Events info pages (CholeSafe's is a flyer image, which I viewed: date/venue only, 'registration details to follow', no fee), and the Cvent summary hop.",
+    "Recon said load-more: not true. The list table holds all 3 upcoming events (Oct 2026 - Mar 2027 window); the Regional Meetings page lists no dated events. The 2026 ASM (Harrogate, 23-25 Sep) is past and not emitted.",
+    "ASM 2027 comes from one banner sentence on the home page (under a stale 'AUGIS ASM 2026' heading); the row uses #asm-2027 on the home URL until the society publishes an event page. City is not stated (ICC Wales); region 'Wales' is derived from the venue name.",
+    "Yorkshire Regional Meeting: only date and venue (LNER Community Stadium) are published; city not stated, region England inferred from 'Yorkshire'. External hop: the Cvent summary only (host checked with urlparse().hostname, check_url_safe + fetch_validated, 1 request per event with a Programme link).",
+    "No AI restriction found for augis.org (robots.txt and terms silent); the extractor makes no LLM calls anyway. specialty 'Surgery (General)' (ASGBI precedent), fixed. Event types are all 'conference' (symposium, one-day meeting, regional meeting): no course/workshop wording on any page."
+  ]
+}

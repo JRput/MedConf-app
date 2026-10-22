@@ -1,0 +1,76 @@
+{
+  "source_id": 135,
+  "slug": "pcronline",
+  "class_name": "PcronlineExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/pcronline.py",
+  "source_row": {
+    "source_name": "PCR Courses",
+    "society": "PCR",
+    "base_url": "https://www.pcronline.com/Courses",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": true,
+    "active": true,
+    "extraction_instructions": "eZ Publish, server-rendered. /Courses has one a.single-content-item per course with 'Title - dates' in p.navigation-link and a one-line blurb; undated and past cards are skipped, PCR Gulf Valves (302 to GulfPCR-GIM) is dropped as a duplicate. Course page: Event JSON-LD (regex-read, sometimes invalid JSON) gives venue/city/country, dates come from the card. Fees on the course's own /Register page: .pricing-item packages (category, current price for the pricing-active timeframe, other timeframes as price-text/price-small), Innovators Day uses its STAND ALONE matrix. Exhibitor/industry/emerging-company categories are skipped."
+  },
+  "registry_comment": "PCR courses (EuroPCR family): /Courses cards -> course page JSON-LD venue + /Register pricing-item fees (EUR/SGD)",
+  "probe_results": {
+    "shells": 12,
+    "shells_forced_fallback": 12,
+    "details_tested": 12,
+    "with_date": 12,
+    "with_pricing": 7,
+    "with_venue": 11,
+    "with_description": 12,
+    "with_specialty": 12
+  },
+  "test_urls": [
+    "https://www.pcronline.com/Courses/PCR-London-Valves",
+    "https://www.pcronline.com/Courses/EuroPCR",
+    "https://www.pcronline.com/Courses/PCR-Fellows-Course/Singapore"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.pcronline.com/Courses/PCR-London-Valves/Register",
+      "field": "fees",
+      "site_says": "Late rate active: Nurses/Allied/Fellows EUR 775, Physicians EUR 1490, Digital package EUR 500 (Onsite 900/1600/500); VAT included",
+      "extractor_says": "775 / 1490 / 500 EUR (Late), onsite column not stored",
+      "match": true
+    },
+    {
+      "url": "https://www.pcronline.com/Courses/EuroPCR",
+      "field": "dates + venue",
+      "site_says": "18-21 May 2027, Paris, Palais des congres",
+      "extractor_says": "2027-05-18..2027-05-21, Palais des congres, Paris / France",
+      "match": true
+    },
+    {
+      "url": "https://www.pcronline.com/Courses/PCR-Fellows-Course/Singapore/Register",
+      "field": "fees",
+      "site_says": "Fellow 1,020 SGD, Physicians 1,270 SGD (Regular on sale, Early sold out)",
+      "extractor_says": "Registration · Fellow · Regular 1020 SGD; Physicians 1270 SGD",
+      "match": true
+    },
+    {
+      "url": "https://www.pcronline.com/Courses/AICT-AsiaPCR/Register",
+      "field": "fees",
+      "site_says": "Regular: Fellows 750 SGD, Physicians 1000 SGD, Nurses and Allied Professionals Free",
+      "extractor_says": "750 / 1000 / 0 SGD (free row takes the page currency)",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Cards without a date ('PCR Fellows Course | Paris', 'The Physiology Course 2026') and past courses (PCR-CIT Chengdu 11-13 Sep 2026, Transseptal Puncture 15-16 Sep 2026) are skipped; 17 cards -> 12 shells.",
+    "PCR Gulf Valves is dropped through a hard-coded alias map because /Courses/PCR-Gulf-Valves 302-redirects to /Courses/GulfPCR-GIM (same event, same dates). If PCR adds new redirecting cards, extend _ALIASES.",
+    "Course-page JSON-LD can be stale: Alfieri's Bootcamp says 2026-10-22 while the card and page text say 9-11 November 2026. Dates therefore always come from the listing card; JSON-LD is used for venue/city/country only, and a location name equal to the page title is discarded (4 pages).",
+    "Fees: 7 of 12 courses show public fees; the other 5 have no /Register page (GulfPCR-GIM, PCR Tokyo Valves, SASCI-AfricaPCR, AVAM, PCR Rio Valves) so tiers are empty. Registration for several 2027 courses has not opened ('Registration will open soon') but prices are printed.",
+    "Exhibitor, industry-representative and emerging-company rates are dropped (not delegate fees). Onsite (door) prices are dropped; only the current timeframe plus later published timeframes are stored. Digital-only fees are stored as 'Digital'.",
+    "Alfieri's Bootcamp prints '3400 EUR HT - 4148 EUR TTC'; the VAT-inclusive 4148 is stored. PCR Innovators Day: the pricing-item block is the EuroPCR bundle, so the 'STAND ALONE' matrix is used (labelled 'Innovators Day stand-alone'). Innovators Day has no JSON-LD, so no venue (Paris is only in prose).",
+    "event_type: PCR calls everything a 'Course'. Per the PLAYBOOK 3-way rule, short (<=3 day) Fellows Course / Bootcamp / Pre-course / Innovators Day are 'workshop' (4), the multi-day meetings (EuroPCR, London/Tokyo/Rio/Gulf Valves, AICT-AsiaPCR, SASCI, AVAM) are 'conference' (8); EuroPCR carries is_flagship. A reviewer may prefer 'course' for all.",
+    "The 'Pre-course on cardiogenic shock' card links to /Network/iHF-Improving-Heart-Failure-care/Pre-course (same host, different section); it parses the same way (Physician 325 Regular / 375 Late EUR, Fellow 225 / 275).",
+    "About 12 course pages + 7 Register pages + 1 listing = about 20 requests per scrape at 1 s gap. Forced-fallback run gave the same 12 shells."
+  ]
+}

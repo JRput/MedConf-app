@@ -1,0 +1,66 @@
+{
+  "source_id": 137,
+  "slug": "eshre",
+  "class_name": "EshreExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/eshre.py",
+  "source_row": {
+    "source_name": "ESHRE Campus and Annual Meeting",
+    "society": "ESHRE",
+    "base_url": "https://www.eshre.eu/en/Education/Calendar-Campus-events",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": true,
+    "active": true,
+    "extraction_instructions": "Sitecore, server-rendered. The Campus calendar is one page of a>div.grid-item cards (p.w-title, blurb, fa-map-marker 'City, Country', fa-calendar 'dd-dd Month yyyy', class places-available/fully-booked). The Annual Meeting (not in that calendar) comes from /Annual-Meeting: '<year> Annual Meeting ... will be held from D to D Month YYYY in City, Country' with a link to /en/Annual-Meeting/ESHRE-<year> (venue). Workshop pages give venue widget, EACCME credits and a <event>/Registration page with a Member / Allied-student / Non-member x Early / Standard table in EUR."
+  },
+  "registry_comment": "ESHRE: Campus workshop calendar (venue, EACCME credits, EUR fee table on /Registration) + Annual Meeting from /Annual-Meeting",
+  "probe_results": {
+    "shells": 10,
+    "shells_forced_fallback": 10,
+    "details_tested": 10,
+    "with_date": 10,
+    "with_pricing": 9,
+    "with_venue": 10,
+    "with_description": 9,
+    "with_specialty": 10
+  },
+  "test_urls": [
+    "https://www.eshre.eu/en/Education/Calendar-Campus-events/Evidence-based-management-of-complex-causes-of-male-infertility",
+    "https://www.eshre.eu/en/Education/Calendar-Campus-events/Perspectives-of-reproductive-surgeons",
+    "https://www.eshre.eu/en/Annual-Meeting/ESHRE-2027"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.eshre.eu/en/Education/Calendar-Campus-events/Evidence-based-management-of-complex-causes-of-male-infertility",
+      "field": "dates, venue, credits, fees",
+      "site_says": "30-31 October 2026, Florence; Grand Hotel Baglioni; max 8.5 European CME credits; Member 427, Allied/student member 305, Non-member 671 EUR standard (early rate ended 30 September)",
+      "extractor_says": "2026-10-30..2026-10-31, Florence/Italy, Grand Hotel Baglioni, 8.5, standard tiers 427 / 305 / 671 EUR",
+      "match": true
+    },
+    {
+      "url": "https://www.eshre.eu/en/Education/Calendar-Campus-events/Comprehensive-approaches-to-pregnancy-loss",
+      "field": "sold out + credits",
+      "site_says": "12-14 November 2026 Budapest; Registration: fully booked; 13.0 CME credits",
+      "extractor_says": "is_sold_out True, 13.0 credits, Mercure Budapest City Center Hotel",
+      "match": true
+    },
+    {
+      "url": "https://www.eshre.eu/Annual-Meeting",
+      "field": "dates + place",
+      "site_says": "43rd Annual Meeting 4 to 7 July 2027 in Stockholm, Sweden; venue Stockholmsmassan",
+      "extractor_says": "2027-07-04..2027-07-07, Stockholm/Sweden, Stockholmsmassan, is_flagship",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Campus workshops are described as 'in-person events with live broadcast'; they are stored as event_format hybrid. The Annual Meeting is stored in_person.",
+    "Fees: Campus fees are public EUR tables on <event>/Registration (same host). Early columns whose deadline has passed are dropped (Florence); deadlines are read from the header cell ('until 30 September' or just '18 February') with the year chosen on or before the event start. Prices use decimal commas in places (Uppsala 312,50) and are parsed as 312.5. Budapest is fully booked and still lists its fees. The social dinner (65 EUR) is optional and not a registration fee: not stored.",
+    "ESHRE 2027 Annual Meeting has no public fee page yet, so pricing_tiers is empty. Its description is empty (no prose on the page). The 2026 meeting (London, 5-8 July 2026) is past and skipped.",
+    "Specialty is a fixed 'Obstetrics & Gynaecology' (reproductive medicine); the male-factor and embryology campuses are borderline but the label is the closest existing one.",
+    "Request budget: calendar + Annual-Meeting + (9 workshop pages + 9 Registration pages) + Annual Meeting page = about 21 requests per scrape. Forced-fallback run gave the same 10 shells.",
+    "EACCME credits are stored for the 4 workshops that print a credit line today (Florence, Budapest, Bologna, Athens); the 2027 workshops after them print none yet, so cpd_points is empty there. The 'organised by the Special Interest Group' line is not stored."
+  ]
+}

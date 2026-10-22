@@ -1,0 +1,81 @@
+{
+  "source_id": 139,
+  "slug": "hematology",
+  "class_name": "HematologyExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/hematology.py",
+  "source_row": {
+    "source_name": "ASH Meetings",
+    "society": "American Society of Hematology (ASH)",
+    "base_url": "https://www.hematology.org/meetings",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Single /meetings page with five sections: ASH Annual Meeting and four Highlights of ASH programmes (North America in four cities, Asia-Pacific, MEMENA, Latin America). Each section states the NEXT edition in a 'taking place <dates>, in <City>, <Country>' sentence; programme pages still carry last edition's text (Kuala Lumpur, Istanbul), so dates/venue are anchored on the current edition's date line. Fees are USD HTML grids on /registration (/registration-information for the Annual Meeting), used only when the page names the edition year. Annual Meeting late-breaking abstract deadline is read from /abstracts."
+  },
+  "registry_comment": "ASH (hematology.org): Annual Meeting + Highlights of ASH regional meetings, USD fee grids, one edition per programme",
+  "probe_results": {
+    "shells": 8,
+    "shells_forced_fallback": 8,
+    "details_tested": 8,
+    "with_date": 8,
+    "with_pricing": 8,
+    "with_venue": 4,
+    "with_city": 8,
+    "with_description": 8,
+    "with_specialty": 8,
+    "with_end_date": 8,
+    "event_types": {
+      "conference": 8
+    },
+    "currency": "USD",
+    "llm_calls": 0
+  },
+  "test_urls": [
+    "https://www.hematology.org/meetings/annual-meeting",
+    "https://www.hematology.org/meetings/highlights-of-ash-in-asia-pacific",
+    "https://www.hematology.org/meetings/highlights-of-ash-in-latin-america"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.hematology.org/meetings/annual-meeting",
+      "field": "dates/venue",
+      "site_says": "December 12-15, 2026, Ernest N. Morial Convention Center, New Orleans, and online",
+      "extractor_says": "2026-12-12..2026-12-15, Ernest N. Morial Convention Center, New Orleans, hybrid",
+      "match": true
+    },
+    {
+      "url": "https://www.hematology.org/meetings/annual-meeting/registration-information",
+      "field": "fee Active and International Member, advance, in-person",
+      "site_says": "$900 (deadline Oct 21 2026)",
+      "extractor_says": "USD 900, is_early_bird, deadline 2026-10-21",
+      "match": true
+    },
+    {
+      "url": "https://www.hematology.org/meetings/highlights-of-ash-in-asia-pacific",
+      "field": "dates/venue/fee",
+      "site_says": "February 12-13, 2027, Centara Grand at CentralWorld, Bangkok; Non-Member advance $675 / late $825",
+      "extractor_says": "2027-02-12..13, Centara Grand at CentralWorld, Bangkok, 675 / 825",
+      "match": true
+    },
+    {
+      "url": "https://www.hematology.org/meetings/highlights-of-ash-in-latin-america/registration",
+      "field": "Non-Member advance/late",
+      "site_says": "$400 / $550",
+      "extractor_says": "400 / 550, advance deadline 2027-03-01",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Coverage checklist: multi-day ranges verified (all 8 rows have end_date > start); fees are on the site's own /registration pages (same host, fetched with fetch_html), no external hop and no image fee tables on any page; abstract deadline for the Annual Meeting read from /abstracts (late-breaking Oct 28 2026; regular call closed Aug 4, not stored); harness --coverage clean after that fix.",
+    "Stale-edition guard: APAC and MEMENA programme pages still show April 2026 Kuala Lumpur and Feb 2026 Istanbul text next to the 2027 edition. Dates/city come from the /meetings listing and the venue is the line after the CURRENT edition's date; verified none of the old text leaks. Fee pages are only used when they name the edition year.",
+    "The Annual Meeting advance rate ends 2026-10-21 (today); the page will flip to late/on-site rates tomorrow and the extractor will follow whatever grids the page then shows. Expired early-bird tiers stay with their deadline.",
+    "North America: four rows (Chicago, New York, Seattle, Washington DC) share the programme URL, made unique with a #<city>-<date> fragment on booking_url/source_url (fragments are not used by other sources: shared-code owner to confirm the dedupe key is the full string). NA venue is not stated (hotel list only), so venue_name is empty on those four rows.",
+    "Region is the country (United States, Thailand, Greece, Chile); US state is dropped. Highlights fees for MEMENA/LatAm are published although registration opens Nov 4.",
+    "specialty uses 'Haematology' (existing vocabulary). cpd_accredited True (ACCME CME text); no CME point count is published.",
+    "No AI restriction found on hematology.org terms, but the extractor makes no LLM calls anyway (0 calls in the full run)."
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "source_id": 142,
+  "slug": "cns",
+  "class_name": "CnsExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/cns.py",
+  "source_row": {
+    "source_name": "CNS Meetings",
+    "society": "Congress of Neurological Surgeons (CNS)",
+    "base_url": "https://www.cns.org/meetings/calendar",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "The calendar is a JS month grid mixing events with on-demand series and award windows. The three category listings (/meetings/courses, /meetings/joint-section-meetings, /meetings/other-neurosurgical-meetings) render div.list-item cards (title link /meetings-detail/<slug>, EventStartDate_s, EventEndDate_s, Teaser_s) and are loaded with the browser; spans over 14 days and past events are dropped. The Annual Meeting comes from the static /meetings/past-and-future-annual-meetings; its microsite /annualmeeting/overview holds the Member and Non-member fee grids (Early Bird/Advanced/Regular) and is attached only to the edition whose year the headers carry. Detail pages: '<format>/<title>/<venue | city, ST>/<dates>', Pricing table, Hotel, ACCME credit text. Third-party symposia link to the organiser page, read for public fees via fetch_validated. Nothing from this site is sent to llm_call (site forbids AI use); description and specialty are deterministic."
+  },
+  "registry_comment": "CNS (cns.org): Annual Meeting, courses, joint section meetings and listed third-party symposia; JS listings via browser; USD; NO AI use allowed by site terms",
+  "probe_results": {
+    "shells": 10,
+    "shells_forced_fallback": 10,
+    "details_tested": 10,
+    "with_date": 10,
+    "with_pricing": 5,
+    "with_venue": 4,
+    "with_city": 8,
+    "with_description": 6,
+    "with_specialty": 10,
+    "with_end_date": 8,
+    "event_types": {
+      "conference": 6,
+      "course": 4
+    },
+    "currency": "USD",
+    "llm_calls": 0
+  },
+  "test_urls": [
+    "https://www.cns.org/annualmeeting/overview",
+    "https://www.cns.org/meetings-detail/cns-tumor-complications-course",
+    "https://www.cns.org/meetings-detail/joint-pediatric-section-annual-meeting"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.cns.org/annualmeeting/overview",
+      "field": "CNS Active (Domestic) Member early/advanced/regular",
+      "site_says": "$1,149 / $1,299 / $1,449; early on or before 5/31/2026, advanced 6/1-9/30/26",
+      "extractor_says": "1149 (deadline 2026-05-31) / 1299 (2026-09-30) / 1449",
+      "match": true
+    },
+    {
+      "url": "https://www.cns.org/meetings-detail/cns-tumor-complications-course",
+      "field": "dates/venue/fee",
+      "site_says": "Jan 16-18, 2027, Grand Hyatt Deer Valley, Park City, Utah; CNS Member $1,095",
+      "extractor_says": "2027-01-16..18, Grand Hyatt Deer Valley, Park City, 1095 USD",
+      "match": true
+    },
+    {
+      "url": "https://www.cns.org/meetings-detail/joint-pediatric-section-annual-meeting",
+      "field": "dates/venue/fee",
+      "site_says": "Dec 3-6, 2026, Hilton Union Square Hotel, San Francisco; Pediatric Section Member $975 by Nov 4, $1,235 after",
+      "extractor_says": "2026-12-03..06, Hilton Union Square Hotel, San Francisco, 975 (deadline 2026-11-04) / 1235",
+      "match": true
+    },
+    {
+      "url": "https://www.cns.org/meetings-detail/new-calendarevent-21",
+      "field": "third-party symposium fees",
+      "site_says": "elpasochildrensfoundation.org: Surgeon $1,500.00, Orthotist $500.00",
+      "extractor_says": "1500 / 500 / 300 / 200 / 150 USD",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "AI TERMS: cns.org/cns-terms-service forbids integrating CNS content into bots/software using AI technologies. Extractor never calls llm_call (0 calls). The shared merge step / remediator could still send page text to the LLM: owner-level exclusion from LLM steps would be needed (shared files). Automated access itself is not prohibited in the text I read; robots.txt has no AI block.",
+    "Browser-first listing (JS): shell counts identical on repeated runs and under --force-fallback (10 / 10 / 10). Each category listing shows a 'N - M of T results' line; the extractor logs a WARNING if T exceeds the cards read (default page size 10; today max 5 per list). Pagination is not followed.",
+    "Coverage checklist: multi-day ranges verified; fees on the event's own page (same host) or, for the one third-party symposium, on the organiser page via check_url_safe + fetch_validated (second hop, 1 request); no image fee tables seen; Annual Meeting fee grids carry no currency symbol issue ($). Harness --coverage: clean on all sampled rows.",
+    "Stale-edition guard: /annualmeeting is always the CURRENT edition. The 2027 Annual Meeting row (Oct 23-27, Phoenix) therefore gets dates and city only, never the 2026 fee grids or description; verified. 2026 early/advanced windows (5/31, 9/30) are already past and are kept with their deadlines because the page still shows them.",
+    "Rows without pricing are justified: Written/Oral Board Review (virtual, pricing section absent), Joint Tumor Section Symposium (Oct 2027) and ASSFN Biennial Meeting (Mar 2028) are save-the-dates with an empty page. The Oral Board teaser says March 21-27 while the header says Mar 20-21: site inconsistency, header dates used.",
+    "Dropped by rule (INFO logged): on-demand series with spans of years (webinar series, SANS exams, Virtual Visiting Professor) and award/scholarship application windows (Nov 13 - Jan 31). Past events on the Other Neurosurgical Meetings list (Apr-Jul 2026) are dropped by date. The Annual Meeting 2028 (Sept 16-20, Nashville) is beyond the 18-month horizon.",
+    "The /meetings/calendar page itself is never used (it is a JS month grid); its internal /api/fusioncontent/* endpoints were looked at during recon but are NOT called by the extractor."
+  ]
+}

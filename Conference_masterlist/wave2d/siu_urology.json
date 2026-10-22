@@ -1,0 +1,67 @@
+{
+  "source_id": 136,
+  "slug": "siu_urology",
+  "class_name": "SiuUrologyExtractor",
+  "status": "partial",
+  "file_written": "medconf-scraper/extractors/siu_urology.py",
+  "source_row": {
+    "source_name": "SIU Events and Congress",
+    "society": "SIU",
+    "base_url": "https://www.siu-urology.org/events",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": true,
+    "active": true,
+    "extraction_instructions": "Custom PHP page: /events is one page of blocks opened by <a name=eventNN>, each with h3 title, free-text date line (year sometimes missing: taken from the footer copyright year), location line and free HTML. Past, undated and in-progress programmes are dropped. The annual Congress is not on that page: the newest /congress-YYYY/highlights page gives dates, city and edition, /general-information the venue and /registration the euro fee tables (IN PERSON / VIRTUAL ONLY x EARLY / REGULAR, member / non-member / Bench-to-Bedside)."
+  },
+  "registry_comment": "SIU (urology): events page blocks + annual Congress from /congress-YYYY pages (EUR fee tables)",
+  "probe_results": {
+    "shells": 2,
+    "shells_forced_fallback": 2,
+    "details_tested": 2,
+    "with_date": 2,
+    "with_pricing": 1,
+    "with_venue": 2,
+    "with_description": 1,
+    "with_specialty": 2
+  },
+  "test_urls": [
+    "https://www.siu-urology.org/congress-2026/highlights",
+    "https://www.siu-urology.org/congress-2026/registration",
+    "https://www.siu-urology.org/events#event90"
+  ],
+  "spot_check": [
+    {
+      "url": "https://www.siu-urology.org/congress-2026/highlights",
+      "field": "dates + city",
+      "site_says": "will take place in Florence, Italy, from November 11-14, 2026; 46th SIU Congress",
+      "extractor_says": "2026-11-11..2026-11-14, Florence / Italy, title 'SIU 2026 Congress (46th)'",
+      "match": true
+    },
+    {
+      "url": "https://www.siu-urology.org/congress-2026/registration",
+      "field": "fees",
+      "site_says": "Non-Member in person EUR 950 early (deadline July 15, passed) / EUR 1,150 regular; SIU Member high/upper-middle income EUR 800 / 950; virtual non-member EUR 300 / 350",
+      "extractor_says": "In person Non-member 1150, In person Member HIC 950, Virtual Non-member 350 (regular only, early dropped) (labels end '· Regular · excl. 22% VAT')",
+      "match": true
+    },
+    {
+      "url": "https://www.siu-urology.org/events#event90",
+      "field": "dates + place",
+      "site_says": "SIU Regional Meeting, November 20-21, 2026, Wuhan, China",
+      "extractor_says": "2026-11-20..2026-11-21, Wuhan / China",
+      "match": true
+    }
+  ],
+  "concerns": [
+    "Only 2 upcoming events exist: the SIU 2026 Congress (Florence) and the SIU Regional Meeting (Wuhan). The events page also holds a Residents' Hub post (30 April 2026, 'Various'), eGrand Rounds (12 February 2026, past) and the Urotrainer programme (31 Aug-21 Nov, remote, already running, enrolment closed); all three are skipped by the date rules (a programme that started more than a week before today and lasts longer than a week counts as in progress).",
+    "Year-less date lines ('August 31-November 21') take their year from the page footer copyright; if the footer is missing the block is skipped.",
+    "The Congress is found through /congress-YYYY links on the events page and the 'will take place in <city>, <country>, from <dates>' sentence on /highlights; a wording change there makes the Congress shell disappear (a WARNING is logged), it would not mis-date.",
+    "Fees: public EUR prices for the Congress, regular column only (early deadline 15 July has passed; the extractor drops closed early columns using the Congress year). Member categories use World Bank income bands. 'Free with SIU Membership' rows (virtual resident/trainee) carry no price and are skipped; the member rates are printed publicly on the page, nothing is behind a login. Fees are as published and exclude 22 percent Italian VAT; every congress tier label ends with \"· excl. 22% VAT\".",
+    "The Regional Meeting block has no body text, so no description, venue or fees (organiser page not linked). Coverage checklist: fee locations checked for the Congress (registration page, no image table, no external fee link); the Regional Meeting has none on the site.",
+    "Request budget: events page + highlights + general-information + registration = 4 requests per scrape. Forced-fallback run gave the same 2 shells.",
+    "Status partial only because the source yields 2 events; everything found is verified."
+  ]
+}
