@@ -142,6 +142,15 @@ from .brit_thoracic import BritThoracicExtractor
 from .bsir import BsirExtractor
 from .rheumatology import RheumatologyExtractor
 from .sbns import SbnsExtractor
+from .aad import AadExtractor
+from .aan import AanExtractor
+from .augis import AugisExtractor
+from .cns import CnsExtractor
+from .eshre import EshreExtractor
+from .eular import EularExtractor
+from .hematology import HematologyExtractor
+from .pcronline import PcronlineExtractor
+from .siu_urology import SiuUrologyExtractor
 from .associationofbreastsurgery import AssociationOfBreastSurgeryExtractor
 from .basl import BASLExtractor
 from .baus import BAUSExtractor
@@ -285,6 +294,15 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     127: RheumatologyExtractor,               # 127: BSR (rheumatology): DNN listings for conferences, courses, webinars; detail Date/Venue/CPD labels + Members/Non-members pricing tabs
     128: BapmExtractor,                       # 128: BAPM (perinatal medicine) meetings and events: teaser cards -> event pages; end date from Date line or intro duration; EventsAir fees for BAPM's own conference
     129: SbnsExtractor,                       # 129: SBNS (neurosurgery) event calendar: Eventfolio cards -> event pages; society meetings plus external courses; fee widget + organiser Book Now link
+    134: EularExtractor,                      # 134: EULAR events directory (Odoo): paginated cards -> event page dates/place; EUR fee from edu.eular.org Moodle page for EULAR-run courses
+    135: PcronlineExtractor,                  # 135: PCR courses (EuroPCR family): /Courses cards -> course page JSON-LD venue + /Register pricing-item fees (EUR/SGD)
+    136: SiuUrologyExtractor,                 # 136: SIU (urology): events page blocks + annual Congress from /congress-YYYY pages (EUR fee tables)
+    137: EshreExtractor,                      # 137: ESHRE: Campus workshop calendar (venue, EACCME credits, EUR fee table on /Registration) + Annual Meeting from /Annual-Meeting
+    139: HematologyExtractor,                 # 139: ASH (hematology.org): Annual Meeting + Highlights of ASH regional meetings, USD fee grids, one edition per programme
+    140: AanExtractor,                        # 140: AAN (aan.com): Annual Meeting, Fall Conference, APP Conference from the upcoming-events page; no fees public; NO AI use allowed by site
+    141: AadExtractor,                        # 141: AAD (aad.org): Annual Meeting 2027/2028, summer educational meeting, Hands-On: Cosmetics course; USD; NO AI use allowed by site terms
+    142: CnsExtractor,                        # 142: CNS (cns.org): Annual Meeting, courses, joint section meetings and listed third-party symposia; JS listings via browser; USD; NO AI use allowed by site terms
+    143: AugisExtractor,                      # 143: AUGIS (augis.org): upper GI surgery events table + ASM banner; booking behind member login so no fees; Cvent summary hop for time/venue
 }
 
 

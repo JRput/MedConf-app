@@ -106,6 +106,9 @@ jobs:
           - group: N
             source_ids: "116,117,118,119,120,121,122"
             source_names: "BSSH VascSoc BAUS HIS BBTS ABS BASL"
+          - group: O
+            source_ids: "134,135,136,137,139,143"
+            source_names: "EULAR PCR SIU ESHRE ASH AUGIS"
 
     steps:
       - name: Check out repository
