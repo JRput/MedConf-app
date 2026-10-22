@@ -76,6 +76,16 @@ _FETCH_JS = """async ([url, query, offset, auth]) => {
   return await r.json();
 }"""
 
+_TRANSPORT_RE = re.compile(
+    r"(?i)failed to fetch|networkerror|net::ERR_|timeout|graphql http (404|429|5\d\d)"
+)
+
+
+def _is_transport_failure(exc: BaseException) -> bool:
+    """CMS down / unreachable / 5xx (as opposed to a changed schema or markup)."""
+    return bool(_TRANSPORT_RE.search(f"{type(exc).__name__}: {exc}"))
+
+
 _ISO_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
 
 # liveType → event_type. Anything not listed falls back to a title heuristic.
@@ -146,16 +156,30 @@ class UrowebExtractor(BaseExtractor):
         browser = getattr(self, "browser", None)
         if browser is None:
             return None
+        last_exc: Optional[BaseException] = None
         for attempt in range(3):
             try:
                 shells = self._walk_listing(browser)
                 if shells:
                     return shells
+                last_exc = None
                 logger.warning("uroweb: empty listing (attempt %d)", attempt + 1)
             except Exception as e:  # noqa: BLE001
+                last_exc = e
                 logger.warning("uroweb: listing attempt %d failed: %s", attempt + 1, e)
             time.sleep(3)
         logger.error("uroweb: listing failed after 3 tries — returning no shells")
+        # 2026-10-22: cms.uroweb.org answered nginx 404 to everything (the
+        # site's own SPA could not load either), so the in-page fetch threw
+        # "TypeError: Failed to fetch" and group F went red. A CMS outage /
+        # transport failure is transient: register it as `unreachable` so it
+        # is a WARNING under main.py's 3-strike rule. Markup/API changes
+        # (graphql errors, missing auth header, empty payload) stay hard fails.
+        if last_exc is not None and _is_transport_failure(last_exc):
+            from extractors import http_fetch
+            http_fetch.note_unreachable(
+                GRAPHQL_URL, ConnectionError(f"net::ERR_FAILED (cms outage): {last_exc}"), browser
+            )
         return []
 
     def _walk_listing(self, browser) -> List[Dict[str, Any]]:
