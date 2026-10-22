@@ -26,14 +26,107 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import os
 import re
+import signal
 import sys
+import threading
+import time
+from contextlib import contextmanager
 from dataclasses import dataclass, field, asdict
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------- #
+# Time budgets (2026-10-22: audits of BOA / BAPM hung for hours — a
+# Cloudflare-challenged host made every Playwright navigation cost ~2 min
+# and the hydration probe tries 11 guessed URLs per row, with no overall
+# cap). Every network step now has a hard timeout and every row / source
+# has a wall-clock budget. A step that runs out of budget is "page not
+# evaluable" (neutral), never a MISSING.
+# ---------------------------------------------------------------- #
+ROW_BUDGET_S = float(os.environ.get("AUDIT_ROW_BUDGET_S", "120"))
+SOURCE_BUDGET_S = float(os.environ.get("AUDIT_SOURCE_BUDGET_S", "900"))
+NAV_TIMEOUT_MS = 15000          # per Playwright navigation
+PROBE_BUDGET_S = 45.0           # hydrated-registration probe, per row
+PAGINATION_BUDGET_S = 60.0      # listing-page pagination check, per source
+
+
+class BudgetExceeded(BaseException):
+    """Raised inside a step when its wall-clock budget runs out. Derives from
+    BaseException so the many `except Exception` blocks in the shared fetchers
+    cannot swallow it."""
+
+
+_source_deadline: Optional[float] = None
+_OFFLINE = False   # True while re-auditing a timed-out row without any network
+
+
+def _source_time_up() -> bool:
+    return _source_deadline is not None and time.time() >= _source_deadline
+
+
+@contextmanager
+def _wallclock(seconds: float, label: str):
+    """Hard wall-clock cap for the enclosed block. Uses SIGALRM on the main
+    thread so it also interrupts a Playwright call or a socket read that
+    never returns; elsewhere (non-main thread, Windows) it is a no-op and
+    the per-call timeouts are the only guard."""
+    if (threading.current_thread() is not threading.main_thread()
+            or not hasattr(signal, "setitimer")):
+        yield
+        return
+
+    def _on_alarm(signum, frame):
+        raise BudgetExceeded(label)
+
+    prev = signal.signal(signal.SIGALRM, _on_alarm)
+    # Re-fire every 3 s after the first alarm in case a handler swallowed it.
+    signal.setitimer(signal.ITIMER_REAL, max(1.0, seconds), 3.0)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, prev)
+
+
+def _goto_capped(b, url: str, timeout_ms: int = NAV_TIMEOUT_MS) -> bool:
+    """Navigate with a hard timeout and a wait strategy that cannot stall
+    (domcontentloaded, never networkidle). No challenge-rotation dance:
+    a challenged page is simply "not evaluable". Returns False if the page
+    did not load or is behind a bot challenge."""
+    try:
+        resp = b.page.goto(url, wait_until="domcontentloaded", timeout=timeout_ms)
+    except Exception as e:
+        logger.debug(f"audit: goto failed for {url}: {e}")
+        return False
+    if resp is not None and resp.status >= 400:
+        return False   # guessed sub-paths mostly 404 - don't wait on them
+    try:
+        if b._is_challenged():
+            logger.debug(f"audit: {url} is behind a bot challenge - not evaluable")
+            return False
+    except Exception:
+        pass
+    return True
+
+
+def _discard_browser(cache) -> None:
+    """After a budget kill the Playwright session may be wedged; drop it so
+    the next step starts a fresh one."""
+    b = getattr(cache, "_browser", None) if cache is not None else None
+    if b is None:
+        return
+    cache._browser = None
+    try:
+        with _wallclock(10, "browser close"):
+            b.close()
+    except (Exception, BudgetExceeded):
+        pass
 
 
 # Society → expected specialty. Any conference from this society whose
@@ -604,24 +697,28 @@ def _hydrated_registration_probe(source_url: str, cache=None, start_date: Option
     Reuses the PageCache's browser if one is passed — otherwise launches
     a fresh BrowserController (used by ad-hoc direct calls).
     """
-    if not source_url:
+    if not source_url or _OFFLINE:
         return None
     if source_url in _HYDRATED_CACHE:
         return _HYDRATED_CACHE[source_url]
     base = source_url.rstrip("/") + "/"
-    candidates = [
-        base + "registration/",
-        base + "registration",
-        base + "registration-2/",
-        base + "attend/registration/",
-        base + "attendee-resources/registration",
-        base + "fees/",
-        base + "fees-and-how-to-book/",
-        base + "rates/",
-        base + "register/",
-        base + "register-now/",
-        source_url,   # the main page itself
-    ]
+    if re.search(r"\.(?:html?|php|aspx?)$", source_url.split("?")[0], re.I):
+        # Appending path segments to a file-style URL only produces 404s.
+        candidates = [source_url]
+    else:
+        candidates = [
+            base + "registration/",
+            base + "registration",
+            base + "registration-2/",
+            base + "attend/registration/",
+            base + "attendee-resources/registration",
+            base + "fees/",
+            base + "fees-and-how-to-book/",
+            base + "rates/",
+            base + "register/",
+            base + "register-now/",
+            source_url,   # the main page itself
+        ]
     # Prefer reusing the PageCache's browser to avoid a second Chromium
     # instance colliding with the one already handling page_text fetches.
     b = None
@@ -638,13 +735,25 @@ def _hydrated_registration_probe(source_url: str, cache=None, start_date: Option
             logger.debug(f"audit: browser launch failed for hydration probe: {e}")
             _HYDRATED_CACHE[source_url] = None
             return None
+    probe_deadline = time.time() + PROBE_BUDGET_S
     try:
         for u in candidates:
+            if time.time() >= probe_deadline or _source_time_up():
+                logger.warning(f"audit: row/source budget exhausted during hydration probe of {source_url}")
+                break
             try:
-                b.navigate(u)
-                b.page.wait_for_timeout(8000)
-                body = b.page.evaluate("document.body.innerText") or ""
-                prices = re.findall(r"[£$€]\s*[\d,]{2,7}(?:\.\d{2})?", body)
+                if not _goto_capped(b, u):
+                    continue
+                body, prices = "", []
+                for _ in range(4):   # hydrate up to 8 s, leave as soon as prices render
+                    left_ms = int(max(0.0, probe_deadline - time.time()) * 1000)
+                    if left_ms <= 0:
+                        break
+                    b.page.wait_for_timeout(min(2000, left_ms))
+                    body = b.page.evaluate("document.body.innerText") or ""
+                    prices = re.findall(r"[£$€]\s*[\d,]{2,7}(?:\.\d{2})?", body)
+                    if len(prices) >= 5:
+                        break
                 if len(prices) >= 5 and _looks_like_registration(body):
                     result = {
                         "url": u,
@@ -654,6 +763,8 @@ def _hydrated_registration_probe(source_url: str, cache=None, start_date: Option
                     }
                     _HYDRATED_CACHE[source_url] = result
                     return result
+            except BudgetExceeded:
+                raise
             except Exception:
                 continue
     finally:
@@ -711,6 +822,15 @@ def audit_row(row: dict, page_text: str, page_html: Optional[str],
     except Exception as e:
         audit.add(FieldVerdict("pricing_tiers", "SUSPECT", None,
                                reason=f"Check crashed: {e}"))
+    # A page we could not read (timeout, outage, bot wall, budget kill) is
+    # "not evaluable", never evidence: verdicts that rest on the page being
+    # empty become neutral instead of MISSING / SUSPECT / GENUINELY_ABSENT.
+    if row.get("source_url") and not (page_text or "").strip():
+        for f in audit.fields:
+            if f.status == "GENUINELY_ABSENT" or (
+                    f.status == "SUSPECT" and "page" in (f.reason or "").lower()):
+                f.reason = f"page not evaluable (was {f.status}: {f.reason})"
+                f.status = "NOT_APPLICABLE"
     audit.finalize()
     return audit
 
@@ -734,11 +854,12 @@ def _check_pagination_on_listing(base_url: str, db_row_count: int) -> Optional[d
     b = BrowserController()
     try:
         b.launch()
-        b.navigate(base_url)
-        b.page.wait_for_timeout(8000)
+        if not _goto_capped(b, base_url):
+            return None   # not evaluable (timeout / bot challenge) - neutral
+        b.page.wait_for_timeout(6000)
         for _ in range(3):
             b.page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            b.page.wait_for_timeout(1500)
+            b.page.wait_for_timeout(1000)
         info = b.page.evaluate("""() => {
             const result = {pageButtons: 0, nextButton: false,
                             showMore: false, loadMore: false,
@@ -774,13 +895,16 @@ def _check_pagination_on_listing(base_url: str, db_row_count: int) -> Optional[d
             "total_hint": info.get("totalPagesLabel"),
             "db_rows": db_row_count,
         }
+    except BudgetExceeded:
+        raise
     except Exception as e:
         logger.warning(f"pagination check failed for {base_url}: {e}")
         return None
     finally:
         try:
-            b.close()
-        except Exception:
+            with _wallclock(10, "browser close"):
+                b.close()
+        except (Exception, BudgetExceeded):
             pass
 
 
@@ -802,15 +926,61 @@ def audit_source(source_id: int) -> dict:
     for t in tiers:
         tiers_by_conf[t["conference_id"]].append(t)
 
+    global _source_deadline
+    from . import explorer as _explorer
     audits: list = []
-    with PageCache() as cache:
-        for row in conferences:
-            url = row.get("source_url")
-            page_text = cache.get(url) if url else ""
-            page_html = cache.get_html(url) if url else None
-            a = audit_row(row, page_text or "", page_html, source,
-                          tiers_by_conf.get(row["id"], []), cache=cache)
-            audits.append(a)
+    unevaluated: list = []     # rows skipped because the source budget ran out
+    not_evaluable: list = []   # rows audited without a readable page (timeout)
+    budget_exhausted = False
+    _source_deadline = time.time() + SOURCE_BUDGET_S
+    # PageCache.get() stops fetching once this deadline passes.
+    _explorer.set_source_deadline(_source_deadline)
+    try:
+        with PageCache() as cache:
+            for row in conferences:
+                if _source_time_up():
+                    if not budget_exhausted:
+                        logger.warning(f"audit: row/source budget exhausted for source {source_id} "
+                                       f"after {SOURCE_BUDGET_S:.0f}s - skipping remaining rows")
+                    budget_exhausted = True
+                    unevaluated.append(row["id"])
+                    continue
+                url = row.get("source_url")
+                page_text, page_html = "", None
+                try:
+                    with _wallclock(ROW_BUDGET_S, f"row {row['id']}"):
+                        page_text = (cache.get(url) if url else "") or ""
+                        page_html = cache.get_html(url) if url else None
+                        a = audit_row(row, page_text, page_html, source,
+                                      tiers_by_conf.get(row["id"], []), cache=cache)
+                except BudgetExceeded:
+                    logger.warning(f"audit: row/source budget exhausted for row {row['id']} "
+                                   f"({url}) after {ROW_BUDGET_S:.0f}s - page not evaluable")
+                    _discard_browser(cache)
+                    # Re-audit offline: no network, DB-only checks, no page text.
+                    global _OFFLINE
+                    _OFFLINE = True
+                    try:
+                        a = audit_row(row, "", None, source,
+                                      tiers_by_conf.get(row["id"], []), cache=None)
+                    finally:
+                        _OFFLINE = False
+                    not_evaluable.append(row["id"])
+                audits.append(a)
+            # Source-level pagination check - detects pagination controls on the
+            # source's listing page and warns if the DB row count seems too low.
+            # This catches sources where a new extractor forgot to walk pagination.
+            pagination_status = None
+            if not _source_time_up() or not audits:
+                try:
+                    with _wallclock(PAGINATION_BUDGET_S, "pagination check"):
+                        pagination_status = _check_pagination_on_listing(
+                            source.get("base_url") or "", len(audits))
+                except BudgetExceeded:
+                    logger.warning("audit: row/source budget exhausted during pagination check - skipped")
+    finally:
+        _explorer.set_source_deadline(None)
+        _source_deadline = None
 
     # Aggregate stats
     total_rows = len(audits)
@@ -821,12 +991,6 @@ def audit_source(source_id: int) -> dict:
         sum(a.completeness_score for a in audits) / max(1, total_rows), 1
     )
 
-    # Source-level pagination check — detects pagination controls on the
-    # source's listing page and warns if the DB row count seems too low.
-    # This catches sources where a new extractor forgot to walk pagination.
-    pagination_status = _check_pagination_on_listing(
-        source.get("base_url") or "", total_rows,
-    )
     pagination_warning = None
     if pagination_status and pagination_status.get("has_pagination"):
         pb = pagination_status.get("page_buttons") or 0
@@ -855,7 +1019,11 @@ def audit_source(source_id: int) -> dict:
         "total_missing_fields": total_missing,
         "total_suspect_fields": total_suspect,
         "avg_completeness": avg_score,
-        "verdict": "PASS" if total_missing == 0 and total_suspect == 0 else "FAIL",
+        "verdict": ("FAIL" if (total_missing or total_suspect) else
+                    "INCOMPLETE" if unevaluated else "PASS"),
+        "budget_exhausted": budget_exhausted,
+        "unevaluated_rows": unevaluated,
+        "not_evaluable_rows": not_evaluable,
         "pagination": pagination_status,
         "pagination_warning": pagination_warning,
         "audits": [asdict(a) for a in audits],
@@ -874,7 +1042,9 @@ def audit_source(source_id: int) -> dict:
 
 
 def _print_summary(result: dict) -> None:
-    verdict_line = "✅ PASS" if result["verdict"] == "PASS" else "❌ FAIL — BLOCKS SIGN-OFF"
+    verdict_line = {"PASS": "✅ PASS",
+                    "INCOMPLETE": "⚠ INCOMPLETE — source time budget ran out, rows unaudited",
+                    }.get(result["verdict"], "❌ FAIL — BLOCKS SIGN-OFF")
     b = "─" * 60
     print(b)
     print(f"Source {result['source_id']}: {result['source_name']}")
@@ -885,6 +1055,10 @@ def _print_summary(result: dict) -> None:
     print(f"  Total SUSPECT:       {result['total_suspect_fields']}")
     print(f"  Avg completeness:    {result['avg_completeness']}%")
     print(f"  Verdict:             {verdict_line}")
+    if result.get("unevaluated_rows"):
+        print(f"  ⚠ Unaudited rows (budget): {len(result['unevaluated_rows'])}")
+    if result.get("not_evaluable_rows"):
+        print(f"  ⚠ Rows with page not evaluable (timeout): {len(result['not_evaluable_rows'])}")
     if result.get("pagination_warning"):
         print(f"  ⚠ Pagination:       {result['pagination_warning']}")
     elif result.get("pagination") and result["pagination"].get("has_pagination"):
