@@ -102,6 +102,18 @@ def canonical_parent(value: Optional[str]) -> Optional[str]:
     return mapped
 
 
+def parent_label(value: Optional[str]) -> Optional[str]:
+    """Display label of the parent that `value` (slug or legacy raw label)
+    resolves to, or None if unresolvable."""
+    slug = canonical_parent(value)
+    if not slug:
+        return None
+    for p in _load()["parents"]:
+        if p["slug"] == slug:
+            return p.get("label")
+    return None
+
+
 def raw_values_for(parent_slug: str) -> list:
     """Every raw conferences.specialty value that canonicalises to `parent_slug`."""
     return [raw for raw, parent in _raw_to_canonical().items() if parent == parent_slug]

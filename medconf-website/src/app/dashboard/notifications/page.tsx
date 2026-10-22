@@ -10,6 +10,7 @@ import type { NotificationItem } from '@/lib/types'
 import { AccountContainer, AccountPageHeader, AccountEmptyState } from '@/components/account/AccountPageHeader'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { notificationHref } from '@/lib/notifications'
 
 export default function NotificationsPage() {
   const { user } = useAuth()
@@ -118,14 +119,6 @@ function FilterTab({ label, active, onClick }: { label: string; active: boolean;
   )
 }
 
-function extractSpecialtyFromTitle(title: string): string {
-  // The cron emits titles like "3 new Cardiology events" — the specialty is
-  // the slice between "X new" and the trailing noun (event/conference/…).
-  const parts = title.split(' ')
-  if (parts.length < 4) return ''
-  return parts.slice(2, -1).join(' ')
-}
-
 const TYPE_STYLE = {
   reminder: { icon: Clock, color: 'text-warn-text' },
   new_in_specialty: { icon: Sparkles, color: 'text-brand-text' },
@@ -139,15 +132,7 @@ function Row({ item, onClick }: { item: NotificationItem; onClick: () => void })
   const unread = !item.read_at
   const style = TYPE_STYLE[item.type] ?? TYPE_STYLE.system
   const Icon = style.icon
-  const href = item.type === 'contribution_update'
-    ? '/dashboard/contributions'
-    : item.type === 'moderation'
-      ? '/admin/moderation'
-      : item.conference_id
-    ? `/conferences/${item.conference_id}`
-    : item.type === 'new_in_specialty'
-      ? `/conferences?specialty=${encodeURIComponent(extractSpecialtyFromTitle(item.title))}&sort=recently_added`
-      : '#'
+  const href = notificationHref(item)
 
   return (
     <Link

@@ -10,6 +10,7 @@ import type { NotificationItem } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
+import { notificationHref } from '@/lib/notifications'
 
 const POLL_INTERVAL_MS = 60_000 // re-fetch unread count every minute
 const RECENT_LIMIT = 6
@@ -17,19 +18,27 @@ const RECENT_LIMIT = 6
 export function NotificationBell() {
   const { user } = useAuth()
   const supabase = createSupabaseClient()
-  const [items, setItems] = useState<NotificationItem[]>([])
+  const [recentAll, setRecentAll] = useState<NotificationItem[]>([])
+  const [recentUnread, setRecentUnread] = useState<NotificationItem[]>([])
+  const [total, setTotal] = useState(0)
   const [unread, setUnread] = useState(0)
   const [open, setOpen] = useState(false)
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
 
   const loadRecent = async () => {
     if (!user) return
-    const [recentResp, countResp] = await Promise.all([
-      supabase.from('notifications').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(RECENT_LIMIT),
-      supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).is('read_at', null),
+    const base = () => supabase.from('notifications').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(RECENT_LIMIT)
+    const count = () => supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id)
+    const [allResp, unreadResp, totalResp, unreadCountResp] = await Promise.all([
+      base(),
+      base().is('read_at', null),
+      count(),
+      count().is('read_at', null),
     ])
-    if (recentResp.data) setItems(recentResp.data as NotificationItem[])
-    if (countResp.count !== null && countResp.count !== undefined) setUnread(countResp.count)
+    if (allResp.data) setRecentAll(allResp.data as NotificationItem[])
+    if (unreadResp.data) setRecentUnread(unreadResp.data as NotificationItem[])
+    if (totalResp.count !== null && totalResp.count !== undefined) setTotal(totalResp.count)
+    if (unreadCountResp.count !== null && unreadCountResp.count !== undefined) setUnread(unreadCountResp.count)
   }
 
   useEffect(() => {
@@ -42,8 +51,12 @@ export function NotificationBell() {
 
   const markAsRead = async (id: string) => {
     if (!user) return
+    const wasUnread = recentAll.some((n) => n.id === id && !n.read_at) || recentUnread.some((n) => n.id === id)
     await supabase.from('notifications').update({ read_at: new Date().toISOString() }).eq('id', id).eq('user_id', user.id)
-    setItems((prev) => prev.map((n) => (n.id === id ? { ...n, read_at: new Date().toISOString() } : n)))
+    if (!wasUnread) return
+    const now = new Date().toISOString()
+    setRecentAll((prev) => prev.map((n) => (n.id === id ? { ...n, read_at: now } : n)))
+    setRecentUnread((prev) => prev.filter((n) => n.id !== id))
     setUnread((n) => Math.max(0, n - 1))
   }
 
@@ -51,13 +64,14 @@ export function NotificationBell() {
     if (!user) return
     const now = new Date().toISOString()
     await supabase.from('notifications').update({ read_at: now }).eq('user_id', user.id).is('read_at', null)
-    setItems((prev) => prev.map((n) => (n.read_at ? n : { ...n, read_at: now })))
+    setRecentAll((prev) => prev.map((n) => (n.read_at ? n : { ...n, read_at: now })))
+    setRecentUnread([])
     setUnread(0)
   }
 
   if (!user) return null
 
-  const visible = filter === 'unread' ? items.filter((n) => !n.read_at) : items
+  const visible = filter === 'unread' ? recentUnread : recentAll
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -92,7 +106,7 @@ export function NotificationBell() {
         </div>
 
         <div className="flex gap-1 border-b border-border px-3 pt-2 pb-1">
-          <FilterTab label={`All (${items.length})`} active={filter === 'all'} onClick={() => setFilter('all')} />
+          <FilterTab label={`All (${total})`} active={filter === 'all'} onClick={() => setFilter('all')} />
           <FilterTab label={`Unread (${unread})`} active={filter === 'unread'} onClick={() => setFilter('unread')} />
         </div>
 
@@ -143,15 +157,6 @@ function FilterTab({ label, active, onClick }: { label: string; active: boolean;
   )
 }
 
-function extractSpecialtyFromTitle(title: string): string {
-  // The cron emits titles like "3 new Cardiology events" or
-  // "5 new Surgery (RCS) courses". The specialty is the slice between
-  // "X new" and the trailing noun (event/conference/course/...).
-  const parts = title.split(' ')
-  if (parts.length < 4) return ''
-  return parts.slice(2, -1).join(' ')
-}
-
 const TYPE_STYLE = {
   reminder: { icon: Clock, color: 'text-warn-text' },
   new_in_specialty: { icon: Sparkles, color: 'text-brand-text' },
@@ -166,20 +171,7 @@ function NotificationRow({ item, onClick }: { item: NotificationItem; onClick: (
   const style = TYPE_STYLE[item.type] ?? TYPE_STYLE.system
   const Icon = style.icon
 
-  // Click target depends on the notification type:
-  // - reminder / conference_change: open the specific conference
-  // - new_in_specialty: open the directory pre-filtered to that specialty,
-  //   sorted by recently_added so the new arrivals surface at the top
-  // - everything else: the full notifications list
-  const href = item.type === 'contribution_update'
-    ? '/dashboard/contributions'
-    : item.type === 'moderation'
-      ? '/admin/moderation'
-      : item.conference_id
-    ? `/conferences/${item.conference_id}`
-    : item.type === 'new_in_specialty'
-      ? `/conferences?specialty=${encodeURIComponent(extractSpecialtyFromTitle(item.title))}&sort=recently_added`
-      : '/dashboard/notifications'
+  const href = notificationHref(item)
 
   return (
     <Link

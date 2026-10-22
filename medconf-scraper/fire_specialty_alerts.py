@@ -25,7 +25,9 @@ events") and advances the watermark to NOW().
 
 In-app only — no emails. The bell icon polls notifications for unread
 counts. Clicking the notification deep-links to
-/conferences?specialty=<...>&sort=recently_added.
+/conferences?specialty=<...>&sort=newest. The title carries the parent's
+display label (e.g. "Oncology"); the website resolves that title text back
+to a parent slug for the link.
 
 Idempotent in the absence of new data: re-running on the same day with
 nothing fresh inserts no notifications.
@@ -45,7 +47,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
-from specialty_taxonomy import TaxonomyLoadError, raw_values_for_profile_specialty
+from specialty_taxonomy import TaxonomyLoadError, parent_label, raw_values_for_profile_specialty
 
 
 def _supabase() -> Client:
@@ -164,8 +166,12 @@ def fire_alerts(sb: Client, dry_run: bool = False) -> dict:
         matches_total += len(matches)
         kinds = {m.get("event_type") or "conference" for m in matches}
 
-        title = _format_title(len(matches), specialty, kinds)
-        body = _format_body(matches, specialty)
+        try:
+            label = parent_label(specialty) or specialty
+        except TaxonomyLoadError:
+            label = specialty
+        title = _format_title(len(matches), label, kinds)
+        body = _format_body(matches, label)
 
         if dry_run:
             alerts_fired += 1
