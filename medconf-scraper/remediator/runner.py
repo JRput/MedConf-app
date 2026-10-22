@@ -212,7 +212,8 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
             page_text = cache.get(url) if url else None
             page_html = cache.get_html(url) if url else None
             unfixed = []
-            row = {**row, "_detail_is_multipage": bool(source.get("detail_is_multipage"))}
+            row = {**row, "_detail_is_multipage": bool(source.get("detail_is_multipage")),
+                   "_page_html": page_html or ""}
             done_fields: set = set()
             for field in gaps:
                 if field in done_fields:
