@@ -13,7 +13,7 @@
     "pagination_template": null,
     "max_pages_hint": 1,
     "detail_is_multipage": false,
-    "active": true,
+    "active": false,
     "extraction_instructions": "The calendar is a JS month grid mixing events with on-demand series and award windows. The three category listings (/meetings/courses, /meetings/joint-section-meetings, /meetings/other-neurosurgical-meetings) render div.list-item cards (title link /meetings-detail/<slug>, EventStartDate_s, EventEndDate_s, Teaser_s) and are loaded with the browser; spans over 14 days and past events are dropped. The Annual Meeting comes from the static /meetings/past-and-future-annual-meetings; its microsite /annualmeeting/overview holds the Member and Non-member fee grids (Early Bird/Advanced/Regular) and is attached only to the edition whose year the headers carry. Detail pages: '<format>/<title>/<venue | city, ST>/<dates>', Pricing table, Hotel, ACCME credit text. Third-party symposia link to the organiser page, read for public fees via fetch_validated. Nothing from this site is sent to llm_call (site forbids AI use); description and specialty are deterministic."
   },
   "registry_comment": "CNS (cns.org): Annual Meeting, courses, joint section meetings and listed third-party symposia; JS listings via browser; USD; NO AI use allowed by site terms",
@@ -71,6 +71,7 @@
     }
   ],
   "concerns": [
+    "Registered INACTIVE 2026-10-22: site terms restrict automated access / third-party use — owner decision pending (see PLAN.md).",
     "AI TERMS: cns.org/cns-terms-service forbids integrating CNS content into bots/software using AI technologies. Extractor never calls llm_call (0 calls). The shared merge step / remediator could still send page text to the LLM: owner-level exclusion from LLM steps would be needed (shared files). Automated access itself is not prohibited in the text I read; robots.txt has no AI block.",
     "Browser-first listing (JS): shell counts identical on repeated runs and under --force-fallback (10 / 10 / 10). Each category listing shows a 'N - M of T results' line; the extractor logs a WARNING if T exceeds the cards read (default page size 10; today max 5 per list). Pagination is not followed.",
     "Coverage checklist: multi-day ranges verified; fees on the event's own page (same host) or, for the one third-party symposium, on the organiser page via check_url_safe + fetch_validated (second hop, 1 request); no image fee tables seen; Annual Meeting fee grids carry no currency symbol issue ($). Harness --coverage: clean on all sampled rows.",

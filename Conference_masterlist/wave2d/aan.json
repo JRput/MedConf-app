@@ -13,7 +13,7 @@
     "pagination_template": null,
     "max_pages_hint": 1,
     "detail_is_multipage": false,
-    "active": true,
+    "active": false,
     "extraction_instructions": "Server-rendered listing: per series an <h4> link, then <p> blocks 'City and online<br>date<br>date' where a place line applies to the dates under it. Editions within 18 months only. Series pages show the next edition or a thank-you for the PAST edition, so page text is used only when its header date matches the shell. No fees are public yet (Annual Meeting registration opens November 2026). Nothing from this site is sent to llm_call (site forbids AI use); description and specialty are deterministic."
   },
   "registry_comment": "AAN (aan.com): Annual Meeting, Fall Conference, APP Conference from the upcoming-events page; no fees public; NO AI use allowed by site",
@@ -63,6 +63,7 @@
     }
   ],
   "concerns": [
+    "Registered INACTIVE 2026-10-22: site terms restrict automated access / third-party use — owner decision pending (see PLAN.md).",
     "SITE FORBIDS AUTOMATION: aan.com/robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and ~20 other AI agents; Terms of Use (e)(i) forbid any robot/spider/scraper/automated means to access or copy the site without AAN's written permission and (iii) forbid using AAN content in any AI/ML system. The probe cleared the host technically, but the Commander/owner should decide whether to register this source at all; status is 'partial' for that reason, the extractor itself is complete. It uses only the one listing page (generic User-agent: * is Allow /) and never calls llm_call.",
     "Shared-pipeline gap: even with llm_call unused here, the merge step / abstract classifier / remediator can still send AAN page text to the LLM. If AAN stays registered, an owner-level exclusion of this source from LLM steps is needed (shared files, not mine to change).",
     "Coverage checklist: multi-day ranges verified; pricing_tiers [] justified: Annual Meeting page says registration opens early November 2026, Fall/APP pages describe the PAST 2026 edition (on-demand add-on only) and later editions have no page; no image fee tables, no registration sub-page, no external event site (the harness PRICE_EXTERNAL_LINK warnings are a cookiepedia.co.uk cookie-banner link, a false positive).",

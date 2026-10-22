@@ -13,7 +13,7 @@
     "pagination_template": null,
     "max_pages_hint": 1,
     "detail_is_multipage": false,
-    "active": true,
+    "active": false,
     "extraction_instructions": "The recon URL (/member/meetings/events/locations) is only the dates page (Annual 2027/2028, summer meetings). The real listing is /member/meetings/events, a card deck: DermCatalyst (postponed, skipped), Hands-On: Cosmetics (own page with date line, venue and Rates), the 2027 Annual Meeting microsite (/member/meetings-education/am27, fees public at /registration/fees: Early bird / Standard grid). Editions without a page (Annual 2028, summer 2027) come from the dates page. Hands-On rates are shown publicly but only members can register. Nothing from this site is sent to llm_call (site forbids AI use); description and specialty are deterministic."
   },
   "registry_comment": "AAD (aad.org): Annual Meeting 2027/2028, summer educational meeting, Hands-On: Cosmetics course; USD; NO AI use allowed by site terms",
@@ -64,6 +64,7 @@
     }
   ],
   "concerns": [
+    "Registered INACTIVE 2026-10-22: site terms restrict automated access / third-party use — owner decision pending (see PLAN.md).",
     "AI TERMS: aad.org/terms-use forbids incorporating Academy content into any AI learning model without written permission. Extractor never calls llm_call (0 calls). The shared merge step / remediator could still send page text to the LLM: owner-level exclusion from LLM steps would be needed (shared files, not mine). Scraping itself is not forbidden in the terms I read (robots.txt has no AI block).",
     "Members' fees behind login: Hands-On: Cosmetics rates are public but 'registration is open to AAD members only'; tier labels say '(AAD members only)'. The Annual Meeting grid covers all categories including non-members and is public.",
     "Coverage checklist: multi-day ranges verified (all 4); fees on the site's own sub-page /registration/fees (same host); no image fee tables; no external event site. Harness --coverage: SUBMISSION_NO_DEADLINE on the Annual Meeting because the page advertises the abstract call, whose deadline (Sept 2, 2026) has already passed, so no deadline is stored.",
