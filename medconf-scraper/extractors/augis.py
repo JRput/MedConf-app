@@ -109,6 +109,18 @@ def parse_cvent_summary(html: str) -> Dict[str, Any]:
     return out
 
 
+_NAV_RE = re.compile(r"(?i)\b(home|menu|login|log in|members?|register|read more|cookies?|skip to|share|privacy|terms|back to|breadcrumb|navigation)\b")
+
+
+def pick_description(lines: List[str], meta: Optional[str] = None) -> Optional[str]:
+    """First descriptive paragraph of the event body, else the meta description; never menu/notice text, never < 60 chars."""
+    for cand in list(lines) + [meta or ""]:
+        c = re.sub(r"\s+", " ", cand or "").strip()
+        if len(c) >= 60 and re.search(r"[.!?]$", c) and not _NAV_RE.search(c[:200]):
+            return c[:600]
+    return None
+
+
 def _region_for(*texts: Optional[str]) -> Optional[str]:
     blob = " ".join(t for t in texts if t).lower()
     for k, v in _NATION.items():
@@ -177,9 +189,10 @@ class AugisExtractor(BaseExtractor):
             if ihtml:
                 cm = re.search(r"(?is)<div id=\"dnn_ContentPane\">(.*?)(?:<div class=\"row mt-4\">)", ihtml)
                 lines = html_to_lines(cm.group(1) if cm else "")
-                para = next((l for l in lines if len(l) >= 80 and re.search(r"[.!?]$", l)), "")
+                md = re.search(r"""(?i)<meta\b[^>]*name=["']description["'][^>]*content=["']([^"']*)""", ihtml)
+                para = pick_description(lines, _html.unescape(md.group(1)) if md else None)
                 if para:
-                    out["description"] = para[:600]
+                    out["description"] = para
                 hm = re.search(r"(?i)\bat ([A-Z][^,\n]{3,40}(?:,\s*[A-Z][^,\n]{3,40})?),[^\n]*", " ".join(lines[:3]))
                 if hm:
                     out["venue_name"] = hm.group(1).strip()

@@ -61,6 +61,7 @@
     "ESHRE 2027 Annual Meeting has no public fee page yet, so pricing_tiers is empty. Its description is empty (no prose on the page). The 2026 meeting (London, 5-8 July 2026) is past and skipped.",
     "Specialty is a fixed 'Obstetrics & Gynaecology' (reproductive medicine); the male-factor and embryology campuses are borderline but the label is the closest existing one.",
     "Request budget: calendar + Annual-Meeting + (9 workshop pages + 9 Registration pages) + Annual Meeting page = about 21 requests per scrape. Forced-fallback run gave the same 10 shells.",
-    "EACCME credits are stored for the 4 workshops that print a credit line today (Florence, Budapest, Bologna, Athens); the 2027 workshops after them print none yet, so cpd_points is empty there. The 'organised by the Special Interest Group' line is not stored."
+    "EACCME credits are stored for the 4 workshops that print a credit line today (Florence, Budapest, Bologna, Athens); the 2027 workshops after them print none yet, so cpd_points is empty there. The 'organised by the Special Interest Group' line is not stored.",
+    "Description picker tightened: the 'Course description' block is cut at 'Read more' and each paragraph is rejected if it contains Home/Menu/Login/Register/Read more/Cookies/Skip to/Share this/Privacy/Terms; order is first clean body paragraph, then meta description, then the listing blurb. Re-run: no nav phrases in any of the 10 descriptions."
   ]
 }

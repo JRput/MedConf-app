@@ -23,7 +23,7 @@
     "details_tested": 12,
     "with_date": 12,
     "with_pricing": 7,
-    "with_venue": 11,
+    "with_venue": 12,
     "with_description": 12,
     "with_specialty": 12
   },
@@ -71,6 +71,7 @@
     "Alfieri's Bootcamp prints '3400 EUR HT - 4148 EUR TTC'; the VAT-inclusive 4148 is stored. PCR Innovators Day: the pricing-item block is the EuroPCR bundle, so the 'STAND ALONE' matrix is used (labelled 'Innovators Day stand-alone'). Innovators Day has no JSON-LD, so no venue (Paris is only in prose).",
     "event_type: PCR calls everything a 'Course'. Per the PLAYBOOK 3-way rule, short (<=3 day) Fellows Course / Bootcamp / Pre-course / Innovators Day are 'workshop' (4), the multi-day meetings (EuroPCR, London/Tokyo/Rio/Gulf Valves, AICT-AsiaPCR, SASCI, AVAM) are 'conference' (8); EuroPCR carries is_flagship. A reviewer may prefer 'course' for all.",
     "The 'Pre-course on cardiogenic shock' card links to /Network/iHF-Improving-Heart-Failure-care/Pre-course (same host, different section); it parses the same way (Physician 325 Regular / 375 Late EUR, Fellow 225 / 275).",
-    "About 12 course pages + 7 Register pages + 1 listing = about 20 requests per scrape at 1 s gap. Forced-fallback run gave the same 12 shells."
+    "About 12 course pages + 7 Register pages + 1 listing = about 20 requests per scrape at 1 s gap. Forced-fallback run gave the same 12 shells.",
+    "event_format is now always set (in_person unless title/blurb says webinar/online/virtual: none do). Innovators Day has no JSON-LD, so its city (Paris) is read from the Register page sentence 'join us in Paris on 17 May 2027'; all 12 rows now have a city."
   ]
 }

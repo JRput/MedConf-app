@@ -171,6 +171,15 @@ def parse_fees(html: str, event_start: Optional[str]) -> List[Dict[str, Any]]:
     return tiers
 
 
+_NAV_RE = re.compile(r"(?i)\b(?:home|menu|login|log in|register|read more|cookies?|skip to|share this|privacy|terms|breadcrumb|myeshre)\b")
+
+
+def clean_description(text: Optional[str]) -> Optional[str]:
+    """Cut at 'Read more', reject text that still carries menu/breadcrumb/cookie phrases or is too short (pure)."""
+    t = re.split(r"(?i)\bread more\b", text or "")[0].strip()
+    return t[:800] if len(t) >= 40 and not _NAV_RE.search(t) else None
+
+
 def venue_from_page(html: str) -> Optional[str]:
     """Workshop page: `w-title Venue` widget -> `innertextandlinks` <p> first line. Annual Meeting page: `<h4>Venue</h4>` block."""
     body = re.sub(r"(?is)<(script|style|svg|noscript)\b.*?</\1\s*>", " ", html or "")
@@ -234,11 +243,15 @@ class EshreExtractor(BaseExtractor):
         else:
             out["event_type"] = "workshop"
             out["event_format"] = "hybrid" if out.get("city") else None     # "in-person events with live broadcast"
-            if shell.get("blurb"):
-                out["description"] = shell["blurb"]
+            body_desc = None
             d = re.search(r"(?is)Course description</[^>]+>(.*?)(?:Read more|Organising Secretariat)", html)
-            if d and len(_txt(d.group(1))) > 40:
-                out["description"] = _txt(d.group(1))[:800]
+            if d:
+                paras = [clean_description(_txt(x)) for x in re.findall(r"(?is)<p[^>]*>(.*?)</p>", d.group(1))] or [clean_description(_txt(d.group(1)))]
+                body_desc = next((x for x in paras if x), None)
+            mm = re.search(r'<meta[^>]+name="description"[^>]*content="([^"]+)"', html)
+            out_desc = body_desc or clean_description(_txt(mm.group(1)) if mm else None) or clean_description(shell.get("blurb"))
+            if out_desc:
+                out["description"] = out_desc
             cme = re.search(r"(?i)maximum of\s*([\d.]+)\s*European CME credits", text)
             if cme:
                 out["cpd_points"] = float(cme.group(1))

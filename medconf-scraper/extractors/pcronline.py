@@ -280,8 +280,8 @@ class PcronlineExtractor(BaseExtractor):
         for k, v in place.items():
             if v:
                 out[k] = v
-        if place.get("city") or place.get("venue_name"):
-            out["event_format"] = "in_person"
+        probe = f"{title} {shell.get('blurb') or ''}".lower()
+        out["event_format"] = "online" if re.search(r"\b(webinar|online course|virtual)\b", probe) else "in_person"   # PCR courses are on site unless stated
         # description: the listing blurb, else the page strapline (h2.event-title)
         desc = shell.get("blurb")
         if not desc:
@@ -301,6 +301,10 @@ class PcronlineExtractor(BaseExtractor):
         if reg:
             time.sleep(self.REQUEST_GAP_S)
             rhtml = fetch_html(urljoin(_ROOT, reg), browser=getattr(self, "browser", None))
+            if not out.get("city"):                                   # no JSON-LD (Innovators Day): "join us in Paris on 17 May 2027"
+                cm = re.search(r"join us in ([A-Z][A-Za-z .'-]{2,30}?) on \d", _txt(rhtml or ""))
+                if cm:
+                    out["city"] = cm.group(1).strip()
             tiers = parse_register(rhtml or "", start)
             if tiers:
                 out["pricing_tiers"] = tiers

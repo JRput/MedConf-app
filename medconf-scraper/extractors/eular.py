@@ -308,8 +308,10 @@ class EularExtractor(BaseExtractor):
             out["start_time"] = side["start_time"]
         place = split_place(side.get("place") or shell.get("venue_raw") or "")
         out.update(place)
-        if place.get("city"):
-            out["event_format"] = "in_person"
+        probe = f"{title} {shell.get('category') or ''} {side.get('place') or ''}".lower()
+        online = bool(re.search(r"\b(online|virtual|webinar|e-?learning)\b", probe))
+        physical = bool(place.get("city")) or not online
+        out["event_format"] = "hybrid" if online and place.get("city") else ("online" if online else "in_person")   # TBC venue defaults to in_person
         desc = pick_description(html)
         org = side.get("organiser_url")
         if org:
