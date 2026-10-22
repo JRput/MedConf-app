@@ -22,7 +22,7 @@
     "shells_forced_fallback": 33,
     "details_tested": 33,
     "with_date": 33,
-    "with_pricing": 9,
+    "with_pricing": 10,
     "with_venue": 25,
     "with_description": 25,
     "with_specialty": 33
@@ -69,6 +69,7 @@
     "Fees: the booking pages (/ems-event-booking-page.html) are behind a login, so fees are only the header .event-pricing line, a booking-widget list or a 'Course fees' block. External rows link to the organiser ('Go to event website'); that link is stored as organiser_url for the fee explorer (two-hop, checklist 5), not followed here. Members' fees behind login. BOA New Consultants Course header says £100 but prose says a £95 fee: header kept.",
     "Coverage checklist: date ranges parsed from both ends (casting courses span weeks, FSL runs 30 Aug-10 Nov); no image fee tables or CFP seen; abstracts left to the merge step.",
     "Digital-access/on-demand cards and 'Cancelled/Postponed' titles are skipped via skip_card().",
-    "Shared base now lives in extractors/ems_calendar.py (EmsCalendarExtractor + helpers, used by boa.py and ics.py); bsg.py imports only the _UK_PLACES map from it. ems_calendar.py must ship with the boa and ics registrations. Tests: medconf-scraper/test_ems_calendar.py (9)."
+    "Shared base now lives in extractors/ems_calendar.py (EmsCalendarExtractor + helpers, used by boa.py and ics.py); bsg.py imports only the _UK_PLACES map from it. ems_calendar.py must ship with the boa and ics registrations. Tests: medconf-scraper/test_ems_calendar.py (9).",
+    "Audit 2026-10-22 follow-up: Ortho Update 2027 fees are public in prose on the course page ('A discounted course fee of £200 is available only for BOA members. (£300 for non-BOA members)') and are now parsed (2 GBP tiers). The booking page itself is login-walled. The 8 rows without a description (Core Skills in Orthopaedic Surgery, Trauma and orthopaedics ST3 interview course, Falls Prevention Summit, 2 x Hip Fracture Summit, Day Case Total Hip Replacement, Deconditioning, Casting Exam only) have only a title/date/venue header on the BOA page and no teaser on the card, so the extractor returns no description; the nav-menu text the audit saw on three of them is not produced by this extractor."
   ]
 }
