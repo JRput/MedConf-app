@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { canonicalSpecialty, rawValuesForParent, RAW_TO_CANONICAL, SPECIALTY_PARENTS } from '../taxonomy/specialties'
 import { classifyPriceBucket } from '../directory-query'
-import { SOCIETIES, societyInfo } from '../taxonomy/societies'
+import { SOCIETIES, societyInfo, societiesByKind } from '../taxonomy/societies'
 
 describe('specialty taxonomy', () => {
   // 10 deliberately tricky raw values from the live data pull (near-
@@ -114,5 +114,34 @@ describe('societies taxonomy', () => {
 
   it('has a Community pseudo-society for user-submitted events', () => {
     expect(societyInfo('Community')?.name).toBe('Community submissions')
+  })
+})
+
+describe('wave 2d societies and runtime fallback', () => {
+  const wave2d: Array<[string, string]> = [
+    ...['EAN', 'AAIC', 'AUA', 'AAO', 'RSNA', 'CHEST', 'ACC', 'ASN', 'ASA', 'UEG', 'ESCRS', 'EULAR', 'PCR', 'SIU', 'ESHRE', 'ASH'].map((k): [string, string] => [k, 'international']),
+    ...['BOFAS', 'BPNA', 'BAAPS', 'BSSH', 'Vascular Society', 'BAUS', 'HIS', 'BBTS', 'ABS', 'BASL', 'BSIR', 'BMFMS', 'BTS', 'BSR', 'BAPM', 'SBNS', 'BSG', 'BOA', 'ICS', 'AUGIS'].map((k): [string, string] => [k, 'specialist']),
+  ]
+
+  it('resolves every wave 2d key with the right kind', () => {
+    expect(wave2d).toHaveLength(36)
+    for (const [code, kind] of wave2d) {
+      expect(SOCIETIES[code], `not in SOCIETIES: ${code}`).toBeDefined()
+      expect(societyInfo(code)?.kind, code).toBe(kind)
+    }
+  })
+
+  it('adds unmapped facet codes under other, without duplicates or pseudo buckets', () => {
+    const g = societiesByKind(['ZZZ New Society', 'BOA', 'unspecified', 'Community'])
+    const all = Object.values(g).flat()
+    expect(g.other.find((s) => s.short === 'ZZZ New Society')?.name).toBe('ZZZ New Society')
+    expect(all.filter((s) => s.short === 'BOA')).toHaveLength(1)
+    expect(all.some((s) => s.short === 'unspecified')).toBe(false)
+    expect(all.filter((s) => s.short === 'Community')).toHaveLength(1) // only the SOCIETIES pseudo entry
+    expect(g.other.some((s) => s.short === 'unspecified')).toBe(false)
+  })
+
+  it('with no argument returns exactly the SOCIETIES entries', () => {
+    expect(Object.values(societiesByKind()).flat()).toHaveLength(Object.keys(SOCIETIES).length)
   })
 })

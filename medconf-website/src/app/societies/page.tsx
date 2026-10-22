@@ -54,7 +54,7 @@ export default async function SocietiesPage({
 
   // 'Community' (user-submitted events) is a directory chip, not a society.
   const grouped = Object.fromEntries(
-    Object.entries(societiesByKind()).map(([kind, list]) => [kind, list.filter((s) => s.short !== 'Community')])
+    Object.entries(societiesByKind(Object.keys(facets?.society ?? {}))).map(([kind, list]) => [kind, list.filter((s) => s.short !== 'Community')])
   ) as ReturnType<typeof societiesByKind>
 
   return (

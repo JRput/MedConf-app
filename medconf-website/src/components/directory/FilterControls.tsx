@@ -83,7 +83,7 @@ export function FilterControls({
   const [societyActive, setSocietyActive] = React.useState('__none__')
 
   const activeCount = countActive(filters)
-  const societyGroups = React.useMemo(() => societiesByKind(), [])
+  const societyGroups = React.useMemo(() => societiesByKind(Object.keys(facets?.society ?? {})), [facets])
 
   function toggleInArray(key: 'format' | 'type' | 'specialty' | 'region' | 'society', value: string) {
     const current = filters[key] as string[]

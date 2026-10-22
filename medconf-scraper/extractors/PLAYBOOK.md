@@ -142,6 +142,16 @@ EXTRACTOR_REGISTRY = {
 }
 ```
 
+### 5. Register the source — DB row, registry, CI groups, website taxonomy
+
+Registration touches four places. Step 4 was missed on waves 2a–2d, so the new societies were invisible on the website until the owner noticed.
+
+1. **`scraper_sources` INSERT** with a SHORT `society` code: an acronym or short brand, at most 25 characters. It is the filter chip label, the `?society=` URL value and the taxonomy key. Several rows of the same society share one code.
+2. **`extractors/__init__.py`** registry entry.
+3. **Identical CI groups** in `.github/workflows/scrape-daily.yml` and `remediator-daily.yml`.
+4. **Add the society to `medconf-website/src/lib/taxonomy/societies.ts`** (name, kind, country). Until then the site shows the bare code under "Other" via the runtime fallback, and the daily `taxonomy-check` job fails red.
+5. **Before pushing**, run `./.venv/bin/python check_taxonomy.py` (in `medconf-scraper/`) and `npm run check:societies` (in `medconf-website/`).
+
 ---
 
 ## Patterns we keep needing — copy these

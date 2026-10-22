@@ -121,6 +121,47 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   ESR: { short: 'ESR', name: 'European Society of Radiology (ECR)', kind: 'international', country: 'EU' },
   'CCR London': { short: 'CCR London', name: 'CCR London (clinical, cosmetic and regenerative medicine congress)', kind: 'other', country: 'UK' },
   'NHS ConfedExpo': { short: 'NHS ConfedExpo', name: 'NHS ConfedExpo (NHS Confederation and NHS England)', kind: 'other', country: 'UK' },
+  // Wave 2d (sources 103–143, 2026-10-22)
+  EAN: { short: 'EAN', name: 'European Academy of Neurology', kind: 'international', country: 'EU' },
+  AAIC: { short: 'AAIC', name: "Alzheimer's Association International Conference (AAIC)", kind: 'international', country: 'US' },
+  AUA: { short: 'AUA', name: 'American Urological Association', kind: 'international', country: 'US' },
+  AAO: { short: 'AAO', name: 'American Academy of Ophthalmology', kind: 'international', country: 'US' },
+  RSNA: { short: 'RSNA', name: 'Radiological Society of North America', kind: 'international', country: 'US' },
+  CHEST: { short: 'CHEST', name: 'American College of Chest Physicians (CHEST)', kind: 'international', country: 'US' },
+  BOFAS: { short: 'BOFAS', name: 'British Orthopaedic Foot and Ankle Society', kind: 'specialist', country: 'UK' },
+  BPNA: { short: 'BPNA', name: 'British Paediatric Neurology Association', kind: 'specialist', country: 'UK' },
+  ACC: { short: 'ACC', name: 'American College of Cardiology', kind: 'international', country: 'US' },
+  ASN: { short: 'ASN', name: 'American Society of Nephrology', kind: 'international', country: 'US' },
+  ASA: { short: 'ASA', name: 'American Society of Anesthesiologists', kind: 'international', country: 'US' },
+  UEG: { short: 'UEG', name: 'United European Gastroenterology', kind: 'international', country: 'EU' },
+  BAAPS: { short: 'BAAPS', name: 'British Association of Aesthetic Plastic Surgeons', kind: 'specialist', country: 'UK' },
+  BSSH: { short: 'BSSH', name: 'British Society for Surgery of the Hand', kind: 'specialist', country: 'UK' },
+  'Vascular Society': { short: 'Vascular Society', name: 'Vascular Society of Great Britain and Ireland', kind: 'specialist', country: 'UK' },
+  BAUS: { short: 'BAUS', name: 'British Association of Urological Surgeons', kind: 'specialist', country: 'UK' },
+  HIS: { short: 'HIS', name: 'Healthcare Infection Society', kind: 'specialist', country: 'UK' },
+  BBTS: { short: 'BBTS', name: 'British Blood Transfusion Society', kind: 'specialist', country: 'UK' },
+  ABS: { short: 'ABS', name: 'Association of Breast Surgery', kind: 'specialist', country: 'UK' },
+  BASL: { short: 'BASL', name: 'British Association for the Study of the Liver', kind: 'specialist', country: 'UK' },
+  BSIR: { short: 'BSIR', name: 'British Society of Interventional Radiology', kind: 'specialist', country: 'UK' },
+  BMFMS: { short: 'BMFMS', name: 'British Maternal and Fetal Medicine Society', kind: 'specialist', country: 'UK' },
+  BTS: { short: 'BTS', name: 'British Thoracic Society', kind: 'specialist', country: 'UK' },
+  BSR: { short: 'BSR', name: 'British Society for Rheumatology', kind: 'specialist', country: 'UK' },
+  BAPM: { short: 'BAPM', name: 'British Association of Perinatal Medicine', kind: 'specialist', country: 'UK' },
+  SBNS: { short: 'SBNS', name: 'Society of British Neurological Surgeons', kind: 'specialist', country: 'UK' },
+  BSG: { short: 'BSG', name: 'British Society of Gastroenterology', kind: 'specialist', country: 'UK' },
+  BOA: { short: 'BOA', name: 'British Orthopaedic Association', kind: 'specialist', country: 'UK' },
+  ESCRS: { short: 'ESCRS', name: 'European Society of Cataract and Refractive Surgeons', kind: 'international', country: 'EU' },
+  ICS: { short: 'ICS', name: 'Intensive Care Society', kind: 'specialist', country: 'UK' },
+  EULAR: { short: 'EULAR', name: 'European Alliance of Associations for Rheumatology (EULAR)', kind: 'international', country: 'EU' },
+  PCR: { short: 'PCR', name: 'PCR — EuroPCR and PCR courses (interventional cardiology)', kind: 'international', country: 'EU' },
+  SIU: { short: 'SIU', name: "Société Internationale d'Urologie (SIU)", kind: 'international', country: 'International' },
+  ESHRE: { short: 'ESHRE', name: 'European Society of Human Reproduction and Embryology', kind: 'international', country: 'EU' },
+  ASH: { short: 'ASH', name: 'American Society of Hematology', kind: 'international', country: 'US' },
+  AUGIS: { short: 'AUGIS', name: 'Association of Upper Gastrointestinal Surgeons of Great Britain and Ireland', kind: 'specialist', country: 'UK' },
+  // AAN (American Academy of Neurology), AAD (American Academy of Dermatology) and
+  // CNS (Congress of Neurological Surgeons) are registered inactive pending an owner
+  // decision on their terms of use. If ever activated they surface via the runtime
+  // fallback in societiesByKind(extraCodes) until added here.
   // Pseudo-society for user-submitted events (source 1000). Stays a directory
   // filter chip; excluded from the /societies listing.
   Community: { short: 'Community', name: 'Community submissions', kind: 'other', country: 'International' },
@@ -135,8 +176,14 @@ export function societyInfo(short: string | null | undefined): SocietyInfo | nul
   return SOCIETIES[short] ?? { short, name: short, kind: 'other', country: 'Unknown' }
 }
 
-/** Grouped by `kind`, for a faceted society filter (royal colleges first, etc). */
-export function societiesByKind(): Record<SocietyKind, SocietyInfo[]> {
+/**
+ * Grouped by `kind`, for a faceted society filter (royal colleges first, etc).
+ * `extraCodes` (e.g. the keys of `directory_facets.society`) lets a society
+ * that exists in the DB but not yet in SOCIETIES still appear, under 'other'
+ * with its code as its name. 'unspecified' (null bucket) and 'Community'
+ * (pseudo-society) are never added. No argument = SOCIETIES only.
+ */
+export function societiesByKind(extraCodes?: Iterable<string>): Record<SocietyKind, SocietyInfo[]> {
   const out: Record<SocietyKind, SocietyInfo[]> = {
     'royal-college': [],
     faculty: [],
@@ -146,6 +193,15 @@ export function societiesByKind(): Record<SocietyKind, SocietyInfo[]> {
     other: [],
   }
   for (const s of Object.values(SOCIETIES)) out[s.kind].push(s)
+  if (extraCodes) {
+    const seen = new Set<string>()
+    for (const code of extraCodes) {
+      if (seen.has(code) || code in SOCIETIES || code === 'unspecified' || code === 'Community') continue
+      seen.add(code)
+      const info = societyInfo(code)
+      if (info) out.other.push(info)
+    }
+  }
   for (const k of Object.keys(out) as SocietyKind[]) out[k].sort((a, b) => a.name.localeCompare(b.name))
   return out
 }

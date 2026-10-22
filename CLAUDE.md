@@ -152,6 +152,7 @@ Scraper run logs live in `medconf-scraper/*.log` (RCGP runs especially).
 - **Dedupe key:** `conferences.source_url` is unique. If extraction yields no source URL, scraper synthesises one from `name|date|city|venue` MD5 hash (see [scraper.py](medconf-scraper/scraper.py:60-75)).
 - **Archival:** expired conferences are archived (`archived = TRUE`), never deleted.
 - **Specialty / region:** plain text fields for now; standardise via enum later if needed.
+- **Society codes:** `scraper_sources.society` is a SHORT code (acronym or short brand, e.g. `BOA`, `Vascular Society`) shared by every row of one society. It is the filter chip label, the `?society=` URL value and the key of `medconf-website/src/lib/taxonomy/societies.ts`. **Registering a source is not done until the code is in that file** (name, kind, country) — the site falls back to the bare code under "Other", and the daily `taxonomy-check` job in `scrape-daily.yml` fails red until it is added. Check locally: `./.venv/bin/python check_taxonomy.py` (scraper) or `npm run check:societies` (website). Missed on waves 2a–2d (HQ LESSONS #25).
 
 ---
 

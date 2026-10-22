@@ -43,6 +43,32 @@ jobs:
           KIMI_BASE_URL: https://integrate.api.nvidia.com/v1
         run: python probe_models.py
 
+  # Taxonomy guard: five registration waves (2a-2d and earlier) forgot to add
+  # new society codes to medconf-website/src/lib/taxonomy/societies.ts, so the
+  # societies stayed invisible on /societies until the owner noticed. This job
+  # turns the daily run red instead. Nothing depends on it; scraping continues.
+  taxonomy-check:
+    name: Website society taxonomy guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install "supabase>=2.0.0" "python-dotenv>=1.0.0"
+
+      - name: Check society codes against website taxonomy
+        working-directory: medconf-scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python check_taxonomy.py
+
   scrape:
     name: Group ${{ matrix.group }}
     needs: probe-models
