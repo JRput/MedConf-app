@@ -193,6 +193,10 @@ class SiuUrologyExtractor(BaseExtractor):
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
         html = fetch_html(_EVENTS_URL, browser=getattr(self, "browser", None))
         if not html or "eventsgrid" not in html:
+            if not html:                      # 2026-10-22: the whole site answered HTTP 500 with an empty body (origin outage)
+                from extractors import http_fetch
+                http_fetch.note_unreachable(_EVENTS_URL, ConnectionError("net::ERR_FAILED (site outage: no usable response)"),
+                                            getattr(self, "browser", None))
             return None
         today = date.today().isoformat()
         shells: List[Dict[str, Any]] = []
@@ -212,6 +216,8 @@ class SiuUrologyExtractor(BaseExtractor):
             shells.append({"title": e["title"], "booking_url": url, "source_url": url, "start_date": e["start_date"], "end_date": e["end_date"],
                            "venue_raw": e["place"], "category": None, "blurb": e["description"]})
         years = sorted({int(y) for y in re.findall(r"/congress-(\d{4})/", html)}, reverse=True)
+        if not years:                                   # discovery fallback: the congress pages follow /congress-<year>/
+            years = [date.today().year]
         if years:
             time.sleep(self.REQUEST_GAP_S)
             hi = f"{_ROOT}/congress-{years[0]}/highlights"
