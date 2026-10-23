@@ -402,6 +402,24 @@ def _default_fetcher(url: str):
     """Return ('pdf', bytes) | ('html', str) | None. 20 s timeout, never raises."""
     try:
         if urlparse(url).path.lower().endswith(".pdf"):
+            import safe_fetch
+            if safe_fetch.enabled():
+                import time as _t
+                cap = 8_000_000
+                verdict, _f, data, _e, _s = safe_fetch.fetch_validated(
+                    url, safe_fetch.check_url_safe, max_bytes=cap,
+                    deadline=_t.monotonic() + _FETCH_TIMEOUT)
+                if verdict != "ok" or not data:
+                    import logging
+                    logging.getLogger(__name__).warning(f"abstract_classifier: safe PDF fetch refused ({verdict}) {url[:120]}")
+                    return None
+                if not data.startswith(b"%PDF"):
+                    return None
+                # Parse in a subprocess; return TEXT so follow_call_for_papers
+                # never reaches the in-process pypdf path.
+                from remediator.pdf_text import pdf_to_text_isolated
+                text = pdf_to_text_isolated(data)
+                return ("pdf", text) if text else None
             import httpx
             r = httpx.get(url, timeout=_FETCH_TIMEOUT, follow_redirects=True,
                           headers={"User-Agent": "Mozilla/5.0 (MedConf scraper)"})

@@ -25,6 +25,8 @@ from typing import Any, Optional
 
 import httpx
 
+import safe_fetch
+
 from logger import logger
 from browser import looks_like_challenge, has_content_shape
 
@@ -105,7 +107,8 @@ def _looks_blocked(status_code: int, body: Optional[str]) -> Optional[str]:
 def _fetch_httpx(url: str, headers: dict, timeout: float):
     """Returns (status_code, body) or (None, None) on a transport-level failure."""
     try:
-        with httpx.Client(timeout=timeout, follow_redirects=True, headers=headers) as c:
+        _Client = safe_fetch.SafeClient if safe_fetch.enabled() else httpx.Client
+        with _Client(timeout=timeout, follow_redirects=True, headers=headers) as c:
             resp = c.get(url)
             return resp.status_code, resp.text
     except Exception as e:
@@ -238,6 +241,12 @@ def fetch_html(
     httpx_blocked = False
     _attempt.update(nav_error=False, saw_body=False)
     status, body = _fetch_httpx(url, req_headers, timeout)
+    if safe_fetch.enabled():
+        # Safe mode: hop-validated httpx only. No Playwright fallback of any
+        # kind (loaded_page / reuse_page / new page): a block or failure is None.
+        if status is None or status >= 400 or _looks_blocked(status, body):
+            return None
+        return body
     if status is not None:
         reason = _looks_blocked(status, body)
         if reason is None:

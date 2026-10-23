@@ -79,6 +79,18 @@ def _llm_call_factory():
     return call
 
 
+COMMUNITY_SOURCE_ID = 1000
+
+
+def _url_patches_allowed(row: dict, source_id: Optional[int] = None) -> bool:
+    """Community rows (source 1000) never get organiser_url / booking_url /
+    source_url patched from fetched content: a hostile page must not be able to
+    publish a link of its choosing without a moderator. Regardless of the
+    safe-fetch flag."""
+    sid = row.get("source_id", source_id)
+    return sid != COMMUNITY_SOURCE_ID
+
+
 def _patch_row(supabase, conference_id: int, field: str, value: Any) -> bool:
     """Apply one patch to the conferences row. Returns True on success."""
     try:
@@ -327,7 +339,7 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                     # No fees, but the explorer reached an external event page:
                     # keep it as organiser_url so the next run can retry cheaply.
                     _ext = getattr(result, "external_url", None) if (result is not None and field == "pricing") else None
-                    if _ext and row.get("organiser_url") in (None, "", row.get("source_url")):
+                    if _ext and _url_patches_allowed(row, source_id) and row.get("organiser_url") in (None, "", row.get("source_url")):
                         if _patch_row(sb, row["id"], "organiser_url", _ext):
                             patches_applied.append({
                                 "conference_id": row["id"],
@@ -361,7 +373,7 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                     # organiser link (and the booking link, if it was just
                     # the listing page) at it.
                     ext = getattr(result, "external_url", None) if field == "pricing" else None
-                    if ext:
+                    if ext and _url_patches_allowed(row, source_id):
                         link_patches = {}
                         if row.get("organiser_url") in (None, "", row.get("source_url")):
                             link_patches["organiser_url"] = ext

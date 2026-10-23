@@ -120,6 +120,11 @@ def fetch_image_as_data_url(url: str, *, timeout: float = 30.0) -> Optional[str]
     """Download an image and return it as a base64 data URL (NVIDIA's hosted
     Llama Vision accepts data URLs as inline image input via the OpenAI
     chat-completions image_url format)."""
+    import safe_fetch
+    if safe_fetch.enabled():
+        # Vision is off for community rows in v1. Future safe variant:
+        # fetch_validated(url, ..., max_bytes=2 MB) + image/* content-type check.
+        return None
     try:
         with httpx.Client(timeout=timeout, follow_redirects=True,
                           headers={"User-Agent": "Mozilla/5.0 (MedConf vision)"}) as c:

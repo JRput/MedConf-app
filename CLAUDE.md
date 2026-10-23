@@ -125,7 +125,7 @@ python -m remediator.audit --source 20                   # gate check for SABCS
 - `fire-reminders.yml` — **08:00 UTC** — fires saved-event reminders users scheduled from the detail page.
 - `fire-moderation-digest.yml` — **09:00 UTC** — expires stale community contributions, leaves one unread `moderation` notification per admin when items await review, logs the placeholder moderator email (`MODERATION_NOTIFY_EMAIL`).
 - `enrich-submissions.yml` — every 6 hours (cron `15 */6 * * *`) — fetches the organiser page of each pending community submission (`enrichment_status='waiting'`).
-- `remediator-daily.yml` has a community step that would run source 1000 (inactive, so skipped by the matrix) explicitly, but it is **disabled (`if: false`, 2026-10-18) pending safe-fetch mode** (`REMEDIATOR_SAFE_FETCH`) in the shared fetchers; community rows are enriched only by `enrich-submissions.yml` until then.
+- `remediator-daily.yml` community job (`remediate-community`, source 1000) is **live since 2026-10-23 under safe-fetch mode** (`REMEDIATOR_SAFE_FETCH=1`): every hop address-checked and IP-pinned via `safe_fetch.SafeClient`, no headless browser, no link-following outside the checked client, `Accept-Encoding: identity` with compressed responses refused, PDFs capped at 8 MB while streaming + `%PDF` header + parsed in a child process (20 s, 20 pages, 1 GB address space, no secrets in env), DOCX skipped, vision off, and `organiser_url`/`booking_url`/`source_url` never written for source 1000 (`runner._url_patches_allowed`). The job runs `test_safe_mode.py` first and can never turn the workflow red. Flag OFF = byte-identical behaviour for scraped sources. Board: MISSION_BOARD_SAFE_FETCH.md.
 
 ---
 

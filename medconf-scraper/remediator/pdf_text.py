@@ -6,10 +6,14 @@ reported as such, never OCR'd here.
 from __future__ import annotations
 
 import io
+import logging
+import os
 import re
 import zipfile
 from typing import Optional
 from urllib.parse import urljoin, urlparse, unquote
+
+logger = logging.getLogger(__name__)
 
 PDF_MAX_PAGES = 20
 PDF_MAX_BYTES = 8_000_000
@@ -63,6 +67,51 @@ def pdf_to_text(data: bytes, max_pages: int = PDF_MAX_PAGES) -> str:
     except Exception:
         return ""
     lines = [_norm(l) for l in "\n".join(pages).splitlines()]
+    return "\n".join(l for l in lines if l)
+
+
+_PDF_CHILD = r"""
+import io, sys
+try:
+    import resource
+    resource.setrlimit(resource.RLIMIT_AS, (1 << 30, 1 << 30))
+except Exception:
+    pass
+data = sys.stdin.buffer.read()
+out = []
+try:
+    from pypdf import PdfReader
+    reader = PdfReader(io.BytesIO(data))
+    for pg in reader.pages[:int(sys.argv[1])]:
+        try:
+            out.append(pg.extract_text() or "")
+        except Exception:
+            continue
+except Exception:
+    pass
+sys.stdout.write("\n".join(out)[:2000000])
+"""
+
+
+def pdf_to_text_isolated(data: bytes, max_pages: int = PDF_MAX_PAGES, timeout: float = 20) -> str:
+    """Safe-fetch mode: parse the PDF in a child process (bytes on stdin,
+    hard timeout, address-space limit) so a parser hang or memory bug cannot
+    take the job down. Same output shape as pdf_to_text; "" on any failure."""
+    import subprocess
+    import sys
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-c", _PDF_CHILD, str(int(max_pages))],
+            input=data, capture_output=True, timeout=timeout, check=False,
+            env={"PATH": os.environ.get("PATH", "")})  # no secrets in the child
+    except Exception as e:
+        logger.warning(f"pdf_text: isolated parse failed ({type(e).__name__}, {len(data)} bytes)")
+        return ""
+    if proc.returncode != 0:
+        logger.warning(f"pdf_text: isolated parse exited {proc.returncode} ({len(data)} bytes)")
+        return ""
+    raw = proc.stdout.decode("utf-8", "ignore")
+    lines = [_norm(l) for l in raw.splitlines()]
     return "\n".join(l for l in lines if l)
 
 

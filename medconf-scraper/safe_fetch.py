@@ -7,7 +7,9 @@ With the flag unset nothing here is used by the remediator.
 Guarantees: http/https only; every redirect hop is address-checked (no IP
 literals, loopback, private, link-local, reserved); no blind redirect
 following; body capped at 2 MB; wall-clock deadline honoured while streaming;
-no browser. Residual DNS rebinding between check and connect is accepted.
+no browser. DNS rebinding between check and connect is closed: every hop
+connects to the address that was validated (IP-pinned, hostname kept for the
+Host header, SNI and certificate verification).
 """
 
 import html as _html
@@ -193,6 +195,7 @@ def fetch_validated(url: str, url_check: Callable = check_url_safe, max_hops: in
                   validated address of a hop
       tls_error   certificate / TLS handshake failure (never retried or bypassed)
       timeout     monotonic `deadline` passed (slow-drip server)
+      encoding_refused  response carries a Content-Encoding (decompression bomb)
     With pinning, all addresses (IPv4 first, then IPv6) are validated and
     tried in order on transport errors; any blocked address refuses the host.
     """
@@ -223,7 +226,8 @@ def fetch_validated(url: str, url_check: Callable = check_url_safe, max_hops: in
                 if deadline is not None and time.monotonic() > deadline:
                     return "timeout", current, b"", "utf-8", 0
                 try:
-                    with client.stream("GET", target, headers=hdrs, extensions=exts) as r:
+                    req_hdrs = {"Accept-Encoding": "identity", **(hdrs or {})}
+                    with client.stream("GET", target, headers=req_hdrs, extensions=exts) as r:
                         location = r.headers.get("location")
                         if r.status_code in _REDIRECT_STATUSES and location:
                             if hop >= max_hops:
@@ -233,6 +237,11 @@ def fetch_validated(url: str, url_check: Callable = check_url_safe, max_hops: in
                             break
                         if not 200 <= r.status_code < 300:
                             return "blocked", current, b"", "utf-8", r.status_code
+                        # httpx decodes gzip/zstd before our byte cap sees the
+                        # data (decompression bomb), so refuse any encoding.
+                        enc_hdr = (r.headers.get("content-encoding") or "").strip().lower()
+                        if enc_hdr and enc_hdr != "identity":
+                            return "encoding_refused", current, b"", "utf-8", r.status_code
                         body = bytearray()
                         for chunk in r.iter_bytes():
                             if deadline is not None and time.monotonic() > deadline:
@@ -288,18 +297,24 @@ def fetch_text_html(url: str, **_ignored) -> tuple:
 
 class SafeClient:
     """Drop-in for the `with httpx.Client(...) as c: c.get(url)` pattern.
-    Constructor kwargs (timeout, headers, follow_redirects) are accepted and
-    ignored: redirects are always hop-validated, never followed blindly."""
+    `timeout` becomes a wall-clock deadline for the whole GET (capped at 20 s,
+    honoured while streaming). Other kwargs (headers, follow_redirects) are
+    accepted and ignored: redirects are always hop-validated, never followed blindly."""
 
-    def __init__(self, max_bytes: int = MAX_BODY_BYTES, **_ignored):
+    def __init__(self, max_bytes: int = MAX_BODY_BYTES, timeout=None, **_ignored):
         self.max_bytes = max_bytes
+        try:
+            self.timeout = min(float(timeout or 20), 20.0)
+        except (TypeError, ValueError):
+            self.timeout = 20.0
 
     def __enter__(self): return self
     def __exit__(self, *a): return False
 
     def get(self, url: str) -> httpx.Response:
         verdict, final, body, _enc, status = fetch_validated(
-            url, check_url_safe, max_bytes=self.max_bytes)
+            url, check_url_safe, max_bytes=self.max_bytes,
+            deadline=time.monotonic() + self.timeout)
         req = httpx.Request("GET", final if verdict in ("ok", "blocked") else url)
         if verdict == "ok":
             return httpx.Response(status, content=body, request=req)

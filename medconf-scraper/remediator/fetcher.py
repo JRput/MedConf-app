@@ -12,6 +12,8 @@ from typing import Optional, Dict
 import html as _html
 import httpx
 
+import safe_fetch
+
 logger = logging.getLogger(__name__)
 
 USER_AGENT = (
@@ -80,8 +82,9 @@ class PageCache:
         if _past_deadline():
             return None
         try:
-            with httpx.Client(timeout=20, follow_redirects=True,
-                              headers={"User-Agent": USER_AGENT}) as c:
+            _Client = safe_fetch.SafeClient if safe_fetch.enabled() else httpx.Client
+            with _Client(timeout=20, follow_redirects=True,
+                         headers={"User-Agent": USER_AGENT}) as c:
                 r = c.get(url)
                 r.raise_for_status()
                 self._html_cache[url] = r.text
@@ -106,6 +109,11 @@ class PageCache:
         return text
 
     def _fetch(self, url: str) -> Optional[str]:
+        if safe_fetch.enabled():
+            # Safe mode: httpx path only (hop-validated, IP-pinned); no
+            # Playwright allowlist, WAF retry or SPA escalation.
+            self._last_status = None
+            return self._fetch_httpx(url)
         # Explicit allowlist — always Playwright, skip httpx.
         if any(h in url for h in _JS_HOSTS):
             return self._fetch_browser(url)
@@ -138,8 +146,9 @@ class PageCache:
 
     def _fetch_httpx(self, url: str) -> Optional[str]:
         try:
-            with httpx.Client(timeout=30, follow_redirects=True,
-                              headers={"User-Agent": USER_AGENT}) as c:
+            _Client = safe_fetch.SafeClient if safe_fetch.enabled() else httpx.Client
+            with _Client(timeout=30, follow_redirects=True,
+                         headers={"User-Agent": USER_AGENT}) as c:
                 r = c.get(url)
                 r.raise_for_status()
                 self._html_cache[url] = r.text
@@ -167,6 +176,8 @@ class PageCache:
             return None
 
     def _fetch_browser(self, url: str) -> Optional[str]:
+        if safe_fetch.enabled():
+            return None  # browser ignores every Python address check
         if self._browser is None:
             try:
                 from browser import BrowserController

@@ -43,6 +43,8 @@ from urllib.parse import urljoin, urlparse
 
 import httpx
 
+import safe_fetch
+
 logger = logging.getLogger(__name__)
 
 
@@ -580,8 +582,13 @@ def fetch_page_text_and_html(url: str, *, timeout: float = FETCH_TIMEOUT_S) -> t
     t0 = _t.time()
     result: tuple[Optional[str], Optional[str]] = (None, None)
     try:
-        with httpx.Client(timeout=timeout, follow_redirects=True,
-                          headers={"User-Agent": EXPLORER_UA, "Accept": "text/html,application/xhtml+xml"}) as c:
+        # Safe mode: every hop address-checked and IP-pinned. This is the ONE
+        # fetch path for every followed URL (external-link tier, registration
+        # sub-pages, nav pages, promoted-pattern replays, /fees guesses), so
+        # all of those tiers stay enabled and are checked here.
+        _Client = safe_fetch.SafeClient if safe_fetch.enabled() else httpx.Client
+        with _Client(timeout=timeout, follow_redirects=True,
+                     headers={"User-Agent": EXPLORER_UA, "Accept": "text/html,application/xhtml+xml"}) as c:
             r = c.get(url)
             r.raise_for_status()
             html = r.text
@@ -779,11 +786,32 @@ PDF_CACHE: dict = {}
 
 
 def _fetch_document_text(url: str, trail: "AuditTrail") -> Optional[str]:
-    """Download a PDF/DOCX (15 s timeout, 8 MB cap, cached) and return its text."""
+    """Download a PDF/DOCX (15 s timeout, 8 MB cap, cached) and return its text.
+    Safe mode: PDF only, hop-validated fetch with the cap enforced while
+    streaming, parsed in a subprocess; links inside documents are never followed."""
     from .pdf_text import document_to_text, PDF_MAX_BYTES
     if url in PDF_CACHE:
         return PDF_CACHE[url]
     text: Optional[str] = None
+    if safe_fetch.enabled():
+        from .pdf_text import pdf_to_text_isolated
+        if urlparse(url).path.lower().endswith(".docx"):
+            trail.notes.append(f"docx_skipped_safe_mode: {url}")
+        else:
+            import time as _t
+            verdict, _final, body, _enc, _st = safe_fetch.fetch_validated(
+                url, safe_fetch.check_url_safe, max_bytes=PDF_MAX_BYTES + 1,
+                deadline=_t.monotonic() + PDF_FETCH_TIMEOUT_S)
+            if verdict != "ok":
+                trail.notes.append(f"pdf_fetch_failed: {url} ({verdict})")
+            elif len(body) > PDF_MAX_BYTES:
+                trail.notes.append(f"pdf_skipped_too_large: {url}")
+            elif not body.startswith(b"%PDF"):
+                trail.notes.append(f"pdf_skipped_not_pdf: {url}")
+            else:
+                text = pdf_to_text_isolated(body)
+        PDF_CACHE[url] = text
+        return text
     try:
         with httpx.Client(timeout=PDF_FETCH_TIMEOUT_S, follow_redirects=True,
                           headers={"User-Agent": EXPLORER_UA}) as c:
@@ -984,6 +1012,8 @@ def render_page(url: str) -> tuple[Optional[str], Optional[str], list]:
     """Rendered-DOM fetch for JS sites (Wix etc.): (innerText, outer HTML,
     [(abs_url, text, in_nav)]). Cached per run. (None, None, []) on failure or
     once the source deadline has passed. Runs on the render worker thread."""
+    if safe_fetch.enabled():
+        return None, None, []  # safe mode: no browser
     if url in RENDER_CACHE:
         return RENDER_CACHE[url]
     if source_time_up():

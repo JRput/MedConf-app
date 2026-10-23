@@ -106,9 +106,14 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
-  # Disabled 2026-10-18 pending safe-fetch mode (REMEDIATOR_SAFE_FETCH) in remediator/fetcher.py, remediator/explorer.py, extractors/http_fetch.py and extractors/abstract_classifier.py - owner approval required for those shared files. Until then community rows are enriched only by the hop-validated pre-moderation job.
+  # Community rows (source 1000). Safe-fetch mode live 2026-10-23
+  # (REMEDIATOR_SAFE_FETCH=1). Guarantees: every fetch hop is address-checked
+  # and IP-pinned (no loopback/private/link-local targets, no blind redirects);
+  # no headless browser; links found on fetched pages are only followed through
+  # the same checked fetcher and never inside documents; PDFs capped while streaming and parsed in a
+  # subprocess (DOCX skipped); no vision image fetches; no organiser_url,
+  # booking_url or source_url patches for source 1000.
   remediate-community:
-    if: false
     name: Remediator community rows (source 1000)
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -134,13 +139,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install Playwright Chromium
-        run: python -m playwright install --with-deps chromium
+      - name: Safe-fetch tests (must pass before touching community rows)
+        working-directory: medconf-scraper
+        run: |
+          pip install pytest
+          python -m pytest test_safe_mode.py test_safe_fetch.py -q
 
       # Control: these URLs were approved by a moderator first, and the moderation UI refuses to approve a submission whose enrichment_status is 'skipped' (url rejected).
       - name: Run remediator on community source 1000
         working-directory: medconf-scraper
         env:
+          REMEDIATOR_SAFE_FETCH: "1"
           KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
           KIMI_BASE_URL: https://integrate.api.nvidia.com/v1
           KIMI_MODEL_CHAIN: "nvidia/nemotron-3.5-lightning-30b-a3b,meta/muse-glimmer-30b,openai/gpt-oss-20b"
