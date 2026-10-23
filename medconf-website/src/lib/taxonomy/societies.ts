@@ -159,11 +159,10 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   ASH: { short: 'ASH', name: 'American Society of Hematology', kind: 'international', country: 'US' },
   AUGIS: { short: 'AUGIS', name: 'Association of Upper Gastrointestinal Surgeons of Great Britain and Ireland', kind: 'specialist', country: 'UK' },
   // AAN (American Academy of Neurology), AAD (American Academy of Dermatology) and
-  // CNS (Congress of Neurological Surgeons) are registered inactive pending an owner
-  // decision on their terms of use. If ever activated they surface via the runtime
-  // fallback in societiesByKind(extraCodes) until added here.
-  // Pseudo-society for user-submitted events (source 1000). Stays a directory
-  // filter chip; excluded from the /societies listing.
+  // CNS (Congress of Neurological Surgeons) were excluded by the owner on 2026-10-23
+  // (their terms forbid automated access / third-party reuse). scraper_sources rows
+  // 140–142 stay inactive; if ever activated they surface via the runtime fallback
+  // in societiesByKind(extraCodes) until added here.
   Community: { short: 'Community', name: 'Community submissions', kind: 'other', country: 'International' },
   ViVE: { short: 'ViVE', name: 'ViVE (digital health event)', kind: 'other', country: 'US' },
 }
