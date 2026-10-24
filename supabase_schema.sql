@@ -642,7 +642,10 @@ REVOKE EXECUTE ON FUNCTION public.remediator_insert_tiers_if_empty(INTEGER, JSON
 GRANT EXECUTE ON FUNCTION public.remediator_insert_tiers_if_empty(INTEGER, JSONB) TO service_role;
 
 -- ============================================
--- ACCESS GATE PHASE 2 (2026-10-24) - migration 20261024000001_access_gate_phase2.sql
+-- ACCESS GATE PHASE 2 (2026-10-24) - two migrations, apply in this order:
+--   1. 20261024000001_access_gate_phase2a_functions.sql (additive: the three functions below) - BEFORE the website deploy
+--   2. 20261024000002_access_gate_phase2b_revoke.sql (policies + anon revokes) - AFTER the website deploy is live
+--   Rollback of step 2: 20261024000002_rollback.sql
 -- Anonymous reads of directory data are closed. The four read policies above
 -- are TO authenticated; community_facts/community_tiers read policies are
 -- likewise TO authenticated (migration 20261018000000 section updated by the

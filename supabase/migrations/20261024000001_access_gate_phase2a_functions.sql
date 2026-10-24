@@ -1,92 +1,19 @@
 -- ============================================================
--- Access gate, Phase 2 (2026-10-24): anonymous visitors can no longer read
--- directory data. The public teaser is served only through three narrow
--- SECURITY DEFINER functions. Board: MISSION_BOARD_ACCESS_GATE.md.
+-- Access gate, Phase 2a of 2b (2026-10-24): STEP 1 OF 2 - apply BEFORE
+-- pushing the website code. Board: MISSION_BOARD_ACCESS_GATE.md.
 --
--- APPLY PLAN (in this order):
---   1. Deploy the website Phase 1+2 code (the code that calls home_preview(),
---      event_preview() and sitemap_events() and uses cookie-aware clients).
---   2. cd medconf-scraper &&
---      ./.venv/bin/python apply_migration.py \
---        ../supabase/migrations/20261024000001_access_gate_phase2.sql <checks...>
---      (checks = the lines of 20261024000001_checks.txt)
---   3. Smoke: anonymous /, /conferences/<id>, /sitemap.xml;
---      signed-in /conferences (list, filters, facets).
---   4. On any failure run 20261024000001_rollback.sql via the same tool.
+-- Purely additive: creates the three narrow SECURITY DEFINER functions that
+-- serve the anonymous teaser (home_preview, event_preview, sitemap_events).
+-- Changes no policy and revokes nothing, so current production keeps working.
+-- They are read-only, take no client-controlled input except event_preview's
+-- id, and read the BASE tables (not the security_invoker view). They return
+-- no fees, CPD, venue, URLs, exact deadlines or full descriptions.
 --
--- DEPLOY ORDER WARNING: apply ONLY after the website code that calls
--- home_preview / event_preview / sitemap_events is deployed. Production reads
--- anon data until then; applying earlier breaks every anonymous page.
---
--- What changes:
---   * SELECT policies on conferences, pricing_tiers, course_sessions,
---     scraper_sources, community_facts, community_tiers become TO authenticated
---     (same predicates). Write policies and service_role are untouched
---     (service_role bypasses RLS).
---   * anon loses SELECT on directory_events and EXECUTE on directory_facets.
---     Postgres grants EXECUTE on new functions to PUBLIC by default, so the
---     revoke names PUBLIC too; otherwise anon would keep access through it.
---   * New functions (SECURITY DEFINER, search_path = public, read-only, no
---     auth.uid()/current_user logic): home_preview(), event_preview(integer),
---     sitemap_events(). They read the BASE tables, not the security_invoker
---     view, so they do not depend on view grants or invoker semantics.
---
--- Idempotent: DROP POLICY IF EXISTS / CREATE OR REPLACE / REVOKE / GRANT.
+-- ORDER: (1) apply this file with 20261024000001_checks.txt,
+--        (2) deploy the website code that calls these functions,
+--        (3) apply 20261024000002_access_gate_phase2b_revoke.sql.
+-- Idempotent: CREATE OR REPLACE / REVOKE / GRANT.
 -- ============================================================
-
--- ------------------------------------------------------------
--- 1. Read policies: authenticated only
--- ------------------------------------------------------------
-DROP POLICY IF EXISTS "Anyone can view conferences" ON public.conferences;
-DROP POLICY IF EXISTS "Authenticated can view conferences" ON public.conferences;
-CREATE POLICY "Authenticated can view conferences"
-    ON public.conferences FOR SELECT TO authenticated
-    USING (archived = FALSE);
-
-DROP POLICY IF EXISTS "Anyone can view pricing tiers" ON public.pricing_tiers;
-DROP POLICY IF EXISTS "Authenticated can view pricing tiers" ON public.pricing_tiers;
-CREATE POLICY "Authenticated can view pricing tiers"
-    ON public.pricing_tiers FOR SELECT TO authenticated
-    USING (TRUE);
-
-DROP POLICY IF EXISTS "Anyone can view course sessions" ON public.course_sessions;
-DROP POLICY IF EXISTS "Authenticated can view course sessions" ON public.course_sessions;
-CREATE POLICY "Authenticated can view course sessions"
-    ON public.course_sessions FOR SELECT TO authenticated
-    USING (TRUE);
-
-DROP POLICY IF EXISTS "Anyone can view scraper sources" ON public.scraper_sources;
-DROP POLICY IF EXISTS "Authenticated can view scraper sources" ON public.scraper_sources;
-CREATE POLICY "Authenticated can view scraper sources"
-    ON public.scraper_sources FOR SELECT TO authenticated
-    USING (TRUE);
-
--- Community facts / tiers (20261018000000_community_contributions.sql)
-DROP POLICY IF EXISTS "Published facts are public" ON public.community_facts;
-DROP POLICY IF EXISTS "Published facts are visible to authenticated" ON public.community_facts;
-CREATE POLICY "Published facts are visible to authenticated"
-    ON public.community_facts FOR SELECT TO authenticated
-    USING (is_published OR public.is_admin());
-
-DROP POLICY IF EXISTS "Published tiers are public" ON public.community_tiers;
-DROP POLICY IF EXISTS "Published tiers are visible to authenticated" ON public.community_tiers;
-CREATE POLICY "Published tiers are visible to authenticated"
-    ON public.community_tiers FOR SELECT TO authenticated
-    USING (is_published OR public.is_admin());
-
-REVOKE SELECT ON public.community_facts, public.community_tiers FROM anon;
-
--- ------------------------------------------------------------
--- 2. Directory view and facets RPC: authenticated only
--- ------------------------------------------------------------
-REVOKE SELECT ON public.directory_events FROM anon;
-
-REVOKE EXECUTE ON FUNCTION public.directory_facets(
-  text, date, date, text[], text[], text[], text[], text, text, text[], boolean, boolean
-) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.directory_facets(
-  text, date, date, text[], text[], text[], text[], text, text, text[], boolean, boolean
-) TO authenticated, service_role;
 
 -- ------------------------------------------------------------
 -- 3. home_preview(): anonymous homepage teaser (counts + names only)

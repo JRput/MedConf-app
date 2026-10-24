@@ -1,10 +1,10 @@
 -- ============================================================
 -- EMERGENCY ROLLBACK if production reads break after applying
--- 20261024000001_access_gate_phase2.sql. Restores anonymous read access
+-- 20261024000002_access_gate_phase2b_revoke.sql. Restores anonymous read access
 -- exactly as it was before (policy names, predicates, grants). Drops nothing
 -- else: home_preview(), event_preview(integer) and sitemap_events() may stay.
 -- Run via: cd medconf-scraper && ./.venv/bin/python apply_migration.py \
---            ../supabase/migrations/20261024000001_rollback.sql
+--            ../supabase/migrations/20261024000002_rollback.sql
 -- Idempotent.
 -- ============================================================
 
