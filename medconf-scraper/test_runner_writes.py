@@ -6,6 +6,7 @@ deletes. Uses a small stateful fake Supabase (no network).
 """
 import copy
 import logging
+import re
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -32,8 +33,14 @@ class _Q:
 
     def _match(self, r):
         for kind, col, val in self.filters:
-            if kind == "eq" and r.get(col) != val:
-                return False
+            if kind == "eq":
+                have = r.get(col)
+                if isinstance(have, bool):
+                    have = str(have).lower()  # PostgREST compares boolean as true/false text
+                if isinstance(val, bool):
+                    val = str(val).lower()
+                if have != val:
+                    return False
             if kind == "is" and not (val == "null" and r.get(col) is None):
                 return False
             if kind == "in" and r.get(col) not in val:
@@ -137,6 +144,10 @@ def _pricing_result(external_url=None):
         to_dict=lambda: {})
 
 
+def _no_pricing_delete(sb):
+    assert not any(w[0] == "pricing_tiers" and w[1] == "delete" for w in sb.writes)
+
+
 def _stored(sb, field):
     return sb.tables["conferences"][0][field]
 
@@ -155,6 +166,7 @@ def test_concurrent_edit_is_not_overwritten(monkeypatch, caplog):
     assert _stored(sb, "venue_name") == "Moderator venue"
     assert [p for p in applied if p["field"] == "venue_name"] == []
     assert "remediator: skipped 1.venue_name: row changed since read" in caplog.text
+    _no_pricing_delete(sb)
 
 
 def test_pricing_not_clobbered_when_tiers_appear(monkeypatch):
@@ -169,6 +181,7 @@ def test_pricing_not_clobbered_when_tiers_appear(monkeypatch):
     assert [t["tier_label"] for t in sb.tables["pricing_tiers"]] == ["Moderator"]
     assert not any(w[0] == "pricing_tiers" and w[1] == "delete" for w in sb.writes)
     assert applied == []
+    _no_pricing_delete(sb)
 
 
 def test_happy_path_still_writes(monkeypatch):
@@ -181,6 +194,7 @@ def test_happy_path_still_writes(monkeypatch):
     assert [t["tier_label"] for t in sb.tables["pricing_tiers"]] == ["Member"]
     assert {p["field"] for p in applied} == {"venue_name", "pricing"}
     assert any(w[0] == "rpc" for w in sb.writes)
+    _no_pricing_delete(sb)
 
 
 def test_link_patch_precondition(monkeypatch):
@@ -193,8 +207,112 @@ def test_link_patch_precondition(monkeypatch):
     applied = _run(monkeypatch, sb, ["pricing"], explorers={"pricing": explorer})
     assert _stored(sb, "organiser_url") == "https://moderator.example"
     assert "organiser_url" not in {p["field"] for p in applied}
+    _no_pricing_delete(sb)
 
 
 def test_no_delete_on_pricing_tiers_anywhere():
     source = Path(runner.__file__).read_text()
-    assert 'pricing_tiers").delete()' not in source
+    assert re.search(r'pricing_tiers["\']\s*\)\s*\.\s*delete\s*\(', source) is None
+
+
+def _no_fees_result():
+    r = _pricing_result(external_url="https://org.example/reg")
+    r.found, r.value = False, None
+    return r
+
+
+def test_no_fees_organiser_link_happy_path(monkeypatch):
+    # Read value is the listing URL (non-NULL): the write must carry it as the precondition.
+    sb = _sb(organiser_url=SRC)
+    applied = _run(monkeypatch, sb, ["pricing"],
+                   explorers={"pricing": lambda **kw: _no_fees_result()})
+    assert _stored(sb, "organiser_url") == "https://org.example/reg"
+    assert [p["field"] for p in applied] == ["organiser_url"]
+
+
+def test_no_fees_organiser_link_precondition(monkeypatch):
+    sb = _sb(organiser_url=SRC)
+
+    def explorer(**kw):
+        sb.tables["conferences"][0]["organiser_url"] = "https://moderator.example"
+        return _no_fees_result()
+
+    applied = _run(monkeypatch, sb, ["pricing"], explorers={"pricing": explorer})
+    assert _stored(sb, "organiser_url") == "https://moderator.example"
+    assert applied == []
+    _no_pricing_delete(sb)
+
+
+PLACEHOLDER = "Call for abstracts - see page for submission date"
+AB_VALUE = {"abstract_open": True, "abstract_deadline": "2027-01-31",
+            "abstract_deadline_note": "Deadline 31 Jan"}
+
+
+def test_abstract_status_not_overwritten_when_note_changes(monkeypatch, caplog):
+    sb = _sb(abstract_open=True, abstract_deadline=None, abstract_deadline_note=PLACEHOLDER)
+
+    def fixer(row, page_text, llm_call):
+        sb.tables["conferences"][0]["abstract_deadline_note"] = "Moderator note"
+        return AB_VALUE, "text"
+
+    with caplog.at_level(logging.WARNING):
+        applied = _run(monkeypatch, sb, ["abstract_status"], fixers={"abstract_status": fixer})
+    assert _stored(sb, "abstract_deadline_note") == "Moderator note"
+    assert _stored(sb, "abstract_deadline") is None
+    assert applied == []
+    assert "skipped 1.abstract_status: row changed since read" in caplog.text
+    _no_pricing_delete(sb)
+
+
+def test_abstract_status_happy_path(monkeypatch):
+    sb = _sb(abstract_open=True, abstract_deadline=None, abstract_deadline_note=PLACEHOLDER)
+    applied = _run(monkeypatch, sb, ["abstract_status"],
+                   fixers={"abstract_status": lambda row, t, llm: (AB_VALUE, "text")})
+    assert _stored(sb, "abstract_deadline") == "2027-01-31"
+    assert _stored(sb, "abstract_deadline_note") == "Deadline 31 Jan"
+    assert [p["field"] for p in applied] == ["abstract_status"]
+    _no_pricing_delete(sb)
+
+
+def test_abstract_status_side_finding_not_overwritten(monkeypatch):
+    sb = _sb(abstract_open=True, abstract_deadline=None, abstract_deadline_note=PLACEHOLDER)
+
+    def explorer(**kw):
+        sb.tables["conferences"][0]["abstract_open"] = False  # concurrent edit
+        r = _pricing_result()
+        r.extras = {"abstract_status": AB_VALUE}
+        return r
+
+    applied = _run(monkeypatch, sb, ["pricing", "abstract_status"],
+                   explorers={"pricing": explorer})
+    assert _stored(sb, "abstract_open") is False
+    assert _stored(sb, "abstract_deadline") is None
+    assert "abstract_status" not in {p["field"] for p in applied}
+    _no_pricing_delete(sb)
+
+
+def test_abstract_status_side_finding_happy_path(monkeypatch):
+    sb = _sb(abstract_open=True, abstract_deadline=None, abstract_deadline_note=PLACEHOLDER)
+
+    def explorer(**kw):
+        r = _pricing_result()
+        r.extras = {"abstract_status": AB_VALUE}
+        return r
+
+    applied = _run(monkeypatch, sb, ["pricing", "abstract_status"],
+                   explorers={"pricing": explorer})
+    assert _stored(sb, "abstract_deadline") == "2027-01-31"
+    assert "abstract_status" in {p["field"] for p in applied}
+
+
+def test_rpc_non_int_result_is_not_success(caplog):
+    class _SBStub:
+        def rpc(self, name, params):
+            return SimpleNamespace(execute=lambda: SimpleNamespace(data=[{"x": 1}]))
+
+    with caplog.at_level(logging.WARNING):
+        ok = runner._patch_row(_SBStub(), 1, "pricing",
+                               [{"tier_label": "M", "price_gbp": 1}])
+    assert ok is False
+    assert "unexpected tier rpc result" in caplog.text
+    assert "[{'x': 1}]" in caplog.text

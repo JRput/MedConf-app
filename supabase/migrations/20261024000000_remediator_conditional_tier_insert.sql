@@ -4,7 +4,9 @@
 -- with moderate_contribution / community_upsert_tiers (check-then-act): a tier
 -- set written between the remediator's read and its delete was destroyed.
 -- This function inserts tiers only when the conference currently has none,
--- serialised on the conferences row lock. Returns the number inserted (0 = row
+-- serialised against other writers that take the same conferences row lock
+-- (moderate_contribution does; the scraper's own tier replace in database.py
+-- does not, so that path is not covered). Returns the number inserted (0 = row
 -- missing, tiers already present, or nothing valid). SECURITY INVOKER: the
 -- caller is the service role. Idempotent to re-apply (CREATE OR REPLACE).
 -- ============================================================

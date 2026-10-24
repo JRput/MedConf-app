@@ -124,14 +124,27 @@ def _patch_row(supabase, conference_id: int, field: str, value: Any,
                 "remediator_insert_tiers_if_empty",
                 {"p_conference_id": conference_id, "p_tiers": rows},
             ).execute()
-            if not res.data:
+            n = res.data
+            if not (isinstance(n, int) and not isinstance(n, bool) and n > 0):
+                if n != 0:
+                    logger.warning(
+                        f"remediator: unexpected tier rpc result for {conference_id}: "
+                        f"{repr(n)[:80]}")
                 return _skip_changed(conference_id, field)
             return True
         if field == "abstract_status":
-            # value is a dict of field updates. Every detect_gaps branch that
-            # yields abstract_status requires `not abstract_deadline`.
+            # value is a dict of field updates; `expected` is the row as read.
+            # All three columns the patch may touch must still hold the values
+            # read (None -> IS NULL, bool -> true/false text for PostgREST).
             q = supabase.table("conferences").update(value).eq("id", conference_id)
-            res = q.is_("abstract_deadline", "null").execute()
+            src = expected if isinstance(expected, dict) else {}
+            for col in ("abstract_open", "abstract_deadline", "abstract_deadline_note"):
+                v = src.get(col)
+                if v is None:
+                    q = q.is_(col, "null")
+                else:
+                    q = q.eq(col, str(v).lower() if isinstance(v, bool) else v)
+            res = q.execute()
         else:
             q = supabase.table("conferences").update({field: value}).eq("id", conference_id)
             if expected is None:
@@ -327,7 +340,8 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                         _ab = (getattr(result, "extras", None) or {}).get("abstract_status")
                         if _ab and field == "pricing" and "abstract_status" in gaps \
                                 and validate("abstract_status", _ab):
-                            if _patch_row(sb, row["id"], "abstract_status", _ab):
+                            if _patch_row(sb, row["id"], "abstract_status", _ab,
+                                      expected=row):
                                 done_fields.add("abstract_status")
                                 patches_applied.append({
                                     "conference_id": row["id"],
@@ -384,7 +398,8 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                     })
                     unfixed.append(field)
                     continue
-                if _patch_row(sb, row["id"], field, value, expected=row.get(field)):
+                if _patch_row(sb, row["id"], field, value,
+                              expected=row if field == "abstract_status" else row.get(field)):
                     patches_applied.append({
                         "conference_id": row["id"],
                         "conference_name": (row.get("conference_name") or "")[:60],

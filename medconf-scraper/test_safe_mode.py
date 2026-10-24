@@ -221,7 +221,12 @@ def test_encoding_refusal_independent_of_installed_decoders(monkeypatch):
         def __init__(self, *a, **k):
             raise AssertionError("decoder used")
 
-    monkeypatch.setattr(dec, "SUPPORTED_DECODERS", {k: Boom for k in dec.SUPPORTED_DECODERS})
+    # Mutate the shared dict in place: httpx._models holds the same object.
+    for k in ("gzip", "deflate", "br", "zstd"):
+        monkeypatch.setitem(dec.SUPPORTED_DECODERS, k, Boom)
+    # Prove the patch is live before relying on it.
+    with pytest.raises(AssertionError, match="decoder used"):
+        httpx.Response(200, headers={"content-encoding": "zstd"}, content=b"x").read()
     read = []
 
     class Body(httpx.SyncByteStream):
@@ -351,6 +356,25 @@ def test_isolated_parser_garbage_is_loud(caplog):
     assert msgs and "pdf_child_error" in msgs[0]
 
 
+def test_marker_survives_stderr_noise_and_is_escaped(monkeypatch, caplog):
+    import logging
+    noise = b"pypdf warning line\n" * 60  # > 1000 bytes before the marker
+    monkeypatch.setattr(subprocess, "run", lambda a, **k: subprocess.CompletedProcess(
+        a, 3, stdout=b"", stderr=noise + b"pdf_child_error:PdfReadError"))
+    with caplog.at_level(logging.WARNING):
+        assert pdf_text.pdf_to_text_isolated(b"%PDF-1.4 x") == ""
+    msg = [r.getMessage() for r in caplog.records if r.getMessage().startswith("pdf_text:")][0]
+    assert "pdf_child_error:PdfReadError" in msg
+    # PDF-influenced stderr with no marker: last 200 chars, escaped, single line
+    monkeypatch.setattr(subprocess, "run", lambda a, **k: subprocess.CompletedProcess(
+        a, 3, stdout=b"", stderr=b"::error::x\nsecond line"))
+    caplog.clear()
+    with caplog.at_level(logging.WARNING):
+        pdf_text.pdf_to_text_isolated(b"%PDF-1.4 x")
+    msg = caplog.records[-1].getMessage()
+    assert "\n" not in msg and "\\n" in msg
+
+
 def test_isolated_parser_corrupt_pdf_is_loud(caplog):
     import logging
     with caplog.at_level(logging.WARNING):
@@ -363,7 +387,7 @@ def test_isolated_parser_corrupt_pdf_is_loud(caplog):
 def test_isolated_parser_no_text_warns(monkeypatch, caplog):
     import logging
     monkeypatch.setattr(subprocess, "run", lambda a, **k: subprocess.CompletedProcess(
-        a, 0, stdout=b"", stderr=b"pdf_child_pages_failed:2"))
+        a, 0, stdout=b"", stderr=b"noise " * 200 + b"pdf_child_pages_failed:2"))
     with caplog.at_level(logging.WARNING):
         assert pdf_text.pdf_to_text_isolated(b"%PDF-1.4 x") == ""
     assert any("produced no text" in r.getMessage() and "pdf_child_pages_failed:2" in r.getMessage()

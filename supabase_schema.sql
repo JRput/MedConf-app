@@ -609,6 +609,8 @@ CREATE TRIGGER update_notification_preferences_updated_at
 
 -- ============================================
 -- Remediator conditional tier insert (2026-10-24)
+-- Inserts tiers only when none exist; serialised only against writers that take
+-- the same conferences row lock (moderate_contribution does, database.py does not).
 -- ============================================
 CREATE OR REPLACE FUNCTION public.remediator_insert_tiers_if_empty(p_conference_id INTEGER, p_tiers JSONB)
 RETURNS INTEGER LANGUAGE plpgsql SET search_path = public AS $$

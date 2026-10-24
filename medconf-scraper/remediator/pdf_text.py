@@ -71,7 +71,8 @@ def pdf_to_text(data: bytes, max_pages: int = PDF_MAX_PAGES) -> str:
 
 
 _PDF_CHILD = r"""
-import io, sys
+import io, sys, logging
+logging.getLogger("pypdf").setLevel(logging.CRITICAL)
 try:
     import resource
     resource.setrlimit(resource.RLIMIT_AS, (1 << 30, 1 << 30))
@@ -98,6 +99,17 @@ sys.stdout.write("\n".join(out)[:2000000])
 """
 
 
+_MARKER_RE = re.compile(r"pdf_child_(?:error|pages_failed):[A-Za-z0-9_]+")
+
+
+def _stderr_marker(stderr: bytes) -> str:
+    """Our marker from anywhere in the child's stderr, else its last 200 chars.
+    Callers log it with !r: stderr can carry PDF-influenced text."""
+    text = (stderr or b"").decode("utf-8", "ignore")
+    m = _MARKER_RE.search(text)
+    return m.group(0) if m else text[-200:]
+
+
 def pdf_to_text_isolated(data: bytes, max_pages: int = PDF_MAX_PAGES, timeout: float = 20) -> str:
     """Safe-fetch mode: parse the PDF in a child process (bytes on stdin,
     hard timeout, address-space limit) so a parser hang or memory bug cannot
@@ -113,15 +125,15 @@ def pdf_to_text_isolated(data: bytes, max_pages: int = PDF_MAX_PAGES, timeout: f
         logger.warning(f"pdf_text: isolated parse failed ({type(e).__name__}, {len(data)} bytes)")
         return ""
     if proc.returncode != 0:
-        marker = proc.stderr.decode("utf-8", "ignore")[:200]
-        logger.warning(f"pdf_text: isolated parse exited {proc.returncode} ({len(data)} bytes; stderr: {marker})")
+        marker = _stderr_marker(proc.stderr)
+        logger.warning(f"pdf_text: isolated parse exited {proc.returncode} ({len(data)} bytes; stderr: {marker!r})")
         return ""
     raw = proc.stdout.decode("utf-8", "ignore")
     lines = [_norm(l) for l in raw.splitlines()]
     text = "\n".join(l for l in lines if l)
     if not text:
-        marker = proc.stderr.decode("utf-8", "ignore")[:200]
-        logger.warning(f"pdf_text: isolated parse produced no text ({len(data)} bytes; stderr: {marker})")
+        marker = _stderr_marker(proc.stderr)
+        logger.warning(f"pdf_text: isolated parse produced no text ({len(data)} bytes; stderr: {marker!r})")
     return text
 
 
