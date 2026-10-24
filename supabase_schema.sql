@@ -690,7 +690,7 @@ RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $
   spec AS (
     SELECT specialty, count(*) AS n FROM live
     WHERE specialty IS NOT NULL AND specialty <> ''
-    GROUP BY specialty ORDER BY n DESC, specialty ASC LIMIT 40
+    GROUP BY specialty ORDER BY n DESC, specialty ASC LIMIT 200
   ),
   soc AS (
     SELECT society, count(*) AS n FROM live
@@ -704,7 +704,8 @@ RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $
       'specialties', (SELECT count(DISTINCT specialty) FROM live WHERE specialty IS NOT NULL AND specialty <> ''),
       'closing_soon', (SELECT count(*) FROM closing_window),
       'this_month', (SELECT count(*) FROM month_rows),
-      'online_this_month', (SELECT count(*) FROM month_rows WHERE event_format = 'online')
+      'online_this_month', (SELECT count(*) FROM month_rows WHERE event_format = 'online'),
+      'active_sources', (SELECT count(*) FROM public.scraper_sources WHERE active = TRUE)
     ),
     'closing_soon', COALESCE((
       SELECT jsonb_agg(jsonb_build_object(

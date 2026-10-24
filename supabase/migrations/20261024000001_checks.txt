@@ -1,7 +1,7 @@
 SELECT has_function_privilege('anon','public.home_preview()','EXECUTE') AND has_function_privilege('authenticated','public.home_preview()','EXECUTE') AS ok
 SELECT has_function_privilege('anon','public.event_preview(integer)','EXECUTE') AND has_function_privilege('anon','public.sitemap_events()','EXECUTE') AS ok
 SELECT (SELECT count(*) FROM pg_proc WHERE pronamespace='public'::regnamespace AND proname IN ('home_preview','event_preview','sitemap_events') AND prosecdef) = 3 AS ok
-SELECT (SELECT count(*) FROM jsonb_object_keys(public.home_preview())) = 5 AND public.home_preview() ?& array['counts','closing_soon','this_month','specialties','societies'] AS ok
+SELECT (SELECT count(*) FROM jsonb_object_keys(public.home_preview())) = 5 AND public.home_preview() ?& array['counts','closing_soon','this_month','specialties','societies'] AND (SELECT count(*) FROM jsonb_object_keys(public.home_preview()->'counts')) = 7 AND (public.home_preview()->'counts') ?& array['events','societies','specialties','closing_soon','this_month','online_this_month','active_sources'] AS ok
 SELECT NOT (public.event_preview((SELECT min(id) FROM conferences WHERE archived=false)) ?| array['price_gbp','cpd_points','abstract_deadline','venue_name','booking_url','organiser_url']) AS ok
 SELECT (SELECT count(*) FROM jsonb_object_keys(public.event_preview((SELECT min(id) FROM conferences WHERE archived=false)))) = 13 AS ok
 SELECT public.event_preview(-1) IS NULL AS ok
