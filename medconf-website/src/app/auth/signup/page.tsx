@@ -8,7 +8,8 @@ import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { resolveNext } from '@/lib/auth/gate'
-import { setNextCookie } from '@/lib/auth/next-cookie'
+import { mapAuthError } from '@/lib/auth/errors'
+import { clearNextCookie, setNextCookie } from '@/lib/auth/next-cookie'
 import { AuthCard, AuthError, AuthField, AuthTerms } from '@/components/auth/AuthCard'
 
 // Auth behaviour is unchanged from the pre-W5 page: useAuth().signUp (which
@@ -64,7 +65,8 @@ function SignUpForm() {
     const { data, error } = await signUp(email, password, nextPath || undefined)
 
     if (error) {
-      setError(error.message)
+      clearNextCookie()
+      setError(mapAuthError(error.message, 'signup'))
       setLoading(false)
       return
     }

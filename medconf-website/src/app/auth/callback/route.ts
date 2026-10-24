@@ -53,13 +53,9 @@ export async function GET(request: NextRequest) {
   const isRecovery = rawType === 'recovery'
   const next = safeNextPath(params.get('next'), isRecovery ? '/auth/reset-password' : '/onboarding')
 
-  // Only echo an email the request itself carried; it is re-validated by the page.
-  const emailParam = params.get('email')
-  const verifyExpiredPath = `/auth/verify?reason=expired${emailParam ? `&email=${encodeURIComponent(emailParam.slice(0, 254))}` : ''}`
-
   const failure = () =>
     NextResponse.redirect(
-      new URL(isRecovery ? '/auth/forgot-password?error=expired' : verifyExpiredPath, requestUrl)
+      new URL(isRecovery ? '/auth/forgot-password?error=expired' : '/auth/verify?reason=expired', requestUrl)
     )
 
   if (error) {

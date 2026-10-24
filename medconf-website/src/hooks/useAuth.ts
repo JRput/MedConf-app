@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
 import { safeNextPath } from '@/lib/auth/password'
+import { clearNextCookie } from '@/lib/auth/next-cookie'
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -47,6 +48,8 @@ export function useAuth() {
   // whether or not the account exists (Supabase does not reveal it either).
   const resendConfirmation = async (email: string, next?: string) => {
     const safeNext = safeNextPath(next, '')
+    // NOTE: the token_hash email templates build their own link from SiteURL and
+    // ignore this redirect's `next`; same-device continuity relies on mc_next.
     const callback = `${window.location.origin}/auth/callback${safeNext ? `?next=${encodeURIComponent(safeNext)}` : ''}`
     const { error } = await supabase.auth.resend({
       type: 'signup',
@@ -74,7 +77,13 @@ export function useAuth() {
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    clearNextCookie()
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      const e = error as { status?: number; name?: string }
+      console.warn('[auth] signOut failed', e.status, e.name)
+      await supabase.auth.signOut({ scope: 'local' })
+    }
   }
 
   return { user, loading, signUp, resendConfirmation, signIn, signOut, requestPasswordReset, updatePassword }

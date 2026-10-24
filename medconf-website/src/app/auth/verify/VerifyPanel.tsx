@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Mail } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
+import { setNextCookie } from '@/lib/auth/next-cookie'
 import { CONFIRM_FIRST } from '@/lib/auth/errors'
 import { signUpHref } from '@/lib/auth/urls'
 import { AuthCard, AuthError, AuthField } from '@/components/auth/AuthCard'
@@ -56,6 +57,7 @@ export function VerifyPanel({
     setError('')
     setSending(true)
     try {
+      if (next) setNextCookie(next)
       const { error: resendError } = await resendConfirmation(target, next || undefined)
       if (resendError) {
         const status = (resendError as { status?: number }).status
@@ -64,7 +66,9 @@ export function VerifyPanel({
         } else if (status === undefined || status === 0 || /fetch|network/i.test(resendError.message)) {
           setError(NETWORK)
         } else {
-          setSentTo(target) // identical to success
+          // Looks identical to success; log status/name only, never the address.
+          console.warn('[verify] resend failed', status, (resendError as { name?: string }).name)
+          setSentTo(target)
           setCooldown(COOLDOWN_SECONDS)
         }
       } else {

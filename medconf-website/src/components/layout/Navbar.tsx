@@ -22,7 +22,11 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   // After signing out, leave the (possibly gated) page and re-render the tree.
   const handleSignOut = async () => {
-    await signOut()
+    try {
+      await signOut()
+    } catch (err) {
+      console.warn('[auth] signOut threw', (err as { name?: string })?.name)
+    }
     router.push('/')
     router.refresh()
   }
@@ -137,7 +141,7 @@ export function Navbar() {
                 )}
                 <button
                   onClick={() => {
-                    handleSignOut()
+                    void handleSignOut()
                     setIsMenuOpen(false)
                   }}
                   className="block w-full rounded-md px-3 py-2.5 text-left text-[0.9375rem] text-danger-text hover:bg-surface-hover"

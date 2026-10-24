@@ -58,4 +58,15 @@ describe('next cookie', () => {
     expect(parseNextCookie('a=1; mc_next=%2Fsaved; b=2')).toBe('/saved')
     expect(parseNextCookie(null)).toBe('')
   })
+
+  // New in F1c: fails on the previous code, which accepted /onboarding.
+  it('never stores or returns a destination under /onboarding', () => {
+    const { written } = fakeDocument()
+    setNextCookie('/onboarding')
+    setNextCookie('/onboarding?next=%2Fsaved')
+    expect(written).toHaveLength(0)
+    expect(parseNextCookie('mc_next=%2Fonboarding')).toBe('')
+    expect(parseNextCookie('mc_next=' + encodeURIComponent('/onboarding?x=1'))).toBe('')
+    expect(parseNextCookie('mc_next=%2Fonboardingx')).toBe('/onboardingx')
+  })
 })

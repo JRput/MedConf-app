@@ -30,6 +30,7 @@ import { SpecialtyCombobox } from '@/components/account/SpecialtyCombobox'
 import { GradeSelect } from '@/components/account/GradeSelect'
 import { Button } from '@/components/ui/button'
 import { safeNextPath } from '@/lib/auth/password'
+import { isUnder } from '@/lib/auth/gate'
 import { clearNextCookie, readNextCookie } from '@/lib/auth/next-cookie'
 
 export default function OnboardingPage() {
@@ -46,8 +47,9 @@ function OnboardingWizard() {
   const router = useRouter()
   const searchParams = useSearchParams()
   // ?next= wins (validated); the same-device mc_next cookie is the fallback.
-  const queryNext = safeNextPath(searchParams.get('next'), '')
-  const destination = () => queryNext || readNextCookie() || '/dashboard'
+  const notOnboarding = (n: string) => (n && !isUnder(n.split(/[?#]/)[0], ['/onboarding']) ? n : '')
+  const queryNext = notOnboarding(safeNextPath(searchParams.get('next'), ''))
+  const destination = () => queryNext || notOnboarding(readNextCookie()) || '/dashboard'
   const supabase = createSupabaseClient()
 
   const [step, setStep] = useState<1 | 2>(1)
@@ -124,17 +126,18 @@ function OnboardingWizard() {
         return
       }
 
-      const { data: existingPrefs } = await supabase.from('notification_preferences').select('id').eq('id', user.id).maybeSingle()
-
-      if (!existingPrefs) {
-        await supabase.from('notification_preferences').insert({
+      // Best effort: a failure here must not block completion.
+      const { error: prefsError } = await supabase.from('notification_preferences').upsert(
+        {
           id: user.id,
           email_new_conferences: true,
           email_abstract_deadlines: true,
           email_price_changes: false,
           email_frequency: 'weekly',
-        })
-      }
+        },
+        { onConflict: 'id', ignoreDuplicates: true }
+      )
+      if (prefsError) console.warn('[onboarding] preferences upsert failed', prefsError.name ?? prefsError.code)
 
       // Hard navigation: the client router cache may hold a /dashboard prefetch
       // from before the profile was complete, which replays the bounce back here.

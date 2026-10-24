@@ -4,6 +4,13 @@
 // only; a cross-device confirmation falls back to /dashboard). The value is
 // never trusted: every read goes through safeNextPath, the only `next` validator.
 import { safeNextPath } from '@/lib/auth/password'
+import { isUnder } from '@/lib/auth/gate'
+
+// /onboarding is never a destination (it would loop the wizard).
+function usable(value: string): string {
+  const safe = safeNextPath(value, '')
+  return safe && !isUnder(safe.split(/[?#]/)[0], ['/onboarding']) ? safe : ''
+}
 
 export const NEXT_COOKIE = 'mc_next'
 const MAX_AGE = 3600
@@ -21,14 +28,14 @@ export function parseNextCookie(cookieHeader: string | null | undefined): string
     } catch {
       return ''
     }
-    return safeNextPath(value, '')
+    return usable(value)
   }
   return ''
 }
 
 export function setNextCookie(next: string | null | undefined): void {
   if (typeof document === 'undefined') return
-  const safe = safeNextPath(next, '')
+  const safe = usable(next ?? '')
   if (!safe) return
   const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; Secure' : ''
   document.cookie = `${NEXT_COOKIE}=${encodeURIComponent(safe)}; Path=/; Max-Age=${MAX_AGE}; SameSite=Lax${secure}`

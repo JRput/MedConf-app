@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { authErrorMessage, isUnconfirmedError, mapAuthError } from '../auth/errors'
+import { authErrorMessage, isLikelyEmail, isUnconfirmedError, mapAuthError } from '../auth/errors'
 
 describe('authErrorMessage', () => {
   it('maps verify_failed', () => {
@@ -47,5 +47,27 @@ describe('mapAuthError', () => {
       expect(out).toBe('Sign-in failed. Try again.')
       expect(out).not.toContain(raw || '\u0000')
     }
+  })
+})
+
+// isLikelyEmail and the signup/rate-limit mappings are new: on the previous code the import is
+// missing / the signup context returns the generic sign-in text, so these fail.
+describe('isLikelyEmail', () => {
+  it('accepts plain addresses', () => {
+    for (const e of ['a@b.co', 'first.last@nhs.net', 'x+tag@sub.example.org']) expect(isLikelyEmail(e)).toBe(true)
+  })
+  it('rejects markup, spaces, prose and overlong values', () => {
+    for (const e of ['<b>x</b>@y.z', 'a b@c.d', 'Click here', 'a'.repeat(300), '', null]) expect(isLikelyEmail(e as string)).toBe(false)
+  })
+})
+describe('mapAuthError signup context', () => {
+  it('maps weak password and rate limits', () => {
+    expect(mapAuthError('Password should be at least 6 characters', 'signup')).toBe('Password does not meet the requirements.')
+    expect(mapAuthError('Password is known to be weak and easy to guess', 'signup')).toBe('Password does not meet the requirements.')
+    expect(mapAuthError('email rate limit exceeded', 'signup')).toBe('Too many attempts. Wait a few minutes and try again.')
+    expect(mapAuthError('Too many requests')).toBe('Too many attempts. Wait a few minutes and try again.')
+  })
+  it('falls back to a generic signup message', () => {
+    expect(mapAuthError('database exploded <x>', 'signup')).toBe('Sign-up failed. Try again.')
   })
 })
