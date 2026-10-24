@@ -43,7 +43,7 @@ Dark mode: every colour is set explicitly, so clients that auto-invert keep cont
 
 ## 2. Production: Supabase dashboard
 
-Dashboard → project `zcpszfbmvfylicpxgsfc` → Authentication → Email Templates. Each template has a Subject field and one body field that takes HTML. The `.txt` files are not pasted there; they are the plain-text alternative for local testing or for a sender such as Resend if you ever send these yourself.
+Dashboard → project `zcpszfbmvfylicpxgsfc` → Authentication → Email Templates (or run `scripts/supabase_auth_setup.py templates`, section 3c). Each template has a Subject field and one body field that takes HTML. The `.txt` files are not pasted there; they are the plain-text alternative for local testing or for a sender such as Resend if you ever send these yourself.
 
 | Dashboard tab | Subject | Paste HTML from |
 |---|---|---|
@@ -56,17 +56,36 @@ Dashboard → project `zcpszfbmvfylicpxgsfc` → Authentication → Email Templa
 
 Paste the whole file including `<!DOCTYPE html>`. Save each tab separately. Leave the `{{ ... }}` placeholders untouched.
 
-## 3. SMTP: what works now and what is needed
+## 3. SMTP: custom sender setup
 
 Supabase's built-in sender only delivers to addresses that belong to the project's team members, and it is rate-limited to a few emails per hour. Real sign-ups from the public will not receive confirmation or reset emails until custom SMTP is configured.
 
-Custom SMTP needs a domain you control for sender authentication (SPF, DKIM). **The owner has no domain yet, so this step is blocked.** Free mail domains such as gmail.com or hotmail.com cannot be verified with Resend.
+The owner has no domain yet. Resend needs a verified domain, so for now use one of the options in 3a, which verify a single sender address instead.
 
-Until then:
-- Sign-ups and resets work for the owner's team-member addresses only.
-- Test accounts for other people must be confirmed by an admin (Authentication → Users, or the admin API `generateLink`).
+### 3a. No domain yet: options that verify a single sender address
 
-Once a domain exists (Resend, recommended):
+In every case the Supabase fields are under Authentication → SMTP Settings (enable custom SMTP). Caps are the providers' published free-tier figures at the time of writing; recheck them on sign-up, as free plans change.
+
+| | Brevo (free) | Gmail with App Password | SendGrid |
+|---|---|---|---|
+| Daily cap | 300 emails/day | about 500 emails/day | 100 emails/day on the free tier (SendGrid has been moving to a time-limited trial; check what your account gets) |
+| Hourly cap | none published | none published, bursts can trigger a temporary block | none published |
+| Sender email | the address you verify in Brevo (Senders & IP → Senders) | the Gmail address itself | the address verified under Single Sender Verification |
+| Sender name | `MedConf` | `MedConf` | `MedConf` |
+| Host | `smtp-relay.brevo.com` | `smtp.gmail.com` | `smtp.sendgrid.net` |
+| Port | `587` | `587` (STARTTLS) or `465` (SSL) | `587` |
+| Username | your Brevo login email | the full Gmail address | the literal text `apikey` |
+| Password | an SMTP key (Brevo → SMTP & API → SMTP keys), not your login password | the 16-character App Password, entered without spaces | an API key with "Mail Send" permission |
+| One-time setup | Verify the sender email by clicking the link Brevo mails to it | Turn on 2-Step Verification, then Google Account → Security → App passwords | Settings → Sender Authentication → Single Sender Verification |
+
+Recommendation: Brevo for headroom (300/day and a proper sending service); Gmail for zero sign-up friction (no new account if you already have one). If you use Gmail, create a dedicated account such as `medconf.noreply@gmail.com` rather than using a personal address, because the App Password gives SMTP access to that whole mailbox and replies land there.
+
+Limits of the no-domain route: mail is sent from a shared or free-mail domain, so SPF/DKIM alignment is weaker, and the first messages may land in spam. Gmail also rewrites the sender to the authenticated address. Move to 3b once a domain exists.
+
+### 3b. When a domain exists: Resend
+
+Free mail domains such as gmail.com or hotmail.com cannot be verified with Resend.
+
 1. Create a Resend account.
 2. Domains → Add Domain → enter the domain (a subdomain such as `mail.<domain>` is fine). Add the DNS records Resend lists (SPF, DKIM, optionally DMARC) at your DNS host. Wait until the domain shows Verified.
 3. API Keys → create a key with "Sending access" for that domain. Copy it once.
@@ -77,9 +96,54 @@ Once a domain exists (Resend, recommended):
    - Password: the API key
    - Sender email `no-reply@<domain>`
    - Sender name `MedConf`
-5. Save, then raise the email rate limit (section 5) and run the test plan below.
+5. Save, then raise the email rate limit (3d) and run the smoke test (3e).
 
 Never put the API key in the repo or in `config.toml`; if you need it locally use `env(RESEND_API_KEY)`.
+
+### 3c. Two ways to apply
+
+**Dashboard.** Authentication → SMTP Settings for the sender (values from 3a or 3b). Authentication → Email Templates for the six templates: paste each HTML file and its subject, as in section 2.
+
+**Script.** `scripts/supabase_auth_setup.py` (Python 3.11, standard library only) pushes the templates and the SMTP settings through the Supabase Management API.
+
+1. Create a personal access token: Supabase dashboard → Account (top-right avatar) → Access Tokens → Generate new token. It starts with `sbp_`. The token acts as you on every project in your account, so treat it like a password. Keep it in the shell environment only, never in a file, and revoke it from the same page when you are done.
+2. Export the variables in your shell. Typing a leading space before each `export` keeps it out of bash history when `HISTCONTROL=ignorespace` is set.
+
+```bash
+export SUPABASE_ACCESS_TOKEN=sbp_...            # personal access token
+export SUPABASE_PROJECT_REF=zcpszfbmvfylicpxgsfc # optional, this is the default
+export SMTP_HOST=smtp-relay.brevo.com
+export SMTP_PORT=587
+export SMTP_USER=you@example.com
+export SMTP_PASS=...                             # SMTP key / app password / API key
+export SMTP_SENDER_EMAIL=medconf.noreply@example.com
+export SMTP_SENDER_NAME=MedConf                  # optional, default MedConf
+export SMTP_RATE_LIMIT_EMAILS_PER_HOUR=100       # optional, see 3d
+```
+
+3. Run, with `--dry-run` first on each (prints field names and sizes, sends nothing, needs no token):
+
+```bash
+python3 scripts/supabase_auth_setup.py templates --dry-run
+python3 scripts/supabase_auth_setup.py templates
+python3 scripts/supabase_auth_setup.py smtp --dry-run
+python3 scripts/supabase_auth_setup.py smtp
+python3 scripts/supabase_auth_setup.py show
+```
+
+After each real push the script re-reads the config and prints only non-secret fields (site URL, redirect allow-list, OTP expiry, SMTP host/port/user/sender, the six subjects and the first 80 characters of each body). It never prints the token or the SMTP password. When finished, `unset` the variables and revoke the token.
+
+### 3d. Rate limits after enabling custom SMTP
+
+Supabase starts a project with custom SMTP at 30 emails per hour. Raise it under Authentication → Rate Limits (or set `SMTP_RATE_LIMIT_EMAILS_PER_HOUR` for the script). Keep it below the provider's daily cap divided by 24 for steady use, and remember that every sign-up, reset and email change counts. Section 5 has the full table.
+
+### 3e. Smoke test
+
+1. Sign up on the live site with an address that is not on the team (a personal address of a friend or a second mailbox of yours).
+2. Confirm the email arrives (check spam on the first send) with the right subject and a teal button.
+3. Open the link on a different device from the one that signed up, for example the phone if you signed up on the laptop.
+4. Expect to land signed in on `/onboarding`. A "verification failed" message means the template still uses `{{ .ConfirmationURL }}` instead of the `token_hash` link.
+5. Repeat once for forgot password; the link should end on `/auth/reset-password`.
 
 ## 4. Test plan
 
