@@ -13,11 +13,32 @@
 // re-verified against it.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { queryDirectory, queryFacets, type DirectoryFacets, type DirectoryFilters, type DirectoryPage } from './directory-query'
+import { DEFAULT_FILTERS, queryDirectory, queryFacets, type DirectoryFacets, type DirectoryFilters, type DirectoryPage } from './directory-query'
 import { queryDirectoryFixture, queryFacetsFixture, FIXTURE_EVENTS } from './__fixtures__/directory'
 
+/**
+ * Fixture data may be served only outside production, or in production when
+ * NEXT_PUBLIC_DIRECTORY_FIXTURE is explicitly set ("1"/"true"). Read lazily so
+ * tests can stub the env.
+ */
+export function fixtureAllowed(): boolean {
+  if (process.env.NODE_ENV !== 'production') return true
+  const flag = (process.env.NEXT_PUBLIC_DIRECTORY_FIXTURE ?? '').trim().toLowerCase()
+  return flag === '1' || flag === 'true'
+}
+
 export function wantsFixture(searchParams: URLSearchParams): boolean {
+  if (!fixtureAllowed()) return false
   return searchParams.get('fixture') === '1' || process.env.NEXT_PUBLIC_DIRECTORY_FIXTURE === '1'
+}
+
+function emptyDirectory(filters: Partial<DirectoryFilters>, wantFacets: boolean) {
+  const pageSize = filters.pageSize && filters.pageSize > 0 ? filters.pageSize : DEFAULT_FILTERS.pageSize
+  const page = filters.page && filters.page > 0 ? filters.page : 1
+  const facets: DirectoryFacets | null = wantFacets
+    ? { format: {}, type: {}, region: {}, country: {}, society: {}, priceBucket: {}, cpd: {}, specialty: {} }
+    : null
+  return { page: { rows: [], total: 0, page, pageSize } as DirectoryPage, facets, usedFixture: false }
 }
 
 export async function resolveDirectory(
@@ -47,6 +68,10 @@ export async function resolveDirectory(
     // propagate; that's a sign this fallback can be deleted.
     const message = err instanceof Error ? err.message : String(err)
     if (/directory_events|directory_facets|PGRST205|schema cache/i.test(message)) {
+      if (!fixtureAllowed()) {
+        console.error('directory_events unavailable', message)
+        return emptyDirectory(filters, opts.wantFacets)
+      }
       console.warn('[directory-source] directory_events not available yet, falling back to fixture:', message)
       return {
         page: queryDirectoryFixture(filters),
@@ -87,6 +112,10 @@ export async function getSocietyNextDates(
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     if (/directory_events|PGRST205|schema cache/i.test(message)) {
+      if (!fixtureAllowed()) {
+        console.error('directory_events unavailable', message)
+        return {}
+      }
       return reduceToEarliest(FIXTURE_EVENTS.filter((e) => e.startDate && e.startDate >= today).map((e) => ({ society: e.society, start_date: e.startDate! })))
     }
     throw err
