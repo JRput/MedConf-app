@@ -15,8 +15,12 @@ import { cache } from 'react'
 import type { PublicEventFields } from '@/lib/event-public'
 
 /** Minimal client surface so tests can pass a stub. */
+type RpcResponse = { data: unknown; error: { code?: string; message?: string } | null }
 export interface RpcClient {
-  rpc(fn: string, args?: Record<string, unknown>): PromiseLike<{ data: unknown; error: { code?: string; message?: string } | null }>
+  rpc(
+    fn: string,
+    args?: Record<string, unknown>
+  ): PromiseLike<RpcResponse> & { range?: (from: number, to: number) => PromiseLike<RpcResponse> }
 }
 
 export interface HomePreview {
@@ -58,9 +62,15 @@ export function resetPreviewWarnings() {
   warned.clear()
 }
 
-async function call(supabase: RpcClient, fn: string, args?: Record<string, unknown>): Promise<PreviewResult<unknown>> {
+async function call(
+  supabase: RpcClient,
+  fn: string,
+  args?: Record<string, unknown>,
+  range?: [number, number]
+): Promise<PreviewResult<unknown>> {
   try {
-    const { data, error } = await supabase.rpc(fn, args)
+    const builder = supabase.rpc(fn, args)
+    const { data, error } = await (range && builder.range ? builder.range(range[0], range[1]) : builder)
     if (!error) return { status: 'ok', data }
     if (error.code === 'PGRST202') {
       // TODO(access-gate): remove after Phase 2b is applied
@@ -126,9 +136,23 @@ async function eventPreviewImpl(supabase: RpcClient, id: number): Promise<EventP
  */
 export const fetchEventPreview = cache(eventPreviewImpl)
 
+const SITEMAP_PAGE = 1000
+const SITEMAP_MAX_PAGES = 10
+
+/**
+ * PostgREST caps a set-returning function at 1000 rows per response, so page
+ * through with Range. Any failure (including on a later page) is reported as a
+ * whole; a partial list is never returned.
+ */
 export async function fetchSitemapEvents(supabase: RpcClient): Promise<PreviewResult<SitemapEvent[]>> {
-  const r = await call(supabase, 'sitemap_events')
-  if (r.status !== 'ok') return r
-  if (!Array.isArray(r.data)) return { status: 'error' }
-  return { status: 'ok', data: r.data as SitemapEvent[] }
+  const rows: SitemapEvent[] = []
+  for (let page = 0; page < SITEMAP_MAX_PAGES; page++) {
+    const from = page * SITEMAP_PAGE
+    const r = await call(supabase, 'sitemap_events', undefined, [from, from + SITEMAP_PAGE - 1])
+    if (r.status !== 'ok') return r
+    if (!Array.isArray(r.data)) return { status: 'error' }
+    rows.push(...(r.data as SitemapEvent[]))
+    if (r.data.length < SITEMAP_PAGE) break
+  }
+  return { status: 'ok', data: rows }
 }

@@ -93,6 +93,70 @@ describe('preview wrappers', () => {
   })
 })
 
+describe('fetchSitemapEvents paging (PostgREST caps an rpc at 1000 rows)', () => {
+  const rows = (n: number, start = 0) => Array.from({ length: n }, (_, i) => ({ id: start + i, updated_at: null }))
+  /** rpc() returns a thenable builder that also has .range(from, to). */
+  function pagedClient(pages: Array<RpcResponseLike>) {
+    const ranges: Array<[number, number]> = []
+    const client = {
+      rpc: () => {
+        const builder = {
+          range: (from: number, to: number) => {
+            ranges.push([from, to])
+            return Promise.resolve(pages[ranges.length - 1])
+          },
+          then: () => {
+            throw new Error('unranged call: would be capped at 1000 rows')
+          },
+        }
+        return builder
+      },
+    } as unknown as RpcClient
+    return { client, ranges }
+  }
+  type RpcResponseLike = { data: unknown; error: { code?: string } | null }
+
+  it('appends pages until one is short: 1000 + 1000 + 132 = 2132 over three range calls', async () => {
+    const { client, ranges } = pagedClient([
+      { data: rows(1000, 0), error: null },
+      { data: rows(1000, 1000), error: null },
+      { data: rows(132, 2000), error: null },
+    ])
+    const r = await fetchSitemapEvents(client)
+    expect(r.status).toBe('ok')
+    expect(r.status === 'ok' && r.data.length).toBe(2132)
+    expect(ranges).toEqual([[0, 999], [1000, 1999], [2000, 2999]])
+  })
+
+  it('a short first page is a single call', async () => {
+    const { client, ranges } = pagedClient([{ data: rows(300), error: null }])
+    const r = await fetchSitemapEvents(client)
+    expect(r.status === 'ok' && r.data.length).toBe(300)
+    expect(ranges).toEqual([[0, 999]])
+  })
+
+  it('an error on page 2 is an error, not a partial list', async () => {
+    const { client } = pagedClient([
+      { data: rows(1000), error: null },
+      { data: null, error: { code: '57014' } },
+    ])
+    expect(await fetchSitemapEvents(client)).toEqual({ status: 'error' })
+  })
+
+  it('PGRST202 on the first page is missing', async () => {
+    const { client } = pagedClient([{ data: null, error: { code: 'PGRST202' } }])
+    expect(await fetchSitemapEvents(client)).toEqual({ status: 'missing' })
+  })
+
+  it('stops at 10 pages', async () => {
+    const full = Array.from({ length: 12 }, () => ({ data: rows(1000), error: null }))
+    const { client, ranges } = pagedClient(full)
+    const r = await fetchSitemapEvents(client)
+    expect(ranges).toHaveLength(10)
+    expect(r.status === 'ok' && r.data.length).toBe(10_000)
+  })
+})
+
 describe('callers: fall back only on "missing"', () => {
   beforeEach(() => {
     h.tables.length = 0
