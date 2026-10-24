@@ -101,45 +101,53 @@ function OnboardingWizard() {
 
     setSaving(true)
     setError('')
+    try {
+      const nowIso = new Date().toISOString()
+      const { error: profileError } = await supabase.from('user_profiles').upsert(
+        {
+          id: user.id,
+          email: user.email ?? '',
+          role: grade,
+          specialty: specialtySlug,
+          profile_completed_at: nowIso,
+          // Watermark for the specialty-alert cron — see the old wizard's
+          // comment, carried over unchanged: stamping NOW() means a new user
+          // is only alerted about events added after they joined.
+          last_specialty_alert_at: nowIso,
+        },
+        { onConflict: 'id' }
+      )
 
-    const nowIso = new Date().toISOString()
-    const { error: profileError } = await supabase.from('user_profiles').upsert(
-      {
-        id: user.id,
-        email: user.email ?? '',
-        role: grade,
-        specialty: specialtySlug,
-        profile_completed_at: nowIso,
-        // Watermark for the specialty-alert cron — see the old wizard's
-        // comment, carried over unchanged: stamping NOW() means a new user
-        // is only alerted about events added after they joined.
-        last_specialty_alert_at: nowIso,
-      },
-      { onConflict: 'id' }
-    )
+      if (profileError) {
+        console.error('Profile save failed:', profileError)
+        setError('Could not save your profile. Please try again.')
+        return
+      }
 
-    if (profileError) {
-      console.error('Profile save failed:', profileError)
+      const { data: existingPrefs } = await supabase.from('notification_preferences').select('id').eq('id', user.id).maybeSingle()
+
+      if (!existingPrefs) {
+        await supabase.from('notification_preferences').insert({
+          id: user.id,
+          email_new_conferences: true,
+          email_abstract_deadlines: true,
+          email_price_changes: false,
+          email_frequency: 'weekly',
+        })
+      }
+
+      // Hard navigation: the client router cache may hold a /dashboard prefetch
+      // from before the profile was complete, which replays the bounce back here.
+      const dest = destination()
+      clearNextCookie()
+      router.refresh()
+      window.location.assign(dest)
+    } catch (err) {
+      console.error('Onboarding failed:', err)
       setError('Could not save your profile. Please try again.')
+    } finally {
       setSaving(false)
-      return
     }
-
-    const { data: existingPrefs } = await supabase.from('notification_preferences').select('id').eq('id', user.id).maybeSingle()
-
-    if (!existingPrefs) {
-      await supabase.from('notification_preferences').insert({
-        id: user.id,
-        email_new_conferences: true,
-        email_abstract_deadlines: true,
-        email_price_changes: false,
-        email_frequency: 'weekly',
-      })
-    }
-
-    const dest = destination()
-    clearNextCookie()
-    router.push(dest)
   }
 
   if (authLoading || loadingProfile) {

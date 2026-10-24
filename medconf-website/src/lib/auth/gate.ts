@@ -89,3 +89,23 @@ export function onboardingRedirectFor(url: URL): URL {
   if (next && !isUnder(next.split(/[?#]/)[0], ['/onboarding'])) target.searchParams.set('next', next)
   return target
 }
+
+/**
+ * Where /auth/callback sends a user after a successful verification.
+ * - recovery -> /auth/reset-password (always).
+ * - A PKCE reset link (`next` is the reset page) keeps that destination.
+ * - email / email_change confirm an existing account: straight to `next`
+ *   (default /onboarding, whose guard bounces completed profiles on).
+ * - signup, invite, magiclink, and the `?code=` path (type null: cannot tell
+ *   a new user from a returning one) go through /onboarding?next=<next> so a
+ *   new account finishes its profile first; onboarding forwards completed
+ *   profiles to `next` or /dashboard.
+ */
+export function landingFor(type: string | null | undefined, next: string | null | undefined): string {
+  if (type === 'recovery') return '/auth/reset-password'
+  const n = safeNextPath(next, '')
+  if (n === '/auth/reset-password') return n
+  if (type === 'email' || type === 'email_change') return n || '/onboarding'
+  if (!n || isUnder(n.split(/[?#]/)[0], ['/onboarding'])) return n || '/onboarding'
+  return `/onboarding?next=${encodeURIComponent(n)}`
+}

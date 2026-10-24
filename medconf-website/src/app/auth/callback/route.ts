@@ -24,6 +24,8 @@
 // everything else -> /auth/verify?reason=expired (resend page). Details are
 // logged server-side. Accepted OTP types: signup, email, recovery,
 // email_change, magiclink, invite.
+// Signup/invite/magiclink (and code) links with a `next` land on
+// /onboarding?next= so new users finish their profile first (landingFor).
 // Landing on /onboarding with no `next`: a valid same-device `mc_next` cookie
 // (set at signup) is forwarded as /onboarding?next=. The cookie is cleared by
 // onboarding on completion, not here (a verified user may still be mid-wizard).
@@ -32,6 +34,7 @@ import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { safeNextPath } from '@/lib/auth/password'
+import { landingFor } from '@/lib/auth/gate'
 
 const OTP_TYPES: readonly EmailOtpType[] = ['signup', 'email', 'recovery', 'email_change', 'magiclink', 'invite']
 
@@ -98,8 +101,9 @@ export async function GET(request: NextRequest) {
     return failure()
   }
 
-  let landing = next
-  if (next === '/onboarding' && !params.get('next')) {
+  // `code` exchanges carry no type, so landingFor treats them as possibly new.
+  let landing = landingFor(code ? null : rawType, next)
+  if (landing === '/onboarding' && !params.get('next')) {
     const cookieNext = safeNextPath(request.cookies.get('mc_next')?.value ?? null, '')
     if (cookieNext) landing = `/onboarding?next=${encodeURIComponent(cookieNext)}`
   }

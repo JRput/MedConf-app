@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { MAX_NEXT_LENGTH, logGetUserError, isGatedPath, isProfileGatedPath, loginHrefFor, loginRedirectFor, onboardingRedirectFor, resolveNext } from '@/lib/auth/gate'
+import { MAX_NEXT_LENGTH, logGetUserError, isGatedPath, isProfileGatedPath, loginHrefFor, landingFor, loginRedirectFor, onboardingRedirectFor, resolveNext } from '@/lib/auth/gate'
 
 describe('isGatedPath', () => {
   it.each([
@@ -114,5 +114,27 @@ describe('onboardingRedirectFor', () => {
     expect(onboardingRedirectFor(new URL('http://localhost:3000//evil.com')).searchParams.has('next')).toBe(false)
     expect(onboardingRedirectFor(new URL('http://localhost:3000/dashboard?q=' + 'x'.repeat(3000))).searchParams.has('next')).toBe(false)
     expect(onboardingRedirectFor(new URL('http://localhost:3000/onboarding')).searchParams.has('next')).toBe(false)
+  })
+})
+
+// landingFor is new, so all of these fail on the previous code (callback redirected straight to `next`).
+describe('landingFor', () => {
+  it('routes new-account links through onboarding with next', () => {
+    for (const t of ['signup', 'invite', 'magiclink'])
+      expect(landingFor(t, '/conferences?q=x')).toBe('/onboarding?next=%2Fconferences%3Fq%3Dx')
+    expect(landingFor(null, '/conferences')).toBe('/onboarding?next=%2Fconferences')
+  })
+  it('defaults to /onboarding without a usable next', () => {
+    expect(landingFor('signup', null)).toBe('/onboarding')
+    expect(landingFor('signup', '//evil.com')).toBe('/onboarding')
+    expect(landingFor('signup', '/onboarding')).toBe('/onboarding')
+  })
+  it('keeps recovery on the reset page', () => {
+    expect(landingFor('recovery', '/conferences')).toBe('/auth/reset-password')
+    expect(landingFor('recovery', null)).toBe('/auth/reset-password')
+    expect(landingFor(null, '/auth/reset-password')).toBe('/auth/reset-password')
+  })
+  it('sends email-change confirmations straight to next', () => {
+    expect(landingFor('email_change', '/settings')).toBe('/settings')
   })
 })

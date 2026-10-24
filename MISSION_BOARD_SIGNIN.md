@@ -38,6 +38,7 @@ Commander: first-time-user journey plan (from T1+T2), triage defects → fix tic
 | signin-T2 `qa-signin` | sonnet | DONE_WITH_CONCERNS (live sweep; 3 defects; signup form untestable: example.com rejected + built-in SMTP rate limit exhausted) | tests/e2e/e2e_signin_live.py (untracked) | scratchpad/signin/ |
 | signin-F1 `auth-fix` | sonnet | DONE_WITH_CONCERNS → committed LOCALLY `632f55b` (not pushed) | see F1 row | 472 tests, build green |
 | signin-F1b `auth-fix` (sweep defects) | sonnet | DISPATCHED | `src/app/onboarding/page.tsx` · `src/app/auth/callback/route.ts` · tests | — |
+| signin-T4 `auth-config-tool` | sonnet | DISPATCHED | `scripts/supabase_auth_setup.py` (new) · `EMAIL_TEMPLATES.md` (SMTP options + API section) | — |
 | signin-F2 `auth-emails` (token_hash links) | sonnet | DONE (5 link templates on `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=…`; recovery carries `next=%2Fauth%2Freset-password`; docs updated; no ConfirmationURL/RedirectTo left) | supabase/templates/** · supabase/config.toml · EMAIL_TEMPLATES.md · EMAIL_SETUP_GUIDE.md | — |
 
 ## Status log
