@@ -17,7 +17,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { parseDirectoryUrl } from '@/lib/directory-url'
-import { resolveDirectory, wantsFixture } from '@/lib/directory-source'
+import { publicDirectoryError, resolveDirectory, wantsFixture } from '@/lib/directory-source'
 
 export async function GET(request: Request) {
   const url = new URL(request.url)
@@ -42,16 +42,7 @@ export async function GET(request: Request) {
       { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
     )
   } catch (err) {
-    console.error('[api/directory]', err)
-    // Supabase/PostgREST errors are plain objects ({ code, message, details,
-    // hint }), not Error instances — String(err) on one of those collapses
-    // to the useless "[object Object]", so pull `.message` explicitly first.
-    const detail =
-      err instanceof Error
-        ? err.message
-        : typeof err === 'object' && err !== null && 'message' in err
-          ? String((err as { message: unknown }).message)
-          : String(err)
-    return NextResponse.json({ error: 'Failed to query directory', detail }, { status: 500 })
+    const { body, status } = publicDirectoryError(err)
+    return NextResponse.json(body, { status })
   }
 }

@@ -171,11 +171,21 @@ function applyFilters(query: any, f: DirectoryFilters, rawSpecialty: string[], u
 
   if (f.q.trim()) {
     q = useIlikeSearch
-      ? q.or(`conference_name.ilike.%${f.q.trim()}%,specialty.ilike.%${f.q.trim()}%,city.ilike.%${f.q.trim()}%`)
+      ? q.or(ilikeOrFilter(f.q))
       : q.textSearch('search_vector', f.q.trim(), { type: 'websearch', config: 'english' })
   }
 
   return q
+}
+
+/** Strip characters that are structural in a PostgREST `.or()` filter string. */
+export function sanitizeIlikeTerm(term: string): string {
+  return term.replace(/[,()"\\]/g, ' ').trim()
+}
+
+export function ilikeOrFilter(raw: string): string {
+  const t = sanitizeIlikeTerm(raw)
+  return `conference_name.ilike.%${t}%,specialty.ilike.%${t}%,city.ilike.%${t}%`
 }
 
 export interface DatePageSplit {

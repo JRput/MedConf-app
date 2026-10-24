@@ -59,3 +59,23 @@ describe('directory-url round-trip', () => {
     expect(params.toString()).toBe('cpd=1')
   })
 })
+
+describe('directory-url hardening', () => {
+  it('clamps pageSize to 100 and page to 1000', () => {
+    expect(parseDirectoryUrl('pageSize=100000').pageSize).toBe(100) // old: 100000
+    expect(parseDirectoryUrl('page=999999').page).toBe(1000) // old: 999999
+  })
+  it('keeps defaults and valid values unchanged', () => {
+    const d = parseDirectoryUrl('')
+    expect(d.page).toBe(DEFAULT_FILTERS.page)
+    expect(d.pageSize).toBe(DEFAULT_FILTERS.pageSize)
+    expect(parseDirectoryUrl('pageSize=50&page=3')).toMatchObject({ pageSize: 50, page: 3 })
+    expect(parseDirectoryUrl('pageSize=abc&page=-2')).toMatchObject({ pageSize: DEFAULT_FILTERS.pageSize, page: DEFAULT_FILTERS.page })
+  })
+  it('drops dateFrom/dateTo that are not plain YYYY-MM-DD', () => {
+    const f = parseDirectoryUrl(new URLSearchParams({ dateFrom: '2026-01-01,or(id.gt.0)', dateTo: '2026-1-1' }))
+    expect(f.dateFrom).toBeNull() // old: raw string passed through
+    expect(f.dateTo).toBeNull()
+    expect(parseDirectoryUrl('dateFrom=2026-01-01&dateTo=2026-12-31')).toMatchObject({ dateFrom: '2026-01-01', dateTo: '2026-12-31' })
+  })
+})

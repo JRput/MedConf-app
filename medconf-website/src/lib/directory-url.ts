@@ -24,6 +24,15 @@ function isOneOf<T extends string>(value: string, allowed: readonly T[]): value 
   return (allowed as readonly string[]).includes(value)
 }
 
+/** Public-endpoint bounds: stops huge range() windows and unbounded cache-key space. */
+export const MAX_PAGE_SIZE = 100
+export const MAX_PAGE = 1000
+
+/** Dates are interpolated into a PostgREST filter string, so accept only YYYY-MM-DD. */
+function isoDateOrNull(v: string | null): string | null {
+  return v !== null && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null
+}
+
 function csv(params: URLSearchParams, key: string): string[] {
   const v = params.get(key)
   if (!v) return []
@@ -69,8 +78,8 @@ export function parseDirectoryUrl(params: URLSearchParams | string): DirectoryFi
     q: p.get('q') ?? DEFAULT_FILTERS.q,
     // Explicit from/to are ignored when a preset is set — resolveDatePreset()
     // in directory-query.ts takes precedence.
-    dateFrom: datePreset ? null : p.get('dateFrom'),
-    dateTo: datePreset ? null : p.get('dateTo'),
+    dateFrom: datePreset ? null : isoDateOrNull(p.get('dateFrom')),
+    dateTo: datePreset ? null : isoDateOrNull(p.get('dateTo')),
     datePreset,
     format: csv(p, 'format').filter((v): v is DirectoryFormat => isOneOf(v, FORMATS)),
     type: csv(p, 'type').filter((v): v is DirectoryType => isOneOf(v, TYPES)),
@@ -82,8 +91,11 @@ export function parseDirectoryUrl(params: URLSearchParams | string): DirectoryFi
     cpd: p.get('cpd') === '1',
     abstractsOpen: p.get('abstractsOpen') === '1',
     sort,
-    page: Number.isFinite(pageRaw) && pageRaw > 0 ? pageRaw : DEFAULT_FILTERS.page,
-    pageSize: Number.isFinite(pageSizeRaw) && pageSizeRaw > 0 ? pageSizeRaw : DEFAULT_FILTERS.pageSize,
+    page: Number.isFinite(pageRaw) && pageRaw > 0 ? Math.min(pageRaw, MAX_PAGE) : DEFAULT_FILTERS.page,
+    pageSize:
+      Number.isFinite(pageSizeRaw) && pageSizeRaw > 0
+        ? Math.min(Math.max(1, pageSizeRaw), MAX_PAGE_SIZE)
+        : DEFAULT_FILTERS.pageSize,
   }
 }
 

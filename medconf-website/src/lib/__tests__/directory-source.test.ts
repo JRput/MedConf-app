@@ -70,3 +70,38 @@ describe('production gate', () => {
     expect(wantsFixture(q(''))).toBe(true)
   })
 })
+
+import { emptyDirectory, publicDirectoryError } from '../directory-source'
+import { ilikeOrFilter } from '../directory-query'
+
+describe('hardening', () => {
+  it('production + flag "true" with no ?fixture serves the fixture (flag drift)', () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    vi.stubEnv('NEXT_PUBLIC_DIRECTORY_FIXTURE', 'true')
+    expect(wantsFixture(q(''))).toBe(true) // old: only "1" forced it
+    vi.stubEnv('NEXT_PUBLIC_DIRECTORY_FIXTURE', ' TRUE ')
+    expect(wantsFixture(q(''))).toBe(true)
+  })
+
+  it('api error body is opaque and the real error is logged server-side', () => {
+    const err = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const r = publicDirectoryError({ message: 'relation "secret_table" does not exist' })
+    expect(r).toEqual({ body: { error: 'directory_unavailable' }, status: 500 }) // old route leaked detail
+    expect(JSON.stringify(r)).not.toContain('secret_table')
+    expect(err).toHaveBeenCalled()
+  })
+
+  it('ilike fallback strips PostgREST structural characters from q', () => {
+    const out = ilikeOrFilter('a,b(c)"\\d')
+    const term = out.split(',')[0].replace('conference_name.ilike.%', '').replace(/%$/, '')
+    expect(term).not.toMatch(/[,()"\\]/) // old: raw interpolation
+    expect(out.split(',')).toHaveLength(3) // exactly the three intended clauses
+  })
+
+  it('emptyDirectory facets have exactly the keys of a live queryFacets result', async () => {
+    // Keep in sync: DirectoryFacets in directory-query.ts.
+    const { queryFacets } = await vi.importActual<typeof import('../directory-query')>('../directory-query')
+    const live = await queryFacets({ rpc: async () => ({ data: {}, error: null }) } as never, {})
+    expect(Object.keys(emptyDirectory({}, true).facets!).sort()).toEqual(Object.keys(live).sort())
+  })
+})

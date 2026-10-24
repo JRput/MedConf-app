@@ -21,18 +21,27 @@ import { queryDirectoryFixture, queryFacetsFixture, FIXTURE_EVENTS } from './__f
  * NEXT_PUBLIC_DIRECTORY_FIXTURE is explicitly set ("1"/"true"). Read lazily so
  * tests can stub the env.
  */
-export function fixtureAllowed(): boolean {
-  if (process.env.NODE_ENV !== 'production') return true
+export function fixtureFlagOn(): boolean {
   const flag = (process.env.NEXT_PUBLIC_DIRECTORY_FIXTURE ?? '').trim().toLowerCase()
   return flag === '1' || flag === 'true'
 }
 
-export function wantsFixture(searchParams: URLSearchParams): boolean {
-  if (!fixtureAllowed()) return false
-  return searchParams.get('fixture') === '1' || process.env.NEXT_PUBLIC_DIRECTORY_FIXTURE === '1'
+export function fixtureAllowed(): boolean {
+  return process.env.NODE_ENV !== 'production' || fixtureFlagOn()
 }
 
-function emptyDirectory(filters: Partial<DirectoryFilters>, wantFacets: boolean) {
+/** Log the real error server-side; return only an opaque body for anonymous callers. */
+export function publicDirectoryError(err: unknown): { body: { error: 'directory_unavailable' }; status: 500 } {
+  console.error('[api/directory]', err)
+  return { body: { error: 'directory_unavailable' }, status: 500 }
+}
+
+export function wantsFixture(searchParams: URLSearchParams): boolean {
+  if (!fixtureAllowed()) return false
+  return searchParams.get('fixture') === '1' || fixtureFlagOn()
+}
+
+export function emptyDirectory(filters: Partial<DirectoryFilters>, wantFacets: boolean) {
   const pageSize = filters.pageSize && filters.pageSize > 0 ? filters.pageSize : DEFAULT_FILTERS.pageSize
   const page = filters.page && filters.page > 0 ? filters.page : 1
   const facets: DirectoryFacets | null = wantFacets
