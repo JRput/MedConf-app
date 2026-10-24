@@ -21,16 +21,19 @@
 // reached the browser, so verified users were not actually signed in.
 // Failures redirect with short codes only, never free text (see
 // lib/auth/errors.ts): recovery -> /auth/forgot-password?error=expired,
-// everything else -> /auth/login?error=verify_failed. Details are logged
-// server-side. Accepted OTP types are the four the app uses: signup, email,
-// recovery, email_change (no magiclink or invite).
+// everything else -> /auth/verify?reason=expired (resend page). Details are
+// logged server-side. Accepted OTP types: signup, email, recovery,
+// email_change, magiclink, invite.
+// Landing on /onboarding with no `next`: a valid same-device `mc_next` cookie
+// (set at signup) is forwarded as /onboarding?next=. The cookie is cleared by
+// onboarding on completion, not here (a verified user may still be mid-wizard).
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import type { EmailOtpType } from '@supabase/supabase-js'
 import { safeNextPath } from '@/lib/auth/password'
 
-const OTP_TYPES: readonly EmailOtpType[] = ['signup', 'email', 'recovery', 'email_change']
+const OTP_TYPES: readonly EmailOtpType[] = ['signup', 'email', 'recovery', 'email_change', 'magiclink', 'invite']
 
 type CookieToSet = { name: string; value: string; options?: Parameters<NextResponse['cookies']['set']>[2] }
 
@@ -47,9 +50,13 @@ export async function GET(request: NextRequest) {
   const isRecovery = rawType === 'recovery'
   const next = safeNextPath(params.get('next'), isRecovery ? '/auth/reset-password' : '/onboarding')
 
+  // Only echo an email the request itself carried; it is re-validated by the page.
+  const emailParam = params.get('email')
+  const verifyExpiredPath = `/auth/verify?reason=expired${emailParam ? `&email=${encodeURIComponent(emailParam.slice(0, 254))}` : ''}`
+
   const failure = () =>
     NextResponse.redirect(
-      new URL(isRecovery ? '/auth/forgot-password?error=expired' : '/auth/login?error=verify_failed', requestUrl)
+      new URL(isRecovery ? '/auth/forgot-password?error=expired' : verifyExpiredPath, requestUrl)
     )
 
   if (error) {
@@ -91,7 +98,12 @@ export async function GET(request: NextRequest) {
     return failure()
   }
 
-  const response = NextResponse.redirect(new URL(next, requestUrl))
+  let landing = next
+  if (next === '/onboarding' && !params.get('next')) {
+    const cookieNext = safeNextPath(request.cookies.get('mc_next')?.value ?? null, '')
+    if (cookieNext) landing = `/onboarding?next=${encodeURIComponent(cookieNext)}`
+  }
+  const response = NextResponse.redirect(new URL(landing, requestUrl))
   pending.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
   return response
 }

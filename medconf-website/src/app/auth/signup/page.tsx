@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { resolveNext } from '@/lib/auth/gate'
+import { setNextCookie } from '@/lib/auth/next-cookie'
 import { AuthCard, AuthError, AuthField, AuthTerms } from '@/components/auth/AuthCard'
 
 // Auth behaviour is unchanged from the pre-W5 page: useAuth().signUp (which
@@ -57,6 +58,8 @@ function SignUpForm() {
 
     setLoading(true)
     setError('')
+    // Same-device continuity: callback/onboarding read this to honour `next`.
+    if (nextPath) setNextCookie(nextPath)
 
     const { data, error } = await signUp(email, password, nextPath || undefined)
 
@@ -67,9 +70,16 @@ function SignUpForm() {
     }
 
     setLoading(false)
-    // No email confirmation required (a session came back): honour next now.
-    // Otherwise the verification link carries it via /auth/callback?next=.
-    router.push(data?.session && nextPath ? nextPath : '/auth/verify')
+    // A session came back (confirmations off): honour next, else finish the
+    // profile. Otherwise show the verify page with the address and `next`;
+    // existing addresses take the same path (anti-enumeration).
+    if (data?.session) {
+      router.push(nextPath || '/onboarding')
+      return
+    }
+    const q = new URLSearchParams({ email: email.trim() })
+    if (nextPath) q.set('next', nextPath)
+    router.push(`/auth/verify?${q.toString()}`)
   }
 
   return (

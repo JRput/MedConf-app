@@ -21,18 +21,33 @@
 // ilike's case-insensitive equality, but that's incidental, not intended.
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { SpecialtyCombobox } from '@/components/account/SpecialtyCombobox'
 import { GradeSelect } from '@/components/account/GradeSelect'
 import { Button } from '@/components/ui/button'
+import { safeNextPath } from '@/lib/auth/password'
+import { clearNextCookie, readNextCookie } from '@/lib/auth/next-cookie'
 
 export default function OnboardingPage() {
+  // useSearchParams needs a Suspense boundary for static prerender.
+  return (
+    <Suspense fallback={null}>
+      <OnboardingWizard />
+    </Suspense>
+  )
+}
+
+function OnboardingWizard() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  // ?next= wins (validated); the same-device mc_next cookie is the fallback.
+  const queryNext = safeNextPath(searchParams.get('next'), '')
+  const destination = () => queryNext || readNextCookie() || '/dashboard'
   const supabase = createSupabaseClient()
 
   const [step, setStep] = useState<1 | 2>(1)
@@ -56,7 +71,9 @@ export default function OnboardingPage() {
       .maybeSingle()
       .then(({ data }) => {
         if (data?.profile_completed_at) {
-          router.push('/dashboard')
+          const dest = destination()
+          clearNextCookie()
+          router.push(dest)
           return
         }
         if (data?.specialty) setSpecialtySlug(data.specialty)
@@ -120,7 +137,9 @@ export default function OnboardingPage() {
       })
     }
 
-    router.push('/dashboard')
+    const dest = destination()
+    clearNextCookie()
+    router.push(dest)
   }
 
   if (authLoading || loadingProfile) {

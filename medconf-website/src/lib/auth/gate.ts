@@ -77,3 +77,15 @@ export function resolveNext(params: URLSearchParams | string | null, fallback = 
   const sp = typeof params === 'string' ? new URLSearchParams(params) : params
   return safeNextPath(sp.get('next'), fallback)
 }
+
+/**
+ * Redirect target for the profile-completion bounce: `/onboarding?next=<where
+ * the user was going>`; `next` omitted when unsafe, oversized, or itself
+ * /onboarding.
+ */
+export function onboardingRedirectFor(url: URL): URL {
+  const target = new URL('/onboarding', url.origin)
+  const next = usableNext(url.pathname + url.search)
+  if (next && !isUnder(next.split(/[?#]/)[0], ['/onboarding'])) target.searchParams.set('next', next)
+  return target
+}

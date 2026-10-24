@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { authErrorMessage } from '@/lib/auth/errors'
+import { authErrorMessage, isUnconfirmedError, mapAuthError } from '@/lib/auth/errors'
 import { resolveNext } from '@/lib/auth/gate'
 import { AuthCard, AuthError, AuthField, AuthTerms } from '@/components/auth/AuthCard'
 
@@ -36,9 +36,18 @@ function LoginForm() {
   const nextPath = resolveNext(searchParams)
   const rawNext = searchParams.get('next')
   const [localError, setLocalError] = useState<string | null>(null)
+  const [unconfirmed, setUnconfirmed] = useState(false)
   const error = localError ?? urlError
-  const setError = (m: string) => setLocalError(m)
+  const setError = (m: string) => {
+    setLocalError(m)
+    if (!m) setUnconfirmed(false)
+  }
   const [loading, setLoading] = useState(false)
+  const safeRawNext = rawNext && nextPath === rawNext ? rawNext : ''
+  const nextQuery = safeRawNext ? `?next=${encodeURIComponent(safeRawNext)}` : ''
+  const resendHref = `/auth/verify?email=${encodeURIComponent(email.trim())}&reason=unconfirmed${
+    safeRawNext ? `&next=${encodeURIComponent(safeRawNext)}` : ''
+  }`
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,7 +67,8 @@ function LoginForm() {
     const { error } = await signIn(email, password)
 
     if (error) {
-      setError(error.message)
+      setError(mapAuthError(error.message))
+      setUnconfirmed(isUnconfirmedError(error.message))
       setLoading(false)
       return
     }
@@ -101,7 +111,7 @@ function LoginForm() {
           label="Password"
           type="password"
           autoComplete="current-password"
-          labelAction={<Link href="/auth/forgot-password">Forgot password?</Link>}
+          labelAction={<Link href={nextQuery ? `/auth/forgot-password${nextQuery}` : '/auth/forgot-password'}>Forgot password?</Link>}
           value={password}
           onChange={(e) => {
             setPassword(e.target.value)
@@ -112,6 +122,11 @@ function LoginForm() {
         />
 
         {error && <AuthError message={error} />}
+        {unconfirmed && (
+          <Link href={resendHref} className="block text-[0.8125rem] font-medium text-brand-text hover:underline">
+            Resend confirmation email
+          </Link>
+        )}
 
         <Button type="submit" disabled={loading} className="w-full">
           {loading ? 'Signing in…' : 'Sign in'}

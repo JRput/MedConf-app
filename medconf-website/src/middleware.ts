@@ -10,7 +10,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { logGetUserError, isGatedPath, isProfileGatedPath, isUnder, loginRedirectFor, resolveNext } from '@/lib/auth/gate'
+import { logGetUserError, isGatedPath, isProfileGatedPath, isUnder, loginRedirectFor, onboardingRedirectFor, resolveNext } from '@/lib/auth/gate'
 
 // Gated surfaces (see lib/auth/gate.ts): the personal pages, the directory
 // list (/conferences exactly), and /societies all need a signed-in user.
@@ -99,7 +99,7 @@ export async function middleware(request: NextRequest) {
     }
 
     if (!profile?.profile_completed_at) {
-      return NextResponse.redirect(new URL('/onboarding', request.url))
+      return NextResponse.redirect(onboardingRedirectFor(request.nextUrl))
     }
 
     if (isUnder(path, ADMIN_PATHS) && profile.is_admin !== true) {

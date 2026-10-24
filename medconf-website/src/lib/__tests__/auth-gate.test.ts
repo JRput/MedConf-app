@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { MAX_NEXT_LENGTH, logGetUserError, isGatedPath, isProfileGatedPath, loginHrefFor, loginRedirectFor, resolveNext } from '@/lib/auth/gate'
+import { MAX_NEXT_LENGTH, logGetUserError, isGatedPath, isProfileGatedPath, loginHrefFor, loginRedirectFor, onboardingRedirectFor, resolveNext } from '@/lib/auth/gate'
 
 describe('isGatedPath', () => {
   it.each([
@@ -99,5 +99,20 @@ describe('next length cap', () => {
   it('keeps a next just under the cap', () => {
     const q = 'y'.repeat(MAX_NEXT_LENGTH - 100)
     expect(loginHrefFor('/conferences', { q })).toContain('next=')
+  })
+})
+
+// onboardingRedirectFor is new: previously the middleware redirected to a bare /onboarding,
+// so the searchParams.get('next') assertions below fail on the old behaviour.
+describe('onboardingRedirectFor', () => {
+  it('carries pathname and search as next', () => {
+    const r = onboardingRedirectFor(new URL('http://localhost:3000/conferences/5?tab=fees'))
+    expect(r.pathname).toBe('/onboarding')
+    expect(r.searchParams.get('next')).toBe('/conferences/5?tab=fees')
+  })
+  it('omits next when unsafe, oversized or already onboarding', () => {
+    expect(onboardingRedirectFor(new URL('http://localhost:3000//evil.com')).searchParams.has('next')).toBe(false)
+    expect(onboardingRedirectFor(new URL('http://localhost:3000/dashboard?q=' + 'x'.repeat(3000))).searchParams.has('next')).toBe(false)
+    expect(onboardingRedirectFor(new URL('http://localhost:3000/onboarding')).searchParams.has('next')).toBe(false)
   })
 })

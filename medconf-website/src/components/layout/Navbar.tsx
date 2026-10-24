@@ -6,6 +6,7 @@ import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { usePendingCount } from '@/hooks/useModeration'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Menu, X, Calendar, CalendarDays, Bookmark, Settings, LogOut, LayoutDashboard, Building2, PlusCircle, ShieldCheck } from 'lucide-react'
 import { NotificationBell } from './NotificationBell'
@@ -15,9 +16,16 @@ import { cn } from '@/lib/utils'
 
 export function Navbar() {
   const { user, signOut, loading } = useAuth()
+  const router = useRouter()
   const isAdmin = useIsAdmin()
   const pendingCount = usePendingCount(isAdmin === true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  // After signing out, leave the (possibly gated) page and re-render the tree.
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/')
+    router.refresh()
+  }
 
   return (
     <nav className="sticky top-0 z-40 border-b border-border bg-bg">
@@ -62,7 +70,7 @@ export function Navbar() {
                   </NavLink>
                 )}
                 <NotificationBell />
-                <Button variant="ghost" size="sm" onClick={signOut}>
+                <Button variant="ghost" size="sm" onClick={handleSignOut}>
                   <LogOut className="size-4" />
                   Sign out
                 </Button>
@@ -129,7 +137,7 @@ export function Navbar() {
                 )}
                 <button
                   onClick={() => {
-                    signOut()
+                    handleSignOut()
                     setIsMenuOpen(false)
                   }}
                   className="block w-full rounded-md px-3 py-2.5 text-left text-[0.9375rem] text-danger-text hover:bg-surface-hover"

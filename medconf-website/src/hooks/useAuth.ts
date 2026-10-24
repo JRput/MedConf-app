@@ -43,6 +43,19 @@ export function useAuth() {
     return { data, error }
   }
 
+  // Re-sends the signup confirmation email. Callers must show the same copy
+  // whether or not the account exists (Supabase does not reveal it either).
+  const resendConfirmation = async (email: string, next?: string) => {
+    const safeNext = safeNextPath(next, '')
+    const callback = `${window.location.origin}/auth/callback${safeNext ? `?next=${encodeURIComponent(safeNext)}` : ''}`
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: callback },
+    })
+    return { error }
+  }
+
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     return { data, error }
@@ -64,6 +77,6 @@ export function useAuth() {
     await supabase.auth.signOut()
   }
 
-  return { user, loading, signUp, signIn, signOut, requestPasswordReset, updatePassword }
+  return { user, loading, signUp, resendConfirmation, signIn, signOut, requestPasswordReset, updatePassword }
 }
 
