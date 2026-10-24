@@ -197,7 +197,7 @@ The callback already accepts `token_hash` + `type`, so no code change is needed.
 Test these scenarios before going live:
 
 - [ ] Sign up with new email → receive verification email
-- [ ] Click verification link → redirected to /conferences
+- [ ] Click verification link → lands on /onboarding, then the page the user intended (see EMAIL_TEMPLATES.md for the template set)
 - [ ] Sign up with already-used email → appropriate error
 - [ ] Try to log in without verifying → blocked
 - [ ] Verification link expires after 1 hour

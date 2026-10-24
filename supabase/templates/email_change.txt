@@ -1,0 +1,14 @@
+Confirm your new email address
+
+You asked to change the email on your MedConf account from {{ .Email }} to {{ .NewEmail }}.
+
+Confirm the change with the button below.
+
+Confirm new email address:
+{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=email_change
+
+This link expires in 1 hour.
+If you did not ask for this change, ignore this email and consider changing your password. Your account email stays as it is until the change is confirmed.
+
+--
+MedConf · medical conferences, courses and CPD in one directory

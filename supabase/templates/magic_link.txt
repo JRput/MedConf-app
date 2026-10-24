@@ -1,0 +1,12 @@
+Sign in to MedConf
+
+Use the button to sign in to MedConf as {{ .Email }}. You do not need a password.
+
+Sign in to MedConf:
+{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=magiclink
+
+This link expires in 1 hour and can be used once.
+If you did not ask to sign in, ignore this email. No one can sign in without this link.
+
+--
+MedConf · medical conferences, courses and CPD in one directory

@@ -1,16 +1,14 @@
+Reset your password
 
-MedConf - Reset Your Password
-=============================
+Someone asked to reset the password for the MedConf account {{ .Email }}.
 
-Someone asked to reset the password for your MedConf account. If that was you, follow the link below to choose a new password. If it wasn't, you can ignore this email — your password stays the same.
+Use the button to choose a new password.
 
-{{ .ConfirmationURL }}
+Choose a new password:
+{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=recovery&next=%2Fauth%2Freset-password
 
-If the link doesn't work, copy and paste it into your browser. The link expires after an hour.
+This link expires in 1 hour and can be used once.
+If you did not ask for this, ignore this email. Your password stays the same.
 
-Kind regards,
-MedConf Team
-
----
-
-If you didn't ask to reset your password, you can safely ignore this email.
+--
+MedConf · medical conferences, courses and CPD in one directory

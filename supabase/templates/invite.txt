@@ -1,0 +1,14 @@
+You are invited to MedConf
+
+You have been invited to join MedConf with {{ .Email }}.
+
+MedConf lists medical conferences, courses and CPD events from many organisers in one searchable directory. We link to the organiser to book; we do not take bookings.
+
+Accept the invitation:
+{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=invite
+
+This link expires in 1 hour.
+If you were not expecting an invitation, ignore this email.
+
+--
+MedConf · medical conferences, courses and CPD in one directory

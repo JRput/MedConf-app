@@ -1,19 +1,14 @@
-MedConf - Verify Your Email
-===========================
+Confirm your email address
 
-Thank you for signing up to MedConf!
+You created a MedConf account with {{ .Email }}. Confirm this address to finish signing up.
 
-Please click on the link below to verify your email:
+After you confirm, you choose your specialty and grade so the directory can show relevant events first.
 
-{{ .ConfirmationURL }}
+Confirm email address:
+{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=signup
 
-If the link doesn't work, copy and paste it into your browser.
+This link expires in 1 hour.
+If you did not create a MedConf account, ignore this email and nothing will happen.
 
-Kind regards,
-MedConf Team
-
----
-
-If you didn't create an account with MedConf, you can safely ignore this email.
-
-
+--
+MedConf · medical conferences, courses and CPD in one directory

@@ -1,0 +1,11 @@
+Your verification code
+
+Enter this code in MedConf to confirm it is you. It is needed for a sensitive change to the account {{ .Email }}.
+
+Your code: {{ .Token }}
+
+This code expires in 1 hour.
+If you did not ask for a code, ignore this email and consider changing your password.
+
+--
+MedConf · medical conferences, courses and CPD in one directory
