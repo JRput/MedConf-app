@@ -91,33 +91,56 @@ def _url_patches_allowed(row: dict, source_id: Optional[int] = None) -> bool:
     return sid != COMMUNITY_SOURCE_ID
 
 
-def _patch_row(supabase, conference_id: int, field: str, value: Any) -> bool:
-    """Apply one patch to the conferences row. Returns True on success."""
+def _skip_changed(conference_id: int, field: str) -> bool:
+    logger.warning(f"remediator: skipped {conference_id}.{field}: row changed since read")
+    return False
+
+
+def _patch_row(supabase, conference_id: int, field: str, value: Any,
+               expected: Any = None) -> bool:
+    """Apply one patch to the conferences row. Returns True only if it landed.
+
+    Compare-and-swap (2026-10-24): the remediator fills gaps, so every write is
+    conditional on the stored value still being what it read (`expected`; None
+    means the column was NULL). A moderator edit between read and write makes
+    the update match zero rows and the patch is skipped. postgrest returns the
+    updated rows (update() defaults to return=representation), so an empty
+    `data` means nothing was written.
+    """
     try:
         if field == "pricing":
-            # Replace pricing tiers wholesale
-            supabase.table("pricing_tiers").delete().eq(
-                "conference_id", conference_id
-            ).execute()
+            # Atomic: the DB function inserts only if the conference has no
+            # tiers at that instant. Never deletes.
             rows = []
             for t in value:
                 rows.append({
-                    "conference_id": conference_id,
                     "tier_label": t["tier_label"],
                     "price_gbp": t["price_gbp"],
                     "currency": t.get("currency", "GBP"),
                     "is_early_bird": t.get("is_early_bird", False),
                     "early_bird_deadline": t.get("early_bird_deadline"),
                 })
-            if rows:
-                supabase.table("pricing_tiers").insert(rows).execute()
+            res = supabase.rpc(
+                "remediator_insert_tiers_if_empty",
+                {"p_conference_id": conference_id, "p_tiers": rows},
+            ).execute()
+            if not res.data:
+                return _skip_changed(conference_id, field)
             return True
         if field == "abstract_status":
-            # value is a dict of field updates
-            supabase.table("conferences").update(value).eq("id", conference_id).execute()
-            return True
-        # Default: single column update
-        supabase.table("conferences").update({field: value}).eq("id", conference_id).execute()
+            # value is a dict of field updates. Every detect_gaps branch that
+            # yields abstract_status requires `not abstract_deadline`.
+            q = supabase.table("conferences").update(value).eq("id", conference_id)
+            res = q.is_("abstract_deadline", "null").execute()
+        else:
+            q = supabase.table("conferences").update({field: value}).eq("id", conference_id)
+            if expected is None:
+                q = q.is_(field, "null")
+            else:
+                q = q.eq(field, expected)
+            res = q.execute()
+        if not res.data:
+            return _skip_changed(conference_id, field)
         return True
     except Exception as e:
         logger.warning(f"remediator: patch failed for {conference_id}.{field}: {e}")
@@ -340,7 +363,8 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                     # keep it as organiser_url so the next run can retry cheaply.
                     _ext = getattr(result, "external_url", None) if (result is not None and field == "pricing") else None
                     if _ext and _url_patches_allowed(row, source_id) and row.get("organiser_url") in (None, "", row.get("source_url")):
-                        if _patch_row(sb, row["id"], "organiser_url", _ext):
+                        if _patch_row(sb, row["id"], "organiser_url", _ext,
+                                      expected=row.get("organiser_url")):
                             patches_applied.append({
                                 "conference_id": row["id"],
                                 "conference_name": (row.get("conference_name") or "")[:60],
@@ -360,7 +384,7 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                     })
                     unfixed.append(field)
                     continue
-                if _patch_row(sb, row["id"], field, value):
+                if _patch_row(sb, row["id"], field, value, expected=row.get(field)):
                     patches_applied.append({
                         "conference_id": row["id"],
                         "conference_name": (row.get("conference_name") or "")[:60],
@@ -380,7 +404,7 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                         if row.get("booking_url") in (None, "", row.get("source_url")):
                             link_patches["booking_url"] = ext
                         for lf, lv in link_patches.items():
-                            if _patch_row(sb, row["id"], lf, lv):
+                            if _patch_row(sb, row["id"], lf, lv, expected=row.get(lf)):
                                 patches_applied.append({
                                     "conference_id": row["id"],
                                     "conference_name": (row.get("conference_name") or "")[:60],

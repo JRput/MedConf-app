@@ -143,7 +143,7 @@ jobs:
         working-directory: medconf-scraper
         run: |
           pip install pytest
-          python -m pytest test_safe_mode.py test_safe_fetch.py -q
+          python -m pytest test_safe_mode.py test_safe_fetch.py test_runner_writes.py -q
         # Offline tests, but `extractors` creates a Supabase client and an LLM client at
         # import time (first runner attempt 2026-10-23 failed at collection:
         # 'supabase_url is required'). Placeholders only — real secrets are scoped

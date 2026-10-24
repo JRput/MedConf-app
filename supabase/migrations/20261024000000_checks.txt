@@ -1,0 +1,4 @@
+SELECT prosrc LIKE '%FOR UPDATE%' AND prosrc LIKE '%pricing_tiers WHERE conference_id%' AS ok FROM pg_proc WHERE proname='remediator_insert_tiers_if_empty'
+SELECT NOT prosecdef AS ok FROM pg_proc WHERE proname='remediator_insert_tiers_if_empty'
+SELECT NOT has_function_privilege('anon','public.remediator_insert_tiers_if_empty(integer,jsonb)','EXECUTE') AND NOT has_function_privilege('authenticated','public.remediator_insert_tiers_if_empty(integer,jsonb)','EXECUTE') AS ok
+SELECT has_function_privilege('service_role','public.remediator_insert_tiers_if_empty(integer,jsonb)','EXECUTE') AS ok

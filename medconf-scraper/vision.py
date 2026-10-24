@@ -157,16 +157,28 @@ def extract_json(
 
     # Build a multi-content message: prompt + each image
     content: list = [{"type": "text", "text": prompt}]
+    import safe_fetch
+    _safe = safe_fetch.enabled()
+    _dropped = False
     for url in image_urls:
         # NVIDIA accepts either http(s) URLs or data URLs. Data URLs are
         # safer for redirect-laden idloom etc.
         if url.startswith("data:"):
+            # extract_json is the single choke point for every vision caller
+            # (explorer.py, fixers/pricing.py, extractors): in safe-fetch mode
+            # no image, inline or fetched, may reach the model.
+            if _safe:
+                _dropped = True
+                continue
             content.append({"type": "image_url", "image_url": {"url": url}})
         else:
             data_url = fetch_image_as_data_url(url)
             if not data_url:
                 continue
             content.append({"type": "image_url", "image_url": {"url": data_url}})
+
+    if _dropped:
+        logger.warning("vision: inline image(s) dropped in safe-fetch mode")
 
     if len(content) == 1:
         # No images successfully attached
@@ -257,6 +269,10 @@ def extract_pricing_from_images(image_urls: List[str], stop_at: Optional[float] 
     4 images fails, we keep the 3 successful ones.
     """
     if not image_urls:
+        return []
+    import safe_fetch
+    if safe_fetch.enabled():
+        logger.info("vision: pricing-from-images skipped in safe-fetch mode")
         return []
     all_tier_dicts: list[dict] = []
     for url in image_urls:

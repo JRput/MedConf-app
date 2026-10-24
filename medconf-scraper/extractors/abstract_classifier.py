@@ -414,11 +414,18 @@ def _default_fetcher(url: str):
                     logging.getLogger(__name__).warning(f"abstract_classifier: safe PDF fetch refused ({verdict}) {url[:120]}")
                     return None
                 if not data.startswith(b"%PDF"):
+                    import logging
+                    logging.getLogger(__name__).warning(
+                        f"abstract_classifier: not a PDF (first bytes {data[:8]!r}) {url[:120]}")
                     return None
                 # Parse in a subprocess; return TEXT so follow_call_for_papers
                 # never reaches the in-process pypdf path.
                 from remediator.pdf_text import pdf_to_text_isolated
                 text = pdf_to_text_isolated(data)
+                if not text:
+                    import logging
+                    logging.getLogger(__name__).warning(
+                        f"abstract_classifier: PDF yielded no text {url[:120]}")
                 return ("pdf", text) if text else None
             import httpx
             r = httpx.get(url, timeout=_FETCH_TIMEOUT, follow_redirects=True,

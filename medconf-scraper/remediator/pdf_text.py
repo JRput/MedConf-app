@@ -79,6 +79,7 @@ except Exception:
     pass
 data = sys.stdin.buffer.read()
 out = []
+failed = 0
 try:
     from pypdf import PdfReader
     reader = PdfReader(io.BytesIO(data))
@@ -86,9 +87,13 @@ try:
         try:
             out.append(pg.extract_text() or "")
         except Exception:
+            failed += 1
             continue
-except Exception:
-    pass
+except Exception as e:
+    sys.stderr.write("pdf_child_error:" + type(e).__name__)
+    sys.exit(3)
+if failed:
+    sys.stderr.write("pdf_child_pages_failed:%d" % failed)
 sys.stdout.write("\n".join(out)[:2000000])
 """
 
@@ -108,11 +113,16 @@ def pdf_to_text_isolated(data: bytes, max_pages: int = PDF_MAX_PAGES, timeout: f
         logger.warning(f"pdf_text: isolated parse failed ({type(e).__name__}, {len(data)} bytes)")
         return ""
     if proc.returncode != 0:
-        logger.warning(f"pdf_text: isolated parse exited {proc.returncode} ({len(data)} bytes)")
+        marker = proc.stderr.decode("utf-8", "ignore")[:200]
+        logger.warning(f"pdf_text: isolated parse exited {proc.returncode} ({len(data)} bytes; stderr: {marker})")
         return ""
     raw = proc.stdout.decode("utf-8", "ignore")
     lines = [_norm(l) for l in raw.splitlines()]
-    return "\n".join(l for l in lines if l)
+    text = "\n".join(l for l in lines if l)
+    if not text:
+        marker = proc.stderr.decode("utf-8", "ignore")[:200]
+        logger.warning(f"pdf_text: isolated parse produced no text ({len(data)} bytes; stderr: {marker})")
+    return text
 
 
 def docx_to_text(data: bytes) -> str:

@@ -189,7 +189,8 @@ def test_safeclient_passes_deadline(monkeypatch):
     assert 0 < seen["deadline"] - time.monotonic() <= 20.5
 
 
-def test_content_encoding_refused_without_reading_body(monkeypatch):
+@pytest.mark.parametrize("enc", ["gzip", "br", "zstd", "deflate", "x-gzip"])
+def test_content_encoding_refused_without_reading_body(monkeypatch, enc):
     _dns(monkeypatch, {"example.org": PUBLIC})
     read = []
 
@@ -202,12 +203,53 @@ def test_content_encoding_refused_without_reading_body(monkeypatch):
 
     def handler(req):
         seen_hdr.append(req.headers.get("accept-encoding"))
-        return httpx.Response(200, headers={"content-encoding": "gzip"}, stream=Body())
+        return httpx.Response(200, headers={"content-encoding": enc}, stream=Body())
 
     client = _RealClient(transport=httpx.MockTransport(handler), follow_redirects=False)
     v, *_ = safe_fetch.fetch_validated("https://example.org/", client=client)
     assert v == "encoding_refused" and read == []
     assert seen_hdr == ["identity"]
+
+
+def test_encoding_refusal_independent_of_installed_decoders(monkeypatch):
+    """Proof for CI (zstandard is an unpinned transitive dep): refusal must
+    not rely on httpx having, or lacking, a decoder for the encoding."""
+    import httpx._decoders as dec
+    _dns(monkeypatch, {"example.org": PUBLIC})
+
+    class Boom:
+        def __init__(self, *a, **k):
+            raise AssertionError("decoder used")
+
+    monkeypatch.setattr(dec, "SUPPORTED_DECODERS", {k: Boom for k in dec.SUPPORTED_DECODERS})
+    read = []
+
+    class Body(httpx.SyncByteStream):
+        def __iter__(self):
+            read.append(1)
+            yield b"bomb"
+
+    client = _RealClient(transport=httpx.MockTransport(
+        lambda r: httpx.Response(200, headers={"content-encoding": "zstd"}, stream=Body())),
+        follow_redirects=False)
+    v, *_ = safe_fetch.fetch_validated("https://example.org/", client=client)
+    assert v == "encoding_refused" and read == []
+
+
+def test_accept_encoding_identity_on_every_hop(monkeypatch):
+    _dns(monkeypatch, {"example.org": PUBLIC})
+    seen = []
+
+    def handler(req):
+        seen.append((req.url.path, req.headers.get("accept-encoding")))
+        if req.url.path == "/a":
+            return httpx.Response(302, headers={"location": "https://example.org/b"})
+        return httpx.Response(200, content=b"ok")
+
+    client = _RealClient(transport=httpx.MockTransport(handler), follow_redirects=False)
+    v, *_ = safe_fetch.fetch_validated("https://example.org/a", client=client)
+    assert v == "ok"
+    assert seen == [("/a", "identity"), ("/b", "identity")]
 
 
 # --------------------------------------------------- redirect to internal host
@@ -301,6 +343,92 @@ def test_isolated_parser_survives_garbage():
     assert pdf_text.pdf_to_text_isolated(b"not a pdf at all") == ""
 
 
+def test_isolated_parser_garbage_is_loud(caplog):
+    import logging
+    with caplog.at_level(logging.WARNING):
+        assert pdf_text.pdf_to_text_isolated(b"not a pdf at all") == ""
+    msgs = [r.getMessage() for r in caplog.records if r.getMessage().startswith("pdf_text:")]
+    assert msgs and "pdf_child_error" in msgs[0]
+
+
+def test_isolated_parser_corrupt_pdf_is_loud(caplog):
+    import logging
+    with caplog.at_level(logging.WARNING):
+        assert pdf_text.pdf_to_text_isolated(b"%PDF-1.4\n1 0 obj<<>>endobj garbage") == ""
+    assert any(r.getMessage().startswith("pdf_text:") and
+               ("pdf_child_error" in r.getMessage() or "no text" in r.getMessage())
+               for r in caplog.records)
+
+
+def test_isolated_parser_no_text_warns(monkeypatch, caplog):
+    import logging
+    monkeypatch.setattr(subprocess, "run", lambda a, **k: subprocess.CompletedProcess(
+        a, 0, stdout=b"", stderr=b"pdf_child_pages_failed:2"))
+    with caplog.at_level(logging.WARNING):
+        assert pdf_text.pdf_to_text_isolated(b"%PDF-1.4 x") == ""
+    assert any("produced no text" in r.getMessage() and "pdf_child_pages_failed:2" in r.getMessage()
+               for r in caplog.records)
+
+
+def test_classifier_non_pdf_bytes_warns(safe_on, monkeypatch, caplog):
+    import logging
+    monkeypatch.setattr(safe_fetch, "fetch_validated",
+                        lambda url, *a, **k: ("ok", url, b"<html>", None, 200))
+    with caplog.at_level(logging.WARNING):
+        assert abstract_classifier._default_fetcher("https://example.org/cfp.pdf") is None
+    assert any("not a PDF" in r.getMessage() for r in caplog.records)
+
+
+def test_explorer_pdf_no_text_noted(safe_on, monkeypatch):
+    monkeypatch.setattr(safe_fetch, "fetch_validated",
+                        lambda url, *a, **k: ("ok", url, b"%PDF-1.4 x", None, 200))
+    monkeypatch.setattr(subprocess, "run", lambda a, **k: subprocess.CompletedProcess(
+        a, 0, stdout=b"", stderr=b""))
+    tr = _trail()
+    assert explorer._fetch_document_text("https://example.org/scan.pdf", tr) == ""
+    assert any(n.startswith("pdf_no_text:") for n in tr.notes)
+
+
+# ------------------------------------------------------- inline images (vision)
+
+DATA_URL = "data:image/png;base64,iVBORw0KGgo="
+
+
+@pytest.fixture
+def vision_rec(monkeypatch):
+    calls = []
+
+    def recorder(*a, **k):
+        calls.append((a, k))
+        msg = SimpleNamespace(content='{"tiers": []}')
+        return SimpleNamespace(choices=[SimpleNamespace(message=msg)])
+
+    monkeypatch.setattr(vision, "_client_get", lambda: object())
+    monkeypatch.setattr(vision, "chat_completion", recorder)
+    return calls
+
+
+def test_extract_json_drops_data_urls_in_safe_mode(safe_on, vision_rec, caplog):
+    import logging
+    with caplog.at_level(logging.WARNING):
+        assert vision.extract_json([DATA_URL], "p") is None
+    assert vision_rec == []
+    assert sum("inline image(s) dropped" in r.getMessage() for r in caplog.records) == 1
+
+
+def test_extract_pricing_from_images_off_in_safe_mode(safe_on, vision_rec):
+    assert vision.extract_pricing_from_images([DATA_URL]) == []
+    assert vision_rec == []
+
+
+def test_extract_json_data_url_reaches_model_flag_off(monkeypatch, vision_rec):
+    monkeypatch.delenv("REMEDIATOR_SAFE_FETCH", raising=False)
+    assert vision.extract_json([DATA_URL], "p") == {"tiers": []}
+    assert len(vision_rec) == 1
+    sent = vision_rec[0][1]["messages"][0]["content"]
+    assert any(c.get("image_url", {}).get("url") == DATA_URL for c in sent)
+
+
 # ------------------------------------------------------------- write policy
 
 def test_url_patches_allowed_helper():
@@ -317,6 +445,7 @@ class _Q:
     def select(self, *a, **k): return self
     def eq(self, *a, **k): return self
     def in_(self, *a, **k): return self
+    def is_(self, *a, **k): return self
     def range(self, *a, **k): return self
     def delete(self): self.op = "delete"; return self
     def insert(self, rows): self.op, self.payload = "insert", rows; return self
@@ -325,7 +454,18 @@ class _Q:
     def execute(self):
         if self.op != "select":
             self.sb.writes.append((self.name, self.op, self.payload))
+        if self.op == "update":
+            return SimpleNamespace(data=[self.payload])  # non-empty: row unchanged since read
         return SimpleNamespace(data=self.sb.data.get(self.name, []) if self.op == "select" else [])
+
+
+class _Rpc:
+    def __init__(self, sb, name, params):
+        self.sb, self.name, self.params = sb, name, params
+
+    def execute(self):
+        self.sb.writes.append(("rpc", self.name, self.params))
+        return SimpleNamespace(data=1)
 
 
 class _SB:
@@ -333,6 +473,7 @@ class _SB:
         self.data, self.writes = data, []
 
     def table(self, name): return _Q(self, name)
+    def rpc(self, name, params=None): return _Rpc(self, name, params)
 
 
 class _FakeCache:

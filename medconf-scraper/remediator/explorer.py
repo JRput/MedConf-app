@@ -810,6 +810,8 @@ def _fetch_document_text(url: str, trail: "AuditTrail") -> Optional[str]:
                 trail.notes.append(f"pdf_skipped_not_pdf: {url}")
             else:
                 text = pdf_to_text_isolated(body)
+                if not text:
+                    trail.notes.append(f"pdf_no_text: {url}")
         PDF_CACHE[url] = text
         return text
     try:
