@@ -53,7 +53,12 @@ export function HomeHero({
                 className="inline-flex min-h-11 items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-1 text-[0.8125rem] text-fg transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-ring [@media(hover:hover)_and_(pointer:fine)]:hover:border-border-strong [@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-hover"
               >
                 {entry.label}
-                {entry.count !== null && <span className="type-numeric text-[0.75rem] text-fg-subtle">{entry.count}</span>}
+                {entry.count !== null && (
+                  <span className="type-numeric text-[0.75rem] text-fg-subtle">
+                    {entry.count}
+                    <span className="sr-only"> events</span>
+                  </span>
+                )}
               </GatedLink>
             ))}
           </nav>

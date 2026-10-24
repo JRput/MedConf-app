@@ -53,7 +53,8 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError) console.warn('[gate] getUser failed', userError.status, userError.name)
   const path = request.nextUrl.pathname
 
   // Not signed in

@@ -158,7 +158,13 @@ export default async function ConferenceDetailPage({ params }: { params: Promise
   )
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser()
+  // A real failure (not just "no session") means a signed-in visitor may be
+  // served the teaser; leave a trace without logging the token or user.
+  if (userError && userError.name !== 'AuthSessionMissingError') {
+    console.warn('[gate] getUser failed', userError.status, userError.name)
+  }
 
   const data = await fetchConferenceData(Number(id), supabase, !!user)
   if (!data) notFound()
@@ -168,7 +174,7 @@ export default async function ConferenceDetailPage({ params }: { params: Promise
     return (
       <div className="min-h-[calc(100vh-4rem)] bg-bg">
         <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-10">
-          <Breadcrumb specialty={pub.specialty} title={pub.conference_name} />
+          <Breadcrumb specialty={pub.specialty} title={pub.conference_name} anonymous />
           <div className="mt-6">
             <EventTeaser event={pub} />
           </div>

@@ -36,7 +36,7 @@ export function GatedSearchForm() {
         } else if (openGate) {
           e.preventDefault()
           openGate(target, {
-            title: 'Sign in to search the directory',
+            title: 'Unlock the directory with a free account',
             body: 'A free account unlocks full search, fees, CPD points and abstract deadlines. Your search is kept.',
           })
         }
@@ -56,7 +56,7 @@ export function GatedSearchForm() {
             value={term}
             onChange={(e) => setTerm(e.target.value)}
             placeholder="Search by title, specialty or location…"
-            className="h-12 pl-11 text-base md:text-base"
+            className="h-12 pl-11 text-base md:text-base focus-visible:ring-[3px] focus-visible:ring-ring"
           />
         </div>
         <Button type="submit" size="lg" className={`h-12 px-5 ${PRESS}`}>

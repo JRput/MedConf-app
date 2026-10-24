@@ -32,7 +32,7 @@ export function HomeSection({
           {link && (
             <GatedLink
               href={link.href}
-              className="group inline-flex min-h-11 items-center gap-1.5 text-[0.8125rem] font-medium text-brand-text outline-none focus-visible:underline [@media(hover:hover)_and_(pointer:fine)]:hover:underline"
+              className="group inline-flex min-h-11 items-center gap-1.5 rounded-sm text-[0.8125rem] font-medium text-brand-text focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none focus-visible:underline [@media(hover:hover)_and_(pointer:fine)]:hover:underline"
             >
               {link.label}
               <ArrowRight className="size-3.5" aria-hidden />

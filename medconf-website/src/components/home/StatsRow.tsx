@@ -3,14 +3,14 @@
 // Counts only — the live proof that the directory is worth signing up for.
 // Every number is a facet or row count from the same fetches the page makes.
 
-import type { HomeStats } from '@/lib/home-teaser'
+import { CLOSING_SOON_DAYS, type HomeStats } from '@/lib/home-teaser'
 
 export function StatsRow({ stats }: { stats: HomeStats }) {
   const items = [
     { label: 'Events listed', value: stats.events },
     { label: 'Societies', value: stats.societies },
     { label: 'Specialties', value: stats.specialties },
-    { label: 'Abstract deadlines in 14 days', value: stats.closingSoon },
+    { label: `Abstract deadlines in ${CLOSING_SOON_DAYS} days`, value: stats.closingSoon },
   ]
   return (
     <section aria-label="Directory at a glance" className="pb-20 sm:pb-24">

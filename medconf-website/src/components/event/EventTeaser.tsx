@@ -23,8 +23,10 @@ export const LOCKED_EVENT_ITEMS = [
 ]
 
 export function EventTeaser({ event }: { event: PublicEventFields }) {
+  const regionDistinct =
+    event.region && event.region.trim().toLowerCase() !== (event.city ?? '').trim().toLowerCase() ? event.region : null
   const place =
-    event.event_format === 'online' ? 'Online' : [event.city, event.region].filter(Boolean).join(', ') || 'Location TBC'
+    event.event_format === 'online' ? 'Online' : [event.city, regionDistinct].filter(Boolean).join(', ') || 'Location TBC'
   const PlaceIcon = event.event_format === 'online' ? Globe : event.event_format === 'hybrid' ? MonitorSmartphone : event.event_format === 'in_person' ? Building2 : MapPin
   const societyName = event.society ? (societyInfo(event.society)?.name ?? event.society) : null
   const next = `/conferences/${event.id}`

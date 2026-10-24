@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isGatedPath, isProfileGatedPath, loginRedirectFor, resolveNext } from '@/lib/auth/gate'
+import { isGatedPath, isProfileGatedPath, loginHrefFor, loginRedirectFor, resolveNext } from '@/lib/auth/gate'
 
 describe('isGatedPath', () => {
   it.each([
@@ -52,5 +52,21 @@ describe('isProfileGatedPath', () => {
   it('profile-gates personal pages', () => {
     expect(isProfileGatedPath('/dashboard')).toBe(true)
     expect(isProfileGatedPath('/admin/moderation')).toBe(true)
+  })
+})
+
+describe('loginHrefFor', () => {
+  it('builds next from pathname and a searchParams record', () => {
+    expect(loginHrefFor('/conferences', { q: 'cardio', specialty: ['a', 'b'], skip: undefined }))
+      .toBe('/auth/login?next=' + encodeURIComponent('/conferences?q=cardio&specialty=a%2Cb'))
+  })
+  it('works with no params and with URLSearchParams', () => {
+    expect(loginHrefFor('/societies')).toBe('/auth/login?next=%2Fsocieties')
+    expect(loginHrefFor('/societies', new URLSearchParams('q=x'))).toBe('/auth/login?next=' + encodeURIComponent('/societies?q=x'))
+  })
+  it('drops next when the result is unsafe', () => {
+    expect(loginHrefFor('/conferences', { q: 'a b' })).toContain('next=') // encoded, so safe
+    expect(loginHrefFor('/a//b')).toBe('/auth/login')
+    expect(loginHrefFor('//evil.com')).toBe('/auth/login')
   })
 })

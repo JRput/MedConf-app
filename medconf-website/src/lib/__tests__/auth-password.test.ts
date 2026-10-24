@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { safeNextPath, validateNewPassword } from '../auth/password'
+import { SAFE_NEXT, UNSAFE_NEXT } from '../auth/__fixtures__/next-paths'
 
 describe('validateNewPassword', () => {
   it('accepts a valid matching pair', () => {
@@ -60,4 +61,9 @@ describe('safeNextPath', () => {
     expect(safeNextPath('/a\nb', fb)).toBe(fb)
     expect(safeNextPath('/a\u0000b', fb)).toBe(fb)
   })
+})
+
+describe('safeNextPath shared fixtures', () => {
+  it.each(SAFE_NEXT)('keeps safe %j', (n) => expect(safeNextPath(n, '/fb')).toBe(n))
+  it.each(UNSAFE_NEXT)('rejects unsafe %j', (n) => expect(safeNextPath(n, '/fb')).toBe('/fb'))
 })

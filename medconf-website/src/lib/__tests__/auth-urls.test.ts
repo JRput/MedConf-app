@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { signInHref, signUpHref } from '../auth/urls'
+import { isSafeNext, signInHref, signUpHref } from '../auth/urls'
+import { SAFE_NEXT, UNSAFE_NEXT } from '../auth/__fixtures__/next-paths'
 
 describe('signInHref / signUpHref', () => {
   it('builds the bare URLs without next', () => {
@@ -28,4 +29,9 @@ describe('signInHref / signUpHref', () => {
     expect(signInHref(next)).toBe('/auth/login')
     expect(signUpHref(next)).toBe('/auth/signup')
   })
+})
+
+describe('isSafeNext shared fixtures', () => {
+  it.each(SAFE_NEXT)('accepts %j', (n) => expect(isSafeNext(n)).toBe(true))
+  it.each(UNSAFE_NEXT)('rejects %j', (n) => expect(isSafeNext(n)).toBe(false))
 })

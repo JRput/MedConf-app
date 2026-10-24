@@ -6,7 +6,8 @@
 // Enter works, middle-click and no-JS still go to the right place, where the
 // route gate sends a signed-out visitor to sign-in with `next`). With JS and
 // no session, a plain click opens the SignInGate carrying `next=href` instead.
-// Signed in: normal client-side navigation. Space on a link does not activate
+// Signed in, or session still loading: normal navigation (the route gate
+// is the real protection).  Space on a link does not activate
 // it natively, so it is handled here to match the "Enter/Space" contract.
 
 import Link from 'next/link'
@@ -26,11 +27,11 @@ export function GatedLink({
   gateTitle?: string
   gateBody?: string
 }) {
-  const { user, openGate } = useGate()
+  const { user, loading, openGate } = useGate()
   const router = useRouter()
 
   const activate = () => {
-    if (user) router.push(href)
+    if (user || loading) router.push(href)
     else if (openGate) openGate(href, { title: gateTitle, body: gateBody })
     else router.push(href)
   }
@@ -44,7 +45,7 @@ export function GatedLink({
         rest.onClick?.(e)
         if (e.defaultPrevented) return
         // Let modified clicks (new tab, etc.) and signed-in navigation proceed natively.
-        if (user || !openGate || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
+        if (user || loading || !openGate || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return
         e.preventDefault()
         activate()
       }}

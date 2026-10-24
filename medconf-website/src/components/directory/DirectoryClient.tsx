@@ -15,6 +15,7 @@ import { SortMenu } from './SortMenu'
 import { ResultsList } from './ResultsList'
 import { Pagination } from './Pagination'
 import { CommandPalette } from './CommandPalette'
+import { SignInPrompt } from '@/components/auth/SignInPrompt'
 import type { FilterPatch } from './FilterControls'
 
 interface DirectoryData {
@@ -32,6 +33,9 @@ interface DirectoryData {
  * client component, which re-fetches via /api/directory and pushes the new
  * state into the URL so links stay shareable.
  */
+/** Thrown when /api/directory answers 401 / sign_in_required. */
+class SignedOutError extends Error {}
+
 export function DirectoryClient({
   initialFilters,
   initialData,
@@ -52,6 +56,7 @@ export function DirectoryClient({
   const [data, setData] = React.useState<DirectoryData>(initialData)
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
+  const [signedOut, setSignedOut] = React.useState(false)
   const lastKeyRef = React.useRef(JSON.stringify(initialFilters))
   const abortRef = React.useRef<AbortController | null>(null)
 
@@ -66,6 +71,7 @@ export function DirectoryClient({
 
     setLoading(true)
     setError(null)
+    setSignedOut(false)
 
     const params = serializeDirectoryFilters(filters)
     params.set('facets', '1')
@@ -73,16 +79,23 @@ export function DirectoryClient({
 
     fetch(`/api/directory?${params.toString()}`, { signal: controller.signal })
       .then((r) => {
+        if (r.status === 401) throw new SignedOutError()
         if (!r.ok) throw new Error(`Request failed (${r.status})`)
         return r.json()
       })
       .then((json: { rows: DirectoryPage['rows']; total: number; page: number; pageSize: number; facets: DirectoryFacets | null; error?: string }) => {
+        if (json.error === 'sign_in_required') throw new SignedOutError()
         if (json.error) throw new Error(json.error)
         setData({ rows: json.rows, total: json.total, page: json.page, pageSize: json.pageSize, facets: json.facets })
         setLoading(false)
       })
       .catch((err: unknown) => {
         if (err instanceof DOMException && err.name === 'AbortError') return
+        if (err instanceof SignedOutError) {
+          setSignedOut(true)
+          setLoading(false)
+          return
+        }
         setError(err instanceof Error ? err.message : 'Something went wrong loading the directory.')
         setLoading(false)
       })
@@ -141,6 +154,12 @@ export function DirectoryClient({
             <SortMenu value={filters.sort} onChange={(sort: DirectorySort) => patch({ sort })} />
           </div>
 
+          {signedOut ? (
+            <SignInPrompt
+              next={`${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`}
+              title="Your session has ended"
+            />
+          ) : (
           <ResultsList
             rows={data.rows}
             loading={loading || isPending}
@@ -153,6 +172,7 @@ export function DirectoryClient({
             hasDateFilter={!!(filters.datePreset || filters.dateFrom || filters.dateTo)}
             onRetry={() => navigate(filters)}
           />
+          )}
 
           <div className="mt-6">
             <Pagination page={data.page} pageSize={data.pageSize} total={data.total} onChange={(page) => patch({ page })} />

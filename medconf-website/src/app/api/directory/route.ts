@@ -27,29 +27,43 @@ export async function GET(request: Request) {
   const fixture = wantsFixture(url.searchParams)
 
   const cookieStore = await cookies()
+  // Refreshed session tokens from getUser() are buffered here and written onto
+  // whichever response goes out, so a token refresh is never discarded.
+  type CookieToSet = { name: string; value: string; options?: Parameters<NextResponse['cookies']['set']>[2] }
+  let refreshed: CookieToSet[] = []
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (cookiesToSet: CookieToSet[]) => { refreshed = cookiesToSet },
+      },
+    }
   )
+  const finish = (res: NextResponse) => {
+    refreshed.forEach(({ name, value, options }) => res.cookies.set(name, value, options))
+    return res
+  }
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError) console.warn('[gate] getUser failed', userError.status, userError.name)
   if (!user) {
-    return NextResponse.json(
+    return finish(NextResponse.json(
       { error: 'sign_in_required' },
       { status: 401, headers: { 'Cache-Control': 'private, no-store' } }
-    )
+    ))
   }
 
   try {
     const { page, facets, usedFixture } = await resolveDirectory(supabase, filters, { fixture, wantFacets })
 
-    return NextResponse.json(
+    return finish(NextResponse.json(
       { ...page, facets, usedFixture },
       { headers: { 'Cache-Control': 'private, max-age=0, must-revalidate' } }
-    )
+    ))
   } catch (err) {
     const { body, status } = publicDirectoryError(err)
-    return NextResponse.json(body, { status })
+    return finish(NextResponse.json(body, { status }))
   }
 }

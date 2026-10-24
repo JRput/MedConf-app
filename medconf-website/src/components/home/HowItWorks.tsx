@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { PRESS } from '@/components/community/press'
 import { signInHref, signUpHref } from '@/lib/auth/urls'
 
-export function HowItWorks({ sourceCount }: { sourceCount: number }) {
+export function HowItWorks({ sourceCount }: { sourceCount: number | null }) {
   const points = [
     {
       title: 'Create a free account',
@@ -19,7 +19,7 @@ export function HowItWorks({ sourceCount }: { sourceCount: number }) {
     },
     {
       title: 'Pulled daily, from the source',
-      body: `Every listing is scraped from the organiser's own site, across ${sourceCount} royal college, faculty and society feeds, re-checked each morning. Past events are archived, not left to rot.`,
+      body: `Every listing is scraped from the organiser's own site, across ${sourceCount ? `${sourceCount} active` : 'our registered'} royal college, faculty and society feeds, re-checked each morning. Past events are archived, not left to rot.`,
     },
     {
       title: 'We don’t take bookings',

@@ -33,6 +33,25 @@ export function loginRedirectFor(url: URL): URL {
   return target
 }
 
+/**
+ * Login href for a server page: `next` is built from the page's own pathname
+ * and its `searchParams` prop and validated with safeNextPath; unsafe -> no next.
+ */
+export function loginHrefFor(pathname: string, searchParams?: URLSearchParams | Record<string, string | string[] | undefined>): string {
+  let qs = ''
+  if (searchParams instanceof URLSearchParams) qs = searchParams.toString()
+  else if (searchParams) {
+    const sp = new URLSearchParams()
+    for (const [k, v] of Object.entries(searchParams)) {
+      if (v == null) continue
+      sp.set(k, Array.isArray(v) ? v.join(',') : v)
+    }
+    qs = sp.toString()
+  }
+  const next = safeNextPath(pathname + (qs ? `?${qs}` : ''), '')
+  return next ? `/auth/login?next=${encodeURIComponent(next)}` : '/auth/login'
+}
+
 /** Validated `next` from a query string / params, else the fallback. */
 export function resolveNext(params: URLSearchParams | string | null, fallback = '/conferences'): string {
   if (params == null) return fallback

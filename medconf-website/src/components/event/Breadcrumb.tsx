@@ -10,7 +10,7 @@ import { ArrowLeft, ChevronRight } from 'lucide-react'
  * reset — checked via `document.referrer` so this only ever points back
  * into our own site, never a stranger's URL.
  */
-export function Breadcrumb({ specialty, title }: { specialty: string | null; title: string }) {
+export function Breadcrumb({ specialty, title, anonymous = false }: { specialty: string | null; title: string; anonymous?: boolean }) {
   const [backHref, setBackHref] = useState('/conferences')
 
   useEffect(() => {
@@ -31,18 +31,22 @@ export function Breadcrumb({ specialty, title }: { specialty: string | null; tit
   return (
     <div className="mb-5 flex items-center justify-between gap-3">
       <nav aria-label="Breadcrumb" className="hidden min-w-0 items-center gap-1.5 type-small text-fg-muted sm:flex">
-        <Link href="/conferences" className="shrink-0 hover:text-fg">
-          Directory
+        <Link href={anonymous ? '/' : '/conferences'} className="shrink-0 hover:text-fg">
+          {anonymous ? 'Home' : 'Directory'}
         </Link>
         {specialty && (
           <>
             <ChevronRight className="size-3.5 shrink-0 text-fg-subtle" aria-hidden />
+            {anonymous ? (
+              <span className="shrink-0">{specialty}</span>
+            ) : (
             <Link
               href={`/conferences?specialty=${encodeURIComponent(specialty)}`}
               className="shrink-0 hover:text-fg"
             >
               {specialty}
             </Link>
+            )}
           </>
         )}
         <ChevronRight className="size-3.5 shrink-0 text-fg-subtle" aria-hidden />
@@ -52,11 +56,11 @@ export function Breadcrumb({ specialty, title }: { specialty: string | null; tit
       </nav>
 
       <Link
-        href={backHref}
+        href={anonymous ? '/' : backHref}
         className="inline-flex shrink-0 items-center gap-1.5 type-small font-medium text-fg-muted transition-colors duration-150 hover:text-brand-text sm:ml-auto"
       >
         <ArrowLeft className="size-4" strokeWidth={1.75} aria-hidden />
-        Back to directory
+        {anonymous ? 'Back to home' : 'Back to directory'}
       </Link>
     </div>
   )

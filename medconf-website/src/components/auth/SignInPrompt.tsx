@@ -15,7 +15,7 @@ export function SignInActions({ next, className }: { next?: string; className?: 
   return (
     <div className={cn('flex flex-wrap gap-2', className)}>
       <Button asChild size="lg" className={PRESS}>
-        <Link href={signUpHref(next)}>Create a free account</Link>
+        <Link href={signUpHref(next)} data-gate-primary>Create a free account</Link>
       </Button>
       <Button asChild size="lg" variant="outline" className={PRESS}>
         <Link href={signInHref(next)}>Sign in</Link>

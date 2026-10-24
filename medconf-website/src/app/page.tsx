@@ -29,7 +29,7 @@ import { TeaserRows, type TeaserRow } from '@/components/home/TeaserRows'
 import { StatsRow } from '@/components/home/StatsRow'
 import { GateProvider } from '@/components/auth/GateProvider'
 import { TeaserBlur } from '@/components/auth/TeaserBlur'
-import { homeStats, relativeDeadline, splitTeaser } from '@/lib/home-teaser'
+import { CLOSING_SOON_DAYS, homeStats, relativeDeadline, splitTeaser } from '@/lib/home-teaser'
 import { BrowseTiles, type BrowseTile } from '@/components/home/BrowseTiles'
 import { HowItWorks } from '@/components/home/HowItWorks'
 
@@ -43,8 +43,6 @@ export const metadata = {
 
 /** How many featured society tiles the "Browse by society" band shows. */
 const FEATURED_SOCIETIES = ['RCGP', 'RCP', 'RCSEng', 'RCPsych', 'ESMO', 'ASCO', 'RCPCH', 'RSM']
-/** Deadline horizon for "Closing soon" — matches DeadlineBadge's urgency bands. */
-const CLOSING_SOON_DAYS = 14
 
 /**
  * Hero-chip labels for the handful of taxonomy parents whose full label is a
@@ -251,12 +249,12 @@ function sortByDeadline(rows: DirectoryEvent[]): DirectoryEvent[] {
  * changes, fall back to the figure in reports/website-audit/data.md rather
  * than failing the page render.
  */
-async function countSources(supabase: ReturnType<typeof createServerClient>): Promise<number> {
+async function countSources(supabase: ReturnType<typeof createServerClient>): Promise<number | null> {
   try {
-    const { count, error } = await supabase.from('scraper_sources').select('id', { count: 'exact', head: true })
+    const { count, error } = await supabase.from('scraper_sources').select('id', { count: 'exact', head: true }).eq('active', true)
     if (error) throw error
-    return count ?? 45
+    return count ?? null
   } catch {
-    return 45
+    return null
   }
 }

@@ -4,11 +4,13 @@
 // (Royal Colleges & Faculties / International societies / Specialist
 // societies / Medical defence), each linking into the directory pre-filtered
 // to that society. Gated: middleware sends signed-out visitors to
-// /auth/login?next=/societies; the page is noindex.
+// /auth/login?next=/societies; the page re-checks the session itself (defence in depth) and is noindex.
 
 import Link from 'next/link'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { loginHrefFor } from '@/lib/auth/gate'
 import { ArrowRight, Building2, Globe2, Shield, Stethoscope } from 'lucide-react'
 import { resolveDirectory, getSocietyNextDates, wantsFixture } from '@/lib/directory-source'
 import { societiesByKind, type SocietyKind } from '@/lib/taxonomy/societies'
@@ -48,6 +50,10 @@ export default async function SocietiesPage({
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
   )
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError) console.warn('[gate] getUser failed', userError.status, userError.name)
+  if (!user) redirect(loginHrefFor('/societies', rawParams))
 
   const [{ facets, usedFixture }, nextDates] = await Promise.all([
     resolveDirectory(supabase, {}, { fixture, wantFacets: true }),

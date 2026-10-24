@@ -32,7 +32,10 @@ export function BrowseTiles({ tiles, columns = 4 }: { tiles: BrowseTile[]; colum
         >
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-[0.9375rem] font-medium leading-snug text-fg-strong">{tile.label}</span>
-            <span className="type-numeric shrink-0 text-[0.8125rem] text-fg-subtle">{tile.count}</span>
+            <span className="type-numeric shrink-0 text-[0.8125rem] text-fg-subtle">
+              {tile.count}
+              <span className="sr-only"> events</span>
+            </span>
           </div>
           {tile.sub && <span className="truncate text-[0.8125rem] text-fg-muted">{tile.sub}</span>}
         </GatedLink>

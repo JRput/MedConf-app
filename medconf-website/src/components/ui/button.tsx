@@ -23,21 +23,21 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-brand text-fg-onbrand hover:bg-brand-hover active:bg-brand-active",
+          "bg-brand text-fg-onbrand [@media(hover:hover)_and_(pointer:fine)]:hover:bg-brand-hover active:bg-brand-active",
         // Quiet primary: brand meaning without brand weight. Used for chips
         // and selected states in the directory.
         subtle:
-          "bg-brand-subtle text-brand-text hover:bg-brand-subtle-hover border border-brand-border",
+          "bg-brand-subtle text-brand-text [@media(hover:hover)_and_(pointer:fine)]:hover:bg-brand-subtle-hover border border-brand-border",
         outline:
-          "border border-border bg-surface text-fg shadow-xs hover:bg-surface-hover hover:border-border-strong active:bg-surface-active",
+          "border border-border bg-surface text-fg shadow-xs [@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-hover [@media(hover:hover)_and_(pointer:fine)]:hover:border-border-strong active:bg-surface-active",
         secondary:
-          "bg-surface-muted text-fg hover:bg-surface-active border border-transparent",
+          "bg-surface-muted text-fg [@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-active border border-transparent",
         ghost:
-          "text-fg-muted hover:bg-surface-hover hover:text-fg active:bg-surface-active",
+          "text-fg-muted [@media(hover:hover)_and_(pointer:fine)]:hover:bg-surface-hover [@media(hover:hover)_and_(pointer:fine)]:hover:text-fg active:bg-surface-active",
         link:
-          "text-brand-text underline-offset-4 hover:underline px-0",
+          "text-brand-text underline-offset-4 [@media(hover:hover)_and_(pointer:fine)]:hover:underline px-0",
         destructive:
-          "bg-danger text-white hover:opacity-90 active:opacity-80 focus-visible:ring-danger",
+          "bg-danger text-white [@media(hover:hover)_and_(pointer:fine)]:hover:opacity-90 active:opacity-80 focus-visible:ring-danger",
       },
       size: {
         default: "h-9 px-3.5 text-sm has-[>svg]:px-3",

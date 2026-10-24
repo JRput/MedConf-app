@@ -6,10 +6,12 @@
 // load. Every filter/sort/page change after that is handled client-side by
 // DirectoryClient, which re-fetches via /api/directory and keeps the URL in
 // sync. Gated: middleware sends signed-out visitors to /auth/login?next=...,
-// and the page is noindex (event detail pages stay the public, indexable surface).
+// and the page re-checks the session itself (defence in depth) and is noindex (event detail pages stay the public, indexable surface).
 
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { loginHrefFor } from '@/lib/auth/gate'
 import { parseDirectoryUrl } from '@/lib/directory-url'
 import { resolveDirectory, wantsFixture } from '@/lib/directory-source'
 import { DirectoryClient } from '@/components/directory/DirectoryClient'
@@ -44,6 +46,10 @@ export default async function ConferencesPage({
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
   )
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  if (userError) console.warn('[gate] getUser failed', userError.status, userError.name)
+  if (!user) redirect(loginHrefFor('/conferences', rawParams))
 
   const { page, facets, usedFixture } = await resolveDirectory(supabase, filters, { fixture, wantFacets: true })
 

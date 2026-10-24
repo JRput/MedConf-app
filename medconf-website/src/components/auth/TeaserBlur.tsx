@@ -24,7 +24,7 @@ export function TeaserBlur({
   next: string
   noun?: string
 }) {
-  const { user } = useGate()
+  const { user, loading } = useGate()
 
   if (user) return <>{children}</>
 
@@ -37,11 +37,13 @@ export function TeaserBlur({
       >
         {children}
       </div>
-      <div className="absolute inset-0 flex items-center justify-center px-2">
+      {/* While the session lookup is pending the card is hidden (not removed),
+          so layout is identical and a signed-in visitor never sees it flash. */}
+      <div className={`absolute inset-0 flex items-center justify-center px-2${loading ? ' invisible' : ''}`}>
         <SignInPrompt
           next={next}
           title={`See all ${total.toLocaleString('en-GB')} ${noun}`}
-          body="Create a free account to browse the full list, search, and see fees, CPD points and deadlines."
+          body="Unlock the full list with a free account: search, fees, CPD points and deadlines."
           className="w-full max-w-md"
         />
       </div>

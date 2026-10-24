@@ -27,12 +27,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .select('id')
         .order('id', { ascending: true })
         .range(from, Math.min(from + CHUNK, CAP) - 1)
-      if (error || !data) break
+      if (error || !data) {
+        console.error('[sitemap]', error?.code ?? error)
+        break
+      }
       ids.push(...data.map((r: { id: number }) => r.id))
       if (data.length < CHUNK) break
     }
     for (const id of ids) entries.push({ url: `${BASE}/conferences/${id}`, changeFrequency: 'weekly', priority: 0.6 })
-  } catch {
+  } catch (err) {
+    console.error('[sitemap]', err instanceof Error ? err.message : err)
     // Database unreachable: ship the static entries rather than failing the sitemap.
   }
 

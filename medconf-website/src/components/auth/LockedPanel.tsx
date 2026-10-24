@@ -1,9 +1,10 @@
 // src/components/auth/LockedPanel.tsx
 //
 // Stands in for the locked sections of an event page. Server-safe. The lock
-// icon and the words "Sign in to see" carry the meaning, never colour alone.
+// icon and the words "Unlock with a free account" carry the meaning, never colour alone.
 // It lists what unlocks; it is never handed the locked values themselves.
 
+import { useId } from 'react'
 import { Lock, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { SignInActions } from './SignInPrompt'
@@ -11,7 +12,7 @@ import { SignInActions } from './SignInPrompt'
 export function LockedPanel({
   items,
   next,
-  title = 'Sign in to see',
+  title = 'Unlock with a free account',
   className,
 }: {
   /** What a free account unlocks, e.g. "Fees and early-bird prices". */
@@ -20,11 +21,12 @@ export function LockedPanel({
   title?: string
   className?: string
 }) {
+  const titleId = useId()
   return (
-    <section aria-labelledby="locked-panel-title" className={cn('space-y-4 rounded-lg border border-border bg-surface p-5', className)}>
+    <section aria-labelledby={titleId} className={cn('space-y-4 rounded-lg border border-border bg-surface p-5', className)}>
       <div className="flex items-center gap-2.5">
         <Lock className="size-4 shrink-0 text-fg-subtle" strokeWidth={1.75} aria-hidden />
-        <h2 id="locked-panel-title" className="type-h3 text-fg-strong">
+        <h2 id={titleId} className="type-h3 text-fg-strong">
           {title}
         </h2>
       </div>

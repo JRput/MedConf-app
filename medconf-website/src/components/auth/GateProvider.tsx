@@ -20,22 +20,29 @@ interface GateCopy {
 
 interface GateContextValue {
   user: User | null
+  /** True until the first session lookup resolves. */
+  loading: boolean
   /** null when no provider is mounted. */
   openGate: ((next: string, copy?: GateCopy) => void) | null
 }
 
-const GateContext = createContext<GateContextValue>({ user: null, openGate: null })
+const GateContext = createContext<GateContextValue>({ user: null, loading: false, openGate: null })
 
 export function useGate(): GateContextValue {
   return useContext(GateContext)
 }
 
 export function GateProvider({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   const [state, setState] = useState<{ open: boolean; next?: string; copy?: GateCopy }>({ open: false })
+  const [trigger, setTrigger] = useState<HTMLElement | null>(null)
 
-  const openGate = useCallback((next: string, copy?: GateCopy) => setState({ open: true, next, copy }), [])
-  const value = useMemo(() => ({ user, openGate }), [user, openGate])
+  const openGate = useCallback((next: string, copy?: GateCopy) => {
+    const el = document.activeElement
+    setTrigger(el instanceof HTMLElement && el !== document.body ? el : null)
+    setState({ open: true, next, copy })
+  }, [])
+  const value = useMemo(() => ({ user, loading, openGate }), [user, loading, openGate])
 
   return (
     <GateContext.Provider value={value}>
@@ -46,6 +53,7 @@ export function GateProvider({ children }: { children: React.ReactNode }) {
         next={state.next}
         title={state.copy?.title}
         body={state.copy?.body}
+        restoreFocusTo={trigger}
       />
     </GateContext.Provider>
   )

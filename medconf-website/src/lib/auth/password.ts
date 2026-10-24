@@ -22,8 +22,9 @@ export function validateNewPassword(password: string, confirm: string): { passwo
  */
 export function safeNextPath(next: string | null | undefined, fallback: string): string {
   if (!next) return fallback
-  if (!next.startsWith('/') || next.startsWith('//')) return fallback
-  if (next.includes('\\')) return fallback
+  if (!next.startsWith('/')) return fallback
+  // No inner "//" anywhere (also catches "/.//evil.com", "/a//b") and no backslash.
+  if (next.includes('//') || next.includes('\\')) return fallback
   if (/[\s\u0000-\u001f\u007f]/.test(next)) return fallback
   // A colon in the first path segment would read as a scheme to some parsers.
   if (/^\/[^/?#]*:/.test(next)) return fallback

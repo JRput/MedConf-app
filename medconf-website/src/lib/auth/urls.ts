@@ -6,14 +6,11 @@
 // the auth pages validate it again with safeNextPath, this is the first of
 // two checks.
 
-/** A single leading "/", no scheme, no "//" anywhere, no backslash or whitespace/control chars. */
+import { safeNextPath } from '@/lib/auth/password'
+
+/** Delegates to safeNextPath, the single `next` validator. */
 export function isSafeNext(next: string | null | undefined): next is string {
-  if (!next) return false
-  if (!next.startsWith('/') || next.startsWith('//')) return false
-  if (next.includes('//') || next.includes('\\')) return false
-  if (/[\s\u0000-\u001f\u007f]/.test(next)) return false
-  if (/^\/[^/?#]*:/.test(next)) return false
-  return true
+  return !!next && safeNextPath(next, '') === next
 }
 
 function withNext(base: string, next?: string): string {

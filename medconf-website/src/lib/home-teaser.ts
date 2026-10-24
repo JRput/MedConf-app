@@ -3,6 +3,9 @@
 // Pure helpers behind the anonymous homepage teaser. Nothing here touches the
 // network; the page feeds in rows it has already fetched.
 
+/** Window for "abstract deadlines closing soon" — shared by the page, the stats row and its label. */
+export const CLOSING_SOON_DAYS = 14
+
 function toUtcDay(d: Date | string): number | null {
   if (typeof d === 'string') {
     const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d)
@@ -50,7 +53,7 @@ export function homeStats(input: {
   windowDays?: number
 }): HomeStats {
   const base = toUtcDay(input.today ?? new Date())
-  const windowDays = input.windowDays ?? 14
+  const windowDays = input.windowDays ?? CLOSING_SOON_DAYS
   const closingSoon = input.deadlines.filter((d) => {
     const t = d ? toUtcDay(d) : null
     if (t === null || base === null) return false
