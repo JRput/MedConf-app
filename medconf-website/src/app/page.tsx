@@ -79,6 +79,7 @@ interface HomeData {
   monthTeaser: TeaserRow[]
   monthTotal: number
   deadlineStat: number
+  sourceCount: number | null
 }
 
 const societyName = (code: string | null) => (code ? (societyInfo(code)?.name ?? code) : null)
@@ -108,6 +109,7 @@ function fromPreview(p: HomePreview): HomeData {
     })),
     monthTotal: p.counts.this_month,
     deadlineStat: p.counts.closing_soon,
+    sourceCount: p.counts.active_sources ?? null,
   }
 }
 
@@ -115,7 +117,7 @@ function fromPreview(p: HomePreview): HomeData {
 // fallback for a database where home_preview() does not exist yet.
 async function fromDirectReads(supabase: ReturnType<typeof createServerClient>): Promise<HomeData> {
   const opts = { fixture: false, wantFacets: false }
-  const [overview, thisMonth, abstractsOpen, onlineThisMonth] = await Promise.all([
+  const [overview, thisMonth, abstractsOpen, onlineThisMonth, sourceCount] = await Promise.all([
     // pageSize 1 — we want `total` and the facet counts, not rows.
     resolveDirectory(supabase, { pageSize: 1 }, { fixture: false, wantFacets: true }),
     resolveDirectory(supabase, { datePreset: 'this-month', pageSize: 12 }, opts),
@@ -124,6 +126,7 @@ async function fromDirectReads(supabase: ReturnType<typeof createServerClient>):
     // applied here rather than in SQL.
     resolveDirectory(supabase, { abstractsOpen: true, pageSize: 100 }, opts),
     resolveDirectory(supabase, { datePreset: 'this-month', format: ['online'], pageSize: 1 }, opts),
+    countSources(supabase),
   ])
 
   const facets = overview.facets
@@ -166,6 +169,7 @@ async function fromDirectReads(supabase: ReturnType<typeof createServerClient>):
       today,
       windowDays: CLOSING_SOON_DAYS,
     }).closingSoon,
+    sourceCount,
   }
 }
 
@@ -176,10 +180,14 @@ export default async function HomePage() {
     { cookies: { getAll: () => [], setAll: () => {} } }
   )
 
-  const [preview, sourceCount] = await Promise.all([fetchHomePreview(supabase), countSources(supabase)])
+  const preview = await fetchHomePreview(supabase)
+  // A real error (not "function missing") must not become a cached page:
+  // throwing makes ISR keep serving the last good copy.
+  if (preview.status === 'error') throw new Error('home_preview failed')
   // Everything below is reduced to plain strings on the server, so a fee, CPD
   // value or exact deadline cannot reach the anonymous HTML or RSC payload.
-  const data = preview ? fromPreview(preview) : await fromDirectReads(supabase)
+  const data = preview.status === 'ok' ? fromPreview(preview.data) : await fromDirectReads(supabase)
+  const sourceCount = data.sourceCount
 
   const { usedFixture, eventCount, societyCount, societyCounts, specialtyCounts, closingTeaser, closingWithin14 } = data
 

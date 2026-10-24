@@ -19,21 +19,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/auth/signup`, changeFrequency: 'yearly', priority: 0.5 },
   ]
 
-  try {
-    const supabase = createSupabaseServerClient()
-    const ids: number[] = []
-    const viaFunction = await fetchSitemapEvents(supabase)
-    if (viaFunction) {
-      for (const r of viaFunction.slice(0, CAP)) {
-        entries.push({
-          url: `${BASE}/conferences/${r.id}`,
-          lastModified: r.updated_at ? new Date(r.updated_at) : undefined,
-          changeFrequency: 'weekly',
-          priority: 0.6,
-        })
-      }
-      return entries
+  const supabase = createSupabaseServerClient()
+  const viaFunction = await fetchSitemapEvents(supabase)
+  // A real error must not be cached as a near-empty sitemap for an hour:
+  // throw (outside any try) so ISR keeps serving the last good copy.
+  if (viaFunction.status === 'error') throw new Error('sitemap_events failed')
+  if (viaFunction.status === 'ok') {
+    for (const r of viaFunction.data.slice(0, CAP)) {
+      entries.push({
+        url: `${BASE}/conferences/${r.id}`,
+        lastModified: r.updated_at ? new Date(r.updated_at) : undefined,
+        changeFrequency: 'weekly',
+        priority: 0.6,
+      })
     }
+    return entries
+  }
+
+  try {
+    const ids: number[] = []
     // TODO(access-gate): remove after Phase 2b is applied (function missing -> direct read)
     for (let from = 0; from < CAP; from += CHUNK) {
       const { data, error } = await supabase

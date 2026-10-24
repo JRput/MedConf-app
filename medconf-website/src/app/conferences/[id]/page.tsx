@@ -3,6 +3,7 @@
 // HTML on first response rather than a client-side fetch. Interactive bits
 // (save, calendar, share, reminders) live in client components underneath.
 
+import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { createServerClient } from '@supabase/ssr'
@@ -19,7 +20,7 @@ import { overlayConference, pickTiers } from '@/lib/community/overlay'
 import { hasAbstractInfo } from '@/lib/conference-helpers'
 import { formatDateRange } from '@/lib/format'
 import { excerpt, publicEventFields, type PublicEventFields } from '@/lib/event-public'
-import { fetchEventPreview, NOT_FOUND } from '@/lib/preview'
+import { fetchEventPreview } from '@/lib/preview'
 import { EventTeaser } from '@/components/event/EventTeaser'
 
 import { Breadcrumb } from '@/components/event/Breadcrumb'
@@ -42,6 +43,9 @@ import { AddInfoTrigger } from '@/components/community/AddInfoTrigger'
  * its society only. Pricing, sessions and community data are not even
  * requested, so there is nothing to leak into the anonymous tree.
  */
+/** One cookieless client per request, so generateMetadata and the page share a cached preview call. */
+const anonClient = cache(() => createSupabaseServerClient())
+
 async function fetchConferenceData(id: number, supabase: SupabaseClient = createSupabaseServerClient(), full = true) {
   const [confResp, pricingResp, sessionsResp] = await Promise.all([
     supabase.from('conferences').select('*').eq('id', id).eq('archived', false).single(),
@@ -146,9 +150,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   // Public fields only, through the narrow function (works after anonymous
   // table reads are revoked). Falls back to the direct read while the
   // function is missing.
-  const preview = await fetchEventPreview(createSupabaseServerClient(), Number(id))
-  if (preview === NOT_FOUND) return { title: 'Event not found — MedConf' }
-  if (preview) return metadataFor({ ...preview, description: preview.description_excerpt })
+  const preview = await fetchEventPreview(anonClient(), Number(id))
+  if (preview.status === 'not_found') return { title: 'Event not found — MedConf' }
+  if (preview.status === 'error') return { title: 'MedConf' } // the page itself throws; no data here
+  if (preview.status === 'ok') return metadataFor({ ...preview.data, description: preview.data.description_excerpt })
 
   // TODO(access-gate): remove after Phase 2b is applied
   const data = await fetchConferenceData(Number(id), undefined, false)
@@ -212,12 +217,15 @@ export default async function ConferenceDetailPage({ params }: { params: Promise
   // null means the function is missing (fall back to the direct read below).
   let pub: PublicEventFields | null = null
   if (!user) {
-    const preview = await fetchEventPreview(createSupabaseServerClient(), Number(id))
-    if (preview === NOT_FOUND) notFound()
-    if (preview) {
+    const preview = await fetchEventPreview(anonClient(), Number(id))
+    if (preview.status === 'not_found') notFound()
+    // A real error (not "function missing") must not fall back to table reads
+    // or render an empty teaser: throw to Next's error boundary.
+    if (preview.status === 'error') throw new Error('event_preview failed')
+    if (preview.status === 'ok') {
       // The SQL excerpt is a plain 300-character cut; re-trim at a word boundary with an ellipsis.
-      const d = preview.description_excerpt
-      pub = { ...preview, description_excerpt: d && d.length >= 300 ? excerpt(d, 299) : excerpt(d) }
+      const d = preview.data.description_excerpt
+      pub = { ...preview.data, description_excerpt: d && d.length >= 300 ? excerpt(d, 299) : excerpt(d) }
     }
   }
 

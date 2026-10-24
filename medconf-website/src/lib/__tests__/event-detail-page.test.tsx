@@ -53,14 +53,22 @@ const h = vi.hoisted(() => {
     society: 'RCP',
     description_excerpt: 'A short public description of the event.',
   }
+  // What a compromised or over-eager function might return: public keys PLUS locked ones.
+  const LEAKY = {
+    ...PUBLIC,
+    venue_name: 'Secret Venue Hall',
+    price_gbp: 999,
+    organiser_url: 'https://organiser.example',
+  }
   return {
+    LEAKY,
     FULL,
     PUBLIC,
     tables: [] as string[],
     rpcCalls: [] as string[],
     user: null as unknown,
     // 'missing' = function not deployed (PGRST202); 'ok' = returns PUBLIC; 'none' = event not found
-    rpcMode: 'missing' as 'missing' | 'ok' | 'none',
+    rpcMode: 'missing' as 'missing' | 'ok' | 'none' | 'error',
   }
 })
 
@@ -74,8 +82,9 @@ vi.mock('@supabase/ssr', () => ({
   createServerClient: () => ({
     rpc: async (fn: string) => {
       h.rpcCalls.push(fn)
+      if (h.rpcMode === 'error') return { data: null, error: { code: '42501', message: 'denied' } }
       if (h.rpcMode === 'missing') return { data: null, error: { code: 'PGRST202', message: 'not found' } }
-      return { data: h.rpcMode === 'ok' ? h.PUBLIC : null, error: null }
+      return { data: h.rpcMode === 'ok' ? h.LEAKY : null, error: null }
     },
     auth: { getUser: async () => ({ data: { user: h.user }, error: null }) },
     from(table: string) {
@@ -151,11 +160,11 @@ describe('ConferenceDetailPage (anonymous, event_preview available)', () => {
     h.rpcMode = 'ok'
   })
 
-  it('renders from the preview: name present, no locked values', async () => {
+  it('renders from the preview: name present, no locked values even if the function over-returns', async () => {
     const el = await ConferenceDetailPage({ params: Promise.resolve({ id: '548' }) })
     const out = serialise(el)
     expect(out).toContain('Cardiology Update 2027')
-    for (const secret of ['Secret Venue Hall', '2026-12-15', 'organiser.example', 'cpd_points', 'price_gbp']) {
+    for (const secret of ['Secret Venue Hall', '2026-12-15', 'organiser.example', 'cpd_points', 'price_gbp', '999']) {
       expect(out).not.toContain(secret)
     }
   })
@@ -170,6 +179,12 @@ describe('ConferenceDetailPage (anonymous, event_preview available)', () => {
   it('404s when the function reports no such event', async () => {
     h.rpcMode = 'none'
     await expect(ConferenceDetailPage({ params: Promise.resolve({ id: '9999' }) })).rejects.toThrow('NEXT_NOT_FOUND')
+    expect(h.tables).toEqual([])
+  })
+
+  it('throws (no fallback, no table reads) on a real function error', async () => {
+    h.rpcMode = 'error'
+    await expect(ConferenceDetailPage({ params: Promise.resolve({ id: '548' }) })).rejects.toThrow('event_preview failed')
     expect(h.tables).toEqual([])
   })
 })

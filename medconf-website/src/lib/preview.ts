@@ -5,15 +5,13 @@
 // the anon role can no longer read the directory tables, so every anonymous
 // surface (homepage, event teaser, sitemap) reads through these instead.
 //
-// Failure policy (Level 2 decision): an anonymous page must never 500 because
-// of a preview call. Every wrapper therefore returns `null` on any error and
-// the caller falls back to its existing direct-read path.
-//   - PGRST202 (function missing: the state on a database where Phase 2a has
-//     not been applied) logs a one-time warning per function.
-//   - Any other error is logged with console.error and also returns null.
-// `fetchEventPreview` additionally returns NOT_FOUND when the function ran and
-// found no (or an archived) event, so "missing" is not confused with "fall back".
+// Failure policy: only PGRST202 (function missing, the state before Phase 2a
+// is applied) permits a fallback to direct reads. Any other error is reported
+// as `error` and the caller must NOT fall back or cache an empty result:
+// pages and the sitemap throw, so ISR keeps serving the last good copy and the
+// event page shows Next's error boundary. Error logs carry the code only.
 
+import { cache } from 'react'
 import type { PublicEventFields } from '@/lib/event-public'
 
 /** Minimal client surface so tests can pass a stub. */
@@ -30,6 +28,8 @@ export interface HomePreview {
     closing_soon: number
     this_month: number
     online_this_month: number
+    /** Optional until the Phase 2a function that adds it is applied. */
+    active_sources?: number
   }
   closing_soon: Array<{ id: number; name: string; society: string | null; days_left: number }>
   this_month: Array<{ id: number; name: string; society: string | null; start_date: string | null; end_date: string | null }>
@@ -44,7 +44,12 @@ export interface SitemapEvent {
   updated_at: string | null
 }
 
-export const NOT_FOUND = 'not_found' as const
+/**
+ * ok = data returned; missing = function not deployed (PGRST202, fallback
+ * allowed); error = anything else (no fallback). Event lookups add not_found.
+ */
+export type PreviewResult<T> = { status: 'ok'; data: T } | { status: 'missing' } | { status: 'error' }
+export type EventPreviewResult = PreviewResult<EventPreview> | { status: 'not_found' }
 
 const warned = new Set<string>()
 
@@ -53,41 +58,77 @@ export function resetPreviewWarnings() {
   warned.clear()
 }
 
-async function call(supabase: RpcClient, fn: string, args?: Record<string, unknown>): Promise<{ ok: true; data: unknown } | { ok: false }> {
+async function call(supabase: RpcClient, fn: string, args?: Record<string, unknown>): Promise<PreviewResult<unknown>> {
   try {
     const { data, error } = await supabase.rpc(fn, args)
-    if (!error) return { ok: true, data }
+    if (!error) return { status: 'ok', data }
     if (error.code === 'PGRST202') {
       // TODO(access-gate): remove after Phase 2b is applied
       if (!warned.has(fn)) {
         warned.add(fn)
         console.warn(`[preview] ${fn} missing — falling back to direct reads`)
       }
-    } else {
-      console.error(`[preview] ${fn} failed`, error.code ?? error.message ?? error)
+      return { status: 'missing' }
     }
-  } catch (err) {
-    console.error(`[preview] ${fn} threw`, err instanceof Error ? err.message : err)
+    console.error(`[preview] ${fn} failed`, error.code ?? 'unknown')
+  } catch {
+    console.error(`[preview] ${fn} threw`)
   }
-  return { ok: false }
+  return { status: 'error' }
 }
 
-export async function fetchHomePreview(supabase: RpcClient): Promise<HomePreview | null> {
+export async function fetchHomePreview(supabase: RpcClient): Promise<PreviewResult<HomePreview>> {
   const r = await call(supabase, 'home_preview')
-  if (!r.ok || !r.data || typeof r.data !== 'object') return null
-  return r.data as HomePreview
+  if (r.status !== 'ok') return r
+  if (!r.data || typeof r.data !== 'object') return { status: 'error' }
+  return { status: 'ok', data: r.data as HomePreview }
 }
 
-/** EventPreview when found, NOT_FOUND when the function says there is no such event, null to fall back. */
-export async function fetchEventPreview(supabase: RpcClient, id: number): Promise<EventPreview | typeof NOT_FOUND | null> {
+const EVENT_KEYS = [
+  'id',
+  'conference_name',
+  'specialty',
+  'event_type',
+  'event_format',
+  'is_flagship',
+  'is_on_demand',
+  'start_date',
+  'end_date',
+  'city',
+  'region',
+  'society',
+  'description_excerpt',
+] as const satisfies ReadonlyArray<keyof PublicEventFields>
+
+/** Copy ONLY the public keys, so a function that over-returns cannot leak into the tree. */
+export function toEventPreview(raw: unknown): EventPreview {
+  const src = (raw ?? {}) as Record<string, unknown>
+  const out: Record<string, unknown> = {}
+  for (const k of EVENT_KEYS) out[k] = src[k] ?? null
+  out.id = src.id
+  out.is_flagship = src.is_flagship === true
+  out.is_on_demand = src.is_on_demand === true
+  return out as unknown as EventPreview
+}
+
+async function eventPreviewImpl(supabase: RpcClient, id: number): Promise<EventPreviewResult> {
   const r = await call(supabase, 'event_preview', { p_id: id })
-  if (!r.ok) return null
-  if (r.data === null || r.data === undefined) return NOT_FOUND
-  return r.data as EventPreview
+  if (r.status !== 'ok') return r
+  if (r.data === null || r.data === undefined) return { status: 'not_found' }
+  if (typeof r.data !== 'object') return { status: 'error' }
+  return { status: 'ok', data: toEventPreview(r.data) }
 }
 
-export async function fetchSitemapEvents(supabase: RpcClient): Promise<SitemapEvent[] | null> {
+/**
+ * `cache()` dedupes per server request when called with the same client and id
+ * (generateMetadata and the page share one RPC if they share a client). Outside
+ * a React server render it is a plain pass-through.
+ */
+export const fetchEventPreview = cache(eventPreviewImpl)
+
+export async function fetchSitemapEvents(supabase: RpcClient): Promise<PreviewResult<SitemapEvent[]>> {
   const r = await call(supabase, 'sitemap_events')
-  if (!r.ok || !Array.isArray(r.data)) return null
-  return r.data as SitemapEvent[]
+  if (r.status !== 'ok') return r
+  if (!Array.isArray(r.data)) return { status: 'error' }
+  return { status: 'ok', data: r.data as SitemapEvent[] }
 }

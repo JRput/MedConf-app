@@ -1,7 +1,31 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { fetchEventPreview, fetchHomePreview, fetchSitemapEvents, NOT_FOUND, resetPreviewWarnings, type RpcClient } from '../preview'
+
+// Server clients used by the homepage and the sitemap. `mode` picks the rpc outcome.
+const h = vi.hoisted(() => ({ mode: 'missing' as 'missing' | 'error', tables: [] as string[] }))
+vi.mock('@supabase/ssr', () => ({
+  createServerClient: () => ({
+    rpc: async (fn: string) => {
+      if (!['home_preview', 'event_preview', 'sitemap_events'].includes(fn)) return { data: {}, error: null } // directory_facets etc.
+      return h.mode === 'missing'
+        ? { data: null, error: { code: 'PGRST202', message: 'nf' } }
+        : { data: null, error: { code: '42501', message: 'denied' } }
+    },
+    from(table: string) {
+      h.tables.push(table)
+      const result = { data: [], error: null, count: 0 }
+      const q: unknown = new Proxy(() => q, {
+        get: (_t, prop) => (prop === 'then' ? (res: (v: unknown) => unknown) => Promise.resolve(result).then(res) : () => q),
+      })
+      return q
+    },
+  }),
+}))
+
+import { fetchEventPreview, fetchHomePreview, fetchSitemapEvents, resetPreviewWarnings, toEventPreview, type RpcClient } from '../preview'
 import { canonicalSpecialty } from '../taxonomy/specialties'
 import { pickSocieties, splitTeaser, sumByParent } from '../home-teaser'
+import sitemap from '@/app/sitemap'
+import HomePage from '@/app/page'
 
 const ok = (data: unknown): RpcClient => ({ rpc: async () => ({ data, error: null }) })
 const fail = (code: string): RpcClient => ({ rpc: async () => ({ data: null, error: { code, message: 'x' } }) })
@@ -16,45 +40,87 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks())
 
 describe('preview wrappers', () => {
-  it('return the typed payload on success and pass the id', async () => {
+  it('return ok with the typed payload and pass the id', async () => {
     const calls: Array<[string, unknown]> = []
     const client: RpcClient = {
       rpc: async (fn, args) => {
         calls.push([fn, args])
-        return { data: fn === 'sitemap_events' ? [{ id: 1, updated_at: null }] : { id: 7 }, error: null }
+        return { data: fn === 'sitemap_events' ? [{ id: 1, updated_at: null }] : { id: 7, conference_name: 'X' }, error: null }
       },
     }
-    expect(await fetchHomePreview(client)).toEqual({ id: 7 })
-    expect(await fetchEventPreview(client, 7)).toEqual({ id: 7 })
-    expect(await fetchSitemapEvents(client)).toEqual([{ id: 1, updated_at: null }])
+    expect(await fetchHomePreview(client)).toMatchObject({ status: 'ok', data: { id: 7 } })
+    expect(await fetchEventPreview(client, 7)).toMatchObject({ status: 'ok', data: { id: 7, conference_name: 'X' } })
+    expect(await fetchSitemapEvents(client)).toEqual({ status: 'ok', data: [{ id: 1, updated_at: null }] })
     expect(calls[1]).toEqual(['event_preview', { p_id: 7 }])
   })
 
-  it('returns null and warns once per function on PGRST202', async () => {
+  it('PGRST202 is "missing" and warns once per function', async () => {
     const c = fail('PGRST202')
-    expect(await fetchHomePreview(c)).toBeNull()
-    expect(await fetchHomePreview(c)).toBeNull()
-    expect(await fetchEventPreview(c, 1)).toBeNull()
-    expect(await fetchSitemapEvents(c)).toBeNull()
+    expect(await fetchHomePreview(c)).toEqual({ status: 'missing' })
+    expect(await fetchHomePreview(c)).toEqual({ status: 'missing' })
+    expect(await fetchEventPreview(c, 1)).toEqual({ status: 'missing' })
+    expect(await fetchSitemapEvents(c)).toEqual({ status: 'missing' })
     expect(warn).toHaveBeenCalledTimes(3)
     expect(warn.mock.calls[0][0]).toBe('[preview] home_preview missing — falling back to direct reads')
     expect(err).not.toHaveBeenCalled()
   })
 
-  it('returns null (never throws) and console.errors on other codes or a thrown client', async () => {
-    expect(await fetchHomePreview(fail('42501'))).toBeNull()
-    expect(await fetchSitemapEvents({ rpc: async () => { throw new Error('boom') } })).toBeNull()
+  it('any other code (or a thrown client) is "error", logs the code only, never throws', async () => {
+    expect(await fetchHomePreview(fail('42501'))).toEqual({ status: 'error' })
+    expect(await fetchSitemapEvents({ rpc: async () => { throw new Error('secret-detail') } })).toEqual({ status: 'error' })
     expect(err).toHaveBeenCalledTimes(2)
+    expect(JSON.stringify(err.mock.calls)).not.toContain('secret-detail')
     expect(warn).not.toHaveBeenCalled()
   })
 
-  it('event_preview distinguishes "no such event" from "function missing"', async () => {
-    expect(await fetchEventPreview(ok(null), 9)).toBe(NOT_FOUND)
-    expect(await fetchEventPreview(fail('PGRST202'), 9)).toBeNull()
+  it('event_preview distinguishes not_found, missing and error', async () => {
+    expect(await fetchEventPreview(ok(null), 9)).toEqual({ status: 'not_found' })
+    expect(await fetchEventPreview(fail('PGRST202'), 9)).toEqual({ status: 'missing' })
+    expect(await fetchEventPreview(fail('500'), 9)).toEqual({ status: 'error' })
   })
 
-  it('rejects a non-array sitemap payload', async () => {
-    expect(await fetchSitemapEvents(ok({ nope: true }))).toBeNull()
+  it('rejects malformed payloads as error', async () => {
+    expect(await fetchSitemapEvents(ok({ nope: true }))).toEqual({ status: 'error' })
+    expect(await fetchHomePreview(ok('str'))).toEqual({ status: 'error' })
+  })
+
+  it('toEventPreview keeps only the 13 public keys', () => {
+    const out = toEventPreview({ id: 1, conference_name: 'N', venue_name: 'Secret', price_gbp: 9, organiser_url: 'u', society: 'RCP' })
+    expect(Object.keys(out).sort()).toEqual(
+      ['id', 'conference_name', 'specialty', 'event_type', 'event_format', 'is_flagship', 'is_on_demand', 'start_date', 'end_date', 'city', 'region', 'society', 'description_excerpt'].sort()
+    )
+    expect(JSON.stringify(out)).not.toMatch(/Secret|organiser_url|price_gbp/)
+  })
+})
+
+describe('callers: fall back only on "missing"', () => {
+  beforeEach(() => {
+    h.tables.length = 0
+  })
+
+  it('sitemap throws on a real error and does not read tables', async () => {
+    h.mode = 'error'
+    await expect(sitemap()).rejects.toThrow('sitemap_events failed')
+    expect(h.tables).toEqual([])
+  })
+
+  it('homepage throws on a real error and does not read tables', async () => {
+    h.mode = 'error'
+    await expect(HomePage()).rejects.toThrow('home_preview failed')
+    expect(h.tables).toEqual([])
+  })
+
+  it('sitemap still falls back to direct reads when the function is missing', async () => {
+    h.mode = 'missing'
+    const entries = await sitemap()
+    expect(entries.length).toBeGreaterThanOrEqual(3)
+    expect(h.tables).toContain('directory_events')
+  })
+
+  it('homepage still falls back to direct reads when the function is missing', async () => {
+    h.mode = 'missing'
+    await HomePage()
+    expect(h.tables.length).toBeGreaterThan(0)
   })
 })
 
