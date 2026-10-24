@@ -139,8 +139,8 @@ with sync_playwright() as pw:
             rec("3c", "malformed email rejected with message", path_of(pg).startswith("/auth/signup") and bool(alert_text(pg) or "valid" in t.lower() or "invalid" in t.lower()),
                 f"alert={alert_text(pg)[:120]!r}", shot(pg, "signup_bad_email"))
             # valid submit (REAL EMAIL #1)
-            if not SEND_EMAILS:
-                info("E2E_SEND_EMAILS=0: signup valid-submit skipped"); return
+            if not (SEND_EMAILS and os.environ.get("E2E_SEND_SIGNUP") == "1"):
+                info("signup valid-submit skipped (set E2E_SEND_SIGNUP=1; @example.com is rejected by the live form and the one allowed email goes to forgot-password)"); return
             pg.locator("#email").fill(EMAIL); pg.locator("#password").fill(PW1)
             pg.get_by_role("button", name=re.compile("create|sign up|continue", re.I)).last.click()
             try:
@@ -192,15 +192,17 @@ with sync_playwright() as pw:
             rec("4a", "callback?token_hash&type=signup&next -> signed in", landed.startswith("/onboarding") or landed.startswith("/conferences"), f"landed {landed}", sp)
             ev = find_user(EMAIL)
             rec("4c", "email_confirmed_at set after link", bool(ev and ev.email_confirmed_at), "")
-            rec("4d", "new user lands on /onboarding", landed.startswith("/onboarding"), f"landed {landed}")
-            rec("4e", "`next` survives to onboarding (still in URL)", "cardio" in p4.url, f"url {landed}")
+            rec("4d", "new user lands on /onboarding?next=...", landed.startswith("/onboarding") and "next=" in landed, f"landed {landed}")
+            rec("4e", "`next` (cardio) carried on the onboarding URL", "cardio" in p4.url, f"url {landed}")
             link_props["ctx"] = ctx4; link_props["pg"] = p4
         run("4", "verification", s4)
 
         # ------------------------------------------------ 5. onboarding + gate open
         def s5():
             p = link_props["pg"]
-            p.goto(f"{BASE}/onboarding"); p.wait_for_load_state("networkidle"); p.wait_for_timeout(1500)
+            if "/onboarding" not in p.url:  # keep ?next= from the verification landing
+                p.goto(f"{BASE}/onboarding")
+            p.wait_for_load_state("networkidle"); p.wait_for_timeout(1500)
             sp = shot(p, "onboarding_1")
             rec("5a", "onboarding step 1 renders", "specialty" in body(p, 400).lower(), body(p, 160), sp)
             p.get_by_role("combobox").first.click(); p.wait_for_timeout(500)
@@ -209,21 +211,15 @@ with sync_playwright() as pw:
             p.get_by_role("button", name=re.compile("continue", re.I)).click(); p.wait_for_timeout(600)
             shot(p, "onboarding_2")
             p.get_by_role("combobox").first.click(); p.get_by_role("option", name="Registrar").click()
-            net = []
-            p.on("response", lambda r: net.append(f"{r.status} {r.request.method} {urlparse(r.url).path[:60]}") if ("supabase" in r.url or "onboarding" in r.url or "dashboard" in r.url) else None)
-            p.on("console", lambda m: net.append("console." + m.type + ": " + m.text[:120]) if m.type in ("error", "warning") else None)
-            p.on("request", lambda r: net.append(f"REQ {r.method} {urlparse(r.url).path[:40]}{'?' + urlparse(r.url).query[:30] if urlparse(r.url).query else ''}") if urlparse(r.url).netloc == urlparse(BASE).netloc else None)
-            p.on("requestfailed", lambda r: net.append(f"FAILED {urlparse(r.url).path[:40]} {r.failure}"))
             t0 = time.time()
-            p.get_by_role("button", name=re.compile(r"^done$", re.I)).click(); p.wait_for_timeout(4000)
-            info(f"after Done+4s: url={path_of(p)} saving_visible={p.get_by_text('Saving').count() > 0}")
-            try: p.wait_for_url(re.compile(r"/(dashboard|conferences)"), timeout=20000)
+            p.get_by_role("button", name=re.compile(r"^done$", re.I)).click()
+            try: p.wait_for_url(lambda u: "/onboarding" not in u, timeout=10000)
             except Exception: pass
-            info(f"Done -> {path_of(p)} took {time.time()-t0:.1f}s; network/console: {net[-24:]}")
+            took = time.time() - t0
             p.wait_for_load_state("networkidle")
             sp = shot(p, "after_onboarding")
             dest = path_of(p)
-            rec("5b", "onboarding Done -> leaves /onboarding (to /dashboard)", not dest.startswith("/onboarding"), f"-> {dest}  (next={NEXT!r} {'honoured' if 'cardio' in dest else 'NOT honoured; goes to dashboard'})", sp)
+            rec("5b", "onboarding Done leaves /onboarding within 10s AND lands on next (/conferences?q=cardio)", took < 10 and dest.startswith("/conferences?q=cardio"), f"-> {dest} after {took:.1f}s", sp)
             p.goto(f"{BASE}{NEXT}"); p.wait_for_load_state("networkidle"); p.wait_for_timeout(1500)
             sp = shot(p, "directory_signed_in")
             rec("5c", "/conferences?q=cardio renders when signed in", path_of(p).startswith("/conferences"), f"{path_of(p)} :: {body(p, 200)}", sp)
@@ -263,7 +259,7 @@ with sync_playwright() as pw:
             if not btn.count():
                 rec("6a", "sign-out control found", False, "none on /dashboard", sp); return
             btn.first.click(); p.wait_for_timeout(2500)
-            rec("6a", "sign out", True, f"landed {path_of(p)}", shot(p, "after_signout"))
+            rec("6a", "Navbar sign out lands on /", path_of(p) == "/", f"landed {path_of(p)}", shot(p, "after_signout"))
             p.goto(f"{BASE}/conferences"); p.wait_for_load_state("networkidle")
             rec("6b", "/conferences redirects to login after logout", path_of(p).startswith("/auth/login"), path_of(p))
             login(p, EMAIL, "wrong-" + PW1); p.wait_for_timeout(2500)
@@ -328,7 +324,16 @@ with sync_playwright() as pw:
             r = svc.auth.admin.create_user({"email": EMAIL_B, "password": PW1, "email_confirm": False})
             created.append(r.user.id)
             login(p, EMAIL_B, PW1); p.wait_for_timeout(3000)
-            rec("8d", "unconfirmed-email login message", path_of(p).startswith("/auth/login") and bool(alert_text(p)), f"alert={alert_text(p)!r}", shot(p, "unconfirmed_login"))
+            rec("8d", "unconfirmed login shows 'Confirm your email before signing in.' + Resend link", "Confirm your email before signing in." in alert_text(p) and p.get_by_role("link", name="Resend confirmation email").count() == 1, f"alert={alert_text(p)!r} resend_link={p.get_by_role('link', name='Resend confirmation email').count()}", shot(p, "unconfirmed_login"))
+            lk = p.get_by_role("link", name="Resend confirmation email")
+            if lk.count():
+                lk.click(); p.wait_for_load_state("networkidle"); p.wait_for_timeout(800)
+                t = body(p, 900)
+                rec("8e", "resend link -> /auth/verify with email, Resend button, '1 hour'", "/auth/verify" in path_of(p) and EMAIL_B in t and "1 hour" in t and p.get_by_role("button", name=re.compile("resend", re.I)).count() >= 1, f"{path_of(p)} :: {t[:260]}", shot(p, "verify_unconfirmed"))
+            p.goto(f"{BASE}/auth/verify?email=Click%20here&reason=unconfirmed"); p.wait_for_load_state("networkidle"); p.wait_for_timeout(600)
+            rec("8f", "malformed email param -> email field shown, not echoed", p.locator("input[type=email], #email").count() >= 1 and "Click here" not in body(p, 1500), body(p, 220), shot(p, "verify_malformed_email"))
+            p.goto(f"{BASE}/auth/callback?token_hash=garbage&type=signup"); p.wait_for_load_state("networkidle"); p.wait_for_timeout(600)
+            rec("8g", "bad token_hash signup link -> /auth/verify?reason=expired with no email=", "/auth/verify" in path_of(p) and "reason=expired" in path_of(p) and "email=" not in path_of(p), path_of(p), shot(p, "verify_expired"))
             # admin action_link (implicit/hash flow) on user B -- what a PKCE-less link does at the callback
             r = svc.auth.admin.generate_link({"type": "signup", "email": EMAIL_B, "password": PW1, "options": {"redirect_to": cb_redirect}})
             c2 = br.new_context(); p2 = c2.new_page()
