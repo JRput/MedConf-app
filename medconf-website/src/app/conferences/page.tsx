@@ -11,7 +11,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { loginHrefFor } from '@/lib/auth/gate'
+import { loginHrefFor, logGetUserError } from '@/lib/auth/gate'
 import { parseDirectoryUrl } from '@/lib/directory-url'
 import { resolveDirectory, wantsFixture } from '@/lib/directory-source'
 import { DirectoryClient } from '@/components/directory/DirectoryClient'
@@ -48,7 +48,7 @@ export default async function ConferencesPage({
   )
 
   const { data: { user }, error: userError } = await supabase.auth.getUser()
-  if (userError) console.warn('[gate] getUser failed', userError.status, userError.name)
+  logGetUserError('conferences', userError)
   if (!user) redirect(loginHrefFor('/conferences', rawParams))
 
   const { page, facets, usedFixture } = await resolveDirectory(supabase, filters, { fixture, wantFacets: true })

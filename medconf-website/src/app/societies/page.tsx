@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { loginHrefFor } from '@/lib/auth/gate'
+import { loginHrefFor, logGetUserError } from '@/lib/auth/gate'
 import { ArrowRight, Building2, Globe2, Shield, Stethoscope } from 'lucide-react'
 import { resolveDirectory, getSocietyNextDates, wantsFixture } from '@/lib/directory-source'
 import { societiesByKind, type SocietyKind } from '@/lib/taxonomy/societies'
@@ -52,7 +52,7 @@ export default async function SocietiesPage({
   )
 
   const { data: { user }, error: userError } = await supabase.auth.getUser()
-  if (userError) console.warn('[gate] getUser failed', userError.status, userError.name)
+  logGetUserError('societies', userError)
   if (!user) redirect(loginHrefFor('/societies', rawParams))
 
   const [{ facets, usedFixture }, nextDates] = await Promise.all([

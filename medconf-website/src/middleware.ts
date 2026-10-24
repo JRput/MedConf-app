@@ -10,7 +10,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { isGatedPath, isProfileGatedPath, isUnder, loginRedirectFor, resolveNext } from '@/lib/auth/gate'
+import { logGetUserError, isGatedPath, isProfileGatedPath, isUnder, loginRedirectFor, resolveNext } from '@/lib/auth/gate'
 
 // Gated surfaces (see lib/auth/gate.ts): the personal pages, the directory
 // list (/conferences exactly), and /societies all need a signed-in user.
@@ -54,7 +54,7 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user }, error: userError } = await supabase.auth.getUser()
-  if (userError) console.warn('[gate] getUser failed', userError.status, userError.name)
+  logGetUserError('middleware', userError)
   const path = request.nextUrl.pathname
 
   // Not signed in

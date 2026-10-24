@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { isGatedPath, isProfileGatedPath, loginHrefFor, loginRedirectFor, resolveNext } from '@/lib/auth/gate'
+import { describe, it, expect, vi, afterEach } from 'vitest'
+import { MAX_NEXT_LENGTH, logGetUserError, isGatedPath, isProfileGatedPath, loginHrefFor, loginRedirectFor, resolveNext } from '@/lib/auth/gate'
 
 describe('isGatedPath', () => {
   it.each([
@@ -65,8 +65,39 @@ describe('loginHrefFor', () => {
     expect(loginHrefFor('/societies', new URLSearchParams('q=x'))).toBe('/auth/login?next=' + encodeURIComponent('/societies?q=x'))
   })
   it('drops next when the result is unsafe', () => {
-    expect(loginHrefFor('/conferences', { q: 'a b' })).toContain('next=') // encoded, so safe
+    expect(loginHrefFor('/conferences', { q: 'a b' })).toBe('/auth/login?next=' + encodeURIComponent('/conferences?q=a+b'))
     expect(loginHrefFor('/a//b')).toBe('/auth/login')
     expect(loginHrefFor('//evil.com')).toBe('/auth/login')
+  })
+})
+
+describe('logGetUserError', () => {
+  afterEach(() => vi.restoreAllMocks())
+  it('stays silent for the normal no-session case and for no error', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    logGetUserError('middleware', { name: 'AuthSessionMissingError', status: 400 })
+    logGetUserError('middleware', null)
+    expect(warn).not.toHaveBeenCalled()
+  })
+  it('logs real failures once, with status and name only', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    logGetUserError('middleware', { name: 'AuthRetryableFetchError', status: 502, message: 'secret-ish' })
+    expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn).toHaveBeenCalledWith('[gate] getUser failed middleware 502 AuthRetryableFetchError')
+  })
+})
+
+describe('next length cap', () => {
+  const long = 'x'.repeat(3000)
+  it('loginHrefFor drops an oversized next', () => {
+    expect(loginHrefFor('/conferences', { q: long })).toBe('/auth/login')
+  })
+  it('loginRedirectFor drops an oversized next', () => {
+    const r = loginRedirectFor(new URL('http://localhost:3000/conferences?q=' + long))
+    expect(r.searchParams.has('next')).toBe(false)
+  })
+  it('keeps a next just under the cap', () => {
+    const q = 'y'.repeat(MAX_NEXT_LENGTH - 100)
+    expect(loginHrefFor('/conferences', { q })).toContain('next=')
   })
 })

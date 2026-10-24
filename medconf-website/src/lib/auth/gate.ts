@@ -25,10 +25,29 @@ export function isProfileGatedPath(pathname: string): boolean {
   return isUnder(pathname, PROTECTED_PATHS)
 }
 
+/** Longest encoded `next` we will put in a login URL; longer values are dropped. */
+export const MAX_NEXT_LENGTH = 2048
+
+function usableNext(raw: string): string {
+  const next = safeNextPath(raw, '')
+  return next && encodeURIComponent(next).length <= MAX_NEXT_LENGTH ? next : ''
+}
+
+/**
+ * Log a getUser() failure (status + name only, never tokens). The
+ * no-session case is normal for anonymous visitors and is not logged.
+ */
+export function logGetUserError(where: string, error: unknown): void {
+  if (!error) return
+  const e = error as { name?: string; status?: number }
+  if (e.name === 'AuthSessionMissingError') return
+  console.warn(`[gate] getUser failed ${where} ${e.status} ${e.name}`)
+}
+
 /** `<origin>/auth/login?next=<pathname+search>`; `next` omitted when unsafe. */
 export function loginRedirectFor(url: URL): URL {
   const target = new URL('/auth/login', url.origin)
-  const next = safeNextPath(url.pathname + url.search, '')
+  const next = usableNext(url.pathname + url.search)
   if (next) target.searchParams.set('next', next)
   return target
 }
@@ -48,7 +67,7 @@ export function loginHrefFor(pathname: string, searchParams?: URLSearchParams | 
     }
     qs = sp.toString()
   }
-  const next = safeNextPath(pathname + (qs ? `?${qs}` : ''), '')
+  const next = usableNext(pathname + (qs ? `?${qs}` : ''))
   return next ? `/auth/login?next=${encodeURIComponent(next)}` : '/auth/login'
 }
 

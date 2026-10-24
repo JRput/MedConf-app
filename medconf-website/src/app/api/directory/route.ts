@@ -17,6 +17,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { logGetUserError } from '@/lib/auth/gate'
 import { parseDirectoryUrl } from '@/lib/directory-url'
 import { publicDirectoryError, resolveDirectory, wantsFixture } from '@/lib/directory-source'
 
@@ -47,7 +48,7 @@ export async function GET(request: Request) {
   }
 
   const { data: { user }, error: userError } = await supabase.auth.getUser()
-  if (userError) console.warn('[gate] getUser failed', userError.status, userError.name)
+  logGetUserError('api/directory', userError)
   if (!user) {
     return finish(NextResponse.json(
       { error: 'sign_in_required' },
@@ -64,6 +65,6 @@ export async function GET(request: Request) {
     ))
   } catch (err) {
     const { body, status } = publicDirectoryError(err)
-    return finish(NextResponse.json(body, { status }))
+    return finish(NextResponse.json(body, { status, headers: { 'Cache-Control': 'private, no-store' } }))
   }
 }

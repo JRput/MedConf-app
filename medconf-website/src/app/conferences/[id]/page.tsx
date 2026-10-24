@@ -18,7 +18,8 @@ import type { CommunityFact, CommunityTier } from '@/lib/community/types'
 import { overlayConference, pickTiers } from '@/lib/community/overlay'
 import { hasAbstractInfo } from '@/lib/conference-helpers'
 import { formatDateRange } from '@/lib/format'
-import { publicEventFields } from '@/lib/event-public'
+import { excerpt, publicEventFields, type PublicEventFields } from '@/lib/event-public'
+import { fetchEventPreview, NOT_FOUND } from '@/lib/preview'
 import { EventTeaser } from '@/components/event/EventTeaser'
 
 import { Breadcrumb } from '@/components/event/Breadcrumb'
@@ -117,12 +118,7 @@ async function fetchRelatedEvents(conference: Conference, supabase: SupabaseClie
   }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params
-  const data = await fetchConferenceData(Number(id), undefined, false)
-  if (!data) return { title: 'Event not found — MedConf' }
-
-  const { conference: c } = data
+function metadataFor(c: { conference_name: string; description: string | null; start_date: string | null; end_date: string | null; event_format: Conference['event_format']; city: string | null; region: string | null }): Metadata {
   const when = formatDateRange(c.start_date, c.end_date)
   const where = c.event_format === 'online' ? 'Online' : [c.city, c.region].filter(Boolean).join(', ')
   const description =
@@ -143,6 +139,52 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       description,
     },
   }
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  // Public fields only, through the narrow function (works after anonymous
+  // table reads are revoked). Falls back to the direct read while the
+  // function is missing.
+  const preview = await fetchEventPreview(createSupabaseServerClient(), Number(id))
+  if (preview === NOT_FOUND) return { title: 'Event not found — MedConf' }
+  if (preview) return metadataFor({ ...preview, description: preview.description_excerpt })
+
+  // TODO(access-gate): remove after Phase 2b is applied
+  const data = await fetchConferenceData(Number(id), undefined, false)
+  if (!data) return { title: 'Event not found — MedConf' }
+  return metadataFor(data.conference)
+}
+
+function renderTeaser(pub: PublicEventFields) {
+  return (
+    <div className="min-h-[calc(100vh-4rem)] bg-bg">
+      <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-10">
+        <Breadcrumb specialty={pub.specialty} title={pub.conference_name} anonymous />
+        <div className="mt-6">
+          <EventTeaser event={pub} />
+        </div>
+        <div className="mt-10 border-t border-border-subtle pt-4">
+          <Link href="/" className="type-small text-fg-muted hover:text-brand-text">
+            ← Back to home
+          </Link>
+        </div>
+      </div>
+      <EventJsonLd
+        anonymous
+        conference={{
+          conference_name: pub.conference_name,
+          description: pub.description_excerpt,
+          start_date: pub.start_date,
+          end_date: pub.end_date,
+          event_format: pub.event_format,
+          is_sold_out: false,
+          city: pub.city,
+          region: pub.region,
+        }}
+      />
+    </div>
+  )
 }
 
 export default async function ConferenceDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -166,41 +208,29 @@ export default async function ConferenceDetailPage({ params }: { params: Promise
     console.warn('[gate] getUser failed', userError.status, userError.name)
   }
 
-  const data = await fetchConferenceData(Number(id), supabase, !!user)
-  if (!data) notFound()
-
+  // Anonymous: read only the public fields, through the narrow function.
+  // null means the function is missing (fall back to the direct read below).
+  let pub: PublicEventFields | null = null
   if (!user) {
-    const pub = publicEventFields(data.conference, data.society)
-    return (
-      <div className="min-h-[calc(100vh-4rem)] bg-bg">
-        <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-10">
-          <Breadcrumb specialty={pub.specialty} title={pub.conference_name} anonymous />
-          <div className="mt-6">
-            <EventTeaser event={pub} />
-          </div>
-          <div className="mt-10 border-t border-border-subtle pt-4">
-            <Link href="/" className="type-small text-fg-muted hover:text-brand-text">
-              ← Back to home
-            </Link>
-          </div>
-        </div>
-        <EventJsonLd
-          anonymous
-          conference={{
-            conference_name: pub.conference_name,
-            description: pub.description_excerpt,
-            start_date: pub.start_date,
-            end_date: pub.end_date,
-            event_format: pub.event_format,
-            is_sold_out: false,
-            city: pub.city,
-            region: pub.region,
-          }}
-        />
-      </div>
-    )
+    const preview = await fetchEventPreview(createSupabaseServerClient(), Number(id))
+    if (preview === NOT_FOUND) notFound()
+    if (preview) {
+      // The SQL excerpt is a plain 300-character cut; re-trim at a word boundary with an ellipsis.
+      const d = preview.description_excerpt
+      pub = { ...preview, description_excerpt: d && d.length >= 300 ? excerpt(d, 299) : excerpt(d) }
+    }
   }
 
+  // TODO(access-gate): the direct-read branch for anonymous visitors goes
+  // away after Phase 2b; signed-in visitors always take it.
+  const data = pub ? null : await fetchConferenceData(Number(id), supabase, !!user)
+  if (!pub && !data) notFound()
+
+  if (!user) {
+    if (!pub) pub = publicEventFields(data!.conference, data!.society)
+    return renderTeaser(pub)
+  }
+  if (!data) notFound()
   const { conference: scraped, tiers: scrapedTiers, sessions, society, facts, communityTiers } = data
   // Scraped data always wins; community values only fill what is empty.
   const { conference: c, communityFields } = overlayConference(scraped, facts)

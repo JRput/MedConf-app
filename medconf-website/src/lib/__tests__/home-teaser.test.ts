@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { homeStats, relativeDeadline, splitTeaser } from '../home-teaser'
+import { homeStats, relativeDaysLeft, relativeDeadline, splitTeaser } from '../home-teaser'
 
 const TODAY = '2026-10-24'
 
@@ -47,5 +47,18 @@ describe('homeStats', () => {
       windowDays: 14,
     })
     expect(s).toEqual({ events: 1200, societies: 2, specialties: 1, closingSoon: 2 })
+  })
+})
+
+describe('relativeDaysLeft', () => {
+  it('words a whole-day count', () => {
+    expect(relativeDaysLeft(0)).toBe('closes today')
+    expect(relativeDaysLeft(1)).toBe('closes tomorrow')
+    expect(relativeDaysLeft(12)).toBe('closes in 12 days')
+  })
+  it('is null for negative, missing or non-finite', () => {
+    expect(relativeDaysLeft(-1)).toBeNull()
+    expect(relativeDaysLeft(null)).toBeNull()
+    expect(relativeDaysLeft(Number.NaN)).toBeNull()
   })
 })

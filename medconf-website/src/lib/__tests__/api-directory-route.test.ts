@@ -66,4 +66,12 @@ describe('GET /api/directory', () => {
     expect(denied.status).toBe(401)
     expect(denied.cookies.get('sb-token')?.value).toBe('refreshed')
   })
+
+  it('500s with private, no-store when the directory read throws', async () => {
+    h.getUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null })
+    h.resolveDirectory.mockRejectedValue(new Error('db down'))
+    const res = await GET(req())
+    expect(res.status).toBe(500)
+    expect(res.headers.get('cache-control')).toBe('private, no-store')
+  })
 })

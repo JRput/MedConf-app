@@ -20,7 +20,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { resolveDirectory } from '@/lib/directory-source'
 import { daysUntil, formatDateRange } from '@/lib/format'
-import { SPECIALTY_PARENTS } from '@/lib/taxonomy/specialties'
+import { SPECIALTY_PARENTS, canonicalSpecialty } from '@/lib/taxonomy/specialties'
 import { societyInfo } from '@/lib/taxonomy/societies'
 import type { DirectoryEvent } from '@/lib/directory'
 import { HomeHero, type QuickEntry } from '@/components/home/HomeHero'
@@ -29,7 +29,8 @@ import { TeaserRows, type TeaserRow } from '@/components/home/TeaserRows'
 import { StatsRow } from '@/components/home/StatsRow'
 import { GateProvider } from '@/components/auth/GateProvider'
 import { TeaserBlur } from '@/components/auth/TeaserBlur'
-import { CLOSING_SOON_DAYS, homeStats, relativeDeadline, splitTeaser } from '@/lib/home-teaser'
+import { CLOSING_SOON_DAYS, homeStats, pickSocieties, relativeDaysLeft, relativeDeadline, splitTeaser, sumByParent } from '@/lib/home-teaser'
+import { fetchHomePreview, type HomePreview } from '@/lib/preview'
 import { BrowseTiles, type BrowseTile } from '@/components/home/BrowseTiles'
 import { HowItWorks } from '@/components/home/HowItWorks'
 
@@ -64,6 +65,110 @@ const CHIP_LABEL: Record<string, string> = {
   'radiology-imaging': 'Radiology',
 }
 
+/** Everything the page renders, independent of where it was read from. */
+interface HomeData {
+  usedFixture: boolean
+  eventCount: number
+  societyCount: number
+  societyCounts: Record<string, number>
+  specialtyCounts: Record<string, number>
+  onlineThisMonth: number
+  freeCount: number | null
+  closingTeaser: TeaserRow[]
+  closingWithin14: number
+  monthTeaser: TeaserRow[]
+  monthTotal: number
+  deadlineStat: number
+}
+
+const societyName = (code: string | null) => (code ? (societyInfo(code)?.name ?? code) : null)
+
+/** Anonymous path: three narrow database functions, no table reads. */
+function fromPreview(p: HomePreview): HomeData {
+  const specialtyCounts = sumByParent(p.specialties, (raw) => canonicalSpecialty(raw === 'unspecified' ? null : raw).parent)
+  const societyCounts = Object.fromEntries(p.societies.map((x) => [x.society, x.count]))
+  return {
+    usedFixture: false,
+    eventCount: p.counts.events,
+    societyCount: p.counts.societies,
+    societyCounts,
+    specialtyCounts,
+    onlineThisMonth: p.counts.online_this_month,
+    freeCount: null, // the preview carries no price facet; the chip shows no count
+    closingTeaser: p.closing_soon.flatMap((e) => {
+      const meta = relativeDaysLeft(e.days_left)
+      return meta ? [{ id: e.id, name: e.name, society: societyName(e.society), meta }] : []
+    }),
+    closingWithin14: p.counts.closing_soon,
+    monthTeaser: p.this_month.map((e) => ({
+      id: e.id,
+      name: e.name,
+      society: societyName(e.society),
+      meta: formatDateRange(e.start_date, e.end_date),
+    })),
+    monthTotal: p.counts.this_month,
+    deadlineStat: p.counts.closing_soon,
+  }
+}
+
+// TODO(access-gate): remove after Phase 2b is applied — direct reads are the
+// fallback for a database where home_preview() does not exist yet.
+async function fromDirectReads(supabase: ReturnType<typeof createServerClient>): Promise<HomeData> {
+  const opts = { fixture: false, wantFacets: false }
+  const [overview, thisMonth, abstractsOpen, onlineThisMonth] = await Promise.all([
+    // pageSize 1 — we want `total` and the facet counts, not rows.
+    resolveDirectory(supabase, { pageSize: 1 }, { fixture: false, wantFacets: true }),
+    resolveDirectory(supabase, { datePreset: 'this-month', pageSize: 12 }, opts),
+    // Only ~55 events have abstracts open at any time (data.md §1), so one
+    // page covers the lot; the 14-day window and the deadline sort are then
+    // applied here rather than in SQL.
+    resolveDirectory(supabase, { abstractsOpen: true, pageSize: 100 }, opts),
+    resolveDirectory(supabase, { datePreset: 'this-month', format: ['online'], pageSize: 1 }, opts),
+  ])
+
+  const facets = overview.facets
+  const societyCounts = facets?.society ?? {}
+  const closingSoon = sortByDeadline(abstractsOpen.page.rows)
+  const closingWithin14 = closingSoon.filter((e) => {
+    const d = daysUntil(e.abstractDeadline)
+    return d !== null && d >= 0 && d <= CLOSING_SOON_DAYS
+  })
+  // Prefer genuinely-urgent rows; if none are inside the window today, fall
+  // back to the next deadlines rather than showing an empty band.
+  const closingRows = (closingWithin14.length ? closingWithin14 : closingSoon).slice(0, 5)
+  const today = new Date()
+
+  return {
+    usedFixture: overview.usedFixture,
+    eventCount: overview.page.total,
+    societyCount: Object.keys(societyCounts).length,
+    societyCounts,
+    specialtyCounts: facets?.specialty ?? {},
+    onlineThisMonth: onlineThisMonth.page.total,
+    freeCount: facets?.priceBucket.free ?? null,
+    closingTeaser: closingRows.flatMap((e) => {
+      const meta = relativeDeadline(e.abstractDeadline, today)
+      return meta ? [{ id: e.id, name: e.name, society: societyName(e.society), meta }] : []
+    }),
+    closingWithin14: closingWithin14.length,
+    monthTeaser: thisMonth.page.rows.map((e) => ({
+      id: e.id,
+      name: e.name,
+      society: societyName(e.society),
+      meta: formatDateRange(e.startDate, e.endDate),
+    })),
+    monthTotal: thisMonth.page.total,
+    deadlineStat: homeStats({
+      total: 0,
+      societyCounts: {},
+      specialtyCounts: {},
+      deadlines: abstractsOpen.page.rows.map((e) => e.abstractDeadline),
+      today,
+      windowDays: CLOSING_SOON_DAYS,
+    }).closingSoon,
+  }
+}
+
 export default async function HomePage() {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -71,38 +176,13 @@ export default async function HomePage() {
     { cookies: { getAll: () => [], setAll: () => {} } }
   )
 
-  const opts = { fixture: false, wantFacets: false }
+  const [preview, sourceCount] = await Promise.all([fetchHomePreview(supabase), countSources(supabase)])
+  // Everything below is reduced to plain strings on the server, so a fee, CPD
+  // value or exact deadline cannot reach the anonymous HTML or RSC payload.
+  const data = preview ? fromPreview(preview) : await fromDirectReads(supabase)
 
-  const [overview, thisMonth, abstractsOpen, onlineThisMonth, sourceCount] = await Promise.all([
-    // pageSize 1 — we want `total` and the facet counts, not rows.
-    resolveDirectory(supabase, { pageSize: 1 }, { fixture: false, wantFacets: true }),
-    resolveDirectory(supabase, { datePreset: 'this-month', pageSize: 12 }, opts),
-    // Only ~55 events have abstracts open at any time (data.md §1), so one
-    // page covers the lot; the 14-day window and the deadline sort are then
-    // applied here rather than in SQL, since queryDirectory's `sort` has no
-    // abstract_deadline option and adding one for a single homepage band
-    // would be the wrong place to put it.
-    resolveDirectory(supabase, { abstractsOpen: true, pageSize: 100 }, opts),
-    resolveDirectory(supabase, { datePreset: 'this-month', format: ['online'], pageSize: 1 }, opts),
-    countSources(supabase),
-  ])
+  const { usedFixture, eventCount, societyCount, societyCounts, specialtyCounts, closingTeaser, closingWithin14 } = data
 
-  const facets = overview.facets
-  const eventCount = overview.page.total
-  const societyCounts = facets?.society ?? {}
-  const societyCount = Object.keys(societyCounts).length
-
-  const closingSoon = sortByDeadline(abstractsOpen.page.rows)
-  const closingWithin14 = closingSoon.filter((e) => {
-    const d = daysUntil(e.abstractDeadline)
-    return d !== null && d >= 0 && d <= CLOSING_SOON_DAYS
-  })
-  // Prefer genuinely-urgent rows; if none are inside the window today, fall
-  // back to the next deadlines rather than showing an empty band — the badge
-  // on each row still states the real urgency either way.
-  const closingRows = (closingWithin14.length ? closingWithin14 : closingSoon).slice(0, 5)
-
-  const specialtyCounts = facets?.specialty ?? {}
   const rankedSpecialties = SPECIALTY_PARENTS.filter((p) => p.slug !== 'other' && (specialtyCounts[p.slug] ?? 0) > 0).sort(
     (a, b) => (specialtyCounts[b.slug] ?? 0) - (specialtyCounts[a.slug] ?? 0)
   )
@@ -116,9 +196,9 @@ export default async function HomePage() {
     {
       label: 'Online this month',
       href: '/conferences?datePreset=this-month&format=online',
-      count: onlineThisMonth.page.total || null,
+      count: data.onlineThisMonth || null,
     },
-    { label: 'Free', href: '/conferences?price=free', count: facets?.priceBucket.free ?? null },
+    { label: 'Free', href: '/conferences?price=free', count: data.freeCount },
   ]
 
   const specialtyTiles: BrowseTile[] = rankedSpecialties.slice(0, 12).map((p) => ({
@@ -127,44 +207,25 @@ export default async function HomePage() {
     count: specialtyCounts[p.slug] ?? 0,
   }))
 
-  const societyTiles: BrowseTile[] = FEATURED_SOCIETIES.filter((short) => (societyCounts[short] ?? 0) > 0).map((short) => ({
-    label: short,
-    sub: societyInfo(short)?.name,
-    href: `/conferences?society=${encodeURIComponent(short)}`,
-    count: societyCounts[short] ?? 0,
+  const societyTiles: BrowseTile[] = pickSocieties(
+    Object.entries(societyCounts).map(([society, count]) => ({ society, count })),
+    { featured: FEATURED_SOCIETIES, limit: 8 }
+  ).map(({ society, count }) => ({
+    label: society,
+    sub: societyInfo(society)?.name,
+    href: `/conferences?society=${encodeURIComponent(society)}`,
+    count,
   }))
 
-  const usedFixture = overview.usedFixture
+  const { visible: monthVisible, blurred: monthBlurred } = splitTeaser(data.monthTeaser, 6)
+  const monthTotal = data.monthTotal
 
-  // ---- Anonymous-safe view models -------------------------------------------
-  // Everything below is reduced to plain strings HERE, on the server, so a fee,
-  // CPD value or exact deadline cannot reach the anonymous HTML or RSC payload
-  // through a component prop. Closing-soon rows get a relative phrase only;
-  // This-month rows get name · society · dates only.
-  const today = new Date()
-  const societyName = (code: string | null) => (code ? (societyInfo(code)?.name ?? code) : null)
-
-  const closingTeaser: TeaserRow[] = closingRows.flatMap((e) => {
-    const meta = relativeDeadline(e.abstractDeadline, today)
-    return meta ? [{ id: e.id, name: e.name, society: societyName(e.society), meta }] : []
-  })
-  const monthTeaser: TeaserRow[] = thisMonth.page.rows.map((e) => ({
-    id: e.id,
-    name: e.name,
-    society: societyName(e.society),
-    meta: formatDateRange(e.startDate, e.endDate),
-  }))
-  const { visible: monthVisible, blurred: monthBlurred } = splitTeaser(monthTeaser, 6)
-  const monthTotal = thisMonth.page.total
-
-  const stats = homeStats({
-    total: eventCount,
-    societyCounts,
-    specialtyCounts,
-    deadlines: abstractsOpen.page.rows.map((e) => e.abstractDeadline),
-    today,
-    windowDays: CLOSING_SOON_DAYS,
-  })
+  const stats = {
+    events: eventCount,
+    societies: societyCount,
+    specialties: rankedSpecialties.length,
+    closingSoon: data.deadlineStat,
+  }
 
   return (
     <GateProvider>
@@ -183,8 +244,8 @@ export default async function HomePage() {
           <HomeSection
             title="Closing soon"
             note={
-              closingWithin14.length
-                ? `${closingWithin14.length} abstract deadline${closingWithin14.length === 1 ? '' : 's'} within ${CLOSING_SOON_DAYS} days`
+              closingWithin14
+                ? `${closingWithin14} abstract deadline${closingWithin14 === 1 ? '' : 's'} within ${CLOSING_SOON_DAYS} days`
                 : 'Next abstract deadlines'
             }
             link={{ href: '/conferences?abstractsOpen=1', label: 'All with abstracts open' }}

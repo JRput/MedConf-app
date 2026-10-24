@@ -38,7 +38,30 @@ const h = vi.hoisted(() => {
     created_at: '2026-01-01',
     updated_at: '2026-01-01',
   }
-  return { FULL, tables: [] as string[], user: null as unknown }
+  const PUBLIC = {
+    id: 548,
+    conference_name: 'Cardiology Update 2027',
+    specialty: 'Cardiology',
+    event_type: 'conference',
+    event_format: 'in_person',
+    is_flagship: false,
+    is_on_demand: false,
+    start_date: '2027-03-01',
+    end_date: '2027-03-03',
+    city: 'Leeds',
+    region: 'Yorkshire',
+    society: 'RCP',
+    description_excerpt: 'A short public description of the event.',
+  }
+  return {
+    FULL,
+    PUBLIC,
+    tables: [] as string[],
+    rpcCalls: [] as string[],
+    user: null as unknown,
+    // 'missing' = function not deployed (PGRST202); 'ok' = returns PUBLIC; 'none' = event not found
+    rpcMode: 'missing' as 'missing' | 'ok' | 'none',
+  }
 })
 
 vi.mock('next/headers', () => ({ cookies: async () => ({ getAll: () => [], set() {} }) }))
@@ -49,6 +72,11 @@ vi.mock('next/navigation', () => ({
 }))
 vi.mock('@supabase/ssr', () => ({
   createServerClient: () => ({
+    rpc: async (fn: string) => {
+      h.rpcCalls.push(fn)
+      if (h.rpcMode === 'missing') return { data: null, error: { code: 'PGRST202', message: 'not found' } }
+      return { data: h.rpcMode === 'ok' ? h.PUBLIC : null, error: null }
+    },
     auth: { getUser: async () => ({ data: { user: h.user }, error: null }) },
     from(table: string) {
       h.tables.push(table)
@@ -83,9 +111,11 @@ function walk(node: unknown): unknown {
 }
 const serialise = (node: unknown) => JSON.stringify(walk(node))
 
-describe('ConferenceDetailPage (anonymous)', () => {
+describe('ConferenceDetailPage (anonymous, function missing: direct-read fallback)', () => {
   beforeEach(() => {
     h.tables.length = 0
+    h.rpcCalls.length = 0
+    h.rpcMode = 'missing'
     h.user = null
   })
 
@@ -110,5 +140,36 @@ describe('ConferenceDetailPage (anonymous)', () => {
     h.user = { id: 'u1' }
     await ConferenceDetailPage({ params: Promise.resolve({ id: '548' }) })
     expect(h.tables).toContain('pricing_tiers')
+  })
+})
+
+describe('ConferenceDetailPage (anonymous, event_preview available)', () => {
+  beforeEach(() => {
+    h.tables.length = 0
+    h.rpcCalls.length = 0
+    h.user = null
+    h.rpcMode = 'ok'
+  })
+
+  it('renders from the preview: name present, no locked values', async () => {
+    const el = await ConferenceDetailPage({ params: Promise.resolve({ id: '548' }) })
+    const out = serialise(el)
+    expect(out).toContain('Cardiology Update 2027')
+    for (const secret of ['Secret Venue Hall', '2026-12-15', 'organiser.example', 'cpd_points', 'price_gbp']) {
+      expect(out).not.toContain(secret)
+    }
+  })
+
+  it('does not read any table on the anonymous branch', async () => {
+    await ConferenceDetailPage({ params: Promise.resolve({ id: '548' }) })
+    expect(h.rpcCalls).toContain('event_preview')
+    expect(h.tables).not.toContain('conferences')
+    expect(h.tables).toEqual([])
+  })
+
+  it('404s when the function reports no such event', async () => {
+    h.rpcMode = 'none'
+    await expect(ConferenceDetailPage({ params: Promise.resolve({ id: '9999' }) })).rejects.toThrow('NEXT_NOT_FOUND')
+    expect(h.tables).toEqual([])
   })
 })

@@ -4,6 +4,7 @@
 
 import type { MetadataRoute } from 'next'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { fetchSitemapEvents } from '@/lib/preview'
 
 export const revalidate = 3600
 
@@ -21,6 +22,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = createSupabaseServerClient()
     const ids: number[] = []
+    const viaFunction = await fetchSitemapEvents(supabase)
+    if (viaFunction) {
+      for (const r of viaFunction.slice(0, CAP)) {
+        entries.push({
+          url: `${BASE}/conferences/${r.id}`,
+          lastModified: r.updated_at ? new Date(r.updated_at) : undefined,
+          changeFrequency: 'weekly',
+          priority: 0.6,
+        })
+      }
+      return entries
+    }
+    // TODO(access-gate): remove after Phase 2b is applied (function missing -> direct read)
     for (let from = 0; from < CAP; from += CHUNK) {
       const { data, error } = await supabase
         .from('directory_events')
