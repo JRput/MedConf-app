@@ -73,7 +73,7 @@ export function Navbar() {
                   <Link href="/auth/login">Sign in</Link>
                 </Button>
                 <Button size="sm" asChild>
-                  <Link href="/auth/signup">Get started</Link>
+                  <Link href="/auth/signup">Create a free account</Link>
                 </Button>
               </>
             ) : null}
@@ -147,7 +147,7 @@ export function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                   className="mt-1 block rounded-md bg-brand px-3 py-2.5 text-center text-[0.9375rem] font-medium text-fg-onbrand"
                 >
-                  Get started
+                  Create a free account
                 </Link>
               </>
             ) : null}

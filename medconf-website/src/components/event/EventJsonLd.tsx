@@ -1,9 +1,28 @@
 import type { Conference, PricingTier } from '@/lib/types'
 
-/** schema.org Event JSON-LD for search engines — dates, location, offers. */
-export function EventJsonLd({ conference, tiers }: { conference: Conference; tiers: PricingTier[] }) {
+type JsonLdConference = Pick<
+  Conference,
+  'conference_name' | 'description' | 'start_date' | 'end_date' | 'event_format' | 'is_sold_out' | 'city' | 'region'
+> &
+  Partial<Pick<Conference, 'venue_name' | 'organiser_url' | 'booking_url'>>
+
+/**
+ * schema.org Event JSON-LD for search engines — dates, location, offers.
+ * `anonymous` (signed-out render): no Offer, no venue name and no organiser
+ * URL, and `isAccessibleForFree: false`, so structured data never carries the
+ * values the page itself locks.
+ */
+export function EventJsonLd({
+  conference,
+  tiers = [],
+  anonymous = false,
+}: {
+  conference: JsonLdConference
+  tiers?: PricingTier[]
+  anonymous?: boolean
+}) {
   const c = conference
-  const prices = tiers.map((t) => Number(t.price_gbp)).filter((n) => Number.isFinite(n))
+  const prices = anonymous ? [] : tiers.map((t) => Number(t.price_gbp)).filter((n) => Number.isFinite(n))
   const priceMin = prices.length ? Math.min(...prices) : undefined
   const currency = tiers.find((t) => t.currency)?.currency ?? 'GBP'
 
@@ -33,6 +52,7 @@ export function EventJsonLd({ conference, tiers }: { conference: Conference; tie
       ? 'https://schema.org/EventMovedOnline'
       : 'https://schema.org/EventScheduled',
     location,
+    ...(anonymous ? { isAccessibleForFree: false } : {}),
     offers:
       priceMin !== undefined
         ? {

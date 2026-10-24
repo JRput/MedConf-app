@@ -7,11 +7,12 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { authErrorMessage } from '@/lib/auth/errors'
+import { resolveNext } from '@/lib/auth/gate'
 import { AuthCard, AuthError, AuthField, AuthTerms } from '@/components/auth/AuthCard'
 
 // Auth behaviour is unchanged from the pre-W5 page: useAuth().signIn, the
 // error message straight from Supabase, and a push to /conferences on
-// success. Only the presentation moved onto the design system — plus
+// success (now to the validated ?next=, default /conferences). Only the presentation moved onto the design system — plus
 // per-field validation messages in place of the single "Please fill in all
 // fields" banner.
 export default function LoginPage() {
@@ -30,7 +31,10 @@ function LoginForm() {
   const [password, setPassword] = useState('')
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
   // /auth/callback sends failures here as ?error=<code>; unknown codes render nothing.
-  const urlError = authErrorMessage(useSearchParams().get('error')) ?? ''
+  const searchParams = useSearchParams()
+  const urlError = authErrorMessage(searchParams.get('error')) ?? ''
+  const nextPath = resolveNext(searchParams)
+  const rawNext = searchParams.get('next')
   const [localError, setLocalError] = useState<string | null>(null)
   const error = localError ?? urlError
   const setError = (m: string) => setLocalError(m)
@@ -60,7 +64,7 @@ function LoginForm() {
     }
 
     setLoading(false)
-    router.push('/conferences')
+    router.push(nextPath)
   }
 
   return (
@@ -70,7 +74,7 @@ function LoginForm() {
       footer={
         <>
           Don&apos;t have an account?{' '}
-          <Link href="/auth/signup" className="font-medium text-brand-text hover:underline">
+          <Link href={rawNext && nextPath === rawNext ? `/auth/signup?next=${encodeURIComponent(nextPath)}` : '/auth/signup'} className="font-medium text-brand-text hover:underline">
             Create one
           </Link>
         </>

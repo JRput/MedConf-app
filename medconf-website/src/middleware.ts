@@ -1,7 +1,7 @@
 // src/middleware.ts
 // Route guard for the whole app.
-// - Unauthenticated users hitting a protected route → /auth/login
-// - Signed-in users on /auth/{login,signup} → /dashboard
+// - Unauthenticated users hitting a gated route → /auth/login?next=<path>
+// - Signed-in users on /auth/{login,signup} → a valid ?next=, else /dashboard
 // - /auth/forgot-password and /auth/reset-password are reachable signed-out
 //   (and signed-in: a recovery link creates a session before the reset page)
 // - Signed-in users on a protected route with profile_completed_at = NULL
@@ -10,29 +10,22 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { isGatedPath, isProfileGatedPath, isUnder, loginRedirectFor, resolveNext } from '@/lib/auth/gate'
 
-// /conferences is intentionally PUBLIC — the directory is the product's
-// discovery surface and gating it defeats both the public-read RLS
-// policy on conferences/pricing_tiers and SEO. Personal surfaces
-// (/saved, /settings, /dashboard, /calendar) and the signup wizard
-// (/onboarding) stay protected.
+// Gated surfaces (see lib/auth/gate.ts): the personal pages, the directory
+// list (/conferences exactly), and /societies all need a signed-in user.
+// /conferences/<id> stays a public teaser; / and /auth/* are public. Signed-out
+// visitors are sent to /auth/login?next=<where they were going>.
 //
-// /calendar is personal by design — it shows only the signed-in user's saved
-// events, so there is no useful signed-out rendering of it to leave public.
-//
-// /submit (community event submissions) needs a signed-in user; /admin is
-// additionally restricted to user_profiles.is_admin below.
-const PROTECTED_PATHS = ['/saved', '/settings', '/dashboard', '/onboarding', '/calendar', '/submit', '/admin']
+// /calendar is personal by design. /submit (community event submissions)
+// needs a signed-in user; /admin is additionally restricted to
+// user_profiles.is_admin below.
 const ADMIN_PATHS = ['/admin']
 // Only the sign-in entry pages bounce a signed-in user. /auth/forgot-password
 // and /auth/reset-password are intentionally NOT listed: they are reachable
 // signed-out, and a signed-in user may still land on reset-password from a
 // recovery link (which signs them in first).
 const AUTH_PATHS = ['/auth/login', '/auth/signup']
-
-function isUnder(path: string, candidates: string[]) {
-  return candidates.some(p => path === p || path.startsWith(p + '/'))
-}
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -65,8 +58,8 @@ export async function middleware(request: NextRequest) {
 
   // Not signed in
   if (!user) {
-    if (isUnder(path, PROTECTED_PATHS)) {
-      return NextResponse.redirect(new URL('/auth/login', request.url))
+    if (isGatedPath(path)) {
+      return NextResponse.redirect(loginRedirectFor(request.nextUrl))
     }
     return response
   }
@@ -74,7 +67,7 @@ export async function middleware(request: NextRequest) {
   // Signed in
   // Bounce off the auth-entry pages
   if (isUnder(path, AUTH_PATHS)) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    return NextResponse.redirect(new URL(resolveNext(request.nextUrl.searchParams, '/dashboard'), request.url))
   }
 
   // Profile completion gate. Skip the lookup on /onboarding itself
@@ -83,7 +76,7 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  if (isUnder(path, PROTECTED_PATHS)) {
+  if (isProfileGatedPath(path)) {
     // One lookup serves both gates. If the is_admin column is not there yet
     // (migration not applied), retry without it so every protected page
     // keeps working instead of bouncing everyone to /onboarding.

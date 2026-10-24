@@ -3,7 +3,10 @@
 // HTML on first response rather than a client-side fetch. Interactive bits
 // (save, calendar, share, reminders) live in client components underneath.
 
+import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
+import { createServerClient } from '@supabase/ssr'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
@@ -15,6 +18,8 @@ import type { CommunityFact, CommunityTier } from '@/lib/community/types'
 import { overlayConference, pickTiers } from '@/lib/community/overlay'
 import { hasAbstractInfo } from '@/lib/conference-helpers'
 import { formatDateRange } from '@/lib/format'
+import { publicEventFields } from '@/lib/event-public'
+import { EventTeaser } from '@/components/event/EventTeaser'
 
 import { Breadcrumb } from '@/components/event/Breadcrumb'
 import { EventSidebar } from '@/components/event/EventSidebar'
@@ -31,13 +36,18 @@ import { ReminderPanel } from '@/components/conferences/ReminderPanel'
 import { CommunityNotes } from '@/components/community/CommunityNotes'
 import { AddInfoTrigger } from '@/components/community/AddInfoTrigger'
 
-async function fetchConferenceData(id: number) {
-  const supabase = createSupabaseServerClient()
-
+/**
+ * `full: false` (anonymous render and metadata) fetches the conference row and
+ * its society only. Pricing, sessions and community data are not even
+ * requested, so there is nothing to leak into the anonymous tree.
+ */
+async function fetchConferenceData(id: number, supabase: SupabaseClient = createSupabaseServerClient(), full = true) {
   const [confResp, pricingResp, sessionsResp] = await Promise.all([
     supabase.from('conferences').select('*').eq('id', id).eq('archived', false).single(),
-    supabase.from('pricing_tiers').select('*').eq('conference_id', id),
-    supabase.from('course_sessions').select('*').eq('course_id', id).order('start_date', { ascending: true }),
+    full ? supabase.from('pricing_tiers').select('*').eq('conference_id', id) : Promise.resolve({ data: [] }),
+    full
+      ? supabase.from('course_sessions').select('*').eq('course_id', id).order('start_date', { ascending: true })
+      : Promise.resolve({ data: [] }),
   ])
 
   if (!confResp.data) return null
@@ -61,7 +71,7 @@ async function fetchConferenceData(id: number) {
   // break the page, so failures degrade to "no community data".
   let facts: CommunityFact[] = []
   let communityTiers: CommunityTier[] = []
-  try {
+  if (full) try {
     const [f, t] = await Promise.all([
       supabase.from('community_facts').select('*').eq('conference_id', id).eq('is_published', true),
       supabase.from('community_tiers').select('*').eq('conference_id', id).eq('is_published', true),
@@ -75,10 +85,9 @@ async function fetchConferenceData(id: number) {
   return { conference, tiers, sessions, society, facts, communityTiers }
 }
 
-async function fetchRelatedEvents(conference: Conference) {
+async function fetchRelatedEvents(conference: Conference, supabase: SupabaseClient) {
   if (!conference.start_date) return []
 
-  const supabase = createSupabaseServerClient()
   const { parent } = canonicalSpecialty(conference.specialty)
   const rawSpecialty = expandSpecialtyFilter([parent])
   if (rawSpecialty.length === 0) return []
@@ -110,7 +119,7 @@ async function fetchRelatedEvents(conference: Conference) {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params
-  const data = await fetchConferenceData(Number(id))
+  const data = await fetchConferenceData(Number(id), undefined, false)
   if (!data) return { title: 'Event not found — MedConf' }
 
   const { conference: c } = data
@@ -138,15 +147,60 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ConferenceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const data = await fetchConferenceData(Number(id))
+  // Cookie-aware client so the session (and RLS) is the visitor's own. The
+  // page is dynamic because of this; the anonymous branch below is the
+  // teaser and is built only from publicEventFields().
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+  )
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const data = await fetchConferenceData(Number(id), supabase, !!user)
   if (!data) notFound()
+
+  if (!user) {
+    const pub = publicEventFields(data.conference, data.society)
+    return (
+      <div className="min-h-[calc(100vh-4rem)] bg-bg">
+        <div className="mx-auto max-w-[1180px] px-4 py-6 sm:px-6 sm:py-10">
+          <Breadcrumb specialty={pub.specialty} title={pub.conference_name} />
+          <div className="mt-6">
+            <EventTeaser event={pub} />
+          </div>
+          <div className="mt-10 border-t border-border-subtle pt-4">
+            <Link href="/" className="type-small text-fg-muted hover:text-brand-text">
+              ← Back to home
+            </Link>
+          </div>
+        </div>
+        <EventJsonLd
+          anonymous
+          conference={{
+            conference_name: pub.conference_name,
+            description: pub.description_excerpt,
+            start_date: pub.start_date,
+            end_date: pub.end_date,
+            event_format: pub.event_format,
+            is_sold_out: false,
+            city: pub.city,
+            region: pub.region,
+          }}
+        />
+      </div>
+    )
+  }
 
   const { conference: scraped, tiers: scrapedTiers, sessions, society, facts, communityTiers } = data
   // Scraped data always wins; community values only fill what is empty.
   const { conference: c, communityFields } = overlayConference(scraped, facts)
   const tiers = pickTiers(scrapedTiers, communityTiers)
   const communityFieldList = [...communityFields]
-  const related = await fetchRelatedEvents(c)
+  const related = await fetchRelatedEvents(c, supabase)
   const abstractsMissing = !hasAbstractInfo(c) && c.event_type !== 'course' && !c.is_on_demand
 
   return (

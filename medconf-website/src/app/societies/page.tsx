@@ -3,7 +3,8 @@
 // ../../../../reports/website-audit/ux.md #2). Grid of tiles grouped by kind
 // (Royal Colleges & Faculties / International societies / Specialist
 // societies / Medical defence), each linking into the directory pre-filtered
-// to that society.
+// to that society. Gated: middleware sends signed-out visitors to
+// /auth/login?next=/societies; the page is noindex.
 
 import Link from 'next/link'
 import { createServerClient } from '@supabase/ssr'
@@ -16,6 +17,7 @@ import { formatDateRange } from '@/lib/format'
 export const metadata = {
   title: 'Societies — MedConf',
   description: 'Browse medical conferences and CPD by royal college, faculty, specialist society or international congress.',
+  robots: { index: false, follow: false },
 }
 
 const KIND_META: Record<SocietyKind, { label: string; Icon: typeof Building2 }> = {

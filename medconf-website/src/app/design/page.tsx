@@ -69,11 +69,26 @@ import { SaveToggle } from '@/components/domain/SaveToggle'
 import { EventRow } from '@/components/domain/EventRow'
 import { EventCardCompact } from '@/components/domain/EventCardCompact'
 
+import { SignInPrompt } from '@/components/auth/SignInPrompt'
+import { SignInGate } from '@/components/auth/SignInGate'
+import { LockedPanel } from '@/components/auth/LockedPanel'
+import { TeaserBlur } from '@/components/auth/TeaserBlur'
+import { GateProvider } from '@/components/auth/GateProvider'
+import { TeaserRows } from '@/components/home/TeaserRows'
+import { LOCKED_EVENT_ITEMS } from '@/components/event/EventTeaser'
+
 import { SAMPLE_EVENTS } from './sample-data'
+
+const GATE_DEMO_ROWS = [
+  { id: 9001, name: 'Annual Cardiology Congress', society: 'Royal College of Physicians', meta: '12–14 Nov 2026' },
+  { id: 9002, name: 'Surgical Skills Masterclass', society: 'Royal College of Surgeons of England', meta: '3 Dec 2026' },
+  { id: 9003, name: 'Oncology Research Symposium', society: 'ESMO', meta: '18–19 Jan 2027' },
+]
 
 export default function DesignPage() {
   const [saved, setSaved] = React.useState<Record<number, boolean>>({ 2: true })
   const [date, setDate] = React.useState<Date | undefined>(new Date())
+  const [gateOpen, setGateOpen] = React.useState(false)
 
   const toggleSave = (id: number) => setSaved((s) => ({ ...s, [id]: !s[id] }))
 
@@ -490,6 +505,34 @@ export default function DesignPage() {
             <EventCardCompact key={e.id} event={e} saved={!!saved[e.id]} onToggleSave={() => toggleSave(e.id)} />
           ))}
         </div>
+      </Section>
+
+      {/* -------------------------------------------------------------- GATE */}
+      <Section
+        id="gate"
+        title="Gate"
+        note="The registration-gate kit: inline prompt, locked panel, blurred teaser rows and the sign-in dialog. Flat 1px cards, no shadow, colour is never the only signal."
+      >
+        <SubHead>SignInPrompt — inline card</SubHead>
+        <SignInPrompt next="/conferences" className="max-w-xl" />
+
+        <SubHead className="mt-8">LockedPanel — stands in for locked event details</SubHead>
+        <LockedPanel items={LOCKED_EVENT_ITEMS} next="/conferences/548" className="max-w-3xl" />
+
+        <SubHead className="mt-8">TeaserBlur — three dummy rows (signed out: blurred, inert, overlaid CTA)</SubHead>
+        <GateProvider>
+          <div className="max-w-3xl">
+            <TeaserBlur total={42} next="/conferences?datePreset=this-month">
+              <TeaserRows rows={GATE_DEMO_ROWS} />
+            </TeaserBlur>
+          </div>
+        </GateProvider>
+
+        <SubHead className="mt-8">SignInGate — dialog (200ms ease-out enter, 150ms exit, opacity only under reduced motion)</SubHead>
+        <Button variant="outline" onClick={() => setGateOpen(true)}>
+          Open sign-in gate
+        </Button>
+        <SignInGate open={gateOpen} onOpenChange={setGateOpen} next="/conferences?q=cardiology" />
       </Section>
     </div>
   )

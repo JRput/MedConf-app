@@ -5,7 +5,8 @@
 // incoming `searchParams`, so the directory is fast and indexable on first
 // load. Every filter/sort/page change after that is handled client-side by
 // DirectoryClient, which re-fetches via /api/directory and keeps the URL in
-// sync.
+// sync. Gated: middleware sends signed-out visitors to /auth/login?next=...,
+// and the page is noindex (event detail pages stay the public, indexable surface).
 
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
@@ -16,6 +17,7 @@ import { DirectoryClient } from '@/components/directory/DirectoryClient'
 export const metadata = {
   title: 'Conference directory — MedConf',
   description: 'Search medical conferences, courses and CPD opportunities by specialty, date, format, price and society.',
+  robots: { index: false, follow: false },
 }
 
 export default async function ConferencesPage({
@@ -33,8 +35,9 @@ export default async function ConferencesPage({
   const filters = parseDirectoryUrl(urlParams)
   const fixture = wantsFixture(urlParams)
 
-  // Public, read-only directory — no session needed, but a server component
-  // can't set cookies anyway, so getAll-only is correct here either way.
+  // Session-gated directory (middleware); request cookies are forwarded so
+  // reads run as the signed-in user. A server component can't set cookies,
+  // so getAll-only is correct.
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

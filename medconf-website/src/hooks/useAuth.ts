@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import type { User } from '@supabase/supabase-js'
+import { safeNextPath } from '@/lib/auth/password'
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -29,12 +30,14 @@ export function useAuth() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, next?: string) => {
+    const safeNext = safeNextPath(next, '')
+    const callback = `${window.location.origin}/auth/callback${safeNext ? `?next=${encodeURIComponent(safeNext)}` : ''}`
     const { data, error } = await supabase.auth.signUp({ 
       email, 
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`
+        emailRedirectTo: callback
       }
     })
     return { data, error }

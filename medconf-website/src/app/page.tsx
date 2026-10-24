@@ -19,13 +19,17 @@
 
 import { createServerClient } from '@supabase/ssr'
 import { resolveDirectory } from '@/lib/directory-source'
-import { daysUntil } from '@/lib/format'
+import { daysUntil, formatDateRange } from '@/lib/format'
 import { SPECIALTY_PARENTS } from '@/lib/taxonomy/specialties'
 import { societyInfo } from '@/lib/taxonomy/societies'
 import type { DirectoryEvent } from '@/lib/directory'
 import { HomeHero, type QuickEntry } from '@/components/home/HomeHero'
 import { HomeSection } from '@/components/home/HomeSection'
-import { HomeEventList } from '@/components/home/HomeEventList'
+import { TeaserRows, type TeaserRow } from '@/components/home/TeaserRows'
+import { StatsRow } from '@/components/home/StatsRow'
+import { GateProvider } from '@/components/auth/GateProvider'
+import { TeaserBlur } from '@/components/auth/TeaserBlur'
+import { homeStats, relativeDeadline, splitTeaser } from '@/lib/home-teaser'
 import { BrowseTiles, type BrowseTile } from '@/components/home/BrowseTiles'
 import { HowItWorks } from '@/components/home/HowItWorks'
 
@@ -34,7 +38,7 @@ export const revalidate = 3600
 export const metadata = {
   title: 'MedConf — medical conferences, courses and CPD in one directory',
   description:
-    'Search medical conferences, courses and CPD events from royal colleges, faculties and international societies. Filter by specialty, date, format, price and society. Free, no account needed.',
+    'Search medical conferences, courses and CPD events from royal colleges, faculties and international societies. Create a free account to search the full directory by specialty, date, format, price and society.',
 }
 
 /** How many featured society tiles the "Browse by society" band shows. */
@@ -74,7 +78,7 @@ export default async function HomePage() {
   const [overview, thisMonth, abstractsOpen, onlineThisMonth, sourceCount] = await Promise.all([
     // pageSize 1 — we want `total` and the facet counts, not rows.
     resolveDirectory(supabase, { pageSize: 1 }, { fixture: false, wantFacets: true }),
-    resolveDirectory(supabase, { datePreset: 'this-month', pageSize: 6 }, opts),
+    resolveDirectory(supabase, { datePreset: 'this-month', pageSize: 12 }, opts),
     // Only ~55 events have abstracts open at any time (data.md §1), so one
     // page covers the lot; the 14-day window and the deadline sort are then
     // applied here rather than in SQL, since queryDirectory's `sort` has no
@@ -134,58 +138,99 @@ export default async function HomePage() {
 
   const usedFixture = overview.usedFixture
 
+  // ---- Anonymous-safe view models -------------------------------------------
+  // Everything below is reduced to plain strings HERE, on the server, so a fee,
+  // CPD value or exact deadline cannot reach the anonymous HTML or RSC payload
+  // through a component prop. Closing-soon rows get a relative phrase only;
+  // This-month rows get name · society · dates only.
+  const today = new Date()
+  const societyName = (code: string | null) => (code ? (societyInfo(code)?.name ?? code) : null)
+
+  const closingTeaser: TeaserRow[] = closingRows.flatMap((e) => {
+    const meta = relativeDeadline(e.abstractDeadline, today)
+    return meta ? [{ id: e.id, name: e.name, society: societyName(e.society), meta }] : []
+  })
+  const monthTeaser: TeaserRow[] = thisMonth.page.rows.map((e) => ({
+    id: e.id,
+    name: e.name,
+    society: societyName(e.society),
+    meta: formatDateRange(e.startDate, e.endDate),
+  }))
+  const { visible: monthVisible, blurred: monthBlurred } = splitTeaser(monthTeaser, 6)
+  const monthTotal = thisMonth.page.total
+
+  const stats = homeStats({
+    total: eventCount,
+    societyCounts,
+    specialtyCounts,
+    deadlines: abstractsOpen.page.rows.map((e) => e.abstractDeadline),
+    today,
+    windowDays: CLOSING_SOON_DAYS,
+  })
+
   return (
-    <div className="mx-auto max-w-[1180px] px-4 pb-20 sm:px-6">
-      {usedFixture && (
-        <p className="type-mono-label pt-4 text-warn-text">
-          Showing sample data — live counts will appear once the database is reachable.
-        </p>
-      )}
+    <GateProvider>
+      <div className="mx-auto max-w-[1180px] px-4 pb-8 sm:px-6">
+        {usedFixture && (
+          <p className="type-mono-label pt-4 text-warn-text">
+            Showing sample data — live counts will appear once the database is reachable.
+          </p>
+        )}
 
-      <HomeHero eventCount={eventCount} societyCount={societyCount} quickEntries={quickEntries} />
+        <HomeHero eventCount={eventCount} societyCount={societyCount} quickEntries={quickEntries} />
 
-      {closingRows.length > 0 && (
-        <HomeSection
-          title="Closing soon"
-          note={
-            closingWithin14.length
-              ? `${closingWithin14.length} abstract deadline${closingWithin14.length === 1 ? '' : 's'} within ${CLOSING_SOON_DAYS} days`
-              : 'Next abstract deadlines'
-          }
-          link={{ href: '/conferences?abstractsOpen=1', label: 'All with abstracts open' }}
-        >
-          <HomeEventList events={closingRows} societyCounts={societyCounts} />
-        </HomeSection>
-      )}
+        <StatsRow stats={stats} />
 
-      {thisMonth.page.rows.length > 0 && (
-        <HomeSection
-          title="This month"
-          note={`${thisMonth.page.total.toLocaleString('en-GB')} events running or starting before the end of the month`}
-          link={{ href: '/conferences?datePreset=this-month', label: 'All this month' }}
-        >
-          <HomeEventList events={thisMonth.page.rows} societyCounts={societyCounts} />
-        </HomeSection>
-      )}
+        {closingTeaser.length > 0 && (
+          <HomeSection
+            title="Closing soon"
+            note={
+              closingWithin14.length
+                ? `${closingWithin14.length} abstract deadline${closingWithin14.length === 1 ? '' : 's'} within ${CLOSING_SOON_DAYS} days`
+                : 'Next abstract deadlines'
+            }
+            link={{ href: '/conferences?abstractsOpen=1', label: 'All with abstracts open' }}
+          >
+            <TeaserRows rows={closingTeaser} />
+          </HomeSection>
+        )}
 
-      {specialtyTiles.length > 0 && (
-        <HomeSection title="Browse by specialty" link={{ href: '/conferences', label: 'All specialties' }}>
-          <BrowseTiles tiles={specialtyTiles} />
-        </HomeSection>
-      )}
+        {monthVisible.length > 0 && (
+          <HomeSection
+            title="This month"
+            note={`${monthTotal.toLocaleString('en-GB')} events running or starting before the end of the month`}
+            link={{ href: '/conferences?datePreset=this-month', label: 'All this month' }}
+          >
+            <TeaserRows rows={monthVisible} />
+            {monthBlurred.length > 0 && (
+              <div className="mt-2.5">
+                <TeaserBlur total={monthTotal} next="/conferences?datePreset=this-month">
+                  <TeaserRows rows={monthBlurred} />
+                </TeaserBlur>
+              </div>
+            )}
+          </HomeSection>
+        )}
 
-      {societyTiles.length > 0 && (
-        <HomeSection
-          title="Browse by society"
-          note={`${societyCount} societies with events listed`}
-          link={{ href: '/societies', label: 'All societies' }}
-        >
-          <BrowseTiles tiles={societyTiles} />
-        </HomeSection>
-      )}
+        {specialtyTiles.length > 0 && (
+          <HomeSection title="Browse by specialty" link={{ href: '/conferences', label: 'All specialties' }}>
+            <BrowseTiles tiles={specialtyTiles} />
+          </HomeSection>
+        )}
 
-      <HowItWorks sourceCount={sourceCount} />
-    </div>
+        {societyTiles.length > 0 && (
+          <HomeSection
+            title="Browse by society"
+            note={`${societyCount} societies with events listed`}
+            link={{ href: '/societies', label: 'All societies' }}
+          >
+            <BrowseTiles tiles={societyTiles} />
+          </HomeSection>
+        )}
+
+        <HowItWorks sourceCount={sourceCount} />
+      </div>
+    </GateProvider>
   )
 }
 

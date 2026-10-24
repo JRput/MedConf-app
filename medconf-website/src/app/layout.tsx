@@ -41,6 +41,7 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://medconf.vercel.app'),
   title: 'MedConf — Medical Conference Directory',
   description: 'Find and book medical conferences and CPD opportunities across the UK. Filter by specialty, location, and price.',
   keywords: ['medical conferences', 'CPD', 'healthcare', 'UK', 'professional development'],

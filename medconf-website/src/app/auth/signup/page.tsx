@@ -1,18 +1,19 @@
 // src/app/auth/signup/page.tsx
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { resolveNext } from '@/lib/auth/gate'
 import { AuthCard, AuthError, AuthField, AuthTerms } from '@/components/auth/AuthCard'
 
 // Auth behaviour is unchanged from the pre-W5 page: useAuth().signUp (which
 // sets emailRedirectTo /auth/callback), the same 8-character minimum, and a
 // push to /auth/verify on success. The copy now states what an account
-// actually gives you — the directory itself is public and needs no account.
+// actually gives you. The directory and societies pages require a free account.
 const BENEFITS = [
   'Save events to a personal calendar',
   'In-app alerts for new events in your specialty',
@@ -20,8 +21,20 @@ const BENEFITS = [
 ]
 
 export default function SignUpPage() {
+  // useSearchParams needs a Suspense boundary for static prerender.
+  return (
+    <Suspense fallback={null}>
+      <SignUpForm />
+    </Suspense>
+  )
+}
+
+function SignUpForm() {
   const { signUp } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const rawNext = searchParams.get('next')
+  const nextPath = resolveNext(searchParams, '')
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -45,7 +58,7 @@ export default function SignUpPage() {
     setLoading(true)
     setError('')
 
-    const { error } = await signUp(email, password)
+    const { data, error } = await signUp(email, password, nextPath || undefined)
 
     if (error) {
       setError(error.message)
@@ -54,7 +67,9 @@ export default function SignUpPage() {
     }
 
     setLoading(false)
-    router.push('/auth/verify')
+    // No email confirmation required (a session came back): honour next now.
+    // Otherwise the verification link carries it via /auth/callback?next=.
+    router.push(data?.session && nextPath ? nextPath : '/auth/verify')
   }
 
   return (
@@ -73,7 +88,7 @@ export default function SignUpPage() {
       footer={
         <>
           Already have an account?{' '}
-          <Link href="/auth/login" className="font-medium text-brand-text hover:underline">
+          <Link href={nextPath && nextPath === rawNext ? `/auth/login?next=${encodeURIComponent(nextPath)}` : '/auth/login'} className="font-medium text-brand-text hover:underline">
             Sign in
           </Link>
         </>
@@ -114,14 +129,6 @@ export default function SignUpPage() {
         <Button type="submit" disabled={loading} className="w-full">
           {loading ? 'Creating account…' : 'Create account'}
         </Button>
-
-        <p className="text-[0.8125rem] text-fg-muted">
-          Just looking? The{' '}
-          <Link href="/conferences" className="font-medium text-brand-text hover:underline">
-            directory is public
-          </Link>{' '}
-          — no account needed to search it.
-        </p>
 
         <AuthTerms />
       </form>
