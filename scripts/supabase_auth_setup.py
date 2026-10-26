@@ -25,6 +25,9 @@ v1-update-auth-service-config, schema UpdateAuthConfigBody):
 Nothing is unconfirmed. If a field ever disappears from a GET, `show` prints a warning.
 
 Standard library only. The token and SMTP password are never printed.
+macOS note: if python3 has no CA bundle (CERTIFICATE_VERIFY_FAILED), run with
+  SSL_CERT_FILE="$(medconf-scraper/.venv/bin/python -c 'import certifi;print(certifi.where())')"
+Token scope needed: Auth Config (read-write) + Project Settings (read-write), this project only.
 """
 import argparse
 import json

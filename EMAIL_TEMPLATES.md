@@ -62,6 +62,8 @@ Supabase's built-in sender only delivers to addresses that belong to the project
 
 The owner has no domain yet. Resend needs a verified domain, so for now use one of the options in 3a, which verify a single sender address instead.
 
+**Production setting since 2026-10-26:** Gmail with App Password (3a, Gmail column) — host `smtp.gmail.com`, port 587, username and sender `hellomedicon@gmail.com`, sender name MedConf, Supabase email rate limit 20/hour. Pushed with the script in 3c together with the six templates; verified by read-back and a live send to a non-team address. Replies to auth emails land in that Gmail inbox.
+
 ### 3a. No domain yet: options that verify a single sender address
 
 In every case the Supabase fields are under Authentication → SMTP Settings (enable custom SMTP). Caps are the providers' published free-tier figures at the time of writing; recheck them on sign-up, as free plans change.
@@ -130,6 +132,8 @@ python3 scripts/supabase_auth_setup.py smtp --dry-run
 python3 scripts/supabase_auth_setup.py smtp
 python3 scripts/supabase_auth_setup.py show
 ```
+
+On this Mac `/usr/local/bin/python3` has no CA bundle (`CERTIFICATE_VERIFY_FAILED`); prefix the command with `SSL_CERT_FILE="$(medconf-scraper/.venv/bin/python -c 'import certifi;print(certifi.where())')"`. Keep the token and SMTP password in the macOS Keychain (`security add-generic-password -a medconf -s SUPABASE_ACCESS_TOKEN -w`) and read them with `security find-generic-password … -w` inside the command, so they never sit in a file. Scope the token to this project with Auth Config (read-write) and Project Settings (read-write) only — the update endpoint needs both — and revoke it afterwards.
 
 After each real push the script re-reads the config and prints only non-secret fields (site URL, redirect allow-list, OTP expiry, SMTP host/port/user/sender, the six subjects and the first 80 characters of each body). It never prints the token or the SMTP password. When finished, `unset` the variables and revoke the token.
 
