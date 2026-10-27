@@ -1058,7 +1058,9 @@ def test_fv6_h1_equal_title_over_last_years_fee_table_is_rejected():
 def test_fv6_own_path_past_edition_heading_is_rejected():
     """Reviewer A5: h1 'Cardio Update 2025 Registration' under the 2027 event's path."""
     html = "<html><body><h1>Cardio Update 2025 Registration</h1><p>Member £80</p><p>Student £40</p></body></html>"
-    assert _pid(cu_row(), CU + "archive/2025-registration", html) == (discovery.REJECTED, "other_year")
+    assert _pid(cu_row(), CU + "registration", html) == (discovery.REJECTED, "other_year")
+    # FV8: the reviewer's original URL is now caught earlier, by the URL path rule
+    assert _pid(cu_row(), CU + "archive/2025-registration", html) == (discovery.REJECTED, "other_year_path")
 
 
 def test_fv6_year_check_allows_start_end_and_title_years():
@@ -1195,3 +1197,152 @@ def test_fv7_pdf_two_years_back_deadline_still_rejected():
 
 def test_fv7_prior_year_without_deadline_word_still_rejected_in_pdf():
     assert _pdf_reason("Cardio Congress 2026 registration fees. Member £300") == "pdf_other_year"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FV8: (C) the own-page scan never reads past its cap and sees ALL visible text;
+#      (D) a prior edition's page under the own path is rejected by URL, and the
+#          deadline exemption needs a date inside 9 months before the start date.
+# ═══════════════════════════════════════════════════════════════════════════════
+_C_ROW = {"conference_name": "Cardio Update 2027", "start_date": "2027-05-01"}
+_C_SIB = ["Heart Failure Masterclass 2027"]
+_C_FILL = "<p>" + "lorem ipsum dolor " * 30000 + "</p>"          # ~540 k chars, all visible text
+_C_OWN = "<p>Registration fees</p><p>Member £100</p><p>Student £50</p>"
+_C_SIB_FEE = "<p>Heart Failure Masterclass 2027 Member £150</p>"
+
+
+def _scope(html):
+    return discovery.own_page_scope(_C_ROW, html, "", _C_SIB)
+
+
+def test_fv8_verifier_c_h1_past_cap_sibling_far_after_h1_is_not_in_window():
+    """Verifier C: h1 beyond 400 k, sibling in the nav above it, sibling's fee line > 400 k
+    after the h1. 915726d returned a 540 k window containing the sibling's fee."""
+    html = "<nav>Heart Failure Masterclass 2027</nav>" + _C_FILL + "<h1>Cardio Update 2027</h1>" + _C_OWN + _C_FILL + _C_SIB_FEE
+    win, _t, lines, reason = _scope(html)
+    assert reason == "own_page_sibling_in_body"
+    assert "Heart Failure" not in win and "£150" not in lines
+    assert "Member £100" in win                                    # the own fees before the cap are kept
+
+
+def test_fv8_only_sibling_mention_beyond_250k_visible_text_is_seen():
+    """Pre-existing variant: visible text was cut at 250 k, so a page whose only sibling
+    mention sits beyond it got reason None and was read whole."""
+    html = "<h1>Cardio Update 2027</h1>" + _C_OWN + _C_FILL + _C_SIB_FEE
+    win, _t, lines, reason = _scope(html)
+    assert reason == "own_page_sibling_in_body"
+    assert "Heart Failure" not in win and "£150" not in lines
+
+
+def test_fv8_sibling_just_beyond_the_cap_after_h1_is_cut_at_the_cap():
+    html = "<h1>Cardio Update 2027</h1>" + _C_OWN + "x" * (400_000 - len(_C_OWN)) + _C_SIB_FEE
+    win, _t, _l, reason = _scope(html)
+    assert reason == "own_page_sibling_in_body" and "Heart Failure" not in win
+
+
+def test_fv8_far_sibling_page_yields_no_sibling_fee_through_discover(monkeypatch):
+    _quiet(monkeypatch)
+    html = "<nav>Heart Failure Masterclass 2027</nav>" + _C_FILL + "<h1>Cardio Update 2027</h1>" + _C_OWN + _C_FILL + _C_SIB_FEE
+    res = discover(dict(_C_ROW, pricing_tiers=[], venue_name="V", city="C", abstract_open=True,
+                        booking_url="https://x.org/cu-2027/"), html, "", "https://x.org/cu-2027/", shell_titles=_C_SIB)
+    assert 150.0 not in [t["price_gbp"] for t in res.tiers]
+
+
+def test_fv8_control_aacr_shaped_page_still_reads_its_own_content():
+    menu = "<ul>" + "".join(f"<li><a href='/m/{i}'>Heart Failure Masterclass 2027</a></li>" for i in range(3)) + "</ul>"
+    html = menu + "<div>" + "<span>menu item</span>" * 10500 + "</div>" + "<h1>Cardio Update 2027</h1>" + _C_OWN + "<p>Venue: Grand Hall, Leeds</p>"
+    assert 200_000 < html.index("<h1>") < 260_000
+    win, _t, _l, reason = _scope(html)
+    assert reason == "own_page_sibling_in_body"
+    assert "Member £100" in win and "Grand Hall" in win and "Heart Failure" not in win
+
+
+# ---- D: prior edition under the own path ------------------------------------------
+_D_BASE = "https://x.org/congress/"
+
+
+def _d_row(**kw):
+    r = {"conference_name": "Cardio Update 2027", "start_date": "2027-05-01", "booking_url": _D_BASE}
+    r.update(kw)
+    return r
+
+
+def _d_pid(url, h1, h2, r=None):
+    html = f"<html><body><h1>{h1}</h1><h2>{h2}</h2><p>Member £300</p><p>Non-member £400</p></body></html>"
+    r = r or _d_row()
+    return discovery.page_identity(r, url, html, discovery._to_text(html), own=discovery.own_paths(r))
+
+
+def test_fv8_verifier_d_prior_year_in_path_is_rejected():
+    assert _d_pid(_D_BASE + "2026/registration", "Registration",
+                  "Early-bird fees (book by 31 May 2026)") == (discovery.REJECTED, "other_year_path")
+
+
+def test_fv8_verifier_d_archive_segment_is_rejected():
+    assert _d_pid(_D_BASE + "past/registration", "Registration",
+                  "Early bird ends 31 May 2026") == (discovery.REJECTED, "archive_path")
+
+
+@pytest.mark.parametrize("seg", ["previous", "archive", "archives", "history", "Past"])
+def test_fv8_archive_segments(seg):
+    assert _d_pid(_D_BASE + f"{seg}/fees", "Registration", "Fees")[1] == "archive_path"
+
+
+@pytest.mark.parametrize("path", ["fees-2026", "fees_2026.html", "2026-registration"])
+def test_fv8_prior_year_in_path_filename_forms(path):
+    assert _d_pid(_D_BASE + path, "Registration", "Fees")[1] == "other_year_path"
+
+
+def test_fv8_deadline_inside_nine_months_stays_strong():
+    r = x_row(start_date="2027-04-15", end_date=None)
+    assert _x_pid("Early-bird fees (book by 31 December 2026)", r=r) == (discovery.STRONG, "own_path")
+
+
+def test_fv8_deadline_more_than_nine_months_before_start_is_rejected():
+    r = x_row(start_date="2027-11-10", end_date=None)
+    assert _x_pid("Early-bird fees (book by 31 December 2026)", r=r) == (discovery.REJECTED, "other_year")
+
+
+def test_fv8_deadline_without_start_date_gets_no_exemption():
+    r = x_row(start_date=None, end_date=None)                       # title year 2027 only
+    assert _x_pid("Early-bird fees (book by 31 December 2026)", r=r) == (discovery.REJECTED, "other_year")
+
+
+def test_fv8_pdf_deadline_window():
+    head = "Registration fees. Bookings before 31 December 2026 receive the early rate. Member £300"
+    assert _pdf_reason(head, x_row(start_date="2027-03-20", end_date=None)) is None
+    assert _pdf_reason(head, x_row(start_date="2027-12-05", end_date=None)) == "pdf_other_year"
+
+
+def test_fv8_pdf_url_with_prior_year_or_archive_is_rejected():
+    run = types.SimpleNamespace(row=x_row(), shell_titles=[])
+    head = "Registration fees. Member £300"
+    assert discovery._pdf_head_reason(run, head, "https://x.org/files/fees_2026.pdf") == "pdf_other_year_path"
+    assert discovery._pdf_head_reason(run, head, "https://x.org/archive/fees.pdf") == "pdf_archive_path"
+    assert discovery._pdf_head_reason(run, head, "https://x.org/files/fees_2027.pdf") is None
+
+
+@pytest.mark.parametrize("h1,h2", [
+    ("Cardio Congress 2027", "2026 registration fees"),
+    ("Cardio Update 2025 Registration", "Fees"),
+    ("Cardio Congress 2027", "Fees (book by 31 December 2025)"),
+    ("Register by 1 March 2026 for the 2026 congress", "Fees"),
+    ("Cardio Update 2026 — register by 31 December 2026", "Fees"),
+    ("Registration closes 2026", "Fees"),
+])
+def test_fv8_verifier_still_rejected_controls(h1, h2):
+    assert _x_pid(h2, h1=h1) == (discovery.REJECTED, "other_year")
+
+
+@pytest.mark.parametrize("head", ["Early-bird deadline 1 March 2025. Delegate £300",
+                                  "Early bird until 31 Dec 2026 for the 2026 meeting. Delegate £300"])
+def test_fv8_verifier_pdf_still_rejected_controls(head):
+    assert _pdf_reason(head) == "pdf_other_year"
+
+
+def test_fv8_own_path_containing_own_year_and_year_hint_unaffected():
+    assert _x_pid("Registration fees") == (discovery.STRONG, "own_path")          # /congress-2027/registration
+    r = x_row(booking_url="https://x.org/other/")
+    html = "<html><body><h1>Cardio Congress 2027</h1><p>Member £300</p></body></html>"
+    assert discovery.page_identity(r, "https://x.org/registration-2027", html, discovery._to_text(html),
+                                   own=discovery.own_paths(r), via_hint=True)[0] == discovery.STRONG

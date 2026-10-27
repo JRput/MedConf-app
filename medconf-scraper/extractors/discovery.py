@@ -302,10 +302,13 @@ def _page_key(url: str) -> str:
     return (url or "").split("#")[0].rstrip("/")
 
 
-def _to_text(html: str) -> str:
+def _to_text(html: str, limit: Optional[int] = 250_000) -> str:
+    """Visible text. `limit=None` returns ALL of it (FV8: the own-page sibling checks must
+    not be blind past 250 k characters); every other caller keeps the 250 k cap."""
     h = re.sub(r"(?is)<(script|style|noscript)\b.*?</\1\s*>", " ", html or "")
     t = _html.unescape(re.sub(r"<[^>]+>", " ", h))
-    return re.sub(r"\s+", " ", t).strip()[:250_000]
+    t = re.sub(r"\s+", " ", t).strip()
+    return t if limit is None else t[:limit]
 
 
 def _to_lines(html: str) -> str:
@@ -932,29 +935,95 @@ def row_years(row: dict) -> set:
 _DEADLINE_WORD_RE = re.compile(
     r"\b(?:by|before|until|till|deadline|ends?|closes?|prior\s+to|early[\s-]*bird|"
     r"book(?:ings?)?\s+by|register\s+by)\b", re.I)
-_DATE_BEFORE_YEAR_RE = re.compile(
-    r"(?:\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?(?:\s+\d{1,2}(?:st|nd|rd|th)?)?,?"
-    r"|\b\d{1,2}[/.\-]\d{1,2}[/.\-])\s*$", re.I)
+_MONTH_NUM = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6, "jul": 7, "aug": 8,
+              "sep": 9, "oct": 10, "nov": 11, "dec": 12}
+_MON = (r"(january|jan|february|feb|march|mar|april|apr|may|june|jun|july|jul|august|aug|"
+        r"september|sept|sep|october|oct|november|nov|december|dec)\b\.?")
+_DATE_FORMS = (   # each anchored at the END of the text before the year; groups -> (day, month)
+    (re.compile(r"\b(\d{1,2})(?:st|nd|rd|th)?\s+" + _MON + r",?\s*$", re.I), lambda g: (g[0], g[1])),
+    (re.compile(r"\b" + _MON + r"\s+(\d{1,2})(?:st|nd|rd|th)?,?\s*$", re.I), lambda g: (g[1], g[0])),
+    (re.compile(r"\b" + _MON + r",?\s*$", re.I), lambda g: ("1", g[0])),
+    (re.compile(r"\b(\d{1,2})[/.\-](\d{1,2})[/.\-]$"), lambda g: (g[0], g[1])),
+)
+DEADLINE_WINDOW_MONTHS = 9      # Level 2 (FV8): early-bird deadlines sit within 9 months of the start
 
 
-def _is_prior_year_deadline(s: str, start: int, year: str, years: set) -> bool:
-    """FV7: exactly one year before the row's earliest year, written as a DATE (a month name
-    or d/m/ right before it), with a deadline word in the ~40 characters before: an
-    early-bird / booking deadline ("book by 31 December 2026"), not another edition."""
+def _deadline_date(before: str, year: str) -> Optional[date]:
+    """The date written right before `year` ("31 December", "December 31,", "Dec", "31/12/");
+    a missing day is the 1st; d/m order. None when there is no parseable date."""
+    for rx, pick in _DATE_FORMS:
+        m = rx.search(before)
+        if not m:
+            continue
+        day, mon = pick(m.groups())
+        try:
+            month = int(mon) if mon.isdigit() else _MONTH_NUM[mon.lower()[:3]]
+            return date(int(year), month, int(day))
+        except (ValueError, KeyError):
+            return None
+    return None
+
+
+def _months_back(d: date, n: int) -> date:
+    import calendar
+    y, m = d.year, d.month - n
+    while m <= 0:
+        m += 12
+        y -= 1
+    return date(y, m, min(d.day, calendar.monthrange(y, m)[1]))
+
+
+def _is_prior_year_deadline(s: str, start: int, year: str, years: set, start_date: Any = None) -> bool:
+    """FV7/FV8: exactly one year before the row's earliest year, written as a DATE right
+    before it, a deadline word in the ~40 characters before, AND that date falls within
+    DEADLINE_WINDOW_MONTHS before the row's start_date (strictly before it). No parseable
+    start_date -> no exemption. An early-bird / booking deadline, not another edition."""
     try:
         if int(year) != min(int(y) for y in years) - 1:
             return False
     except ValueError:
         return False
+    begins = _is_date(start_date)
+    if begins is None:
+        return False
     before = s[max(0, start - 40):start]
-    return bool(_DATE_BEFORE_YEAR_RE.search(before)) and bool(_DEADLINE_WORD_RE.search(before))
+    if not _DEADLINE_WORD_RE.search(before):
+        return False
+    when = _deadline_date(before, year)
+    return when is not None and _months_back(begins, DEADLINE_WINDOW_MONTHS) <= when < begins
 
 
-def _foreign_year(s: str, years: set) -> Optional[str]:
+def _foreign_year(s: str, years: set, start_date: Any = None) -> Optional[str]:
     for m in _YEAR_RE.finditer(s or ""):
         y = m.group(1)
-        if y not in years and not _is_prior_year_deadline(s, m.start(), y, years):
+        if y not in years and not _is_prior_year_deadline(s, m.start(), y, years, start_date):
             return y
+    return None
+
+
+ARCHIVE_SEGMENTS = frozenset({"past", "previous", "archive", "archives", "history"})   # Level 2 (FV8)
+
+
+def url_edition_reason(row: dict, url: str) -> Optional[str]:
+    """FV8: a prior edition's page under the event's own path. "other_year_path" when the
+    URL path (segments and filename) carries a 20xx year that is not the row's (years in the
+    row's own booking/source path count as the row's); "archive_path" when a segment is
+    past / previous / archive / archives / history (unless the row's own path has it)."""
+    path = urlparse(url or "").path.lower()
+    if not path:
+        return None
+    own_segs, own_years = set(), set()
+    for u in (row.get("booking_url"), row.get("source_url")):
+        p = urlparse(str(u or "")).path.lower()
+        own_segs.update(x for x in p.split("/") if x)
+        own_years.update(_YEAR_RE.findall(p))
+    allowed = row_years(row) | own_years
+    if any(y not in allowed for y in _YEAR_RE.findall(path)):
+        return "other_year_path"
+    for seg in (x for x in path.split("/") if x):
+        stem = seg.rsplit(".", 1)[0]
+        if (seg in ARCHIVE_SEGMENTS or stem in ARCHIVE_SEGMENTS) and seg not in own_segs:
+            return "archive_path"
     return None
 
 
@@ -979,6 +1048,7 @@ def page_identity(row: dict, url: str, html: str, text: str, *, own: Iterable[Tu
                   via_hint: bool = False, shell_titles: Iterable[str] = ()) -> Tuple[str, str]:
     """(verdict, reason) for one FETCHED page. Decision order (first match wins):
       1. any heading (h1-h4, <title>) names another shell title of the source  -> REJECTED other_shell_in_heading
+      1a. URL path carries a 20xx year not the row's / an archive segment     -> REJECTED other_year_path / archive_path (FV8)
       1b. main heading, or the heading right above the first fee amount, names a
           20xx year that is not the row's (start / end / title year)            -> REJECTED other_year
           (own-path pages included; FV6)
@@ -998,8 +1068,11 @@ def page_identity(row: dict, url: str, html: str, text: str, *, own: Iterable[Tu
         if _names_other_shell(title_n, _norm(h), others):
             return REJECTED, "other_shell_in_heading"
     mains = _main_headings(html)
+    edition = url_edition_reason(row, url)          # FV8: before any year exemption
+    if edition:
+        return REJECTED, edition
     years = row_years(row)
-    if years and any(_foreign_year(h, years) for h in mains + [_fee_heading(html) or ""]):
+    if years and any(_foreign_year(h, years, row.get("start_date")) for h in mains + [_fee_heading(html) or ""]):
         return REJECTED, "other_year"
     rels = [_heading_relation(title_n, _norm(h), year) for h in mains]
     if "extends_event" in rels and not any(r in ("equal", "section") for r in rels):
@@ -1233,8 +1306,9 @@ def own_page_scope(row: dict, html: str, text: str, shell_titles: Iterable[str])
             only a window is read: from the page's main <h1> up to the first sibling
             occurrence AFTER it (mentions above the h1 are site menus / banners and the
             window excludes them); a page without an <h1> keeps only the html before the
-            first occurrence; a sibling that cannot be located in the html (caller text
-            only) -> nothing. (Level 2, FV6: the literal "before the first occurrence" rule
+            first occurrence; the window never runs past the raw scan cap (start +
+            SIBLING_SCAN_CHARS) and must itself name no sibling; a sibling named only in
+            the caller text -> nothing. Sibling detection reads ALL visible text (FV8). (Level 2, FV6: the literal "before the first occurrence" rule
             cut the whole event content of pages whose mega-menu lists sibling meetings.)
     Otherwise the whole page, reason None. The extractor's own output is never touched."""
     title_n = _norm(row.get("conference_name"))
@@ -1245,33 +1319,37 @@ def own_page_scope(row: dict, html: str, text: str, shell_titles: Iterable[str])
     for h in _all_headings(html):
         if _names_other_shell(title_n, _norm(h), others):
             return "", "", "", "own_page_names_other_shell"
-    page_text = _to_text(html)
-    if not (_names_other_shell(title_n, _norm(page_text), others)
-            or _names_other_shell(title_n, _norm(text or ""), others)):
+    # FV8: ALL visible text (no 250 k cap) decides whether the page names a sibling
+    html_hit = _names_other_shell(title_n, _norm(_to_text(html, limit=None)), others)
+    if not (html_hit or _names_other_shell(title_n, _norm(text or ""), others)):
         return html, full_text, _to_lines(html), None
+    if not html_hit:
+        return "", "", "", "own_page_sibling_in_body"         # named only in the caller's text
     h1 = next((m for m in re.finditer(r"<h1\b[^>]*>(.*?)</h1\s*>", _blank_scripts(html), re.I | re.S)
                if _strip_tags(m.group(1))), None)
     start = h1.start() if h1 else 0
-    if _first_sibling_offset(html, title_n, others) is None:
-        return "", "", "", "own_page_sibling_in_body"         # named, but not locatable in the html
     cut = _first_sibling_offset(html, title_n, others, after=start)
     if cut is None:
-        if _names_other_shell(title_n, _norm(_to_text(html[start:])), others):
-            return "", "", "", "own_page_sibling_in_body"     # in the window but not locatable
-        cut = len(html)                                       # every mention is above the h1
+        # FV8: the raw scan stops at its cap; the window never extends past what was scanned
+        cut = min(len(html), start + SIBLING_SCAN_CHARS)
     win = html[start:cut]
+    if _names_other_shell(title_n, _norm(_to_text(win, limit=None)), others):
+        return "", "", "", "own_page_sibling_in_body"         # a mention the raw matcher missed
     return win, _to_text(win), _to_lines(win), "own_page_sibling_in_body"
 
 
-def _pdf_head_reason(run: "_Run", txt: str) -> Optional[str]:
-    """A PDF whose first 2,000 characters name another shell title, or a 20xx year that
-    is not the row's, is not this event's document."""
+def _pdf_head_reason(run: "_Run", txt: str, url: Optional[str] = None) -> Optional[str]:
+    """A PDF whose URL is a prior edition's (FV8), or whose first 2,000 characters name
+    another shell title or a 20xx year that is not the row's, is not this event's document."""
+    edition = url_edition_reason(run.row, url) if url else None
+    if edition:
+        return f"pdf_{edition}"
     head = (txt or "")[:2000]
     others = _norm_shell_titles(run.row, run.shell_titles)
     if others and _names_other_shell(_norm(run.row.get("conference_name")), _norm(head), others):
         return "pdf_names_other_shell"
     years = row_years(run.row)
-    if years and _foreign_year(head, years):
+    if years and _foreign_year(head, years, run.row.get("start_date")):
         return "pdf_other_year"
     return None
 
@@ -1416,7 +1494,7 @@ def _follow_pdf(run: _Run) -> None:
     if len(txt.strip()) < 40:
         run.log(f"pdf:{fieldname}", url, ["no_text_layer"], t)
         return
-    why = _pdf_head_reason(run, txt)
+    why = _pdf_head_reason(run, txt, url)
     if why:
         run.res.evidence.append({"step": f"pdf:{fieldname}", "url": url, "found": [why], "reason": why,
                                  "elapsed_ms": int((run.budget.clock() - t) * 1000)})
