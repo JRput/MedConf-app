@@ -929,9 +929,31 @@ def row_years(row: dict) -> set:
     return out
 
 
+_DEADLINE_WORD_RE = re.compile(
+    r"\b(?:by|before|until|till|deadline|ends?|closes?|prior\s+to|early[\s-]*bird|"
+    r"book(?:ings?)?\s+by|register\s+by)\b", re.I)
+_DATE_BEFORE_YEAR_RE = re.compile(
+    r"(?:\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\.?(?:\s+\d{1,2}(?:st|nd|rd|th)?)?,?"
+    r"|\b\d{1,2}[/.\-]\d{1,2}[/.\-])\s*$", re.I)
+
+
+def _is_prior_year_deadline(s: str, start: int, year: str, years: set) -> bool:
+    """FV7: exactly one year before the row's earliest year, written as a DATE (a month name
+    or d/m/ right before it), with a deadline word in the ~40 characters before: an
+    early-bird / booking deadline ("book by 31 December 2026"), not another edition."""
+    try:
+        if int(year) != min(int(y) for y in years) - 1:
+            return False
+    except ValueError:
+        return False
+    before = s[max(0, start - 40):start]
+    return bool(_DATE_BEFORE_YEAR_RE.search(before)) and bool(_DEADLINE_WORD_RE.search(before))
+
+
 def _foreign_year(s: str, years: set) -> Optional[str]:
-    for y in _YEAR_RE.findall(s or ""):
-        if y not in years:
+    for m in _YEAR_RE.finditer(s or ""):
+        y = m.group(1)
+        if y not in years and not _is_prior_year_deadline(s, m.start(), y, years):
             return y
     return None
 
@@ -1163,8 +1185,13 @@ def is_shared_page(row: dict, base_url: str, shared: bool = False) -> bool:
 
 
 # ── the event's own page: other-shell checks (FV6) ───────────────────────────────
-_RAW_SEP = r"(?:<[^>]*>|&[A-Za-z#0-9]+;|[\W_])+"
-_RAW_STOP = r"(?:(?:the|and|of)" + _RAW_SEP + r")*"
+# FV7 (ReDoS): every character has exactly ONE way to be consumed. A tag never spans another
+# "<"; a "<" / "&" that does not open a tag / entity falls to the single-character branch
+# only then. Possessive quantifiers (Python >= 3.11; CI pins 3.11) stop any re-split on a
+# failed match. Separators are still: tags, entities, any non-word character, "_".
+_RAW_SEP = (r"(?:<[^<>]*>|&[A-Za-z#0-9]+;|[^\w<&]|_|<(?![^<>]*>)|&(?![A-Za-z#0-9]+;))++")
+_RAW_STOP = r"(?:(?:the|and|of)" + _RAW_SEP + r")*+"
+SIBLING_SCAN_CHARS = 400_000   # Level 2 (FV7): raw-html window scanned per call after `after`
 
 
 def _phrase_rx(norm_phrase: str) -> "re.Pattern[str]":
@@ -1184,11 +1211,12 @@ def _first_sibling_offset(html: str, title_n: str, others: List[str], after: int
     """Offset in `html` of the first occurrence at or after `after` of any sibling shell
     title (a shorter sibling inside the row's own title does not count), or None."""
     h = _blank_scripts(html)
-    mine = [m.span() for m in _phrase_rx(title_n).finditer(h)] if title_n else []
+    end = min(len(h), after + SIBLING_SCAN_CHARS)   # beyond it: not found -> callers fail closed
+    mine = [m.span() for m in _phrase_rx(title_n).finditer(h, 0, end)] if title_n else []
     best: Optional[int] = None
     for o in others:
         inside_ok = bool(title_n) and _has(o, title_n)
-        for m in _phrase_rx(o).finditer(h, after):
+        for m in _phrase_rx(o).finditer(h, after, end):
             if not inside_ok and any(a <= m.start() and m.end() <= b for a, b in mine):
                 continue
             if best is None or m.start() < best:

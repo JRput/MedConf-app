@@ -1095,3 +1095,103 @@ def test_fv6_sibling_only_in_caller_text_gives_nothing(monkeypatch):
     text = "Cardio Update 2027 Registration fees Member £100 Related: Heart Failure Masterclass 2027"
     res = discover(cu_row(), html, text, CU, shell_titles=SIB)
     assert res.tiers == [] and "own_page_sibling_in_body" in _reasons(res)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FV7: (1) the own-page phrase matcher has no catastrophic backtracking;
+#      (2) a prior-year DEADLINE date is not a foreign year.
+# ═══════════════════════════════════════════════════════════════════════════════
+import subprocess
+import sys
+from pathlib import Path
+
+_REDOS_INPUTS = {
+    "lt_gt_pairs": '"esmo " + "<>" * 10000 + " xyz"',
+    "lt_run": '"esmo " + "<" * 50000 + " xyz"',
+    "amp_run": '"esmo " + "&" * 20000 + " xyz"',
+    "lt_the_run": '"esmo " + "<the " * 5000 + " xyz"',
+}
+
+
+@pytest.mark.parametrize("name", sorted(_REDOS_INPUTS))
+def test_fv7_phrase_rx_is_linear_on_adversarial_input(name):
+    """Run in a child process with a hard 10 s kill so the pre-fix (exponential) regex fails
+    fast instead of hanging the suite; the child reports its own elapsed time."""
+    code = ("import time; from extractors.discovery import _phrase_rx\n"
+            f"s = {_REDOS_INPUTS[name]}\nrx = _phrase_rx('esmo congress')\n"
+            "t = time.perf_counter(); n = sum(1 for _ in rx.finditer(s))\n"
+            "print(n, (time.perf_counter() - t) * 1000)")
+    try:
+        out = subprocess.run([sys.executable, "-c", code], cwd=str(Path(__file__).resolve().parent),
+                             capture_output=True, text=True, timeout=10)
+    except subprocess.TimeoutExpired:
+        pytest.fail(f"{name}: regex still running after 10 s")
+    n, ms = out.stdout.split()
+    assert int(n) == 0
+    assert float(ms) < 100.0, f"{name}: {ms} ms"
+
+
+@pytest.mark.parametrize("s", ["ESMO&nbsp;<b>Congress</b>", "ESMO - Congress", "ESMO of the Congress", "esmo_congress"])
+def test_fv7_phrase_rx_still_matches_separators(s):
+    assert discovery._phrase_rx("esmo congress").search(s)
+
+
+@pytest.mark.parametrize("s", ["esmocongress", "ESMO Congresses"])
+def test_fv7_phrase_rx_word_boundaries_unchanged(s):
+    assert not discovery._phrase_rx("esmo congress").search(s)
+
+
+def test_fv7_phrase_rx_tag_and_entity_with_stop_words():
+    rx = discovery._phrase_rx("heart failure masterclass 2027")
+    assert rx.search("<li>Heart <span class='x'>Failure</span> &amp; the Masterclass&#160;2027</li>")
+    assert rx.search("Heart < Failure Masterclass 2027")        # a stray '<' is a separator
+
+
+X27 = "https://x.org/congress-2027/"
+
+
+def x_row(**kw):
+    r = {"conference_name": "Cardio Congress 2027", "start_date": "2027-04-10", "end_date": "2027-04-12",
+         "event_format": "in_person", "pricing_tiers": [], "booking_url": X27}
+    r.update(kw)
+    return r
+
+
+def _x_pid(fee_heading, h1="Cardio Congress 2027", r=None):
+    html = (f"<html><body><h1>{h1}</h1><h2>{fee_heading}</h2>"
+            "<p>Member £300</p><p>Non-member £400</p></body></html>")
+    r = r or x_row()
+    return discovery.page_identity(r, X27 + "registration", html, discovery._to_text(html),
+                                   own=discovery.own_paths(r))
+
+
+def _pdf_reason(head, r=None):
+    run = types.SimpleNamespace(row=r or x_row(), shell_titles=[])
+    return discovery._pdf_head_reason(run, head)
+
+
+def test_fv7_prior_year_early_bird_deadline_in_fee_heading_is_strong():
+    assert _x_pid("Early-bird fees (book by 31 December 2026)") == (discovery.STRONG, "own_path")
+
+
+def test_fv7_prior_year_deadline_in_pdf_head_is_accepted():
+    assert _pdf_reason("Registration fees. Bookings before 31 December 2026 receive the early rate. "
+                       "Member £300 Non-member £400") is None
+
+
+@pytest.mark.parametrize("fee_heading,h1", [
+    ("2026 registration fees", "Cardio Congress 2027"),
+    ("Registration fees", "Cardio Update 2025 Registration"),
+    ("Early-bird fees (book by 31 December 2025)", "Cardio Congress 2027"),   # two years back
+    ("Early bird fees for Cardio Update 2026", "Cardio Congress 2027"),       # no date: an edition, not a deadline
+])
+def test_fv7_other_years_still_rejected(fee_heading, h1):
+    assert _x_pid(fee_heading, h1) == (discovery.REJECTED, "other_year")
+
+
+def test_fv7_pdf_two_years_back_deadline_still_rejected():
+    assert _pdf_reason("Early-bird deadline 1 March 2025. Member £300") == "pdf_other_year"
+
+
+def test_fv7_prior_year_without_deadline_word_still_rejected_in_pdf():
+    assert _pdf_reason("Cardio Congress 2026 registration fees. Member £300") == "pdf_other_year"
