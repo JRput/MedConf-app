@@ -13,7 +13,7 @@ between runs, so we save ~95% of LLM calls compared to a full re-fetch.
 """
 
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
 from extractors import http_fetch
@@ -61,6 +61,57 @@ def _synthesise_source_url(source: Dict[str, Any], conf: Dict[str, Any]) -> str:
     h = hashlib.md5(f"{name}|{start}|{city}|{venue}".encode()).hexdigest()[:8]
     slug = name.lower().replace(" ", "-").replace("/", "-")[:40].strip("-")
     return f"{source['base_url']}#{slug}-{h}"
+
+
+def _stale_without_pricing(existing: dict, days: int) -> bool:
+    """True when the row has no pricing tiers and its last detail scrape is
+    older than `days` (or never happened). Needs `pricing_tiers` embedded by
+    get_conference_by_source_url; absent key => unknown => False (no churn)."""
+    tiers = existing.get("pricing_tiers")
+    if tiers is None or tiers:
+        return False
+    last = existing.get("last_detail_at")
+    if not last:
+        return True
+    try:
+        ts = datetime.fromisoformat(str(last).replace("Z", "+00:00"))
+    except ValueError:
+        return True
+    if ts.tzinfo is not None:
+        ts = ts.astimezone(timezone.utc).replace(tzinfo=None)
+    return (datetime.utcnow() - ts).days >= days
+
+
+HOOK_REDETAIL_CAP_PER_RUN = 15  # tier-less rows re-detailed per run (oldest first)
+_PROTECTED_KEYS = ("event_format", "event_type")
+
+
+def _non_destructive_changes(existing: dict, cleaned: dict, evidence=()) -> dict:
+    """Changed keys for a re-detail of a stored row that must not erase data.
+
+    Drops a new None/empty value when the stored value is non-empty, never
+    moves event_format/event_type away from a stored value, and never
+    downgrades is_flagship True -> False -- EXCEPT for keys in `evidence`
+    (set by the extractor from Kontent / the page / its title rule), which
+    may overwrite: that is how a wrong stored value gets corrected.
+    """
+    changes = {}
+    for k, v in cleaned.items():
+        old = existing.get(k)
+        if old == v:
+            continue
+        if k in evidence:
+            changes[k] = v
+            continue
+        empty = v is None or v == "" or v == [] or v == {}
+        if empty and old not in (None, "", [], {}):
+            continue
+        if k in _PROTECTED_KEYS and old:
+            continue
+        if k == "is_flagship" and old is True and not v:
+            continue
+        changes[k] = v
+    return changes
 
 
 def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
@@ -138,6 +189,30 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
         logger.info(f"Source {source['id']}: starting incremental processing of {len(shells)} shells")
 
         # --- Phase B: for each shell, decide skip-or-extract ---
+        # Per-source opt-in (REFRESH_DETAIL_WHEN_NO_PRICING_DAYS): look up all
+        # rows once so tier-less stale rows can be ranked oldest-first and
+        # capped per run. Sources without the attribute skip this entirely.
+        refresh_days = getattr(getattr(agent, "extractor", None),
+                               "REFRESH_DETAIL_WHEN_NO_PRICING_DAYS", None)
+        existing_cache: Dict[str, Any] = {}
+        hook_allowed_ids: set = set()
+        if refresh_days:
+            stale_rows = []
+            for sh in shells:
+                bu = sh.get("booking_url") or _synthesise_source_url(source, sh)
+                try:
+                    ex = get_conference_by_source_url(bu)
+                except Exception as e:
+                    logger.warning(f"  Lookup failed for {bu[:60]}: {e}")
+                    ex = None
+                existing_cache[bu] = ex
+                if ex and _stale_without_pricing(ex, refresh_days):
+                    stale_rows.append(ex)
+            stale_rows.sort(key=lambda r: str(r.get("last_detail_at") or ""))
+            hook_allowed_ids = {r["id"] for r in stale_rows[:HOOK_REDETAIL_CAP_PER_RUN]}
+            logger.info(f"Source {source['id']}: {len(stale_rows)} tier-less stale rows; "
+                        f"re-detailing {len(hook_allowed_ids)} this run (cap {HOOK_REDETAIL_CAP_PER_RUN})")
+
         for i, shell in enumerate(shells, start=1):
             if i % 25 == 0:
                 logger.info(f"  Progress: {i}/{len(shells)} (skipped unchanged: {skipped_unchanged}, "
@@ -146,11 +221,14 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
             booking_url = shell.get("booking_url") or _synthesise_source_url(source, shell)
             new_hash = _compute_listing_hash(shell)
 
-            try:
-                existing = get_conference_by_source_url(booking_url)
-            except Exception as e:
-                logger.warning(f"  Lookup failed for {booking_url[:60]}: {e}")
-                existing = None
+            if refresh_days and booking_url in existing_cache:
+                existing = existing_cache[booking_url]
+            else:
+                try:
+                    existing = get_conference_by_source_url(booking_url)
+                except Exception as e:
+                    logger.warning(f"  Lookup failed for {booking_url[:60]}: {e}")
+                    existing = None
 
             # Fast path: nothing changed at the listing level → just confirm
             # presence. BUT: the listing hash is computed from listing-card
@@ -169,6 +247,10 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
                 fmt is None
                 or (fmt == "in_person" and not (existing.get("venue_name") and existing.get("city")))
             )
+            # Opt-in hook (see pre-pass above): a capped, oldest-first set of
+            # stale tier-less rows is re-detailed even when the hash matches.
+            if existing and refresh_days and not needs_refresh_for_pending_fields:
+                needs_refresh_for_pending_fields = existing["id"] in hook_allowed_ids
             if existing and existing.get("listing_hash") == new_hash and not needs_refresh_for_pending_fields:
                 try:
                     bump_last_seen(existing["id"])
@@ -180,6 +262,7 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
 
             # Slow path: new event OR listing changed → fetch detail page and re-extract
             merged = agent.extract_detail_for_shell(shell)
+            evidence = set(merged.pop("_evidence", None) or [])
 
             # Detect whether the SOFT (LLM-dependent) fields succeeded. We use
             # these as the proxy for "the LLM call worked" — they're the parts
@@ -220,7 +303,12 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
             try:
                 if existing:
                     # Update only changed fields (cheaper, less log noise)
-                    changes = {k: v for k, v in cleaned.items() if existing.get(k) != v}
+                    if refresh_days:
+                        # Opted-in source: a re-detail must never erase stored
+                        # location/type data when the page yields nothing.
+                        changes = _non_destructive_changes(existing, cleaned, evidence)
+                    else:
+                        changes = {k: v for k, v in cleaned.items() if existing.get(k) != v}
                     if changes:
                         update_conference(existing["id"], changes)
                     conference_id = existing["id"]
@@ -244,7 +332,12 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
                             idx_to_session_id[src["_idx"]] = dst["id"]
 
                 # ---- Pricing tiers (with optional session_id wiring) ----
-                delete_pricing_tiers(conference_id)
+                if not tiers and refresh_days and existing and existing.get("pricing_tiers"):
+                    logger.info(f"  {cleaned.get('conference_name', '?')[:50]}: no tiers parsed; "
+                                f"kept {len(existing['pricing_tiers'])} stored tier(s) (delete skipped)")
+                if tiers or not refresh_days:
+                    # opted-in sources never wipe stored fees on an empty parse
+                    delete_pricing_tiers(conference_id)
                 if tiers:
                     for t in tiers:
                         sidx = t.pop("_session_idx", None)

@@ -43,8 +43,19 @@ _KONTENT_FIELDS = ",".join([
 ])
 
 
+_KONTENT_DEAD = False  # set after the first failure; one warning per run
+
+
 def _fetch_kontent_by_slugs(slugs: set) -> dict:
-    """Return {url_slug: kontent_item_elements} for all matching meetings."""
+    """Return {url_slug: kontent_item_elements} for all matching meetings.
+
+    ESMO moved CMS (2026-10): the Kontent host no longer resolves. After the
+    first failure we skip the call for the rest of the process so a dead API
+    costs one request and ONE warning, not one per event.
+    """
+    global _KONTENT_DEAD
+    if _KONTENT_DEAD:
+        return {}
     try:
         with httpx.Client(timeout=60) as c:
             r = c.get(
@@ -58,7 +69,9 @@ def _fetch_kontent_by_slugs(slugs: set) -> dict:
             r.raise_for_status()
             data = r.json()
     except Exception as e:
-        logger.warning(f"ESMO Kontent fetch failed: {e}")
+        _KONTENT_DEAD = True
+        logger.warning(f"ESMO Kontent API unavailable ({e}); continuing from "
+                       f"rendered pages only (venue/dates/type degrade)")
         return {}
     out: dict = {}
     for item in data.get("items", []):
@@ -107,6 +120,31 @@ def _classify_event_type(title: str, meeting_type_kontent: list) -> str:
     if "congress" in tl:
         return "conference"
     return "workshop"
+
+
+_COURSE_WORDS = re.compile(
+    r"\b(course|preceptorship|masterclass|master class|school)\b", re.I)
+_CONF_WORDS = re.compile(
+    r"\b(congress|symposium|forum|plenary|annual meeting|conference)\b", re.I)
+
+
+def _title_event_type(title: str) -> Optional[str]:
+    """Title-only type rule used when the content API is unavailable.
+
+    Returns "conference" or "course" when the title says so, else None
+    ("no evidence": the caller defaults to workshop WITHOUT treating it as
+    evidence, so a default can never overwrite a stored type).
+    Webinars stay workshop. Preceptorships/masterclasses/schools/courses are
+    classed "course" (a deliberate upgrade over the old stored "workshop").
+    """
+    tl = (title or "").lower()
+    if "webinar" in tl or "highlights" in tl or "best of" in tl:
+        return None
+    if _COURSE_WORDS.search(tl) and "congress" not in tl:
+        return "course"
+    if _CONF_WORDS.search(tl) or _is_esmo_flagship(title or "", []):
+        return "conference"
+    return None
 
 
 def _is_esmo_flagship(title: str, meeting_type_kontent: list) -> bool:
@@ -219,7 +257,7 @@ def _pricing_from_esmo_fee_table(decoded_html: str) -> List[dict]:
             if not (10 <= price <= 20000):
                 continue
             if col_labels and idx < len(col_labels):
-                full_label = f"{label} — {col_labels[idx]}"
+                full_label = f"{col_labels[idx]} · {label}"
             else:
                 full_label = label
             full_label = full_label.strip()[:200]
@@ -251,7 +289,7 @@ def _pricing_from_esmo_fee_table(decoded_html: str) -> List[dict]:
                 continue
             label = re.sub(r"\s+", " ", matches[-1].group(0)).strip()
             between = txt[matches[-1].end():m.start()]
-            label = f"{label} — {'non-member' if between.count('€') >= 1 else 'member'}"
+            label = f"{label} · {'non-member' if between.count('€') >= 1 else 'member'}"
             key = (label.lower(), price)
             if key in seen:
                 continue
@@ -269,99 +307,302 @@ def _unescape_json_html(s: str) -> str:
     return re.sub(r"\\u([0-9a-fA-F]{4})", lambda m: chr(int(m.group(1), 16)), s)
 
 
+_MONTHS = {
+    "jan": 1, "january": 1, "feb": 2, "february": 2, "mar": 3, "march": 3,
+    "apr": 4, "april": 4, "may": 5, "jun": 6, "june": 6, "jul": 7,
+    "july": 7, "aug": 8, "august": 8, "sep": 9, "sept": 9, "september": 9,
+    "oct": 10, "october": 10, "nov": 11, "november": 11, "dec": 12,
+    "december": 12,
+}
+
+# One money amount, currency symbol/code first ("€ 360.00", "SGD 1,280.00").
+_CUR_TOKEN = r"(?:HKD|SGD|BRL|CHF|USD|US\$|GBP|EUR|R\$|€|£|\$)"
+_AMOUNT_RE = re.compile(rf"({_CUR_TOKEN})\s?(\d[\d,]*(?:\.\d{{1,2}})?)")
+_ROW_RE = re.compile(
+    rf"^(?P<label>.+?)(?P<sep>\t+|\s{{2,}}|\s(?={_CUR_TOKEN}\s?\d))"
+    rf"(?P<rest>{_CUR_TOKEN}\s?\d[\d,]*(?:\.\d{{1,2}})?"
+    rf"(?:\s*{_CUR_TOKEN}\s?\d[\d,]*(?:\.\d{{1,2}})?)*)\s*$"
+)
+_DATE_ONLY_RE = re.compile(
+    r"^\s*(?:until|from|before|after|by)\s+\d{1,2}(?:st|nd|rd|th)?\s+[A-Za-z]+\s+\d{4}\s*$",
+    re.I,
+)
+_COL_RE = re.compile(
+    r"\b(Early|Late|Full|Standard)\s+registration\b(?!\s+deadline)"
+    r"|\bOnsite\b",
+    re.I,
+)
+_COL_DATE_RE = re.compile(
+    r"\s*(?:until|from|before|after|by)\s+"
+    r"(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\s+(\d{4})",
+    re.I,
+)
+_CUR_CODE = {"€": "EUR", "£": "GBP", "$": "USD", "US$": "USD", "R$": "BRL"}
+_OTHER_FEES_RE = re.compile(r"^\s*Other\s+registration\s+fees?\b", re.I)
+
+
+def _norm_fee_label(label: str) -> str:
+    """Clean a fee-table row label: nbsp, footnote stars, ESMO/ IASLC spacing."""
+    s = label.replace(" ", " ").replace(" ", " ")
+    s = re.sub(r"\s*/\s*", " / ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    s = re.sub(r"\s*\*+\s*$", "", s).strip()
+    return s
+
+
+def _iso_from_parts(d: str, mon: str, y: str) -> Optional[str]:
+    m = _MONTHS.get(mon.lower()) or _MONTHS.get(mon.lower()[:3])
+    if not m:
+        return None
+    return f"{int(y):04d}-{m:02d}-{int(d):02d}"
+
+
+def _parse_fee_header(block: str) -> List[dict]:
+    """Columns [{name, deadline_iso}] from a header block, in order."""
+    cols: List[dict] = []
+    for m in _COL_RE.finditer(block):
+        word = (m.group(1) or "Onsite").capitalize()
+        name = "Onsite" if word == "Onsite" else f"{word} registration"
+        dm = _COL_DATE_RE.match(block, m.end())
+        iso = _iso_from_parts(*dm.groups()) if dm else None
+        cols.append({"name": name, "deadline": iso})
+    return cols
+
+
+def _currency_code(sym: str) -> str:
+    return _CUR_CODE.get(sym, sym)
+
+
 def _pricing_from_registration_text(text: str) -> List[dict]:
-    """Extract pricing from ESMO Registration sub-page rendered text.
+    """Table-driven parse of an ESMO /registration sub-page (innerText).
 
-    ESMO registration pages typically render a multi-column table like:
-        ESMO Member                SGD 465.00  SGD 670.00  SGD 990.00
-        ESMO Member Industry*      SGD 645.00  SGD 895.00  SGD 1,280.00
-        ...
-    with column headers Early / Late / Full registration.
+    Header block (may span lines, tab-separated):
+        Registration fees
+        (19% German VAT included)<TAB>Early registration
+        until 13 January 2027<TAB>Late registration
+        until 17 February 2027<TAB>Full registration
+        from 18 February 2027
+    Rows: any label, then one amount per column (tab or 2+ spaces):
+        ESMO / IASLC Member<TAB>€ 360.00<TAB>€ 505.00<TAB>€ 765.00
 
-    Currency is EUR / USD / GBP / SGD depending on the event.
+    The header is the contiguous cluster of column/date lines directly above
+    the first row (prose elsewhere cannot shift columns). The table ends at
+    the first blank line once rows exist, at a heading (non-row line with no
+    tab), after two consecutive non-row lines, or at "Other registration
+    fees". A tab-bearing non-amount line ("Press\tFree of charge") inside the
+    table is skipped, not a terminator.
+
+    Emits `<column> · <label>` tiers (timeframe first: the website tabs on the leading piece) (CLAUDE.md §5). Currency comes from the
+    amounts; a row in another currency is dropped with a WARNING. A row with
+    one amount under several columns gets no column suffix; a partial row
+    (2 of 3) is ambiguous and skipped with a WARNING. Without an
+    Early/Late/Full header, single-amount rows under a "Registration fees"
+    heading emit label-only tiers.
     """
+    lines = text.replace("\u00a0", " ").replace("\u202f", " ").splitlines()
+    for i, ln in enumerate(lines):
+        if _OTHER_FEES_RE.match(ln):
+            lines = lines[:i]
+            break
+
+    def _is_row(ln: str):
+        m = _ROW_RE.match(ln.strip())
+        if not m:
+            return None
+        label = _norm_fee_label(m.group("label"))
+        if not (3 <= len(label) <= 120):
+            return None
+        amts = _AMOUNT_RE.findall(m.group("rest"))
+        if not amts:
+            return None
+        # "Fees from €50": a single plain space is only a separator when the
+        # line carries several amounts (a real table row).
+        if m.group("sep") == " " and len(amts) < 2:
+            return None
+        return (label, amts)
+
+    cols: List[dict] = []
+    start = None
+    for r, ln in enumerate(lines):
+        if not _is_row(ln):
+            continue
+        h = r
+        while h - 1 >= 0 and (_COL_RE.search(lines[h - 1])
+                              or _DATE_ONLY_RE.match(lines[h - 1])):
+            h -= 1
+        if h == r:
+            continue
+        found = _parse_fee_header("\n".join(lines[h:r]))
+        widest = 0
+        for ln2 in lines[r:]:
+            row2 = _is_row(ln2)
+            if not row2:
+                if not ln2.strip():
+                    break
+                continue
+            widest = max(widest, len(row2[1]))
+        if widest >= 2 and len(found) > widest:
+            found = found[-widest:]  # prose glued above the header adds extras
+        if len({c["name"] for c in found}) >= 2:
+            cols, start = found, r
+            break
+
+    if start is None:
+        for i, ln in enumerate(lines):
+            if re.match(r"^\s*Registration\s+fees?\b", ln, re.I):
+                for j in range(i + 1, min(i + 30, len(lines))):
+                    if _is_row(lines[j]):
+                        start = j
+                        break
+                if start is not None:
+                    break
+        if start is None:
+            return []
+
     tiers: List[dict] = []
     seen: set = set()
-
-    # Detect column labels from headers
-    hdr = re.search(
-        r"(Early\s+registration).{0,200}?(Late\s+registration).{0,200}?"
-        r"(Full\s+registration|Standard\s+registration|Onsite)",
-        text, re.I | re.S,
-    )
-    col_labels = ["Early registration", "Late registration",
-                  "Full registration"] if hdr else None
-
-    # Detect currency — check each in order of specificity. ESMO regional
-    # events use local currency: SGD (Asia/Singapore), HKD (Hong Kong),
-    # BRL (Latin America/Brazil), USD (global), GBP (UK/London), CHF
-    # (Switzerland). Default falls to EUR (European events).
-    for code, pattern in [
-        ("HKD", r"HKD\s*([\d,]+(?:\.\d{2})?)"),
-        ("SGD", r"SGD\s*([\d,]+(?:\.\d{2})?)"),
-        ("BRL", r"(?:BRL|R\$)\s*([\d,]+(?:\.\d{2})?)"),
-        ("CHF", r"CHF\s*([\d,]+(?:\.\d{2})?)"),
-        ("USD", r"(?:USD|US\$)\s*([\d,]+(?:\.\d{2})?)"),
-        ("GBP", r"(?:GBP|£)\s*([\d,]+(?:\.\d{2})?)"),
-        ("EUR", r"(?:EUR|€)\s*([\d,]+(?:\.\d{2})?)"),
-    ]:
-        if re.search(pattern, text):
-            currency = code
-            cur_re = pattern
-            break
-    else:
-        currency = "EUR"
-        cur_re = r"(?:EUR|€)\s*([\d,]+(?:\.\d{2})?)"
-
-    # ESMO row labels (member category rows only — NOT column headers)
-    row_label_re = re.compile(
-        r"(ESMO\s+Member(?:\s+Industry)?"
-        r"(?:\s+Developing\s+Countries?)?"
-        r"(?:\s+in\s+Training)?[*]{0,3}|"
-        r"Non\s+ESMO\s+Members?(?:\s+Industry)?[*]{0,3}|"
-        r"Members?\s+affiliated\s+to\s+[A-Z]+(?:[/\-\s]+[A-Z]+)*[*]{0,3}|"
-        r"Standard\s+rate|Regular\s+rate|"
-        r"Patient\s+Advocates?)",
-        re.I,
-    )
-
-    # Number of prices per row = number of column labels (if detected).
-    # If not detected, cap at 4 as a safety limit.
-    max_prices_per_row = len(col_labels) if col_labels else 4
-
-    for lm in row_label_re.finditer(text):
-        label = re.sub(r"\s+", " ", lm.group(1)).strip()
-        window = text[lm.end(): lm.end() + 300]
-        raw_prices = re.findall(cur_re, window)
-        if not raw_prices:
+    currency = None
+    misses = 0
+    for ln in lines[start:]:
+        if not ln.strip():
+            break  # blank line ends the table once rows exist
+        row = _is_row(ln)
+        if not row:
+            misses += 1
+            if "\t" not in ln or misses >= 2:
+                break  # heading / prose, or two non-rows in a row
             continue
-        prices: List[float] = []
-        for p in raw_prices[:max_prices_per_row]:
+        misses = 0
+        label, amts = row
+        n, m = len(amts), len(cols)
+        suffix_cols = bool(cols)
+        if cols:
+            if n > m:
+                logger.warning(f"ESMO fees: {n}-amount row under {m} columns skipped: {label!r}")
+                continue
+            elif n == 1 and m > 1:
+                suffix_cols = False
+            elif n < m:
+                logger.warning(f"ESMO fees: ambiguous {n}-of-{m} row skipped: {label!r}")
+                continue
+        elif n != 1:
+            continue
+        for idx, (sym, num) in enumerate(amts):
             try:
-                prices.append(float(p.replace(",", "")))
+                price = float(num.replace(",", ""))
             except ValueError:
-                pass
-        if not prices:
-            continue
-        for idx, price in enumerate(prices):
+                continue
             if not (10 <= price <= 20000):
                 continue
-            if col_labels and idx < len(col_labels):
-                full_label = f"{label} — {col_labels[idx]}"
-            else:
-                full_label = label
-            full_label = full_label.strip()[:200]
-            key = (full_label.lower(), price)
+            cur = _currency_code(sym)
+            if currency is None:
+                currency = cur
+            elif cur != currency:
+                logger.warning(f"ESMO fees: {cur} amount in a {currency} table "
+                               f"dropped: {label!r}")
+                continue
+            col = cols[idx] if suffix_cols else None
+            full = (f"{col['name']} · {label}" if col else label)[:200]
+            key = (full.lower(), price)
             if key in seen:
                 continue
             seen.add(key)
+            early = bool(col and col["name"].startswith("Early"))
             tiers.append({
-                "tier_label": full_label, "price_gbp": price,
+                "tier_label": full, "price_gbp": price,
                 "currency": currency,
-                "is_early_bird": "early" in full_label.lower(),
-                "early_bird_deadline": None,
+                "is_early_bird": early,
+                "early_bird_deadline": col["deadline"] if early else None,
             })
     return tiers
+
+
+_ONLINE_WORDS = re.compile(r"\b(webinar|e-?learning|webcast|online|virtual)\b", re.I)
+_RDATE = re.compile(r"(\d{1,2})\s+([A-Za-z]{3,9})\s+(\d{4})")
+_MENU_WORDS = {
+    "registration", "programme", "program", "abstracts", "overview", "sponsors",
+    "faculty", "accommodation", "location", "venue", "start date", "end date",
+    "travel", "contact", "home", "speakers", "exhibition", "industry participation",
+}
+_HYBRID_RE = re.compile(r"\bhybrid\b|(?:&|\band\b|\+)\s*(?:online|virtual)\b", re.I)
+
+
+def _facts_from_rendered(text: str, title: str = "") -> Dict[str, Any]:
+    """Location facts from the rendered event page, only with page evidence.
+
+    ESMO's event page carries a structured block:
+        Start date / 17 Mar 2027 / End date / 20 Mar 2027 /
+        Location / Munich, Germany / Venue / <blank> / <venue name>
+    Returns any of start_date, end_date, city, venue_name, event_format
+    (in_person / online / hybrid). A key is absent when the page does not
+    say. If several blocks exist (related events), the first one after the
+    event title line wins, else the last. Venue is read only within a few
+    lines after the Location value and menu words are rejected.
+    """
+    out: Dict[str, Any] = {}
+    if not text:
+        return out
+    lines = [l.strip() for l in text.replace("\u00a0", " ").splitlines()]
+    low = [l.lower() for l in lines]
+
+    anchors = [i for i, l in enumerate(low) if l == "start date"] or \
+              [i for i, l in enumerate(low) if l == "location"]
+    seg = None
+    if anchors:
+        tl = (title or "").strip().lower()
+        a0 = None
+        if tl and tl in low:
+            after_title = [x for x in anchors if x > low.index(tl)]
+            a0 = after_title[0] if after_title else None
+        elif len(anchors) == 1:
+            a0 = anchors[0]      # title absent: only an unambiguous block
+        if a0 is not None:
+            seg = (a0, min(a0 + 14, len(lines)))
+    if seg:
+        sl, sl_low = lines[seg[0]:seg[1]], low[seg[0]:seg[1]]
+
+        def nxt(idx: int, span: int = 2) -> Optional[str]:
+            for v in sl[idx + 1: idx + 1 + span]:
+                if v:
+                    return v
+            return None
+
+        for key, label in (("start_date", "start date"), ("end_date", "end date")):
+            if label in sl_low:
+                v = nxt(sl_low.index(label))
+                m = _RDATE.fullmatch(v) if v else None
+                if m:
+                    iso = _iso_from_parts(*m.groups())
+                    if iso:
+                        out[key] = iso
+        if "location" in sl_low:
+            li = sl_low.index("location")
+            loc = nxt(li)
+            if loc and loc.lower() not in _MENU_WORDS:
+                is_hybrid = bool(_HYBRID_RE.search(loc))
+                cleaned = _HYBRID_RE.sub(" ", loc)
+                cleaned = re.sub(r"\b(online|virtual|webinar|e-?learning)\b", " ",
+                                 cleaned, flags=re.I)
+                cleaned = re.sub(r"\s+", " ", cleaned).strip(" -\u2013,&()+")
+                city = _parse_city(cleaned) if cleaned else None
+                if city:
+                    out["city"] = city
+                    out["event_format"] = "hybrid" if is_hybrid else "in_person"
+                elif re.search(r"\b(online|virtual|webinar|e-?learning)\b", loc, re.I):
+                    out["event_format"] = "online"
+            # Venue label must sit within 4 lines after the Location value.
+            if out.get("event_format") != "online":
+                for vi in range(li + 1, min(li + 6, len(sl))):
+                    if sl_low[vi] == "venue":
+                        v = nxt(vi, 3)
+                        if (v and 4 < len(v) < 120
+                                and v.lower() not in _MENU_WORDS):
+                            out["venue_name"] = v
+                            out.setdefault("event_format", "in_person")
+                        break
+    if "event_format" not in out and title and _ONLINE_WORDS.search(title):
+        out["event_format"] = "online"
+    return out
 
 
 def _extract_venue_from_paragraphs(rendered_text: str) -> Optional[str]:
@@ -512,6 +753,11 @@ def _extract_description_from_paragraphs(
 
 class ESMOExtractor(BaseExtractor):
     """European Society for Medical Oncology meeting calendar."""
+
+    # Opt-in self-heal (scraper.py): re-detail a row with NO pricing tiers
+    # whose last detail scrape is older than this many days, even when its
+    # listing hash is unchanged (fees are published late on /registration).
+    REFRESH_DETAIL_WHEN_NO_PRICING_DAYS = 7
 
     # Cache: url_slug -> kontent elements. Populated in list_shells_override
     # and re-used in extract_detail so we hit the API only once.
@@ -668,13 +914,10 @@ class ESMOExtractor(BaseExtractor):
                 out["event_format"] = "in_person"
                 out["city"] = city
             else:
-                # Kontent says not virtual, no city — genuinely undetermined
-                # Default to online for safety (webinars, virtual courses)
-                # UNLESS the meeting_type suggests otherwise
+                # Kontent says not virtual and gives no city: only a
+                # webinar/series meeting type is evidence of "online".
                 mt_names = [m.get("name", "").lower() for m in meeting_type_val]
                 if any("webinar" in n or "series" in n for n in mt_names):
-                    out["event_format"] = "online"
-                else:
                     out["event_format"] = "online"
 
             # Dates
@@ -834,6 +1077,13 @@ class ESMOExtractor(BaseExtractor):
             except Exception as e:
                 logger.warning(f"ESMO abstracts-subpage fetch failed: {e}")
 
+        # Rendered-page facts (dates, city, venue, format) fill whatever
+        # Kontent did not supply. Evidence only; absent keys stay absent.
+        for k, v in _facts_from_rendered(
+                rendered_text, out.get("conference_name") or shell.get("title") or ""
+        ).items():
+            out.setdefault(k, v)
+
         # If venue is still missing AND a /venue sub-page exists, fetch it
         if "venue_name" not in out and venue_subpage_url:
             try:
@@ -858,11 +1108,19 @@ class ESMOExtractor(BaseExtractor):
             if v:
                 out["venue_name"] = v
 
+        if out.get("event_format") == "online":
+            out.pop("venue_name", None)
+        if out.get("venue_name") and "event_format" not in out:
+            out["event_format"] = "in_person"  # a venue is page evidence
+
         if raw:
             decoded = _unescape_json_html(raw)
-            tiers = _pricing_from_esmo_fee_table(decoded)
-            if tiers:
-                out["pricing_tiers"] = tiers
+            # Registration sub-page tiers win; the main-page Nuxt payload
+            # is only a fallback when the sub-page yielded nothing.
+            if not out.get("pricing_tiers"):
+                tiers = _pricing_from_esmo_fee_table(decoded)
+                if tiers:
+                    out["pricing_tiers"] = tiers
 
             # Venue fallback — Kontent's venue is often empty. Look for
             # "The course/meeting will be held at [Name] of/in [City]"
@@ -960,7 +1218,7 @@ class ESMOExtractor(BaseExtractor):
         if "description" not in out:
             title = out.get("conference_name") or shell.get("title") or ""
             city = out.get("city")
-            fmt = out.get("event_format", "online")
+            fmt = out.get("event_format")
             start = out.get("start_date")
             end = out.get("end_date")
             date_str = ""
@@ -983,10 +1241,25 @@ class ESMOExtractor(BaseExtractor):
         # 3. Final safety net for required fields
         if "conference_name" not in out and shell.get("title"):
             out["conference_name"] = shell["title"]
-        if "event_type" not in out:
-            out["event_type"] = "workshop"
-        if "event_format" not in out:
-            out["event_format"] = "online"
+        # Evidence-backed keys: values from Kontent, the rendered page, or a
+        # title rule that UPGRADES (conference / course / flagship True). A
+        # bare default (workshop, flagship False) is not evidence, so it can
+        # never overwrite a stored value on re-detail.
+        type_evidence = "event_type" in out  # set from Kontent above
+        if not type_evidence:
+            t = out.get("conference_name") or shell.get("title") or ""
+            title_type = _title_event_type(t)
+            out["event_type"] = title_type or "workshop"
+            type_evidence = title_type is not None
+            if _is_esmo_flagship(t, []) and not re.search(
+                    r"highlights|best of|webinar", t, re.I):
+                out["is_flagship"] = True
+        ev = {k for k in ("event_format", "city", "venue_name") if out.get(k)}
+        if type_evidence:
+            ev.add("event_type")
+        if out.get("is_flagship"):
+            ev.add("is_flagship")
+        out["_evidence"] = sorted(ev)
 
         # 4. Static classification
         out["society"] = "ESMO"

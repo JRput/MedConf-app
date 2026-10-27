@@ -536,22 +536,7 @@ def check_abstract_status(row, page_text, page_html, source) -> FieldVerdict:
                         f"open={ao} deadline={ad} note={an}")
 
 
-FREE_EVENT_RE = re.compile(r"(?:free\s+(?:to\s+attend|of\s+charge|event|admission)|"
-                           r"complimentary|no\s+(?:cost|charge|fee))")
-
-
-def price_text_signal(page_text: str) -> bool:
-    """True when the page shows currency amounts that look like fees (not
-    just a no-show/cancellation penalty). Pure; shared with the new-source
-    coverage checks."""
-    if not re.search(r"[£$€]\s*\d+", page_text or ""):
-        return False
-    tl = (page_text or "").lower()
-    penalty_context = re.search(
-        r"(?:do\s+not\s+attend|charged\s+a\s+fee\s+of|"
-        r"cancellation\s+fee|no-show)", tl)
-    return bool(not penalty_context or re.search(
-        r"[£$€]\s*\d+\s+(?:member|non|early|standard|full|conference|registration)", tl))
+from remediator.signals import FREE_EVENT_RE, price_text_signal  # noqa: E402,F401
 
 
 def check_pricing(row, page_text, page_html, source, pricing_tiers,
@@ -561,6 +546,17 @@ def check_pricing(row, page_text, page_html, source, pricing_tiers,
     is_free = FREE_EVENT_RE.search(tl)
 
     if n > 0:
+        # Stored-as-free guard: every tier is 0 (or the lone "Standard" 0) yet
+        # the page shows fee amounts -> a false "Free" (ESMO ELCC 2027).
+        def _is_zero(t):
+            try:
+                return float(t.get("price_gbp") or 0) == 0
+            except (TypeError, ValueError):
+                return False
+        if all(_is_zero(t) for t in pricing_tiers) and price_text_signal(page_text):
+            return FieldVerdict("pricing_tiers", "SUSPECT", f"{n} tiers, all 0",
+                                page_evidence="Page has currency amounts",
+                                reason="Stored as free but page shows fee amounts")
         return FieldVerdict("pricing_tiers", "OK", f"{n} tiers")
     if is_free:
         return FieldVerdict("pricing_tiers", "GENUINELY_ABSENT", "0 tiers",

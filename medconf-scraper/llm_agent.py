@@ -245,6 +245,8 @@ class AgentLoop:
                 llm_call=self._llm_call,
             )
             merged = self._merge_shell_and_detail(shell, detail)
+            if detail.get("_evidence"):
+                merged["_evidence"] = detail["_evidence"]  # popped by scraper.py
             self._ensure_submission_info(merged, booking_url)
             return merged
         except Exception as e:
@@ -311,7 +313,9 @@ class AgentLoop:
             for i, shell in enumerate(shells):
                 self.step_count += 1
                 logger.info(f"Detail {i+1}/{len(shells)}: {(shell.get('title') or '')[:60]}")
-                self.extracted_data.append(self.extract_detail_for_shell(shell))
+                d = self.extract_detail_for_shell(shell)
+                d.pop("_evidence", None)  # scraper.py-only hint
+                self.extracted_data.append(d)
             return {
                 "data": self.extracted_data,
                 "steps_taken": self.step_count,

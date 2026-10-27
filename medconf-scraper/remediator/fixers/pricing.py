@@ -14,6 +14,8 @@ from typing import Callable, List, Optional, Tuple
 
 import httpx
 
+from remediator.signals import NON_FEE_CONTEXT_RE, free_phrase_context, price_text_signal
+
 logger = logging.getLogger(__name__)
 
 # "complimentary" alone is NOT enough: SCCM's shared calendar page says
@@ -72,6 +74,8 @@ def _text_pricing_sweep(page_text: str) -> List[dict]:
         label = label.strip()[:200]
         if not label or len(label) < 3:
             return
+        if NON_FEE_CONTEXT_RE.search(label):
+            return  # cancellation / parking / deposit... is not a registration fee
         try:
             price = float(price_str.replace(",", ""))
         except ValueError:
@@ -131,20 +135,30 @@ def fix_pricing(
     if not page_text and not source_url:
         return None, None
 
-    # 1. Free event check
-    if page_text and _FREE_RE.search(page_text):
-        return [{
-            "tier_label": "Standard",
-            "price_gbp": 0.0,
-            "currency": "GBP",
-            "is_early_bird": False,
-            "early_bird_deadline": None,
-        }], "free_event"
-
-    # 2. Text regex sweep on the page itself
+    # 1. Text regex sweep FIRST: a page that shows fee amounts is never free.
+    # (2026-10-18: ESMO ELCC/Breast 2027 were marked free because one table row
+    # said "Press Representatives | Free of charge" beside nine EUR rows.)
     tiers = _text_pricing_sweep(page_text or "")
     if tiers:
         return tiers, "text_regex"
+
+    # 2. Free event: only when a free phrase describes the whole event, the
+    # page shows no currency amounts, and the phrase is not a table row /
+    # single fee category (see signals.free_phrase_context).
+    if page_text and _FREE_RE.search(page_text) and not price_text_signal(page_text):
+        ctx = free_phrase_context(page_text, _FREE_RE)
+        if ctx:
+            logger.info("fix_pricing: free_event accepted for %s, matched line: %r",
+                        source_url, ctx[:200])
+            return [{
+                "tier_label": "Standard",
+                "price_gbp": 0.0,
+                "currency": "GBP",
+                "is_early_bird": False,
+                "early_bird_deadline": None,
+            }], "free_event"
+        logger.info("fix_pricing: free wording rejected for %s (table row / category / no event context)",
+                    source_url)
 
     # 3. Try fees sub-pages — only for source URL patterns we KNOW have them.
     # Salesforce LWC portals (my.rcr.ac.uk) and similar don't have sub-pages,

@@ -64,7 +64,10 @@ def get_recent_log_statuses(source_id: int, limit: int = 2) -> List[str]:
 
 def get_conference_by_source_url(source_url: str) -> Optional[Dict[str, Any]]:
     """Check if a conference with this source URL already exists."""
-    response = supabase.table("conferences").select("*").eq("source_url", source_url).execute()
+    # pricing_tiers(id) is embedded so callers can tell "no fees stored"
+    # without a second query (scraper self-heal for opt-in sources).
+    response = (supabase.table("conferences").select("*, pricing_tiers(id)")
+                .eq("source_url", source_url).execute())
     return response.data[0] if response.data else None
 
 
