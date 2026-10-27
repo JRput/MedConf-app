@@ -766,6 +766,8 @@ class ESMOExtractor(BaseExtractor):
     # whose last detail scrape is older than this many days, even when its
     # listing hash is unchanged (fees are published late on /registration).
     REFRESH_DETAIL_WHEN_NO_PRICING_DAYS = 7
+    # Per-run cap on those re-details (scraper default is 5; ESMO keeps 10).
+    HOOK_REDETAIL_CAP = 10
 
     # Cache: url_slug -> kontent elements. Populated in list_shells_override
     # and re-used in extract_detail so we hit the API only once.

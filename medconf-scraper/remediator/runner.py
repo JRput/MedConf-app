@@ -23,7 +23,7 @@ from .fixers import REGISTRY as FIXERS
 from .validators import validate
 from .report import write_report
 from .explorer import (
-    EXPLORERS, external_identity_ok, set_source_deadline, get_source_deadline, source_time_up,
+    EXPLORERS, set_source_deadline, get_source_deadline, source_time_up,
     reset_fetch_state, fetch_stats, close_render_browser,
 )
 from .learned_patterns import (
@@ -183,35 +183,40 @@ def _gaps_with_page_amounts(row: dict, gaps: list, tiers: list, page_text: Optio
     return gaps
 
 
-def _norm_title(t: str) -> str:
-    return re.sub(r"[^a-z0-9]+", " ", (t or "").lower()).strip()
+def _cached_only(cache, url: str):
+    """(text, html) when `url` is ALREADY in the page cache; None otherwise. Never fetches."""
+    store = getattr(cache, "_cache", None)
+    if not isinstance(store, dict) or url not in store:
+        return None
+    html_store = getattr(cache, "_html_cache", None)
+    return store.get(url), (html_store.get(url) if isinstance(html_store, dict) else None)
 
 
-def _page_heading(html: Optional[str], text: str) -> str:
-    m = re.search(r"<h1[^>]*>(.*?)</h1>", html or "", re.I | re.S)
-    if m:
-        return re.sub(r"<[^>]+>", " ", m.group(1))
-    for line in (text or "").splitlines():
-        if line.strip():
-            return line.strip()[:200]
-    return ""
+def replay_gate(row: dict, sub_url: str, cache, shell_titles: Iterable[str]) -> tuple:
+    """(page_text | None, reason) for replaying a promoted sub-page on `row` (FV6, fail closed).
 
-
-def replay_identity_ok(row: dict, sub_text: str, sub_html: Optional[str],
-                       sibling_titles: Iterable[str] = ()) -> bool:
-    """A promoted sub-page may be replayed on a row only if it passes the explorer's
-    external-page identity check AND its heading does not name another row of the source."""
-    if not external_identity_ok(row, sub_text):
-        return False
-    heading = _norm_title(_page_heading(sub_html, sub_text))
-    own = _norm_title(row.get("conference_name"))
-    if not heading or (own and own in heading):
-        return True
-    for t in sibling_titles:
-        n = _norm_title(t)
-        if n and n != own and n in heading and n not in own and own not in n:
-            return False
-    return True
+    The page is fetched only when `sub_url` sits strictly under the row's own booking /
+    source path; any other URL is read only if it is already in the cache (a per-event
+    URL is never fetched for every same-domain row). Either way the page must pass
+    extractors.discovery.page_identity as STRONG, with every title of the source as
+    shell titles. Reasons: "ok", "fetch_failed" (no demotion), "not_under_own_path",
+    "identity_<verdict>:<detail>"."""
+    from extractors.discovery import page_identity, own_paths, under_own_paths, STRONG
+    if under_own_paths(sub_url, row):
+        text = cache.get(sub_url)
+        html = cache.get_html(sub_url) if text else None
+    else:
+        got = _cached_only(cache, sub_url)
+        if got is None:
+            return None, "not_under_own_path"
+        text, html = got
+    if not text:
+        return None, "fetch_failed"
+    verdict, detail = page_identity(row, sub_url, html or "", text, own=own_paths(row),
+                                    shell_titles=list(shell_titles or ()))
+    if verdict != STRONG:
+        return None, f"identity_{verdict}:{detail}"
+    return text, "ok"
 
 
 COMMUNITY_SOURCE_ID = 1000
@@ -541,15 +546,14 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                             if not sub:
                                 continue
                             sub_url = resolve_subpage(f_url, sub)
-                            sub_text = cache.get(sub_url)
-                            if not sub_text:
+                            sub_text, why = replay_gate(
+                                row, sub_url, cache,
+                                [c.get("conference_name") or "" for c in conferences])
+                            if why == "fetch_failed":
                                 continue
-                            if not replay_identity_ok(
-                                    row, sub_text, cache.get_html(sub_url),
-                                    [c.get("conference_name") or "" for c in conferences
-                                     if c["id"] != row["id"]]):
-                                logger.info("remediator: promoted page %s skipped for %s "
-                                            "(identity check failed)", sub_url, row["id"])
+                            if sub_text is None:
+                                logger.info("remediator: promoted page %s skipped for %s (%s)",
+                                            sub_url, row["id"], why)
                                 try:
                                     record_failure(p)
                                 except Exception as e:

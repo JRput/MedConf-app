@@ -19,7 +19,7 @@ INCLUDE_PATTERN = (
     r"|\bdoctorate\s+(in|of)\b)"
 )
 EXCLUDE_PATTERN = (
-    r"(\b(ceremon\w*|graduation|awards?|prepar\w*|revision|exam\w*|mock|osce|symposium|congress|conference|webinar|lecture|open\s+day|viva|workshop|info(rmation)?\s+session|alumni|interview|live\s+20\d\d|networking|taster|masterclass)\b"
+    r"(\b(ceremon\w*|graduation|awards?|prepar\w*|revision|exam\w*|mock|osce|symposium|congress|conference|webinar|lecture|open\s+day|viva|workshop|open\s+evening|info(rmation)?\s+(session|evening)|alumni|interview|live\s+20\d\d|networking|taster|masterclass)\b"
     r"|\bfor\s+the\s+diploma\b"
     r"|,\s*(md|do|mph|mba|phd|msc|mres|mphil|dphil|pgcert|pgdip|facs|frcp|frcs|frca|mrcp|mrcs|rn|bds)\b)"
 )

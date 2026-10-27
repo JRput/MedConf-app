@@ -87,7 +87,21 @@ def _stale_without_pricing(existing: dict, days: int) -> bool:
 # their last detail scrape is this old. Every extractor gets it; an extractor opts
 # out with REFRESH_DETAIL_WHEN_NO_PRICING_DAYS = None, or tunes it with another int.
 DEFAULT_REFRESH_DETAIL_WHEN_NO_PRICING_DAYS = 7
-HOOK_REDETAIL_CAP_PER_RUN = 10  # tier-less rows re-detailed per run, per source (oldest first)
+# Tier-less rows re-detailed per run, per source (oldest dated first; never-detailed rows
+# last). An extractor may set its own HOOK_REDETAIL_CAP (ESMO: 10). FV6 load cap: 10 -> 5.
+HOOK_REDETAIL_CAP_PER_RUN = 5
+
+
+def _hook_cap(extractor) -> int:
+    cap = getattr(extractor, "HOOK_REDETAIL_CAP", None)
+    return cap if isinstance(cap, int) and not isinstance(cap, bool) and cap >= 0 else HOOK_REDETAIL_CAP_PER_RUN
+
+
+def _hook_sort_key(row: dict):
+    """Oldest dated detail first; rows never detailed (last_detail_at NULL) after every
+    dated row, so the same never-detailed rows cannot take the whole cap every night."""
+    last = row.get("last_detail_at")
+    return (not last, str(last or ""))
 _PROTECTED_KEYS = ("event_format", "event_type")
 
 
@@ -216,10 +230,11 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
                 existing_cache[bu] = ex
                 if ex and _stale_without_pricing(ex, refresh_days):
                     stale_rows.append(ex)
-            stale_rows.sort(key=lambda r: str(r.get("last_detail_at") or ""))
-            hook_allowed_ids = {r["id"] for r in stale_rows[:HOOK_REDETAIL_CAP_PER_RUN]}
+            stale_rows.sort(key=_hook_sort_key)
+            hook_cap = _hook_cap(_ext)
+            hook_allowed_ids = {r["id"] for r in stale_rows[:hook_cap]}
             logger.info(f"Source {source['id']}: {len(stale_rows)} tier-less stale rows; "
-                        f"re-detailing {len(hook_allowed_ids)} this run (cap {HOOK_REDETAIL_CAP_PER_RUN})")
+                        f"re-detailing {len(hook_allowed_ids)} this run (cap {hook_cap})")
 
         for i, shell in enumerate(shells, start=1):
             if i % 25 == 0:

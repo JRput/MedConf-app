@@ -33,3 +33,10 @@ def test_live_or_evening_study_degrees_stay_degree(t):
 @pytest.mark.parametrize("t", ["Masters of Endoscopy Live 2027", "MPH Alumni networking evening"])
 def test_live_year_and_alumni_evening_stay_excluded(t):
     assert degree_rule.is_degree_title(t) is False
+
+
+# FV6 (V cycle 3 LOW): recruitment evenings are not degrees.
+@pytest.mark.parametrize("t", ["MSc Open Evening", "PgDip Medical Education Information Evening",
+                               "MSc info evening", "PgCert Information Session"])
+def test_fv6_open_and_information_evenings_not_degree(t):
+    assert degree_rule.is_degree_title(t) is False

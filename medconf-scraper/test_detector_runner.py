@@ -273,7 +273,7 @@ class _ReplayCache(_FakeCache):
 def _replay(monkeypatch):
     seen, failures = [], []
     confs = [_conf(id=1, conference_name="Alpha Congress 2027", source_url="https://e.org/events/alpha"),
-             _conf(id=2, conference_name="Beta Summit 2027", source_url="https://e.org/events/beta")]
+             _conf(id=2, conference_name="Beta Summit 2027", source_url="https://e.org/events/beta-summit")]
     entry = {"domain": "e.org", "field": "pricing", "method": "subpage", "subpage_path": BETA_URL,
              "hits": 5, "promoted": True}
     def fixer(row, text, llm):
@@ -285,11 +285,13 @@ def _replay(monkeypatch):
 
 
 def test_replayed_page_naming_another_event_is_not_used(monkeypatch):
-    """Row Alpha mentions-in-passing on Beta's page: token check passes, heading names Beta."""
+    """Row Alpha mentions-in-passing on Beta's page: token check passes, heading names Beta.
+    FV6: Alpha is not under the page's path (never fetched for it); Beta's own page names
+    the sibling 'Alpha Congress 2027' in its body -> WEAK in page_identity -> skipped too."""
     seen, failures = _replay(monkeypatch)
     assert (1, BETA_TEXT) not in seen          # never fed Beta's fees to Alpha
-    assert (2, BETA_TEXT) in seen              # Beta's own page is still replayed for Beta
-    assert failures == [BETA_URL]              # one failure counted, for Alpha only
+    assert (2, BETA_TEXT) not in seen          # fail closed: sibling named in the body
+    assert failures == [BETA_URL, BETA_URL]
 
 
 def test_record_failure_drops_pattern_after_three(monkeypatch, tmp_path):
@@ -331,3 +333,96 @@ def test_identity_window_prefix_title():
     row = {"conference_name": "Sepsis Course"}
     w = runner.identity_window(row, text, ["Sepsis Course Advanced"])
     assert "£100" in w and "£500" not in w
+
+
+# ----------------------------------------------------------- FV6 replay guard (fail closed)
+class _PeekCache(_FakeCache):
+    """PageCache stand-in with the real cache's `_cache` / `_html_cache` dicts."""
+    pages: dict = {}
+    fetched: list = []
+
+    def __init__(self):
+        self._cache, self._html_cache = {}, {}
+
+    def get(self, u):
+        _PeekCache.fetched.append(u)
+        t, h = _PeekCache.pages.get(u, ("main page", "<html></html>"))
+        self._cache[u], self._html_cache[u] = t, h
+        return t
+
+    def get_html(self, u):
+        if u not in self._html_cache:
+            self.get(u)
+        return self._html_cache[u]
+
+
+def _fv6_replay(monkeypatch, confs, sub_url, sub_text, sub_html, pages=None):
+    seen, failures = [], []
+    _PeekCache.pages = dict(pages or {}, **{sub_url: (sub_text, sub_html)})
+    _PeekCache.fetched = []
+    entry = {"domain": "x", "field": "pricing", "method": "subpage", "subpage_path": sub_url,
+             "hits": 5, "promoted": True}
+
+    def fixer(row, text, llm):
+        seen.append((row["id"], text))
+        return None, None
+    monkeypatch.setattr(runner, "record_failure", lambda e: failures.append(e["subpage_path"]))
+    _drive(monkeypatch, confs, ["pricing"], {"pricing": fixer}, promoted=[entry], cache=_PeekCache)
+    return seen, failures, list(_PeekCache.fetched)
+
+
+def test_fv6_replay_easl_congress_never_gets_sld_summit_page(monkeypatch):
+    """Reviewer: row 'EASL Congress 2027' vs h1 'SLD Summit 2027', sibling 'EASL SLD Summit 2027'.
+    The summit row is processed FIRST, so the page is already cached for the congress row."""
+    sub = "https://easl.eu/events/sld-summit-2027/registration"
+    confs = [_conf(id=2, conference_name="EASL SLD Summit 2027", start_date="2027-03-01",
+                   source_url="https://easl.eu/events/sld-summit-2027"),
+             _conf(id=1, conference_name="EASL Congress 2027", start_date="2027-06-01",
+                   source_url="https://easl.eu/events/easl-congress-2027")]
+    text = "SLD Summit 2027\nRegistration fees\nMember 300 EUR\nOrganised by EASL, 2027"
+    seen, failures, _ = _fv6_replay(monkeypatch, confs, sub, text, "<html><h1>SLD Summit 2027</h1></html>")
+    assert (1, text) not in seen
+    assert (2, text) in seen                  # the summit's own page still replays for the summit
+    assert failures == [sub]
+
+
+def test_fv6_replay_generic_booking_rates_page_is_skipped_without_fetch(monkeypatch):
+    sub = "https://brit-thoracic.org.uk/booking-rates"
+    confs = [_conf(id=1, conference_name="BTS Summer Meeting 2027", start_date="2027-06-20",
+                   source_url="https://brit-thoracic.org.uk/events/summer-meeting-2027")]
+    text = "Booking rates\nBTS members £300\nBritish Thoracic Society 2027"
+    seen, failures, fetched = _fv6_replay(monkeypatch, confs, sub, text, "<html><h1>Booking rates</h1></html>")
+    assert (1, text) not in seen and failures == [sub]
+    assert sub not in fetched                 # never fetched: not under the row's own path
+
+
+def test_fv6_replay_cached_generic_booking_rates_page_is_weak(monkeypatch):
+    """Even when the page is already cached (no fetch needed), WEAK identity is skipped."""
+    sub = "https://brit-thoracic.org.uk/booking-rates"
+    confs = [_conf(id=1, conference_name="BTS Summer Meeting 2027", start_date="2027-06-20",
+                   source_url=sub)]                       # row's own page IS the rates page: cached
+    confs.append(_conf(id=2, conference_name="BTS Winter Meeting 2027", start_date="2027-12-01",
+                       source_url="https://brit-thoracic.org.uk/events/winter-meeting-2027"))
+    text = "Booking rates\nBTS members £300\nBritish Thoracic Society 2027"
+    seen, failures, _ = _fv6_replay(monkeypatch, confs, sub, text, "<html><h1>Booking rates</h1></html>")
+    assert (2, text) not in seen and sub in failures
+
+
+def test_fv6_replay_own_path_page_naming_another_year_is_skipped(monkeypatch):
+    sub = "https://brit-thoracic.org.uk/events/winter-meeting/booking"
+    confs = [_conf(id=1, conference_name="BTS Winter Meeting 2027", start_date="2027-12-01",
+                   source_url="https://brit-thoracic.org.uk/events/winter-meeting")]
+    text = "Winter Meeting 2026 booking rates\nMember £280"
+    seen, failures, _ = _fv6_replay(monkeypatch, confs, sub, text,
+                                    "<html><h1>Winter Meeting 2026 booking rates</h1></html>")
+    assert (1, text) not in seen and failures == [sub]
+
+
+def test_fv6_replay_per_event_url_fetched_only_for_its_own_row(monkeypatch):
+    sub = "https://e.org/events/one/fees"
+    confs = [_conf(id=n, conference_name=f"Event Number {n} 2027", start_date="2027-01-01",
+                   source_url=f"https://e.org/events/{w}") for n, w in ((1, "one"), (2, "two"), (3, "three"))]
+    seen, failures, fetched = _fv6_replay(monkeypatch, confs, sub, "Fees\nMember £10 Event Number 2027",
+                                          "<html><h1>Fees</h1></html>")
+    assert fetched.count(sub) == 1            # fetched for row 1 (own path) only
+    assert sorted(failures) == [sub, sub]     # rows 2 and 3 skipped, demotion counted

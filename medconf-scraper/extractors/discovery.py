@@ -47,7 +47,8 @@ import money
 
 __all__ = [
     "DiscoveryHints", "DiscoveryBudget", "VisionLedger", "DiscoveryResult",
-    "discover", "apply_to_row", "missing_fields",
+    "discover", "apply_to_row", "missing_fields", "page_identity", "own_page_scope", "own_paths", "row_years",
+    "STRONG", "WEAK", "REJECTED",
 ]
 
 FIELD_FEES, FIELD_VENUE, FIELD_ABSTRACT = "fees", "venue", "abstract"
@@ -912,10 +913,53 @@ def _names_other_shell(title_n: str, text_n: str, others: List[str]) -> bool:
     return False
 
 
+_YEAR_RE = re.compile(r"(?<![0-9])(20\d\d)(?![0-9])")
+_HEADING_RE = re.compile(r"<h([1-6])\b[^>]*>(.*?)</h\1\s*>", re.I | re.S)
+
+
+def row_years(row: dict) -> set:
+    """The years that belong to this row: its start and end year, plus any 20xx year
+    written in its own title ("Annual Meeting 2027" held in early 2028 keeps 2027)."""
+    out = set()
+    for k in ("start_date", "end_date"):
+        y = str(row.get(k) or "")[:4]
+        if y.isdigit() and y.startswith("20"):
+            out.add(y)
+    out.update(_YEAR_RE.findall(str(row.get("conference_name") or "")))
+    return out
+
+
+def _foreign_year(s: str, years: set) -> Optional[str]:
+    for y in _YEAR_RE.findall(s or ""):
+        if y not in years:
+            return y
+    return None
+
+
+def _has_money(text: str) -> bool:
+    try:
+        return any(m.currency and m.amount and m.amount > 0 for m in money.find_amounts(text, context=text))
+    except Exception:  # noqa: BLE001
+        return False
+
+
+def _fee_heading(html: str) -> Optional[str]:
+    """The heading (h1-h6) immediately above the first currency amount on the page."""
+    hs = list(_HEADING_RE.finditer(html or ""))
+    for i, m in enumerate(hs):
+        end = hs[i + 1].start() if i + 1 < len(hs) else len(html)
+        if _has_money(_to_text(html[m.end():end])[:20_000]):
+            return _strip_tags(m.group(2))
+    return None
+
+
 def page_identity(row: dict, url: str, html: str, text: str, *, own: Iterable[Tuple[str, str]],
                   via_hint: bool = False, shell_titles: Iterable[str] = ()) -> Tuple[str, str]:
     """(verdict, reason) for one FETCHED page. Decision order (first match wins):
       1. any heading (h1-h4, <title>) names another shell title of the source  -> REJECTED other_shell_in_heading
+      1b. main heading, or the heading right above the first fee amount, names a
+          20xx year that is not the row's (start / end / title year)            -> REJECTED other_year
+          (own-path pages included; FV6)
       2. main heading = row title + an event-type word the title lacks        -> REJECTED extends_title_with_event_word
       3. main heading reads like another event (no shared distinctive word)    -> REJECTED heading_names_other_event
                                                     (acronym row: WEAK acronym_row)
@@ -932,6 +976,9 @@ def page_identity(row: dict, url: str, html: str, text: str, *, own: Iterable[Tu
         if _names_other_shell(title_n, _norm(h), others):
             return REJECTED, "other_shell_in_heading"
     mains = _main_headings(html)
+    years = row_years(row)
+    if years and any(_foreign_year(h, years) for h in mains + [_fee_heading(html) or ""]):
+        return REJECTED, "other_year"
     rels = [_heading_relation(title_n, _norm(h), year) for h in mains]
     if "extends_event" in rels and not any(r in ("equal", "section") for r in rels):
         return REJECTED, "extends_title_with_event_word"
@@ -1095,12 +1142,110 @@ class _Run:
         return True
 
 
+def own_paths(row: dict) -> List[Tuple[str, str]]:
+    """The event's own URL paths: booking_url and source_url (fragments ignored); a stored
+    URL that is a strict ANCESTOR of the other one is a listing, not the event's own path."""
+    own = [o for o in (_own_path(u) for u in (row.get("booking_url"), row.get("source_url")) if u) if o]
+    return [o for o in own if not any(x != o and x[0] == o[0] and x[1].startswith(o[1] + "/") for x in own)]
+
+
+def under_own_paths(url: str, row: dict) -> bool:
+    """`url` sits strictly under one of the row's own URL paths."""
+    return _under_own_path(url, own_paths(row))
+
+
 def is_shared_page(row: dict, base_url: str, shared: bool = False) -> bool:
     """A page that may carry several events: the caller says so (base URL shared by >= 2
     shells), or the page / the row's booking URL carries a #fragment."""
     if shared:
         return True
     return any("#" in str(u or "") for u in (base_url, row.get("booking_url")))   # incl. a bare "#" (SCCM)
+
+
+# ── the event's own page: other-shell checks (FV6) ───────────────────────────────
+_RAW_SEP = r"(?:<[^>]*>|&[A-Za-z#0-9]+;|[\W_])+"
+_RAW_STOP = r"(?:(?:the|and|of)" + _RAW_SEP + r")*"
+
+
+def _phrase_rx(norm_phrase: str) -> "re.Pattern[str]":
+    """Matches a _norm()-form phrase in RAW html (tags, entities, punctuation and the
+    stop words the/and/of allowed between its words)."""
+    words = norm_phrase.split()
+    body = (_RAW_SEP + _RAW_STOP).join(re.escape(w) for w in words)
+    return re.compile(r"(?<![^\W_])" + body + r"(?![^\W_])", re.I)
+
+
+def _blank_scripts(html: str) -> str:
+    """script/style/noscript bodies replaced by spaces of the same length (offsets kept)."""
+    return re.sub(r"(?is)<(script|style|noscript)\b.*?</\1\s*>", lambda m: " " * len(m.group(0)), html or "")
+
+
+def _first_sibling_offset(html: str, title_n: str, others: List[str], after: int = 0) -> Optional[int]:
+    """Offset in `html` of the first occurrence at or after `after` of any sibling shell
+    title (a shorter sibling inside the row's own title does not count), or None."""
+    h = _blank_scripts(html)
+    mine = [m.span() for m in _phrase_rx(title_n).finditer(h)] if title_n else []
+    best: Optional[int] = None
+    for o in others:
+        inside_ok = bool(title_n) and _has(o, title_n)
+        for m in _phrase_rx(o).finditer(h, after):
+            if not inside_ok and any(a <= m.start() and m.end() <= b for a, b in mine):
+                continue
+            if best is None or m.start() < best:
+                best = m.start()
+            break
+    return best
+
+
+def own_page_scope(row: dict, html: str, text: str, shell_titles: Iterable[str]) -> Tuple[str, str, str, Optional[str]]:
+    """(html, text, lines, reason) the discovery pass may read on the event's OWN page.
+    Rule 1: a heading (h1-h4, <title>) names another shell -> nothing at all
+            (reason own_page_names_other_shell: no fees, venue, images or PDFs).
+    Rule 4: another shell is named only in body / nav -> reason own_page_sibling_in_body and
+            only a window is read: from the page's main <h1> up to the first sibling
+            occurrence AFTER it (mentions above the h1 are site menus / banners and the
+            window excludes them); a page without an <h1> keeps only the html before the
+            first occurrence; a sibling that cannot be located in the html (caller text
+            only) -> nothing. (Level 2, FV6: the literal "before the first occurrence" rule
+            cut the whole event content of pages whose mega-menu lists sibling meetings.)
+    Otherwise the whole page, reason None. The extractor's own output is never touched."""
+    title_n = _norm(row.get("conference_name"))
+    others = _norm_shell_titles(row, shell_titles)
+    full_text = text or _to_text(html)
+    if not others:
+        return html, full_text, _to_lines(html), None
+    for h in _all_headings(html):
+        if _names_other_shell(title_n, _norm(h), others):
+            return "", "", "", "own_page_names_other_shell"
+    page_text = _to_text(html)
+    if not (_names_other_shell(title_n, _norm(page_text), others)
+            or _names_other_shell(title_n, _norm(text or ""), others)):
+        return html, full_text, _to_lines(html), None
+    h1 = next((m for m in re.finditer(r"<h1\b[^>]*>(.*?)</h1\s*>", _blank_scripts(html), re.I | re.S)
+               if _strip_tags(m.group(1))), None)
+    start = h1.start() if h1 else 0
+    if _first_sibling_offset(html, title_n, others) is None:
+        return "", "", "", "own_page_sibling_in_body"         # named, but not locatable in the html
+    cut = _first_sibling_offset(html, title_n, others, after=start)
+    if cut is None:
+        if _names_other_shell(title_n, _norm(_to_text(html[start:])), others):
+            return "", "", "", "own_page_sibling_in_body"     # in the window but not locatable
+        cut = len(html)                                       # every mention is above the h1
+    win = html[start:cut]
+    return win, _to_text(win), _to_lines(win), "own_page_sibling_in_body"
+
+
+def _pdf_head_reason(run: "_Run", txt: str) -> Optional[str]:
+    """A PDF whose first 2,000 characters name another shell title, or a 20xx year that
+    is not the row's, is not this event's document."""
+    head = (txt or "")[:2000]
+    others = _norm_shell_titles(run.row, run.shell_titles)
+    if others and _names_other_shell(_norm(run.row.get("conference_name")), _norm(head), others):
+        return "pdf_names_other_shell"
+    years = row_years(run.row)
+    if years and _foreign_year(head, years):
+        return "pdf_other_year"
+    return None
 
 
 def discover(row: dict, page_html: str, page_text: str, base_url: str, *,
@@ -1124,9 +1269,7 @@ def discover(row: dict, page_html: str, page_text: str, base_url: str, *,
         res = DiscoveryResult()
         res.evidence.append({"step": "skip", "reason": "shared_page", "url": base_url or "", "found": [], "elapsed_ms": 0})
         return res
-    own = [o for o in (_own_path(u) for u in (row.get("booking_url"), row.get("source_url")) if u) if o]
-    # a stored URL that is a strict ANCESTOR of the other one is a listing, not the event's own path
-    own = [o for o in own if not any(x != o and x[0] == o[0] and x[1].startswith(o[1] + "/") for x in own)]
+    own = own_paths(row)
     if not own and not (row.get("booking_url") or row.get("source_url")):
         own = [_own_path(base_url or "")]        # no stored URL: the page the caller holds is the event's
     run = _Run(row, budget, hints, own=own, shell_titles=list(shell_titles or ()) + list(sibling_titles or ()))
@@ -1147,8 +1290,14 @@ def _discover(run: _Run, html: str, text: str, base_url: str, skip: set) -> None
     t = b.clock()
     page_missing_abs = FIELD_ABSTRACT in run.missing
     run.missing.discard(FIELD_ABSTRACT)
-    # the event's own page (the extractor's page, not fetched here) is the row's identity itself
-    run.parse(html, text or _to_text(html), _to_lines(html), base_url, external=False, step="page", t_start=t)
+    # the event's own page (the extractor's page, not fetched here) is the row's identity
+    # itself, but a related-events box naming ANOTHER shell is not (FV6 own_page_scope)
+    o_html, o_text, o_lines, o_reason = own_page_scope(run.row, html, text, run.shell_titles)
+    if o_reason:
+        res.evidence.append({"step": "page", "url": base_url, "found": [o_reason], "reason": o_reason,
+                             "elapsed_ms": int((b.clock() - t) * 1000)})
+    if o_reason != "own_page_names_other_shell" and (o_html or o_lines):
+        run.parse(o_html, o_text, o_lines, base_url, external=False, step="page", t_start=t)
     hints = run.hints
     if page_missing_abs:
         run.missing.add(FIELD_ABSTRACT)
@@ -1238,6 +1387,11 @@ def _follow_pdf(run: _Run) -> None:
     txt = _pdf_text(data, run.left())
     if len(txt.strip()) < 40:
         run.log(f"pdf:{fieldname}", url, ["no_text_layer"], t)
+        return
+    why = _pdf_head_reason(run, txt)
+    if why:
+        run.res.evidence.append({"step": f"pdf:{fieldname}", "url": url, "found": [why], "reason": why,
+                                 "elapsed_ms": int((run.budget.clock() - t) * 1000)})
         return
     flat = re.sub(r"\s+", " ", txt)
     run.parse("", flat[:250_000], txt, url, external=False, step=f"pdf:{fieldname}", t_start=t, allow_images=False)

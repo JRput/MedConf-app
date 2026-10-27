@@ -919,3 +919,179 @@ def test_pdf_fetch_has_a_total_read_deadline_even_on_a_stalled_chunk(monkeypatch
     assert out is None and _t.monotonic() - t0 < 1.0
     _trickle(monkeypatch, [b"%PDF-1.4 " + b"x" * 1000], [0.0])
     assert _REAL_FETCH_BYTES("https://conf.example.org/fees.pdf", 5.0).startswith(b"%PDF")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FV6 (V cycle 3): the event's own page and its PDFs get the other-shell checks; the
+# identity gate rejects a heading naming another year.
+# ═══════════════════════════════════════════════════════════════════════════════
+CU = "https://conf.example.org/event/cardio-update-2027/"
+SIB = ["Heart Failure Masterclass 2027"]
+
+
+def cu_row(**kw):
+    r = {"conference_name": "Cardio Update 2027", "start_date": "2027-05-01", "event_format": "in_person",
+         "pricing_tiers": [], "venue_name": "Hall", "city": "Leeds", "abstract_open": True, "booking_url": CU}
+    r.update(kw)
+    return r
+
+
+def _quiet(monkeypatch):
+    monkeypatch.setattr(discovery, "_fetch_html", lambda u, t: None)
+    monkeypatch.setattr(discovery, "_vision_pricing", lambda *a, **k: [])
+
+
+def _reasons(res):
+    return [e.get("reason") for e in res.evidence if e.get("reason")]
+
+
+def test_fv6_own_page_related_box_with_sibling_heading_gives_nothing(monkeypatch):
+    """Reviewer A1: 'Related events / Heart Failure Masterclass 2027 / Registration fees /
+    Member £150 / Non-member £220' on the own page wrote the sibling's tiers."""
+    _quiet(monkeypatch)
+    html = ("<html><body><h1>Cardio Update 2027</h1><p>Details to follow.</p>"
+            "<aside><h3>Related events</h3><h4>Heart Failure Masterclass 2027</h4>"
+            "<p>Registration fees</p><p>Member £150</p><p>Non-member £220</p></aside></body></html>")
+    res = discover(cu_row(), html, "", CU, shell_titles=SIB)
+    assert res.tiers == []
+    assert "own_page_names_other_shell" in _reasons(res)
+
+
+def test_fv6_own_page_sibling_heading_blocks_images_and_pdfs(monkeypatch):
+    """A heading hit takes nothing from the own page: no PDF fetched, no image read."""
+    _quiet(monkeypatch)
+    monkeypatch.setattr(discovery, "_fee_images", lambda *a, **k: pytest.fail("image scan on a hit page"))
+    html = ("<html><body><h1>Cardio Update 2027</h1><h3>Heart Failure Masterclass 2027</h3>"
+            '<a href="/files/fees.pdf">Registration fees</a></body></html>')
+    res = discover(cu_row(), html, "", CU, shell_titles=SIB)       # _fetch_bytes fails the test if called
+    assert res.tiers == [] and "own_page_names_other_shell" in _reasons(res)
+
+
+def test_fv6_own_page_sibling_in_body_reads_only_text_before_it(monkeypatch):
+    _quiet(monkeypatch)
+    html = ("<html><body><h1>Cardio Update 2027</h1><h2>Registration fees</h2>"
+            "<p>Member £100</p><p>Non-member £140</p>"
+            "<div class='related'><p>Heart Failure Masterclass 2027</p><p>Member £150</p>"
+            "<p>Non-member £220</p></div></body></html>")
+    res = discover(cu_row(), html, "", CU, shell_titles=SIB)
+    assert sorted(t["price_gbp"] for t in res.tiers) == [100.0, 140.0]
+    assert "own_page_sibling_in_body" in _reasons(res)
+
+
+def test_fv6_own_page_sibling_before_the_fee_heading_skips_the_sweep(monkeypatch):
+    _quiet(monkeypatch)
+    html = ("<html><body><h1>Cardio Update 2027</h1><p>See also Heart Failure Masterclass 2027.</p>"
+            "<h2>Registration fees</h2><p>Member £150</p><p>Non-member £220</p></body></html>")
+    res = discover(cu_row(), html, "", CU, shell_titles=SIB)
+    assert res.tiers == [] and "own_page_sibling_in_body" in _reasons(res)
+
+
+def test_fv6_own_page_without_siblings_is_unchanged(monkeypatch):
+    _quiet(monkeypatch)
+    html = ("<html><body><h1>Cardio Update 2027</h1><h2>Registration fees</h2>"
+            "<p>Member £100</p><p>Non-member £140</p></body></html>")
+    res = discover(cu_row(), html, "", CU, shell_titles=SIB)
+    assert sorted(t["price_gbp"] for t in res.tiers) == [100.0, 140.0]
+    assert _reasons(res) == []
+
+
+def test_fv6_row_title_inside_a_longer_sibling_in_body_is_located(monkeypatch):
+    """Sibling 'Cardio Update 2027 Workshop' contains the row title: it is still cut."""
+    _quiet(monkeypatch)
+    html = ("<html><body><h1>Cardio Update 2027</h1><h2>Registration fees</h2><p>Member £100</p>"
+            "<p>Non-member £140</p><p>Also: Cardio Update 2027 Workshop &mdash; Member £60</p></body></html>")
+    res = discover(cu_row(), html, "", CU, shell_titles=["Cardio Update 2027 Workshop"])
+    assert sorted(t["price_gbp"] for t in res.tiers) == [100.0, 140.0]
+
+
+def _pdf_world(monkeypatch, pdf_text):
+    _quiet(monkeypatch)
+    got = []
+    monkeypatch.setattr(discovery, "_fetch_bytes", lambda u, *a, **k: got.append(u) or b"%PDF-1.4")
+    monkeypatch.setattr(discovery, "_pdf_text", lambda d, timeout=20.0: pdf_text)
+    return got
+
+
+def test_fv6_sibling_pdf_linked_from_own_page_contributes_nothing(monkeypatch):
+    """Reviewer A2: the sibling's '...masterclass-registration.pdf' wrote its tiers."""
+    _pdf_world(monkeypatch, "Heart Failure Masterclass 2027\nRegistration fees\nDelegate £300\nTrainee £100\n" + "x" * 50)
+    html = ('<html><body><h1>Cardio Update 2027</h1><aside>Also: <a href="/files/heart-failure-masterclass-'
+            'registration.pdf">Heart Failure Masterclass registration form</a></aside></body></html>')
+    res = discover(cu_row(), html, "", CU, shell_titles=SIB)
+    assert res.tiers == [] and "pdf_names_other_shell" in _reasons(res)
+
+
+def test_fv6_pdf_naming_another_year_is_rejected(monkeypatch):
+    _pdf_world(monkeypatch, "Cardio Update 2025\nRegistration fees\nDelegate £300\nTrainee £100\n" + "x" * 50)
+    html = '<html><body><h1>Cardio Update 2027</h1><a href="/files/fees.pdf">Registration fees</a></body></html>'
+    res = discover(cu_row(), html, "", CU, shell_titles=SIB)
+    assert res.tiers == [] and "pdf_other_year" in _reasons(res)
+
+
+def test_fv6_own_pdf_with_own_year_still_parses(monkeypatch):
+    got = _pdf_world(monkeypatch, "Cardio Update 2027\nRegistration fees\nDelegate £300\nTrainee £100\n" + "x" * 50)
+    html = '<html><body><h1>Cardio Update 2027</h1><a href="/files/fees.pdf">Registration fees</a></body></html>'
+    res = discover(cu_row(), html, "", CU, shell_titles=SIB)
+    assert got and sorted(t["price_gbp"] for t in res.tiers) == [100.0, 300.0]
+
+
+def test_fv6_pdf_in_body_part_after_sibling_is_not_collected(monkeypatch):
+    got = _pdf_world(monkeypatch, "Cardio Update 2027\nRegistration fees\nDelegate £300\n" + "x" * 50)
+    html = ("<html><body><h1>Cardio Update 2027</h1><p>Related: Heart Failure Masterclass 2027</p>"
+            '<a href="/files/fees.pdf">Registration fees</a></body></html>')
+    res = discover(cu_row(), html, "", CU, shell_titles=SIB)
+    assert got == [] and res.tiers == []
+
+
+def _pid(r, url, html):
+    return discovery.page_identity(r, url, html, discovery._to_text(html), own=discovery.own_paths(r))
+
+
+def test_fv6_h1_equal_title_over_last_years_fee_table_is_rejected():
+    """Reviewer A4: h1 = title, fee heading '2026 registration fees' -> was STRONG."""
+    html = ("<html><body><h1>Cardio Update 2027</h1><h2>2026 registration fees (for reference)</h2>"
+            "<p>Member £90</p><p>Non-member £130</p></body></html>")
+    r = cu_row(booking_url="https://conf.example.org/x")
+    assert _pid(r, "https://conf.example.org/fees", html) == (discovery.REJECTED, "other_year")
+
+
+def test_fv6_own_path_past_edition_heading_is_rejected():
+    """Reviewer A5: h1 'Cardio Update 2025 Registration' under the 2027 event's path."""
+    html = "<html><body><h1>Cardio Update 2025 Registration</h1><p>Member £80</p><p>Student £40</p></body></html>"
+    assert _pid(cu_row(), CU + "archive/2025-registration", html) == (discovery.REJECTED, "other_year")
+
+
+def test_fv6_year_check_allows_start_end_and_title_years():
+    r = cu_row(conference_name="Winter Congress 2026", start_date="2026-12-30", end_date="2027-01-02")
+    html = "<html><body><h1>Winter Congress 2026</h1><h2>2027 registration fees</h2><p>Member £80</p></body></html>"
+    assert _pid(r, CU + "fees", html)[0] == discovery.STRONG
+    html2 = "<html><body><h1>Registration</h1><h2>Fees 2027</h2><p>Member £80</p></body></html>"
+    assert _pid(cu_row(), CU + "fees", html2) == (discovery.STRONG, "own_path")
+
+
+def test_fv6_year_in_body_text_only_does_not_reject():
+    html = ("<html><body><h1>Registration</h1><h2>Fees</h2><p>Member £80 (early bird until 31 Dec 2026)</p>"
+            "</body></html>")
+    assert _pid(cu_row(), CU + "fees", html) == (discovery.STRONG, "own_path")
+
+
+def test_fv6_sibling_in_site_menu_above_h1_does_not_blank_the_page(monkeypatch):
+    """Level 2 refinement: a mega-menu listing sibling meetings ABOVE the h1 is excluded from
+    the window (window = h1 .. next sibling mention), so the event's own fees still parse."""
+    _quiet(monkeypatch)
+    html = ("<html><body><nav><a href='/m/hf'>Heart Failure Masterclass 2027</a></nav>"
+            "<div class='promo'>Member £999</div>"
+            "<h1>Cardio Update 2027</h1><h2>Registration fees</h2><p>Member £100</p><p>Non-member £140</p>"
+            "<aside><p>Heart Failure Masterclass 2027</p><p>Member £150</p></aside></body></html>")
+    res = discover(cu_row(), html, "", CU, shell_titles=SIB)
+    assert sorted(t["price_gbp"] for t in res.tiers) == [100.0, 140.0]
+    assert "own_page_sibling_in_body" in _reasons(res)
+
+
+def test_fv6_sibling_only_in_caller_text_gives_nothing(monkeypatch):
+    _quiet(monkeypatch)
+    html = ("<html><body><h1>Cardio Update 2027</h1><h2>Registration fees</h2>"
+            "<p>Member £100</p><p>Non-member £140</p></body></html>")
+    text = "Cardio Update 2027 Registration fees Member £100 Related: Heart Failure Masterclass 2027"
+    res = discover(cu_row(), html, text, CU, shell_titles=SIB)
+    assert res.tiers == [] and "own_page_sibling_in_body" in _reasons(res)

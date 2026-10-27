@@ -364,8 +364,8 @@ def test_hook_redetail_keeps_location_and_type(monkeypatch):
 def test_hook_cap_per_run_oldest_first(monkeypatch):
     rows = {f"https://x/{n}": _stored(n, 10 + n) for n in range(1, 21)}
     _run(monkeypatch, rows, days=7)
-    assert len(_FakeAgent.detailed) == scraper_mod.HOOK_REDETAIL_CAP_PER_RUN == 10
-    expected = {f"https://x/{n}" for n in range(11, 21)}  # the 10 oldest
+    assert len(_FakeAgent.detailed) == scraper_mod.HOOK_REDETAIL_CAP_PER_RUN == 5
+    expected = {f"https://x/{n}" for n in range(16, 21)}  # the 5 oldest (FV6 default cap)
     assert set(_FakeAgent.detailed) == expected
 
 
@@ -663,3 +663,35 @@ def test_listing_changed_redetail_still_mirrors_sessions(monkeypatch):
     _got, calls = _redetail_sessions(monkeypatch, row2, dict(
         _DETAIL, event_type="course", sessions=[{"start_date": "2027-03-17", "_idx": 0}]))
     assert ("delete", 1) in calls and ("insert", 1, 1) in calls   # a hook parse WITH sessions replaces them
+
+
+# --------------------------------------------------------------------------
+# FV6 load mitigation: default hook cap 5, ESMO keeps 10, NULL last_detail_at last
+# --------------------------------------------------------------------------
+def test_fv6_default_hook_cap_is_five_and_esmo_keeps_ten():
+    assert scraper_mod.HOOK_REDETAIL_CAP_PER_RUN == 5
+    assert esmo.ESMOExtractor.HOOK_REDETAIL_CAP == 10
+    assert scraper_mod._hook_cap(esmo.ESMOExtractor) == 10
+    assert scraper_mod._hook_cap(_FakeExtractor()) == 5
+
+
+def test_fv6_extractor_cap_attribute_is_honoured(monkeypatch):
+    monkeypatch.setattr(_FakeExtractor, "HOOK_REDETAIL_CAP", 10, raising=False)
+    rows = {f"https://x/{n}": _stored(n, 10 + n) for n in range(1, 21)}
+    _run(monkeypatch, rows, days=7)
+    assert set(_FakeAgent.detailed) == {f"https://x/{n}" for n in range(11, 21)}
+
+
+def test_fv6_never_detailed_rows_sort_after_dated_rows(monkeypatch):
+    rows = {f"https://x/n{n}": _stored(n, 0, last_detail_at=None) for n in range(1, 9)}
+    rows.update({f"https://x/d{n}": _stored(100 + n, 8 + n) for n in range(1, 4)})
+    _run(monkeypatch, rows, days=7)
+    assert len(_FakeAgent.detailed) == 5
+    assert {f"https://x/d{n}" for n in range(1, 4)} <= set(_FakeAgent.detailed)   # all dated rows first
+    assert len([u for u in _FakeAgent.detailed if "/n" in u]) == 2                 # NULL rows fill the rest
+
+
+def test_fv6_hook_sort_key_order():
+    rows = [{"last_detail_at": None}, {"last_detail_at": "2026-01-02"}, {"last_detail_at": "2025-05-01"}]
+    rows.sort(key=scraper_mod._hook_sort_key)
+    assert [r["last_detail_at"] for r in rows] == ["2025-05-01", "2026-01-02", None]
