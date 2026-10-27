@@ -20,7 +20,7 @@ SET LOCAL lock_timeout = '10s';
 CREATE OR REPLACE FUNCTION public.is_degree_title(p_title text)
 RETURNS boolean LANGUAGE sql IMMUTABLE PARALLEL SAFE SET search_path = pg_catalog AS $f$
   SELECT COALESCE(p_title, '') ~* '(\y(m\.?sc|b\.?sc|mres|mphil|phd|dphil|mba|mph|pgcert|pgdip)\y|\ypostgraduate\s+(certificate|diploma)\y|\ydiploma\s+in\y|\yadvanced\s+certificate\s+in\y|\ycertificate\s+in\y.*\ylevel\s*7\y|\ymaster''?s?\s+(of|in)\y|\ybachelors?\s+of\y|\ydoctorate\s+(in|of)\y)'
-     AND COALESCE(p_title, '') !~* '(\y(ceremon\w*|graduation|awards?|prepar\w*|revision|exam\w*|mock|osce|symposium|congress|conference|webinar|lecture|open\s+day|viva|workshop|info(rmation)?\s+session|evening|alumni|interview|live|networking|taster|masterclass)\y|\yfor\s+the\s+diploma\y|,\s*(md|do|mph|mba|phd|msc|mres|mphil|dphil|pgcert|pgdip|facs|frcp|frcs|frca|mrcp|mrcs|rn|bds)\y)'
+     AND COALESCE(p_title, '') !~* '(\y(ceremon\w*|graduation|awards?|prepar\w*|revision|exam\w*|mock|osce|symposium|congress|conference|webinar|lecture|open\s+day|viva|workshop|info(rmation)?\s+session|alumni|interview|live\s+20\d\d|networking|taster|masterclass)\y|\yfor\s+the\s+diploma\y|,\s*(md|do|mph|mba|phd|msc|mres|mphil|dphil|pgcert|pgdip|facs|frcp|frcs|frca|mrcp|mrcs|rn|bds)\y)'
 $f$;
 REVOKE EXECUTE ON FUNCTION public.is_degree_title(text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.is_degree_title(text) TO service_role;
@@ -78,11 +78,11 @@ CREATE TABLE IF NOT EXISTS public.event_type_degree_backfill (
 ALTER TABLE public.event_type_degree_backfill ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.event_type_degree_backfill FROM PUBLIC, anon, authenticated;
 
--- Backfill: record first, then update (same predicate; idempotent via ON CONFLICT / event_type filter).
+-- Backfill: only rows stored as 'conference' (an extractor's course/workshop is kept; else rows would flip on every re-detail). Record first, then update (same predicate; idempotent via ON CONFLICT / event_type filter).
 INSERT INTO public.event_type_degree_backfill (conference_id, prev_event_type)
 SELECT id, event_type FROM public.conferences
- WHERE archived = FALSE AND event_type <> 'degree' AND public.is_degree_title(conference_name)
+ WHERE archived = FALSE AND event_type = 'conference' AND public.is_degree_title(conference_name)
 ON CONFLICT (conference_id) DO NOTHING;
 
 UPDATE public.conferences SET event_type = 'degree'
- WHERE archived = FALSE AND event_type <> 'degree' AND public.is_degree_title(conference_name);
+ WHERE archived = FALSE AND event_type = 'conference' AND public.is_degree_title(conference_name);

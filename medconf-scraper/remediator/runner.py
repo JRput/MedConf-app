@@ -23,11 +23,11 @@ from .fixers import REGISTRY as FIXERS
 from .validators import validate
 from .report import write_report
 from .explorer import (
-    EXPLORERS, set_source_deadline, get_source_deadline, source_time_up,
+    EXPLORERS, external_identity_ok, set_source_deadline, get_source_deadline, source_time_up,
     reset_fetch_state, fetch_stats, close_render_browser,
 )
 from .learned_patterns import (
-    record_success, get_promoted_patterns, resolve_subpage, patterns_path,
+    record_success, get_promoted_patterns, resolve_subpage, patterns_path, record_failure,
 )
 import re
 import money
@@ -177,7 +177,41 @@ def _gaps_with_page_amounts(row: dict, gaps: list, tiers: list, page_text: Optio
                     row.get("id"), n, len(tiers))
         row["_pricing_gap_kind"] = "partial"
         return [*gaps, "pricing"]
+    if n > len(tiers):
+        logger.info("remediator: %s: page shows %d fee amounts vs %d stored tiers: advisory only "
+                    "(stored set is not replaceable by the SQL rule)", row.get("id"), n, len(tiers))
     return gaps
+
+
+def _norm_title(t: str) -> str:
+    return re.sub(r"[^a-z0-9]+", " ", (t or "").lower()).strip()
+
+
+def _page_heading(html: Optional[str], text: str) -> str:
+    m = re.search(r"<h1[^>]*>(.*?)</h1>", html or "", re.I | re.S)
+    if m:
+        return re.sub(r"<[^>]+>", " ", m.group(1))
+    for line in (text or "").splitlines():
+        if line.strip():
+            return line.strip()[:200]
+    return ""
+
+
+def replay_identity_ok(row: dict, sub_text: str, sub_html: Optional[str],
+                       sibling_titles: Iterable[str] = ()) -> bool:
+    """A promoted sub-page may be replayed on a row only if it passes the explorer's
+    external-page identity check AND its heading does not name another row of the source."""
+    if not external_identity_ok(row, sub_text):
+        return False
+    heading = _norm_title(_page_heading(sub_html, sub_text))
+    own = _norm_title(row.get("conference_name"))
+    if not heading or (own and own in heading):
+        return True
+    for t in sibling_titles:
+        n = _norm_title(t)
+        if n and n != own and n in heading and n not in own and own not in n:
+            return False
+    return True
 
 
 COMMUNITY_SOURCE_ID = 1000
@@ -510,6 +544,17 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                             sub_text = cache.get(sub_url)
                             if not sub_text:
                                 continue
+                            if not replay_identity_ok(
+                                    row, sub_text, cache.get_html(sub_url),
+                                    [c.get("conference_name") or "" for c in conferences
+                                     if c["id"] != row["id"]]):
+                                logger.info("remediator: promoted page %s skipped for %s "
+                                            "(identity check failed)", sub_url, row["id"])
+                                try:
+                                    record_failure(p)
+                                except Exception as e:
+                                    logger.warning(f"learned_patterns failure record failed: {e}")
+                                continue
                             # Re-run the fixer against the sub-page text
                             if fixer:
                                 try:
@@ -532,7 +577,9 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                     try:
                         explorer = EXPLORERS[field]
                         result = explorer(
-                            row=row,
+                            # Shared page: the organiser_url hop is only a loose token/date
+                            # identity check, which passes every sibling. Skip it.
+                            row={**row, "organiser_url": None} if shared else row,
                             page_text=f_text or "",
                             page_html=f_html,
                             base_url=url,
@@ -588,7 +635,7 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                     # No fees, but the explorer reached an external event page:
                     # keep it as organiser_url so the next run can retry cheaply.
                     _ext = getattr(result, "external_url", None) if (result is not None and field == "pricing") else None
-                    if _ext and _url_patches_allowed(row, source_id) and row.get("organiser_url") in (None, "", row.get("source_url")):
+                    if _ext and not shared and _url_patches_allowed(row, source_id) and row.get("organiser_url") in (None, "", row.get("source_url")):
                         if _patch_row(sb, row["id"], "organiser_url", _ext,
                                       expected=row.get("organiser_url")):
                             patches_applied.append({
@@ -626,7 +673,7 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                     # organiser link (and the booking link, if it was just
                     # the listing page) at it.
                     ext = getattr(result, "external_url", None) if field == "pricing" else None
-                    if ext and _url_patches_allowed(row, source_id):
+                    if ext and not shared and _url_patches_allowed(row, source_id):
                         link_patches = {}
                         if row.get("organiser_url") in (None, "", row.get("source_url")):
                             link_patches["organiser_url"] = ext

@@ -50,22 +50,22 @@ def abstract_applicable(row: dict) -> bool:
     return False
 
 
-# Pricing: stored-but-useless tiers (Level 2 heuristics, B2).
-_GENERIC_LABEL_WORDS = {"standard", "registration", "fee", "fees", "price",
-                        "rate", "course", "ticket", "general", "event"}
+# Pricing: stored-but-useless tiers. ONE label list, identical to the IN (...) list of
+# public.remediator_replace_tiers_if_zero_or_generic (a test reads the SQL file and
+# asserts equality): only rows that function would replace are ever sent to it.
+REPLACE_GENERIC_LABELS = frozenset({"standard", "registration", "registration fee", "fee",
+                                    "fees", "price", "course fee", "delegate"})
 
 
 def _is_generic_label(label) -> bool:
-    words = re.findall(r"[a-z]+", (label or "").lower())
-    if not words or " · " in (label or ""):
-        return False
-    return all(w in _GENERIC_LABEL_WORDS for w in words)
+    """Case/space-insensitive exact match, as the SQL function does."""
+    return re.sub(r"\s+", " ", (label or "").strip()).lower() in REPLACE_GENERIC_LABELS
 
 
 def _price_zero(t: dict) -> bool:
     v = t.get("price_gbp")
     try:
-        return v is None or float(v) == 0
+        return v is not None and float(v) == 0   # NULL is not 0 (SQL: price_gbp = 0)
     except (TypeError, ValueError):
         return False
 
@@ -73,7 +73,9 @@ def _price_zero(t: dict) -> bool:
 def pricing_gap_kind(has_pricing: bool, tiers: Optional[list] = None,
                      page_amount_count: Optional[int] = None) -> Optional[str]:
     """None = no gap; "none" = no tiers; "zero" = every tier is 0;
-    "partial" = one generic-label tier, or fewer tiers than amounts on the page.
+    "partial" = exactly one tier with a label in REPLACE_GENERIC_LABELS (the SQL rule);
+    "advisory" = fewer tiers than amounts on the page but NOT SQL-eligible: never a gap,
+    never explored (the RPC would refuse the write).
     `tiers` unknown (None) keeps the old behaviour: any tier = no gap."""
     if not has_pricing:
         return "none"
@@ -84,7 +86,7 @@ def pricing_gap_kind(has_pricing: bool, tiers: Optional[list] = None,
     if len(tiers) == 1 and _is_generic_label(tiers[0].get("tier_label")):
         return "partial"
     if page_amount_count is not None and page_amount_count > len(tiers):
-        return "partial"
+        return "advisory"
     return None
 
 
@@ -150,7 +152,7 @@ def detect_gaps(
 
     # Pricing — if no pricing rows exist and the row isn't free/known-no-pricing
     if not row.get("is_on_demand") and pricing_gap_kind(
-            has_pricing, tiers, page_amount_count):
+            has_pricing, tiers, page_amount_count) not in (None, "advisory"):
         gaps.append("pricing")
 
     # Abstract status — flag whenever:

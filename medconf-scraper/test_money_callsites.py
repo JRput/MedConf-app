@@ -191,10 +191,20 @@ def test_no_extractor_builds_a_tier_without_a_currency_key():
     assert offenders == []
 
 
+def _lines(src):
+    return sorted(_tier_builders_without_currency(ast.parse(src)))
+
+
 def test_tier_builder_guard_sees_spread_dict_call_and_subscript_forms():
-    bad = ast.parse("def f(t):\n    a = {**t, 'price_gbp': 1}\n    b = dict(price_gbp=2, tier_label='x')\n"
-                    "    t['price_gbp'] = 3\n    return a, b\n")
-    assert len(_tier_builders_without_currency(bad)) == 3
-    good = ast.parse("def f(t):\n    a = {**t, 'price_gbp': 1, 'currency': 'EUR'}\n"
-                     "    b = dict(price_gbp=2, currency='USD')\n    t['price_gbp'] = 3\n    t['currency'] = 'GBP'\n")
-    assert _tier_builders_without_currency(good) == []
+    # each form alone, with its exact line: a guard that drops one form, or that
+    # counts another form twice, cannot reach the right answer
+    assert _lines("def f(t):\n    return {**t, 'price_gbp': 1}\n") == [2]
+    assert _lines("def f():\n    return dict(price_gbp=2, tier_label='x')\n") == [2]
+    assert _lines("def f(t):\n    t['price_gbp'] = 3\n    return t\n") == [2]
+    assert _lines("def f(t):\n    a = {**t, 'price_gbp': 1}\n    b = dict(price_gbp=2)\n    t['price_gbp'] = 3\n") == [2, 3, 4]
+    # compliant forms stay clean, each alone
+    assert _lines("def f(t):\n    return {**t, 'price_gbp': 1, 'currency': 'EUR'}\n") == []
+    assert _lines("def f():\n    return dict(price_gbp=2, currency='USD')\n") == []
+    assert _lines("def f(t):\n    t['price_gbp'] = 3\n    t['currency'] = 'GBP'\n") == []
+    # scoping: a currency named in ANOTHER function does not excuse this builder
+    assert _lines("def g(t):\n    t['currency'] = 'GBP'\ndef f(t):\n    t['price_gbp'] = 3\n") == [4]

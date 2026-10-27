@@ -602,19 +602,23 @@ def test_listing_changed_redetail_writes_a_real_move_to_online(monkeypatch):
 
 def test_hook_only_redetail_without_evidence_keeps_stored_values(monkeypatch):
     got = _redetail(monkeypatch, _stored_pending(), _DETAIL)
+    # the sentinel proves the re-detail ran and wrote: an empty `got` would pass the check below vacuously
+    assert got.get("description") == "d" * 60
     assert not set(got) & {"event_format", "venue_name", "city", "abstract_deadline", "is_flagship"}
 
 
 def test_hook_redetail_with_listing_backed_format_change_is_written(monkeypatch):
     got = _redetail(monkeypatch, _stored_pending(), dict(_DETAIL, _evidence=["event_format"]))
     assert got["event_format"] == "online"
-    assert "venue_name" not in got                          # still protected: no evidence for it
+    assert got.get("description") == "d" * 60
+    assert not set(got) & {"venue_name", "city", "abstract_deadline", "is_flagship"}   # no evidence for these
 
 
 def test_evidence_aware_extractor_keeps_non_destructive_rule_on_listing_change(monkeypatch):
     row = _stored_pending()
     row["listing_hash"] = "old-hash"
     got = _redetail(monkeypatch, row, dict(_DETAIL, _evidence=[], _evidence_aware=True))
+    assert got.get("description") == "d" * 60              # the re-detail ran and wrote (not vacuous)
     assert not set(got) & {"event_format", "venue_name", "city", "is_flagship"}
 
 
@@ -631,3 +635,31 @@ def test_shell_card_values_are_evidence_for_every_extractor():
     assert "conference_name" not in out2["_evidence"]
     out3 = ag._merge_shell_and_detail({"title": "T", "booking_url": "https://x.org/w", "start_date": "2027-02-01"}, {})
     assert "end_date" not in out3["_evidence"]              # a defaulted end (= start) is not evidence
+
+
+# ---- FV4 addendum: a hook-only re-detail never wipes stored course sessions -------------
+def _redetail_sessions(monkeypatch, row, detail):
+    calls = []
+    monkeypatch.setattr(scraper_mod, "delete_course_sessions", lambda i: calls.append(("delete", i)))
+    monkeypatch.setattr(scraper_mod, "insert_course_sessions",
+                        lambda i, s: calls.append(("insert", i, len(s))) or [{"id": f"s{n}"} for n in range(len(s))])
+    got = _redetail(monkeypatch, row, detail)
+    return got, calls
+
+
+def test_hook_only_redetail_with_empty_session_parse_keeps_stored_sessions(monkeypatch):
+    row = _stored_pending(event_type="course", course_sessions=[{"id": "keep-1"}, {"id": "keep-2"}])
+    got, calls = _redetail_sessions(monkeypatch, row, dict(_DETAIL, event_type="course", sessions=[]))
+    assert got.get("description") == "d" * 60          # the hook re-detail ran and wrote (not vacuous)
+    assert ("delete", 1) not in calls                    # stored sessions survive an empty parse
+
+
+def test_listing_changed_redetail_still_mirrors_sessions(monkeypatch):
+    row = _stored_pending(event_type="course", course_sessions=[{"id": "old"}])
+    row["listing_hash"] = "old-hash"                     # an ordinary re-detail keeps plain semantics
+    _got, calls = _redetail_sessions(monkeypatch, row, dict(_DETAIL, event_type="course", sessions=[]))
+    assert ("delete", 1) in calls
+    row2 = _stored_pending(event_type="course")
+    _got, calls = _redetail_sessions(monkeypatch, row2, dict(
+        _DETAIL, event_type="course", sessions=[{"start_date": "2027-03-17", "_idx": 0}]))
+    assert ("delete", 1) in calls and ("insert", 1, 1) in calls   # a hook parse WITH sessions replaces them

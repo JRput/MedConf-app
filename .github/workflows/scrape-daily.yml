@@ -220,12 +220,31 @@ jobs:
       - name: Install dependencies
         run: pip install "supabase>=2.0.0" "python-dotenv>=1.0.0"
 
+      # Level 2 (2026-10-27): the gate needs yesterday's dated report to confirm a drop on
+      # 2 consecutive reports, but CI checks out only the committed baseline-equal file.
+      # Cache the dated reports (NOT baseline.json, which stays the committed one) like the
+      # learned-patterns cache in remediator-daily.yml: key per day, restore the newest.
+      - name: Restore previous coverage reports
+        uses: actions/cache/restore@v4
+        with:
+          path: reports/coverage/????-??-??.json
+          key: coverage-reports-${{ github.run_id }}
+          restore-keys: |
+            coverage-reports-
+
       - name: Coverage report and regression check
         working-directory: medconf-scraper
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python coverage_report.py
+
+      - name: Save coverage reports
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: reports/coverage/????-??-??.json
+          key: coverage-reports-${{ github.run_id }}
 
       - name: Upload coverage report
         if: always()

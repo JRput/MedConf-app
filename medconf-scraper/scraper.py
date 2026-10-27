@@ -342,7 +342,12 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
                 # re-fetch so the table mirrors the source page. Then map any
                 # per-session pricing tiers to the new session UUIDs.
                 idx_to_session_id: Dict[int, str] = {}
-                if sessions is not None:
+                if sessions is not None and not sessions and via_hook and existing:
+                    # mirror of the tier rule: a HOOK-ONLY re-detail (listing unchanged)
+                    # that parses no sessions never wipes the stored ones
+                    logger.info(f"  {cleaned.get('conference_name', '?')[:50]}: no sessions parsed on a "
+                                f"hook-only re-detail; kept stored sessions (delete skipped)")
+                elif sessions is not None:
                     delete_course_sessions(conference_id)
                     inserted = insert_course_sessions(conference_id, sessions)
                     # Pair returned rows with input order (insert preserves order

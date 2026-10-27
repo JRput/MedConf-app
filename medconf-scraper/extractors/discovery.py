@@ -133,46 +133,101 @@ class DiscoveryResult:
 
 
 # ── seams (monkeypatched by tests; real network lives only here) ──────────────────
+HTML_MAX_BYTES = 2_000_000
+
+
+def _hard_cap(fn: Callable[[], Any], seconds: float) -> Any:
+    """fn() in a daemon thread, abandoned after `seconds` of WALL-CLOCK time (returns
+    None then). httpx timeouts are per socket operation: a server that trickles bytes or
+    stalls one read can outlast them; this cap is the total read deadline."""
+    import threading
+    box: Dict[str, Any] = {}
+
+    def _run():
+        try:
+            box["v"] = fn()
+        except Exception as e:  # noqa: BLE001
+            box["e"] = e
+
+    t = threading.Thread(target=_run, daemon=True)
+    t.start()
+    t.join(max(0.1, seconds))
+    if t.is_alive():
+        logger.debug(f"discovery: fetch abandoned after {seconds:.1f}s (total read deadline)")
+        return None
+    if "e" in box:
+        raise box["e"]
+    return box.get("v")
+
+
+def _stream_body(url: str, timeout: float, max_bytes: int, headers: Optional[dict] = None):
+    """(status, body_bytes, encoding) streamed with a per-chunk deadline + size check; None
+    when the body passes `max_bytes` or the deadline. Callers also wrap it in _hard_cap."""
+    import httpx
+    end = time.monotonic() + timeout
+    buf = bytearray()
+    with httpx.Client(timeout=httpx.Timeout(min(timeout, 10.0), connect=min(timeout, 5.0)), follow_redirects=True,
+                      headers=headers or {"User-Agent": "Mozilla/5.0 (compatible; MedConfBot)"}) as c:
+        with c.stream("GET", url) as r:
+            try:
+                if int((r.headers or {}).get("content-length") or 0) > max_bytes:
+                    return None
+            except ValueError:
+                pass
+            for chunk in r.iter_bytes():
+                buf.extend(chunk)
+                if len(buf) > max_bytes or time.monotonic() > end:
+                    return None
+            return r.status_code, bytes(buf), getattr(r, "encoding", None)
+
+
+def _get_capped(url: str, timeout: float, max_bytes: int, headers: Optional[dict] = None):
+    """(status, body, encoding) or None, inside a total read deadline of `timeout` s and a
+    hard size cap. Safe-fetch mode goes through the hop-validated client (its own deadline)."""
+    import safe_fetch
+    if safe_fetch.enabled():
+        got = _hard_cap(lambda: safe_fetch.fetch_validated(
+            url, safe_fetch.check_url_safe, max_bytes=max_bytes + 1,
+            deadline=time.monotonic() + timeout), timeout)
+        if not got or got[0] != "ok":
+            return None
+        return got[4] or 200, got[2], got[3]
+    return _hard_cap(lambda: _stream_body(url, timeout, max_bytes, headers), timeout)
+
+
 def _fetch_html(url: str, timeout: float) -> Optional[str]:
-    """HTML body or None. extractors.http_fetch.fetch_html with no browser: honours
-    the timeout and the safe-fetch flag (SafeClient), recognises bot-block pages and
-    never launches Playwright."""
+    """HTML body or None: total read deadline `timeout`, body <= HTML_MAX_BYTES, error and
+    bot-block pages refused (extractors.http_fetch's detector), safe-fetch honoured, never
+    launches Playwright."""
     try:
         from extractors import http_fetch
-        return http_fetch.fetch_html(url, timeout=timeout)
+        got = _get_capped(url, timeout, HTML_MAX_BYTES, dict(getattr(http_fetch, "DEFAULT_HEADERS", {}) or {}) or None)
+        if not got:
+            return None
+        status, body, enc = got
+        if body is None or len(body) > HTML_MAX_BYTES or (status or 0) >= 400:
+            return None
+        try:
+            text = body.decode(enc or "utf-8", errors="replace")
+        except LookupError:
+            text = body.decode("utf-8", errors="replace")
+        looks = getattr(http_fetch, "_looks_blocked", None)
+        if looks and looks(status, text):
+            return None
+        return text
     except Exception as e:  # noqa: BLE001
         logger.debug(f"discovery: fetch failed {url}: {type(e).__name__}")
         return None
 
 
 def _fetch_bytes(url: str, timeout: float, max_bytes: int = PDF_MAX_BYTES) -> Optional[bytes]:
-    """PDF bytes (<= max_bytes, `%PDF` header) or None."""
+    """PDF bytes (<= max_bytes, `%PDF` header) or None, inside a total read deadline."""
     try:
-        import safe_fetch
-        if safe_fetch.enabled():
-            verdict, _final, body, _enc, _st = safe_fetch.fetch_validated(
-                url, safe_fetch.check_url_safe, max_bytes=max_bytes + 1,
-                deadline=time.monotonic() + timeout)
-            data = body if verdict == "ok" else None
-        else:
-            import httpx
-            buf = bytearray()
-            end = time.monotonic() + timeout
-            with httpx.Client(timeout=httpx.Timeout(timeout, connect=min(timeout, 5.0)), follow_redirects=True,
-                              headers={"User-Agent": "Mozilla/5.0 (compatible; MedConfBot)"}) as c:
-                with c.stream("GET", url) as r:
-                    r.raise_for_status()
-                    try:
-                        if int(r.headers.get("content-length") or 0) > max_bytes:
-                            return None
-                    except ValueError:
-                        pass
-                    for chunk in r.iter_bytes():
-                        buf.extend(chunk)
-                        if len(buf) > max_bytes or time.monotonic() > end:
-                            return None
-            data = bytes(buf)
-        if not data or len(data) > max_bytes or not data.startswith(b"%PDF"):
+        got = _get_capped(url, timeout, max_bytes)
+        if not got:
+            return None
+        status, data, _enc = got
+        if (status or 0) >= 400 or not data or len(data) > max_bytes or not data.startswith(b"%PDF"):
             return None
         return data
     except Exception as e:  # noqa: BLE001
@@ -191,9 +246,15 @@ def _pdf_text(data: bytes, timeout: float = 20.0) -> str:
         return ""
 
 
-def _vision_pricing(image_urls: List[str], stop_at: float) -> List[Dict[str, Any]]:
+def _vision_pricing(image_urls: List[str], stop_at: float, timeout: Optional[float] = None) -> List[Dict[str, Any]]:
+    """The remaining budget is BOTH the per-image download timeout and the hard call
+    timeout inside vision, and the whole call is hard-capped at it here as well."""
     import vision
-    return vision.extract_pricing_from_images(image_urls, stop_at=stop_at)
+    limit = max(1.0, timeout if timeout is not None else stop_at - time.time())
+    return vision.call_with_hard_timeout(
+        lambda: vision.extract_pricing_from_images(image_urls, stop_at=stop_at,
+                                                   fetch_timeout=limit, call_timeout=limit),
+        limit) or []
 
 
 def _vision_allowed() -> bool:
@@ -309,7 +370,9 @@ def _pairs(res: Any) -> List[Tuple[str, str]]:
 
 
 # ── candidate selection ──────────────────────────────────────────────────────────
-def _hint_candidates(fieldname: str, page_url: str, row: dict, hints: Optional[DiscoveryHints]) -> List[str]:
+def _hint_candidates(fieldname: str, page_url: str, row: dict, hints: Optional[DiscoveryHints]) -> List[Tuple[str, Optional[str]]]:
+    """(url, declared_host) per hint. Suffixes live on the event page's host; a URL
+    template declares the host written in it, or None when a placeholder builds the host."""
     if not hints:
         return []
     attr = _HINT_ATTR[fieldname]
@@ -318,14 +381,17 @@ def _hint_candidates(fieldname: str, page_url: str, row: dict, hints: Optional[D
     ctx = {"url": clean, "base": f"{pu.scheme}://{pu.netloc}",
            "year": (str(row.get("start_date") or "")[:4] or ""),
            "slug": clean.rsplit("/", 1)[-1]}
-    out: List[str] = []
+    out: List[Tuple[str, Optional[str]]] = []
     for suf in getattr(hints, f"{attr}_suffixes", ()) or ():
-        out.append(clean + suf if not suf.startswith("?") else clean + suf)
+        out.append((clean + suf, _host(page_url)))
     for tpl in getattr(hints, f"{attr}_urls", ()) or ():
         try:
-            out.append(tpl.format(**ctx))
+            url = tpl.format(**ctx)
+            probe = tpl.format(url="http://\x00/", base="http://\x00", year="0", slug="\x00")
         except (KeyError, IndexError, ValueError):
             continue
+        declared = _host(probe)
+        out.append((url, None if (not declared or "\x00" in declared) else declared))
     return out
 
 
@@ -342,17 +408,6 @@ _SITEWIDE_NEG_RE = re.compile(
     r"technology|cost-of|journal|publication|about|contact|donate|exhibitor|sponsor", re.I)
 _WEAK_TITLE_TOKENS = {"annual", "meeting", "conference", "congress", "course", "international", "symposium",
                       "update", "updates", "training", "workshop", "series", "online", "webinar", "event"}
-
-
-def _in_event_path(base_url: str, url: str) -> bool:
-    """True only when `url` sits under the event page's OWN URL path
-    (/events/conferences/<slug>/registration for the page /events/conferences/<slug>).
-    The PARENT directory does not count: its other children are other events."""
-    b, u = urlparse(base_url), urlparse(url)
-    own = "/".join(x for x in b.path.split("/") if x)
-    if not own or _host(base_url) != _host(url):
-        return False
-    return (u.path.rstrip("/") + "/").startswith("/" + own + "/")
 
 
 def _title_tokens(row: dict) -> set:
@@ -417,8 +472,12 @@ def _candidates(fieldname: str, html: str, page_url: str, row: dict,
         seen.add(k)
         buckets[prio].append({"url": url, "why": why, "field": fieldname, "external": external})
 
-    for u in _hint_candidates(fieldname, page_url, row, hints):
-        add(u, "hint", 0)
+    for u, declared in _hint_candidates(fieldname, page_url, row, hints):
+        # a hint is fetched only on the event page's host or the host the hint itself declares
+        if _host(u) == _host(page_url):
+            add(u, "hint", 0)
+        elif declared and _host(u) == declared:
+            add(u, "hint", 0, external=True)
     words = ((hints.anchor_words or {}).get(_HINT_ATTR[fieldname]) or ()) if hints else ()
     if words:
         rx = re.compile("|".join(re.escape(w) for w in words), re.I)
@@ -685,17 +744,19 @@ def _place_from(html: str, text: str, base_url: str) -> Optional[Dict[str, Any]]
     return None
 
 
-def _identity_ok(row: dict, text: str) -> bool:
-    got = _call("external_identity_ok", row, text)
-    if got is not None:
-        return bool(got)
-    low = (text or "").lower()
-    toks = {t for t in re.findall(r"[a-z0-9]{5,}", (row.get("conference_name") or "").lower())
-            if t not in {"annual", "meeting", "conference", "congress", "course", "international"}}
-    return any(t in low for t in toks)
+# ── identity of a fetched page: FAIL-CLOSED three-valued gate (FV4) ─────────────────
+# STRONG   -> the page's data (and its links) may be used.
+# WEAK     -> recorded in evidence (reason "weak_identity"); NOTHING from it is used.
+# REJECTED -> recorded (reason "identity_mismatch"); NOTHING from it is used.
+#
+# Level-2 lists (recorded on MISSION_BOARD_COVERAGE.md):
+SECTION_PHRASES = ("call for abstracts", "call for papers", "registration", "register", "fees", "pricing",
+                   "prices", "tickets", "booking", "venue", "location", "travel", "abstracts", "programme")
+EVENT_TYPE_WORDS = frozenset({"workshop", "masterclass", "course", "webinar", "symposium", "congress",
+                              "conference", "meeting", "summit", "day", "forum", "lecture", "series"})
+_NORM_STOP = frozenset({"the", "and", "of"})
+STRONG, WEAK, REJECTED = "strong", "weak", "rejected"
 
-
-# ── identity of a fetched page ───────────────────────────────────────────────────
 _ID_WEAK = {"annual", "meeting", "conference", "congress", "course", "international", "symposium",
             "update", "updates", "training", "workshop", "series", "online", "webinar", "event", "events",
             "with", "from", "that", "this", "your", "live", "scientific", "national", "global", "world"}
@@ -708,46 +769,84 @@ _EVENT_NOUN_RE = re.compile(
     r"\b(?:conference|congress|course|masterclass|summit|symposium|meeting|workshop|webinar|forum|"
     r"update|annual|study\s+day|school|academy|convention|colloquium|seminar|bootcamp|assembly)\b|\b20\d\d\b",
     re.I)
-_DATE_FORMATS = ("%d %B %Y", "%B %d, %Y", "%B %d %Y", "%d %b %Y", "%b %d, %Y", "%d/%m/%Y", "%Y-%m-%d", "%d %B", "%B %d")
-ID_MIN_TOKENS_SMALL, ID_MIN_TOKENS_LARGE = 1, 2     # Level-2 decision: >= 3 title tokens need 2 hits off the event's own path
+_ACRONYM_RE = re.compile(r"\b[A-Z]{2,}[0-9]*\b")
+_TITLE_SEP_RE = re.compile(r"\s+[|–—-]\s+|\s*\|\s*")
 
 
-def _row_tokens(row: dict) -> set:
-    name = row.get("conference_name") or ""
-    toks = {t for t in re.findall(r"[a-z0-9]{4,}", name.lower()) if t not in _ID_WEAK and not t.isdigit()}
-    toks |= {t.lower() for t in re.findall(r"\b[A-Z]{3}\b", name)}
-    return toks
+def _norm(s: Any) -> str:
+    """Identity normal form: case, punctuation, whitespace and the stop words the/and/of
+    removed ("The Cardio Update & Co. 2027" -> "cardio update co 2027")."""
+    t = _html.unescape(str(s or "")).lower().replace("&", " and ")
+    return " ".join(w for w in re.sub(r"[\W_]+", " ", t).split() if w not in _NORM_STOP)
 
 
-def _date_in_text(row: dict, low: str) -> bool:
-    d = _is_date(row.get("start_date"))
-    if not d:
-        return False
-    for f in _DATE_FORMATS[:7]:
-        try:
-            if d.strftime(f).lower().lstrip("0") in low or d.strftime(f).lower() in low:
-                return True
-        except ValueError:
-            pass
-    return False
+def _has(hay: str, needle: str) -> bool:
+    return bool(needle) and f" {needle} " in f" {hay} "
 
 
-def _heading_of(html: str) -> str:
-    """The page's own heading: first <h1>, else the first segment of <title>."""
-    m = re.search(r"<h1\b[^>]*>(.*?)</h1\s*>", html or "", re.I | re.S)
+def _cut(hay: str, needle: str) -> str:
+    """hay with every whole-phrase occurrence of needle replaced by a barrier."""
+    return f" {hay} ".replace(f" {needle} ", " | ").strip() if needle else hay
+
+
+def _strip_tags(x: str) -> str:
+    return re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", x or ""))).strip()
+
+
+def _main_headings(html: str) -> List[str]:
+    """The page's own heading: its first non-empty <h1>; else <title> minus the site
+    suffix (or prefix) segment."""
+    for m in re.finditer(r"<h1\b[^>]*>(.*?)</h1\s*>", html or "", re.I | re.S):
+        h = _strip_tags(m.group(1))
+        if h:
+            return [h]
+    m = re.search(r"<title\b[^>]*>(.*?)</title\s*>", html or "", re.I | re.S)
     if not m:
-        m = re.search(r"<title\b[^>]*>(.*?)</title\s*>", html or "", re.I | re.S)
-        if m:
-            seg = re.split(r"\s[|\u2013\u2014-]\s|\|", _html.unescape(m.group(1)))[0]
-            return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", seg)).strip()
-        return ""
-    return re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", m.group(1)))).strip()
+        return []
+    t = _strip_tags(m.group(1))
+    segs = [x for x in _TITLE_SEP_RE.split(t) if x.strip()]
+    if len(segs) >= 2:
+        return [" ".join(segs[:-1]), " ".join(segs[1:])]
+    return [t] if t else []
+
+
+def _all_headings(html: str) -> List[str]:
+    out = [_strip_tags(m.group(1)) for m in re.finditer(r"<h[1-4]\b[^>]*>(.*?)</h[1-4]\s*>", html or "", re.I | re.S)]
+    m = re.search(r"<title\b[^>]*>(.*?)</title\s*>", html or "", re.I | re.S)
+    if m:
+        out.append(_strip_tags(m.group(1)))
+    return [h for h in out if h]
+
+
+def _own_path(url: str) -> Optional[Tuple[str, str]]:
+    """(host, "/a/b") of an event URL; None for a bare host (a homepage owns nothing)."""
+    pu = urlparse(url or "")
+    path = "/".join(x for x in pu.path.lower().split("/") if x)
+    if pu.scheme not in ("http", "https") or not path:
+        return None
+    return _host(url), "/" + path
+
+
+def _under_own_path(url: str, own: Iterable[Tuple[str, str]]) -> bool:
+    """True only when `url` sits strictly UNDER one of the event's own URL paths
+    (/events/<slug>/registration for /events/<slug>). The parent directory, a sibling
+    slug sharing a prefix (/events/<slug>-workshop) and the page itself do not count."""
+    pu = urlparse(url or "")
+    path = "/" + "/".join(x for x in pu.path.lower().split("/") if x)
+    return any(_host(url) == h and path.startswith(p + "/") for h, p in own)
+
+
+def _in_event_path(base_url: str, url: str) -> bool:
+    o = _own_path(base_url)
+    return bool(o) and _under_own_path(url, [o])
 
 
 def _heading_names_other_event(row: dict, heading: str) -> bool:
     """The heading reads like an EVENT name (an event noun or a year plus at least one
     distinctive word) and shares no distinctive word with this row's title."""
-    toks = _row_tokens(row)
+    name = row.get("conference_name") or ""
+    toks = {t for t in re.findall(r"[a-z0-9]{4,}", name.lower()) if t not in _ID_WEAK and not t.isdigit()}
+    toks |= {t.lower() for t in re.findall(r"\b[A-Z]{3}\b", name)}
     if not heading or not toks:
         return False
     low = heading.lower()
@@ -757,81 +856,98 @@ def _heading_names_other_event(row: dict, heading: str) -> bool:
     return bool(words) and bool(_EVENT_NOUN_RE.search(heading))
 
 
-def _page_identity_problem(row: dict, html: str, text: str, kind: str) -> Optional[str]:
-    """None when the fetched page is this event's; else the reason it is not.
-    kind: "own" (under the event's own URL path), "site" (same host, elsewhere),
-    "external" (another host the event page linked to)."""
-    if _heading_names_other_event(row, _heading_of(html)):
-        return "heading_names_other_event"
-    if kind == "external":
-        return None if _identity_ok(row, text) else "no_identity"
-    if kind == "own":
-        return None                 # the page's address sits under the event's own URL: that is the identity evidence
-    low = (text or "").lower()
-    toks = _row_tokens(row)
-    hits = sum(1 for t in toks if t in low)
-    need = 1 if len(toks) < 3 else ID_MIN_TOKENS_LARGE
-    if toks and hits >= min(need, len(toks)):
-        return None
-    if _date_in_text(row, low):
-        return None
-    return "no_identity"
-
-
-# ── shared pages (one URL, several events) ───────────────────────────────────────
-SHARED_WINDOW_LINES = 60
-
-
-def _squash(x: Any) -> str:
-    return re.sub(r"\s+", " ", str(x or "")).strip().lower()
-
-
-def _shared_window(row: dict, html: str, sibling_titles: Iterable[str]) -> Optional[Tuple[str, str]]:
-    """(lines_text, flat_text) of the part of a shared page that belongs to THIS row:
-    from the line carrying its full title up to the next sibling's title (mirrors
-    remediator.runner.identity_window). None when the title is not found, or only
-    inside a longer sibling's title."""
-    title = _squash(row.get("conference_name"))
-    if len(title) < 6:
-        return None
-    lines = [l for l in (re.sub(r"\s+", " ", x).strip() for x in _to_lines(html).split("\n")) if l]
-    sibs = {_squash(t) for t in sibling_titles}
-    sibs = {t for t in sibs if len(t) >= 6 and t != title}
-    longer = [t for t in sibs if title in t]
-    start, pos0 = -1, 0
-    for i, l in enumerate(lines):
-        low = l.lower()
-        p = low.find(title)
-        while p >= 0:
-            inside = any(low.startswith(t, q) for t in longer
-                         for q in range(max(0, p - len(t) + len(title)), p + 1))
-            if not inside:
-                start, pos0 = i, p
+def _only_section_words(rest: List[str], year: str) -> bool:
+    """True when the leftover heading tokens are ONLY allow-listed section phrases (and
+    the row's own start year)."""
+    phrases = sorted((p.split() for p in SECTION_PHRASES), key=len, reverse=True)
+    i = 0
+    while i < len(rest):
+        if rest[i] == "|" or (year and rest[i] == year):
+            i += 1
+            continue
+        for ph in phrases:
+            if rest[i:i + len(ph)] == ph:
+                i += len(ph)
                 break
-            p = low.find(title, p + 1)
-        if start >= 0:
-            break
-    if start < 0:
-        return None
-    end = min(len(lines), start + SHARED_WINDOW_LINES)
-    first = lines[start][pos0:]
-    cut = len(first)
-    for t in sibs:
-        j = first.lower().find(t, len(title))
-        if 0 <= j < cut:
-            cut = j
-    out = [first[:cut]]
-    if cut == len(first):
-        for k in range(start + 1, end):
-            low = lines[k].lower()
-            hit = [low.find(t) for t in sibs if t in low]
-            if hit:
-                if min(hit) > 0:
-                    out.append(lines[k][:min(hit)])
-                break
-            out.append(lines[k])
-    win = [l for l in out if l.strip()]
-    return "\n".join(win), " ".join(win)[:250_000]
+        else:
+            return False
+    return True
+
+
+def _heading_relation(title_n: str, heading_n: str, year: str) -> str:
+    """"equal" | "section" (title + allow-listed section words only) | "extends_event"
+    (title + an event-type word the title does not have) | "contains" | "absent"."""
+    if not title_n or not heading_n:
+        return "absent"
+    if heading_n == title_n:
+        return "equal"
+    if not _has(heading_n, title_n):
+        return "absent"
+    rest = _cut(heading_n, title_n).split()
+    title_words = set(title_n.split())
+    if any(w in EVENT_TYPE_WORDS and w not in title_words for w in rest):
+        return "extends_event"
+    return "section" if _only_section_words(rest, year) else "contains"
+
+
+def _norm_shell_titles(row: dict, titles: Iterable[str]) -> List[str]:
+    me = _norm(row.get("conference_name"))
+    out = []
+    for t in titles or ():
+        n = _norm(t)
+        if n and n != me and len(n) >= 8 and len(n.split()) >= 2 and n not in out:
+            out.append(n)
+    return out
+
+
+def _names_other_shell(title_n: str, text_n: str, others: List[str]) -> bool:
+    """A sibling shell title occurs in text_n. A sibling that CONTAINS the row title is
+    searched as is; a shorter one only outside occurrences of the row's own title."""
+    if not others or not text_n:
+        return False
+    cut = _cut(text_n, title_n) if title_n else text_n
+    for o in others:
+        if _has(cut if not (title_n and _has(o, title_n)) else text_n, o):
+            return True
+    return False
+
+
+def page_identity(row: dict, url: str, html: str, text: str, *, own: Iterable[Tuple[str, str]],
+                  via_hint: bool = False, shell_titles: Iterable[str] = ()) -> Tuple[str, str]:
+    """(verdict, reason) for one FETCHED page. Decision order (first match wins):
+      1. any heading (h1-h4, <title>) names another shell title of the source  -> REJECTED other_shell_in_heading
+      2. main heading = row title + an event-type word the title lacks        -> REJECTED extends_title_with_event_word
+      3. main heading reads like another event (no shared distinctive word)    -> REJECTED heading_names_other_event
+                                                    (acronym row: WEAK acronym_row)
+      4. body / nav text names another shell title                             -> WEAK other_shell_in_body
+      5. url strictly under the event's own URL path                           -> STRONG own_path
+      6. main heading == row title (+ only allow-listed section words)         -> STRONG heading_equals_title
+      7. url came from an extractor DISCOVERY_HINTS entry (host checked)       -> STRONG hint
+      8. otherwise                                                             -> WEAK no_strong_identity"""
+    title_n = _norm(row.get("conference_name"))
+    others = _norm_shell_titles(row, shell_titles)
+    year = str(row.get("start_date") or "")[:4]
+    year = year if year.isdigit() else ""
+    for h in _all_headings(html):
+        if _names_other_shell(title_n, _norm(h), others):
+            return REJECTED, "other_shell_in_heading"
+    mains = _main_headings(html)
+    rels = [_heading_relation(title_n, _norm(h), year) for h in mains]
+    if "extends_event" in rels and not any(r in ("equal", "section") for r in rels):
+        return REJECTED, "extends_title_with_event_word"
+    if mains and _heading_names_other_event(row, mains[0]):
+        if _ACRONYM_RE.search(row.get("conference_name") or ""):
+            return WEAK, "acronym_row"
+        return REJECTED, "heading_names_other_event"
+    if _names_other_shell(title_n, _norm((text or "")[:250_000]), others):
+        return WEAK, "other_shell_in_body"
+    if _under_own_path(url, own):
+        return STRONG, "own_path"
+    if any(r in ("equal", "section") for r in rels):
+        return STRONG, "heading_equals_title"
+    if via_hint:
+        return STRONG, "hint"
+    return WEAK, "no_strong_identity"
 
 
 # ── money-adjacent images and PDF links ──────────────────────────────────────────
@@ -885,8 +1001,10 @@ def missing_fields(row: dict) -> List[str]:
 
 
 class _Run:
-    def __init__(self, row, budget, hints):
+    def __init__(self, row, budget, hints, own=(), shell_titles=()):
         self.row, self.budget, self.hints = row, budget, hints
+        self.own = [o for o in own if o]
+        self.shell_titles = list(shell_titles or ())
         self.res = DiscoveryResult()
         self.t0 = budget.clock()
         self.wall = budget.wall_seconds
@@ -919,15 +1037,20 @@ class _Run:
 
     # parsing one body of text/html
     def parse(self, html: str, text: str, lines_text: str, url: str, *, external: bool,
-              step: str, t_start: float, allow_images: bool = True, verify: Optional[str] = None) -> bool:
-        """Parse one body. `verify` ("own" | "site" | "external") runs the identity check
-        first; a page that fails it contributes NOTHING. Returns False when rejected."""
+              step: str, t_start: float, allow_images: bool = True, verify: bool = False,
+              via_hint: bool = False) -> bool:
+        """Parse one body. `verify=True` (every FETCHED page) runs the fail-closed identity
+        gate first: only a STRONG page contributes data, images, PDFs or links; a WEAK or
+        REJECTED page is recorded in evidence and contributes NOTHING. Returns False then."""
         found: List[str] = []
+        ident: Optional[Tuple[str, str]] = None
         if verify:
-            why = _page_identity_problem(self.row, html, text, verify)
-            if why:
-                self.res.evidence.append({"step": step, "url": url, "found": ["identity_mismatch"],
-                                          "reason": "identity_mismatch", "detail": why,
+            ident = page_identity(self.row, url, html, text, own=self.own, via_hint=via_hint,
+                                  shell_titles=self.shell_titles)
+            if ident[0] != STRONG:
+                reason = "weak_identity" if ident[0] == WEAK else "identity_mismatch"
+                self.res.evidence.append({"step": step, "url": url, "found": [reason], "reason": reason,
+                                          "identity": ident[0], "detail": ident[1],
                                           "elapsed_ms": int((self.budget.clock() - t_start) * 1000)})
                 return False
         if self.need(FIELD_FEES):
@@ -967,7 +1090,17 @@ class _Run:
                 if all(u != p[0] for p in self.pdfs):
                     self.pdfs.append((u, label))
         self.log(step, url, found, t_start)
+        if ident:
+            self.res.evidence[-1].update(identity=ident[0], detail=ident[1])
         return True
+
+
+def is_shared_page(row: dict, base_url: str, shared: bool = False) -> bool:
+    """A page that may carry several events: the caller says so (base URL shared by >= 2
+    shells), or the page / the row's booking URL carries a #fragment."""
+    if shared:
+        return True
+    return any("#" in str(u or "") for u in (base_url, row.get("booking_url")))   # incl. a bare "#" (SCCM)
 
 
 def discover(row: dict, page_html: str, page_text: str, base_url: str, *,
@@ -975,28 +1108,37 @@ def discover(row: dict, page_html: str, page_text: str, base_url: str, *,
              budget: Optional[DiscoveryBudget] = None,
              skip_urls: Iterable[str] = (),
              shared: bool = False,
+             shell_titles: Iterable[str] = (),
              sibling_titles: Iterable[str] = ()) -> DiscoveryResult:
     """Find missing fees / venue / abstract info on linked pages, a PDF and fee
     images. Never raises, never calls a text LLM. `skip_urls`: pages already
-    followed by the caller (e.g. the call-for-papers link of
-    _ensure_submission_info). `shared=True`: the page carries several events
-    (calendar page, #fragment row); only the row's own title block is parsed and no
-    link of the page is followed (organiser_url still is, behind the identity check);
-    when no block can be found nothing is discovered (evidence shared_page_no_window)."""
+    followed by the caller (e.g. the call-for-papers link of _ensure_submission_info).
+    `shell_titles`: the titles of the source's OTHER shells; a fetched page naming one in
+    a heading is rejected, in its body it is weak (see page_identity).
+    `shared=True` or a #fragment row: the page carries several events -> NO scrape-time
+    discovery at all (evidence [{"step": "skip", "reason": "shared_page"}]); the nightly
+    remediator's windowed guard owns shared pages."""
     budget = budget or DiscoveryBudget()
-    shared = bool(shared) or bool(urlparse(base_url or "").fragment)     # a #fragment row lives on a shared page
-    run = _Run(row or {}, budget, hints)
+    row = row or {}
+    if is_shared_page(row, base_url or "", shared):
+        res = DiscoveryResult()
+        res.evidence.append({"step": "skip", "reason": "shared_page", "url": base_url or "", "found": [], "elapsed_ms": 0})
+        return res
+    own = [o for o in (_own_path(u) for u in (row.get("booking_url"), row.get("source_url")) if u) if o]
+    # a stored URL that is a strict ANCESTOR of the other one is a listing, not the event's own path
+    own = [o for o in own if not any(x != o and x[0] == o[0] and x[1].startswith(o[1] + "/") for x in own)]
+    if not own and not (row.get("booking_url") or row.get("source_url")):
+        own = [_own_path(base_url or "")]        # no stored URL: the page the caller holds is the event's
+    run = _Run(row, budget, hints, own=own, shell_titles=list(shell_titles or ()) + list(sibling_titles or ()))
     try:
-        _discover(run, page_html or "", page_text or "", base_url or "",
-                  {_page_key(u) for u in skip_urls if u}, shared=shared, siblings=list(sibling_titles or ()))
+        _discover(run, page_html or "", page_text or "", base_url or "", {_page_key(u) for u in skip_urls if u})
     except Exception as e:  # noqa: BLE001
         logger.warning(f"discovery: aborted ({type(e).__name__}: {e})")
         run.res.evidence.append({"step": "error", "url": base_url, "found": [type(e).__name__], "elapsed_ms": 0})
     return run.res
 
 
-def _discover(run: _Run, html: str, text: str, base_url: str, skip: set,
-              shared: bool = False, siblings: Optional[List[str]] = None) -> None:
+def _discover(run: _Run, html: str, text: str, base_url: str, skip: set) -> None:
     b, res = run.budget, run.res
     if not run.missing or not base_url:
         return
@@ -1005,18 +1147,9 @@ def _discover(run: _Run, html: str, text: str, base_url: str, skip: set,
     t = b.clock()
     page_missing_abs = FIELD_ABSTRACT in run.missing
     run.missing.discard(FIELD_ABSTRACT)
-    if shared:
-        win = _shared_window(run.row, html, siblings or [])
-        if win is None:
-            run.log("page", base_url, ["shared_page_no_window"], t)
-            res.evidence[-1]["reason"] = "shared_page_no_window"
-            return
-        # only this row's block is read; nothing of the shared page is followed
-        run.parse("", win[1], win[0], base_url, external=False, step="page:window", t_start=t)
-        html, hints = "", None
-    else:
-        run.parse(html, text or _to_text(html), _to_lines(html), base_url, external=False, step="page", t_start=t)
-        hints = run.hints
+    # the event's own page (the extractor's page, not fetched here) is the row's identity itself
+    run.parse(html, text or _to_text(html), _to_lines(html), base_url, external=False, step="page", t_start=t)
+    hints = run.hints
     if page_missing_abs:
         run.missing.add(FIELD_ABSTRACT)
 
@@ -1046,10 +1179,8 @@ def _discover(run: _Run, html: str, text: str, base_url: str, skip: set,
         if not body:
             run.log(step, cand["url"], ["fetch_failed"], t)
             continue
-        kind = ("external" if cand["external"] else
-                "own" if (cand["why"] in ("hint", "hint_anchor") or _in_event_path(base_url, cand["url"])) else "site")
         accepted = run.parse(body, _to_text(body), _to_lines(body), cand["url"], external=cand["external"],
-                             step=step, t_start=t, verify=kind)
+                             step=step, t_start=t, verify=True, via_hint=cand["why"] == "hint")
         if accepted and fetched < b.max_html and not (cand["external"] and _is_ticketing_host(cand["url"])):
             # the fetched page's own links (same host as it) lead the pools: this is how
             # organiser_url (a homepage) reaches its /abstracts or /registration page
@@ -1131,7 +1262,7 @@ def _read_images(run: _Run) -> None:
         limit = min(led.seconds_left(), run.left(), 60.0)
         led.images_used += 1
         try:
-            vt = _vision_pricing([src], time.time() + limit)
+            vt = _vision_pricing([src], time.time() + limit, limit)
         except Exception as e:  # noqa: BLE001
             vt = []
             logger.debug(f"discovery: vision failed: {type(e).__name__}")

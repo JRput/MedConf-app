@@ -24,7 +24,7 @@ SET LOCAL lock_timeout = '10s';
 CREATE OR REPLACE FUNCTION public.is_degree_title(p_title text)
 RETURNS boolean LANGUAGE sql IMMUTABLE PARALLEL SAFE SET search_path = pg_catalog AS $f$
   SELECT COALESCE(p_title, '') ~* '(\y(m\.?sc|b\.?sc|mres|mphil|phd|dphil|mba|mph|pgcert|pgdip)\y|\ypostgraduate\s+(certificate|diploma)\y|\ydiploma\s+in\y|\yadvanced\s+certificate\s+in\y|\ycertificate\s+in\y.*\ylevel\s*7\y|\ymaster''?s?\s+(of|in)\y|\ybachelors?\s+of\y|\ydoctorate\s+(in|of)\y)'
-     AND COALESCE(p_title, '') !~* '(\y(ceremon\w*|graduation|awards?|prepar\w*|revision|exam\w*|mock|osce|symposium|congress|conference|webinar|lecture|open\s+day|viva|workshop|info(rmation)?\s+session|evening|alumni|interview|live|networking|taster|masterclass)\y|\yfor\s+the\s+diploma\y|,\s*(md|do|mph|mba|phd|msc|mres|mphil|dphil|pgcert|pgdip|facs|frcp|frcs|frca|mrcp|mrcs|rn|bds)\y)'
+     AND COALESCE(p_title, '') !~* '(\y(ceremon\w*|graduation|awards?|prepar\w*|revision|exam\w*|mock|osce|symposium|congress|conference|webinar|lecture|open\s+day|viva|workshop|info(rmation)?\s+session|alumni|interview|live\s+20\d\d|networking|taster|masterclass)\y|\yfor\s+the\s+diploma\y|,\s*(md|do|mph|mba|phd|msc|mres|mphil|dphil|pgcert|pgdip|facs|frcp|frcs|frca|mrcp|mrcs|rn|bds)\y)'
 $f$;
 REVOKE EXECUTE ON FUNCTION public.is_degree_title(text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.is_degree_title(text) TO service_role;
@@ -85,11 +85,11 @@ REVOKE ALL ON TABLE public.event_type_degree_backfill FROM PUBLIC, anon, authent
 -- Backfill: record first, then update (same predicate; idempotent via ON CONFLICT / event_type filter).
 INSERT INTO public.event_type_degree_backfill (conference_id, prev_event_type)
 SELECT id, event_type FROM public.conferences
- WHERE archived = FALSE AND event_type <> 'degree' AND public.is_degree_title(conference_name)
+ WHERE archived = FALSE AND event_type = 'conference' AND public.is_degree_title(conference_name)
 ON CONFLICT (conference_id) DO NOTHING;
 
 UPDATE public.conferences SET event_type = 'degree'
- WHERE archived = FALSE AND event_type <> 'degree' AND public.is_degree_title(conference_name);
+ WHERE archived = FALSE AND event_type = 'conference' AND public.is_degree_title(conference_name);
 
 -- ===== checks [0000] =====
 DO $chk$ BEGIN IF NOT COALESCE((SELECT ok FROM (SELECT (SELECT count(*) FROM pg_constraint WHERE conrelid='public.conferences'::regclass AND contype='c' AND pg_get_constraintdef(oid) LIKE '%event_type = ANY%') = 1 AND (SELECT bool_and(pg_get_constraintdef(oid) LIKE '%degree%' AND pg_get_constraintdef(oid) LIKE '%workshop%' AND pg_get_constraintdef(oid) LIKE '%course%' AND pg_get_constraintdef(oid) LIKE '%conference%') FROM pg_constraint WHERE conrelid='public.conferences'::regclass AND contype='c' AND pg_get_constraintdef(oid) LIKE '%event_type = ANY%') AS ok) q LIMIT 1), false) THEN RAISE EXCEPTION 'dry-run check 0000#1 FAILED'; END IF; END $chk$;
@@ -98,7 +98,7 @@ DO $chk$ BEGIN IF NOT COALESCE((SELECT ok FROM (SELECT bool_and(public.is_degree
 DO $chk$ BEGIN IF NOT COALESCE((SELECT ok FROM (SELECT bool_and(NOT public.is_degree_title(t)) AS ok FROM unnest(ARRAY['MRCP(UK) Diploma Ceremony','MRCP(UK) Diploma Ceremony 2027','Preparation Course for the Diploma in Special Care Dentistry','OSCE Revision Course for MSc students','PgDip Graduation Day','Annual Awards Dinner MSc','Mock Exam Day for the Diploma','A Conversation with Selwyn O. Rogers Jr., MD, MPH, FACS','ASCO Annual Meeting','RCEM Annual Conference 2027','PhD Student Symposium','Advanced Life Support Provider Course','MSc Student Prize Lecture','Masters of Endoscopy Live 2027']) t) q LIMIT 1), false) THEN RAISE EXCEPTION 'dry-run check 0000#4 FAILED'; END IF; END $chk$;
 DO $chk$ BEGIN IF NOT COALESCE((SELECT ok FROM (SELECT public.is_degree_title(NULL) = false AS ok) q LIMIT 1), false) THEN RAISE EXCEPTION 'dry-run check 0000#5 FAILED'; END IF; END $chk$;
 DO $chk$ BEGIN IF NOT COALESCE((SELECT ok FROM (SELECT NOT has_function_privilege('anon','public.is_degree_title(text)','EXECUTE') AND NOT has_function_privilege('authenticated','public.is_degree_title(text)','EXECUTE') AND has_function_privilege('service_role','public.is_degree_title(text)','EXECUTE') AS ok) q LIMIT 1), false) THEN RAISE EXCEPTION 'dry-run check 0000#6 FAILED'; END IF; END $chk$;
-DO $chk$ BEGIN IF NOT COALESCE((SELECT ok FROM (SELECT (SELECT count(*) FROM public.conferences WHERE archived=false AND event_type<>'degree' AND public.is_degree_title(conference_name)) = 0 AS ok) q LIMIT 1), false) THEN RAISE EXCEPTION 'dry-run check 0000#7 FAILED'; END IF; END $chk$;
+DO $chk$ BEGIN IF NOT COALESCE((SELECT ok FROM (SELECT (SELECT count(*) FROM public.conferences WHERE archived=false AND event_type='conference' AND public.is_degree_title(conference_name)) = 0 AS ok) q LIMIT 1), false) THEN RAISE EXCEPTION 'dry-run check 0000#7 FAILED'; END IF; END $chk$;
 DO $chk$ BEGIN IF NOT COALESCE((SELECT ok FROM (SELECT (SELECT count(*) FROM public.conferences WHERE event_type='degree' AND archived=false) = (SELECT count(*) FROM public.event_type_degree_backfill) AS ok) q LIMIT 1), false) THEN RAISE EXCEPTION 'dry-run check 0000#8 FAILED'; END IF; END $chk$;
 DO $chk$ BEGIN IF NOT COALESCE((SELECT ok FROM (SELECT NOT has_table_privilege('anon','public.event_type_degree_backfill','SELECT') AND NOT has_table_privilege('authenticated','public.event_type_degree_backfill','SELECT') AND (SELECT relrowsecurity FROM pg_class WHERE oid='public.event_type_degree_backfill'::regclass) AS ok) q LIMIT 1), false) THEN RAISE EXCEPTION 'dry-run check 0000#9 FAILED'; END IF; END $chk$;
 -- ===== 20261027000001_remediator_replace_tiers.sql =====

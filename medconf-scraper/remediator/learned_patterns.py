@@ -101,6 +101,32 @@ def record_success(*, source_url: str, field: str, method: str,
     return entry
 
 
+MAX_REPLAY_FAILURES = 3
+
+
+def record_failure(entry: dict) -> bool:
+    """A promoted replay failed the identity check on a row. Count it on the stored
+    pattern and drop the pattern after MAX_REPLAY_FAILURES. Returns True if dropped."""
+    domain = entry.get("domain") or ""
+    if not domain:
+        return False
+    key = f"{domain}|{entry.get('field')}|{entry.get('method')}"
+    if entry.get("subpage_path"):
+        key += f"|{entry['subpage_path']}"
+    data = _load()
+    patterns = data.setdefault("patterns", {})
+    stored = patterns.get(key)
+    if stored is None:
+        return False
+    stored["failures"] = stored.get("failures", 0) + 1
+    dropped = stored["failures"] >= MAX_REPLAY_FAILURES
+    if dropped:
+        del patterns[key]
+        logger.info(f"learned_patterns: DROPPED {key} after {stored['failures']} identity failures")
+    _save(data)
+    return dropped
+
+
 def get_promoted_patterns(source_url: str, field: str) -> list:
     """Return promoted patterns for this (domain, field) — caller tries them
     BEFORE escalating to explorer or LLM."""

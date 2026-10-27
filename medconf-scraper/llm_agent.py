@@ -156,15 +156,17 @@ def _is_flagship_from_url(url: Optional[str]) -> bool:
     return any(host in u for host in _FLAGSHIP_URL_HOSTS)
 
 
+def _shell_key(u) -> str:
+    return (u or "").split("#")[0].split("?")[0].rstrip("/")
+
+
 def shared_page_info(shells, url: str):
-    """(shared, sibling_titles): a row's page is SHARED when its booking url carries a
+    """(shared, same_url_titles): a row's page is SHARED when its booking url carries a
     #fragment, or the same url (fragment and query stripped) is the booking url of >= 2
-    shells of the source. Siblings are the titles of the shells on that url."""
-    def key(u):
-        return (u or "").split("#")[0].split("?")[0].rstrip("/")
+    shells of the source. Shared rows get NO scrape-time discovery (FV4)."""
     try:
-        k = key(url)
-        same = [x for x in (shells or []) if key(x.get("booking_url")) == k]
+        k = _shell_key(url)
+        same = [x for x in (shells or []) if _shell_key(x.get("booking_url")) == k]
         shared = ("#" in (url or "").rstrip("#")) or len(same) >= 2
         return shared, [x.get("title") for x in same if x.get("title")]
     except Exception:
@@ -324,6 +326,16 @@ class AgentLoop:
             from extractors import discovery
             if not discovery.missing_fields(merged):
                 return
+            shells = getattr(self, "shells", None) or []
+            shared, _same = shared_page_info(shells, url)
+            if shared:
+                # one URL, several events: the nightly remediator's windowed guard owns it
+                merged["_discovery_evidence"] = {"filled": [], "deferred": [], "evidence": [
+                    {"step": "skip", "reason": "shared_page", "url": url, "found": [], "elapsed_ms": 0}]}
+                return
+            me = _shell_key(url)
+            others = [x.get("title") for x in shells
+                      if x.get("title") and _shell_key(x.get("booking_url")) != me]
             page = self.browser.page
             text = (self.browser.get_page_text() or "")[:250_000]
             html = ""
@@ -340,13 +352,12 @@ class AgentLoop:
                 pass
             if getattr(self, "_vision_ledger", None) is None:
                 self._vision_ledger = discovery.VisionLedger()   # one per source run
-            shared, siblings = shared_page_info(getattr(self, "shells", None), url)
             res = discovery.discover(
                 merged, html, text, base,
                 hints=getattr(self.extractor, "DISCOVERY_HINTS", None),
                 budget=discovery.DiscoveryBudget(vision=self._vision_ledger),
                 skip_urls=[u for u in skip if u],
-                shared=shared, sibling_titles=siblings)
+                shell_titles=others)
             written = discovery.apply_to_row(merged, res)
             merged["_discovery_evidence"] = {
                 "filled": written, "evidence": res.evidence, "deferred": res.deferred}

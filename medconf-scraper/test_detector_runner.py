@@ -39,13 +39,39 @@ def test_all_zero_tiers_gap():
     assert "pricing" in detect_gaps(_row(), True, tiers=[T("Standard", 0)])
     assert "pricing" in detect_gaps(_row(), True, tiers=[T("A", 0), T("B", 0.0)])
 
-@pytest.mark.parametrize("label", ["Standard", "Registration", "Fee", "Price",
-                                   "Course fee", "standard fee"])
+@pytest.mark.parametrize("label", ["Standard", "Registration", "Registration fee", "Fee", "Fees",
+                                   "Price", "Course fee", "Delegate", "  standard "])
 def test_single_generic_tier_is_partial(label):
     rows = [(_row(id=7))]
     out = detect_gaps_for_rows(rows, {7: [T(label, 250)]})
     assert out and "pricing" in out[0][1]
     assert out[0][0]["_pricing_gap_kind"] == "partial"
+
+@pytest.mark.parametrize("label", ["standard fee", "Ticket", "General", "Rate", "Event"])
+def test_single_label_outside_sql_set_is_no_gap(label):
+    """Not in the SQL function's label set: the RPC would return 0, so it is not a gap."""
+    out = detect_gaps_for_rows([_row(id=7)], {7: [T(label, 250)]})
+    assert not out or "pricing" not in out[0][1]
+
+
+def test_generic_labels_match_sql_function():
+    import re
+    from pathlib import Path
+    from remediator.detector import REPLACE_GENERIC_LABELS
+    sql = (Path(__file__).resolve().parent.parent / "supabase/migrations/20261027000001_remediator_replace_tiers.sql").read_text()
+    m = re.search(r"IN \(([^)]*)\)\)\)", sql)
+    assert m, "label IN (...) list not found in SQL"
+    assert set(re.findall(r"'([^']+)'", m.group(1))) == set(REPLACE_GENERIC_LABELS)
+
+
+def test_null_price_is_not_zero_like_sql():
+    from remediator.detector import pricing_gap_kind
+    assert pricing_gap_kind(True, [{"tier_label": "Member", "price_gbp": None}]) is None
+
+
+def test_more_amounts_than_tiers_is_advisory_not_a_gap():
+    from remediator.detector import pricing_gap_kind
+    assert pricing_gap_kind(True, [T("Consultant", 99)], 3) == "advisory"
 
 def test_single_specific_tier_no_gap():
     assert "pricing" not in detect_gaps(_row(), True, tiers=[T("Member · Early bird", 99)])
@@ -55,7 +81,9 @@ def test_page_amount_count_hint():
     one = [T("Consultant", 99)]
     assert "pricing" not in detect_gaps(_row(), True, tiers=one)
     assert "pricing" not in detect_gaps(_row(), True, tiers=one, page_amount_count=1)
-    assert "pricing" in detect_gaps(_row(), True, tiers=one, page_amount_count=3)
+    assert "pricing" not in detect_gaps(_row(), True, tiers=one, page_amount_count=3)  # advisory only
+    generic = [T("Standard", 99)]
+    assert "pricing" in detect_gaps(_row(), True, tiers=generic, page_amount_count=3)
 
 def test_zero_tier_rows_order_before_partial():
     now = None
@@ -128,13 +156,13 @@ class _Cache(_FakeCache):
         _Cache.fetched.append(u)
         return "page text"
 
-def _drive(monkeypatch, confs, gaps, fixers, explorers=None, promoted=None):
+def _drive(monkeypatch, confs, gaps, fixers, explorers=None, promoted=None, cache=None):
     sb = _SB({"scraper_sources": [{"id": 5, "society": "S", "source_name": "n"}],
               "conferences": confs, "pricing_tiers": []})
     _Cache.fetched = []
     monkeypatch.setattr(runner, "_get_supabase", lambda: sb)
     monkeypatch.setattr(runner, "_llm_call_factory", lambda: (lambda *a, **k: None))
-    monkeypatch.setattr(runner, "PageCache", _Cache)
+    monkeypatch.setattr(runner, "PageCache", cache or _Cache)
     monkeypatch.setattr(runner, "FIXERS", fixers)
     monkeypatch.setattr(runner, "EXPLORERS", explorers or {})
     monkeypatch.setattr(runner, "validate", lambda f, v: True)
@@ -207,6 +235,75 @@ def test_shared_page_guard(monkeypatch):
     assert seen[4] == PAGE          # unshared row untouched
     assert explored == [4]          # explorer skipped on shared rows
     assert any(c["conference_id"] == 3 for c in cap["patches_couldnt_fix"])
+
+def test_shared_row_explorer_never_gets_organiser_url(monkeypatch):
+    """Even when an explorer is reached for a shared-page row, the organiser_url hop is off."""
+    got = []
+    confs = [
+        _conf(id=1, conference_name="Basic Life Support Course", source_url="https://e.org/c#bls",
+              organiser_url="https://other.org/x"),
+        _conf(id=2, conference_name="Advanced Sepsis Masterclass", source_url="https://e.org/c#sep",
+              organiser_url="https://other.org/y"),
+        _conf(id=4, conference_name="Solo", source_url="https://e.org/solo", organiser_url="https://o.org/s"),
+    ]
+    monkeypatch.setattr(runner, "SHARED_GUARDED_FIELDS", ())   # force the explorer to be reached
+    monkeypatch.setattr(runner, "PageCache", _SharedCache)
+    expl = lambda **kw: got.append((kw["row"]["id"], kw["row"].get("organiser_url"))) or SimpleNamespace(
+        found=False, value=None, to_dict=lambda: {}, external_url="https://other.org/z",
+        extras={}, method="x", audit_trail=SimpleNamespace(subpages_fetched=[]))
+    sb, cap = _drive(monkeypatch, confs, ["pricing"], {"pricing": lambda r, t, l: (None, None)},
+                     explorers={"pricing": expl})
+    d = dict(got)
+    assert d[1] is None and d[2] is None          # shared rows: hop disabled
+    assert d[4] == "https://o.org/s"              # unshared row keeps it
+
+
+BETA_URL = "https://e.org/events/beta-summit/fees"
+BETA_HTML = "<html><h1>Beta Summit 2027</h1><p>Fees. See also Alpha Congress 2027.</p></html>"
+BETA_TEXT = "Beta Summit 2027\nFees: Delegate 999 EUR. See also Alpha Congress 2027."
+
+
+class _ReplayCache(_FakeCache):
+    def get(self, u):
+        return BETA_TEXT if u == BETA_URL else "main page"
+    def get_html(self, u):
+        return BETA_HTML if u == BETA_URL else "<html></html>"
+
+
+def _replay(monkeypatch):
+    seen, failures = [], []
+    confs = [_conf(id=1, conference_name="Alpha Congress 2027", source_url="https://e.org/events/alpha"),
+             _conf(id=2, conference_name="Beta Summit 2027", source_url="https://e.org/events/beta")]
+    entry = {"domain": "e.org", "field": "pricing", "method": "subpage", "subpage_path": BETA_URL,
+             "hits": 5, "promoted": True}
+    def fixer(row, text, llm):
+        seen.append((row["id"], text))
+        return None, None
+    monkeypatch.setattr(runner, "record_failure", lambda e: failures.append(e["subpage_path"]))
+    _drive(monkeypatch, confs, ["pricing"], {"pricing": fixer}, promoted=[entry], cache=_ReplayCache)
+    return seen, failures
+
+
+def test_replayed_page_naming_another_event_is_not_used(monkeypatch):
+    """Row Alpha mentions-in-passing on Beta's page: token check passes, heading names Beta."""
+    seen, failures = _replay(monkeypatch)
+    assert (1, BETA_TEXT) not in seen          # never fed Beta's fees to Alpha
+    assert (2, BETA_TEXT) in seen              # Beta's own page is still replayed for Beta
+    assert failures == [BETA_URL]              # one failure counted, for Alpha only
+
+
+def test_record_failure_drops_pattern_after_three(monkeypatch, tmp_path):
+    monkeypatch.setattr(learned_patterns, "_PATTERNS_PATH", tmp_path / "lp.json")
+    for _ in range(3):
+        learned_patterns.record_success(source_url="https://e.org/a", field="pricing",
+                                        method="subpage", subpage_path=BETA_URL)
+    e = learned_patterns.get_promoted_patterns("https://e.org/a", "pricing")[0]
+    assert learned_patterns.record_failure(e) is False
+    assert learned_patterns.record_failure(e) is False
+    assert learned_patterns.get_promoted_patterns("https://e.org/a", "pricing")
+    assert learned_patterns.record_failure(e) is True
+    assert learned_patterns.get_promoted_patterns("https://e.org/a", "pricing") == []
+
 
 # ----------------------------------------------------------- fixer order
 def test_fixer_order(monkeypatch):

@@ -105,3 +105,12 @@ def test_markdown_renders():
     cur = cr.compute_coverage([{"id": 1, "source_name": "A"}], [conf(1, 1)], {1})
     md = cr.render_markdown(cur, ["x"], "2026-10-27")
     assert "| 1 | A | 1 | 100% |" in md and "- x" in md
+
+
+def test_load_previous_ignores_baseline_and_today_and_future(tmp_path):
+    """Restored cache = dated files only; baseline.json, today and later days never count."""
+    import json
+    for n, d in (("2026-10-25", "old"), ("2026-10-26", "yesterday"), ("2026-10-27", "today"),
+                 ("2026-10-28", "future"), ("baseline", "baseline")):
+        (tmp_path / f"{n}.json").write_text(json.dumps({"date": d}))
+    assert cr.load_previous(tmp_path, "2026-10-27") == {"date": "yesterday"}

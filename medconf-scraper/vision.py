@@ -147,6 +147,8 @@ def extract_json(
     *,
     max_tokens: int = 2000,
     timeout: float = 60.0,
+    fetch_timeout: Optional[float] = None,
+    hard_timeout: Optional[float] = None,
 ) -> Optional[dict]:
     """Send one or more images + a prompt to the vision model. Returns the
     parsed JSON object on success, None on any failure (network error,
@@ -154,9 +156,13 @@ def extract_json(
 
     The prompt should instruct the model to return ONLY a JSON object — we
     strip ```json fences and locate the first {...} block before parsing.
+
+    fetch_timeout: per-image download timeout (default 30 s). hard_timeout: wall-clock
+    cap on download(s) + model call together (default: the call alone gets timeout + 20).
     """
     if not image_urls:
         return None
+    t_start = time.monotonic()
 
     # Build a multi-content message: prompt + each image
     content: list = [{"type": "text", "text": prompt}]
@@ -175,7 +181,8 @@ def extract_json(
                 continue
             content.append({"type": "image_url", "image_url": {"url": url}})
         else:
-            data_url = fetch_image_as_data_url(url)
+            data_url = (fetch_image_as_data_url(url) if fetch_timeout is None else
+                        fetch_image_as_data_url(url, timeout=max(0.5, fetch_timeout)))
             if not data_url:
                 continue
             content.append({"type": "image_url", "image_url": {"url": data_url}})
@@ -187,6 +194,13 @@ def extract_json(
         # No images successfully attached
         return None
 
+    cap = timeout + 20
+    if hard_timeout is not None:
+        cap = hard_timeout - (time.monotonic() - t_start)
+        if cap < 0.5:
+            logger.warning("vision: no time left for the model call")
+            return None
+        timeout = min(timeout, cap)
     try:
         resp = call_with_hard_timeout(
             lambda: chat_completion(
@@ -197,7 +211,7 @@ def extract_json(
                 max_tokens=max_tokens,
                 timeout=timeout,
             ),
-            timeout + 20,
+            cap,
         )
         raw = (resp.choices[0].message.content or "").strip()
     except Exception as e:
@@ -260,7 +274,9 @@ Rules:
 PRICING_PROMPT = PRICING_PROMPT.replace("{SYMBOLS}", prompt_symbol_table())
 
 
-def extract_pricing_from_images(image_urls: List[str], stop_at: Optional[float] = None) -> list[dict]:
+def extract_pricing_from_images(image_urls: List[str], stop_at: Optional[float] = None, *,
+                                fetch_timeout: Optional[float] = None,
+                                call_timeout: Optional[float] = None) -> list[dict]:
     """High-level helper: send pricing images to the vision model and
     return a list of pricing_tier dicts ready for insertion.
 
@@ -271,6 +287,10 @@ def extract_pricing_from_images(image_urls: List[str], stop_at: Optional[float] 
 
     Returns [] on total failure. Partial failures are tolerated — if 1 of
     4 images fails, we keep the 3 successful ones.
+
+    fetch_timeout / call_timeout (scrape-time discovery passes its remaining budget as
+    both): per-image download timeout and wall-clock cap on download + model call; both
+    are further capped by what is left before `stop_at`.
     """
     if not image_urls:
         return []
@@ -283,7 +303,13 @@ def extract_pricing_from_images(image_urls: List[str], stop_at: Optional[float] 
         if stop_at is not None and time.time() >= stop_at:
             logger.warning("vision: stop_at deadline reached — skipping remaining images")
             break
-        result = extract_json([url], PRICING_PROMPT, max_tokens=3000)
+        left = None if stop_at is None else stop_at - time.time()
+        ft = fetch_timeout if left is None else min(x for x in (fetch_timeout, left) if x is not None)
+        ct = call_timeout if left is None else min(x for x in (call_timeout, left) if x is not None)
+        if ft is None and ct is None:
+            result = extract_json([url], PRICING_PROMPT, max_tokens=3000)
+        else:
+            result = extract_json([url], PRICING_PROMPT, max_tokens=3000, fetch_timeout=ft, hard_timeout=ct)
         if not result or "tiers" not in result:
             logger.warning(f"vision: no tiers extracted from {url[:120]}")  # url may be a multi-MB data: URL
             continue

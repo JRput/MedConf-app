@@ -219,10 +219,18 @@ TIERS = [{"tier_label": "Member", "price_gbp": 300.0}]
 
 
 def test_runner_flags_partial_when_page_shows_more_amounts():
+    """Only a SQL-eligible stored set (one generic label) is promoted to a pricing gap."""
+    row = {"id": 1, "conference_name": "Annual Congress 2027"}
+    page = "Registration: Member 300 EUR, Non-member 450 EUR, Student 150 EUR"
+    gaps = _gaps_with_page_amounts(row, ["description"], [{"tier_label": "Standard", "price_gbp": 300.0}], page, False)
+    assert "pricing" in gaps and row["_pricing_gap_kind"] == "partial"
+
+
+def test_runner_more_amounts_but_not_sql_eligible_is_advisory_only():
     row = {"id": 1, "conference_name": "Annual Congress 2027"}
     page = "Registration: Member 300 EUR, Non-member 450 EUR, Student 150 EUR"
     gaps = _gaps_with_page_amounts(row, ["description"], TIERS, page, False)
-    assert "pricing" in gaps and row["_pricing_gap_kind"] == "partial"
+    assert "pricing" not in gaps and "_pricing_gap_kind" not in row
 
 
 def test_runner_no_flag_when_counts_match_or_no_page():

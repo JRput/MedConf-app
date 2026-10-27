@@ -120,7 +120,7 @@ IMG_PAGE = ('<html><body><h2>Registration fees</h2>'
 
 def test_fee_image_read_by_vision_within_budget(monkeypatch):
     seen = []
-    monkeypatch.setattr(discovery, "_vision_pricing", lambda urls, stop_at: seen.append(urls) or [
+    monkeypatch.setattr(discovery, "_vision_pricing", lambda urls, stop_at, timeout=None: seen.append(urls) or [
         {"tier_label": "Member", "price_gbp": 150.0, "currency": "EUR", "is_early_bird": False},
         {"tier_label": "Guess", "price_gbp": 99.0, "currency": None, "is_early_bird": False}])
     led = VisionLedger()
@@ -145,7 +145,7 @@ def test_inline_data_image_goes_to_vision(monkeypatch):
     page = ('<h2>Registration fees</h2><img src="data:image/png;base64,' + "A" * 60000 +
             '" width="800" height="600">')
     got = []
-    monkeypatch.setattr(discovery, "_vision_pricing", lambda urls, stop_at: got.append(urls[0][:21]) or [
+    monkeypatch.setattr(discovery, "_vision_pricing", lambda urls, stop_at, timeout=None: got.append(urls[0][:21]) or [
         {"tier_label": "Delegate", "price_gbp": 10.0, "currency": "USD"}])
     res = discover(row(event_format="online"), page, "", BASE)
     assert got == ["data:image/png;base64"] and res.tiers[0]["currency"] == "USD"
@@ -226,6 +226,9 @@ def test_hint_url_template_and_anchor_words(monkeypatch):
     net2 = Net({"https://conf.example.org/x/rates-info": REG})
     monkeypatch.setattr(discovery, "_fetch_html", net2)
     hints2 = DiscoveryHints(anchor_words={"fees": ("delegate rates",)})
+    # an anchor-word link is picked from the page, not declared by the hint: it needs its own STRONG identity
+    assert discover(row(event_format="online"), page, "", BASE, hints=hints2).tiers == []
+    net2.pages["https://conf.example.org/x/rates-info"] = REG.replace("<body>", "<body><h1>Annual Meeting 2027 Registration</h1>")
     assert len(discover(row(event_format="online"), page, "", BASE, hints=hints2).tiers) == 3
 
 
@@ -242,7 +245,7 @@ def test_external_hop_to_organiser_url_is_identity_gated(monkeypatch):
     monkeypatch.setattr(discovery, "_fetch_html", Net({org: page.replace("Minimally Invasive Course", "Other thing")}))
     r2 = row(conference_name="Quite Different Symposium", event_format="online", organiser_url=org)
     res2 = discover(r2, "<html><body>info</body></html>", "", BASE)
-    assert res2.tiers == [] and any("identity_mismatch" in e["found"] for e in res2.evidence)
+    assert res2.tiers == [] and any(e.get("identity") == "weak" for e in res2.evidence)
 
 
 def test_external_links_other_than_organiser_url_never_followed(monkeypatch):
@@ -373,7 +376,8 @@ def test_venue_from_banner_on_the_page_itself(monkeypatch):
 
 def test_second_hop_from_organiser_homepage_to_its_abstracts_page(monkeypatch):
     org = "https://emuc.example.net/"
-    home = '<html><body><a href="/scientific-programme/abstracts/">Abstract Submission</a> Welcome to the Zebrafish Symposium</body></html>'
+    home = ('<html><body><h1>Zebrafish Symposium 2027</h1>'
+            '<a href="/scientific-programme/abstracts/">Abstract Submission</a> Welcome</body></html>')
     abs_ = ("<html><body><h1>Zebrafish Symposium 2027 abstracts</h1>"
             "<p>Abstract submission deadline: 1 August 2099. Submit your abstract.</p></body></html>")
     net = Net({org: home, "https://emuc.example.net/scientific-programme/abstracts/": abs_})
@@ -382,6 +386,11 @@ def test_second_hop_from_organiser_homepage_to_its_abstracts_page(monkeypatch):
             conference_name="Zebrafish Symposium 2027")
     res = discover(r, "<html><body>stub</body></html>", "", BASE)
     assert res.abstract_deadline == "2099-08-01" and len(net.fetched) == 2
+    # FV4 trade-off: a homepage whose heading is not the event title is WEAK -> no second hop
+    net.pages[org] = home.replace("<h1>Zebrafish Symposium 2027</h1>", "")
+    net.fetched.clear()
+    res = discover(r, "<html><body>stub</body></html>", "", BASE)
+    assert not res.has_abstract() and net.fetched == [org]
 
 
 def test_site_wide_pages_that_never_name_the_field_are_not_fetched(monkeypatch):
@@ -416,7 +425,7 @@ def test_generic_topic_words_do_not_make_an_external_link_this_event():
 def test_ticketing_host_uses_identity_and_date_gated_handler(monkeypatch):
     ld = ('{"@type":"Event","name":"Zebrafish Symposium 2027","startDate":"2099-09-01",'
           '"offers":[{"@type":"Offer","name":"Standard","price":"45","priceCurrency":"GBP"}]}')
-    page = f'<html><head><script type="application/ld+json">{ld}</script></head><body>Zebrafish Symposium 2027</body></html>'
+    page = f'<html><head><script type="application/ld+json">{ld}</script></head><body><h1>Zebrafish Symposium 2027</h1></body></html>'
     eb = "https://www.eventbrite.co.uk/e/annual-meeting-2027-tickets-1"
     monkeypatch.setattr(discovery, "_fetch_html", Net({eb: page}))
     zr = dict(event_format="online", abstract_open=True, organiser_url=eb, conference_name="Zebrafish Symposium 2027")
@@ -477,19 +486,26 @@ def test_same_host_page_outside_own_path_must_name_the_event(monkeypatch):
     generic = '<html><body><h1>Delegate registration</h1><p>Member: £100</p><p>Non-member: £150</p></body></html>'
     monkeypatch.setattr(discovery, "_fetch_html", Net({other: generic}))
     res = discover(row_, page, "", CARDIO)
-    assert res.tiers == [] and any(e.get("reason") == "identity_mismatch" for e in res.evidence)
+    assert res.tiers == [] and any(e.get("reason") == "weak_identity" for e in res.evidence)
     named = generic.replace("<p>Member", "<p>Cardio Update 2027 delegates</p><p>Member")
     monkeypatch.setattr(discovery, "_fetch_html", Net({other: named}))
+    assert discover(row_, page, "", CARDIO).tiers == []          # FV4: the title in the body is not identity
+    titled = generic.replace("Delegate registration", "Cardio Update 2027: Registration")
+    monkeypatch.setattr(discovery, "_fetch_html", Net({other: titled}))
     assert len(discover(row_, page, "", CARDIO).tiers) == 2
 
 
 def test_rejected_page_links_are_not_followed(monkeypatch):
-    bad = NEURO_PAGE.replace("</body>", '<a href="/events/conferences/neuro-masterclass-2027/venue">Venue</a>'
-                             '<a href="/files/fees.pdf">Fees PDF</a></body>')
-    net = Net({NEURO: bad})
+    """The rejected sibling page offers NO fees or venue, so an engine without the gate is
+    never 'satisfied' by it and goes on to its links: they must still never be fetched."""
+    bad = ("<html><body><h1>Neuro Masterclass 2027</h1><p>Programme to follow.</p>"
+           f"<a href='{NEURO}/registration'>Registration</a><a href='{NEURO}/venue'>Venue</a>"
+           "<a href='/files/fees.pdf'>Registration fees PDF</a></body></html>")
+    net = Net({NEURO: bad})                     # autouse fixture fails any PDF fetch
     monkeypatch.setattr(discovery, "_fetch_html", net)
     res = discover(cardio_row(), CARDIO_PAGE, "", CARDIO, budget=DiscoveryBudget(max_html=3))
     assert net.fetched == [NEURO]
+    assert [e.get("reason") for e in res.evidence if e["step"].startswith("fetch")] == ["identity_mismatch"]
 
 
 SHARED = """<html><body><h1>Events calendar</h1>
@@ -499,34 +515,23 @@ SHARED = """<html><body><h1>Events calendar</h1>
 </body></html>"""
 
 
-def test_fragment_row_on_shared_page_reads_only_its_own_block(monkeypatch):
-    """Reviewer T2: the ICU summit must not get the sepsis webinar's $50/$80."""
+def test_fragment_row_on_shared_page_gets_no_scrape_time_discovery(monkeypatch):
+    """Reviewer T2 (FV4): a #fragment row is skipped entirely, no window parsing."""
     monkeypatch.setattr(discovery, "_fetch_html", lambda u, t: pytest.fail(f"followed {u}"))
-    r_ = row(conference_name="ICU Leadership Summit")
-    res = discover(r_, SHARED, "", "https://sccm.org/calendar#icu-leadership-summit-ab12")
-    assert sorted(t["price_gbp"] for t in res.tiers) == [150.0, 400.0]
-    r2 = row(conference_name="Webinar on Sepsis")
-    res2 = discover(r2, SHARED, "", "https://sccm.org/calendar#sepsis", sibling_titles=["ICU Leadership Summit"])
-    assert sorted(t["price_gbp"] for t in res2.tiers) == [50.0, 80.0]
+    for name, frag in (("ICU Leadership Summit", "#icu-leadership-summit-ab12"), ("Webinar on Sepsis", "#sepsis")):
+        res = discover(row(conference_name=name), SHARED, "", "https://sccm.org/calendar" + frag)
+        assert res.tiers == [] and res.venue_name is None and res.evidence[0]["reason"] == "shared_page"
 
 
-def test_shared_page_without_a_window_discovers_nothing(monkeypatch):
+def test_shared_flag_skips_even_without_a_fragment(monkeypatch):
     monkeypatch.setattr(discovery, "_fetch_html", lambda u, t: pytest.fail(f"followed {u}"))
-    res = discover(row(conference_name="Not On This Page"), SHARED, "", "https://sccm.org/calendar#nope",
-                   shared=True)
-    assert res.tiers == [] and res.venue_name is None
-    assert res.evidence[0]["reason"] == "shared_page_no_window"
+    res = discover(row(conference_name="ICU Leadership Summit"), SHARED, "", "https://sccm.org/calendar", shared=True)
+    assert res.tiers == [] and [e["step"] for e in res.evidence] == ["skip"]
+    r = row(conference_name="ICU Leadership Summit", booking_url="https://sccm.org/calendar#icu")
+    assert discover(r, SHARED, "", "https://sccm.org/calendar").evidence[0]["reason"] == "shared_page"
 
 
-def test_shared_page_never_follows_links_of_the_page(monkeypatch):
-    monkeypatch.setattr(discovery, "_fetch_html", lambda u, t: pytest.fail(f"followed {u}"))
-    html = SHARED.replace("<p>Delegate", "<a href='/calendar/icu/registration'>Registration</a><p>Delegate")
-    res = discover(row(conference_name="ICU Leadership Summit", pricing_tiers=[]), html.replace("Student: $150", ""),
-                   "", "https://sccm.org/calendar#icu", shared=True)
-    assert {t["price_gbp"] for t in res.tiers} <= {400.0}               # never the webinar's $50 / $80
-
-
-def test_shared_window_longer_sibling_title_is_not_the_row():
+def test_shared_page_info_keys():
     from llm_agent import shared_page_info
     shells = [{"title": "Sepsis Update", "booking_url": "https://x.org/cal"},
               {"title": "Sepsis Update Advanced", "booking_url": "https://x.org/cal?page=2"},
@@ -535,14 +540,9 @@ def test_shared_window_longer_sibling_title_is_not_the_row():
     assert shared and sorted(sibs) == ["Sepsis Update", "Sepsis Update Advanced"]
     assert shared_page_info(shells, "https://x.org/other") == (False, ["Other"])
     assert shared_page_info([], "https://x.org/cal#frag")[0] is True
-    html = ("<h2>Sepsis Update Advanced</h2><p>Member: $900</p><p>Fees</p>"
-            "<h2>Sepsis Update</h2><p>Fees</p><p>Member: $100</p><p>Fee: $120</p>")
-    win = discovery._shared_window({"conference_name": "Sepsis Update"}, html,
-                                   ["Sepsis Update Advanced", "Sepsis Update"])
-    assert win and "$100" in win[1] and "$900" not in win[1]
 
 
-def test_agent_hook_windows_a_page_shared_by_two_shells(monkeypatch):
+def test_agent_hook_skips_a_page_shared_by_two_shells(monkeypatch):
     from llm_agent import AgentLoop
     monkeypatch.setattr(discovery, "_fetch_html", lambda u, t: pytest.fail(f"followed {u}"))
     html = ("<html><body><h2>Annual Meeting 2027</h2><p>Registration fees</p><p>Member: £120</p>"
@@ -552,7 +552,9 @@ def test_agent_hook_windows_a_page_shared_by_two_shells(monkeypatch):
     ag.shells = [{"title": "Annual Meeting 2027", "booking_url": BASE}, {"title": "Other Webinar 2027", "booking_url": BASE}]
     merged = row(venue_name="V", city="C", abstract_open=True)
     AgentLoop._discover_missing(ag, merged, BASE)
-    assert sorted(t["price_gbp"] for t in merged["pricing_tiers"]) == [60.0, 120.0]
+    assert merged["pricing_tiers"] == []
+    assert merged["_discovery_evidence"]["evidence"] == [
+        {"step": "skip", "reason": "shared_page", "url": BASE, "found": [], "elapsed_ms": 0}]
 
 
 # ---- wall clock is enforced INSIDE steps ----------------------------------------------
@@ -610,8 +612,310 @@ def test_pdf_step_skipped_when_clock_cannot_cover_fetch_plus_parse(monkeypatch):
 
 
 def test_every_step_timeout_fits_in_what_is_left(monkeypatch):
+    """Hung hosts (every fetch burns its full timeout). Observable guards:
+    (a) 0.5 s left after the first fetch is below the 1 s reserve -> the 2nd fetch never starts;
+    (b) 2 s left -> the 2nd fetch is given exactly 2 s, and the PDF step (needs fetch + parse
+        reserve) is skipped."""
+    ev = {"conference_name": "Wall Test Congress", "event_format": "in_person"}
     clk = FakeClock()
     _slow_world(monkeypatch, clk, html_cost=100.0)
-    discover({"conference_name": "Wall Test Congress", "event_format": "in_person"}, PDF_PAGE, "",
-             "https://h.org/a/b/c", budget=DiscoveryBudget(clock=clk))
-    assert clk.t <= 20.0 + 1e-9 and [c[0] for c in clk.calls] == ["html", "html"]
+    discover(ev, PDF_PAGE, "", "https://h.org/a/b/c", budget=DiscoveryBudget(clock=clk, wall_seconds=10.5))
+    assert clk.calls == [("html", 10.0)] and clk.t <= 10.5
+    clk = FakeClock()
+    _slow_world(monkeypatch, clk, html_cost=100.0)
+    discover(ev, PDF_PAGE, "", "https://h.org/a/b/c", budget=DiscoveryBudget(clock=clk, wall_seconds=12.0))
+    assert clk.calls == [("html", 10.0), ("html", 2.0)] and clk.t <= 12.0
+    # (c) 4 s left after two 6 s fetches: below the PDF reserve (fetch 2 s + child parse 3 s),
+    #     so the PDF step is never started (the pre-fix engine started it above 3 s)
+    clk = FakeClock()
+    _slow_world(monkeypatch, clk, html_cost=6.0)
+    discover(ev, PDF_PAGE, "", "https://h.org/a/b/c", budget=DiscoveryBudget(clock=clk, wall_seconds=16.0))
+    assert [c[0] for c in clk.calls] == ["html", "html"] and clk.t <= 16.0
+
+
+# ═══ FV4 fail-closed identity gate (V cycle 2 FAIL → foreman decision, 2026-10-27) ═════
+FEES_HTML = """<h2>Registration fees</h2><table><tr><th>Category</th><th>Fee</th></tr>
+<tr><td>Member</td><td>£250</td></tr><tr><td>Non-member</td><td>£350</td></tr></table>
+<h2>Venue</h2><p>Venue: Royal Hall, Edinburgh</p>"""
+
+
+def own_row(**kw):
+    return cardio_row(booking_url=CARDIO, source_url=CARDIO, **kw)
+
+
+def _verdicts(res):
+    return [(e.get("reason"), e.get("detail"), e.get("identity")) for e in res.evidence if e["step"].startswith("fetch")]
+
+
+def test_fv4_workshop_sibling_extending_the_title_is_rejected(monkeypatch):
+    w = CARDIO + "-workshop"
+    page = f"<html><body><h1>Cardio Update 2027</h1><a href='{w}'>Registration</a></body></html>"
+    monkeypatch.setattr(discovery, "_fetch_html", Net({w: f"<html><body><h1>Cardio Update 2027 Workshop</h1>{FEES_HTML}</body></html>"}))
+    res = discover(own_row(), page, "", CARDIO)
+    assert res.tiers == [] and res.venue_name is None
+    assert _verdicts(res) == [("identity_mismatch", "extends_title_with_event_word", "rejected")]
+
+
+def test_fv4_site_wide_fees_page_naming_the_row_once_is_weak(monkeypatch):
+    f = "https://soc.org/fees"
+    page = f"<html><body><h1>Cardio Update 2027</h1><a href='{f}'>Registration fees</a></body></html>"
+    body = f"<html><body><p>Cardio Update 2027: see later.</p><p>Neuro Masterclass 2027</p>{FEES_HTML}<a href='/fees/x.pdf'>Fees PDF</a></body></html>"
+    net = Net({f: body})
+    monkeypatch.setattr(discovery, "_fetch_html", net)
+    res = discover(own_row(), page, "", CARDIO, budget=DiscoveryBudget(max_html=3))
+    assert res.tiers == [] and res.venue_name is None and net.fetched == [f]
+    assert _verdicts(res) == [("weak_identity", "no_strong_identity", "weak")]
+
+
+def test_fv4_own_path_registration_page_with_generic_heading_is_strong(monkeypatch):
+    r = CARDIO + "/registration"
+    page = f"<html><body><h1>Cardio Update 2027</h1><a href='{r}'>Registration</a></body></html>"
+    monkeypatch.setattr(discovery, "_fetch_html", Net({r: f"<html><body><h1>Registration</h1>{FEES_HTML}</body></html>"}))
+    res = discover(own_row(), page, "", CARDIO, shell_titles=["Neuro Masterclass 2027"])
+    assert sorted(t["price_gbp"] for t in res.tiers) == [250.0, 350.0] and res.city == "Edinburgh"
+    assert _verdicts(res)[0][2] == "strong" and res.evidence[1]["detail"] == "own_path"
+
+
+def test_fv4_heading_equal_to_title_plus_section_word_is_strong(monkeypatch):
+    p = "https://soc.org/portal/register?event=991"
+    page = f"<html><body><h1>Cardio Update 2027</h1><a href='{p}'>Register now</a></body></html>"
+    monkeypatch.setattr(discovery, "_fetch_html", Net({p: f"<html><body><h1>Cardio Update 2027 — Registration</h1>{FEES_HTML}</body></html>"}))
+    res = discover(own_row(), page, "", CARDIO)
+    assert sorted(t["price_gbp"] for t in res.tiers) == [250.0, 350.0]
+    assert res.evidence[1]["identity"] == "strong" and res.evidence[1]["detail"] == "heading_equals_title"
+
+
+def test_fv4_other_shell_title_in_a_heading_is_rejected_even_on_own_path(monkeypatch):
+    r = CARDIO + "/registration"
+    page = f"<html><body><h1>Cardio Update 2027</h1><a href='{r}'>Registration</a></body></html>"
+    body = f"<html><body><h1>Cardio Update 2027</h1><h2>Also this spring: Neuro Masterclass 2027</h2>{FEES_HTML}</body></html>"
+    monkeypatch.setattr(discovery, "_fetch_html", Net({r: body}))
+    res = discover(own_row(), page, "", CARDIO, shell_titles=["Cardio Update 2027", "Neuro Masterclass 2027"])
+    assert res.tiers == [] and res.venue_name is None
+    assert _verdicts(res) == [("identity_mismatch", "other_shell_in_heading", "rejected")]
+
+
+def test_fv4_other_shell_title_in_body_or_nav_only_is_weak(monkeypatch):
+    r = CARDIO + "/registration"
+    page = f"<html><body><h1>Cardio Update 2027</h1><a href='{r}'>Registration</a></body></html>"
+    body = f"<html><body><nav><a href='/n'>Neuro Masterclass 2027</a></nav><h1>Registration</h1>{FEES_HTML}</body></html>"
+    monkeypatch.setattr(discovery, "_fetch_html", Net({r: body}))
+    res = discover(own_row(), page, "", CARDIO, shell_titles=["Neuro Masterclass 2027"])
+    assert res.tiers == [] and _verdicts(res) == [("weak_identity", "other_shell_in_body", "weak")]
+
+
+def test_fv4_row_title_inside_a_longer_sibling_title_heading_is_rejected(monkeypatch):
+    r = "https://soc.org/events/cardio-update/registration"
+    page = f"<html><body><h1>Cardio Update</h1><a href='{r}'>Registration</a></body></html>"
+    body = f"<html><body><h1>Cardio Update Advanced</h1>{FEES_HTML}</body></html>"
+    monkeypatch.setattr(discovery, "_fetch_html", Net({r: body}))
+    rw = row(conference_name="Cardio Update", booking_url="https://soc.org/events/cardio-update")
+    res = discover(rw, page, "", "https://soc.org/events/cardio-update", shell_titles=["Cardio Update Advanced"])
+    assert res.tiers == [] and _verdicts(res)[0][1] == "other_shell_in_heading"
+
+
+def test_fv4_shared_fragment_row_is_skipped_entirely(monkeypatch):
+    monkeypatch.setattr(discovery, "_fetch_html", lambda u, t: pytest.fail(f"followed {u}"))
+    res = discover(row(conference_name="ICU Leadership Summit"), SHARED, "", "https://sccm.org/calendar#icu-leadership-summit-ab12")
+    assert res.tiers == [] and res.venue_name is None
+    assert res.evidence == [{"step": "skip", "reason": "shared_page", "url": "https://sccm.org/calendar#icu-leadership-summit-ab12",
+                             "found": [], "elapsed_ms": 0}]
+
+
+def test_fv4_unlisted_next_event_can_no_longer_leak(monkeypatch):
+    html = ("<html><body><h2>ICU Leadership Summit</h2><p>Registration fees</p><p>Member: $400</p>"
+            "<h2>Paediatric ICU Day</h2><p>Registration fees</p><p>Delegate: $30</p><p>Student: $45</p></body></html>")
+    res = discover(row(conference_name="ICU Leadership Summit"), html, "", "https://sccm.org/calendar#icu", shared=True,
+                   shell_titles=["Webinar on Sepsis"])
+    assert res.tiers == [] and res.evidence[0]["reason"] == "shared_page"
+
+
+def test_fv4_agent_hook_skips_a_base_url_shared_by_two_shells(monkeypatch):
+    from llm_agent import AgentLoop
+    monkeypatch.setattr(discovery, "_fetch_html", lambda u, t: pytest.fail(f"followed {u}"))
+    html = ("<html><body><h2>Annual Meeting 2027</h2><p>Registration fees</p><p>Member: £120</p>"
+            "<p>Student: £60</p><h2>Other Webinar 2027</h2><p>Registration fees</p><p>Member: £5</p></body></html>")
+    ag = _agent(types.SimpleNamespace(), html=html)
+    ag.shells = [{"title": "Annual Meeting 2027", "booking_url": BASE + "?a=1"},
+                 {"title": "Other Webinar 2027", "booking_url": BASE + "?a=2"}]
+    merged = row(venue_name="V", city="C", abstract_open=True)
+    AgentLoop._discover_missing(ag, merged, BASE + "?a=1")
+    assert merged["pricing_tiers"] == []
+    assert merged["_discovery_evidence"]["evidence"][0]["reason"] == "shared_page"
+
+
+def test_fv4_agent_hook_passes_every_other_shell_title(monkeypatch):
+    from llm_agent import AgentLoop
+    seen = {}
+    real = discovery.discover
+
+    def spy(*a, **k):
+        seen.update(k)
+        return real(*a, **k)
+    monkeypatch.setattr(discovery, "discover", spy)
+    monkeypatch.setattr(discovery, "_fetch_html", Net({}))
+    ag = _agent(types.SimpleNamespace())
+    ag.shells = [{"title": "Annual Meeting 2027", "booking_url": BASE}, {"title": "Other Webinar 2027", "booking_url": "https://conf.example.org/w"}]
+    AgentLoop._discover_missing(ag, row(), BASE)
+    assert seen["shell_titles"] == ["Other Webinar 2027"]
+
+
+def test_fv4_nav_only_title_occurrence_no_longer_matters(monkeypatch):
+    p = "https://soc.org/registration-information"
+    page = f"<html><body><h1>Cardio Update 2027</h1><a href='{p}'>Registration</a></body></html>"
+    body = (f"<html><body><nav><a href='{CARDIO}'>Cardio Update 2027</a><a>Neuro Masterclass</a></nav>"
+            f"<p>1 March 2027</p>{FEES_HTML}</body></html>")
+    monkeypatch.setattr(discovery, "_fetch_html", Net({p: body}))
+    res = discover(own_row(), page, "", CARDIO)
+    assert res.tiers == [] and _verdicts(res) == [("weak_identity", "no_strong_identity", "weak")]
+
+
+def test_fv4_acronym_row_with_spelled_out_heading_is_weak_not_rejected(monkeypatch):
+    a = "https://b-s-h.org.uk/events/asm-2027"
+    monkeypatch.setattr(discovery, "_fetch_html", Net({a + "/registration": f"<html><h1>Annual Scientific Meeting 2027 Liverpool</h1>{FEES_HTML}</html>"}))
+    rw = row(conference_name="BSH ASM 2027", start_date="2027-04-20", booking_url=a)
+    res = discover(rw, f"<html><h1>BSH ASM 2027</h1><a href='{a}/registration'>Registration</a></html>", "", a)
+    assert res.tiers == [] and _verdicts(res) == [("weak_identity", "acronym_row", "weak")]
+
+
+def test_fv4_weak_page_links_and_pdfs_are_not_followed(monkeypatch):
+    f = "https://soc.org/fees"
+    page = f"<html><body><h1>Cardio Update 2027</h1><a href='{f}'>Registration fees</a></body></html>"
+    body = "<html><body><a href='/fees/cardio-update-2027/registration'>Registration</a><a href='/f/fees.pdf'>Registration fees</a></body></html>"
+    net = Net({f: body})
+    monkeypatch.setattr(discovery, "_fetch_html", net)
+    res = discover(own_row(), page, "", CARDIO, budget=DiscoveryBudget(max_html=3))   # autouse fails any PDF fetch
+    assert net.fetched == [f] and res.tiers == []
+
+
+def test_fv4_hint_strong_only_on_same_or_declared_host(monkeypatch):
+    reg = "https://reg.partner.net/cardio-update-2027"
+    net = Net({reg: f"<html><body><h1>Delegate rates</h1>{FEES_HTML}</body></html>"})
+    monkeypatch.setattr(discovery, "_fetch_html", net)
+    res = discover(own_row(), "<html><h1>Cardio Update 2027</h1></html>", "", CARDIO,
+                   hints=DiscoveryHints(fees_urls=("https://reg.partner.net/{slug}",)))
+    assert len(res.tiers) == 2 and res.evidence[1]["detail"] == "hint"
+    net2 = Net({})
+    monkeypatch.setattr(discovery, "_fetch_html", net2)
+    discover(own_row(), "<html><h1>Cardio Update 2027</h1></html>", "", CARDIO,
+             hints=DiscoveryHints(fees_urls=("https://{slug}.evil.net/fees",)))
+    assert net2.fetched == []                     # host built from a placeholder: never a hint
+
+
+def test_fv4_vision_wall_holds_with_two_80s_calls(monkeypatch):
+    """Reviewer cycle-2 case: each vision call may take 80 s; the 140 s wall must hold.
+    The stub honours the timeout it is given (as the real seam now does via a hard cap)."""
+    clk, calls = FakeClock(), []
+
+    def vis(urls, stop_at, timeout=None):
+        calls.append(timeout)
+        clk.t += 80.0 if timeout is None else min(80.0, timeout)
+        return []
+    monkeypatch.setattr(discovery, "_fetch_html", lambda u, t: None)
+    monkeypatch.setattr(discovery, "_vision_pricing", vis)
+    pimg = "<html><h2>Registration fees</h2>" + "".join(
+        f"<img src='/img/fees-table-{i}.png' width='900' height='700' alt='Registration fees table'>" for i in range(4)) + "</html>"
+    res = discover({"conference_name": "Wall Test Congress", "event_format": "online", "abstract_open": True},
+                   pimg, "", "https://h.org/a/b/c", budget=DiscoveryBudget(clock=clk))
+    assert calls and all(c is not None for c in calls)
+    assert clk.t <= 140.0 + 1e-9
+    assert res.deferred == ["fee_image_pending"]
+
+
+def test_fv4_vision_seam_passes_the_budget_to_vision(monkeypatch):
+    import vision
+    got = {}
+    monkeypatch.setattr(vision, "extract_pricing_from_images", lambda urls, **k: got.update(k) or [])
+    monkeypatch.undo()   # drop the autouse stub of _vision_pricing, keep this one below
+    monkeypatch.setattr(vision, "extract_pricing_from_images", lambda urls, **k: got.update(k) or [])
+    import time as _t
+    discovery._vision_pricing(["https://h.org/x.png"], _t.time() + 30, 30.0)
+    assert got["fetch_timeout"] == 30.0 and got["call_timeout"] == 30.0
+
+
+def test_fv4_vision_module_hard_call_timeout(monkeypatch):
+    import time as _t
+    import vision
+    import safe_fetch
+    monkeypatch.setattr(safe_fetch, "enabled", lambda: False)
+    fetched = []
+    monkeypatch.setattr(vision, "fetch_image_as_data_url", lambda u, timeout=30.0: fetched.append(timeout) or "data:image/png;base64,AA")
+    monkeypatch.setattr(vision, "chat_completion", lambda *a, **k: _t.sleep(3.0))
+    monkeypatch.setattr(vision, "_client_get", lambda: None)
+    t0 = _t.monotonic()
+    out = vision.extract_pricing_from_images(["https://h.org/x.png"], stop_at=_t.time() + 10, fetch_timeout=0.7, call_timeout=0.7)
+    assert out == [] and _t.monotonic() - t0 < 1.5
+    assert fetched and fetched[0] <= 0.7
+
+
+# ═══ FV4 addendum: total read deadline + size caps on discovery's own fetches ════════════
+_REAL_FETCH_HTML, _REAL_FETCH_BYTES = discovery._fetch_html, discovery._fetch_bytes
+
+
+class _TrickleClient:
+    """Stands in for httpx.Client: the body arrives as `chunks`, each after `delays[i]` s.
+    Ignores every timeout it is given (a server that keeps the socket alive)."""
+    chunks, delays, status = [], [], 200
+
+    def __init__(self, *a, **k): pass
+    def __enter__(self): return self
+    def __exit__(self, *a): return False
+
+    def _iter(self):
+        import time as _t
+        for c, d in zip(type(self).chunks, type(self).delays):
+            _t.sleep(d)
+            yield c
+
+    def get(self, url):                                      # httpx reads the whole body
+        body = b"".join(self._iter())
+        return types.SimpleNamespace(status_code=type(self).status, text=body.decode(), content=body,
+                                     headers={}, encoding="utf-8")
+
+    def stream(self, method, url):
+        cli = self
+
+        class _R:
+            status_code, headers, encoding = type(cli).status, {}, "utf-8"
+            def __enter__(s): return s
+            def __exit__(s, *a): return False
+            def raise_for_status(s): pass
+            def iter_bytes(s): return cli._iter()
+        return _R()
+
+
+def _trickle(monkeypatch, chunks, delays):
+    import httpx
+    import safe_fetch
+    monkeypatch.setattr(safe_fetch, "enabled", lambda: False)
+    monkeypatch.setattr(_TrickleClient, "chunks", chunks)
+    monkeypatch.setattr(_TrickleClient, "delays", delays)
+    monkeypatch.setattr(httpx, "Client", _TrickleClient)
+
+
+_PAGE_CHUNK = b"<html><body><h1>Annual Meeting 2027</h1>" + b"<p>Member: \xc2\xa3120</p>" * 20
+
+
+def test_html_fetch_has_a_total_read_deadline(monkeypatch):
+    import time as _t
+    _trickle(monkeypatch, [_PAGE_CHUNK] * 12, [0.15] * 12)          # 1.8 s of trickle
+    t0 = _t.monotonic()
+    out = _REAL_FETCH_HTML("https://conf.example.org/event/annual-2027/registration", 0.6)
+    assert out is None and _t.monotonic() - t0 < 1.0
+
+
+def test_html_fetch_caps_the_body_at_2mb(monkeypatch):
+    _trickle(monkeypatch, [b"<p>" + b"x" * 500_000 + b"</p>"] * 5, [0.0] * 5)     # 2.5 MB, fast
+    assert _REAL_FETCH_HTML("https://conf.example.org/big", 5.0) is None
+    _trickle(monkeypatch, [_PAGE_CHUNK] * 10, [0.0] * 10)        # a real-sized page still comes through
+    assert "Annual Meeting 2027" in (_REAL_FETCH_HTML("https://conf.example.org/ok", 5.0) or "")
+
+
+def test_pdf_fetch_has_a_total_read_deadline_even_on_a_stalled_chunk(monkeypatch):
+    import time as _t
+    _trickle(monkeypatch, [b"%PDF-1.4 " + b"x" * 1000, b"y" * 1000], [0.0, 1.5])  # 2nd chunk stalls 1.5 s
+    t0 = _t.monotonic()
+    out = _REAL_FETCH_BYTES("https://conf.example.org/fees.pdf", 0.6)
+    assert out is None and _t.monotonic() - t0 < 1.0
+    _trickle(monkeypatch, [b"%PDF-1.4 " + b"x" * 1000], [0.0])
+    assert _REAL_FETCH_BYTES("https://conf.example.org/fees.pdf", 5.0).startswith(b"%PDF")
