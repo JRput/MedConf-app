@@ -116,8 +116,9 @@ def _abs_entry():
     pytest.skip("no absolute entry")
 
 def test_resolve_subpage_forms():
-    e = _abs_entry()
-    assert learned_patterns.resolve_subpage("https://x.org/event/", e["subpage_path"]) == e["subpage_path"]
+    # inline fixtures: the repo's learned_patterns.json may hold no absolute entry
+    absolute = "https://easl.eu/events/congress/venue"
+    assert learned_patterns.resolve_subpage("https://x.org/event/", absolute) == absolute
     assert learned_patterns.resolve_subpage("https://x.org/event/", "/fees") == "https://x.org/event/fees"
     assert learned_patterns.resolve_subpage("https://x.org/event", "fees") == "https://x.org/event/fees"
 
@@ -148,7 +149,8 @@ def _drive(monkeypatch, confs, gaps, fixers, explorers=None, promoted=None):
     return sb, cap
 
 def test_replay_uses_absolute_subpage_as_is(monkeypatch):
-    e = _abs_entry()
+    e = {"subpage_path": "https://easl.eu/events/congress/venue", "method": "venue_text",
+         "promoted": True}
     calls = []
     def fixer(row, text, llm):
         calls.append(text)

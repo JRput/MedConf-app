@@ -17,7 +17,7 @@ import { canonicalSpecialty } from '@/lib/taxonomy/specialties'
 import type { Conference, PricingTier, CourseSession, SourceSummary } from '@/lib/types'
 import type { CommunityFact, CommunityTier } from '@/lib/community/types'
 import { overlayConference, pickTiers } from '@/lib/community/overlay'
-import { hasAbstractInfo } from '@/lib/conference-helpers'
+import { hasAbstractInfo, isCourseLike } from '@/lib/conference-helpers'
 import { formatDateRange } from '@/lib/format'
 import { excerpt, publicEventFields, type PublicEventFields } from '@/lib/event-public'
 import { fetchEventPreview } from '@/lib/preview'
@@ -245,7 +245,7 @@ export default async function ConferenceDetailPage({ params }: { params: Promise
   const tiers = pickTiers(scrapedTiers, communityTiers)
   const communityFieldList = [...communityFields]
   const related = await fetchRelatedEvents(c, supabase)
-  const abstractsMissing = !hasAbstractInfo(c) && c.event_type !== 'course' && !c.is_on_demand
+  const abstractsMissing = !hasAbstractInfo(c) && !isCourseLike(c.event_type) && !c.is_on_demand
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-bg">
@@ -273,7 +273,7 @@ export default async function ConferenceDetailPage({ params }: { params: Promise
               </section>
             )}
 
-            {c.event_type === 'course' && sessions.length > 0 ? (
+            {isCourseLike(c.event_type) && sessions.length > 0 ? (
               <section className="space-y-3">
                 <div className="flex items-center justify-between">
                   <h2 className="type-h3 text-fg-strong">Programme &amp; sessions</h2>

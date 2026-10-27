@@ -86,7 +86,7 @@ def long_codes(rows: list[dict]) -> list[tuple[int, str]]:
 # Coverage-run guard (2026-10-27): a source registered in the last 7 days must
 # have a build JSON (Conference_masterlist/wave*/) carrying `coverage_run`, which
 # harness.py writes when coverage checks run (default). Sources registered before
-# the cutoff are grandfathered; sources with no discoverable build JSON are skipped.
+# the cutoff are grandfathered; one registered after it with NO build JSON fails too.
 COVERAGE_REQUIRED_FROM = "2026-10-28"
 BUILD_GLOB_ROOT = os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "..", "Conference_masterlist")
@@ -116,7 +116,7 @@ def missing_coverage_runs(rows: list[dict], build_docs: list[dict], now=None,
         if c < cutoff:
             continue
         docs = by_id.get(r["id"]) or by_url.get(r.get("base_url")) or []
-        if docs and not any(d.get("coverage_run") for d in docs):
+        if not any(d.get("coverage_run") for d in docs):  # no build JSON at all fails too
             out.append((r["id"], r.get("source_name") or ""))
     return sorted(out)
 
@@ -178,7 +178,7 @@ def main() -> int:
 
     no_cov = missing_coverage_runs(rows, load_build_docs())
     for sid, nm in no_cov:
-        print(f"NO_COVERAGE_RUN  id={sid:03d}  {nm}: build JSON lacks `coverage_run` — rerun harness.py (coverage is default)")
+        print(f"NO_COVERAGE_RUN  id={sid:03d}  {nm}: no build JSON with a `coverage_run` — run harness.py (coverage is default); a hand-registered source needs a build JSON carrying `coverage_run` too")
 
     if no_cov:
         print(f"FAIL — {len(no_cov)} recently registered source(s) without a recorded coverage run")

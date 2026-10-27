@@ -557,3 +557,77 @@ def test_best_of_title_not_flagship_evidence(monkeypatch):
     out = _extract_no_kontent(monkeypatch, "Best of ESMO Congress 2026")
     assert "is_flagship" not in out and "event_type" not in out["_evidence"]
     assert "is_flagship" not in out["_evidence"]
+
+
+# ---- FV1: the non-destructive rule is for hook-only re-details ---------------------------
+def _redetail(monkeypatch, row, detail, days=7):
+    """Run one event through scrape_source with the agent returning `detail`; return the updates."""
+    shells = [{"title": "E", "booking_url": "https://x/a"}]
+    updates = []
+    monkeypatch.setattr(scraper_mod, "AgentLoop", lambda src: _FakeAgent(shells, days))
+    monkeypatch.setattr(_FakeAgent, "extract_detail_for_shell", lambda self, sh: dict(detail))
+    monkeypatch.setattr(scraper_mod, "get_conference_by_source_url", lambda u: row)
+    monkeypatch.setattr(scraper_mod, "update_conference", lambda i, ch: updates.append(ch))
+    monkeypatch.setattr(scraper_mod, "bump_last_seen", lambda i: None)
+    monkeypatch.setattr(scraper_mod, "delete_pricing_tiers", lambda i: None)
+    monkeypatch.setattr(scraper_mod, "insert_pricing_tiers", lambda i, t: None)
+    monkeypatch.setattr(scraper_mod.http_fetch, "reset_blocks", lambda: None)
+    scraper_mod.scrape_source({"id": 99, "source_name": "Some Society"})
+    out = {}
+    for ch in updates:
+        out.update(ch)
+    return out
+
+
+_DETAIL = {"conference_name": "E", "start_date": "2027-03-17", "end_date": "2027-03-17",
+           "event_type": "conference", "description": "d" * 60, "specialty": "x",
+           "event_format": "online", "venue_name": None, "city": None, "abstract_deadline": None,
+           "is_flagship": False, "pricing_tiers": [], "organiser_url": "u"}
+
+
+def _stored_pending(**kw):
+    row = _stored(1, 30, abstract_deadline="2027-01-01", **kw)
+    row["listing_hash"] = scraper_mod._compute_listing_hash({"title": "E", "booking_url": "https://x/a"})
+    return row
+
+
+def test_listing_changed_redetail_writes_a_real_move_to_online(monkeypatch):
+    """Reviewer T4: a non-ESMO row whose listing changed and which went online must be written."""
+    row = _stored_pending()
+    row["listing_hash"] = "old-hash"                       # listing changed -> ordinary re-detail
+    got = _redetail(monkeypatch, row, _DETAIL)
+    assert got["event_format"] == "online" and got["abstract_deadline"] is None
+    assert got["is_flagship"] is False and got["venue_name"] is None
+
+
+def test_hook_only_redetail_without_evidence_keeps_stored_values(monkeypatch):
+    got = _redetail(monkeypatch, _stored_pending(), _DETAIL)
+    assert not set(got) & {"event_format", "venue_name", "city", "abstract_deadline", "is_flagship"}
+
+
+def test_hook_redetail_with_listing_backed_format_change_is_written(monkeypatch):
+    got = _redetail(monkeypatch, _stored_pending(), dict(_DETAIL, _evidence=["event_format"]))
+    assert got["event_format"] == "online"
+    assert "venue_name" not in got                          # still protected: no evidence for it
+
+
+def test_evidence_aware_extractor_keeps_non_destructive_rule_on_listing_change(monkeypatch):
+    row = _stored_pending()
+    row["listing_hash"] = "old-hash"
+    got = _redetail(monkeypatch, row, dict(_DETAIL, _evidence=[], _evidence_aware=True))
+    assert not set(got) & {"event_format", "venue_name", "city", "is_flagship"}
+
+
+def test_shell_card_values_are_evidence_for_every_extractor():
+    from llm_agent import AgentLoop
+    ag = AgentLoop.__new__(AgentLoop)
+    shell = {"title": "Webinar X", "booking_url": "https://x.org/w", "start_date": "2027-02-01",
+             "end_date": "2027-02-02", "location_hint": "Online"}
+    out = ag._merge_shell_and_detail(shell, {})
+    assert {"event_format", "start_date", "end_date", "conference_name"} <= set(out["_evidence"])
+    out2 = ag._merge_shell_and_detail({"title": "T", "booking_url": "https://x.org/w", "start_date": "2027-02-01"},
+                                      {"event_format": "in_person", "end_date": "2027-02-03", "conference_name": "T2"})
+    assert "event_format" not in out2["_evidence"] and "end_date" not in out2["_evidence"]
+    assert "conference_name" not in out2["_evidence"]
+    out3 = ag._merge_shell_and_detail({"title": "T", "booking_url": "https://x.org/w", "start_date": "2027-02-01"}, {})
+    assert "end_date" not in out3["_evidence"]              # a defaulted end (= start) is not evidence

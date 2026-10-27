@@ -68,6 +68,7 @@ const h = vi.hoisted(() => {
     rpcCalls: [] as string[],
     user: null as unknown,
     // 'missing' = function not deployed (PGRST202); 'ok' = returns PUBLIC; 'none' = event not found
+    eventType: 'conference',
     rpcMode: 'missing' as 'missing' | 'ok' | 'none' | 'error',
   }
 })
@@ -90,7 +91,7 @@ vi.mock('@supabase/ssr', () => ({
     from(table: string) {
       h.tables.push(table)
       const result = {
-        data: table === 'conferences' ? h.FULL : table === 'scraper_sources' ? { society: 'RCP' } : [],
+        data: table === 'conferences' ? { ...h.FULL, event_type: h.eventType, abstract_deadline: null, abstract_deadline_note: null, abstract_open: false } : table === 'course_sessions' ? [{ id: 's1', course_id: 548, start_date: '2027-05-01', end_date: '2027-05-02', availability_status: 'available' }] : table === 'scraper_sources' ? { society: 'RCP' } : [],
         error: null,
       }
       const q: Record<string, unknown> = {}
@@ -186,5 +187,25 @@ describe('ConferenceDetailPage (anonymous, event_preview available)', () => {
     h.rpcMode = 'error'
     await expect(ConferenceDetailPage({ params: Promise.resolve({ id: '548' }) })).rejects.toThrow('event_preview failed')
     expect(h.tables).toEqual([])
+  })
+})
+
+describe('ConferenceDetailPage degree (signed in)', () => {
+  beforeEach(() => {
+    h.tables.length = 0
+    h.rpcMode = 'missing'
+    h.user = { id: 'u1' }
+  })
+  it('renders sessions and no abstracts prompt for a degree', async () => {
+    h.eventType = 'degree'
+    const out = serialise(await ConferenceDetailPage({ params: Promise.resolve({ id: '548' }) }))
+    expect(out).toContain('Programme & sessions')
+    expect(out).not.toContain('"section":"abstracts"')
+    h.eventType = 'conference'
+  })
+  it('a conference with no abstract info keeps the prompt and shows no sessions', async () => {
+    const out = serialise(await ConferenceDetailPage({ params: Promise.resolve({ id: '548' }) }))
+    expect(out).not.toContain('Programme & sessions')
+    expect(out).toContain('"section":"abstracts"')
   })
 })

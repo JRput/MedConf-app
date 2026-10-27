@@ -142,13 +142,33 @@ def _is_timeframe(line: str) -> bool:
     return True
 
 
-def _split_tf_prefix(line: str):
-    """"By July 15th: EUR300 EUR170" -> ("By July 15th", cells). None when not that shape."""
+_SUFFIX_START = re.compile(r"\d[\d.,']*\s*(?:[A-Z]{3}|[€£$¥₹₩₪₺฿₱₽₴])(?![\dA-Za-z])")
+
+
+def _split_head_cells(line: str):
+    """(head, cells) where cells start at the first price cell. `money.find_amounts`
+    skips the leading cell of a SUFFIX-code grid ("1500 EUR  900 EUR": the first
+    match is "900 EUR"), so the start is moved back over one bare number that is
+    itself a suffix cell and the whole tail must parse as cells."""
     m = _first_price(line)
     if not m:
         return None
-    head = line[:m.span[0]].strip().rstrip(":-–| ").strip()
-    cells = _cells(line[m.span[0]:])
+    start = m.span[0]
+    mm = re.search(r"(?<![\w.,'])\d[\d.,']*\s*$", line[:start])
+    if mm and _SUFFIX_START.match(line, mm.start()):
+        c2 = _cells(line[mm.start():])
+        if c2 and c2[0][1]:
+            start = mm.start()
+    cells = _cells(line[start:])
+    return line[:start], cells
+
+
+def _split_tf_prefix(line: str):
+    """"By July 15th: EUR300 EUR170" -> ("By July 15th", cells). None when not that shape."""
+    hc = _split_head_cells(line)
+    if not hc:
+        return None
+    head, cells = hc[0].strip().rstrip(":-–| ").strip(), hc[1]
     if head and cells and _is_timeframe(head):
         return head, cells
     return None
@@ -273,10 +293,10 @@ def _col_oriented(lines: list) -> list:
         while p < n:
             ln = lines[p]
             inline = None
-            m = _first_price(ln)
-            if m and m.span[0] > 0:
-                head = ln[:m.span[0]].strip(" :-–|")
-                cells = _cells(ln[m.span[0]:])
+            hc = _split_head_cells(ln)
+            if hc and hc[0]:
+                head = hc[0].strip(" :-–|")
+                cells = hc[1]
                 if head and cells and len(cells) == k:
                     inline = (head, cells, p + 1)
             if inline is None and _cells(ln) is None and p + 1 < n:

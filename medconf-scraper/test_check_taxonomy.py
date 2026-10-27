@@ -58,7 +58,7 @@ def test_missing_coverage_runs():
     ]
     docs = [{"source_id": 1, "source_row": {}}, {"source_id": 2, "coverage_run": {"exit_code": 0}},
             {"source_id": 4, "source_row": {}}]
-    assert ct.missing_coverage_runs(rows, docs, now=now) == [(1, "New")]
+    assert ct.missing_coverage_runs(rows, docs, now=now) == [(1, "New"), (3, "NoBuild")]  # no build JSON fails too
     # grandfathered: registered before the required-from cutoff
     early = [dict(r, created_at="2026-10-26T00:00:00Z") for r in rows]
     assert ct.missing_coverage_runs(early, docs, now=datetime(2026, 10, 27, tzinfo=timezone.utc)) == []

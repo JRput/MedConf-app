@@ -4,7 +4,7 @@
 // community value only fills a field the scraper left empty.
 
 import type { Conference, PricingTier } from '../types'
-import { hasAbstractInfo } from '../conference-helpers'
+import { hasAbstractInfo, isCourseLike } from '../conference-helpers'
 import { normalizeUrl } from './normalize-url'
 import { CURRENCIES } from './schema'
 import type { AddInfoSection, CommunityFact, CommunityTier, FactField } from './types'
@@ -184,7 +184,7 @@ export function emptySections(conference: Conference, tiers: PricingTier[]): Add
     out.push('venue')
   }
   if (tiers.length === 0 && conference.event_type !== 'course') out.push('fees')
-  if (!hasAbstractInfo(conference)) out.push('abstracts')
+  if (!hasAbstractInfo(conference) && !isCourseLike(conference.event_type)) out.push('abstracts')
   if (!conference.cpd_accredited && conference.cpd_points == null) out.push('cpd')
   if (isEmpty(conference.organiser_url)) out.push('links')
   out.push('note')

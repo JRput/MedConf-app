@@ -359,6 +359,11 @@ def _resolve_token(tok: Optional[str], ctx_evidence: List[Tuple[int, int, str]])
     return True, None
 
 
+_COUNTER_BEFORE_RE = re.compile(
+    r"\b(?:module|day|part|session|week|workshop|lecture|step|stage|level|class|year|option|package|"
+    r"tier|category|group|room|track|course|hour|number|no\.?|nr\.?|#)\s*$", re.I)
+
+
 def _looks_like_year(raw: str) -> bool:
     return bool(re.fullmatch(r"(?:19|20|21)\d\d", raw.strip()))
 
@@ -385,13 +390,21 @@ def _scan(text: str, context: Optional[str], require_currency: bool) -> Iterator
             continue
         n1 = m.group("n1")
         start = m.start()
-        if not present and " " in n1 and re.search(r"[A-Za-z]", norm[:m.start("n1")]):
+        cut_applied = False
+        prefix_text = norm[:m.start("n1")]
+        # A SUFFIX code ("Module 3 450 EUR") is no proof that "3 450" is one number when a
+        # counter word ("Module", "Day", "Part", ...) introduces the first group; a prefix
+        # marker ("EUR 1 200") or a bare cell ("1 200,00 €") keeps its thousands reading.
+        suffix_only = bool(m.group("s1")) and not (m.group("p1") or m.group("p2"))
+        counter_label = suffix_only and bool(_COUNTER_BEFORE_RE.search(prefix_text))
+        if (not present or counter_label) and " " in n1 and re.search(r"[A-Za-z]", prefix_text):
             # No currency marker AND the number sits in prose: a space is NOT a thousands mark
             # ("Day 1 350" is 350, not 1350). Keep only the last group. A bare number that IS
             # the cell ("1 200,00", "2 500") keeps space thousands. (X1, 2026-10-27)
             cut = n1.rindex(" ")
             start = m.start("n1") + cut + 1
             n1 = n1[cut + 1:]
+            cut_applied = True
         amount = parse_number(n1, cur, dash=bool(m.group("d1")))
         if amount is None:
             continue
@@ -403,7 +416,7 @@ def _scan(text: str, context: Optional[str], require_currency: bool) -> Iterator
             if h is not None and h > amount and (own_tok or not _looks_like_year(n2)):
                 high = h
         end = m.end() if high is not None else (m.end("s1") if m.group("s1") else m.end("d1") if m.group("d1") else m.end("n1"))
-        yield Money(amount=amount, currency=cur, high=high, span=(start if not present else m.start(), end))
+        yield Money(amount=amount, currency=cur, high=high, span=(start if (not present or cut_applied) else m.start(), end))
 
 
 def find_amounts(text: str, context: Optional[str] = None, require_currency: bool = True) -> List[Money]:

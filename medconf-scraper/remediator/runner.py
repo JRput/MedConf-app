@@ -30,6 +30,7 @@ from .learned_patterns import (
     record_success, get_promoted_patterns, resolve_subpage, patterns_path,
 )
 import re
+import money
 from urllib.parse import urldefrag, urlsplit, urlunsplit
 
 logger = logging.getLogger(__name__)
@@ -86,9 +87,10 @@ def _llm_call_factory():
 # Fixer order within a row: the owner's three fields first, so the per-source
 # budget is spent on fees / abstracts / venue before anything else.
 FIELD_PRIORITY = ("pricing", "abstract_status", "venue_name", "city")
-# Fields whose evidence is an amount/date on the page: a page shared by several
-# rows must not feed them whole-page text.
-SHARED_GUARDED_FIELDS = ("pricing", "abstract_status")
+# Fields whose evidence is an amount/date/place on the page: a page shared by several
+# rows must not feed them whole-page text (venue/city added 2026-10-27 with the
+# venue explorer; the explorer itself is skipped on shared pages).
+SHARED_GUARDED_FIELDS = ("pricing", "abstract_status", "venue_name", "city")
 WINDOW_AFTER = 1800
 
 
@@ -98,11 +100,12 @@ def _order_fields(gaps: list) -> list:
 
 
 def _base_url(url: Optional[str]) -> str:
-    """Grouping key: no #fragment, no query."""
+    """Grouping key: no #fragment. The QUERY is kept: `?id=1` and `?id=2` are different
+    events (ALSG, CoSRH), only a #fragment means the same page."""
     if not url:
         return ""
     p = urlsplit(urldefrag(url)[0])
-    return urlunsplit((p.scheme, p.netloc.lower(), p.path.rstrip("/"), "", ""))
+    return urlunsplit((p.scheme, p.netloc.lower(), p.path.rstrip("/"), p.query, ""))
 
 
 def _shared_bases(rows: list) -> set:
@@ -189,13 +192,72 @@ def _url_patches_allowed(row: dict, source_id: Optional[int] = None) -> bool:
     return sid != COMMUNITY_SOURCE_ID
 
 
+def _host_is_uk(url: Optional[str]) -> bool:
+    host = (urlsplit(url or "").hostname or "").lower()
+    return host == "uk" or host.endswith(".uk")
+
+
+def _free_tier_currency(row: dict, page_text: Optional[str]) -> Optional[str]:
+    """Currency for a free-event verdict's £0 tier. The fixer hard-codes GBP; that
+    only stands when the source/organiser site is .uk. Otherwise the currency the
+    page itself evidences, else None (the tier is not written). Never defaulted."""
+    if _host_is_uk(row.get("source_url")) or _host_is_uk(row.get("organiser_url")):
+        return "GBP"
+    return money.detect_currency(page_text or "")
+
+
+def _with_currency(value: list, method: Optional[str], row: dict, page_text: Optional[str]) -> Optional[list]:
+    """Drop every tier that has no currency (log line each); None when nothing is left."""
+    out = []
+    for t in value or []:
+        if not isinstance(t, dict):
+            continue
+        if method and "free_event" in method:
+            cur = _free_tier_currency(row, page_text)
+            if not cur:
+                logger.info("remediator: %s: free-event tier dropped: no .uk site and no currency on the page",
+                            row.get("id"))
+                continue
+            t = {**t, "currency": cur}
+        elif not t.get("currency"):
+            logger.info("remediator: %s: tier %r dropped: no currency", row.get("id"),
+                        str(t.get("tier_label"))[:60])
+            continue
+        out.append(t)
+    return out or None
+
+
+REPLACE_TIERS_RPC = "remediator_replace_tiers_if_zero_or_generic"
+_RPC_ABSENT_CODES = ("PGRST202", "42883")
+
+
+def replace_rpc_available(supabase) -> bool:
+    """True when the replace-tiers DB function exists. Probed with a no-op call
+    (conference id 0 does not exist: the function returns 0 and changes nothing).
+    Only a PostgREST "function not found" (PGRST202) / Postgres undefined_function
+    (42883) means absent; any other error is also treated as unavailable for this
+    run (we cannot tell), with its own log line."""
+    try:
+        supabase.rpc(REPLACE_TIERS_RPC, {"p_conference_id": 0, "p_tiers": []}).execute()
+        return True
+    except Exception as e:
+        text = f"{getattr(e, 'code', '')} {e}"
+        if any(c in text for c in _RPC_ABSENT_CODES) or "Could not find the function" in text:
+            logger.warning("remediator: %s is not installed yet (migration 20261027000001 pending): "
+                           "skipping zero/partial pricing rows this run", REPLACE_TIERS_RPC)
+        else:
+            logger.warning("remediator: %s probe failed (%s): skipping zero/partial pricing rows "
+                           "this run", REPLACE_TIERS_RPC, str(e)[:120])
+        return False
+
+
 def _skip_changed(conference_id: int, field: str) -> bool:
     logger.warning(f"remediator: skipped {conference_id}.{field}: row changed since read")
     return False
 
 
 def _patch_row(supabase, conference_id: int, field: str, value: Any,
-               expected: Any = None) -> bool:
+               expected: Any = None, replace: bool = False) -> bool:
     """Apply one patch to the conferences row. Returns True only if it landed.
 
     Compare-and-swap (2026-10-24): the remediator fills gaps, so every write is
@@ -208,18 +270,20 @@ def _patch_row(supabase, conference_id: int, field: str, value: Any,
     try:
         if field == "pricing":
             # Atomic: the DB function inserts only if the conference has no
-            # tiers at that instant. Never deletes.
+            # tiers at that instant. Never deletes. With replace=True (row's pricing
+            # gap is all-zero / one generic tier) the replace function swaps the tiers
+            # under its own rules instead (all-zero or one generic label only).
             rows = []
             for t in value:
                 rows.append({
                     "tier_label": t["tier_label"],
                     "price_gbp": t["price_gbp"],
-                    "currency": t.get("currency", "GBP"),
+                    "currency": t.get("currency"),   # never defaulted; the DB rejects a missing one
                     "is_early_bird": t.get("is_early_bird", False),
                     "early_bird_deadline": t.get("early_bird_deadline"),
                 })
             res = supabase.rpc(
-                "remediator_insert_tiers_if_empty",
+                REPLACE_TIERS_RPC if replace else "remediator_insert_tiers_if_empty",
                 {"p_conference_id": conference_id, "p_tiers": rows},
             ).execute()
             n = res.data
@@ -317,6 +381,22 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
     if only_ids is not None:
         _keep = {int(i) for i in only_ids}
         gaps_per_row = [(r, g) for r, g in gaps_per_row if r["id"] in _keep]
+    replace_ok_cache: dict = {}
+
+    def replace_ok() -> bool:
+        if "v" not in replace_ok_cache:
+            replace_ok_cache["v"] = replace_rpc_available(sb)
+        return replace_ok_cache["v"]
+
+    if any(r.get("_pricing_gap_kind") in ("zero", "partial") for r, _ in gaps_per_row) \
+            and not replace_ok():
+        trimmed = []
+        for r, g in gaps_per_row:
+            if r.get("_pricing_gap_kind") in ("zero", "partial"):
+                g = [x for x in g if x != "pricing"]
+            if g:
+                trimmed.append((r, g))
+        gaps_per_row = trimmed
     events_with_gaps = len(gaps_per_row)
     logger.info(
         f"remediator source {source_id}: first rows this run: "
@@ -369,6 +449,9 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                 row, gaps, pricing_by_conf.get(row["id"]) or [], page_text, shared,
                 [c.get("conference_name") or "" for c in conferences
                  if c["id"] != row["id"] and _base_url(c.get("source_url")) == _base_url(url)])
+            if row.get("_pricing_gap_kind") in ("zero", "partial") and "pricing" in gaps \
+                    and not replace_ok():
+                gaps = [x for x in gaps if x != "pricing"]   # nothing could be written
             done_fields: set = set()
             for field in _order_fields(gaps):
                 if field in done_fields:
@@ -390,6 +473,8 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                         continue
                     # Window text only; no promoted replay or explorer (both
                     # sweep the whole shared page / its links per row).
+                    # (venue/city: the explorer is skipped too, f_url=None, it would
+                    # read the whole page and its links.)
                     f_text, f_html, f_url = win, None, None
                 value: Any = None
                 method: Optional[str] = None
@@ -496,6 +581,9 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                             f"remediator: explorer {field} crashed on {row['id']}: {e}"
                         )
 
+                if value is not None and field == "pricing":
+                    value = _with_currency(value, method, row, f_text or page_text)
+
                 if value is None:
                     # No fees, but the explorer reached an external event page:
                     # keep it as organiser_url so the next run can retry cheaply.
@@ -523,7 +611,9 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                     unfixed.append(field)
                     continue
                 if _patch_row(sb, row["id"], field, value,
-                              expected=row if field == "abstract_status" else row.get(field)):
+                              expected=row if field == "abstract_status" else row.get(field),
+                              replace=(field == "pricing"
+                                       and row.get("_pricing_gap_kind") in ("zero", "partial"))):
                     patches_applied.append({
                         "conference_id": row["id"],
                         "conference_name": (row.get("conference_name") or "")[:60],

@@ -2,6 +2,7 @@
 every fee form is read at the layer that used to misread it."""
 import ast
 import glob
+import os
 
 import pytest
 
@@ -143,24 +144,57 @@ def test_vision_reexports_money_and_prompt_lists_the_symbol_table():
 
 
 def test_llm_prompts_no_longer_require_a_gbp_amount():
+    """The old prompts said 'if no GBP amount (£N) ...' and had no currency field; the
+    new ones must forbid guessing GBP and put "currency" in the pricing_tiers schema."""
     import inspect
+    import re
     import llm_agent
     from extractors import fallback
     for mod in (llm_agent, fallback):
         src = inspect.getsource(mod)
         assert "no GBP amount" not in src and "no GBP prices" not in src
-        assert '"currency"' in src or "currency" in src
+        assert "never guess GBP" in src.replace("Never guess GBP", "never guess GBP")
+        assert re.search(r'"pricing_tiers": \[\{\{[^\]]*"currency"', src), mod.__name__
 
 
 # ── guard: a literal tier dict must name its currency ─────────────────────────────────
 
+_EXTRACTOR_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "extractors")
+
+
+def _tier_builders_without_currency(tree):
+    """Dict literals (spread or not), dict(...) calls, and x["price_gbp"] = ... assignments
+    that name a price but whose builder never names a currency."""
+    out = []
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Dict):
+            keys = [k.value if isinstance(k, ast.Constant) else None for k in n.keys]
+            if "price_gbp" in keys and "currency" not in keys:
+                out.append(n.lineno)
+        elif isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "dict":
+            kw = [k.arg for k in n.keywords]
+            if "price_gbp" in kw and "currency" not in kw:
+                out.append(n.lineno)
+    for fn in [n for n in ast.walk(tree) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]:
+        subs = [(t.slice.value, n.lineno) for n in ast.walk(fn) if isinstance(n, ast.Assign)
+                for t in n.targets if isinstance(t, ast.Subscript) and isinstance(t.slice, ast.Constant)]
+        names = {k for k, _ in subs}
+        out += [ln for k, ln in subs if k == "price_gbp" and "currency" not in names]
+    return out
+
+
 def test_no_extractor_builds_a_tier_without_a_currency_key():
-    offenders = []
-    for f in sorted(glob.glob("extractors/*.py")):
-        tree = ast.parse(open(f).read())
-        for n in ast.walk(tree):
-            if isinstance(n, ast.Dict):
-                keys = [k.value for k in n.keys if isinstance(k, ast.Constant)]
-                if "price_gbp" in keys and "currency" not in keys and len(keys) == len(n.keys):
-                    offenders.append(f"{f}:{n.lineno}")
+    files = sorted(glob.glob(os.path.join(_EXTRACTOR_DIR, "*.py")))
+    assert len(files) > 50, "extractor glob is empty (cwd-relative?)"       # the old glob passed on []
+    offenders = [f"{os.path.basename(f)}:{ln}" for f in files
+                 for ln in _tier_builders_without_currency(ast.parse(open(f, encoding="utf-8").read()))]
     assert offenders == []
+
+
+def test_tier_builder_guard_sees_spread_dict_call_and_subscript_forms():
+    bad = ast.parse("def f(t):\n    a = {**t, 'price_gbp': 1}\n    b = dict(price_gbp=2, tier_label='x')\n"
+                    "    t['price_gbp'] = 3\n    return a, b\n")
+    assert len(_tier_builders_without_currency(bad)) == 3
+    good = ast.parse("def f(t):\n    a = {**t, 'price_gbp': 1, 'currency': 'EUR'}\n"
+                     "    b = dict(price_gbp=2, currency='USD')\n    t['price_gbp'] = 3\n    t['currency'] = 'GBP'\n")
+    assert _tier_builders_without_currency(good) == []

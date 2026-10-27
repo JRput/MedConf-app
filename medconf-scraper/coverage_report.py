@@ -13,10 +13,13 @@ Per ACTIVE source (non-archived events only):
 Writes reports/coverage/<date>.json + .md, prints a GitHub job summary when
 GITHUB_STEP_SUMMARY is set, and compares with reports/coverage/baseline.json.
 
-Exit codes: 0 ok, 1 regression, 2 config/network error.
-Regression = a source with >= MIN_EVENTS events dropped by more than
-MAX_DROP_PP percentage points on any metric, OR a source registered in the
-last RECENT_DAYS days has no coverage entry (no live events).
+Exit codes: 0 ok (also: DB/transport error -> "coverage check skipped"), 1 regression,
+2 config error (missing SUPABASE_URL / SUPABASE_KEY).
+Regression (red) = a source with >= MIN_EVENTS events whose metric is more than
+MAX_DROP_PP points below the baseline on TWO consecutive daily reports (today's and
+the previous report file), OR a source registered in the last RECENT_DAYS days has
+no coverage entry (no live events). First run / no previous report: never red.
+Sources with fewer than MIN_EVENTS events are advisory only (printed, never red).
 --update-baseline rewrites the baseline from the current numbers.
 """
 from __future__ import annotations
@@ -28,7 +31,7 @@ import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-MIN_EVENTS = 10
+MIN_EVENTS = 25  # below this a single event moves a metric by > MAX_DROP_PP: advisory only
 MAX_DROP_PP = 10.0
 RECENT_DAYS = 7
 METRICS = ("fees_pct", "abstracts_pct", "venue_pct", "city_pct")
@@ -101,30 +104,71 @@ def recent_source_ids(sources: list[dict], now: datetime, days: int = RECENT_DAY
     return sorted(ids)
 
 
-def compare(baseline: dict | None, current: dict, recent_ids: list[int]) -> list[str]:
-    """Return regression messages (empty = pass)."""
-    problems: list[str] = []
-    cur = current["sources"]
-    for sid in recent_ids:
-        e = cur.get(str(sid))
-        if not e or not e["events"]:
-            problems.append(f"source {sid}: registered in the last {RECENT_DAYS} days but has no coverage entry (no live events)")
+def _drops(baseline: dict | None, current: dict, min_events: int | None, max_events: int | None = None):
+    """{(sid, metric): (bv, nv, events, name)} for metrics more than MAX_DROP_PP under baseline."""
+    out = {}
     base = (baseline or {}).get("sources", {})
-    for sid, e in cur.items():
+    for sid, e in (current or {}).get("sources", {}).items():
         b = base.get(sid)
-        if not b or e["events"] < MIN_EVENTS:
+        n = e.get("events") or 0
+        if not b or (min_events is not None and n < min_events) or (max_events is not None and n >= max_events):
             continue
         for m in METRICS:
             nv, bv = e.get(m), b.get(m)
             if nv is None or bv is None:
                 continue
             if bv - nv > MAX_DROP_PP:
-                problems.append(f"source {sid} ({e.get('name')}): {m} fell {bv:.1f}% -> {nv:.1f}% "
-                                f"(-{bv - nv:.1f} pp, {e['events']} events)")
-    return problems
+                out[(sid, m)] = (bv, nv, n, e.get("name"))
+    return out
 
 
-def render_markdown(current: dict, problems: list[str], day: str) -> str:
+def evaluate(baseline: dict | None, current: dict, recent_ids: list[int],
+             previous: dict | None = None) -> tuple[list[str], list[str]]:
+    """(regressions, advisories). A regression needs the same drop vs the baseline on
+    today's report AND the previous one; a single-day dip, or no previous report,
+    is advisory. Small sources (< MIN_EVENTS) are always advisory."""
+    problems: list[str] = []
+    advisories: list[str] = []
+    cur = current["sources"]
+    for sid in recent_ids:
+        e = cur.get(str(sid))
+        if not e or not e["events"]:
+            problems.append(f"source {sid}: registered in the last {RECENT_DAYS} days but has no coverage entry (no live events)")
+    prev_drops = _drops(baseline, previous, MIN_EVENTS) if previous else None
+    for (sid, m), (bv, nv, n, name) in _drops(baseline, current, MIN_EVENTS).items():
+        msg = f"source {sid} ({name}): {m} fell {bv:.1f}% -> {nv:.1f}% (-{bv - nv:.1f} pp, {n} events)"
+        if prev_drops is not None and (sid, m) in prev_drops:
+            problems.append(msg + " on 2 consecutive reports")
+        else:
+            advisories.append(msg + (" (first day below threshold)" if prev_drops is not None
+                                     else " (no previous report to confirm)"))
+    for (sid, m), (bv, nv, n, name) in _drops(baseline, current, None, MIN_EVENTS).items():
+        advisories.append(f"source {sid} ({name}): {m} fell {bv:.1f}% -> {nv:.1f}% "
+                          f"(-{bv - nv:.1f} pp, only {n} events: advisory)")
+    return problems, advisories
+
+
+def compare(baseline: dict | None, current: dict, recent_ids: list[int],
+            previous: dict | None = None) -> list[str]:
+    """Regression messages only (empty = pass)."""
+    return evaluate(baseline, current, recent_ids, previous)[0]
+
+
+def load_previous(out_dir: Path, day: str) -> dict | None:
+    """Latest dated report in out_dir strictly before `day`, or None."""
+    best = None
+    for p in out_dir.glob("????-??-??.json"):
+        if p.stem < day and (best is None or p.stem > best.stem):
+            best = p
+    if best is None:
+        return None
+    try:
+        return json.loads(best.read_text())
+    except (OSError, ValueError):
+        return None
+
+
+def render_markdown(current: dict, problems: list[str], day: str, advisories: list[str] | None = None) -> str:
     def f(v):
         return "n/a" if v is None else f"{v:.0f}%"
     t = current["totals"]
@@ -133,6 +177,8 @@ def render_markdown(current: dict, problems: list[str], day: str) -> str:
              f"| venue {f(t['venue_pct'])} | city {f(t['city_pct'])}", ""]
     lines += ["**Regressions:** " + ("none" if not problems else ""), ""]
     lines += [f"- {p}" for p in problems]
+    if advisories:
+        lines += ["", "**Advisory (never red):**", ""] + [f"- {a}" for a in advisories]
     lines += ["", "| id | source | events | fees | abstracts | venue | city |", "|---|---|---|---|---|---|---|"]
     for sid, e in sorted(current["sources"].items(), key=lambda kv: int(kv[0])):
         lines.append(f"| {sid} | {e.get('name') or ''} | {e['events']} | {f(e['fees_pct'])} | "
@@ -177,8 +223,17 @@ def main() -> int:
                            "abstract_deadline_note,is_on_demand", archived=False)
         tiers = {r["conference_id"] for r in _fetch_all(cl, "pricing_tiers", "id,conference_id")}
     except Exception as e:
-        print(f"ERROR: could not read Supabase: {e}", file=sys.stderr)
-        return 2
+        # A transient DB / network error says nothing about coverage: never red.
+        msg = f"coverage check skipped: could not read Supabase ({type(e).__name__}: {str(e)[:200]})"
+        print(msg)
+        summ = os.getenv("GITHUB_STEP_SUMMARY")
+        if summ:
+            try:
+                with open(summ, "a", encoding="utf-8") as fh:
+                    fh.write(msg + "\n")
+            except OSError:
+                pass
+        return 0
 
     now = datetime.now(timezone.utc)
     day = date.today().isoformat()
@@ -186,15 +241,17 @@ def main() -> int:
     current["date"] = day
     bp = Path(args.baseline)
     baseline = json.loads(bp.read_text()) if bp.exists() else None
-    problems = compare(baseline, current, recent_source_ids(sources, now))
+    previous = load_previous(Path(args.out_dir), day)
+    problems, advisories = evaluate(baseline, current, recent_source_ids(sources, now), previous)
     if baseline is None:
         print("NOTE: no baseline file; regression comparison skipped")
 
     out = Path(args.out_dir)
     out.mkdir(parents=True, exist_ok=True)
     current["regressions"] = problems
+    current["advisories"] = advisories
     (out / f"{day}.json").write_text(json.dumps(current, indent=2))
-    md = render_markdown(current, problems, day)
+    md = render_markdown(current, problems, day, advisories)
     (out / f"{day}.md").write_text(md)
     print(md)
     summ = os.getenv("GITHUB_STEP_SUMMARY")
@@ -202,7 +259,7 @@ def main() -> int:
         with open(summ, "a", encoding="utf-8") as fh:
             fh.write(md)
     if args.update_baseline:
-        clean = {k: v for k, v in current.items() if k != "regressions"}
+        clean = {k: v for k, v in current.items() if k not in ("regressions", "advisories")}
         bp.write_text(json.dumps(clean, indent=2))
         print(f"baseline updated: {bp}")
         return 0

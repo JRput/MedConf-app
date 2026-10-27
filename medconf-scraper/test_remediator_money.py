@@ -207,8 +207,10 @@ def test_validator_warns_on_tiny_amounts_but_accepts(caplog):
     assert "suspiciously small" not in caplog.text
 
 
-def test_validator_legacy_missing_currency_key_unchanged():
-    assert rv.validate_pricing_tiers([{"tier_label": "Member", "price_gbp": 100}])
+def test_validator_missing_currency_key_is_rejected_not_gbp():
+    assert not rv.validate_pricing_tiers([{"tier_label": "Member", "price_gbp": 100}])
+    assert not rv.validate_pricing_tiers([{"tier_label": "Member", "price_gbp": 100, "currency": None}])
+    assert rv.validate_pricing_tiers([{"tier_label": "Member", "price_gbp": 100, "currency": "GBP"}])
 
 
 # ── runner page_amount_count ────────────────────────────────────────────────────
@@ -297,3 +299,169 @@ def test_ifosworld_cost_no_default_currency():
 def test_bare_cell_number_keeps_space_thousands():
     assert money.parse_amount("1 200,00").amount == 1200.0       # the cell IS the number
     assert money.parse_amount("2 500").amount == 2500.0
+
+
+def test_matrix_suffix_code_grid_keeps_first_column():
+    text = ("Physicians\nResidents\nStudents\n"
+            "By July 15th   1500 EUR  900 EUR  600 EUR\n"
+            "After July 15th   1800 EUR  1100 EUR  700 EUR")
+    tiers = fm.parse_fee_matrix(text)
+    assert sorted(t["price_gbp"] for t in tiers) == [600, 700, 900, 1100, 1500, 1800]
+    assert {t["currency"] for t in tiers} == {"EUR"}
+    assert not any(any(ch.isdigit() for ch in t["tier_label"].replace("15th", "")) for t in tiers)
+    assert "Physicians · By July 15th" in [t["tier_label"] for t in tiers]
+
+
+# ── FV2: runner shared venue guard, replace RPC, currency, shared key ───────────
+
+import logging
+from types import SimpleNamespace as _NS
+
+from remediator import runner as _runner
+from test_runner_writes import _SB as _BaseSB, _conf as _rconf
+
+
+def test_shared_base_keeps_query_strips_fragment():
+    b = _runner._base_url
+    assert b("https://e.org/events?id=1#top") == b("https://e.org/events?id=1")
+    assert b("https://e.org/events?id=1") != b("https://e.org/events?id=2")
+    rows = [{"source_url": "https://alsg.org.uk/e?id=1"}, {"source_url": "https://alsg.org.uk/e?id=2"}]
+    assert _runner._shared_bases(rows) == set()
+    rows = [{"source_url": "https://e.org/c#a"}, {"source_url": "https://e.org/c#b"}]
+    assert _runner._shared_bases(rows) == {"https://e.org/c"}
+
+
+def test_venue_and_city_are_shared_guarded():
+    assert {"venue_name", "city"} <= set(_runner.SHARED_GUARDED_FIELDS)
+
+
+def test_shared_page_venue_fixer_gets_only_the_row_window(monkeypatch):
+    from test_detector_runner import _drive
+    page = ("Intro. Basic Life Support Course - Venue: Leeds Hall.\n"
+            "Advanced Sepsis Masterclass - Venue: Cardiff Arena.\nFooter")
+
+    class Cache:
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def get(self, u): return page
+        def get_html(self, u): return "<html>" + page + "</html>"
+
+    seen, explored = {}, []
+
+    def venue_fixer(row, text, llm):
+        seen[row["id"]] = text
+        return None, None
+
+    confs = [_rconf(id=1, conference_name="Basic Life Support Course", source_url="https://e.org/c#bls"),
+             _rconf(id=2, conference_name="Advanced Sepsis Masterclass", source_url="https://e.org/c#sep"),
+             _rconf(id=3, conference_name="Unrelated Gala Dinner", source_url="https://e.org/c#gala")]
+    monkeypatch.setattr(_runner, "PageCache", Cache)
+    import test_detector_runner as tdr
+    monkeypatch.setattr(tdr, "_Cache", Cache, raising=False)
+    explorers = {"venue_name": lambda **kw: explored.append(kw["row"]["id"])}
+    sb = _BaseSB({"scraper_sources": [{"id": 5, "society": "S", "source_name": "n"}],
+                  "conferences": confs, "pricing_tiers": []})
+    monkeypatch.setattr(_runner, "_get_supabase", lambda: sb)
+    monkeypatch.setattr(_runner, "_llm_call_factory", lambda: (lambda *a, **k: None))
+    monkeypatch.setattr(_runner, "FIXERS", {"venue_name": venue_fixer})
+    monkeypatch.setattr(_runner, "EXPLORERS", explorers)
+    monkeypatch.setattr(_runner, "validate", lambda f, v: True)
+    monkeypatch.setattr(_runner, "detect_gaps_for_rows", lambda c, p: [(r, ["venue_name"]) for r in c])
+    monkeypatch.setattr(_runner, "get_promoted_patterns", lambda *a, **k: [])
+    monkeypatch.setattr(_runner, "close_render_browser", lambda: None)
+    monkeypatch.setattr(_runner, "write_report", lambda **k: "r.json")
+    _runner.remediate_source(5)
+    assert "Leeds" in seen[1] and "Cardiff" not in seen[1]
+    assert "Cardiff" in seen[2] and "Leeds" not in seen[2]
+    assert 3 not in seen and explored == []
+
+
+class _ReplaceSB(_BaseSB):
+    """Fake Supabase whose replace-tiers function is present or absent."""
+    def __init__(self, tables, present):
+        super().__init__(tables)
+        self.present, self.calls = present, []
+
+    def rpc(self, name, params):
+        sb = self
+        class R:
+            def execute(self_):
+                sb.calls.append((name, params))
+                if name == _runner.REPLACE_TIERS_RPC:
+                    if not sb.present:
+                        raise Exception("{'code': 'PGRST202', 'message': 'Could not find the function'}")
+                    return _NS(data=0 if params["p_conference_id"] == 0 else len(params["p_tiers"]))
+                return _NS(data=len(params["p_tiers"]))
+        return R()
+
+
+def _drive_pricing(monkeypatch, present, confs):
+    sb = _ReplaceSB({"scraper_sources": [{"id": 5, "society": "S", "source_name": "n"}],
+                     "conferences": confs, "pricing_tiers": []}, present)
+    fixed = []
+
+    def fixer(row, text, llm):
+        fixed.append(row["id"])
+        return [{"tier_label": "Member", "price_gbp": 100.0, "currency": "EUR"}], "text"
+
+    class Cache:
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def get(self, u): return "Member 100 EUR"
+        def get_html(self, u): return ""
+
+    monkeypatch.setattr(_runner, "_get_supabase", lambda: sb)
+    monkeypatch.setattr(_runner, "_llm_call_factory", lambda: (lambda *a, **k: None))
+    monkeypatch.setattr(_runner, "PageCache", Cache)
+    monkeypatch.setattr(_runner, "FIXERS", {"pricing": fixer})
+    monkeypatch.setattr(_runner, "EXPLORERS", {})
+    monkeypatch.setattr(_runner, "validate", lambda f, v: True)
+    monkeypatch.setattr(_runner, "detect_gaps_for_rows",
+                        lambda c, p: [({**r, "_pricing_gap_kind": "zero"}, ["pricing"]) for r in c])
+    monkeypatch.setattr(_runner, "get_promoted_patterns", lambda *a, **k: [])
+    monkeypatch.setattr(_runner, "close_render_browser", lambda: None)
+    cap = {}
+    monkeypatch.setattr(_runner, "write_report", lambda **k: cap.update(k) or "r.json")
+    _runner.remediate_source(5)
+    return sb, fixed, cap
+
+
+def test_zero_tier_rows_write_through_replace_rpc_when_present(monkeypatch):
+    confs = [_rconf(id=1, source_url="https://a.org/1"), _rconf(id=2, source_url="https://a.org/2")]
+    sb, fixed, cap = _drive_pricing(monkeypatch, True, confs)
+    names = [c[0] for c in sb.calls]
+    assert fixed == [1, 2]
+    assert names.count(_runner.REPLACE_TIERS_RPC) == 3        # one probe + two replaces
+    assert "remediator_insert_tiers_if_empty" not in names
+    assert {a["conference_id"] for a in cap["patches_applied"]} == {1, 2}
+
+
+def test_zero_tier_rows_skipped_when_replace_rpc_absent(monkeypatch, caplog):
+    confs = [_rconf(id=1, source_url="https://a.org/1"), _rconf(id=2, source_url="https://a.org/2")]
+    with caplog.at_level(logging.WARNING):
+        sb, fixed, cap = _drive_pricing(monkeypatch, False, confs)
+    assert fixed == []                                         # no fetch / fixer budget burned
+    assert [c[0] for c in sb.calls] == [_runner.REPLACE_TIERS_RPC]   # probed ONCE
+    assert cap["patches_applied"] == []
+    assert caplog.text.count("not installed yet") == 1
+
+
+def test_tier_without_currency_is_dropped_never_gbp(caplog):
+    row = {"id": 9, "source_url": "https://x.org/e"}
+    with caplog.at_level(logging.INFO):
+        assert _runner._with_currency([{"tier_label": "Member", "price_gbp": 5.0}], "text", row, "") is None
+    assert "no currency" in caplog.text
+    kept = _runner._with_currency([{"tier_label": "A", "price_gbp": 5.0, "currency": "EUR"},
+                                   {"tier_label": "B", "price_gbp": 5.0}], "text", row, "")
+    assert [t["tier_label"] for t in kept] == ["A"]
+
+
+def test_free_event_tier_currency_rule():
+    free = [{"tier_label": "Standard", "price_gbp": 0.0, "currency": "GBP"}]
+    uk = _runner._with_currency(free, "free_event", {"id": 1, "source_url": "https://rcp.ac.uk/e"}, "Free of charge")
+    assert uk[0]["currency"] == "GBP"
+    eu = _runner._with_currency(free, "free_event", {"id": 1, "source_url": "https://esmo.org/e"},
+                                "Free of charge. Hotel from €120")
+    assert eu[0]["currency"] == "EUR"
+    assert _runner._with_currency(free, "free_event", {"id": 1, "source_url": "https://esmo.org/e"},
+                                  "Free of charge") is None

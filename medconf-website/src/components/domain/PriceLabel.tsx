@@ -19,7 +19,7 @@ import { formatMoney } from '@/lib/format'
 export function PriceLabel({
   min,
   max,
-  currency = 'GBP',
+  currency,
   size = 'sm',
   href,
   className,

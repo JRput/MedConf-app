@@ -151,3 +151,18 @@ def test_money_is_a_value_object():
     assert Money(1.0, "GBP") == Money(1.0, "GBP", None, (0, 0))
     with pytest.raises(Exception):
         Money(1.0, "GBP").amount = 2.0                       # frozen
+
+
+# ---- FV1: a suffix code does not make "Module 3 450 EUR" read as 3450 -------------------
+@pytest.mark.parametrize("text,amount", [
+    ("Module 3 450 EUR", 450.0),
+    ("Day 1 350 EUR", 350.0),
+    ("Part 2 1200 GBP", 1200.0),
+    ("Module 3 EUR 450", 450.0),
+    ("Registration fee 1 200 EUR", 1200.0),      # a fee label is not a counter word: thousands kept
+    ("1 200,00 €", 1200.0),                       # a bare cell keeps its thousands
+    ("EUR 1 200", 1200.0),
+])
+def test_suffix_code_after_a_counter_word_reads_last_group_only(text, amount):
+    got = money.find_amounts(text)
+    assert [m.amount for m in got] == [amount]

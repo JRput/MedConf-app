@@ -148,6 +148,7 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
 
         # --- Phase A: walk all listing pages ---
         shells = agent.list_shells()
+        agent.shells = shells            # lets discovery recognise pages shared by several shells
         summary["conferences_found"] = len(shells)
 
         if not shells:
@@ -256,8 +257,12 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
             )
             # Opt-in hook (see pre-pass above): a capped, oldest-first set of
             # stale tier-less rows is re-detailed even when the hash matches.
+            # `via_hook`: this re-detail exists ONLY because of the hook (listing
+            # unchanged, no self-heal need), so it is held to the non-destructive rule.
+            via_hook = False
             if existing and refresh_days and not needs_refresh_for_pending_fields:
                 needs_refresh_for_pending_fields = existing["id"] in hook_allowed_ids
+                via_hook = needs_refresh_for_pending_fields and existing.get("listing_hash") == new_hash
             if existing and existing.get("listing_hash") == new_hash and not needs_refresh_for_pending_fields:
                 try:
                     bump_last_seen(existing["id"])
@@ -270,6 +275,7 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
             # Slow path: new event OR listing changed → fetch detail page and re-extract
             merged = agent.extract_detail_for_shell(shell)
             evidence = set(merged.pop("_evidence", None) or [])
+            evidence_aware = bool(merged.pop("_evidence_aware", False))
             disc = merged.pop("_discovery_evidence", None)
             if disc and (disc.get("filled") or disc.get("deferred") or disc.get("evidence")):
                 logger.info(f"  discovery_evidence {merged.get('conference_name', '?')[:50]!r}: "
@@ -314,9 +320,12 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
             try:
                 if existing:
                     # Update only changed fields (cheaper, less log noise)
-                    if refresh_days:
-                        # Re-detail hook active: a re-detail must never erase stored
-                        # location/type data when the page yields nothing.
+                    if refresh_days and (via_hook or evidence_aware):
+                        # A hook-only re-detail (listing unchanged), or an extractor that
+                        # reports its own evidence (ESMO), must never erase stored
+                        # location/type data when the page yields nothing. Any other
+                        # re-detail (the listing changed, self-heal) keeps plain semantics,
+                        # so a real move in-person -> online or a cleared deadline lands.
                         changes = _non_destructive_changes(existing, cleaned, evidence)
                     else:
                         changes = {k: v for k, v in cleaned.items() if existing.get(k) != v}

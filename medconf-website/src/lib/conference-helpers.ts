@@ -9,6 +9,11 @@
 
 import type { Conference, CourseSession } from './types'
 
+/** Courses and degrees are multi-session programmes: they show sessions and never get the abstracts prompt. */
+export function isCourseLike(eventType: string | null | undefined): boolean {
+  return eventType === 'course' || eventType === 'degree'
+}
+
 /**
  * True only when abstracts are genuinely still being accepted right now.
  *

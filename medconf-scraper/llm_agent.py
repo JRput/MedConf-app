@@ -156,6 +156,21 @@ def _is_flagship_from_url(url: Optional[str]) -> bool:
     return any(host in u for host in _FLAGSHIP_URL_HOSTS)
 
 
+def shared_page_info(shells, url: str):
+    """(shared, sibling_titles): a row's page is SHARED when its booking url carries a
+    #fragment, or the same url (fragment and query stripped) is the booking url of >= 2
+    shells of the source. Siblings are the titles of the shells on that url."""
+    def key(u):
+        return (u or "").split("#")[0].split("?")[0].rstrip("/")
+    try:
+        k = key(url)
+        same = [x for x in (shells or []) if key(x.get("booking_url")) == k]
+        shared = ("#" in (url or "").rstrip("#")) or len(same) >= 2
+        return shared, [x.get("title") for x in same if x.get("title")]
+    except Exception:
+        return False, []
+
+
 class AgentLoop:
     """
     The agentic loop that uses an LLM to navigate websites and extract conference data.
@@ -251,8 +266,11 @@ class AgentLoop:
                 llm_call=self._llm_call,
             )
             merged = self._merge_shell_and_detail(shell, detail)
-            if detail.get("_evidence"):
-                merged["_evidence"] = detail["_evidence"]  # popped by scraper.py
+            # `_evidence`: keys whose value is backed by the page (extractor-declared) or by
+            # the listing card (shell); `_evidence_aware`: the extractor reports evidence at
+            # all (ESMO). Both popped by scraper.py.
+            merged["_evidence"] = sorted(set(merged.get("_evidence") or []) | set(detail.get("_evidence") or []))
+            merged["_evidence_aware"] = "_evidence" in detail
             self._ensure_submission_info(merged, booking_url)
             self._discover_missing(merged, booking_url)
             return merged
@@ -322,11 +340,13 @@ class AgentLoop:
                 pass
             if getattr(self, "_vision_ledger", None) is None:
                 self._vision_ledger = discovery.VisionLedger()   # one per source run
+            shared, siblings = shared_page_info(getattr(self, "shells", None), url)
             res = discovery.discover(
                 merged, html, text, base,
                 hints=getattr(self.extractor, "DISCOVERY_HINTS", None),
                 budget=discovery.DiscoveryBudget(vision=self._vision_ledger),
-                skip_urls=[u for u in skip if u])
+                skip_urls=[u for u in skip if u],
+                shared=shared, sibling_titles=siblings)
             written = discovery.apply_to_row(merged, res)
             merged["_discovery_evidence"] = {
                 "filled": written, "evidence": res.evidence, "deferred": res.deferred}
@@ -355,6 +375,7 @@ class AgentLoop:
         try:
             self.open_browser()
             shells = self.list_shells()
+            self.shells = shells
             if not shells:
                 logger.info("No structured cards; using legacy LLM fallback")
                 return self._run_legacy_fallback()
@@ -363,6 +384,7 @@ class AgentLoop:
                 logger.info(f"Detail {i+1}/{len(shells)}: {(shell.get('title') or '')[:60]}")
                 d = self.extract_detail_for_shell(shell)
                 d.pop("_evidence", None)  # scraper.py-only hint
+                d.pop("_evidence_aware", None)
                 d.pop("_discovery_evidence", None)
                 self.extracted_data.append(d)
             return {
@@ -436,9 +458,12 @@ class AgentLoop:
         #   4. fallback to 'conference'
         #   0. awarded-qualification title (MSc/PgDip/"Diploma in …") always wins:
         #      the shared degree rule beats any extractor-level guess.
+        #      (never over an extractor-supplied workshop/course: only when the extractor
+        #      gave no type, or the generic 'conference')
+        _det_type = detail.get("event_type")
         event_type = (
-            ("degree" if is_degree_title(conference_name) else None)
-            or detail.get("event_type")
+            ("degree" if is_degree_title(conference_name) and _det_type in (None, "", "conference") else None)
+            or _det_type
             or _event_type_from_category(shell.get("category"))
             or _event_type_from_title(conference_name)
             or "conference"
@@ -449,7 +474,20 @@ class AgentLoop:
         # Sessions array is course-specific. Pass through to the upsert layer.
         sessions = detail.get("sessions")
 
+        # Keys whose merged value comes from the LISTING CARD: evidence for a re-detail
+        # (scraper._non_destructive_changes may overwrite a stored value with them).
+        shell_ev = set()
+        if detail.get("event_format") is None and event_format:
+            shell_ev.add("event_format")
+        if shell.get("start_date"):
+            shell_ev.add("start_date")
+        if not detail.get("end_date") and shell.get("end_date"):     # a defaulted end (= start) is not evidence
+            shell_ev.add("end_date")
+        if not detail.get("conference_name") and conference_name:
+            shell_ev.add("conference_name")
+
         return {
+            "_evidence": sorted(shell_ev),
             # Deterministic from listing
             "conference_name": conference_name,
             "event_type": event_type,
@@ -513,7 +551,11 @@ class AgentLoop:
         booking_url = shell.get("booking_url")
         location_hint = shell.get("location_hint")
         is_online = bool(location_hint and location_hint.lower() == "online")
+        shell_ev = {"conference_name"} | ({"start_date"} if shell.get("start_date") else set()) \
+            | ({"event_format"} if is_online else set())
         return {
+            "_evidence": sorted(shell_ev),
+            "_evidence_aware": False,
             "conference_name": shell["title"],
             "booking_url": booking_url,
             "is_sold_out": shell.get("is_sold_out", False),

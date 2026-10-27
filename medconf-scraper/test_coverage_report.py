@@ -43,13 +43,51 @@ def _cur(events, **m):
 
 
 def test_regression_threshold():
+    base = _cur(30)
+    prev_bad = _cur(30, fees_pct=60.0)
+    assert cr.compare(base, _cur(30, fees_pct=70.0), [], prev_bad) == []         # exactly 10pp: ok
+    assert len(cr.compare(base, _cur(30, fees_pct=69.9), [], prev_bad)) == 1     # 2 consecutive reports
+    assert cr.compare(base, _cur(30, venue_pct=None), [], prev_bad) == []        # n/a ignored
+    assert cr.compare(None, _cur(30, fees_pct=0.0), [], prev_bad) == []          # no baseline
+    assert cr.compare(base, _cur(30, fees_pct=95.0), [], prev_bad) == []         # improvement
+
+
+def test_single_day_dip_and_first_run_are_not_red():
+    base = _cur(30)
+    bad = _cur(30, fees_pct=50.0)
+    probs, adv = cr.evaluate(base, bad, [], None)                                # no previous report
+    assert probs == [] and len(adv) == 1
+    probs, adv = cr.evaluate(base, bad, [], _cur(30, fees_pct=79.0))             # yesterday was fine
+    assert probs == [] and "first day" in adv[0]
+    probs, _ = cr.evaluate(base, bad, [], _cur(30, fees_pct=55.0))               # two bad days
+    assert len(probs) == 1
+
+
+def test_small_sources_are_advisory_only():
     base = _cur(20)
-    assert cr.compare(base, _cur(20, fees_pct=70.0), []) == []                 # exactly 10pp: ok
-    assert len(cr.compare(base, _cur(20, fees_pct=69.9), [])) == 1
-    assert cr.compare(base, _cur(9, fees_pct=0.0), []) == []                   # < 10 events ignored
-    assert cr.compare(base, _cur(20, venue_pct=None), []) == []                # n/a ignored
-    assert cr.compare(None, _cur(20, fees_pct=0.0), []) == []                  # no baseline
-    assert cr.compare(base, _cur(20, fees_pct=95.0), []) == []                 # improvement
+    probs, adv = cr.evaluate(base, _cur(20, fees_pct=0.0), [], _cur(20, fees_pct=0.0))
+    assert probs == [] and len(adv) == 1 and "advisory" in adv[0]
+    assert cr.evaluate(base, _cur(9, fees_pct=0.0), [], None)[0] == []
+
+
+def test_load_previous_picks_latest_earlier_report(tmp_path):
+    for d in ("2026-10-24", "2026-10-26", "2026-10-27", "baseline"):
+        (tmp_path / f"{d}.json").write_text('{"date": "%s"}' % d)
+    assert cr.load_previous(tmp_path, "2026-10-27") == {"date": "2026-10-26"}
+    assert cr.load_previous(tmp_path, "2026-10-24") is None
+
+
+def test_transport_error_exits_zero_with_skip_line(monkeypatch, capsys, tmp_path):
+    import sys, types
+    monkeypatch.setenv("SUPABASE_URL", "http://x"); monkeypatch.setenv("SUPABASE_KEY", "k")
+    fake = types.ModuleType("supabase")
+    def boom(*a, **k): raise ConnectionError("dns down")
+    fake.create_client = boom
+    monkeypatch.setitem(sys.modules, "supabase", fake)
+    monkeypatch.setattr(sys, "argv", ["coverage_report.py", "--out-dir", str(tmp_path)])
+    assert cr.main() == 0
+    assert "coverage check skipped" in capsys.readouterr().out
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_recent_source_without_entry():

@@ -433,7 +433,7 @@ export default function DesignPage() {
             <div className="flex flex-wrap items-center gap-6">
               <Labelled label="free"><PriceLabel min={0} size="md" /></Labelled>
               <Labelled label="exact"><PriceLabel min={720} max={720} size="md" /></Labelled>
-              <Labelled label="from (GBP)"><PriceLabel min={28} max={208} size="md" /></Labelled>
+              <Labelled label="from (GBP)"><PriceLabel min={28} max={208} currency="GBP" size="md" /></Labelled>
               <Labelled label="USD"><PriceLabel min={795} max={1450} currency="USD" size="md" /></Labelled>
               <Labelled label="EUR"><PriceLabel min={640} max={1180} currency="EUR" size="md" /></Labelled>
               <Labelled label="unknown"><PriceLabel min={null} size="md" /></Labelled>

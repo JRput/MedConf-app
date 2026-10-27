@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { createSupabaseClient } from '@/lib/supabase'
 import { useAuth } from '@/hooks/useAuth'
 import type { Conference, UserReminder, ReminderType, CourseSession } from '@/lib/types'
-import { upcomingSessions } from '@/lib/conference-helpers'
+import { isCourseLike, upcomingSessions } from '@/lib/conference-helpers'
 import { Bell, Plus, X, Clock, AlertCircle, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -45,7 +45,7 @@ export function ReminderPanel({ conference, sessions }: Props) {
   // Only multi-session courses use the session picker. Single-date courses
   // (no course_sessions rows) fall back to the conventional date-based
   // reminder so users can still set one.
-  const isCourse = conference.event_type === 'course' && (sessions?.length ?? 0) > 0
+  const isCourse = isCourseLike(conference.event_type) && (sessions?.length ?? 0) > 0
   const availableSessions = isCourse ? upcomingSessions(sessions) : []
 
   // Available reminder types for THIS event. Courses use 'conference_start'

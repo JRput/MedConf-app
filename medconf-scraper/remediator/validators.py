@@ -78,10 +78,10 @@ def validate_pricing_tiers(value: list) -> bool:
             return False
         label = t.get("tier_label")
         price = t.get("price_gbp")
-        currency = t.get("currency", "GBP")   # key absent = legacy text path (GBP)
+        currency = t.get("currency")   # absent / null is rejected: never defaulted to GBP
         if not isinstance(label, str) or len(label) < 3 or len(label) > 200:
             return False
-        # A present-but-null/unknown currency (vision could not read one) is rejected, not defaulted.
+        # A missing / null / unknown currency is rejected, not defaulted.
         if currency not in money.KNOWN_CODES:
             return False
         if not isinstance(price, (int, float)) or isinstance(price, bool) or price < 0 \

@@ -123,3 +123,15 @@ def test_cfp_nav_abstracts_link():
 def test_cfp_generic_only_still_found():
     html = '<a href="/forms/reg-form.pdf">Booking form</a>'
     assert find_call_for_papers_link(html, BASE) == "https://www.soc.org/forms/reg-form.pdf"
+
+
+def test_merge_keeps_extractor_workshop_or_course_over_the_title_rule():
+    """FV1: the title rule's `degree` applies only when the extractor gave no type or 'conference'."""
+    from llm_agent import AgentLoop as LLMAgent
+    shell = {"title": "RCPSG Postgraduate Diploma in Travel Medicine", "booking_url": "https://x.org/a",
+             "start_date": "2027-01-01"}
+    agent = LLMAgent.__new__(LLMAgent)
+    assert agent._merge_shell_and_detail(shell, {"event_type": "workshop"})["event_type"] == "workshop"
+    assert agent._merge_shell_and_detail(shell, {"event_type": "course"})["event_type"] == "course"
+    assert agent._merge_shell_and_detail(shell, {})["event_type"] == "degree"
+    assert agent._merge_shell_and_detail(shell, {"event_type": "conference"})["event_type"] == "degree"

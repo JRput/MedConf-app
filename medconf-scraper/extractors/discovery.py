@@ -55,6 +55,8 @@ _FIELD_ORDER = (FIELD_FEES, FIELD_VENUE, FIELD_ABSTRACT)
 _HINT_ATTR = {FIELD_FEES: "fees", FIELD_VENUE: "venue", FIELD_ABSTRACT: "abstracts"}
 MAX_TIERS = 40
 PDF_MAX_BYTES = 8_000_000
+PDF_MIN_FETCH = 2.0      # a PDF step starts only when the clock allows at least this much fetch ...
+PDF_MIN_PARSE = 3.0      # ... plus this much for the child-process parse
 
 
 # ── public types ─────────────────────────────────────────────────────────────────
@@ -156,10 +158,15 @@ def _fetch_bytes(url: str, timeout: float, max_bytes: int = PDF_MAX_BYTES) -> Op
             import httpx
             buf = bytearray()
             end = time.monotonic() + timeout
-            with httpx.Client(timeout=timeout, follow_redirects=True,
+            with httpx.Client(timeout=httpx.Timeout(timeout, connect=min(timeout, 5.0)), follow_redirects=True,
                               headers={"User-Agent": "Mozilla/5.0 (compatible; MedConfBot)"}) as c:
                 with c.stream("GET", url) as r:
                     r.raise_for_status()
+                    try:
+                        if int(r.headers.get("content-length") or 0) > max_bytes:
+                            return None
+                    except ValueError:
+                        pass
                     for chunk in r.iter_bytes():
                         buf.extend(chunk)
                         if len(buf) > max_bytes or time.monotonic() > end:
@@ -173,11 +180,12 @@ def _fetch_bytes(url: str, timeout: float, max_bytes: int = PDF_MAX_BYTES) -> Op
         return None
 
 
-def _pdf_text(data: bytes) -> str:
-    """Child-process parse under remediator.pdf_text limits (<= 20 pages, 20 s)."""
+def _pdf_text(data: bytes, timeout: float = 20.0) -> str:
+    """Child-process parse under remediator.pdf_text limits (<= 20 pages); the child
+    is killed after `timeout` seconds (the caller passes what is left of the wall clock)."""
     try:
         from remediator.pdf_text import pdf_to_text_isolated, PDF_MAX_PAGES
-        return pdf_to_text_isolated(data, max_pages=PDF_MAX_PAGES) or ""
+        return pdf_to_text_isolated(data, max_pages=PDF_MAX_PAGES, timeout=max(1.0, timeout)) or ""
     except Exception as e:  # noqa: BLE001
         logger.debug(f"discovery: pdf parse failed: {type(e).__name__}")
         return ""
@@ -337,14 +345,14 @@ _WEAK_TITLE_TOKENS = {"annual", "meeting", "conference", "congress", "course", "
 
 
 def _in_event_path(base_url: str, url: str) -> bool:
-    """True when `url` sits under the event page's own directory (event pages are at
-    depth >= 3, e.g. /events/conferences/<slug>). Shallow event pages scope the whole
-    site, so nothing counts as 'inside' and every candidate must name the field."""
+    """True only when `url` sits under the event page's OWN URL path
+    (/events/conferences/<slug>/registration for the page /events/conferences/<slug>).
+    The PARENT directory does not count: its other children are other events."""
     b, u = urlparse(base_url), urlparse(url)
-    parts = [x for x in b.path.split("/") if x]
-    if len(parts) < 3 or _host(base_url) != _host(url):
+    own = "/".join(x for x in b.path.split("/") if x)
+    if not own or _host(base_url) != _host(url):
         return False
-    return (u.path.rstrip("/") + "/").startswith("/" + "/".join(parts[:-1]) + "/")
+    return (u.path.rstrip("/") + "/").startswith("/" + own + "/")
 
 
 def _title_tokens(row: dict) -> set:
@@ -687,6 +695,145 @@ def _identity_ok(row: dict, text: str) -> bool:
     return any(t in low for t in toks)
 
 
+# ── identity of a fetched page ───────────────────────────────────────────────────
+_ID_WEAK = {"annual", "meeting", "conference", "congress", "course", "international", "symposium",
+            "update", "updates", "training", "workshop", "series", "online", "webinar", "event", "events",
+            "with", "from", "that", "this", "your", "live", "scientific", "national", "global", "world"}
+_HEAD_GENERIC = {"registration", "register", "fees", "pricing", "prices", "tickets", "booking", "venue",
+                 "location", "travel", "directions", "abstract", "abstracts", "submission", "submissions",
+                 "programme", "program", "information", "details", "delegate", "delegates", "accommodation",
+                 "welcome", "about", "home", "overview", "contact", "speakers", "sponsors", "exhibitors",
+                 "schedule", "agenda", "general", "important", "dates", "call", "papers", "posters"}
+_EVENT_NOUN_RE = re.compile(
+    r"\b(?:conference|congress|course|masterclass|summit|symposium|meeting|workshop|webinar|forum|"
+    r"update|annual|study\s+day|school|academy|convention|colloquium|seminar|bootcamp|assembly)\b|\b20\d\d\b",
+    re.I)
+_DATE_FORMATS = ("%d %B %Y", "%B %d, %Y", "%B %d %Y", "%d %b %Y", "%b %d, %Y", "%d/%m/%Y", "%Y-%m-%d", "%d %B", "%B %d")
+ID_MIN_TOKENS_SMALL, ID_MIN_TOKENS_LARGE = 1, 2     # Level-2 decision: >= 3 title tokens need 2 hits off the event's own path
+
+
+def _row_tokens(row: dict) -> set:
+    name = row.get("conference_name") or ""
+    toks = {t for t in re.findall(r"[a-z0-9]{4,}", name.lower()) if t not in _ID_WEAK and not t.isdigit()}
+    toks |= {t.lower() for t in re.findall(r"\b[A-Z]{3}\b", name)}
+    return toks
+
+
+def _date_in_text(row: dict, low: str) -> bool:
+    d = _is_date(row.get("start_date"))
+    if not d:
+        return False
+    for f in _DATE_FORMATS[:7]:
+        try:
+            if d.strftime(f).lower().lstrip("0") in low or d.strftime(f).lower() in low:
+                return True
+        except ValueError:
+            pass
+    return False
+
+
+def _heading_of(html: str) -> str:
+    """The page's own heading: first <h1>, else the first segment of <title>."""
+    m = re.search(r"<h1\b[^>]*>(.*?)</h1\s*>", html or "", re.I | re.S)
+    if not m:
+        m = re.search(r"<title\b[^>]*>(.*?)</title\s*>", html or "", re.I | re.S)
+        if m:
+            seg = re.split(r"\s[|\u2013\u2014-]\s|\|", _html.unescape(m.group(1)))[0]
+            return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", seg)).strip()
+        return ""
+    return re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", m.group(1)))).strip()
+
+
+def _heading_names_other_event(row: dict, heading: str) -> bool:
+    """The heading reads like an EVENT name (an event noun or a year plus at least one
+    distinctive word) and shares no distinctive word with this row's title."""
+    toks = _row_tokens(row)
+    if not heading or not toks:
+        return False
+    low = heading.lower()
+    if any(t in low for t in toks):
+        return False
+    words = {w for w in re.findall(r"[a-z]{4,}", low) if w not in _ID_WEAK and w not in _HEAD_GENERIC}
+    return bool(words) and bool(_EVENT_NOUN_RE.search(heading))
+
+
+def _page_identity_problem(row: dict, html: str, text: str, kind: str) -> Optional[str]:
+    """None when the fetched page is this event's; else the reason it is not.
+    kind: "own" (under the event's own URL path), "site" (same host, elsewhere),
+    "external" (another host the event page linked to)."""
+    if _heading_names_other_event(row, _heading_of(html)):
+        return "heading_names_other_event"
+    if kind == "external":
+        return None if _identity_ok(row, text) else "no_identity"
+    if kind == "own":
+        return None                 # the page's address sits under the event's own URL: that is the identity evidence
+    low = (text or "").lower()
+    toks = _row_tokens(row)
+    hits = sum(1 for t in toks if t in low)
+    need = 1 if len(toks) < 3 else ID_MIN_TOKENS_LARGE
+    if toks and hits >= min(need, len(toks)):
+        return None
+    if _date_in_text(row, low):
+        return None
+    return "no_identity"
+
+
+# ── shared pages (one URL, several events) ───────────────────────────────────────
+SHARED_WINDOW_LINES = 60
+
+
+def _squash(x: Any) -> str:
+    return re.sub(r"\s+", " ", str(x or "")).strip().lower()
+
+
+def _shared_window(row: dict, html: str, sibling_titles: Iterable[str]) -> Optional[Tuple[str, str]]:
+    """(lines_text, flat_text) of the part of a shared page that belongs to THIS row:
+    from the line carrying its full title up to the next sibling's title (mirrors
+    remediator.runner.identity_window). None when the title is not found, or only
+    inside a longer sibling's title."""
+    title = _squash(row.get("conference_name"))
+    if len(title) < 6:
+        return None
+    lines = [l for l in (re.sub(r"\s+", " ", x).strip() for x in _to_lines(html).split("\n")) if l]
+    sibs = {_squash(t) for t in sibling_titles}
+    sibs = {t for t in sibs if len(t) >= 6 and t != title}
+    longer = [t for t in sibs if title in t]
+    start, pos0 = -1, 0
+    for i, l in enumerate(lines):
+        low = l.lower()
+        p = low.find(title)
+        while p >= 0:
+            inside = any(low.startswith(t, q) for t in longer
+                         for q in range(max(0, p - len(t) + len(title)), p + 1))
+            if not inside:
+                start, pos0 = i, p
+                break
+            p = low.find(title, p + 1)
+        if start >= 0:
+            break
+    if start < 0:
+        return None
+    end = min(len(lines), start + SHARED_WINDOW_LINES)
+    first = lines[start][pos0:]
+    cut = len(first)
+    for t in sibs:
+        j = first.lower().find(t, len(title))
+        if 0 <= j < cut:
+            cut = j
+    out = [first[:cut]]
+    if cut == len(first):
+        for k in range(start + 1, end):
+            low = lines[k].lower()
+            hit = [low.find(t) for t in sibs if t in low]
+            if hit:
+                if min(hit) > 0:
+                    out.append(lines[k][:min(hit)])
+                break
+            out.append(lines[k])
+    win = [l for l in out if l.strip()]
+    return "\n".join(win), " ".join(win)[:250_000]
+
+
 # ── money-adjacent images and PDF links ──────────────────────────────────────────
 def _fee_images(html: str, page_url: str, strict: bool) -> List[str]:
     """Image sources worth vision. Uses the selection core of
@@ -772,11 +919,17 @@ class _Run:
 
     # parsing one body of text/html
     def parse(self, html: str, text: str, lines_text: str, url: str, *, external: bool,
-              step: str, t_start: float, allow_images: bool = True) -> None:
+              step: str, t_start: float, allow_images: bool = True, verify: Optional[str] = None) -> bool:
+        """Parse one body. `verify` ("own" | "site" | "external") runs the identity check
+        first; a page that fails it contributes NOTHING. Returns False when rejected."""
         found: List[str] = []
-        if external and not _identity_ok(self.row, text):
-            self.log(step, url, ["identity_mismatch"], t_start)
-            return
+        if verify:
+            why = _page_identity_problem(self.row, html, text, verify)
+            if why:
+                self.res.evidence.append({"step": step, "url": url, "found": ["identity_mismatch"],
+                                          "reason": "identity_mismatch", "detail": why,
+                                          "elapsed_ms": int((self.budget.clock() - t_start) * 1000)})
+                return False
         if self.need(FIELD_FEES):
             if external and _is_ticketing_host(url):
                 # identity + same-date gated, holding fees / deposits removed (explorer)
@@ -814,28 +967,36 @@ class _Run:
                 if all(u != p[0] for p in self.pdfs):
                     self.pdfs.append((u, label))
         self.log(step, url, found, t_start)
+        return True
 
 
 def discover(row: dict, page_html: str, page_text: str, base_url: str, *,
              hints: Optional[DiscoveryHints] = None,
              budget: Optional[DiscoveryBudget] = None,
-             skip_urls: Iterable[str] = ()) -> DiscoveryResult:
+             skip_urls: Iterable[str] = (),
+             shared: bool = False,
+             sibling_titles: Iterable[str] = ()) -> DiscoveryResult:
     """Find missing fees / venue / abstract info on linked pages, a PDF and fee
     images. Never raises, never calls a text LLM. `skip_urls`: pages already
     followed by the caller (e.g. the call-for-papers link of
-    _ensure_submission_info)."""
+    _ensure_submission_info). `shared=True`: the page carries several events
+    (calendar page, #fragment row); only the row's own title block is parsed and no
+    link of the page is followed (organiser_url still is, behind the identity check);
+    when no block can be found nothing is discovered (evidence shared_page_no_window)."""
     budget = budget or DiscoveryBudget()
+    shared = bool(shared) or bool(urlparse(base_url or "").fragment)     # a #fragment row lives on a shared page
     run = _Run(row or {}, budget, hints)
     try:
         _discover(run, page_html or "", page_text or "", base_url or "",
-                  {_page_key(u) for u in skip_urls if u})
+                  {_page_key(u) for u in skip_urls if u}, shared=shared, siblings=list(sibling_titles or ()))
     except Exception as e:  # noqa: BLE001
         logger.warning(f"discovery: aborted ({type(e).__name__}: {e})")
         run.res.evidence.append({"step": "error", "url": base_url, "found": [type(e).__name__], "elapsed_ms": 0})
     return run.res
 
 
-def _discover(run: _Run, html: str, text: str, base_url: str, skip: set) -> None:
+def _discover(run: _Run, html: str, text: str, base_url: str, skip: set,
+              shared: bool = False, siblings: Optional[List[str]] = None) -> None:
     b, res = run.budget, run.res
     if not run.missing or not base_url:
         return
@@ -844,12 +1005,23 @@ def _discover(run: _Run, html: str, text: str, base_url: str, skip: set) -> None
     t = b.clock()
     page_missing_abs = FIELD_ABSTRACT in run.missing
     run.missing.discard(FIELD_ABSTRACT)
-    run.parse(html, text or _to_text(html), _to_lines(html), base_url, external=False, step="page", t_start=t)
+    if shared:
+        win = _shared_window(run.row, html, siblings or [])
+        if win is None:
+            run.log("page", base_url, ["shared_page_no_window"], t)
+            res.evidence[-1]["reason"] = "shared_page_no_window"
+            return
+        # only this row's block is read; nothing of the shared page is followed
+        run.parse("", win[1], win[0], base_url, external=False, step="page:window", t_start=t)
+        html, hints = "", None
+    else:
+        run.parse(html, text or _to_text(html), _to_lines(html), base_url, external=False, step="page", t_start=t)
+        hints = run.hints
     if page_missing_abs:
         run.missing.add(FIELD_ABSTRACT)
 
     # 2. at most max_html sub-pages, one round-robin pass over the missing fields
-    pools = {f: _candidates(f, html, base_url, run.row, run.hints, skip) for f in _FIELD_ORDER if f in run.missing}
+    pools = {f: _candidates(f, html, base_url, run.row, hints, skip) for f in _FIELD_ORDER if f in run.missing}
     tried: set = set(skip)
     fetched = 0
     while fetched < b.max_html and run.any_needed() and run.left() > 1.0:
@@ -874,21 +1046,23 @@ def _discover(run: _Run, html: str, text: str, base_url: str, skip: set) -> None
         if not body:
             run.log(step, cand["url"], ["fetch_failed"], t)
             continue
-        run.parse(body, _to_text(body), _to_lines(body), cand["url"], external=cand["external"],
-                  step=step, t_start=t)
-        if fetched < b.max_html and not (cand["external"] and _is_ticketing_host(cand["url"])):
+        kind = ("external" if cand["external"] else
+                "own" if (cand["why"] in ("hint", "hint_anchor") or _in_event_path(base_url, cand["url"])) else "site")
+        accepted = run.parse(body, _to_text(body), _to_lines(body), cand["url"], external=cand["external"],
+                             step=step, t_start=t, verify=kind)
+        if accepted and fetched < b.max_html and not (cand["external"] and _is_ticketing_host(cand["url"])):
             # the fetched page's own links (same host as it) lead the pools: this is how
             # organiser_url (a homepage) reaches its /abstracts or /registration page
             for f in _FIELD_ORDER:
                 if not run.need(f):
                     continue
                 deeper = [dict(c, external=cand["external"])
-                          for c in _candidates(f, body, cand["url"], run.row, run.hints, tried)
+                          for c in _candidates(f, body, cand["url"], run.row, hints, tried)
                           if c["why"] not in ("organiser_url", "linked_event_site")]
                 pools[f] = deeper + pools.get(f, [])
 
     # 3. ONE PDF for whatever is still missing
-    if run.any_needed() and run.pdfs and b.max_pdf > 0 and run.left() > 3.0:
+    if run.any_needed() and run.pdfs and b.max_pdf > 0 and run.left() > PDF_MIN_FETCH + PDF_MIN_PARSE:
         _follow_pdf(run)
 
     # 4. fee images (vision), inside the per-source ledger
@@ -922,11 +1096,15 @@ def _follow_pdf(run: _Run) -> None:
         return
     url, _label, fieldname = pick
     t = run.budget.clock()
-    data = _fetch_bytes(url, max(2.0, min(run.budget.pdf_timeout, run.left())), PDF_MAX_BYTES)
+    # the fetch may use the budget's PDF timeout, but never the slice the parse needs
+    data = _fetch_bytes(url, max(PDF_MIN_FETCH, min(run.budget.pdf_timeout, run.left() - PDF_MIN_PARSE)), PDF_MAX_BYTES)
     if not data:
         run.log(f"pdf:{fieldname}", url, ["fetch_rejected"], t)
         return
-    txt = _pdf_text(data)
+    if run.left() < PDF_MIN_PARSE:
+        run.log(f"pdf:{fieldname}", url, ["budget_exhausted"], t)
+        return
+    txt = _pdf_text(data, run.left())
     if len(txt.strip()) < 40:
         run.log(f"pdf:{fieldname}", url, ["no_text_layer"], t)
         return
