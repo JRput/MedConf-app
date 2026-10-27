@@ -14,7 +14,9 @@ import html as _html
 import re
 import time
 from datetime import date
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
+
+import money
 
 from logger import logger
 
@@ -41,8 +43,6 @@ _TOTAL_RE = re.compile(r"Showing\s+\d+\s+to\s+\d+\s+of\s+(\d+)\s+results", re.I)
 _POSTCODE_RE = re.compile(r"^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$")
 _VENUE_WORD_RE = re.compile(r"(?i)\b(hotel|inn|centre|center|house|hall|college|hospital|university|institute|conference|suite|arena|stadium|voco|hilton|marriott|campus|school|trust)\b")
 _ONLINE_RE = re.compile(r"^(?:online|virtual|webinar|zoom|teams|remote|livestream|tbc|tba)\b", re.I)
-_AMOUNT_ONLY_RE = re.compile(r"^([£€$])\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)\b")
-_SYM = {"£": "GBP", "€": "EUR", "$": "USD"}
 _FEE_HEAD_RE = re.compile(r"(?i)^(?:(?:registration|course|event|delegate)\s+)?(?:fees?|pricing|prices|ticket prices?|costs?)\s*:?$|^registrations?\s*:?$")
 _DESC_SKIP_RE = re.compile(r"(?i)^(?:programme|registration|on behalf|if you|please|delegate|not a bsg|the bsg is committed|you can register|you must|nurse,|sold out)|^[^.]{0,40}\bnot yet open\b|cookie|code of conduct")
 _NOTE_RE = re.compile(r"(?i)^(?:if you|please|not a bsg member|on behalf|delegate information|group bookings|cancellation|nurse,|you must|invoices|payments by)")
@@ -117,6 +117,25 @@ def place_from_raw(raw: Optional[str]) -> Dict[str, Any]:
     return out
 
 
+def _lead_amount(text: str) -> Optional[money.Money]:
+    """The amount a string STARTS with (`money.find_amounts`: £ € $ S$ A$, ISO codes,
+    EU decimals), or None. Bare "$" is USD; a currency the text does not state is None."""
+    found = money.find_amounts(text or "")
+    if found and found[0].span[0] == 0 and found[0].currency and found[0].high is None:
+        return found[0]
+    return None
+
+
+def _label_then_amount(line: str) -> Optional[Tuple[str, money.Money]]:
+    """"Members: £150.00 (...)" -> ("Members", Money). Tries each colon, label 2-80 chars."""
+    for m in re.finditer(r":", line):
+        label = line[:m.start()].strip()
+        am = _lead_amount(line[m.end():].strip())
+        if 2 <= len(label) <= 80 and am:
+            return label, am
+    return None
+
+
 def _tier(label: str, amount: float, cur: str, section: Optional[str] = None) -> Dict[str, Any]:
     label = re.sub(r"\s+", " ", label).strip(" :-")
     parts = [p.strip() for p in re.split(r"\s+-\s+", label) if p.strip()]
@@ -132,9 +151,10 @@ def parse_fees(lines: List[str], default_currency: str = "GBP") -> List[Dict[str
     start = next((i for i, l in enumerate(lines) if _FEE_HEAD_RE.match(l.strip())), None)
     if start is None:
         for ln in lines:                                           # "Course Fee: £1,750.00" on one line
-            m = re.match(r"(?i)^(?:course|registration|event|delegate)?\s*fees?\s*:\s*([£€$])\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)\b", ln.strip())
-            if m:
-                return [_tier("Standard", float(m.group(2).replace(",", "")), _SYM[m.group(1)])]
+            m = re.match(r"(?i)^(?:course|registration|event|delegate)?\s*fees?\s*:\s*(\S.*)$", ln.strip())
+            am = _lead_amount(m.group(1)) if m else None
+            if am:
+                return [_tier("Standard", am.amount, am.currency)]
         return prose_fees(lines[:120], default_currency)
     tiers: List[Dict[str, Any]] = []
     seen = set()
@@ -155,24 +175,24 @@ def parse_fees(lines: List[str], default_currency: str = "GBP") -> List[Dict[str
             break
         nxt = lines[i + 1].strip() if i + 1 < len(lines) else ""
         nxt2 = lines[i + 2].strip() if i + 2 < len(lines) else ""
-        if _AMOUNT_ONLY_RE.match(ln) and i == start + 1:          # "Course Fee:" / "£1,750.00"
-            am = _AMOUNT_ONLY_RE.match(ln)
-            add("Standard", float(am.group(2).replace(",", "")), _SYM[am.group(1)])
+        lead = _lead_amount(ln)
+        if lead and i == start + 1:                               # "Course Fee:" / "£1,750.00"
+            add("Standard", lead.amount, lead.currency)
             i += 1
             continue
-        inline = re.match(r"^(.{2,80}?)\s*:\s*([£€$]\s*[0-9][0-9,]*(?:\.[0-9]{1,2})?)", ln)
+        inline = _label_then_amount(ln)
+        colon_amt = _lead_amount(re.sub(r"^:\s*", "", nxt)) if nxt.startswith(":") else None
+        colon_amt2 = _lead_amount(re.sub(r"^:\s*", "", nxt2)) if nxt2.startswith(":") else None
         if inline:
-            am = _AMOUNT_ONLY_RE.match(inline.group(2))
-            add(inline.group(1), float(am.group(2).replace(",", "")), _SYM[am.group(1)])
-        elif ln.endswith(":") and _AMOUNT_ONLY_RE.match(nxt):
-            am = _AMOUNT_ONLY_RE.match(nxt)
-            add(ln[:-1], float(am.group(2).replace(",", "")), _SYM[am.group(1)])
+            add(inline[0], inline[1].amount, inline[1].currency)
+        elif ln.endswith(":") and _lead_amount(nxt):
+            am = _lead_amount(nxt)
+            add(ln[:-1], am.amount, am.currency)
             i += 1
-        elif re.match(r"^:\s*[£€$]", nxt) and len(ln) <= 60 and not ln.startswith(":"):
-            am = _AMOUNT_ONLY_RE.match(re.sub(r"^:\s*", "", nxt))
-            add(ln, float(am.group(2).replace(",", "")), _SYM[am.group(1)])
+        elif colon_amt and len(ln) <= 60 and not ln.startswith(":"):
+            add(ln, colon_amt.amount, colon_amt.currency)
             i += 1
-        elif re.match(r"^:\s*[£€$]", nxt2) and len(ln) <= 60 and not ln.endswith(":") and not re.search(r"[£€$]", ln):
+        elif colon_amt2 and len(ln) <= 60 and not ln.endswith(":") and not money.find_amounts(ln):
             section = ln                                           # "Full event ticket" above "Members" / ": £100.00"
         i += 1
     if tiers:
@@ -191,9 +211,14 @@ def prose_fees(lines: List[str], default_currency: str = "GBP") -> List[Dict[str
                 tiers.append(_tier("Everyone", 0.0, default_currency))
             elif re.search(r"(?i)\bmembers?\b", who) and len(who.split()) <= 6:     # anything else is prose, not a fee category
                 tiers.append(_tier(who, 0.0, default_currency))
-        m = re.search(r"(?i)\b(non-?members?)\b[^£.]{0,50}?([£€$])\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)", ln)
+        m = re.search(r"(?i)\b(non-?members?)\b", ln)
         if m:
-            tiers.append(_tier("Non-members", float(m.group(3).replace(",", "")), _SYM[m.group(2)]))
+            tail = ln[m.end():]
+            found = money.find_amounts(tail)
+            if found and found[0].currency and found[0].high is None:
+                gap = tail[:found[0].span[0]]
+                if len(gap) <= 50 and "." not in gap:
+                    tiers.append(_tier("Non-members", found[0].amount, found[0].currency))
     return tiers
 
 

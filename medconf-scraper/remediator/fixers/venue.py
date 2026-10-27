@@ -60,6 +60,19 @@ def _heuristic_venue(page_text: str) -> Optional[str]:
     return None
 
 
+def _html_place(row: dict) -> Optional[dict]:
+    """Venue / city evidence in the row's already-fetched page HTML (JSON-LD,
+    Google-Maps embed, address block...). No network; site chrome excluded."""
+    html = row.get("_page_html")
+    if not html:
+        return None
+    try:
+        from ..explorer import extract_place_from_html
+        return extract_place_from_html(html, row.get("source_url") or "")
+    except Exception:  # noqa: BLE001 - a parser bug must not sink the fixer
+        return None
+
+
 def fix_venue(
     row: dict,
     page_text: str,
@@ -75,6 +88,10 @@ def fix_venue(
         h = sane_venue(h)                 # never a footer / address blob (CROI, Euroanaesthesia 2026-10-14)
         if h:
             return h, "heuristic_prefix"
+
+    place = _html_place(row)
+    if place and place.get("venue_name"):
+        return place["venue_name"], f"html_{place['method']}"
 
     # LLM with strict prompt
     title = row.get("conference_name") or ""
@@ -128,6 +145,10 @@ def fix_city(
             city = mapping.get(area.group(1))
             if city:
                 return city, "heuristic_postcode_prefix"
+
+    place = _html_place(row)
+    if place and place.get("city"):
+        return place["city"], f"html_{place['method']}"
 
     # LLM
     prompt = f"""From this event page, extract the CITY only (no street address).

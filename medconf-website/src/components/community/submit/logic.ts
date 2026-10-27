@@ -43,6 +43,9 @@ export const COMMON_COUNTRIES = [
 export interface SubmitValues {
   conference_name: string
   organiser_url: string
+  // 'degree' is deliberately absent: the community hide-scope validator
+  // (supabase/migrations/20261018000006:79) still rejects it. Follow-up: widen
+  // that validator, then add 'degree' here, in schema.ts and in Sections.tsx.
   event_type: '' | 'conference' | 'workshop' | 'course'
   event_format: '' | 'in_person' | 'online' | 'hybrid'
   is_flagship: boolean

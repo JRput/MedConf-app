@@ -54,3 +54,33 @@ def test_comma_thousands_without_decimals():
     assert _parse_price("1200,50") == 1200.5
     assert _parse_price("1 200,00") == 1200.0
     assert _parse_price("1.130 EUR") == 1130.0
+
+
+# ── R2 HIGH bugs (2026-10-27): EU decimals, prefixed dollars, named currencies ─────────
+
+def test_eu_decimal_with_symbol_prefix_is_not_one_and_a_half():
+    from extractors.pricing_tables import _parse_price
+    assert _parse_price("€ 1.500,00") == 1500.0
+
+
+def _one_col(head, cell, default=""):
+    html = (f"<h3>{head}</h3><table><tr><td>Member</td><td>{cell}</td></tr>"
+            f"<tr><td>Student</td><td>{cell}</td></tr></table>")
+    return [(t["price_gbp"], t["currency"]) for t in parse_pricing_tables(html, default_currency=default)]
+
+
+def test_prefixed_dollar_symbols_are_not_usd():
+    assert _one_col("Registration fees (S$)", "465")[:1] == [(465.0, "SGD")]     # old: USD
+    assert _one_col("Registration fees", "S$465")[:1] == [(465.0, "SGD")]
+    assert _one_col("Registration fees (A$)", "250")[:1] == [(250.0, "AUD")]
+    assert _one_col("Registration fees", "HK$1,280")[:1] == [(1280.0, "HKD")]
+
+
+def test_currency_named_in_heading_beyond_the_old_whitelist():
+    assert _one_col("Fees in CAD", "400", default="GBP")[:1] == [(400.0, "CAD")]
+    assert _one_col("Registration fees (SEK)", "2 500")[:1] == [(2500.0, "SEK")]
+
+
+def test_no_detectable_currency_drops_the_tiers_instead_of_defaulting_to_gbp():
+    assert _one_col("Registration fees", "350") == []
+    assert _one_col("Registration fees", "350", default="GBP")[:1] == [(350.0, "GBP")]   # explicit default still honoured

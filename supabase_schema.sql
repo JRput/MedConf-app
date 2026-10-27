@@ -763,3 +763,125 @@ RETURNS TABLE(id integer, updated_at timestamptz) LANGUAGE sql STABLE SECURITY D
 $$;
 REVOKE ALL ON FUNCTION public.sitemap_events() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.sitemap_events() TO anon, authenticated;
+
+-- ============================================
+-- event_type 'degree' + tier replacement (2026-10-27, migrations 20261027000000/1)
+-- The inline CHECKs above still list three event types; the block below widens
+-- them (idempotent), so a fresh bootstrap ends at the live shape:
+--   conferences.event_type IN (conference, workshop, course, degree)
+--   scraper_sources.default_event_type IN (conference, workshop, course, degree, mixed)
+-- The title backfill and its audit table are data migration only (see the migration file).
+-- ============================================
+CREATE OR REPLACE FUNCTION public.is_degree_title(p_title text)
+RETURNS boolean LANGUAGE sql IMMUTABLE PARALLEL SAFE SET search_path = pg_catalog AS $f$
+  SELECT COALESCE(p_title, '') ~* '(\y(m\.?sc|b\.?sc|mres|mphil|phd|dphil|mba|mph|pgcert|pgdip)\y|\ypostgraduate\s+(certificate|diploma)\y|\ydiploma\s+in\y|\yadvanced\s+certificate\s+in\y|\ycertificate\s+in\y.*\ylevel\s*7\y|\ymaster''?s?\s+(of|in)\y|\ybachelors?\s+of\y|\ydoctorate\s+(in|of)\y)'
+     AND COALESCE(p_title, '') !~* '(\y(ceremon\w*|graduation|awards?|prepar\w*|revision|exam\w*|mock|osce|symposium|congress|conference|webinar)\y|\yfor\s+the\s+diploma\y|,\s*(md|do|mph|mba|phd|msc|mres|mphil|dphil|pgcert|pgdip|facs|frcp|frcs|frca|mrcp|mrcs|rn|bds)\y)'
+$f$;
+REVOKE EXECUTE ON FUNCTION public.is_degree_title(text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.is_degree_title(text) TO service_role;
+
+-- Widen the CHECKs. The inline CHECKs are unnamed in the baseline, so find them
+-- by definition rather than by an assumed name. Skips when already widened.
+DO $$
+DECLARE
+  r record;
+  n integer;
+BEGIN
+  -- conferences.event_type
+  SELECT count(*) INTO n FROM pg_constraint
+   WHERE conrelid = 'public.conferences'::regclass AND contype = 'c'
+     AND pg_get_constraintdef(oid) LIKE '%event_type = ANY%';
+  IF n > 1 THEN RAISE EXCEPTION 'conferences: % event_type CHECKs found, expected at most 1', n; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint
+                  WHERE conrelid = 'public.conferences'::regclass AND contype = 'c'
+                    AND pg_get_constraintdef(oid) LIKE '%event_type = ANY%'
+                    AND pg_get_constraintdef(oid) LIKE '%degree%') THEN
+    FOR r IN SELECT conname FROM pg_constraint
+              WHERE conrelid = 'public.conferences'::regclass AND contype = 'c'
+                AND pg_get_constraintdef(oid) LIKE '%event_type = ANY%' LOOP
+      EXECUTE format('ALTER TABLE public.conferences DROP CONSTRAINT %I', r.conname);
+    END LOOP;
+    ALTER TABLE public.conferences ADD CONSTRAINT conferences_event_type_check
+      CHECK (event_type IN ('conference','workshop','course','degree'));
+  END IF;
+
+  -- scraper_sources.default_event_type
+  SELECT count(*) INTO n FROM pg_constraint
+   WHERE conrelid = 'public.scraper_sources'::regclass AND contype = 'c'
+     AND pg_get_constraintdef(oid) LIKE '%default_event_type = ANY%';
+  IF n > 1 THEN RAISE EXCEPTION 'scraper_sources: % default_event_type CHECKs found, expected at most 1', n; END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint
+                  WHERE conrelid = 'public.scraper_sources'::regclass AND contype = 'c'
+                    AND pg_get_constraintdef(oid) LIKE '%default_event_type = ANY%'
+                    AND pg_get_constraintdef(oid) LIKE '%degree%') THEN
+    FOR r IN SELECT conname FROM pg_constraint
+              WHERE conrelid = 'public.scraper_sources'::regclass AND contype = 'c'
+                AND pg_get_constraintdef(oid) LIKE '%default_event_type = ANY%' LOOP
+      EXECUTE format('ALTER TABLE public.scraper_sources DROP CONSTRAINT %I', r.conname);
+    END LOOP;
+    ALTER TABLE public.scraper_sources ADD CONSTRAINT scraper_sources_default_event_type_check
+      CHECK (default_event_type IN ('conference','workshop','course','degree','mixed'));
+  END IF;
+END $$;
+
+-- Remediator: replace all-zero / single-generic-label tiers under the row lock
+-- (rules in 20261027000001_remediator_replace_tiers.sql; service_role only).
+CREATE OR REPLACE FUNCTION public.remediator_replace_tiers_if_zero_or_generic(p_conference_id bigint, p_tiers jsonb)
+RETURNS integer LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_catalog AS $$
+DECLARE
+  t jsonb;
+  v jsonb := '[]'::jsonb;
+  n_exist integer;
+  n_zero integer;
+  one_label text;
+  price numeric;
+  cur text;
+  dl date;
+  any_pos boolean := FALSE;
+  n integer := 0;
+BEGIN
+  PERFORM 1 FROM conferences WHERE id = p_conference_id FOR UPDATE;
+  IF NOT FOUND THEN RETURN 0; END IF;
+
+  SELECT count(*), count(*) FILTER (WHERE price_gbp = 0), min(tier_label)
+    INTO n_exist, n_zero, one_label
+    FROM pricing_tiers WHERE conference_id = p_conference_id;
+  IF n_exist = 0 THEN RETURN 0; END IF;
+  IF NOT (n_zero = n_exist
+          OR (n_exist = 1 AND lower(regexp_replace(btrim(one_label), '\s+', ' ', 'g'))
+              IN ('standard','registration','registration fee','fee','fees','price','course fee','delegate'))) THEN
+    RETURN 0;
+  END IF;
+
+  FOR t IN SELECT * FROM jsonb_array_elements(COALESCE(p_tiers, '[]'::jsonb)) LOOP
+    BEGIN
+      IF NULLIF(btrim(t ->> 'tier_label'), '') IS NULL THEN CONTINUE; END IF;
+      IF COALESCE(t ->> 'price_gbp', '') !~ '^\d{1,8}(\.\d{1,2})?$' THEN CONTINUE; END IF;
+      cur := upper(btrim(COALESCE(t ->> 'currency', '')));
+      IF cur !~ '^[A-Z]{3}$' THEN CONTINUE; END IF;   -- no GBP default, ever
+      price := (t ->> 'price_gbp')::numeric;
+      dl := NULL;
+      IF COALESCE(t ->> 'early_bird_deadline', '') ~ '^\d{4}-\d{2}-\d{2}$' THEN
+        dl := (t ->> 'early_bird_deadline')::date;
+      END IF;
+      IF price > 0 THEN any_pos := TRUE; END IF;
+      v := v || jsonb_build_array(jsonb_build_object(
+             'l', btrim(t ->> 'tier_label'), 'p', price, 'c', cur,
+             'e', COALESCE((t ->> 'is_early_bird')::boolean, FALSE), 'd', dl));
+    EXCEPTION WHEN others THEN
+      CONTINUE;   -- bad date / boolean: skip this tier only
+    END;
+  END LOOP;
+  IF NOT any_pos THEN RETURN 0; END IF;
+
+  DELETE FROM pricing_tiers WHERE conference_id = p_conference_id;
+  FOR t IN SELECT * FROM jsonb_array_elements(v) LOOP
+    INSERT INTO pricing_tiers (conference_id, tier_label, price_gbp, currency, is_early_bird, early_bird_deadline)
+    VALUES (p_conference_id, t ->> 'l', (t ->> 'p')::numeric, t ->> 'c', (t ->> 'e')::boolean,
+            NULLIF(t ->> 'd', 'null')::date);
+    n := n + 1;
+  END LOOP;
+  RETURN n;
+END $$;
+REVOKE EXECUTE ON FUNCTION public.remediator_replace_tiers_if_zero_or_generic(bigint, jsonb) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.remediator_replace_tiers_if_zero_or_generic(bigint, jsonb) TO service_role;

@@ -37,14 +37,9 @@ from playwright.sync_api import Page
 from .base import BaseExtractor
 from .http_fetch import fetch_html
 from .specialty_classifier import classify_specialty
+import money
 from logger import logger
 
-_CURRENCY_SYMBOLS = {"£": "GBP", "€": "EUR", "$": "USD"}
-_CURRENCY_CODES = ("GBP", "EUR", "USD", "CHF", "AUD", "CAD", "HKD", "SGD")
-_AMOUNT_RE = re.compile(
-    r"(?:(£|€|\$|" + "|".join(_CURRENCY_CODES) + r")\s?([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)"
-    r"|([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)\s?(" + "|".join(_CURRENCY_CODES) + r")\b)"
-)
 _FEE_HEADING_RE = re.compile(r"\b(registration fees?|course fees?|fees?|pricing|prices?|ticket prices?|cost)\b", re.I)
 _FEE_STOP_RE = re.compile(r"deadline|payments? (?:are|is|can)|register now|book (?:here|now)|terms (?:&|and)", re.I)
 _BOILERPLATE_RE = re.compile(
@@ -200,21 +195,17 @@ def city_country_after_year(text: str) -> Optional[Tuple[str, str]]:
 # ── fees ────────────────────────────────────────────────────────────────────
 
 def _amount_in(line: str, default_currency: str) -> Optional[Tuple[float, str, int]]:
-    """(amount, currency, start index of the amount) for the first money token."""
-    m = _AMOUNT_RE.search(line)
-    if not m:
+    """(amount, currency, start index of the amount) for the first priced token in the line.
+    Parsed by money.py: "£1,250.00", "1.500,00 €", "S$465", "A$250", "350 PLN". `default_currency`
+    is only context for ambiguous symbols ("kr" under SEK, "$" under AUD) - an amount whose
+    currency the text does not settle is skipped, never defaulted."""
+    found = money.find_amounts(line, context=default_currency)
+    if not found:
         return None
-    if m.group(1):
-        cur = _CURRENCY_SYMBOLS.get(m.group(1), m.group(1))
-        raw = m.group(2)
-    else:
-        cur = m.group(4)
-        raw = m.group(3)
-    try:
-        amt = float(raw.replace(",", ""))
-    except ValueError:
+    m = found[0]
+    if m.currency is None:
         return None
-    return amt, cur or default_currency, m.start()
+    return m.amount, m.currency, m.span[0]
 
 
 def _clean_label(label: str) -> str:
@@ -279,12 +270,15 @@ def tiers_from_cost_details(e: Dict[str, Any], default_currency: str) -> List[Di
     """Tribe's structured cost (usually empty). `cost_details.values` = ['25', '50']."""
     cd = e.get("cost_details") or {}
     vals = cd.get("values") or []
-    cur = (cd.get("currency_code") or "").upper() or _CURRENCY_SYMBOLS.get(cd.get("currency_symbol") or "", default_currency)
+    cur = (money.normalize_currency(cd.get("currency_code")) or money.normalize_currency(cd.get("currency_symbol"))
+           or money.normalize_currency(default_currency))
+    if not cur:
+        logger.warning(f"tribe: cost_details {cd!r} carries no currency and the extractor sets none - tiers skipped")
+        return []
     tiers: List[Dict[str, Any]] = []
     for v in vals:
-        try:
-            amt = float(str(v).replace(",", ""))
-        except ValueError:
+        amt = money.parse_number(str(v), cur)
+        if amt is None:
             continue
         tiers.append({"tier_label": "Free" if amt == 0 else "Standard", "price_gbp": amt, "currency": cur,
                       "is_early_bird": False, "early_bird_deadline": None})

@@ -736,7 +736,7 @@ class RCEMExtractor(BaseExtractor):
             label = " ".join(label_parts).strip()[:120] or "Standard"
             tiers.append({
                 "tier_label": label,
-                "price_gbp": price,
+                "price_gbp": price, "currency": "GBP",
                 "is_early_bird": "early" in label.lower(),
                 "early_bird_deadline": None,
             })
@@ -798,7 +798,7 @@ class RCEMExtractor(BaseExtractor):
                         suffix = f"{n_days} day" if n_days == 1 else f"{n_days} days"
                         tiers.append({
                             "tier_label": f"{band_label} · {fmt_label} · {status} · {{grade}} · {suffix}",
-                            "price_gbp": float(price),
+                            "price_gbp": float(price), "currency": "GBP",
                             "is_early_bird": early,
                             "early_bird_deadline": deadline,
                         })
@@ -830,7 +830,7 @@ class RCEMExtractor(BaseExtractor):
                     suffix = f"{n_days} day" if n_days == 1 else f"{n_days} days"
                     tiers.append({
                         "tier_label": f"Abstract presenter · Face-to-face · {status} · {grade_label} · {suffix}",
-                        "price_gbp": float(price),
+                        "price_gbp": float(price), "currency": "GBP",
                         "is_early_bird": False,
                         "early_bird_deadline": None,
                     })
@@ -849,7 +849,7 @@ class RCEMExtractor(BaseExtractor):
                     suffix = f"{n_days} day" if n_days == 1 else f"{n_days} days"
                     tiers.append({
                         "tier_label": f"LMIC member · {fmt_label} · {grade_label} · {suffix}",
-                        "price_gbp": float(price),
+                        "price_gbp": float(price), "currency": "GBP",
                         "is_early_bird": False,
                         "early_bird_deadline": None,
                     })

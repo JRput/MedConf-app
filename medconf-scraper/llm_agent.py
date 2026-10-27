@@ -39,6 +39,9 @@ def _event_type_from_category(cat: Optional[str]) -> Optional[str]:
     return None
 
 
+from extractors.degree_rule import is_degree_title  # noqa: E402
+
+
 # Title-keyword rules. Order matters — more-specific terms first.
 # Each entry is (regex, event_type).
 _TITLE_RULES = [
@@ -55,6 +58,9 @@ def _event_type_from_title(title: Optional[str]) -> Optional[str]:
     — caller falls through to 'conference' as the safe default."""
     if not title:
         return None
+    # Awarded qualifications first (shared with the SQL is_degree_title).
+    if is_degree_title(title):
+        return "degree"
     for rx, kind in _TITLE_RULES:
         if rx.search(title):
             return kind
@@ -248,6 +254,7 @@ class AgentLoop:
             if detail.get("_evidence"):
                 merged["_evidence"] = detail["_evidence"]  # popped by scraper.py
             self._ensure_submission_info(merged, booking_url)
+            self._discover_missing(merged, booking_url)
             return merged
         except Exception as e:
             logger.warning(f"  Detail extraction failed for '{title_short}': {e}")
@@ -287,6 +294,47 @@ class AgentLoop:
         except Exception as e:
             logger.warning(f"  submission guarantee skipped: {e}")
 
+    def _discover_missing(self, merged: Dict[str, Any], url: str) -> None:
+        """Scrape-time sub-page discovery (ticket X3): for fees / venue / abstract
+        info the extractor left EMPTY, run the shared engine on the page we already
+        hold (no refetch of the main page). Fills only empty fields; the evidence
+        trail rides on `_discovery_evidence` (popped by scraper.py and logged).
+        Opt out with extractor.DISCOVERY_ENABLED = False. Never raises."""
+        try:
+            if not getattr(self.extractor, "DISCOVERY_ENABLED", True):
+                return
+            from extractors import discovery
+            if not discovery.missing_fields(merged):
+                return
+            page = self.browser.page
+            text = (self.browser.get_page_text() or "")[:250_000]
+            html = ""
+            try:
+                html = page.content()
+            except Exception:
+                pass
+            base = getattr(page, "url", None) or url
+            skip = []
+            try:  # _ensure_submission_info already followed this call-for-papers link
+                from extractors.abstract_classifier import find_call_for_papers_link
+                skip.append(find_call_for_papers_link(html, base))
+            except Exception:
+                pass
+            if getattr(self, "_vision_ledger", None) is None:
+                self._vision_ledger = discovery.VisionLedger()   # one per source run
+            res = discovery.discover(
+                merged, html, text, base,
+                hints=getattr(self.extractor, "DISCOVERY_HINTS", None),
+                budget=discovery.DiscoveryBudget(vision=self._vision_ledger),
+                skip_urls=[u for u in skip if u])
+            written = discovery.apply_to_row(merged, res)
+            merged["_discovery_evidence"] = {
+                "filled": written, "evidence": res.evidence, "deferred": res.deferred}
+            if written or res.deferred:
+                logger.info(f"  discovery filled {written} deferred={res.deferred}")
+        except Exception as e:
+            logger.warning(f"  discovery skipped: {e}")
+
     # ------------------------------------------------------------------ #
     # Browser lifecycle helpers (called explicitly by scraper.py now)
     # ------------------------------------------------------------------ #
@@ -315,6 +363,7 @@ class AgentLoop:
                 logger.info(f"Detail {i+1}/{len(shells)}: {(shell.get('title') or '')[:60]}")
                 d = self.extract_detail_for_shell(shell)
                 d.pop("_evidence", None)  # scraper.py-only hint
+                d.pop("_discovery_evidence", None)
                 self.extracted_data.append(d)
             return {
                 "data": self.extracted_data,
@@ -385,8 +434,11 @@ class AgentLoop:
         #   3. title-keyword heuristic (covers RCGP/RSM/RCSEng-events whose listing
         #      cards don't expose a category)
         #   4. fallback to 'conference'
+        #   0. awarded-qualification title (MSc/PgDip/"Diploma in …") always wins:
+        #      the shared degree rule beats any extractor-level guess.
         event_type = (
-            detail.get("event_type")
+            ("degree" if is_degree_title(conference_name) else None)
+            or detail.get("event_type")
             or _event_type_from_category(shell.get("category"))
             or _event_type_from_title(conference_name)
             or "conference"
@@ -573,7 +625,7 @@ Based on the page content and your extraction instructions, decide your next act
 DATA FIDELITY RULES (HIGHEST PRIORITY — never violate):
 A. Extract ONLY values that are explicitly visible in CURRENT PAGE CONTENT above. Do NOT use prior knowledge, training-data memory, or plausible guesses.
 B. If a field is not on the page, set it to null (for strings, numbers, dates) or [] (for pricing_tiers). NEVER fabricate. NEVER fall back to a generic value.
-C. Pricing: if no GBP amount (£N) appears on the page for a specific conference, that conference's "pricing_tiers" MUST be []. Marketing copy like "free for members" alone is NOT a tier — leave it empty.
+C. Pricing: if no price (an amount with a currency symbol or code, e.g. £150, €150, EUR 150, S$465, 150 CHF) appears on the page for a specific conference, that conference's "pricing_tiers" MUST be []. Each tier carries the ISO-4217 code of the currency printed with its price ("GBP", "EUR", "USD", "SGD"...) in "currency"; use null if the page does not show which currency (never guess GBP). Copy the number exactly as printed (do not convert currencies). Marketing copy like "free for members" alone is NOT a tier — leave it empty.
 D. Dates (start_date / end_date / abstract_deadline): null if no calendar date is shown for that event. Do not infer from event names, "annual" labels, or training data.
 E. organiser_url: pick the per-event booking/detail link from AVAILABLE LINKS ON PAGE that corresponds to THIS specific conference. Match by proximity in the page text and by recognisable event slug. If you cannot confidently identify the right link for this event, use null. Do NOT use the listing URL as a fallback.
 F. cpd_points: integer if a number is explicitly shown (e.g. "6 CPD points"). Otherwise null. Do not estimate.
@@ -615,7 +667,7 @@ Conference object structure (apply DATA FIDELITY RULES — use null / [] when a 
     "abstract_deadline": "YYYY-MM-DD" or null,
     "organiser_url": string or null (per-event link from AVAILABLE LINKS — null if not identifiable, see rule E),
     "description": string or null (a short summary built ONLY from text on this page),
-    "pricing_tiers": [{{"tier_label": string, "price_gbp": number}}] (EMPTY ARRAY [] if no GBP prices are shown on the page for this event, see rule C)
+    "pricing_tiers": [{{"tier_label": string, "price_gbp": number (the amount as printed, in the printed currency), "currency": ISO-4217 code or null if the page does not show it}}] (EMPTY ARRAY [] if no prices are shown on the page for this event, see rule C)
 }}"""
 
         # Call Kimi K2.5 API - disable thinking mode for direct JSON output

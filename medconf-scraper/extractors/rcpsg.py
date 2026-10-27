@@ -431,7 +431,7 @@ class RCPSGExtractor(BaseExtractor):
     @classmethod
     def _parse_purchase_block(cls, text: str) -> List[Dict[str, Any]]:
         def tier(label: str, amt: str) -> Dict[str, Any]:
-            return {"tier_label": label, "price_gbp": float(amt.replace(",", "")),
+            return {"tier_label": label, "price_gbp": float(amt.replace(",", "")), "currency": "GBP",
                     "is_early_bird": False, "early_bird_deadline": None}
         m = cls._PURCHASE_MEMBER_RE.search(text or "")
         if m:
@@ -476,7 +476,7 @@ class RCPSGExtractor(BaseExtractor):
             label = self._normalise_label(label_raw)
             tiers.append({
                 "tier_label": label[:120],
-                "price_gbp": price,
+                "price_gbp": price, "currency": "GBP",
                 "is_early_bird": bool(re.search(r"early[- ]?bird", label, re.I)),
                 "early_bird_deadline": None,
             })

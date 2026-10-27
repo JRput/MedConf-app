@@ -318,6 +318,38 @@ def _extract_venue_from_header(html: str) -> Optional[str]:
     return None
 
 
+def _parse_header_location(html: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """Venue banner under the event title -> (venue_name, city, region).
+
+    Live shape (2026-10-27): <span class="header-meta"><span class="date">…
+    </span><span class="location">Sheraton Grand Chicago Riverwalk </span>
+    <span class="location">Chicago, Illinois</span></span>; the body repeats it
+    as <strong> lines. One location span = city only (no venue). Webinar /
+    virtual / online = no place. Nothing found -> (None, None, None).
+    """
+    locs: List[str] = []
+    m = re.search(r'<span[^>]+class="header-meta"[^>]*>(.*?)</span>\s*</span>', html or "", re.S)
+    if m:
+        locs = [_clean_text(x) for x in re.findall(
+            r'<span[^>]+class="location"[^>]*>(.*?)</span>', m.group(0), re.S)]
+    if not locs:
+        m = re.search(
+            r"<p[^>]*>\s*<strong>\s*(?:[A-Z][a-z]{2,8}\.?\s+\d{1,2}[^<]*20\d{2})\s*</strong>\s*<br\s*/?>"
+            r"\s*(?:<strong>\s*([^<]{3,90}?)\s*</strong>\s*<br\s*/?>\s*)?"
+            r"<strong>\s*([^<]{3,60}?,\s*[^<]{2,40}?)\s*</strong>", html or "", re.S)
+        if m:
+            locs = [_html.unescape(x).strip() for x in m.groups() if x]
+    locs = [re.sub(r"\s+", " ", x).strip() for x in locs if x and x.strip()]
+    if not locs:
+        return None, None, None
+    place = locs[-1]
+    if place.lower() in ("webinar", "virtual", "online"):
+        return None, None, None
+    city, region = _parse_city_region(place)
+    venue = locs[-2] if len(locs) >= 2 and locs[-2].lower() not in ("webinar", "virtual", "online") else None
+    return venue, city, region
+
+
 def _extract_venue_bits(html: str, city_hint: str) -> Tuple[Optional[str], Optional[str]]:
     """Return (venue_name, refined_city). Falls back to header parser."""
     venue = _extract_venue_from_header(html)
@@ -667,13 +699,24 @@ class AACRExtractor(BaseExtractor):
             if tiers:
                 out["pricing_tiers"] = tiers[:40]  # cap to avoid DB bloat
 
+        # 10a. Venue banner on the event's own page (header-meta spans)
+        mp_html = _fetch(url, require_path_prefix=None)
+        if mp_html:
+            b_venue, b_city, b_region = _parse_header_location(mp_html)
+            if b_venue:
+                out["venue_name"] = b_venue
+            if b_city and not out.get("city"):
+                out["city"] = b_city
+                if b_region and not out.get("region"):
+                    out["region"] = b_region
+
         # 10. Venue — try /general-information/ header first, then key-dates
         for suffix in ("general-information/", "key-dates/"):
             gi_html = _fetch(url.rstrip("/") + "/" + suffix,
                              require_path_prefix=event_slug or None)
             if gi_html:
                 venue = _extract_venue_from_header(gi_html)
-                if venue:
+                if venue and not out.get("venue_name"):
                     out["venue_name"] = venue
                     break
 

@@ -261,9 +261,14 @@ def test_extract_detail_emits_no_format_or_type_without_evidence(monkeypatch):
 import scraper as scraper_mod  # noqa: E402
 
 
+_UNSET = object()
+
+
 class _FakeExtractor:
-    def __init__(self, days=None):
-        if days is not None:
+    """A generic (non-ESMO) extractor. `days` omitted = the attribute is absent
+    (scraper default applies); `days=None` = explicit opt-out."""
+    def __init__(self, days=_UNSET):
+        if days is not _UNSET:
             self.REFRESH_DETAIL_WHEN_NO_PRICING_DAYS = days
 
 
@@ -291,7 +296,7 @@ class _FakeAgent:
                 "is_flagship": False, "organiser_url": shell["booking_url"]}
 
 
-def _run(monkeypatch, rows, days):
+def _run(monkeypatch, rows, days=_UNSET):
     """rows: {booking_url: existing-row dict}. Returns (updates, inserted_tiers)."""
     shells = [{"title": f"Event {i}", "booking_url": u} for i, u in enumerate(rows)]
     for sh in shells:
@@ -305,7 +310,7 @@ def _run(monkeypatch, rows, days):
     monkeypatch.setattr(scraper_mod, "delete_pricing_tiers", lambda i: None)
     monkeypatch.setattr(scraper_mod, "insert_pricing_tiers", lambda i, t: tiers.append((i, t)))
     monkeypatch.setattr(scraper_mod.http_fetch, "reset_blocks", lambda: None)
-    scraper_mod.scrape_source({"id": 17, "source_name": "ESMO"})
+    scraper_mod.scrape_source({"id": 99, "source_name": "Some Society"})
     return updates, tiers
 
 
@@ -317,10 +322,27 @@ def _stored(i, days_old, **kw):
     return row
 
 
-def test_source_without_attribute_never_redetails_unchanged_row(monkeypatch):
+def test_explicit_none_opts_out_of_redetail(monkeypatch):
     rows = {"https://x/a": _stored(1, 400)}
     updates, tiers = _run(monkeypatch, rows, days=None)
     assert _FakeAgent.detailed == [] and updates == []
+
+
+def test_default_applies_to_every_extractor_without_the_attribute(monkeypatch):
+    """Generalised hook: a non-ESMO extractor with no attribute is re-detailed at 7 days."""
+    assert scraper_mod.DEFAULT_REFRESH_DETAIL_WHEN_NO_PRICING_DAYS == 7
+    rows = {"https://x/a": _stored(1, 30), "https://x/b": _stored(2, 3)}
+    updates, tiers = _run(monkeypatch, rows)          # attribute absent
+    assert _FakeAgent.detailed == ["https://x/a"]
+    assert [i for i, _ in tiers] == [1]
+
+
+def test_default_hook_keeps_location_and_type_for_generic_extractor(monkeypatch):
+    rows = {"https://x/a": _stored(1, 30)}
+    updates, _ = _run(monkeypatch, rows)              # attribute absent
+    changed = {k for _, ch in updates for k in ch}
+    assert not changed & {"venue_name", "city", "event_format", "event_type"}
+    assert "is_flagship" not in changed
 
 
 def test_attribute_redetails_stale_tierless_row(monkeypatch):
@@ -342,8 +364,8 @@ def test_hook_redetail_keeps_location_and_type(monkeypatch):
 def test_hook_cap_per_run_oldest_first(monkeypatch):
     rows = {f"https://x/{n}": _stored(n, 10 + n) for n in range(1, 21)}
     _run(monkeypatch, rows, days=7)
-    assert len(_FakeAgent.detailed) == scraper_mod.HOOK_REDETAIL_CAP_PER_RUN == 15
-    expected = {f"https://x/{n}" for n in range(6, 21)}  # the 15 oldest
+    assert len(_FakeAgent.detailed) == scraper_mod.HOOK_REDETAIL_CAP_PER_RUN == 10
+    expected = {f"https://x/{n}" for n in range(11, 21)}  # the 10 oldest
     assert set(_FakeAgent.detailed) == expected
 
 
@@ -441,7 +463,7 @@ def test_hook_logs_info_when_delete_skipped(monkeypatch):
     monkeypatch.setattr(scraper_mod, "delete_pricing_tiers", lambda i: deleted.append(i))
     monkeypatch.setattr(scraper_mod, "insert_pricing_tiers", lambda i, t: None)
     monkeypatch.setattr(scraper_mod.http_fetch, "reset_blocks", lambda: None)
-    scraper_mod.scrape_source({"id": 17, "source_name": "ESMO"})
+    scraper_mod.scrape_source({"id": 99, "source_name": "Some Society"})
     assert deleted == [] and any("delete skipped" in m for m in infos)
 
 

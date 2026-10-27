@@ -38,6 +38,151 @@ ONLINE_TITLE_KEYS = ("online", "webinar", "virtual", "remote")
 IN_PERSON_TITLE_KEYS = ()  # rare to see explicit; default by venue presence
 
 
+# --------------------------------------------------------------------------- #
+# Free-text fee lines (engage events whose fees sit in the organiser's own
+# description, e.g. "£495 - Members / £595 - Non-members").
+#
+# There is no structured price field behind the Salesforce booking app: the
+# ui-api Event__c record carries only the same rich-text Detail__c that the
+# rendered page shows, so we parse the rendered text the extractor already has.
+# --------------------------------------------------------------------------- #
+_FEE_TOKEN_RE = re.compile(
+    r"(?P<amt>£\s*(?P<num>\d[\d,]*(?:\.\d{1,2})?)|\bFREE\b(?:\s+of\s+charge)?)"
+    r"|(?P<lab>\bNon[- ]?(?:RCGP\s+)?members?(?:\s*(?:/|,|&|and)\s*guests?)?\b"
+    r"|\b(?:RCGP\s+)?members?\b|\btrainees?\b|\bstudents?\b|\bguests?\b"
+    r"|\ball\s+tickets\b|\bstandard\b)",
+    re.I,
+)
+# Text allowed between a price and its label (either order). Anything else
+# between them means the two are not a pair ("members ODE REWIND: free").
+_FEE_GAP_RE = re.compile(
+    r"^[\s:\-–—/|,.()*]*(?:(?:for|per|rate|price|ticket|tickets|fee|only|is)[\s:\-–—/|,.()*]*)?$",
+    re.I,
+)
+_FEE_SKIP_RE = re.compile(r"deposit|refund", re.I)
+# "Early bird trainee one-day ticket: £159" (one ticket per line)
+_TICKET_LINE_RE = re.compile(
+    r"^\W*(?P<eb>early[- ]bird\s+)?(?P<cat>trainee\s+|student\s+)?"
+    r"(?P<days>one|two|three|1|2|3)[- ]day\s+ticket\s*:?\s*£\s*(?P<num>\d[\d,]*(?:\.\d{1,2})?)",
+    re.I,
+)
+# "Non-members will be charged £24", "delegates will be charged £175 to attend"
+_CHARGED_RE = re.compile(
+    r"\b(?P<lab>non[- ]members?|members?|delegates?|attendees?)\s+(?:will\s+be|are|is)\s+charged\s+"
+    r"£\s*(?P<num>\d[\d,]*(?:\.\d{1,2})?)",
+    re.I,
+)
+_EB_UNTIL_RE = re.compile(
+    r"early[- ]bird[^\n]{0,60}?\buntil\s+(?:\w+day\s+)?(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)(?:\s+(\d{4}))?",
+    re.I,
+)
+_DAYWORD = {"one": "One", "1": "One", "two": "Two", "2": "Two", "three": "Three", "3": "Three"}
+
+
+def _early_bird_deadline(text: str, start_iso: Optional[str]) -> Optional[str]:
+    """ISO date from 'Early bird discount until Thursday 3 December' (year inferred
+    from the event start: the latest such date not after the start)."""
+    m = _EB_UNTIL_RE.search(text or "")
+    if not m:
+        return None
+    mon = {"jan":1,"feb":2,"mar":3,"apr":4,"may":5,"jun":6,"jul":7,"aug":8,
+           "sep":9,"oct":10,"nov":11,"dec":12}.get(m.group(2).lower()[:3])
+    if not mon:
+        return None
+    from datetime import date
+    try:
+        if m.group(3):
+            return date(int(m.group(3)), mon, int(m.group(1))).isoformat()
+        if not start_iso:
+            return None
+        sy = int(start_iso[:4])
+        d = date(sy, mon, int(m.group(1)))
+        if d.isoformat() > start_iso:
+            d = date(sy - 1, mon, int(m.group(1)))
+        return d.isoformat()
+    except ValueError:
+        return None
+
+
+def _canon_fee_label(raw: str) -> str:
+    r = re.sub(r"[^a-z]", "", raw.lower())
+    if r.startswith("nonmember") or r.startswith("nonrcgpmember"):
+        return "Non-Member"
+    if "member" in r:
+        return "Member"
+    if r.startswith("trainee"):
+        return "Trainee"
+    if r.startswith("student"):
+        return "Student"
+    if r.startswith("guest"):
+        return "Guest"
+    if r in ("standard", "alltickets"):
+        return "Standard"
+    return raw.strip().title()
+
+
+def parse_rcgp_fee_text(text: str, start_iso: Optional[str] = None) -> List[Dict[str, Any]]:
+    """Parse fee lines from rendered engage page text. Returns GBP tiers.
+
+    Handles price-first ("£495 - Members / £595 - Non-members",
+    "FREE - Member / £18 Non-member", "£40.00 - All tickets") and
+    label-first ("Non RCGP Members and Guests £25.00", "RCGP Members: FREE")
+    lines. Orientation is decided per line by its first token. Lines that
+    mention a deposit/refund are skipped (a refundable deposit is not a fee).
+    A FREE tier is kept only when the event also has a priced tier, so wholly
+    free events are left to the free-event handling elsewhere.
+    """
+    tiers: List[Dict[str, Any]] = []
+    seen = set()
+    eb_deadline = _early_bird_deadline(text, start_iso)
+
+    def add(label: str, price: float, early: bool = False) -> None:
+        if (label, price) in seen:
+            return
+        seen.add((label, price))
+        tiers.append({
+            "tier_label": label,
+            "price_gbp": price,
+            "currency": "GBP",
+            "is_early_bird": early,
+            "early_bird_deadline": eb_deadline if early else None,
+        })
+
+    for line in (text or "").splitlines():
+        if len(line) > 400 or _FEE_SKIP_RE.search(line):
+            continue
+        tm = _TICKET_LINE_RE.match(line)
+        if tm:
+            cat = "Trainee" if tm.group("cat") else "Standard"
+            early = bool(tm.group("eb"))
+            label = f"{_DAYWORD[tm.group('days').lower()]}-day ticket · {cat}"
+            if early:
+                label += " · Early Bird"
+            add(label, float(tm.group("num").replace(",", "")), early)
+            continue
+        cm = _CHARGED_RE.search(line)
+        if cm:
+            add(_canon_fee_label(cm.group("lab")) if "member" in cm.group("lab").lower() else "Standard",
+                float(cm.group("num").replace(",", "")))
+            continue
+        toks = [(m, "amt" if m.group("amt") else "lab") for m in _FEE_TOKEN_RE.finditer(line)]
+        if len(toks) < 2:
+            continue
+        price_first = toks[0][1] == "amt"
+        for (a, ka), (b, kb) in zip(toks, toks[1:]):
+            if (ka, kb) != (("amt", "lab") if price_first else ("lab", "amt")):
+                continue
+            if not _FEE_GAP_RE.match(line[a.end():b.start()]):
+                continue
+            amt_m, lab_m = (a, b) if price_first else (b, a)
+            price = float(amt_m.group("num").replace(",", "")) if amt_m.group("num") else 0.0
+            label = _canon_fee_label(lab_m.group("lab"))
+            add(label, price)
+    if not any(t["price_gbp"] > 0 for t in tiers):
+        return []
+    return tiers
+
+
 class RCGPExtractor(BaseExtractor):
 
     def extract_detail(
@@ -63,7 +208,7 @@ class RCGPExtractor(BaseExtractor):
         result: Dict[str, Any] = {}
 
         # 1. Pricing — inline <span>Member rate: £99</span> patterns
-        result["pricing_tiers"] = self._extract_engage_pricing(page)
+        result["pricing_tiers"] = self._extract_engage_pricing(page, shell.get("start_date"))
 
         # 2. Format & venue inferred from title + listing hints
         result.update(self._infer_format_from_listing(shell))
@@ -105,7 +250,7 @@ class RCGPExtractor(BaseExtractor):
 
         return result
 
-    def _extract_engage_pricing(self, page: Page) -> List[Dict[str, Any]]:
+    def _extract_engage_pricing(self, page: Page, start_iso: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Pricing on engage pages is rendered as <p><span>Member rate: £99</span></p>
         across two patterns:
@@ -145,11 +290,22 @@ class RCGPExtractor(BaseExtractor):
             seen.add(key)
             tiers.append({
                 "tier_label": label,
-                "price_gbp": price,
+                "price_gbp": price, "currency": "GBP",
                 "is_early_bird": False,
                 "early_bird_deadline": None,
             })
-        return tiers
+        if tiers:
+            return tiers
+
+        # Nothing in the "Member rate: £99" form: the organiser may have typed
+        # the fees as free text in the description ("£495 - Members / £595 -
+        # Non-members"). Parse the rendered, line-structured text instead.
+        try:
+            inner = page.evaluate("() => document.body.innerText || ''")
+        except Exception as e:
+            logger.warning(f"RCGP engage free-text fee parse failed: {e}")
+            return []
+        return parse_rcgp_fee_text(inner, start_iso)
 
     @staticmethod
     def _normalise_tier_label(raw: str) -> str:
@@ -599,7 +755,7 @@ Respond with valid JSON only, no markdown, no extra text:
             seen.add(key)
             tiers.append({
                 "tier_label": label,
-                "price_gbp": price,
+                "price_gbp": price, "currency": "GBP",
                 "is_early_bird": "early" in raw_label.lower(),
                 "early_bird_deadline": None,
             })

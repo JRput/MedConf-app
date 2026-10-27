@@ -2,8 +2,11 @@
 """Base class for per-source detail-page extractors."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional, List, Callable
+from typing import Dict, Any, Optional, List, Callable, TYPE_CHECKING
 from playwright.sync_api import Page
+
+if TYPE_CHECKING:  # pragma: no cover
+    from extractors.discovery import DiscoveryHints
 
 
 class BaseExtractor(ABC):
@@ -22,9 +25,26 @@ class BaseExtractor(ABC):
         dict of the conference fields.
       - Soft fields (description, specialty) may use llm_call() for the
         small fraction of work that genuinely needs reasoning.
+
+    `DISCOVERY_ENABLED` (default True): after extract_detail the pipeline runs the
+    shared scrape-time discovery engine (extractors/discovery.py) for every field
+    still missing (fees / venue+city / abstract info): it follows up to 2 linked
+    pages, ONE PDF and fee images within strict budgets, with no LLM, and fills
+    only EMPTY fields. Set False to opt a source out.
+
+    `DISCOVERY_HINTS` (default None): a `discovery.DiscoveryHints` naming where
+    this source keeps its sub-pages (suffixes like "/registration", URL templates
+    with {url} {base} {year} {slug}, extra anchor words per field). The engine
+    tries hints first and never requires them.
+
+    `REFRESH_DETAIL_WHEN_NO_PRICING_DAYS` is read by scraper.py (default 7 for
+    every extractor; None opts out): stored rows with no pricing tiers are
+    re-detailed after that many days, capped per run, oldest first.
     """
 
     verified_empty: Optional[str] = None
+    DISCOVERY_ENABLED: bool = True
+    DISCOVERY_HINTS: Optional["DiscoveryHints"] = None
 
     def __init__(self, source: Dict[str, Any]):
         self.source = source

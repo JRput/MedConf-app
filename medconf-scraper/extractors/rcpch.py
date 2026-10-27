@@ -525,7 +525,7 @@ class RCPCHExtractor(BaseExtractor):
             tier_label = f"{current_header} · {label}" if current_header and current_header != label else label
             tiers.append({
                 "tier_label": tier_label[:120],
-                "price_gbp": price,
+                "price_gbp": price, "currency": "GBP",
                 "is_early_bird": False,
                 "early_bird_deadline": None,
             })
@@ -535,7 +535,7 @@ class RCPCHExtractor(BaseExtractor):
             if re.search(r"\bfree\b", fee_text, re.I) and not re.search(r"£\s*[1-9]", fee_text):
                 tiers.append({
                     "tier_label": "Standard",
-                    "price_gbp": 0.0,
+                    "price_gbp": 0.0, "currency": "GBP",
                     "is_early_bird": False,
                     "early_bird_deadline": None,
                 })

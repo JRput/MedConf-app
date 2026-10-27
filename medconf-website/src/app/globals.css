@@ -108,6 +108,10 @@
   --type-workshop-subtle: #f9efe2;
   --type-workshop-border: #e5c69c;
 
+  --type-degree-text:   #1d6b5e;
+  --type-degree-subtle: #e4f3f0;
+  --type-degree-border: #a9d4cc;
+
   /* Formats — deliberately quieter than event types: the icon carries most
      of the signal, colour only nudges. */
   --fmt-online-text:   #1a41b0;
@@ -214,6 +218,10 @@
   --type-workshop-subtle: rgb(215 160 100 / 0.14);
   --type-workshop-border: rgb(215 160 100 / 0.30);
 
+  --type-degree-text:   #6fcdbd;
+  --type-degree-subtle: rgb(100 200 185 / 0.14);
+  --type-degree-border: rgb(100 200 185 / 0.30);
+
   --fmt-online-text:   #92aeee;
   --fmt-online-subtle: rgb(130 165 235 / 0.13);
   --fmt-inperson-text:   #c9c3b6;
@@ -308,6 +316,9 @@
   --color-type-workshop-text: var(--type-workshop-text);
   --color-type-workshop-subtle: var(--type-workshop-subtle);
   --color-type-workshop-border: var(--type-workshop-border);
+  --color-type-degree-text: var(--type-degree-text);
+  --color-type-degree-subtle: var(--type-degree-subtle);
+  --color-type-degree-border: var(--type-degree-border);
 
   --color-fmt-online-text: var(--fmt-online-text);
   --color-fmt-online-subtle: var(--fmt-online-subtle);

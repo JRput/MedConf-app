@@ -13,6 +13,7 @@ between runs, so we save ~95% of LLM calls compared to a full re-fetch.
 """
 
 import hashlib
+import json
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
@@ -82,7 +83,11 @@ def _stale_without_pricing(existing: dict, days: int) -> bool:
     return (datetime.utcnow() - ts).days >= days
 
 
-HOOK_REDETAIL_CAP_PER_RUN = 15  # tier-less rows re-detailed per run (oldest first)
+# Tier-less stored rows are re-detailed (through the same discovery engine) once
+# their last detail scrape is this old. Every extractor gets it; an extractor opts
+# out with REFRESH_DETAIL_WHEN_NO_PRICING_DAYS = None, or tunes it with another int.
+DEFAULT_REFRESH_DETAIL_WHEN_NO_PRICING_DAYS = 7
+HOOK_REDETAIL_CAP_PER_RUN = 10  # tier-less rows re-detailed per run, per source (oldest first)
 _PROTECTED_KEYS = ("event_format", "event_type")
 
 
@@ -189,11 +194,13 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
         logger.info(f"Source {source['id']}: starting incremental processing of {len(shells)} shells")
 
         # --- Phase B: for each shell, decide skip-or-extract ---
-        # Per-source opt-in (REFRESH_DETAIL_WHEN_NO_PRICING_DAYS): look up all
-        # rows once so tier-less stale rows can be ranked oldest-first and
-        # capped per run. Sources without the attribute skip this entirely.
-        refresh_days = getattr(getattr(agent, "extractor", None),
-                               "REFRESH_DETAIL_WHEN_NO_PRICING_DAYS", None)
+        # Re-detail hook (REFRESH_DETAIL_WHEN_NO_PRICING_DAYS, default 7 for every
+        # extractor, None opts out): look up all rows once so tier-less stale rows
+        # can be ranked oldest-first and capped per run.
+        _ext = getattr(agent, "extractor", None)
+        refresh_days = (getattr(_ext, "REFRESH_DETAIL_WHEN_NO_PRICING_DAYS",
+                                DEFAULT_REFRESH_DETAIL_WHEN_NO_PRICING_DAYS)
+                        if _ext is not None else None)
         existing_cache: Dict[str, Any] = {}
         hook_allowed_ids: set = set()
         if refresh_days:
@@ -263,6 +270,10 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
             # Slow path: new event OR listing changed → fetch detail page and re-extract
             merged = agent.extract_detail_for_shell(shell)
             evidence = set(merged.pop("_evidence", None) or [])
+            disc = merged.pop("_discovery_evidence", None)
+            if disc and (disc.get("filled") or disc.get("deferred") or disc.get("evidence")):
+                logger.info(f"  discovery_evidence {merged.get('conference_name', '?')[:50]!r}: "
+                            f"{json.dumps(disc, default=str)[:1500]}")
 
             # Detect whether the SOFT (LLM-dependent) fields succeeded. We use
             # these as the proxy for "the LLM call worked" — they're the parts
@@ -304,7 +315,7 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
                 if existing:
                     # Update only changed fields (cheaper, less log noise)
                     if refresh_days:
-                        # Opted-in source: a re-detail must never erase stored
+                        # Re-detail hook active: a re-detail must never erase stored
                         # location/type data when the page yields nothing.
                         changes = _non_destructive_changes(existing, cleaned, evidence)
                     else:

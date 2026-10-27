@@ -39,12 +39,33 @@ def _load() -> dict:
         return {"patterns": {}, "version": 1}
 
 
+def patterns_path() -> Path:
+    return _PATTERNS_PATH
+
+
+def resolve_subpage(base_url: str, subpage_path: str) -> str:
+    """Promoted entries hold the sub-page as a FULL URL (what the explorer
+    fetched) or, historically, a path. Absolute URLs are used as-is; a path is
+    appended to the page URL."""
+    sub = (subpage_path or "").strip()
+    if sub.lower().startswith(("http://", "https://")):
+        return sub
+    return base_url.rstrip("/") + "/" + sub.lstrip("/")
+
+
 def _save(data: dict) -> None:
+    """Atomic: write a pid-unique temp file in the same dir, fsync, rename."""
     _PATTERNS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    tmp = str(_PATTERNS_PATH) + ".tmp"
-    with open(tmp, "w") as f:
-        json.dump(data, f, indent=2, sort_keys=True)
-    os.replace(tmp, _PATTERNS_PATH)
+    tmp = f"{_PATTERNS_PATH}.{os.getpid()}.tmp"
+    try:
+        with open(tmp, "w") as f:
+            json.dump(data, f, indent=2, sort_keys=True)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, _PATTERNS_PATH)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
 
 
 def _domain_of(url: str) -> str:

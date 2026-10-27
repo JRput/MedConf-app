@@ -188,9 +188,10 @@ class ResusExtractor(BaseExtractor):
             pool = sorted(pool, key=lambda s: s["start_date"])
             parent_start = pool[0]["start_date"]
 
-        parent_venue = self._uniform([s.get("venue_name") for s in upcoming])
-        parent_city = self._uniform([s.get("city") for s in upcoming])
-        parent_region = self._uniform([s.get("region") for s in upcoming])
+        # Venue/city come from the row whose date IS the event's start_date
+        # (never a cross-row guess); no match / ambiguous -> absent.
+        loc = self._location_for_start(upcoming, parent_start)
+        parent_venue, parent_city, parent_region = loc["venue_name"], loc["city"], loc["region"]
 
         return {
             "conference_name": course_name,
@@ -519,6 +520,17 @@ class ResusExtractor(BaseExtractor):
             if key in c:
                 return val
         return None
+
+    @classmethod
+    def _location_for_start(cls, sessions: List[Dict[str, Any]], start_date: Optional[str]) -> Dict[str, Optional[str]]:
+        """Centre/town of the availability row dated exactly start_date.
+        Several rows on that date with different centres -> unknown (None)."""
+        rows = [s for s in sessions if start_date and s.get("start_date") == start_date]
+        return {
+            "venue_name": cls._uniform([s.get("venue_name") for s in rows]),
+            "city": cls._uniform([s.get("city") for s in rows]),
+            "region": cls._uniform([s.get("region") for s in rows]),
+        }
 
     @staticmethod
     def _uniform(values: List[Optional[str]]) -> Optional[str]:

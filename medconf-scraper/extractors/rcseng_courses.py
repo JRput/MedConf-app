@@ -354,7 +354,7 @@ class RCSEngCoursesExtractor(BaseExtractor):
                 continue
             tiers.append({
                 "tier_label": "Course fee",
-                "price_gbp": price,
+                "price_gbp": price, "currency": "GBP",
                 "is_early_bird": False,
                 "early_bird_deadline": None,
                 # The scraper layer maps this to the real session UUID after insert.
@@ -389,7 +389,7 @@ class RCSEngCoursesExtractor(BaseExtractor):
             if 0 <= value <= 10_000:
                 return [{
                     "tier_label": "Course fee",
-                    "price_gbp": value,
+                    "price_gbp": value, "currency": "GBP",
                     "is_early_bird": False,
                     "early_bird_deadline": None,
                 }]

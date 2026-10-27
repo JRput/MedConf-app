@@ -387,11 +387,11 @@ class MDUExtractor(BaseExtractor):
         member = self.parse_gbp(data.get("memberPrice") or "")
         non_member = self.parse_gbp(data.get("nonMemberPrice") or "")
         if member is not None:
-            tiers.append({"tier_label": "Member", "price_gbp": member,
+            tiers.append({"tier_label": "Member", "price_gbp": member, "currency": "GBP",
                           "session_id": None, "is_early_bird": False,
                           "early_bird_deadline": None})
         if non_member is not None:
-            tiers.append({"tier_label": "Non-member", "price_gbp": non_member,
+            tiers.append({"tier_label": "Non-member", "price_gbp": non_member, "currency": "GBP",
                           "session_id": None, "is_early_bird": False,
                           "early_bird_deadline": None})
         result["pricing_tiers"] = tiers

@@ -44,3 +44,21 @@ def test_long_codes():
         {"id": 3, "society": "B" * 30, "active": False},
     ]
     assert long_codes(rows) == [(1, "A" * 30)]
+
+
+def test_missing_coverage_runs():
+    from datetime import datetime, timezone
+    import check_taxonomy as ct
+    now = datetime(2026, 11, 3, tzinfo=timezone.utc)
+    rows = [
+        {"id": 1, "active": True, "created_at": "2026-11-01T00:00:00Z", "source_name": "New", "base_url": "u1"},
+        {"id": 2, "active": True, "created_at": "2026-11-01T00:00:00Z", "source_name": "Done", "base_url": "u2"},
+        {"id": 3, "active": True, "created_at": "2026-11-01T00:00:00Z", "source_name": "NoBuild", "base_url": "u3"},
+        {"id": 4, "active": True, "created_at": "2026-10-20T00:00:00Z", "source_name": "Old", "base_url": "u4"},
+    ]
+    docs = [{"source_id": 1, "source_row": {}}, {"source_id": 2, "coverage_run": {"exit_code": 0}},
+            {"source_id": 4, "source_row": {}}]
+    assert ct.missing_coverage_runs(rows, docs, now=now) == [(1, "New")]
+    # grandfathered: registered before the required-from cutoff
+    early = [dict(r, created_at="2026-10-26T00:00:00Z") for r in rows]
+    assert ct.missing_coverage_runs(early, docs, now=datetime(2026, 10, 27, tzinfo=timezone.utc)) == []

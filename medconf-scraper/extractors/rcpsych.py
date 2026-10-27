@@ -341,7 +341,7 @@ class RCPsychExtractor(BaseExtractor):
                 tier_label = f"{label} · {qualifier}" if qualifier else label
                 tiers.append({
                     "tier_label": tier_label[:120],
-                    "price_gbp": price,
+                    "price_gbp": price, "currency": "GBP",
                     "is_early_bird": False,
                     "early_bird_deadline": None,
                 })

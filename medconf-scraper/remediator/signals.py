@@ -16,31 +16,40 @@ NON_FEE_CONTEXT_RE = re.compile(
     r"charged\s+a\s+fee\s+of|penalt|parking|deposit|late[- ]payment|"
     r"admin(?:istration|istrative)?\s+(?:charge|fee)|refund", re.I)
 
-_AMOUNT_RE = re.compile(
-    r"(?:[£$€]|(?<![A-Za-z])(?:EUR|USD|GBP|CHF|SGD|HKD|BRL|AUD|CAD))"
-    r"[\s\u00a0]*(\d[\d,]*(?:\.\d+)?)", re.I)
-
-
-def price_text_signal(page_text: str) -> bool:
-    """True when the page shows non-zero currency amounts (symbol or ISO code)
-    that look like fees: zero amounts and penalty/side charges (cancellation,
-    no-show, parking, deposit, refund...) in the preceding 40 chars are ignored.
-    Pure; shared with the audit and the new-source coverage checks."""
+def fee_amounts(page_text: str) -> list:
+    """Non-zero currency amounts on the page that look like fees, as `money.Money`
+    (symbol or ISO code, prefix or suffix, European decimals). Zero amounts and
+    amounts whose sentence-bounded preceding 40 chars name a penalty / side charge
+    (cancellation, no-show, parking, deposit, refund...) are ignored. An amount
+    whose currency symbol is ambiguous ("kr") is kept: it is still a price."""
+    import money
     text = page_text or ""
-    for m in _AMOUNT_RE.finditer(text):
-        try:
-            if float(m.group(1).replace(",", "")) == 0:
-                continue
-        except ValueError:
+    out = []
+    for m in money.find_amounts(text):
+        if m.amount <= 0:
             continue
-        window = text[max(0, m.start() - 40): m.start()]
+        start = m.span[0]
+        window = text[max(0, start - 40): start]
         cut = max(window.rfind(". "), window.rfind("\n"), window.rfind("\t"))
         if cut >= 0:
             window = window[cut + 1:]  # lookback never crosses a sentence/line/cell
         if NON_FEE_CONTEXT_RE.search(window):
             continue
-        return True
-    return False
+        out.append(m)
+    return out
+
+
+def page_amount_count(page_text: str) -> int:
+    """Distinct fee-like amounts on the page (same value + currency counted once):
+    the `page_amount_count` the detector compares with the stored tier count."""
+    return len({(m.amount, m.currency) for m in fee_amounts(page_text)})
+
+
+def price_text_signal(page_text: str) -> bool:
+    """True when the page shows non-zero currency amounts that look like fees
+    (see `fee_amounts`). Pure; shared with the audit and the new-source coverage
+    checks."""
+    return bool(fee_amounts(page_text))
 
 
 # Words that mean a "free" phrase is describing ONE fee category (a table row),

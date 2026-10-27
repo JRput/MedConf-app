@@ -448,3 +448,28 @@ Rules that follow from the table:
 - Do not call the abstract classifier yourself unless you have better page text than the merge step — it runs for you.
 - Run with `--coverage` before sign-off: `harness.py <mod> <Cls> <build.json> --details N --coverage` checks patterns 1-9 on real pages before the source is registered (exit 2 = a PRICE_*/SUBMISSION_* warning fired; resolve it or explain it in `concerns`).
 - Run the harness twice (normal + `--force-fallback`) AND the audit; attach the audit summary to the build JSON.
+
+## Coverage gate (2026-10-27)
+
+- **Nightly job:** `coverage-check` in `scrape-daily.yml` runs `coverage_report.py` after all scrape groups. Per active source it reports events, % with fee tiers, % of conferences and workshops with an abstract deadline or note, and % of in-person/hybrid rows with venue and with city. The JSON and Markdown go to the job summary and an artifact (`reports/coverage/<date>.json`).
+- **Red only on regression:** a source with 10 or more events falling more than 10 percentage points on any metric against `reports/coverage/baseline.json`, or a source registered in the last 7 days with no live events. After an intended change run `python coverage_report.py --update-baseline` and commit the baseline.
+- **Mandatory `coverage_run`:** `harness.py` now runs the coverage checks by default (`--no-coverage` opts out) and writes the warnings and exit code into the build JSON as `coverage_run`. The `taxonomy-check` job (`check_taxonomy.py`) fails when a source registered since 2026-10-28, within the last 7 days, has a build JSON without it. Resolve or explain warnings in `concerns`.
+
+
+## Scrape-time discovery (X3, 2026-10-27)
+
+Every source gets sub-page discovery during the scrape, with no per-extractor code. After `extract_detail` and `_ensure_submission_info`, `llm_agent._discover_missing` runs `extractors/discovery.py` for each of fees, venue+city and abstract info that is still EMPTY, and fills only empty fields.
+
+What it does, within strict budgets and with no text LLM:
+- Reads the page the agent already holds, then follows at most 2 further HTML pages (10 s each, same site; plus one hop to `organiser_url` or to an external link whose address names this event; a ticketing-host page goes through the explorer's identity and date gated handler). A fetched page's own links lead the next pick, so an organiser homepage reaches its `/abstracts` page.
+- Follows ONE PDF (fee, abstract or venue labelled; 8 MB, 20 pages, `%PDF`, child-process parse).
+- Reads money-adjacent images (including inline `data:` images) with the vision chain inside a per-source, per-run ledger of 5 images and 120 s. Beyond it the result is `deferred: ["fee_image_pending"]`. Vision is skipped in safe-fetch mode.
+- Wall clock 20 s without vision, 140 s with it (monotonic, checked between steps).
+- Parsers: `pricing_tables`, then `fee_matrix`, then a `money.find_amounts` fee-context sweep; `abstract_classifier`; the explorer's place extractor with a `location_evidence` fallback. A tier with no currency is dropped, amount 0 is not a fee, and a label that appears at different prices is dropped as ambiguous (the page lists several editions).
+- Records `_discovery_evidence` (steps with URL, found, elapsed ms, and what was deferred); `scraper.py` logs it and pops it before validation.
+
+Per-extractor knobs on `BaseExtractor`: `DISCOVERY_ENABLED = False` opts out; `DISCOVERY_HINTS = DiscoveryHints(fees_suffixes=("/registration",), venue_urls=("{base}/{year}/venue",), anchor_words={"fees": ("delegate rates",)})` is tried before the shared pickers. Hints are optional; the engine never requires them.
+
+Re-detail hook (`scraper.py`): `REFRESH_DETAIL_WHEN_NO_PRICING_DAYS` now defaults to 7 for every extractor (`None` opts out), at most `HOOK_REDETAIL_CAP_PER_RUN = 10` tier-less rows per source per run, oldest first. Re-details use the non-destructive update and `_evidence` rules, so a re-detail never erases stored location or type data.
+
+Onboarding check: after registering a source, run one live detail through the engine (`discovery.discover(row, html, text, url)`) and read the `evidence` list. If a field is missing and the site has the sub-page, add a hint rather than extractor code.

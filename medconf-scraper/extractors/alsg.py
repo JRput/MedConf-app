@@ -321,7 +321,7 @@ class ALSGExtractor(BaseExtractor):
                 continue
             tiers.append({
                 "tier_label": "Course fee",
-                "price_gbp": price,
+                "price_gbp": price, "currency": "GBP",
                 "is_early_bird": False,
                 "early_bird_deadline": None,
                 "_session_idx": s["_idx"],

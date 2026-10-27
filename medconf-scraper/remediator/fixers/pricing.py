@@ -14,6 +14,8 @@ from typing import Callable, List, Optional, Tuple
 
 import httpx
 
+import money
+
 from remediator.signals import NON_FEE_CONTEXT_RE, free_phrase_context, price_text_signal
 
 logger = logging.getLogger(__name__)
@@ -57,8 +59,13 @@ _PRICE_LABEL_WORDS = (
 )
 
 
+_VAT_TAIL_RE = re.compile(r"^\s*(?:\(|\+|plus\b|incl?\.?|excl?\.?|ex\.?|\-)?\s*(?:incl\w*\.?\s+|excl\w*\.?\s+)?(?:VAT|GST|tax)\b", re.I)
+
+
 def _text_pricing_sweep(page_text: str) -> List[dict]:
-    """Find pricing rows in three patterns:
+    """Find pricing rows in three patterns (amounts read by `money.find_amounts`:
+    symbol or ISO-code, prefix or suffix, "1.500,00 €", "S$465"; a tier whose
+    currency the text does not state is dropped, never defaulted):
        - Line A: "Label | £100.00"
        - Line B: "Label £100.00" (label and price on same line)
        - Inline C: "...Cost £1400 ..." (label-word immediately before
@@ -70,19 +77,17 @@ def _text_pricing_sweep(page_text: str) -> List[dict]:
     tiers: List[dict] = []
     seen_keys: set = set()
 
-    def add(label: str, symbol: str, price_str: str) -> None:
+    def add(label: str, mny) -> None:
         label = label.strip()[:200]
         if not label or len(label) < 3:
             return
         if NON_FEE_CONTEXT_RE.search(label):
             return  # cancellation / parking / deposit... is not a registration fee
-        try:
-            price = float(price_str.replace(",", ""))
-        except ValueError:
+        if mny.high is not None or not mny.currency:
+            return  # a range is not one fee; no stated currency is never GBP
+        price = mny.amount
+        if price <= 0 or not money.plausible(price, mny.currency):
             return
-        if price <= 0 or price > 50000:
-            return
-        currency = {"£": "GBP", "$": "USD", "€": "EUR"}[symbol]
         key = (label.lower(), price)
         if key in seen_keys:
             return
@@ -90,22 +95,24 @@ def _text_pricing_sweep(page_text: str) -> List[dict]:
         tiers.append({
             "tier_label": label,
             "price_gbp": price,
-            "currency": currency,
+            "currency": mny.currency,
             "is_early_bird": "early" in label.lower(),
             "early_bird_deadline": None,
         })
 
-    # Pattern A & B — line-form
+    # Pattern A & B — line-form: the line's single amount ends it (an optional
+    # "+ VAT" note may follow) and everything before it is the label.
     for line in page_text.splitlines():
         line = line.strip()
-        if "£" not in line and "$" not in line and "€" not in line:
+        if not line or not re.search(r"\d", line):
             continue
-        m = re.search(r"^(.*?)[|:]\s*([£$€])\s*([\d,]+(?:\.\d+)?)\s*$", line)
-        if not m:
-            m = re.search(r"^(.+?)\s+([£$€])\s*([\d,]+(?:\.\d+)?)\s*$", line)
-        if not m:
+        found = money.find_amounts(line)
+        if len(found) != 1:
             continue
-        add(m.group(1), m.group(2), m.group(3))
+        mny = found[0]
+        if line[mny.span[1]:].strip() and not _VAT_TAIL_RE.match(line[mny.span[1]:]):
+            continue
+        add(line[:mny.span[0]].rstrip(" \t|:-\u2013\u2014"), mny)
 
     # Pattern C — inline "<label-word> £<amount>" within paragraphs. Many
     # WordPress / academic course sites flatten to one big line in
@@ -114,14 +121,15 @@ def _text_pricing_sweep(page_text: str) -> List[dict]:
     # "in 1400 hours". Captures up to 3 leading words for context
     # (e.g. "Late registration £200").
     label_alt = "|".join(_PRICE_LABEL_WORDS)
-    inline_rx = re.compile(
-        rf"((?:[A-Za-z][A-Za-z-]{{2,30}}[ \t]+){{0,3}}(?:{label_alt}))"   # same-line words only: no label may span a line break
-        r"\s*[:\-]?\s*"
-        r"([£$€])\s*([\d,]+(?:\.\d+)?)",
+    tail_rx = re.compile(
+        rf"(?<![A-Za-z])((?:[A-Za-z][A-Za-z-]{{2,30}}[ \t]+){{0,3}}(?:{label_alt}))\s*[:\-]?\s*$",   # same-line words only: no label may span a line break
         re.I,
     )
-    for m in inline_rx.finditer(page_text):
-        add(m.group(1), m.group(2), m.group(3))
+    for mny in money.find_amounts(page_text):
+        window = page_text[max(0, mny.span[0] - 80): mny.span[0]]
+        m = tail_rx.search(window)
+        if m:
+            add(m.group(1), mny)
 
     return tiers
 

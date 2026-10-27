@@ -466,7 +466,7 @@ class RCPEExtractor(BaseExtractor):
             for pm in re.finditer(r"charge of\s*£\s*([0-9]+(?:\.[0-9]{2})?)\s*per\s+(\w+)", plain, re.I):
                 tiers.append({
                     "tier_label": pm.group(2).strip().title(),
-                    "price_gbp": float(pm.group(1)),
+                    "price_gbp": float(pm.group(1)), "currency": "GBP",
                     "is_early_bird": False,
                     "early_bird_deadline": None,
                 })
@@ -475,7 +475,7 @@ class RCPEExtractor(BaseExtractor):
             ):
                 tiers.append({
                     "tier_label": "Standard",
-                    "price_gbp": 0.0,
+                    "price_gbp": 0.0, "currency": "GBP",
                     "is_early_bird": False,
                     "early_bird_deadline": None,
                 })
@@ -501,7 +501,7 @@ class RCPEExtractor(BaseExtractor):
                     continue
                 tiers.append({
                     "tier_label": label[:120],
-                    "price_gbp": price,
+                    "price_gbp": price, "currency": "GBP",
                     "is_early_bird": bool(re.search(r"early[- ]?bird", label, re.I)),
                     "early_bird_deadline": None,
                 })

@@ -269,7 +269,7 @@ class RCPathExtractor(BaseExtractor):
         if not tiers and banner.get("is_free"):
             tiers = [{
                 "tier_label": "Standard",
-                "price_gbp": 0.0,
+                "price_gbp": 0.0, "currency": "GBP",
                 "is_early_bird": False,
                 "early_bird_deadline": None,
             }]
@@ -413,7 +413,7 @@ class RCPathExtractor(BaseExtractor):
                     continue
             tiers.append({
                 "tier_label": label[:120],
-                "price_gbp": price,
+                "price_gbp": price, "currency": "GBP",
                 "is_early_bird": bool(re.search(r"early[- ]?bird", label, re.I)),
                 "early_bird_deadline": None,
             })

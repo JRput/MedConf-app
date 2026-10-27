@@ -418,7 +418,7 @@ class CoSRHExtractor(BaseExtractor):
                     continue
                 tiers.append({
                     "tier_label": label[:120],
-                    "price_gbp": price,
+                    "price_gbp": price, "currency": "GBP",
                     "is_early_bird": bool(re.search(r"early[- ]?bird", label, re.I)),
                     "early_bird_deadline": None,
                 })
@@ -426,7 +426,7 @@ class CoSRHExtractor(BaseExtractor):
         if not tiers and re.search(r"free of charge|completely free|no charge|no cost", body_text, re.I):
             tiers.append({
                 "tier_label": "Standard",
-                "price_gbp": 0.0,
+                "price_gbp": 0.0, "currency": "GBP",
                 "is_early_bird": False,
                 "early_bird_deadline": None,
             })
@@ -491,7 +491,7 @@ class CoSRHExtractor(BaseExtractor):
                     parts = [p for p in (current_group, col, label) if p]
                     tiers.append({
                         "tier_label": " · ".join(parts)[:120],
-                        "price_gbp": price,
+                        "price_gbp": price, "currency": "GBP",
                         "is_early_bird": bool(re.search(r"early[- ]?bird", label, re.I)),
                         "early_bird_deadline": None,
                     })
@@ -506,7 +506,7 @@ class CoSRHExtractor(BaseExtractor):
                 parts = [p for p in (current_group, label) if p]
                 tiers.append({
                     "tier_label": " · ".join(parts)[:120],
-                    "price_gbp": price,
+                    "price_gbp": price, "currency": "GBP",
                     "is_early_bird": bool(re.search(r"early[- ]?bird", label, re.I)),
                     "early_bird_deadline": None,
                 })

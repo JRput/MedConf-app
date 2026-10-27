@@ -560,7 +560,7 @@ class FPMExtractor(BaseExtractor):
             label = f"{section} · {category}"[:120] if section else category[:120]
             tiers.append({
                 "tier_label": label,
-                "price_gbp": price,
+                "price_gbp": price, "currency": "GBP",
                 "is_early_bird": False,
                 "early_bird_deadline": None,
             })
@@ -609,7 +609,7 @@ class FPMExtractor(BaseExtractor):
                 continue
             tiers.append({
                 "tier_label": label,
-                "price_gbp": price,
+                "price_gbp": price, "currency": "GBP",
                 "is_early_bird": False,
                 "early_bird_deadline": None,
             })

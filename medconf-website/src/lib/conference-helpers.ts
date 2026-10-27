@@ -43,17 +43,96 @@ export function daysUntilDeadline(c: Conference): number | null {
   return Math.ceil(diff)
 }
 
-/** Currency code (ISO 4217) → display symbol. Falls back to the code
- * itself for currencies we haven't mapped yet (e.g. "AUD 250"). */
+// Currencies whose narrow symbol is unambiguous for our audience. Everything
+// else uses the en-GB "symbol" form, which disambiguates ("A$", "HK$", "US$"
+// is avoided only for USD) or falls back to the ISO code ("SGD", "CHF", "SEK").
+const NARROW_OK = new Set(['GBP', 'EUR', 'USD', 'INR', 'KRW', 'JPY'])
+
+/** Normalised ISO-4217-shaped code, or null when absent / not three letters. */
+export function normaliseCurrency(code: string | undefined | null): string | null {
+  const c = (code ?? '').trim().toUpperCase()
+  return /^[A-Z]{3}$/.test(c) ? c : null
+}
+
+/**
+ * Build an en-GB currency formatter, or null when the runtime does not know
+ * the code (or it is the "no currency" placeholder XXX). Prefers
+ * `narrowSymbol`, falling back to `symbol` where the runtime lacks it.
+ */
+export function currencyFormatter(
+  code: string,
+  minimumFractionDigits?: number
+): Intl.NumberFormat | null {
+  if (code === 'XXX') return null
+  const display = NARROW_OK.has(code) ? 'narrowSymbol' : 'symbol'
+  for (const currencyDisplay of [display, 'symbol'] as const) {
+    try {
+      return new Intl.NumberFormat('en-GB', {
+        style: 'currency',
+        currency: code,
+        currencyDisplay,
+        ...(minimumFractionDigits === undefined ? {} : { minimumFractionDigits }),
+      })
+    } catch {
+      /* try the next display, then give up */
+    }
+  }
+  return null
+}
+
+/** Currency code (ISO 4217) → display symbol; alphabetic symbols and unknown
+ * codes come back as "CODE " (trailing space) so "SGD 250" reads correctly.
+ * Null / empty / malformed → '' (callers must flag the unknown currency). */
 export function currencySymbol(code: string | undefined | null): string {
-  switch ((code || 'GBP').toUpperCase()) {
-    case 'GBP': return '£'
-    case 'USD': return '$'
-    case 'EUR': return '€'
-    case 'AUD': return 'A$'
-    case 'CAD': return 'C$'
-    case 'INR': return '₹'
-    default: return `${code} `
+  const c = normaliseCurrency(code)
+  if (!c) return ''
+  const fmt = currencyFormatter(c)
+  const sym = fmt?.formatToParts(0).find((p) => p.type === 'currency')?.value
+  if (!sym || sym === '\u00a4') return `${c} `
+  return /[A-Za-z]$/.test(sym) ? `${sym} ` : sym
+}
+
+export interface PriceSummary {
+  min: number | null
+  max: number | null
+  /** Currency the min/max are in; null = the tiers carry no usable currency. */
+  currency: string | null
+  /** Tiers priced in some other currency and therefore left out of min/max. */
+  otherCount: number
+}
+
+/**
+ * One honest price range for a set of tiers. Numbers from different
+ * currencies are never mixed: a single-currency set gives its range; a mixed
+ * set gives the GBP range if any GBP tier exists, else the most frequent
+ * currency (ties: first seen), plus a count of the tiers left out.
+ */
+export function summarisePrices(
+  tiers: { price_gbp: number | string | null; currency?: string | null }[]
+): PriceSummary {
+  const groups = new Map<string, number[]>() // '' = unknown currency
+  let total = 0
+  for (const t of tiers) {
+    const n = Number(t.price_gbp)
+    if (t.price_gbp === null || t.price_gbp === '' || !Number.isFinite(n)) continue
+    const key = normaliseCurrency(t.currency) ?? ''
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key)!.push(n)
+    total++
+  }
+  if (groups.size === 0) return { min: null, max: null, currency: null, otherCount: 0 }
+  let chosen: string
+  if (groups.size === 1 || groups.has('GBP')) {
+    chosen = groups.size === 1 ? [...groups.keys()][0] : 'GBP'
+  } else {
+    chosen = [...groups.entries()].reduce((best, cur) => (cur[1].length > best[1].length ? cur : best))[0]
+  }
+  const nums = groups.get(chosen)!
+  return {
+    min: Math.min(...nums),
+    max: Math.max(...nums),
+    currency: chosen || null,
+    otherCount: total - nums.length,
   }
 }
 

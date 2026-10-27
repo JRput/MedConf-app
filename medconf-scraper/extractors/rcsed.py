@@ -496,7 +496,7 @@ class RCSEdExtractor(BaseExtractor):
             label = re.split(r"£", text)[0].strip(" :-")
             if not label:
                 continue
-            tiers.append({"tier_label": label[:120], "price_gbp": price,
+            tiers.append({"tier_label": label[:120], "price_gbp": price, "currency": "GBP",
                            "is_early_bird": bool(re.search(r"early[- ]?bird", label, re.I)),
                            "early_bird_deadline": None})
 
@@ -513,7 +513,7 @@ class RCSEdExtractor(BaseExtractor):
                 label = re.sub(r"£\s*[0-9,]+(?:\.[0-9]+)?", "", text).strip(" :-")
                 if not label:
                     label = "Standard"
-                tiers.append({"tier_label": label[:120], "price_gbp": price,
+                tiers.append({"tier_label": label[:120], "price_gbp": price, "currency": "GBP",
                                "is_early_bird": bool(re.search(r"early[- ]?bird", label, re.I)),
                                "early_bird_deadline": None})
 
@@ -546,7 +546,7 @@ class RCSEdExtractor(BaseExtractor):
                 price = self.parse_gbp("£" + m.group(1))
                 if price is not None:
                     tiers.append({"tier_label": "Course fee · From",
-                                  "price_gbp": price,
+                                  "price_gbp": price, "currency": "GBP",
                                   "is_early_bird": False,
                                   "early_bird_deadline": None})
 

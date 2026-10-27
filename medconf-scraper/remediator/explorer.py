@@ -43,6 +43,7 @@ from urllib.parse import urljoin, urlparse
 
 import httpx
 
+import money
 import safe_fetch
 
 logger = logging.getLogger(__name__)
@@ -109,6 +110,26 @@ JUNK_EXTERNAL_HOSTS = (
     "addthis.com", "sharethis.com",
 )
 
+# Hosts blocked ONLY as exact host or registered-domain suffix ("." + host),
+# never as a substring: "x.com" used to block confex.com / dropbox.com / box.com
+# and "google.com" blocked Google Forms.
+_JUNK_PATH_EXCEPTIONS = {"google.com": ("/forms",)}
+
+
+def is_junk_external(url_or_host: str) -> bool:
+    """True when the URL's host IS (or is a subdomain of) a junk host."""
+    s_ = (url_or_host or "").strip()
+    pu = urlparse(s_ if "//" in s_ else "//" + s_)
+    host = (pu.hostname or "").lower()
+    path = pu.path or ""
+    for j in JUNK_EXTERNAL_HOSTS:
+        if host == j or host.endswith("." + j):
+            if any(path.startswith(pre) for pre in _JUNK_PATH_EXCEPTIONS.get(j, ())):
+                return False
+            return True
+    return False
+
+
 # Link text keywords that suggest "the real event page is here"
 EXTERNAL_FOLLOW_TEXT_RE = re.compile(
     r"(register|book\s+now|book\s+here|more\s+info|find\s+out\s+more|"
@@ -125,7 +146,9 @@ EXTERNAL_FOLLOW_TEXT_RE = re.compile(
 TICKETING_HOST_RE = re.compile(
     r"(eventbrite|cvent|eventsair|regonline|ticketsource|oxfordabstracts|"
     r"ticketlight|tickettailor|eventzilla|bookwhen|gotowebinar|zoom\.us/webinar|"
-    r"onlineregistrationform|congressbooking|conferencecare|cmevents)", re.I)
+    r"onlineregistrationform|congressbooking|conferencecare|cmevents|"
+    r"exordo|eventsforce|conftool|whova|(?:^|\.)ti\.to(?:$|[/:])|eventscase|bizzabo|hopin|"
+    r"trybooking|humanitix)", re.I)
 
 
 # Generic anchor text ("here", "this link", a bare URL...) that says nothing
@@ -223,7 +246,7 @@ def find_external_event_links(
         if ext_host == host or ext_host.endswith("." + host) or host.endswith("." + ext_host):
             continue
         # Skip junk hosts
-        if any(j in ext_host for j in JUNK_EXTERNAL_HOSTS):
+        if is_junk_external(href):
             continue
         clean = href.split("#")[0]
         if clean in seen:
@@ -293,7 +316,7 @@ def find_same_domain_anchors(html: str, base_url: str, limit: int = 25) -> list[
     )
     candidates: list[str] = []
     seen: set = set()
-    for m in re.finditer(r'href="([^"]+)"', html):
+    for m in re.finditer(r"""href=["']([^"']+)["']""", html):
         href = m.group(1).strip()
         if not href or href.startswith("#") or href.startswith("javascript:"):
             continue
@@ -304,10 +327,11 @@ def find_same_domain_anchors(html: str, base_url: str, limit: int = 25) -> list[
         parsed = urlparse(absolute)
         if parsed.netloc and parsed.netloc.lower() != host:
             continue
-        clean = absolute.split("#")[0].split("?")[0]
+        # Only the #fragment is dropped: /register.aspx?eventid=55 is a page.
+        clean = absolute.split("#")[0]
         if clean in seen:
             continue
-        if not keywords_rx.search(clean):
+        if not keywords_rx.search(clean.split("?")[0]):
             continue
         seen.add(clean)
         candidates.append(clean)
@@ -317,8 +341,12 @@ def find_same_domain_anchors(html: str, base_url: str, limit: int = 25) -> list[
 
 
 _REG_LINK_RE = re.compile(
-    r"\b(?:registration|register|fees?|pricing|prices?|rates?|tickets?|book(?:ing)?|"
-    r"how\s+to\s+(?:book|register))\b", re.I)
+    r"\b(?:registration|register|fees?|pricing|prices?|rates?|tickets?|book(?:ing)?|costs?|"
+    r"attend(?:ing)?|delegate\s+(?:information|info|rates?|fees?)|"
+    r"how\s+to\s+(?:book|register)|"
+    # non-English labels (ES FR DE IT NL)
+    r"inscripci[o\u00f3]n|inscription|anmeldung|registrierung|tarifs?|kosten|geb[u\u00fc]hren|"
+    r"iscrizione|quote|preise|inschrijving|tarieven)\b", re.I)
 _REG_LINK_NEG_RE = re.compile(r"newsletter|subscribe|unsubscribe|log\s?in|sign\s?in|privacy|cookie", re.I)
 
 
@@ -329,7 +357,7 @@ def find_registration_links(html: str, base_url: str, limit: int = 3) -> list[tu
     capped. Other-host links are never returned (external follow is a
     separate, identity-gated tier)."""
     host = urlparse(base_url).netloc.lower().removeprefix("www.")
-    self_url = base_url.split("#")[0].split("?")[0].rstrip("/")
+    self_url = base_url.split("#")[0].rstrip("/")
     out: list[tuple[str, str]] = []
     seen: set = set()
     for m in re.finditer(r'<a\b[^>]*?href=["\']([^"\']+)["\'][^>]*>(.*?)</a\s*>', html or "", re.I | re.S):
@@ -341,7 +369,7 @@ def find_registration_links(html: str, base_url: str, limit: int = 3) -> list[tu
         pu = urlparse(absolute)
         if pu.scheme not in ("http", "https") or pu.netloc.lower().removeprefix("www.") != host:
             continue
-        clean = absolute.split("#")[0].split("?")[0]
+        clean = absolute.split("#")[0]
         if clean.rstrip("/") == self_url or clean in seen:
             continue
         if _REG_LINK_NEG_RE.search(text) or _REG_LINK_NEG_RE.search(pu.path):
@@ -367,7 +395,7 @@ def llm_classify_anchors(
     host = urlparse(base_url).netloc.lower()
     anchors: list[tuple[str, str]] = []
     seen: set = set()
-    for m in re.finditer(r'<a[^>]+href="([^"]+)"[^>]*>([^<]{1,120})</a>', html):
+    for m in re.finditer(r"""<a[^>]+href=["']([^"']+)["'][^>]*>([^<]{1,120})</a>""", html):
         href = m.group(1).strip()
         text = re.sub(r"\s+", " ", m.group(2)).strip()
         if not href or not text or href.startswith("#") or href.startswith("javascript:"):
@@ -379,8 +407,8 @@ def llm_classify_anchors(
         parsed = urlparse(absolute)
         if parsed.netloc and parsed.netloc.lower() != host:
             continue
-        clean = absolute.split("#")[0].split("?")[0]
-        if clean in seen or clean == base_url:
+        clean = absolute.split("#")[0]
+        if clean in seen or clean == base_url.split("#")[0]:
             continue
         seen.add(clean)
         anchors.append((clean, text[:80]))
@@ -619,7 +647,8 @@ def fetch_page_text_and_html(url: str, *, timeout: float = FETCH_TIMEOUT_S) -> t
 # Fetched text is whitespace-collapsed, so the line-based sweep only sees
 # "label-word £N" shapes. External registration pages typically render
 # "Medical Students - £10 Nurses - £35 ..." or "Regular $ 799 Price Until ...".
-_FLAT_PRICE_RE = re.compile(r"([£$€])\s?(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{2}))?")
+# Amounts are read by `money.find_amounts` (any currency form, prefix or suffix,
+# European decimals); there is no private symbol table here any more.
 _FLAT_FEE_CTX_RE = re.compile(
     r"(registration|register|pricing|prices?|fees?|tickets?|delegate|rates?|early\s*bird|book\s+your)", re.I)
 _FLAT_LABEL_JUNK_RE = re.compile(
@@ -641,17 +670,18 @@ def _flat_text_price_sweep(text: str, max_tiers: int = 40) -> list:
     """Tiers from flattened text where each price is preceded by its label
     ("Label - £N", "Label $ N"). Needs >=2 distinct labelled prices and a
     fee-context word shortly before the first one; sponsor budgets, refunds
-    and holding fees are rejected. Never guesses a currency: the symbol
-    decides (£/$/€)."""
+    and holding fees are rejected. Never guesses a currency: the amount's
+    own symbol / ISO code decides (`money.find_amounts`)."""
     if not text or len(text) < 20:
         return []
     tiers: list = []
     seen: set = set()
     prev_end = 0
     first_start = None
-    for m in _FLAT_PRICE_RE.finditer(text):
-        raw = text[max(prev_end, m.start() - 120): m.start()]
-        prev_end = m.end()
+    for m in money.find_amounts(text):
+        m_start, m_end = m.span
+        raw = text[max(prev_end, m_start - 120): m_start]
+        prev_end = m_end
         # Card layouts: a "REGISTER NOW" button, or leaked CSS/JS braces, end
         # the previous card; the label is only what follows.
         raw = _FLAT_CARD_BREAK_RE.split(raw)[-1]
@@ -670,24 +700,23 @@ def _flat_text_price_sweep(text: str, max_tiers: int = 40) -> list:
             continue
         # "Day pass £20 - Medic / Nurse": the label FOLLOWS the price. Mixed
         # label orders mislabel tiers, so refuse the whole page.
-        if (_PRICE_FIRST_RE.match(text[m.end(): m.end() + 6])
+        if (_PRICE_FIRST_RE.match(text[m_end: m_end + 6])
                 and not re.search(r"[-\u2013\u2014:|]\s*$", raw)):
             return []
-        try:
-            price = float(m.group(2).replace(",", "") + ("." + m.group(3) if m.group(3) else ""))
-        except ValueError:
-            continue
-        if price <= 0 or price > 50000:
+        price = m.amount
+        if m.high is not None or not m.currency:
+            continue  # a range is not one fee; a currency the text does not state is never guessed
+        if price <= 0 or not money.plausible(price, m.currency):
             continue
         if first_start is None:
-            first_start = m.start()
+            first_start = m_start
         key = (label.lower(), price)
         if key in seen:
             continue
         seen.add(key)
         tiers.append({
             "tier_label": label[:200], "price_gbp": price,
-            "currency": {"£": "GBP", "$": "USD", "\u20ac": "EUR"}[m.group(1)],
+            "currency": m.currency,
             "is_early_bird": "early" in label.lower(), "early_bird_deadline": None,
         })
         if len(tiers) > max_tiers:
@@ -781,7 +810,9 @@ def _plain_table_tiers(html: Optional[str], trail: Optional["AuditTrail"] = None
 
 PDF_FETCH_TIMEOUT_S = float(os.environ.get("REMEDIATOR_PDF_TIMEOUT_S", "15"))
 PDF_MAX_TIERS = 40
-_PLAIN_FEE_LINE_RE = re.compile(r"^(?P<label>[A-Za-z][^\d$£€|]{2,100}?)[\s.:|\-]*(?P<price>\d{1,3}(?:[,.]\d{3})+|\d{2,5})(?:[.,]\d{2})?\s*$")
+# Space is deliberately NOT a thousands mark here: "Day 1 350" is a label and 350,
+# not 1350 (no currency marker on the line).
+_PLAIN_FEE_LINE_RE = re.compile(r"^(?P<label>[A-Za-z][^\d$£€|]{2,100}?)[\s.:|\-]*(?P<price>\d{1,3}(?:[',.]\d{3})+(?:[.,]\d{1,2})?|\d{2,5}(?:[.,]\d{1,2})?)\s*$")
 PDF_CACHE: dict = {}
 
 
@@ -846,16 +877,20 @@ def _tiers_from_document_text(text: str, trail: "AuditTrail") -> list:
     if not tiers:
         # Plain-number fee lines ("Member  450") -> pseudo table for the
         # shared parser. Needs a currency word/code somewhere in the document.
-        from extractors.pricing_tables import _detect_currency, parse_pricing_tables
-        currency = _detect_currency(text[:20000], "")
+        from extractors.pricing_tables import parse_pricing_tables
+        currency = money.detect_currency(text[:20000])
         rows = []
         for line in text.splitlines():
             m = _PLAIN_FEE_LINE_RE.match(line.strip())
             if not m:
                 continue
-            label, price = m.group("label").strip(" .:|-"), m.group("price")
-            if re.fullmatch(r"(19|20)\d\d", price) or len(re.findall(r"[A-Za-z]", label)) < 3:
+            label, price_raw = m.group("label").strip(" .:|-"), m.group("price")
+            if re.fullmatch(r"(19|20)\d\d", price_raw) or len(re.findall(r"[A-Za-z]", label)) < 3:
                 continue  # year / page-number-ish
+            amount = money.parse_number(price_raw, currency)
+            if amount is None or not money.plausible(amount, currency):
+                continue
+            price = f"{amount:.2f}"
             if re.search(r"(?i)\b(page|tel|phone|fax|postcode|room|floor)\b", label):
                 continue
             rows.append(f"<tr><td>{_html.escape(label)}</td><td>{price}</td></tr>")
@@ -913,6 +948,215 @@ def _rendered_fee_tiers(url: str, html: Optional[str], trail: "AuditTrail"):
     return _external_page_tiers(re.sub(r"[ \t\r\f\v]+", " ", r_text).replace("\n", " "), r_html or html, trail, lines=r_text)
 
 
+# --- Ticketing hosts: a source of fees, not a stop --------------------------
+_HOLDING_FEE_RE = re.compile(r"holding\s+fee|booking\s+deposit|fully\s+refund|refundable|refunded", re.I)
+
+
+def _is_non_fee_text(s_: str) -> bool:
+    from .signals import NON_FEE_CONTEXT_RE
+    return bool(s_) and bool(NON_FEE_CONTEXT_RE.search(s_) or _HOLDING_FEE_RE.search(s_))
+
+
+def _amount_contexts(text: str):
+    """[(match, is_non_fee)] for every currency amount in `text`. The context of
+    an amount is the stretch BEFORE it back to the previous amount or sentence
+    end, and the stretch AFTER it up to the next amount or sentence end."""
+    ms = money.find_amounts(text or "")
+    out = []
+    for i, m in enumerate(ms):
+        m_start, m_end = m.span
+        prev_end = ms[i - 1].span[1] if i else 0
+        next_start = ms[i + 1].span[0] if i + 1 < len(ms) else len(text)
+        before = text[max(prev_end, m_start - 60): m_start]
+        before = re.split(r"[.!?]\s", before)[-1]
+        after = text[m_end: min(next_start, m_end + 120)]
+        after = re.split(r"[.!?](?:\s|$)", after)[0]
+        out.append((m, _is_non_fee_text(before) or _is_non_fee_text(after)))
+    return out
+
+
+def _non_fee_amount_values(text: str) -> set:
+    """Numeric values the page itself calls a holding fee / deposit / refundable.
+    An Eventbrite offer of exactly that amount IS the holding fee (RCPath
+    "The Consultant Files": AggregateOffer 10.0 = the 10 GBP refundable hold)."""
+    vals = set()
+    for m, nonfee in _amount_contexts(text):
+        if nonfee:
+            if m.amount > 0 and money.plausible(m.amount, m.currency):
+                vals.add(m.amount)
+    return vals
+
+
+def _strip_non_fee_amounts(text: str) -> str:
+    """Remove amounts that sit in a holding-fee / deposit / refundable context
+    (RCPath Eventbrite: "£10 holding fee ... fully refunded"). The context of
+    an amount is the stretch BEFORE it back to the previous amount or sentence
+    end, and the stretch AFTER it up to the next amount or sentence end."""
+    if not text:
+        return text
+    out, last = [], 0
+    for m, nonfee in _amount_contexts(text):
+        if nonfee:
+            out.append(text[last:m.span[0]])
+            last = m.span[1]
+    out.append(text[last:])
+    return "".join(out)
+
+
+def _ld_event_nodes(html: str):
+    """Yield every JSON-LD dict that carries `offers`."""
+    def walk(n):
+        if isinstance(n, list):
+            for x in n:
+                yield from walk(x)
+        elif isinstance(n, dict):
+            if "offers" in n:
+                yield n
+            for v in n.values():
+                if isinstance(v, (dict, list)):
+                    yield from walk(v)
+    for m in re.finditer(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script\s*>',
+                         html or "", re.I | re.S):
+        try:
+            data = json.loads(_html.unescape(m.group(1)).strip())
+        except Exception:
+            continue
+        yield from walk(data)
+
+
+def _num(v, currency: Optional[str] = None) -> Optional[float]:
+    """Structured-data price (JSON-LD / Eventbrite) -> float via `money.parse_number`
+    ("1.500,00" = 1500, "95,50" = 95.5, "1,200" = 1200). Numbers pass through. 0 <
+    value <= the per-currency cap, else None."""
+    try:
+        if isinstance(v, str):
+            v = v.strip()
+            # schema.org prices are dot-decimal ("1500.50"); anything else goes through money
+            f = float(v) if re.fullmatch(r"\d+(?:\.\d+)?", v) else money.parse_number(v, currency)
+            if f is None:
+                return None
+        else:
+            f = float(v)
+    except (TypeError, ValueError):
+        return None
+    return f if 0 < f <= money.max_amount(currency) else None
+
+
+def _offer_tiers(offers, default_label: str) -> list:
+    out: list = []
+    seen: set = set()
+
+    def add(label: str, price, cur):
+        cur = money.normalize_currency(cur)
+        p_ = _num(price, cur)
+        if p_ is None or not cur:
+            return          # currency comes from the offer, never defaulted
+        label = re.sub(r"\s+", " ", str(label or default_label)).strip()[:200] or default_label
+        if _is_non_fee_text(label):
+            return
+        key = (label.lower(), p_, cur)
+        if key in seen:
+            return
+        seen.add(key)
+        out.append({"tier_label": label, "price_gbp": p_, "currency": cur,
+                    "is_early_bird": "early" in label.lower(), "early_bird_deadline": None})
+
+    for o in (offers if isinstance(offers, list) else [offers]):
+        if not isinstance(o, dict):
+            continue
+        ctx = " ".join(str(o.get(k) or "") for k in ("name", "description", "category"))
+        if _is_non_fee_text(ctx):
+            continue
+        typ = str(o.get("@type") or "")
+        if "AggregateOffer" in typ:
+            nested = o.get("offers")
+            if nested:
+                out.extend(x for x in _offer_tiers(nested, default_label)
+                           if (x["tier_label"].lower(), x["price_gbp"], x["currency"]) not in seen)
+                continue
+            lo, hi = o.get("lowPrice"), o.get("highPrice")
+            cur = o.get("priceCurrency")
+            nm = o.get("name") or default_label
+            if _num(lo) is not None and _num(hi) is not None and _num(lo) != _num(hi):
+                add(f"{nm} (from)", lo, cur)
+                add(f"{nm} (up to)", hi, cur)
+            else:
+                add(nm, lo if _num(lo) is not None else hi, cur)
+        else:
+            add(o.get("name"), o.get("price"), o.get("priceCurrency"))
+    return out
+
+
+def _eventbrite_inline_tiers(html: str) -> list:
+    """Eventbrite's server data lists ticket classes as ...,"display_name":"X",
+    ...,"cost":{"currency":"GBP","major_value":"45.00",...}. Only the "cost"
+    object is read (never "fee" / "tax" / "actual_cost")."""
+    out: list = []
+    seen: set = set()
+    for m in re.finditer(r'"cost"\s*:\s*(\{[^{}]*\})', html or ""):
+        try:
+            c = json.loads(m.group(1))
+        except Exception:
+            continue
+        cur = money.normalize_currency(c.get("currency"))
+        price = _num(c.get("major_value"), cur)
+        if price is None or not cur:
+            continue
+        back = (html or "")[max(0, m.start() - 700): m.start()]
+        names = re.findall(r'"(?:display_name|name)"\s*:\s*"([^"]{1,120})"', back)
+        label = names[-1] if names else "Ticket"
+        if _is_non_fee_text(label):
+            continue
+        key = (label.lower(), price, cur)
+        if key not in seen:
+            seen.add(key)
+            out.append({"tier_label": label, "price_gbp": price, "currency": cur,
+                        "is_early_bird": "early" in label.lower(), "early_bird_deadline": None})
+    return out
+
+
+def _ticketing_tiers(row: dict, text: Optional[str], html: Optional[str],
+                     trail: Optional["AuditTrail"] = None) -> tuple:
+    """(tiers, how) from a ticketing-host page: JSON-LD offers, Eventbrite
+    inline ticket data, else the rendered text with holding-fee / deposit /
+    refundable amounts removed. The tiers belong to the row only when the page
+    (or the JSON-LD event) passes the identity check: a title/token match
+    (`external_identity_ok`) AND, when the event states a start date, the same
+    date as the row (a different occurrence is a different event)."""
+    page_ok = external_identity_ok(row, text or "")
+    held = _non_fee_amount_values(text or "")      # holding fee / deposit amounts named on the page
+    want_date = (row.get("start_date") or "")[:10]
+    for node in _ld_event_nodes(html or ""):
+        name = str(node.get("name") or "")
+        if name and not external_identity_ok(row, name):
+            continue
+        if not name and not page_ok:
+            continue
+        sd = str(node.get("startDate") or "")[:10]
+        if sd and want_date and re.fullmatch(r"\d{4}-\d{2}-\d{2}", sd) and sd != want_date:
+            if trail is not None:
+                trail.notes.append(f"ticketing_date_mismatch: {sd} != {want_date}")
+            continue
+        tiers = [t for t in _offer_tiers(node.get("offers"), "Ticket") if t["price_gbp"] not in held]
+        if tiers:
+            return tiers, "jsonld"
+    if not page_ok:
+        return [], ""
+    inline = [t for t in _eventbrite_inline_tiers(html or "") if t["price_gbp"] not in held]
+    if inline:
+        return inline, "inline"
+    clean = _strip_non_fee_amounts(text or "")
+    html_arg = None if clean != (text or "") else html   # tables may still hold the stripped amounts
+    tiers, how = _external_page_tiers(clean, html_arg, trail)
+    tiers = [t for t in tiers if not _is_non_fee_text(t.get("tier_label", ""))]
+    return (tiers, f"text_{how}") if tiers else ([], "")
+
+
+def ticketing_host_tiers(row: dict, text: Optional[str], html: Optional[str],
+                         trail: Optional["AuditTrail"] = None) -> list:
+    return _ticketing_tiers(row, text, html, trail or AuditTrail())[0]
+
+
 def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudget",
                                   trail: "AuditTrail", limit: int = 2):
     """On an external event site, fetch up to `limit` same-host registration/
@@ -965,15 +1209,19 @@ def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudg
 
 # --- Nav-page follow (microsites whose fees sit under "General Info") --------
 NAV_MAX_PAGES = 3
-NAV_MAX_LINKS = 8
+NAV_MAX_LINKS = 24
+NAV_SCAN_LINKS = 150   # anchors classified before ranking: position must not matter
 NAV_FETCH_ALLOWANCE = int(os.environ.get("REMEDIATOR_EXPLORE_NAV_FETCHES", "5"))
+# Reduced allowance for sources NOT flagged detail_is_multipage (Level 2, X2).
+NAV_UNFLAGGED_ALLOWANCE = 2
 NAV_RENDER_WAIT_MS = int(os.environ.get("REMEDIATOR_NAV_RENDER_WAIT_MS", "4000"))
 _NAV_SKIP_RE = re.compile(
     r"\b(?:privacy|contact|home|news|sponsor\w*|exhibit\w*|gallery|cookies?|terms|"
     r"log\s?in|sign\s?in|member\s+area|newsletter|press|media)\b", re.I)
 # (rank, regex) - lower rank first. Fees often hide under General/Practical Info.
 _NAV_FEE_RANKS = (
-    (0, re.compile(r"\b(?:registration|register|fees?|pricing|prices?|tickets?)\b", re.I)),
+    (0, re.compile(r"\b(?:registration|register|fees?|pricing|prices?|costs?|rates?|tickets?|"
+                   r"delegate\s+(?:information|info|rates?|fees?)|book(?:ing)?)\b", re.I)),
     (1, re.compile(r"\b(?:general\s+info(?:rmation)?|practical(?:\s+info(?:rmation)?)?)\b", re.I)),
     (2, re.compile(r"\b(?:info(?:rmation)?|participants?|delegates?|attend\w*|venue)\b", re.I)),
 )
@@ -1081,7 +1329,7 @@ def prioritise_nav_links(links: list, base_url: str, *, need_abstract: bool = Tr
     participants|attend|venue) come before abstract/call-for-papers pages;
     one abstract slot is reserved so a long fee list cannot crowd it out."""
     host = urlparse(base_url).netloc.lower().removeprefix("www.")
-    self_url = base_url.split("#")[0].split("?")[0].rstrip("/")
+    self_url = base_url.split("#")[0].rstrip("/")
     nav = [l for l in links if l[2]] or list(links)
     seen: set = set()
     cands: list = []
@@ -1089,14 +1337,14 @@ def prioritise_nav_links(links: list, base_url: str, *, need_abstract: bool = Tr
         pu = urlparse(url)
         if pu.scheme not in ("http", "https") or pu.netloc.lower().removeprefix("www.") != host:
             continue
-        clean = url.split("#")[0].split("?")[0]
+        clean = url.split("#")[0]   # query strings are part of the page identity
         if clean.rstrip("/") == self_url or clean in seen:
             continue
         seen.add(clean)
         if not text and not pu.path.strip("/"):
             continue
         cands.append((clean, text))
-        if len(cands) >= max_links:
+        if len(cands) >= NAV_SCAN_LINKS:
             break
     fees: list = []
     abstracts: list = []
@@ -1117,6 +1365,8 @@ def prioritise_nav_links(links: list, base_url: str, *, need_abstract: bool = Tr
             elif need_abstract and _NAV_ABSTRACT_RE.search(path):
                 abstracts.append((url, text))
     fees.sort(key=lambda x: x[0])  # stable
+    fees = fees[:max_links]       # rank first, THEN cap: link position no longer matters
+    abstracts = abstracts[:max_links]
     chosen = [(u, t, "fees") for _, u, t in fees[:max_pages - 1 if abstracts else max_pages]]
     chosen += [(u, t, "abstract") for u, t in abstracts[:max(1, max_pages - len(chosen))]]
     for _, u, t in fees[len(chosen):]:
@@ -1146,8 +1396,19 @@ def _nav_abstract_status(row: dict, text: str) -> Optional[dict]:
     return None
 
 
+def nav_has_discovery_words(html: str, base_url: str) -> bool:
+    """True when the page's own nav/header links carry a fee / abstract / venue
+    word (gate for the reduced nav walk on sources not flagged multipage)."""
+    for _u, text, in_nav in static_nav_links(html or "", base_url):
+        if not in_nav or not text:
+            continue
+        if any(rx.search(text) for _r, rx in _NAV_FEE_RANKS) or _NAV_ABSTRACT_RE.search(text):
+            return True
+    return False
+
+
 def _follow_nav_pages(row: dict, html: str, base_url: str, trail: "AuditTrail",
-                      extras: dict, llm_call=None):
+                      extras: dict, llm_call=None, fetch_allowance: Optional[int] = None):
     """Microsite fallback: no registration-named link, so follow up to 3 of
     the site's top-level nav pages (General Info / Practical / Abstracts ...).
     Runs every fee detector on each page and the abstract classifier on
@@ -1155,7 +1416,7 @@ def _follow_nav_pages(row: dict, html: str, base_url: str, trail: "AuditTrail",
     Returns (tiers, url, method) or None. Own small fetch allowance."""
     if not html or any(str(n).startswith("nav_page_followed:") for n in trail.notes):
         return None
-    budget = ExploreBudget(max_fetches=NAV_FETCH_ALLOWANCE)
+    budget = ExploreBudget(max_fetches=NAV_FETCH_ALLOWANCE if fetch_allowance is None else fetch_allowance)
     need_abs = not row.get("abstract_deadline")
     rendered = False
     picks = prioritise_nav_links(static_nav_links(html, base_url), base_url, need_abstract=need_abs)
@@ -1228,6 +1489,10 @@ def _follow_nav_pages(row: dict, html: str, base_url: str, trail: "AuditTrail",
     return found
 
 
+SUBPAGE_TEXT_PAGE_CAP = 6000
+SUBPAGE_TEXT_TOTAL_CAP = 20000
+
+
 def explore_for_pricing(
     *,
     row: dict,
@@ -1245,6 +1510,39 @@ def explore_for_pricing(
     return res
 
 
+def _llm_tiers_to_schema(parsed_tiers) -> list:
+    """LLM tier dicts -> our tier schema. The currency must be a valid code (or symbol /
+    name `money.normalize_currency` knows); a tier without one is DROPPED and logged,
+    never defaulted to GBP. Amounts over the per-currency cap are dropped too."""
+    out_tiers: list = []
+    for t in parsed_tiers or []:
+        if not isinstance(t, dict):
+            continue
+        try:
+            price = float(t.get("price"))
+        except (TypeError, ValueError):
+            continue
+        label = str(t.get("tier_label", "")).strip()[:200]
+        if not label or price <= 0:
+            continue
+        cur = money.normalize_currency(t.get("currency"))
+        if not cur:
+            logger.warning("explorer: llm tier %r dropped: no valid currency (%r); not defaulting to GBP",
+                           label[:60], t.get("currency"))
+            continue
+        if not money.plausible(price, cur):
+            logger.warning("explorer: llm tier %r dropped: %s %s over the plausible cap", label[:60], cur, price)
+            continue
+        out_tiers.append({
+            "tier_label": label,
+            "price_gbp": price,
+            "currency": cur,
+            "is_early_bird": bool(t.get("is_early_bird")),
+            "early_bird_deadline": t.get("early_bird_deadline"),
+        })
+    return out_tiers
+
+
 def _explore_for_pricing(
     *,
     row: dict,
@@ -1256,9 +1554,22 @@ def _explore_for_pricing(
 ) -> ExploreResult:
     trail = AuditTrail()
     trail.total_text_chars = len(page_text or "")
-    accumulated_text = page_text or ""
+    accumulated_text = (page_text or "")[:8000]
     accumulated_tiers: list = []
     budget = ExploreBudget()
+    _sub_chars = [0]
+
+    def _accumulate(url: str, txt: Optional[str]) -> None:
+        """Feed the final LLM pass the text of each identity-checked sub-page
+        (6 000 chars per page, 20 000 in total)."""
+        nonlocal accumulated_text
+        room = SUBPAGE_TEXT_TOTAL_CAP - _sub_chars[0]
+        if not txt or room <= 0:
+            return
+        piece = txt[:min(SUBPAGE_TEXT_PAGE_CAP, room)]
+        _sub_chars[0] += len(piece)
+        accumulated_text += f"\n\n--- SUB-PAGE {url} ---\n{piece}"
+
     identity_tokens: set = set()  # filled by the sub-page block; Tier 3 must not NameError without it
     external_seen: Optional[str] = None  # last external page fetched (organiser_url retry hint)
 
@@ -1447,6 +1758,7 @@ def _explore_for_pricing(
             # Event-identity gate — skip if this sub-page isn't about our event
             if not page_matches_event(sub_text, url):
                 continue
+            _accumulate(url, sub_text)
             tiers = _text_pricing_sweep(sub_text)
             if tiers:
                 trail.llm_reasoning = f"Found prices on sub-page {url} via text regex sweep."
@@ -1503,8 +1815,18 @@ def _explore_for_pricing(
 
     # 2b. Own-site microsite (source flagged detail_is_multipage): same nav
     # fallback as for external sites, only when the walk above found nothing.
-    if page_html and row.get("_detail_is_multipage") and not find_registration_links(page_html, base_url, limit=1):
-        nav = _follow_nav_pages(row, page_html, base_url, trail, extras, llm_call)
+    # Level 2 (X2): sources NOT flagged get the same walk, with a reduced
+    # allowance, when the nav itself carries a fee / abstract / venue word.
+    _flagged = bool(row.get("_detail_is_multipage"))
+    _walk_nav = bool(page_html) and not find_registration_links(page_html, base_url, limit=1) and (
+        _flagged or nav_has_discovery_words(page_html, base_url))
+    if _walk_nav:
+        if not _flagged:
+            trail.notes.append(f"nav_walk_unflagged: nav has a fee/abstract/venue word; "
+                               f"allowance {NAV_UNFLAGGED_ALLOWANCE} fetches")
+            logger.info(f"explorer: nav walk on unflagged source {base_url}")
+        nav = _follow_nav_pages(row, page_html, base_url, trail, extras, llm_call,
+                                fetch_allowance=None if _flagged else NAV_UNFLAGGED_ALLOWANCE)
         if nav:
             ntiers, nav_url, nav_method = nav
             trail.llm_reasoning = f"Followed nav page {nav_url} of the event microsite. Found prices via {nav_method}."
@@ -1557,6 +1879,27 @@ def _explore_for_pricing(
                 trail.notes.append(f"external_identity_rejected: {ext_url}")
                 continue
             external_seen = external_seen or ext_url
+            _accumulate(ext_url, sub_text)
+            # Ticketing hosts (Eventbrite, Exordo, ...) are a SOURCE of fees: read
+            # JSON-LD offers / inline ticket data / the sanitised page text.
+            _ticketing = bool(TICKETING_HOST_RE.search(urlparse(ext_url).netloc or ""))
+            if _ticketing:
+                tk_tiers, tk_how = _ticketing_tiers(row, sub_text, sub_html, trail)
+                if tk_tiers:
+                    logger.info(f"explorer: ticketing host {ext_url} -> {len(tk_tiers)} tiers via {tk_how}")
+                    trail.notes.append(f"ticketing_{tk_how}: {len(tk_tiers)} tiers from {ext_url}")
+                    trail.llm_reasoning = (f"Followed ticketing link {link_text!r} to {ext_url}. "
+                                           f"Found prices via {tk_how}.")
+                    return ExploreResult(
+                        field="pricing", value=tk_tiers,
+                        method=f"ticketing_{tk_how}:{urlparse(ext_url).netloc}",
+                        audit_trail=trail, found=True, external_url=ext_url,
+                    )
+                # Nothing usable on the ticket page: its sub-links are marketing pages
+                # (eventbrite.co.uk/l/sell-tickets), and its holding fees / deposits are
+                # not fees, so no generic text sweep, image pass or two-hop follow.
+                trail.notes.append(f"ticketing_no_fee_found: {ext_url}")
+                continue
             # External text regex sweep + fee tables + flat "Label - £N" text
             tiers, _how = _external_page_tiers(sub_text, sub_html, trail)
             if tiers:
@@ -1635,7 +1978,7 @@ def _explore_for_pricing(
 
     # 4. LLM with full context: ask if anywhere we've collected mentions money
     title = row.get("conference_name") or ""
-    context = accumulated_text[:8000]
+    context = accumulated_text
     if not context:
         trail.llm_reasoning = "No page text available."
         return ExploreResult(
@@ -1649,7 +1992,9 @@ EVENT: {title}
 I have searched the main event page (with all tabs expanded) and {len(trail.subpages_fetched)} sub-page(s). The accumulated text follows.
 
 If there is ANY registration-fee information (member rates, non-member rates, day passes, etc), extract it as JSON:
-{{"tiers": [{{"tier_label": "...", "price": <number>, "currency": "GBP|USD|EUR", "is_early_bird": false, "early_bird_deadline": null}}, ...], "reasoning": "where you found it"}}
+{{"tiers": [{{"tier_label": "...", "price": <number>, "currency": "<ISO 4217 code the page states, or null>", "is_early_bird": false, "early_bird_deadline": null}}, ...], "reasoning": "where you found it"}}
+
+Currency: use the code the page states ({money.prompt_symbol_table()}). If the page does not state a currency, use null; never assume GBP.
 
 If you genuinely see NO fee information anywhere, respond with:
 {{"tiers": [], "reasoning": "what you DID see — be specific about what sections were present (e.g. 'page has Overview, Programme, Speakers tabs but no Fees section')"}}
@@ -1693,23 +2038,7 @@ PAGE TEXT:
             field="pricing", value=None, method="not_found",
             audit_trail=trail, found=False, external_url=external_seen,
         )
-    # Convert LLM tiers to our schema
-    out_tiers: list = []
-    for t in parsed_tiers:
-        try:
-            price = float(t.get("price"))
-        except (TypeError, ValueError):
-            continue
-        label = str(t.get("tier_label", "")).strip()[:200]
-        if not label or price <= 0:
-            continue
-        out_tiers.append({
-            "tier_label": label,
-            "price_gbp": price,
-            "currency": str(t.get("currency", "GBP")).upper()[:3],
-            "is_early_bird": bool(t.get("is_early_bird")),
-            "early_bird_deadline": t.get("early_bird_deadline"),
-        })
+    out_tiers = _llm_tiers_to_schema(parsed_tiers)
     if not out_tiers:
         return ExploreResult(
             field="pricing", value=None, method="not_found",
@@ -1719,6 +2048,43 @@ PAGE TEXT:
         field="pricing", value=out_tiers, method="llm_full_context",
         audit_trail=trail, found=True,
     )
+
+
+_ABSTRACT_PAGE_RE = re.compile(
+    r"abstract|call\s+for\s+(?:papers?|posters?|cases?|submissions?|abstracts?)|"
+    r"(?:paper|poster|case|abstract)\s+submissions?|submit\s+(?:a\s+|your\s+)?(?:paper|poster|case)", re.I)
+_ABSTRACT_LINK_RE = re.compile(
+    r"abstracts?|call\s+for\s+(?:papers?|posters?|cases?|submissions?|abstracts?)|"
+    r"(?:paper|poster|case)\s+submissions?|submissions?|posters?|submit\s+(?:a\s+|your\s+)?(?:paper|poster|case)",
+    re.I)
+_ABSTRACT_LINK_NEG_RE = re.compile(r"newsletter|subscribe|log\s?in|sign\s?in|privacy|cookie|sponsor|exhibit", re.I)
+
+
+def find_abstract_links(html: str, base_url: str, limit: int = 4) -> list:
+    """Same-host anchors (nav / menus included) whose TEXT or path says
+    abstracts / call for papers, posters, cases / submissions. Query strings
+    kept, fragments dropped. [(absolute_url, text)]."""
+    host = urlparse(base_url).netloc.lower().removeprefix("www.")
+    self_url = base_url.split("#")[0].rstrip("/")
+    out: list = []
+    seen: set = set()
+    for url, text, _nav in static_nav_links(html or "", base_url):
+        pu = urlparse(url)
+        if pu.scheme not in ("http", "https") or pu.netloc.lower().removeprefix("www.") != host:
+            continue
+        clean = url.split("#")[0]
+        if clean.rstrip("/") == self_url or clean in seen:
+            continue
+        path = pu.path.replace("-", " ").replace("_", " ")
+        if _ABSTRACT_LINK_NEG_RE.search(text) or _ABSTRACT_LINK_NEG_RE.search(path):
+            continue
+        if not (_ABSTRACT_LINK_RE.search(text[:80]) or _ABSTRACT_LINK_RE.search(path)):
+            continue
+        seen.add(clean)
+        out.append((clean, text[:60]))
+        if len(out) >= limit:
+            break
+    return out
 
 
 def explore_for_abstract_status(
@@ -1738,19 +2104,29 @@ def explore_for_abstract_status(
 
     # 1. Standard fixer on the main page
     val, method = fix_abstract_status(row, page_text or "", llm_call)
-    if val:
+    if val and method != "no_abstract_mention":
         trail.llm_reasoning = f"Main-page abstract fixer succeeded via {method}."
         trail.notes.append(f"main_fixer: {method}")
         return ExploreResult(
             field="abstract_status", value=val, method=f"main:{method}",
             audit_trail=trail, found=True,
         )
+    if val:
+        # The MAIN page not naming abstracts is not proof: keep looking (sub-pages,
+        # nav links, the organiser site) and only fall back to "closed" at the end.
+        trail.notes.append("main_fixer: no_abstract_mention (not final; exploring sub-pages)")
 
     # 2. Walk same-domain sub-pages
     parsed = urlparse(base_url)
     host = parsed.netloc.lower()
+    abstract_links: list = []          # discovered abstract / call-for links (nav included)
+    reached: set = set()               # of those, the ones actually read
+    reached_with_word: list = []       # reached pages that talk about abstracts but gave no status
     if page_html and not any(d in host for d in SKIP_SUBPAGE_GUESS_DOMAINS):
-        anchors = find_same_domain_anchors(page_html, base_url, limit=15)
+        abstract_links = find_abstract_links(page_html, base_url)
+        anchors = [u for u, _ in abstract_links] + find_same_domain_anchors(page_html, base_url, limit=15)
+        for u, t in abstract_links:
+            trail.notes.append(f"abstract_link_found: {u} ({t})")
         seed = base_url.split("?")[0].rstrip("/")
         for suffix in ("/abstracts", "/pages/abstracts", "/call-for-abstracts",
                        "/pages/Late-Abstracts", "/abstract-submission",
@@ -1764,14 +2140,27 @@ def explore_for_abstract_status(
             if budget.exhausted():
                 trail.notes.append("explore_budget_exhausted: stopped sub-page walk")
                 break
-            sub_text, _ = budget.fetch(url)
+            if urlparse(url).path.lower().endswith(".pdf"):
+                if budget.exhausted():
+                    trail.notes.append("explore_budget_exhausted: stopped sub-page walk")
+                    break
+                budget.fetches += 1
+                sub_text = _fetch_document_text(url, trail)
+            else:
+                sub_text, _ = budget.fetch(url)
             if not sub_text:
                 continue
+            logger.info(f"explorer: abstract page read {url}")
             trail.subpages_fetched.append(url)
             trail.total_text_chars += len(sub_text)
-            if "abstract" not in sub_text.lower():
+            reached.add(url)
+            # "Call for papers / posters / cases / submissions" pages count even
+            # without the literal word "abstract".
+            if not _ABSTRACT_PAGE_RE.search(sub_text):
                 continue
             val, method = fix_abstract_status(row, sub_text, llm_call)
+            if not val:
+                reached_with_word.append(url)
             if val:
                 trail.llm_reasoning = f"Sub-page abstract fixer succeeded at {url} via {method}."
                 trail.notes.append(f"subpage_fixer: {url} → {method}")
@@ -1780,12 +2169,67 @@ def explore_for_abstract_status(
                     method=f"subpage:{urlparse(url).path}", audit_trail=trail, found=True,
                 )
 
+    # 2b. One external-organiser hop (EANM stub -> the congress's own site).
+    external_unreached = False
+    organiser = (row.get("organiser_url") or "").strip()
+    src = (row.get("source_url") or base_url or "").split("#")[0].rstrip("/")
+    if (organiser.startswith("http") and organiser.split("#")[0].rstrip("/") != src
+            and not is_junk_external(organiser)):
+        ebudget = ExploreBudget(max_fetches=3)
+        o_text, o_html = ebudget.fetch(organiser)
+        if not o_text:
+            external_unreached = True
+            trail.notes.append(f"abstract_external_fetch_failed: {organiser}")
+        elif not external_identity_ok(row, o_text):
+            trail.notes.append(f"abstract_external_identity_rejected: {organiser}")
+        else:
+            trail.subpages_fetched.append(organiser)
+            trail.total_text_chars += len(o_text)
+            logger.info(f"explorer: abstract external organiser page followed {organiser}")
+            trail.notes.append(f"abstract_external_followed: {organiser}")
+            o_pages = [(organiser, o_text)]
+            o_links = find_abstract_links(o_html or "", organiser, limit=2)
+            for u, t in o_links:
+                pt, _ph = ebudget.fetch(u)
+                if pt:
+                    trail.subpages_fetched.append(u)
+                    trail.notes.append(f"abstract_external_page_followed: {u} ({t})")
+                    o_pages.append((u, pt))
+                else:
+                    external_unreached = True
+            for u, pt in o_pages:
+                if not _ABSTRACT_PAGE_RE.search(pt):
+                    continue
+                val2, method2 = fix_abstract_status(row, pt, llm_call)
+                if val2:
+                    trail.llm_reasoning = f"Organiser-site abstract fixer succeeded at {u} via {method2}."
+                    return ExploreResult(field="abstract_status", value=val2,
+                                         method=f"external:{urlparse(u).netloc}:{method2}",
+                                         audit_trail=trail, found=True, external_url=u)
+                reached_with_word.append(u)
+
     # 3. LLM with full context for explicit-closed wording
     title = row.get("conference_name") or ""
     context = (page_text or "")[:8000]
-    if "abstract" not in context.lower():
+    if not _ABSTRACT_PAGE_RE.search(context):
+        # The MAIN page not naming abstracts proves nothing while a discovered
+        # abstract / call-for link (or PDF) was not read: report "unknown".
+        unreached = [u for u, _ in abstract_links if u not in reached]
+        unreached = unreached or ([organiser] if external_unreached else [])
+        if not page_html or unreached or reached_with_word:
+            why = ("no page HTML to look for links" if not page_html else
+                   f"{len(unreached)} abstract link(s) not reached" if unreached else
+                   "abstract page(s) read but status unparsed")
+            trail.llm_reasoning = f"Main page has no abstract wording but {why}: status unknown."
+            trail.notes.append(f"abstract_unknown: {why}")
+            logger.info(f"explorer: abstract status unknown for row {row.get('id')}: {why}")
+            return ExploreResult(
+                field="abstract_status", value=None,
+                method="unknown_unreached" if (unreached or not page_html) else "unknown_unparsed",
+                audit_trail=trail, found=False,
+            )
         trail.llm_reasoning = "No 'abstract' mention in fetched text — likely no abstract programme."
-        # Confidently set closed
+        # Every discovered abstract / call-for link was read; set closed
         return ExploreResult(
             field="abstract_status", value={"abstract_open": False},
             method="no_abstract_anywhere", audit_trail=trail, found=True,
@@ -1864,7 +2308,281 @@ PAGE TEXT:
     )
 
 
+# --- Venue explorer ----------------------------------------------------------
+_VENUE_LINK_RE = re.compile(
+    r"\b(?:venue|location|travel|getting\s+(?:there|here|to)|how\s+to\s+(?:find\s+us|get\s+(?:there|here)|reach)|"
+    r"find\s+us|directions?|accommodation|hotels?|maps?)\b", re.I)
+_VENUE_LINK_NEG_RE = re.compile(
+    r"newsletter|subscribe|log\s?in|sign\s?in|privacy|cookie|site\s*map|sitemap|sponsor|exhibit", re.I)
+VENUE_MAX_PAGES = 3
+
+_COUNTRY_RE = re.compile(
+    r"(?:UK|U\.K\.|United Kingdom|England|Scotland|Wales|Northern Ireland|Ireland|USA|U\.S\.A\.|US|United States|"
+    r"Germany|France|Spain|Italy|Netherlands|Belgium|Switzerland|Austria|Portugal|Sweden|Norway|Denmark|Finland|"
+    r"Canada|Australia|Singapore|Hong Kong|Japan|China|India|Brazil|Greece|Poland|Czech Republic)", re.I)
+_VENUE_NAME_WORD_RE = re.compile(
+    r"(?i)\b(?:cent(?:re|er)|hall|hotel|convention|congress|arena|auditorium|university|college|campus|palais|messe|"
+    r"resort|theatre|theater|institute|academy|stadium|pavilion|expo|exhibition|hospital|suite|lab|house|museum|"
+    r"school|clinic|building|forum|park)\b")
+_UK_POSTCODE_TAIL_RE = re.compile(r"\b[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}\b")
+_STATE_ZIP_RE = re.compile(r"^[A-Z]{2}(?:\s+\d{5}(?:-\d{4})?)?$")
+
+
+def find_venue_links(html: str, base_url: str, limit: int = VENUE_MAX_PAGES) -> list:
+    """Same-site links whose anchor text or URL says venue / location / travel /
+    getting there / how to find us / directions / accommodation / hotel / map.
+    Links inside the event's own path come first. [(absolute_url, text)]."""
+    host = urlparse(base_url).netloc.lower().removeprefix("www.")
+    self_url = base_url.split("#")[0].rstrip("/")
+    found: list = []
+    seen: set = set()
+    for url, text, _nav in static_nav_links(html or "", base_url):
+        pu = urlparse(url)
+        if pu.scheme not in ("http", "https") or pu.netloc.lower().removeprefix("www.") != host:
+            continue
+        clean = url.split("#")[0]
+        if clean.rstrip("/") == self_url or clean in seen:
+            continue
+        path = pu.path.replace("-", " ").replace("_", " ")
+        if _VENUE_LINK_NEG_RE.search(text) or _VENUE_LINK_NEG_RE.search(path):
+            continue
+        if not (_VENUE_LINK_RE.search(text[:80]) or _VENUE_LINK_RE.search(path)):
+            continue
+        seen.add(clean)
+        found.append((outside_event_path(base_url, clean), len(found), clean, text[:60]))
+    found.sort(key=lambda x: (x[0], x[1]))
+    return [(u, t) for _o, _i, u, t in found[:limit]]
+
+
+def _city_from_parts(parts: list) -> Optional[str]:
+    """City from a comma-separated place string ("Venue, Street, City POSTCODE").
+    A lone part is the venue, never a city."""
+    ps = [p.strip() for p in parts if p and p.strip()]
+    if len(ps) < 2:
+        return None
+    popped_region = False
+    while len(ps) > 1 and _COUNTRY_RE.fullmatch(ps[-1]):
+        ps.pop()
+    if len(ps) > 1 and _STATE_ZIP_RE.match(ps[-1]):
+        ps.pop()
+        popped_region = True
+    if len(ps) < 2 and not popped_region:
+        return None
+    last = _UK_POSTCODE_TAIL_RE.sub("", ps[-1])
+    last = re.sub(r"^\d{4,6}\s+", "", last).strip(" ,")
+    if not last or len(last) > 40 or re.search(r"\d", last) or not last[0].isalpha():
+        return None
+    return last
+
+
+def _clean_place_name(name: str) -> Optional[str]:
+    from extractors.tribe_events import sane_venue
+    n = re.sub(r"\s+", " ", (name or "")).strip(" ,;")
+    if not n or len(n) < 3 or re.match(r"^\d", n) or re.fullmatch(r"-?[\d.,\s]+", n):
+        return None
+    if re.search(r"\b(?:online|virtual|zoom|webinar|tba|tbc|tbd)\b", n, re.I):
+        return None
+    return sane_venue(n)
+
+
+def _place_from_text(q: str, method: str) -> Optional[dict]:
+    parts = [x for x in re.split(r"\s*,\s*", q) if x]
+    venue = _clean_place_name(parts[0]) if parts else None
+    city = _city_from_parts(parts)
+    if not venue and not city:
+        return None
+    return {"venue_name": venue, "city": city, "method": method}
+
+
+_MAPS_URL_RE = re.compile(r"""["'(]((?:https?:)?//(?:[a-z0-9-]+\.)?(?:google\.[a-z.]+/maps|maps\.google\.[a-z.]+)[^"')\s<>]*)""", re.I)
+
+
+def _maps_places(h: str):
+    from urllib.parse import parse_qs, unquote_plus
+    for m in _MAPS_URL_RE.finditer(h or ""):
+        url = _html.unescape(m.group(1))
+        pu = urlparse(url if url.startswith("http") else "https:" + url)
+        qs = parse_qs(pu.query)
+        q = (qs.get("q") or qs.get("query") or qs.get("daddr") or [""])[0]
+        if not q:
+            pm = re.search(r"/maps/place/([^/@?]+)", pu.path)
+            q = unquote_plus(pm.group(1)) if pm else ""
+        q = q.strip()
+        if q:
+            yield q
+
+
+def extract_place_from_html(html: str, base_url: str = "", text: Optional[str] = None) -> Optional[dict]:
+    """Venue / city evidence on ONE page (no network): JSON-LD `location`,
+    Google-Maps embeds (q= / place/ path), "Venue:/Location:" lines, address
+    blocks (extractors.location_evidence). Site chrome (nav/header/footer/
+    aside) is excluded, so an organiser's head-office footer never counts.
+    Returns {"venue_name","city","method"} or None."""
+    if not html:
+        return None
+    from extractors import location_evidence as le
+    # 1. JSON-LD (structured)
+    for m in le._LD_RE.finditer(html):
+        try:
+            data = json.loads(m.group(1).strip())
+        except Exception:
+            continue
+        for loc in le._ld_places(data):
+            if not isinstance(loc, dict) or "VirtualLocation" in str(loc.get("@type")):
+                continue
+            addr = loc.get("address")
+            city = addr.get("addressLocality") if isinstance(addr, dict) else None
+            name = _clean_place_name(str(loc.get("name") or ""))
+            if isinstance(city, str) and (not city.strip() or re.search(r"\d", city)):
+                city = None
+            if name or city:
+                return {"venue_name": name, "city": (city or "").strip() or None, "method": "jsonld_location"}
+    body = _CHROME_BLOCK_RE.sub(" ", html)          # nav/header/footer/aside/script/style out
+    # 2. Google Maps embeds / links
+    for q in _maps_places(body):
+        pl = _place_from_text(q, "maps_embed")
+        if pl:
+            return pl
+    # 3. "Venue:" / "Location:" lines
+    from .fixers.venue import _heuristic_venue
+    lined = re.sub(r"<(?:br|/p|/div|/li|/tr|/h[1-6])\b[^>]*>", "\n", body, flags=re.I)
+    plain = _html.unescape(re.sub(r"<[^>]+>", " ", lined))
+    plain = "\n".join(re.sub(r"[ \t\r\xa0]+", " ", l).strip() for l in plain.split("\n"))
+    cand = _heuristic_venue(plain)
+    if cand:
+        parts = re.split(r"\s*,\s*", cand.strip())
+        # "Berlin, Germany" / "Madrid, Spain": a bare city (+ country), not a venue
+        if (len(parts) == 2 and _COUNTRY_RE.fullmatch(parts[1].strip())
+                and not _VENUE_NAME_WORD_RE.search(parts[0]) and not re.search(r"\d", parts[0])):
+            return {"venue_name": None, "city": parts[0].strip(), "method": "location_city_line"}
+        venue = _clean_place_name(cand)
+        if venue:
+            return {"venue_name": venue, "city": _city_from_parts(parts), "method": "venue_line"}
+    # 4. address blocks / venue-keyword lines / "<Venue>, <City>" under the H1
+    ev = le.find_location_evidence(body, plain)
+    if ev:
+        kind, _, val = ev.partition(": ")
+        val = val.strip()
+        if kind == "address block":
+            parts = re.split(r"\s*,\s*", val)
+            venue = _clean_place_name(parts[0]) if len(parts) >= 3 and not re.search(r"\d", parts[0]) else None
+            city = _city_from_parts(parts)
+            if venue or city:
+                return {"venue_name": venue, "city": city, "method": "address_block"}
+        elif kind == "venue line":
+            venue = _clean_place_name(val)
+            if venue:
+                return {"venue_name": venue, "city": None, "method": "venue_keyword_line"}
+        elif kind == "line under h1":
+            pl = _place_from_text(val, "under_h1")
+            if pl and pl["venue_name"]:
+                return pl
+    return None
+
+
+def _strong_event_identity(row: dict, text: str) -> bool:
+    """Strict gate for a same-site page OUTSIDE the event's own path: at least
+    two distinctive title tokens, one of them 7+ letters (a society name alone,
+    as on a head-office "How to find us" page, is not enough)."""
+    weak = {"the", "and", "for", "with", "from", "event", "course", "conference", "training", "annual",
+            "meeting", "online", "live", "webinar", "series", "international"}
+    toks = {t for t in re.findall(r"[a-z]{4,}", (row.get("conference_name") or "").lower()) if t not in weak}
+    return identity_match_strength(toks, text)[1] if toks else False
+
+
+def explore_for_venue(row: dict, html: Optional[str], base_url: str, trail: "AuditTrail",
+                      budget: Optional["ExploreBudget"] = None) -> Optional[dict]:
+    """Find the venue / city for `row` when the main page's quick fixers failed.
+    Reads the main page (JSON-LD, Maps embeds, labelled lines, address blocks),
+    then follows up to VENUE_MAX_PAGES same-site venue / travel / location /
+    accommodation links (identity-gated when they sit outside the event's own
+    path, so a "How to find us" head-office page is never used), then ONE
+    external-organiser hop when the row has `organiser_url`.
+    Returns {"venue_name","city","method","url"} or None."""
+    budget = budget or ExploreBudget()
+
+    def hit(pl: dict, url: str) -> dict:
+        logger.info(f"explorer: venue found via {pl['method']} at {url}: "
+                    f"{pl.get('venue_name')!r} / {pl.get('city')!r}")
+        trail.notes.append(f"venue_found: {pl['method']} at {url}")
+        return {**pl, "url": url}
+
+    pl = extract_place_from_html(html or "", base_url)
+    if pl:
+        return hit(pl, base_url)
+
+    pages = 0
+    for url, text in find_venue_links(html or "", base_url, limit=VENUE_MAX_PAGES):
+        if pages >= VENUE_MAX_PAGES or budget.exhausted():
+            trail.notes.append("explore_budget_exhausted: stopped venue-page walk")
+            break
+        sub_text, sub_html = budget.fetch(url)
+        pages += 1
+        if not sub_text:
+            continue
+        trail.subpages_fetched.append(url)
+        trail.total_text_chars += len(sub_text)
+        if outside_event_path(base_url, url) and not _strong_event_identity(row, sub_text):
+            trail.notes.append(f"venue_page_rejected_identity: {url}")
+            continue
+        logger.info(f"explorer: venue page followed {url} ({text})")
+        trail.notes.append(f"venue_page_followed: {url} ({text})")
+        pl = extract_place_from_html(sub_html or "", url)
+        if pl:
+            return hit(pl, url)
+
+    organiser = (row.get("organiser_url") or "").strip()
+    src = (row.get("source_url") or base_url or "").split("#")[0].rstrip("/")
+    if (organiser.startswith("http") and organiser.split("#")[0].rstrip("/") != src
+            and not is_junk_external(organiser) and not budget.exhausted()):
+        o_text, o_html = budget.fetch(organiser)
+        if o_text:
+            trail.subpages_fetched.append(organiser)
+            trail.total_text_chars += len(o_text)
+            if not external_identity_ok(row, o_text):
+                trail.notes.append(f"venue_external_identity_rejected: {organiser}")
+            else:
+                logger.info(f"explorer: venue external organiser page followed {organiser}")
+                trail.notes.append(f"venue_external_followed: {organiser}")
+                pl = extract_place_from_html(o_html or "", organiser)
+                if pl:
+                    return hit(pl, organiser)
+                for url, text in find_venue_links(o_html or "", organiser, limit=1):
+                    if budget.exhausted():
+                        break
+                    v_text, v_html = budget.fetch(url)
+                    if not v_text:
+                        continue
+                    trail.subpages_fetched.append(url)
+                    trail.notes.append(f"venue_external_page_followed: {url} ({text})")
+                    pl = extract_place_from_html(v_html or "", url)
+                    if pl:
+                        return hit(pl, url)
+    return None
+
+
+def _venue_field_explorer(field_name: str):
+    """Runner-facing wrapper: EXPLORERS[field] is called with row / page_text /
+    page_html / base_url / llm_call and returns an ExploreResult."""
+    def run(*, row: dict, page_text: str, page_html: Optional[str], base_url: str,
+            llm_call: Callable[[str], Optional[str]]) -> ExploreResult:
+        trail = AuditTrail()
+        trail.total_text_chars = len(page_text or "")
+        got = explore_for_venue(row, page_html, base_url, trail)
+        value = (got or {}).get(field_name)
+        if not value:
+            trail.llm_reasoning = f"No {field_name} on the main page, venue/travel pages or organiser site."
+            return ExploreResult(field=field_name, value=None, method="not_found",
+                                 audit_trail=trail, found=False)
+        trail.llm_reasoning = f"{field_name} from {got['method']} at {got['url']}."
+        return ExploreResult(field=field_name, value=value, method=f"venue_{got['method']}",
+                             audit_trail=trail, found=True)
+    return run
+
+
 EXPLORERS = {
     "pricing": explore_for_pricing,
     "abstract_status": explore_for_abstract_status,
+    "venue_name": _venue_field_explorer("venue_name"),
+    "city": _venue_field_explorer("city"),
 }

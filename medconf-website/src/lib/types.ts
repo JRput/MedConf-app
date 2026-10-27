@@ -1,6 +1,6 @@
 // src/lib/types.ts
 
-export type EventType = 'conference' | 'workshop' | 'course'
+export type EventType = 'conference' | 'workshop' | 'course' | 'degree'
 
 export interface Conference {
   id: number

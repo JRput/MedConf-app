@@ -24,6 +24,7 @@ import httpx
 from playwright.sync_api import Page
 
 from .base import BaseExtractor
+import money
 from logger import logger
 
 
@@ -128,6 +129,9 @@ _CONF_WORDS = re.compile(
     r"\b(congress|symposium|forum|plenary|annual meeting|conference)\b", re.I)
 
 
+from extractors.degree_rule import is_degree_title  # noqa: E402
+
+
 def _title_event_type(title: str) -> Optional[str]:
     """Title-only type rule used when the content API is unavailable.
 
@@ -137,6 +141,8 @@ def _title_event_type(title: str) -> Optional[str]:
     Webinars stay workshop. Preceptorships/masterclasses/schools/courses are
     classed "course" (a deliberate upgrade over the old stored "workshop").
     """
+    if is_degree_title(title):
+        return "degree"
     tl = (title or "").lower()
     if "webinar" in tl or "highlights" in tl or "best of" in tl:
         return None
@@ -316,7 +322,10 @@ _MONTHS = {
 }
 
 # One money amount, currency symbol/code first ("€ 360.00", "SGD 1,280.00").
-_CUR_TOKEN = r"(?:HKD|SGD|BRL|CHF|USD|US\$|GBP|EUR|R\$|€|£|\$)"
+# Token set comes from money.py (every ISO code it knows + the dollar-prefixed symbols), longest first.
+_CUR_TOKEN = ("(?:" + "|".join(re.escape(t) for t in sorted(
+    set(money.KNOWN_CODES) | {"US$", "A$", "C$", "NZ$", "S$", "HK$", "R$", "MX$", "€", "£", "$"},
+    key=lambda t: (-len(t), t))) + ")")
 _AMOUNT_RE = re.compile(rf"({_CUR_TOKEN})\s?(\d[\d,]*(?:\.\d{{1,2}})?)")
 _ROW_RE = re.compile(
     rf"^(?P<label>.+?)(?P<sep>\t+|\s{{2,}}|\s(?={_CUR_TOKEN}\s?\d))"
@@ -337,7 +346,6 @@ _COL_DATE_RE = re.compile(
     r"(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\s+(\d{4})",
     re.I,
 )
-_CUR_CODE = {"€": "EUR", "£": "GBP", "$": "USD", "US$": "USD", "R$": "BRL"}
 _OTHER_FEES_RE = re.compile(r"^\s*Other\s+registration\s+fees?\b", re.I)
 
 
@@ -370,7 +378,7 @@ def _parse_fee_header(block: str) -> List[dict]:
 
 
 def _currency_code(sym: str) -> str:
-    return _CUR_CODE.get(sym, sym)
+    return money.normalize_currency(sym) or sym
 
 
 def _pricing_from_registration_text(text: str) -> List[dict]:

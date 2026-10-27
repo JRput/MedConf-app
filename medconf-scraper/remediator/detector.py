@@ -9,7 +9,8 @@ Gap detection is conservative — we DON'T treat the following as gaps:
 """
 
 from __future__ import annotations
-from typing import List, Tuple
+import re
+from typing import List, Optional, Tuple
 
 
 # Fields the remediator's fixers target. Order = priority — earlier fields
@@ -30,11 +31,81 @@ def is_online(row: dict) -> bool:
     return (row.get("event_format") or "").lower() == "online"
 
 
+# Abstract-rule (Level 2, B2 2026-10-27). One rule for detector AND audit:
+# conferences and workshops are checked; courses are excluded (625 courses,
+# none with abstract info) unless the title itself advertises a call.
+_CALL_WORDS_RE = re.compile(
+    r"\babstracts?\b|call\s+for\s+(?:papers|posters|submissions|proposals)"
+    r"|poster\s+(?:presentations?|sessions?|submissions?)", re.I)
+
+
+def abstract_applicable(row: dict) -> bool:
+    et = row.get("event_type")
+    if et == "degree":
+        return False
+    if et in ("conference", "workshop"):
+        return True
+    if et == "course":
+        return bool(_CALL_WORDS_RE.search(row.get("conference_name") or ""))
+    return False
+
+
+# Pricing: stored-but-useless tiers (Level 2 heuristics, B2).
+_GENERIC_LABEL_WORDS = {"standard", "registration", "fee", "fees", "price",
+                        "rate", "course", "ticket", "general", "event"}
+
+
+def _is_generic_label(label) -> bool:
+    words = re.findall(r"[a-z]+", (label or "").lower())
+    if not words or " · " in (label or ""):
+        return False
+    return all(w in _GENERIC_LABEL_WORDS for w in words)
+
+
+def _price_zero(t: dict) -> bool:
+    v = t.get("price_gbp")
+    try:
+        return v is None or float(v) == 0
+    except (TypeError, ValueError):
+        return False
+
+
+def pricing_gap_kind(has_pricing: bool, tiers: Optional[list] = None,
+                     page_amount_count: Optional[int] = None) -> Optional[str]:
+    """None = no gap; "none" = no tiers; "zero" = every tier is 0;
+    "partial" = one generic-label tier, or fewer tiers than amounts on the page.
+    `tiers` unknown (None) keeps the old behaviour: any tier = no gap."""
+    if not has_pricing:
+        return "none"
+    if not tiers:
+        return None
+    if all(_price_zero(t) for t in tiers):
+        return "zero"
+    if len(tiers) == 1 and _is_generic_label(tiers[0].get("tier_label")):
+        return "partial"
+    if page_amount_count is not None and page_amount_count > len(tiers):
+        return "partial"
+    return None
+
+
+# Cities that, in the title of an "online" row, suggest a physical event.
+_PLACE_RE = re.compile(
+    r"\b(?:london|edinburgh|glasgow|manchester|birmingham|leeds|liverpool|bristol|"
+    r"cardiff|belfast|newcastle|sheffield|nottingham|oxford|cambridge|dublin|"
+    r"paris|berlin|madrid|barcelona|vienna|amsterdam|rome|milan|lisbon|brussels|"
+    r"copenhagen|stockholm|geneva|zurich|prague|budapest|athens|istanbul|"
+    r"new york|boston|chicago|san francisco|san diego|los angeles|orlando|"
+    r"washington|toronto|singapore|hong kong|dubai|sydney|melbourne|tokyo|"
+    r"barcelona|munich|hamburg|frankfurt|valencia|florence|nice|lyon)\b", re.I)
+
+
 def detect_gaps(
     row: dict,
     has_pricing: bool,
     *,
     expected_specialties: set | None = None,
+    tiers: Optional[list] = None,
+    page_amount_count: Optional[int] = None,
 ) -> List[str]:
     """Return list of field names that are gaps for THIS row.
 
@@ -59,6 +130,12 @@ def detect_gaps(
     # Event format unset entirely
     if not row.get("event_format"):
         gaps.append("event_format")
+    elif fmt == "online" and not row.get("venue_name") and (
+            (row.get("city") or "").strip()
+            or _PLACE_RE.search(row.get("conference_name") or "")):
+        # "online" row that names a place: the format itself is suspect.
+        # Re-check the format, never fetch a venue for it.
+        gaps.append("event_format")
 
     # CPD — only if cpd_accredited is True or unknown
     if row.get("cpd_accredited") is not False and row.get("cpd_points") is None:
@@ -72,7 +149,8 @@ def detect_gaps(
         gaps.append("specialty")  # wrong specialty for this society
 
     # Pricing — if no pricing rows exist and the row isn't free/known-no-pricing
-    if not has_pricing and not row.get("is_on_demand"):
+    if not row.get("is_on_demand") and pricing_gap_kind(
+            has_pricing, tiers, page_amount_count):
         gaps.append("pricing")
 
     # Abstract status — flag whenever:
@@ -98,7 +176,7 @@ def detect_gaps(
     elif placeholder_note and not row.get("abstract_deadline") \
             and not row.get("is_on_demand"):
         gaps.append("abstract_status")
-    elif row.get("event_type") in ("conference", "workshop") \
+    elif abstract_applicable(row) \
             and not row.get("abstract_deadline") \
             and not row.get("abstract_deadline_note") \
             and not row.get("is_on_demand"):
@@ -116,10 +194,16 @@ def detect_gaps_for_rows(
     """Batch wrapper. Returns only rows that have at least one gap."""
     out: List[Tuple[dict, List[str]]] = []
     for r in rows:
-        has_pricing = bool(pricing_by_conf.get(r["id"]))
+        tiers = pricing_by_conf.get(r["id"]) or []
+        has_pricing = bool(tiers)
         gaps = detect_gaps(r, has_pricing,
-                           expected_specialties=expected_specialties)
+                           expected_specialties=expected_specialties,
+                           tiers=tiers)
         if gaps:
+            if "pricing" in gaps and not r.get("is_on_demand"):
+                kind = pricing_gap_kind(has_pricing, tiers)
+                if kind in ("zero", "partial"):
+                    r = {**r, "_pricing_gap_kind": kind}
             out.append((r, gaps))
     return out
 
@@ -153,10 +237,13 @@ def order_gap_rows(
 
     def key(item):
         row = item[0]
+        # Rows that already hold some tiers (zero/partial) rank after rows
+        # with no tiers at all, within the same attempt bucket.
+        low = 1 if row.get("_pricing_gap_kind") in ("zero", "partial") else 0
         t = _ts(row)
         if t is None:
-            return (0, 0.0, row.get("id") or 0)
+            return (0, low, 0.0, row.get("id") or 0)
         recent = 1 if t >= cutoff else 0
-        return (1 + recent, t.timestamp(), row.get("id") or 0)
+        return (1 + recent, low, t.timestamp(), row.get("id") or 0)
 
     return sorted(gap_rows, key=key)

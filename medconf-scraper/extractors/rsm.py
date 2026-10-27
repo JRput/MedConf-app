@@ -254,7 +254,7 @@ class RSMExtractor(BaseExtractor):
 
                 tiers.append({
                     "tier_label": tier_label[:120],
-                    "price_gbp": price,
+                    "price_gbp": price, "currency": "GBP",
                     "is_early_bird": False,
                     "early_bird_deadline": None,
                 })

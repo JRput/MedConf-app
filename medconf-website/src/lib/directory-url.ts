@@ -14,7 +14,7 @@ import type { CountryFilter, DatePreset, DirectoryFilters, DirectoryFormat, Dire
 import { DEFAULT_FILTERS } from './directory-query'
 
 const FORMATS: DirectoryFormat[] = ['in_person', 'online', 'hybrid']
-const TYPES: DirectoryType[] = ['conference', 'course', 'workshop']
+const TYPES: DirectoryType[] = ['conference', 'course', 'workshop', 'degree']
 const PRESETS: DatePreset[] = ['this-month', 'next-3-months', 'this-year']
 const PRICES: PriceFilter[] = ['free', 'under-100', 'under-300', 'any']
 const SORTS: DirectorySort[] = ['date', 'newest', 'price']

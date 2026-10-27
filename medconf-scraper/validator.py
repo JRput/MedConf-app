@@ -5,6 +5,8 @@ import re
 from datetime import datetime
 from typing import Dict, Any, List
 
+import money
+
 REQUIRED_FIELDS = ["conference_name", "source_url"]
 
 
@@ -82,6 +84,24 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
         except (ValueError, TypeError):
             warnings.append(f"Invalid price for tier '{t.get('tier_label')}' — skipped")
             continue
+        # Currency: never defaulted. A tier carries an ISO code in KNOWN_CODES, or the
+        # conference's own URL (".uk" / ".ac.uk" ...) is the evidence; otherwise skip it.
+        cur = money.normalize_currency(t.get("currency")) if t.get("currency") else None
+        if cur is None:
+            if t.get("currency"):
+                warnings.append(f"Unknown currency {t.get('currency')!r} on tier '{t.get('tier_label')}' — skipped")
+                continue
+            cur = (money.detect_currency("", cleaned.get("source_url"))
+                   or money.detect_currency("", cleaned.get("organiser_url")))
+            if cur is None:
+                warnings.append(f"No currency on tier '{t.get('tier_label')}' and none evidenced by the source URL — skipped")
+                continue
+        t["currency"] = cur
+        if t["price_gbp"] < 0 or t["price_gbp"] > money.max_amount(cur):
+            warnings.append(f"Implausible price {t['price_gbp']} {cur} for tier '{t.get('tier_label')}' — skipped")
+            continue
+        if 0 < t["price_gbp"] < 5:
+            warnings.append(f"Suspiciously low price {t['price_gbp']} {cur} for tier '{t.get('tier_label')}' (kept — check the source)")
         cleaned_label = _clean_label(t["tier_label"])
         if not cleaned_label or cleaned_label.lower() in _JUNK_LABELS:
             warnings.append(
@@ -90,7 +110,7 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
             continue
         t["tier_label"] = cleaned_label
         # Drop exact duplicates (same label ignoring case/plural, same price)
-        key = (re.sub(r"s$", "", cleaned_label.lower()), float(t["price_gbp"]), (t.get("currency") or "GBP"))
+        key = (re.sub(r"s$", "", cleaned_label.lower()), float(t["price_gbp"]), t["currency"])
         if key in seen_tiers:
             continue
         seen_tiers.add(key)
@@ -157,7 +177,7 @@ def validate_conference(data: Dict[str, Any]) -> Dict[str, Any]:
 
     # Validate event_type — defaults to 'conference' if missing/invalid
     et = cleaned.get("event_type")
-    if et not in ("conference", "course", "workshop"):
+    if et not in ("conference", "course", "workshop", "degree"):
         if et is not None:
             warnings.append(f"Invalid event_type '{et}' — defaulted to 'conference'")
         cleaned["event_type"] = "conference"

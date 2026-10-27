@@ -73,6 +73,9 @@ from typing import List, Optional
 import httpx
 from openai import OpenAI
 
+# normalize_currency lives in money.py (shared by every layer); re-exported here for callers/tests.
+from money import normalize_currency, prompt_symbol_table  # noqa: F401
+
 from config import KIMI_API_KEY, KIMI_BASE_URL
 from llm_client import chat_completion, current_model
 
@@ -247,13 +250,14 @@ Output ONLY this JSON shape, no prose, no markdown fences:
 
 Rules:
 - Include EVERY dimension (section, attendee type, timeframe/band) in every tier_label, separated by " · ".
-- currency: the 3-letter ISO code. Prefer a code or country printed in the image (e.g. "USD 100", "(USD)", "KRW", "CHF") over a bare symbol. Symbols: £=GBP, €=EUR, ₩=KRW, ¥ or 円=JPY, S$=SGD, HK$=HKD, plain $=USD. If no code or symbol is visible anywhere, set "currency": null — do NOT guess GBP.
+- currency: the 3-letter ISO code. Prefer a code or country printed in the image (e.g. "USD 100", "(USD)", "KRW", "CHF") over a bare symbol. Symbols: {SYMBOLS}. If no code or symbol is visible anywhere, set "currency": null — do NOT guess GBP.
 - is_early_bird true ONLY for columns/rows explicitly labelled "Early", "Super Early Bird" etc.
 - early_bird_deadline: ISO YYYY-MM-DD ONLY if the year is visible in the image; copy the digits exactly as printed. Do NOT guess a year.
 - If a single price spans multiple columns (one flat rate shown across a merged cell), emit ONE tier for that row (not duplicates).
 - Be exhaustive but do NOT invent rows that aren't visible.
 - If no fee table is visible in the image, return {"tiers": []}.
 """
+PRICING_PROMPT = PRICING_PROMPT.replace("{SYMBOLS}", prompt_symbol_table())
 
 
 def extract_pricing_from_images(image_urls: List[str], stop_at: Optional[float] = None) -> list[dict]:
@@ -333,30 +337,6 @@ _LABEL_ACRONYMS = {
 }
 _ACRO_LOOKUP = {a.lower(): a for a in _LABEL_ACRONYMS}
 
-
-_CURRENCY_SYMBOLS = {
-    "£": "GBP", "€": "EUR", "₩": "KRW", "¥": "JPY", "円": "JPY", "$": "USD",
-    "S$": "SGD", "HK$": "HKD", "US$": "USD", "A$": "AUD", "C$": "CAD", "₹": "INR",
-    "CHF": "CHF", "R$": "BRL",
-}
-
-
-def normalize_currency(raw) -> Optional[str]:
-    """3-letter ISO code or common symbol -> ISO code; anything else
-    (None, '', 'unknown', 'N/A') -> None. Never defaults to GBP."""
-    if raw is None:
-        return None
-    s = str(raw).strip()
-    if not s:
-        return None
-    if s in _CURRENCY_SYMBOLS:
-        return _CURRENCY_SYMBOLS[s]
-    u = s.upper()
-    if u in _CURRENCY_SYMBOLS:
-        return _CURRENCY_SYMBOLS[u]
-    if re.fullmatch(r"[A-Z]{3}", u) and u not in {"N/A", "NAN", "UNK", "NUL"}:
-        return u
-    return None
 
 
 def _clean_vision_label(raw: str) -> str:

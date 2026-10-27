@@ -10,6 +10,7 @@ import type { FactField } from '@/lib/community/types'
 import { CommunityTag } from '@/components/community/CommunityTag'
 import { AddInfoTrigger } from '@/components/community/AddInfoTrigger'
 import { formatDateRange } from '@/lib/format'
+import { summarisePrices } from '@/lib/conference-helpers'
 import { downloadIcs } from '@/lib/ics'
 import { useAuth } from '@/hooks/useAuth'
 import { useSaved } from '@/hooks/useSaved'
@@ -40,10 +41,7 @@ export function EventSidebar({
   const { isSaved, toggleSave } = useSaved()
   const saved = isSaved(c.id)
 
-  const prices = tiers.map((t) => Number(t.price_gbp)).filter((n) => Number.isFinite(n))
-  const priceMin = prices.length ? Math.min(...prices) : null
-  const priceMax = prices.length ? Math.max(...prices) : null
-  const currency = tiers.find((t) => t.currency)?.currency ?? 'GBP'
+  const { min: priceMin, max: priceMax, currency, otherCount } = summarisePrices(tiers)
 
   const mapHref =
     c.event_format !== 'online' && (c.venue_name || c.city)
@@ -120,7 +118,7 @@ export function EventSidebar({
             {fromCommunity('cpd_accredited', 'cpd_points') && <CommunityTag />}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <PriceLabel min={priceMin} max={priceMax} currency={currency} href={c.organiser_url ?? c.booking_url} size="md" />
+            <SidebarPrice min={priceMin} max={priceMax} currency={currency} otherCount={otherCount} href={c.organiser_url ?? c.booking_url} />
             {priceFromCommunity && <CommunityTag />}
           </span>
         </div>
@@ -161,6 +159,32 @@ export function EventSidebar({
         <AddInfoTrigger conference={c} tiers={tiers} />
       </div>
     </aside>
+  )
+}
+
+/** Price range in ONE currency, with a hint when tiers in others were left out. */
+export function SidebarPrice({
+  min,
+  max,
+  currency,
+  otherCount,
+  href,
+}: {
+  min: number | null
+  max: number | null
+  currency: string | null
+  otherCount: number
+  href?: string | null
+}) {
+  return (
+    <span className="inline-flex flex-col items-end gap-0.5">
+      <PriceLabel min={min} max={max} currency={currency} href={href} size="md" />
+      {otherCount > 0 && (
+        <span className="type-caption text-fg-subtle">
+          + {otherCount} in other {otherCount === 1 ? 'currency' : 'currencies'}
+        </span>
+      )}
+    </span>
   )
 }
 

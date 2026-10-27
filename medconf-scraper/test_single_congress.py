@@ -173,3 +173,10 @@ def test_sane_venue_rejects_office_footers_and_keeps_names():
     assert sane_venue("Bella Center Copenhagen") == "Bella Center Copenhagen"
     assert sane_venue("Stockholmsmässan, Älvsjö") == "Stockholmsmässan, Älvsjö"
     assert sane_venue("Copenhagen, Denmark Official Website: euroanaesthesia.org/2027/") == "Copenhagen, Denmark"
+
+
+def test_parse_amount_decimal_pence_not_read_as_thousands():
+    # HIGH (R2, 2026-10-27): "£1,250.00" was read as 125000 by the 28 single_congress subclasses.
+    assert parse_amount("£1,250.00", "EUR") == (1250.0, "GBP")
+    assert parse_amount("€ 1.500,00", "EUR") == (1500.0, "EUR")
+    assert parse_amount("$1,395.50", "USD") == (1395.5, "USD")

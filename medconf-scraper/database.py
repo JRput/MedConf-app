@@ -3,6 +3,7 @@
 
 import logging
 from supabase import create_client
+import money
 from config import SUPABASE_URL, SUPABASE_KEY
 from datetime import datetime, date, timedelta
 from typing import Optional, List, Dict, Any
@@ -91,11 +92,17 @@ def insert_pricing_tiers(conference_id: int, tiers: List[Dict[str, Any]]) -> Non
     leave it null."""
     rows = []
     for t in tiers:
+        cur = money.normalize_currency(t.get("currency"))
+        if cur is None:
+            # Never default to GBP: a tier whose currency is unknown is worse than no tier.
+            logger.warning(f"insert_pricing_tiers: conference {conference_id} tier "
+                           f"{t.get('tier_label')!r} has no valid currency ({t.get('currency')!r}) - refused")
+            continue
         row = {
             "conference_id": conference_id,
             "tier_label": t["tier_label"],
             "price_gbp": t["price_gbp"],
-            "currency": t.get("currency", "GBP"),
+            "currency": cur,
             "is_early_bird": t.get("is_early_bird", False),
             "early_bird_deadline": t.get("early_bird_deadline"),
         }

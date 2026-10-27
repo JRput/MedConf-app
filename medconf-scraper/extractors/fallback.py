@@ -60,7 +60,8 @@ DETAIL PAGE CONTENT:
 DATA FIDELITY RULES (highest priority — never violate):
 - Extract ONLY values explicitly stated on the detail page above.
 - Use null / [] when a field is not on the page. NEVER fabricate or guess.
-- Pricing: if no GBP amount (e.g. £150) is shown for this event, "pricing_tiers" MUST be [].
+- Pricing: if no price with a currency symbol or code (e.g. £150, €150, EUR 150, S$465) is shown for this event, "pricing_tiers" MUST be [].
+  Each tier's "currency" is the ISO-4217 code printed with its price (GBP, EUR, USD, SGD ...), or null if the page does not show it. Never guess GBP.
   Marketing copy like "free for members" without a stated tier price is NOT a tier.
 - Dates: only use end_date if a multi-day end date is explicitly shown.
 - event_format: "online" only if the page says webinar/online/virtual; "in_person" if
@@ -81,7 +82,7 @@ Respond ONLY with valid JSON, no text before or after, no markdown fences:
   "cpd_accredited": boolean,
   "abstract_open": boolean,
   "abstract_deadline": "YYYY-MM-DD" | null,
-  "pricing_tiers": [{{"tier_label": "Member | Non-member | Trainee | etc", "price_gbp": number}}]
+  "pricing_tiers": [{{"tier_label": "Member | Non-member | Trainee | etc", "price_gbp": number, "currency": "ISO code or null"}}]
 }}"""
 
         raw = llm_call(prompt)

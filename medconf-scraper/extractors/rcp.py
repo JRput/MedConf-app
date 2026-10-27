@@ -205,7 +205,7 @@ class RCPExtractor(BaseExtractor):
             label = _normalise_rcp_label(label)
             tiers.append({
                 "tier_label": label[:120],
-                "price_gbp": price,
+                "price_gbp": price, "currency": "GBP",
                 "is_early_bird": False,
                 "early_bird_deadline": None,
             })

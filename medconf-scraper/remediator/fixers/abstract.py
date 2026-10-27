@@ -125,6 +125,13 @@ def fix_abstract_status(
     abstract_deadline, abstract_deadline_note) or (None, None)."""
     if not page_text:
         return None, None
+    # Courses / degrees without call-for-papers wording in the title get no
+    # verdict at all (same rule as remediator.detector.abstract_applicable).
+    # Rows with no event_type (direct fixer calls) are not second-guessed.
+    if row.get("event_type"):
+        from remediator.detector import abstract_applicable
+        if not abstract_applicable(row):
+            return None, "not_applicable"
 
     text_l = page_text.lower()
 
@@ -168,9 +175,15 @@ def fix_abstract_status(
         out = {"abstract_open": p_open, "abstract_deadline_note": p_note}
         return out, "programme_note"
 
-    # No abstract mention at all → confirm closed
+    # No abstract mention on THIS page. That is not evidence of "no abstract
+    # programme": the call for papers usually lives on a sub-page, a PDF or the
+    # organiser's own site. Return "unknown" (no write); the terminal verdict
+    # (`no_abstract_anywhere`, abstract_open=False) is written only by
+    # explorer.explore_for_abstract_status after it read every discovered
+    # abstract / call-for link, PDF and the organiser hop (HQ LESSONS #89).
+    # The method name stays visible to callers and logs as "no_abstract_mention".
     if "abstract" not in text_l:
-        return {"abstract_open": False}, "no_abstract_mention"
+        return None, "no_abstract_mention"
 
     # 1. Explicit-closed wording wins outright
     for pat in _CLOSED_PATTERNS:

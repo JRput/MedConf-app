@@ -4,7 +4,7 @@
 import { useMemo, useState } from 'react'
 import type { PricingTier } from '@/lib/types'
 import { Clock, ChevronDown, ChevronRight, ArrowUpRight } from 'lucide-react'
-import { currencySymbol } from '@/lib/conference-helpers'
+import { formatMoney } from '@/lib/format'
 import type { Conference } from '@/lib/types'
 import { AddInfoTrigger } from '@/components/community/AddInfoTrigger'
 import { CommunityTag } from '@/components/community/CommunityTag'
@@ -221,7 +221,7 @@ export function PricingTable({ tiers, organiserUrl, conference }: PricingTablePr
                 <tr key={tier.id} className={cn('border-t border-border-subtle', i % 2 === 1 && 'bg-surface-muted/50')}>
                   <td className="px-4 py-3 font-medium text-fg">{rowLabel}</td>
                   <td className="px-4 py-3 text-right type-numeric font-semibold text-fg-strong">
-                    {currencySymbol(tier.currency)}{tier.price_gbp.toFixed(2)}
+                    {formatMoney(Number(tier.price_gbp), tier.currency)}
                   </td>
                   {hasNotes && (
                     <td className="px-4 py-3">
@@ -266,7 +266,7 @@ export function PricingTable({ tiers, organiserUrl, conference }: PricingTablePr
                   <tr key={tier.id} className={cn(i % 2 === 1 && 'bg-surface-hover')}>
                     <td className="px-4 py-2.5 text-fg">{tier.tier_label}</td>
                     <td className="px-4 py-2.5 text-right type-numeric font-semibold text-fg-strong">
-                      {currencySymbol(tier.currency)}{tier.price_gbp.toFixed(2)}
+                      {formatMoney(Number(tier.price_gbp), tier.currency)}
                     </td>
                   </tr>
                 ))}

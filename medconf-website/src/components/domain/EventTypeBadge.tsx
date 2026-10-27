@@ -6,12 +6,14 @@ const LABEL: Record<EventType, string> = {
   conference: 'Conference',
   course: 'Course',
   workshop: 'Workshop',
+  degree: 'Degree',
 }
 
 const VARIANT = {
   conference: 'conference',
   course: 'course',
   workshop: 'workshop',
+  degree: 'degree',
 } as const
 
 /**

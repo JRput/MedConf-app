@@ -9,7 +9,7 @@ import type { FilterPatch } from './FilterControls'
 
 const SPECIALTY_LABEL = new Map(SPECIALTY_PARENTS.map((p) => [p.slug, p.label]))
 const FORMAT_LABEL: Record<string, string> = { in_person: 'In person', online: 'Online', hybrid: 'Hybrid' }
-const TYPE_LABEL: Record<string, string> = { conference: 'Conference', course: 'Course', workshop: 'Workshop' }
+const TYPE_LABEL: Record<string, string> = { conference: 'Conference', course: 'Course', workshop: 'Workshop', degree: 'Degree' }
 const DATE_PRESET_LABEL: Record<string, string> = { 'this-month': 'This month', 'next-3-months': 'Next 3 months', 'this-year': 'This year' }
 const PRICE_LABEL: Record<string, string> = { free: 'Free', 'under-100': 'Under £100', 'under-300': 'Under £300' }
 

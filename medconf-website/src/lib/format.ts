@@ -2,7 +2,7 @@
 // Display formatting shared by the directory primitives. Pure functions, no
 // React — so W2 can reuse them in server components, sorting and tests.
 
-import { currencySymbol } from './conference-helpers'
+import { currencyFormatter, normaliseCurrency } from './conference-helpers'
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 
@@ -80,11 +80,29 @@ export function relativeDays(days: number): string {
 }
 
 /**
- * Money with the right symbol and no pointless decimals — clinicians scan
- * "£185", not "£185.00". Non-integer amounts keep two places.
+ * Money through Intl with the tier's own ISO code: right symbol, grouping and
+ * minor units (JPY/KRW have none). Whole amounts drop decimals ("£185");
+ * fractional ones keep the currency's usual places. Unknown codes render as
+ * "SEK 2,500"; a missing currency renders the bare amount plus a
+ * "(currency unknown)" hint unless `hint: false` (the caller shows its own).
  */
-export function formatMoney(amount: number, currency?: string | null): string {
-  const symbol = currencySymbol(currency)
-  const value = Number.isInteger(amount) ? String(amount) : amount.toFixed(2)
-  return `${symbol}${value}`
+export function formatMoney(
+  amount: number,
+  currency?: string | null,
+  opts: { hint?: boolean } = {}
+): string {
+  const code = normaliseCurrency(currency)
+  const whole = Number.isInteger(amount)
+  const plain = new Intl.NumberFormat('en-GB', {
+    minimumFractionDigits: whole ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(amount)
+  if (!code) {
+    const raw = (currency ?? '').trim()
+    if (raw) return `${raw.toUpperCase()} ${plain}` // malformed, e.g. "£" or "EURO"
+    return opts.hint === false ? plain : `${plain} (currency unknown)`
+  }
+  const fmt = currencyFormatter(code, whole ? 0 : undefined)
+  if (!fmt) return `${code} ${plain}`
+  return fmt.format(amount).replace(/\u00a0/g, ' ')
 }

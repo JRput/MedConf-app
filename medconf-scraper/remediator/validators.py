@@ -1,9 +1,14 @@
 """Sanity gates for fixer outputs before they reach Supabase."""
 
 from __future__ import annotations
+import logging
 import re
 from datetime import date as _date
 from typing import Any
+
+import money
+
+logger = logging.getLogger(__name__)
 
 
 def validate_description(value: str) -> bool:
@@ -59,12 +64,10 @@ def validate_specialty(value: str) -> bool:
     return 3 <= len(value) <= 80
 
 
-# Matches pricing_tiers.currency in production (CLAUDE.md §5) plus KRW and the
-# few others already accepted. KRW/JPY/INR prices are routinely 5-6 digits.
-_VALID_CURRENCIES = ("GBP", "USD", "EUR", "HKD", "SGD", "CHF", "BRL",
-                     "AUD", "CAD", "INR", "JPY", "KRW")
-_HIGH_DENOMINATION = ("KRW", "JPY", "INR")
-_HIGH_DENOMINATION_CAP = 10_000_000
+# Currencies are the shared `money.KNOWN_CODES` table (ISO-4217, 50 codes) and the
+# per-currency fee cap is `money.max_amount` (KRW/JPY/INR/IDR... legitimately run to
+# 5-9 digits). pricing_tiers.currency is text, so any known code is storable.
+_SMALL_AMOUNT = 5.0
 
 
 def validate_pricing_tiers(value: list) -> bool:
@@ -78,12 +81,15 @@ def validate_pricing_tiers(value: list) -> bool:
         currency = t.get("currency", "GBP")   # key absent = legacy text path (GBP)
         if not isinstance(label, str) or len(label) < 3 or len(label) > 200:
             return False
-        cap = _HIGH_DENOMINATION_CAP if currency in _HIGH_DENOMINATION else 50000
-        if not isinstance(price, (int, float)) or price < 0 or price > cap:
-            return False
         # A present-but-null/unknown currency (vision could not read one) is rejected, not defaulted.
-        if currency not in _VALID_CURRENCIES:
+        if currency not in money.KNOWN_CODES:
             return False
+        if not isinstance(price, (int, float)) or isinstance(price, bool) or price < 0 \
+                or price > money.max_amount(currency):
+            return False
+        if 0 < price < _SMALL_AMOUNT:
+            logger.warning("validate pricing: suspiciously small amount %s %s for %r "
+                           "(a thousands separator or a page number misread?)", currency, price, label[:60])
     return True
 
 

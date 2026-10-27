@@ -25,6 +25,58 @@ _VENUE_KW_RE = re.compile(
     r"\b[A-Z][\w'&.\-]+(?:\s+[A-Z&][\w'&.\-]*)*\s+"
     r"(?:Convention\s+Cent(?:er|re)|Conference\s+Cent(?:er|re)|Exhibition\s+Cent(?:er|re)|Hotel|University|Hospital|Hall)\b")
 
+_MON = r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\.?"
+# "October 26 - 30, 2027" / "Feb 28 - Mar 3, 2027" / "June 1, 2027" (month first)
+_DATE_RANGE = rf"{_MON}\s+\d{{1,2}}(?:\s*[-\u2013\u2014]\s*(?:{_MON}\s+)?\d{{1,2}})?,\s*20\d{{2}}"
+_BANNER_DATE_RE = re.compile(rf"^{_DATE_RANGE}$")
+# banner on ONE line: <date range> <Venue words> <City>, <State|Country>
+_BANNER_LINE_RE = re.compile(
+    rf"^{_DATE_RANGE}\s+(?P<rest>[A-Z][A-Za-z0-9&'.\- ]{{3,90}}?)\s*,\s*(?P<region>[A-Z][A-Za-z.'\- ]{{2,30}})$")
+# "<Place words>, <Place words>": capitalised words only (a venue/city line)
+_PLACE_PAIR_RE = re.compile(
+    r"^[A-Z][A-Za-z0-9&'.\-]*(?: (?:[A-Z][A-Za-z0-9&'.\-]*|of|de|the|and|&|la|le|du|von|van))*"
+    r",\s*[A-Z][A-Za-z.'\-]*(?: (?:[A-Z][A-Za-z.'\-]*|of|de|the|and|&))*$")
+_NOT_PLACE_PAIR_RE = re.compile(
+    r"\b(?:Dr|Prof|Professor|Consultant|Director|Chair|Chairman|President|Ltd|Limited|Inc|LLC|Registration|Abstract|Programme|Register)\b|\b(?:by|from)\b",
+    re.I)
+_H1_RE = re.compile(r"<h1\b[^>]*>.*?</h1\s*>", re.I | re.S)
+
+
+def _is_place_pair(line: str) -> bool:
+    return (len(line) <= 90 and len(line.split()) <= 10 and not re.search(r"\d", line)
+            and bool(_PLACE_PAIR_RE.match(line)) and not _NOT_PLACE_PAIR_RE.search(line)
+            and not _NOT_PLACE_RE.search(line))
+
+
+def _banner_evidence(lines) -> Optional[str]:
+    """Date/venue banner under the event title: "October 26 - 30, 2027
+    Sheraton Grand Chicago Riverwalk Chicago, Illinois" on one line, or the
+    date on its own line followed by 1-2 place lines (spans/<br> rendering)."""
+    for i, l in enumerate(lines):
+        if len(l) <= 160:
+            m = _BANNER_LINE_RE.match(l)
+            if m and not _NOT_PLACE_RE.search(l) and not re.search(r"\d", m.group("rest")):
+                return f"date/venue banner: {l[:120]}"
+        if _BANNER_DATE_RE.match(l):
+            nxt = lines[i + 1: i + 3]
+            if nxt and _is_place_pair(nxt[-1]) and all(len(x) <= 90 and not re.search(r"\d{4}", x) for x in nxt):
+                return f"date/venue banner: {l} {' '.join(nxt)}"[:140]
+    return None
+
+
+def _under_h1_evidence(h: str) -> Optional[str]:
+    """"<Venue>, <City>" as the first line directly under the page's H1."""
+    m = _H1_RE.search(h)
+    if not m:
+        return None
+    tail = _BLOCK_TAG_RE.sub("\n", h[m.end():m.end() + 1500])
+    for l in tail.split("\n"):
+        l = re.sub(r"[ \t\r\xa0]+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", l))).strip()
+        if not l:
+            continue
+        return f"line under h1: {l[:100]}" if _is_place_pair(l) else None
+    return None
+
 
 def _ld_places(node: Any):
     if isinstance(node, list):
@@ -67,8 +119,8 @@ def find_location_evidence(page_html: str, page_text: str = "") -> Optional[str]
     if ld:
         return ld
     if page_html:
-        h = _CHROME_RE.sub(" ", page_html)
-        h = _BLOCK_TAG_RE.sub("\n", h)
+        h_raw = _CHROME_RE.sub(" ", page_html)
+        h = _BLOCK_TAG_RE.sub("\n", h_raw)
         text = _html.unescape(re.sub(r"<[^>]+>", " ", h))
     else:
         text = page_text or ""
@@ -85,6 +137,14 @@ def find_location_evidence(page_html: str, page_text: str = "") -> Optional[str]
             val = lines[i + 1]
         if val and re.search(r"[A-Za-z]{3}", val) and not _FORM_LABEL_RE.search(val) and not _NOT_PLACE_RE.search(val) and len(val) <= 160:
             return f"labelled line: {l[:60]} {val[:100]}".strip()
+
+    ban = _banner_evidence(lines)
+    if ban:
+        return ban
+    if page_html:
+        h1 = _under_h1_evidence(h_raw)
+        if h1:
+            return h1
 
     for l in lines:
         if len(l) > 200:

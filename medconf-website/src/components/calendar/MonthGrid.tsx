@@ -326,7 +326,9 @@ function DayCellBox({
                   ? 'bg-type-course-text'
                   : e.eventType === 'workshop'
                     ? 'bg-type-workshop-text'
-                    : 'bg-type-conference-text'
+                    : e.eventType === 'degree'
+                      ? 'bg-type-degree-text'
+                      : 'bg-type-conference-text'
               )}
             />
           ))}

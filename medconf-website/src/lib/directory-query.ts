@@ -25,7 +25,7 @@ import { directoryEventFromRow, type DirectoryEvent, type DirectoryEventRow } fr
 import { canonicalSpecialty, rawValuesForParent } from './taxonomy/specialties'
 
 export type DirectoryFormat = 'in_person' | 'online' | 'hybrid'
-export type DirectoryType = 'conference' | 'course' | 'workshop'
+export type DirectoryType = 'conference' | 'course' | 'workshop' | 'degree'
 export type DatePreset = 'this-month' | 'next-3-months' | 'this-year'
 export type PriceFilter = 'free' | 'under-100' | 'under-300' | 'any'
 export type DirectorySort = 'date' | 'newest' | 'price'

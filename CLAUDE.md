@@ -120,6 +120,7 @@ python -m remediator.audit --source 20                   # gate check for SABCS
 
 ### Daily cron schedule (`.github/workflows/`)
 - `scrape-daily.yml` — **02:00 UTC** — `probe-models` job, then 15 grouped jobs A–O (`--sources`), `fail-fast: false`. Keep `remediator-daily.yml` groups identical. A source that yields 0 cards after an anti-bot challenge or a transport outage is recorded as `blocked` / `unreachable` (WARNING, group stays green); 3 consecutive such runs fail the group red (`main.py`, since 2026-10-09).
+- `scrape-daily.yml` also runs `coverage-check` (read-only `coverage_report.py`, red only on a coverage regression vs `reports/coverage/baseline.json`) after the groups; `remediator-daily.yml` groups F and G are split into F/F2 and G/G2 (mirrored in `scrape-daily.yml`), plus an advisory `audit-report` job (since 2026-10-27).
 - `fire-specialty-alerts.yml` — **03:00 UTC** — batched in-app "N new Cardiology events" per user.
 - `remediator-daily.yml` — **04:00 UTC** — runs `python -m remediator --all`. Uploads JSON reports as artifacts.
 - `fire-reminders.yml` — **08:00 UTC** — fires saved-event reminders users scheduled from the detail page.

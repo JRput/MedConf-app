@@ -34,6 +34,8 @@ from typing import Dict, Any, Optional, Callable, List
 import json
 from playwright.sync_api import Page
 
+import money
+
 from .base import BaseExtractor
 from .http_fetch import fetch_html
 from logger import logger
@@ -51,7 +53,8 @@ _VENUE_WORDS = re.compile(
     r"tower|campus|school|museum|auditorium|regency|hyatt|marriott|hilton)",
     re.I,
 )
-_CURRENCY_SYMBOLS = {"$": "USD", "€": "EUR", "£": "GBP"}
+# Currency comes from the API's own code / symbol / cost text via `money` and is NEVER
+# defaulted (this calendar is international): no stated currency -> no tier.
 
 
 def _clean(s: Optional[str]) -> str:
@@ -155,19 +158,28 @@ def _split_venue(venue_raw: str, city: str, country: str, desc: str):
 
 def _parse_cost(ev: dict) -> List[Dict[str, Any]]:
     details = ev.get("cost_details") or {}
-    code = details.get("currency_code") or _CURRENCY_SYMBOLS.get(details.get("currency_symbol") or "", "USD")
     text = _clean(ev.get("cost"))
+    code = (money.normalize_currency(details.get("currency_code"))
+            or money.normalize_currency(details.get("currency_symbol"))
+            or money.detect_currency(text or ""))
+    if not code:
+        return []
     if text and re.search(r"\bfree\b", text, re.I):
         return [{"tier_label": "Free", "price_gbp": 0.0, "currency": code,
                  "is_early_bird": False, "early_bird_deadline": None}]
     vals: List[float] = []
     for v in details.get("values") or []:
         try:
-            vals.append(float(str(v).replace(",", "")))
+            n = money.parse_number(str(v).strip(), code)
+            if n is not None:
+                vals.append(n)
         except ValueError:
             pass
     if not vals and text:
-        vals = [float(x.replace(",", "")) for x in re.findall(r"(\d[\d,]*(?:\.\d+)?)", text)]
+        for m in money.find_amounts(text, context=code, require_currency=False):
+            vals.append(m.amount)
+            if m.high is not None:
+                vals.append(m.high)
     vals = sorted(set(v for v in vals if v > 0))
     if not vals:
         return []

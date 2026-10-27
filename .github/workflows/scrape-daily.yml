@@ -105,12 +105,20 @@ jobs:
           - group: E
             source_ids: "30,31,32,33,35,36,37,41"
             source_names: "RCPE RCPCH RCOphth FPH FPM ESC ACPGBI FICM"
+          # F/G split into halves 2026-10-27 to match remediator-daily.yml
+          # (group F of the remediator hit 82.8/90 min); keep both in sync.
           - group: F
-            source_ids: "46,47,48,49,50,51,52,53,54,55,56,57,58,59"
-            source_names: "BAETS AANS AAGL ESP EAU EANM SCCM AdvanceHE IFOS IDWeek ISUOG IHI BSH ACEP"
+            source_ids: "46,47,48,49,50,51,52"
+            source_names: "BAETS AANS AAGL ESP EAU EANM SCCM"
+          - group: F2
+            source_ids: "53,54,55,56,57,58,59"
+            source_names: "AdvanceHE IFOS IDWeek ISUOG IHI BSH ACEP"
           - group: G
-            source_ids: "60,61,62,63,64,65,66,67,68,69,70,71,73,74"
-            source_names: "ERS BSGE BCIS FDI ECCO EASL BAPRAS ESICM APM ERA EUSEM DermaMedical BIA SAM"
+            source_ids: "60,61,62,63,64,65,66"
+            source_names: "ERS BSGE BCIS FDI ECCO EASL BAPRAS"
+          - group: G2
+            source_ids: "67,68,69,70,71,73,74"
+            source_names: "ESICM APM ERA EUSEM DermaMedical BIA SAM"
           - group: H
             source_ids: "75,76,77,78,79,80,81,82,83,84"
             source_names: "AAOS UltrasoundSite Endocrine ARRS BSCCP CRF EADV ATACC InterfaceAesthetics BDIAP"
@@ -188,3 +196,42 @@ jobs:
           path: medconf-scraper/*.log
           if-no-files-found: ignore
           retention-days: 14
+
+  # Coverage gate (2026-10-27): per-source fee / abstract / venue / city
+  # coverage after the scrape. Red only on a regression against
+  # reports/coverage/baseline.json (a source with >= 10 events dropping more
+  # than 10 pp on a metric, or a source registered in the last 7 days with no
+  # coverage entry). Read-only. Refresh the baseline with
+  # `python coverage_report.py --update-baseline` after an intended change.
+  coverage-check:
+    name: Coverage gate
+    needs: scrape
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install "supabase>=2.0.0" "python-dotenv>=1.0.0"
+
+      - name: Coverage report and regression check
+        working-directory: medconf-scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python coverage_report.py
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.run_id }}
+          path: reports/coverage/*.*
+          if-no-files-found: warn
+          retention-days: 30

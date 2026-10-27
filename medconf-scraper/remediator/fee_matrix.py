@@ -26,12 +26,10 @@ import html as _html
 import re
 from typing import Optional
 
-SEP = " · "
-_SYMS = {"£": "GBP", "$": "USD", "€": "EUR"}
+import money
 
+SEP = " · "
 _NUM = r"\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?"
-_PRICE_RE = re.compile(
-    rf"(?:(?P<s1>[£$€])\s?(?P<n1>{_NUM})|(?P<n2>{_NUM})\s?(?P<s2>[£$€]))")
 _NA_RE = re.compile(r"^(?:-+|–|—|n/?a|free|tb[ac]|incl\.?|included)$", re.I)
 
 _MONTH = (r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*")
@@ -60,53 +58,75 @@ def html_to_lines(html: str) -> str:
 
 
 def parse_amount(raw: str) -> Optional[float]:
-    """"300,00" -> 300.0, "1.200,00" -> 1200.0, "1,200.50" -> 1200.5, "1.200" -> 1200."""
+    """"300,00" -> 300.0, "1.200,00" -> 1200.0, "1,200.50" -> 1200.5, "1.200" -> 1200
+    (the shared `money.parse_number` decimal rule)."""
     s = raw.strip()
     if not s or not re.fullmatch(_NUM, s):
         return None
-    has_dot, has_com = "." in s, "," in s
-    if has_dot and has_com:
-        dec = "." if s.rfind(".") > s.rfind(",") else ","
-        thou = "," if dec == "." else "."
-        s = s.replace(thou, "").replace(dec, ".")
-    elif has_com or has_dot:
-        sep = "," if has_com else "."
-        parts = s.split(sep)
-        if len(parts) > 2 or len(parts[-1]) == 3:
-            s = "".join(parts)  # thousands separator(s)
-        else:
-            s = parts[0] + "." + parts[1]  # decimal
-    try:
-        return float(s)
-    except ValueError:
-        return None
+    return money.parse_number(s)
+
+
+def _first_price(line: str):
+    """First currency-bearing amount in `line` (a `money.Money`) or None."""
+    found = money.find_amounts(line)
+    return found[0] if found else None
+
+
+_SUFFIX_CELL_SPLIT = re.compile(r"(?<=[€£₹₩₪₺฿₱₽₴])\s+(?=\d)|(?<=[A-Za-z])(?<=\b[A-Z]{3})\s+(?=\d+(?:[.,]\d+)*\s*[A-Z]{3}\b)")
 
 
 def _cells(line: str) -> Optional[list]:
+    """Cells of a price line; falls back to cell-by-cell parsing for space-separated
+    SUFFIX forms ("300 € 170 € 90 €", "300 EUR 170 EUR") that `money.find_amounts`
+    cannot tell apart from a trailing number."""
+    out = _cells_whole(line)
+    if out is not None:
+        return out
+    pieces = [p for p in _SUFFIX_CELL_SPLIT.split(line.strip()) if p and p.strip()]
+    if len(pieces) < 2:
+        return None
+    cells: list = []
+    for piece in pieces:
+        c = _cells_whole(piece)
+        if c is None:
+            return None
+        cells.extend(c)
+    return cells or None
+
+
+def _cells_whole(line: str) -> Optional[list]:
     """A line made only of price / n-a cells -> list of (price|None, currency|None).
-    None when the line holds anything else."""
+    Prices are read by `money.find_amounts` ("EUR300,00", "CHF 1'200", "S$465",
+    "300 €", "1.200,00 €"). None when the line holds anything else, including an
+    amount whose currency the text does not state or a price range."""
     s = line.strip()
     if not s:
         return None
     out: list = []
-    pos = 0
-    while pos < len(s):
-        while pos < len(s) and s[pos] in " |\t/":
-            pos += 1
-        if pos >= len(s):
-            break
-        m = _PRICE_RE.match(s, pos)
-        if m:
-            amt = parse_amount(m.group("n1") or m.group("n2"))
-            cur = _SYMS[m.group("s1") or m.group("s2")]
-            out.append((amt, cur))
-            pos = m.end()
-            continue
-        m2 = re.match(r"(-+|–|—|n/?a|free|tb[ac])(?=[\s|/]|$)", s[pos:], re.I)
-        if m2:
+
+    def gap(text: str) -> bool:
+        pos = 0
+        while pos < len(text):
+            while pos < len(text) and text[pos] in " |\t/":
+                pos += 1
+            if pos >= len(text):
+                break
+            m2 = re.match(r"(-+|–|—|n/?a|free|tb[ac])(?=[\s|/]|$)", text[pos:], re.I)
+            if not m2:
+                return False
             out.append((None, None))
             pos += m2.end()
-            continue
+        return True
+
+    cursor = 0
+    for mny in money.find_amounts(s):
+        if mny.high is not None or not mny.currency:
+            return None
+        if not gap(s[cursor:mny.span[0]]):
+            return None
+        out.append((mny.amount, mny.currency))
+        cursor = mny.span[1]
+    if not gap(s[cursor:]):
         return None
     return out or None
 
@@ -124,11 +144,11 @@ def _is_timeframe(line: str) -> bool:
 
 def _split_tf_prefix(line: str):
     """"By July 15th: EUR300 EUR170" -> ("By July 15th", cells). None when not that shape."""
-    m = _PRICE_RE.search(line)
+    m = _first_price(line)
     if not m:
         return None
-    head = line[:m.start()].strip().rstrip(":-–| ").strip()
-    cells = _cells(line[m.start():])
+    head = line[:m.span[0]].strip().rstrip(":-–| ").strip()
+    cells = _cells(line[m.span[0]:])
     if head and cells and _is_timeframe(head):
         return head, cells
     return None
@@ -223,7 +243,7 @@ def _row_oriented(lines: list) -> list:
             header, group = cand
         tf_clean = tf.strip(" :-–|")
         for col, (amt, cur) in zip(header, cells):
-            if amt is None or amt <= 0 or amt > 50000:
+            if amt is None or amt <= 0 or not money.plausible(amt, cur):
                 continue
             tiers.append(_tier(_label([group, col, tf_clean]), amt, cur, tf_clean))
         pend = []
@@ -253,10 +273,10 @@ def _col_oriented(lines: list) -> list:
         while p < n:
             ln = lines[p]
             inline = None
-            m = _PRICE_RE.search(ln)
-            if m and m.start() > 0:
-                head = ln[:m.start()].strip(" :-–|")
-                cells = _cells(ln[m.start():])
+            m = _first_price(ln)
+            if m and m.span[0] > 0:
+                head = ln[:m.span[0]].strip(" :-–|")
+                cells = _cells(ln[m.span[0]:])
                 if head and cells and len(cells) == k:
                     inline = (head, cells, p + 1)
             if inline is None and _cells(ln) is None and p + 1 < n:
@@ -279,7 +299,7 @@ def _col_oriented(lines: list) -> list:
             label, cells, p = inline
             found_rows += 1
             for tf, (amt, cur) in zip(header, cells):
-                if amt is None or amt <= 0 or amt > 50000:
+                if amt is None or amt <= 0 or not money.plausible(amt, cur):
                     continue
                 tiers.append(_tier(_label([group, label, tf]), amt, cur, tf))
         i = max(p, j)
@@ -342,7 +362,7 @@ def _tab_grid(lines: list) -> list:
             continue
         hdr = frames[-k:] if len(frames) > k else frames
         for (tf, dl), (amt, cur) in zip(hdr, cells):
-            if amt is None or amt <= 0 or amt > 50000:
+            if amt is None or amt <= 0 or not money.plausible(amt, cur):
                 continue
             t = _tier(_label([label, tf]), amt, cur, tf)
             if t["is_early_bird"] and dl:

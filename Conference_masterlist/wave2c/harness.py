@@ -1,14 +1,17 @@
 """No-DB test harness for a new extractor (wave 1b).
 
 Usage (from medconf-scraper/, with the venv):
-  PYTHONPATH=. ./.venv/bin/python ../Conference_masterlist/wave2/harness.py <module> <ClassName> <build.json> [--details N] [--force-fallback] [--coverage]
+  PYTHONPATH=. ./.venv/bin/python ../Conference_masterlist/wave2/harness.py <module> <ClassName> <build.json> [--details N] [--force-fallback] [--no-coverage]
 
 Reads `source_row` from the build JSON, runs Phase A (list shells — extractor
 override, else the generic paginated DOM walker) and Phase B (detail
 extraction) on N shells spread across the listing. Never writes to
-Supabase. --coverage runs medconf-scraper/coverage_checks.py on each merged
-event + rendered page (PLAYBOOK "Coverage checklist"), prints warnings, a
-summary table, and exits 2 if any PRICE_*/SUBMISSION_* warning fired.
+Supabase. Coverage is ON by default (since 2026-10-27; --no-coverage opts out):
+it runs medconf-scraper/coverage_checks.py on each merged event + rendered
+page (PLAYBOOK "Coverage checklist"), prints warnings, a summary table, writes
+the result into the build JSON under `coverage_run` (check_taxonomy.py fails
+CI for a recently registered source whose build JSON lacks it), and exits 2 if
+any PRICE_*/SUBMISSION_* warning fired.
 --force-fallback makes http_fetch's httpx path report 403 so the
 Playwright path (what GitHub runners often need) is exercised.
 """
@@ -18,7 +21,10 @@ logging.basicConfig(level=logging.WARNING)
 ap = argparse.ArgumentParser()
 ap.add_argument("module"); ap.add_argument("cls"); ap.add_argument("build_json")
 ap.add_argument("--details", type=int, default=5); ap.add_argument("--force-fallback", action="store_true")
-ap.add_argument("--coverage", action="store_true")
+ap.add_argument("--coverage", dest="coverage", action="store_true", default=True,
+                help="(default) run the coverage checks")
+ap.add_argument("--no-coverage", dest="coverage", action="store_false",
+                help="skip the coverage checks (the build JSON then gets no coverage_run)")
 a = ap.parse_args()
 
 if a.force_fallback:
@@ -46,6 +52,7 @@ def llm_call(prompt):
 
 from collections import Counter
 cov_counts, cov_blocking = Counter(), False
+cov_warnings, cov_pages = [], 0
 b = BrowserController(); b.launch()
 try:
     ext.browser = b
@@ -89,6 +96,10 @@ try:
                     b.navigate(u); r = (b.page.content(), b.page.inner_text("body"))
                     return r
                 ws += location_on_linked_pages(merged, b.page.url, _fetch, any(w.code == "LOCATION_ON_PAGE" for w in ws))
+                cov_pages += 1
+                for w in ws:
+                    cov_warnings.append({"code": w.code, "message": w.message, "url": b.page.url,
+                                         "evidence": (w.evidence or "")[:300]})
                 if ws:
                     for w in ws:
                         cov_counts[w.code] += 1; cov_blocking |= is_blocking(w)
@@ -103,6 +114,14 @@ if a.coverage:
         for code, n in sorted(cov_counts.items()): print(f"   {code:26} {n}")
     else:
         print("   no warnings")
+    from datetime import date
+    _bj = json.load(open(a.build_json))
+    _bj["coverage_run"] = {"date": date.today().isoformat(), "pages_checked": cov_pages,
+                           "warnings": cov_warnings, "blocking": bool(cov_blocking),
+                           "exit_code": 2 if cov_blocking else 0}
+    with open(a.build_json, "w") as _f:
+        json.dump(_bj, _f, indent=2, ensure_ascii=False); _f.write("\n")
+    print(f"   coverage_run recorded in {a.build_json}")
     if cov_blocking:
         print("   -> PRICE_*/SUBMISSION_* warnings fired: fix or explain in build JSON concerns. Exit 2.")
         sys.exit(2)

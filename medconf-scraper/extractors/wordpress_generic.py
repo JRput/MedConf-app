@@ -45,6 +45,7 @@ from .http_fetch import fetch_html
 from .pricing_tables import parse_pricing_tables
 from .specialty_classifier import classify_specialty
 from .tribe_events import clip_venue, html_to_lines, parse_fee_lines, pick_description
+import money
 from logger import logger
 
 # ── dates ───────────────────────────────────────────────────────────────────
@@ -550,11 +551,15 @@ def tiers_from_offers(ev: Dict[str, Any], default_currency: str = "GBP") -> List
         if not isinstance(o, dict):
             continue
         raw = o.get("price", o.get("lowPrice"))
-        try:
-            amt = float(str(raw).replace(",", "").strip())
-        except (TypeError, ValueError):
+        cur = money.normalize_currency(o.get("priceCurrency")) or money.normalize_currency(default_currency)
+        if raw is None:
             continue
-        cur = (o.get("priceCurrency") or default_currency).upper()
+        amt = money.parse_number(str(raw), cur)
+        if amt is None:
+            continue
+        if not cur:
+            logger.warning(f"wordpress: JSON-LD offer {o.get('name')!r} has no priceCurrency and the extractor sets none - skipped")
+            continue
         name = _text(str(o.get("name") or o.get("category") or o.get("description") or "")) or ("Free" if amt == 0 else "Standard")
         label = f"Registration \u00b7 {name[:70]}"
         key = (label, amt, cur)
@@ -602,15 +607,28 @@ def location_from_ld(ev: Dict[str, Any]) -> Tuple[Optional[str], Optional[str], 
 
 # ── fees ────────────────────────────────────────────────────────────────────
 
-_AMOUNT_ONLY_RE = re.compile(r"^(?:from\s+)?(£|€|\$|GBP|EUR|USD|CHF)\s?([0-9][0-9,]*(?:\.[0-9]{1,2})?)\s*(?:\+\s*VAT)?\*?$", re.I)
 _FEE_HEAD_RE = re.compile(r"^(?:registration fees?|course fees?|fees?|pricing|prices?|ticket prices?|cost|costs?)\s*:?$", re.I)
-_HEAD_AMOUNT_RE = re.compile(r"^(fees?|prices?|cost|registration fees?|ticket price)\s*:?\s*(£|€|\$|GBP|EUR|USD|CHF)\s?([0-9][0-9,]*(?:\.[0-9]{1,2})?)\*?$", re.I)
-_HEAD_RANGE_RE = re.compile(
-    r"^(fees?|prices?|cost|registration fees?|ticket price)\s*:?\s*(£|€|\$|GBP|EUR|USD|CHF)\s?([0-9][0-9,]*(?:\.[0-9]{1,2})?)\s*(?:-|\u2013|to)\s*"
-    r"(?:(?:£|€|\$|GBP|EUR|USD|CHF)\s?)?([0-9][0-9,]*(?:\.[0-9]{1,2})?)\*?$", re.I)
+_HEAD_PRICE_RE = re.compile(r"^(fees?|prices?|cost|registration fees?|ticket price)\s*:?\s*(.+?)\*?$", re.I)
+_VAT_TAIL_RE = re.compile(r"(?i)\s*(?:\+\s*|plus\s+|excl\.?\s+|incl\.?\s+)?(?:vat|tax)\s*")
 _FREE_LINE_RE = re.compile(r"^(?:registration\s+)?(?:fees?|cost|price|admission|entry)\s*:\s*(?:free|no charge)\b", re.I)
 _FREE_RE = re.compile(r"\bfree (?:to attend|of charge|event|webinar|registration|entry)\b|\bno (?:charge|cost|fee)\b|\bfree\b\s*$", re.I)
-_SYM = {"£": "GBP", "€": "EUR", "$": "USD"}
+
+
+def _priced(text: str, context: str = "") -> Optional[money.Money]:
+    """One amount-only expression ("From £350 + VAT", "€ 1.500,00*", "350 PLN") via money.py, else None.
+    Nothing but an optional leading 'from', a trailing VAT note and footnote stars may surround it."""
+    t = (text or "").strip()
+    m = money.parse_amount(t, context=context)
+    if m is None or m.currency is None:
+        return None
+    rest = (t[:m.span[0]] + " " + t[m.span[1]:])
+    rest = re.sub(r"(?i)\bfrom\b", " ", rest)
+    rest = _VAT_TAIL_RE.sub(" ", rest)
+    if re.sub(r"[\s*]", "", rest):
+        return None
+    if not money.plausible(m.amount, m.currency):
+        return None
+    return m
 
 
 def dedupe_consecutive(lines: List[str]) -> List[str]:
@@ -632,30 +650,28 @@ def fee_tiers_from_lines(lines: List[str], default_currency: str = "GBP") -> Lis
             return [{"tier_label": "Fees \u00b7 Free", "price_gbp": 0.0, "currency": default_currency,
                      "is_early_bird": False, "early_bird_deadline": None}]
     for ln in lines:                                  # "Price £200-£350": the site gives a range, not labelled grades
-        m = _HEAD_RANGE_RE.match(ln)
-        if m:
-            cur = _SYM.get(m.group(2), m.group(2).upper())
-            lo, hi = float(m.group(3).replace(",", "")), float(m.group(4).replace(",", ""))
-            head = m.group(1).title()
-            rows = [(f"{head} \u00b7 Lowest rate", lo)] + ([(f"{head} \u00b7 Highest rate", hi)] if hi != lo else [])
-            return [{"tier_label": lab, "price_gbp": amt, "currency": cur, "is_early_bird": False, "early_bird_deadline": None}
+        hm = _HEAD_PRICE_RE.match(ln)
+        m = _priced(hm.group(2), default_currency) if hm else None
+        if m and m.high is not None:
+            head = hm.group(1).title()
+            rows = [(f"{head} \u00b7 Lowest rate", m.amount)] + ([(f"{head} \u00b7 Highest rate", m.high)] if m.high != m.amount else [])
+            return [{"tier_label": lab, "price_gbp": amt, "currency": m.currency, "is_early_bird": False, "early_bird_deadline": None}
                     for lab, amt in rows]
     for ln in lines:                                  # "Price £950" on one line
-        m = _HEAD_AMOUNT_RE.match(ln)
-        if m:
-            cur = _SYM.get(m.group(2), m.group(2).upper())
-            return [{"tier_label": f"{m.group(1).title()} \u00b7 Standard", "price_gbp": float(m.group(3).replace(",", "")),
-                     "currency": cur, "is_early_bird": False, "early_bird_deadline": None}]
+        hm = _HEAD_PRICE_RE.match(ln)
+        m = _priced(hm.group(2), default_currency) if hm else None
+        if m and m.high is None:
+            return [{"tier_label": f"{hm.group(1).title()} \u00b7 Standard", "price_gbp": m.amount,
+                     "currency": m.currency, "is_early_bird": False, "early_bird_deadline": None}]
     for i, ln in enumerate(lines):
         if not _FEE_HEAD_RE.match(ln):
             continue
         found = []
         for nxt in lines[i + 1:i + 4]:
-            m = _AMOUNT_ONLY_RE.match(nxt)
-            if m:
-                cur = _SYM.get(m.group(1), m.group(1).upper())
-                found.append({"tier_label": f"{ln.rstrip(':').title()} \u00b7 Standard", "price_gbp": float(m.group(2).replace(",", "")),
-                              "currency": cur, "is_early_bird": False, "early_bird_deadline": None})
+            m = _priced(nxt, default_currency)
+            if m and m.high is None:
+                found.append({"tier_label": f"{ln.rstrip(':').title()} \u00b7 Standard", "price_gbp": m.amount,
+                              "currency": m.currency, "is_early_bird": False, "early_bird_deadline": None})
                 break
         if found:
             return found

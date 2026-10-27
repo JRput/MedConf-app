@@ -160,6 +160,7 @@ export default function DesignPage() {
           <EventTypeBadge type="conference" isFlagship />
           <EventTypeBadge type="course" />
           <EventTypeBadge type="workshop" />
+          <EventTypeBadge type="degree" />
           <EventTypeBadge type="conference" isOnDemand />
           <Separator orientation="vertical" className="h-5" />
           <FormatBadge format="in_person" />
@@ -345,6 +346,7 @@ export default function DesignPage() {
                       <ToggleGroupItem value="conference">Conference</ToggleGroupItem>
                       <ToggleGroupItem value="course">Course</ToggleGroupItem>
                       <ToggleGroupItem value="workshop">Workshop</ToggleGroupItem>
+                      <ToggleGroupItem value="degree">Degree</ToggleGroupItem>
                     </ToggleGroup>
                   </div>
                 </SheetContent>

@@ -339,6 +339,9 @@ _CFP_LINK_RE = re.compile(
     r"|proposal|smapply|oxfordabstracts|exordo",
     re.IGNORECASE,
 )
+# Strong = names a call/abstract/submission programme; generic "submit"/"form"
+# links ("Booking form.pdf", "Submit an event") only win when nothing strong exists.
+_CFP_WEAK_ONLY_RE = re.compile(r"\bsubmit\b|\bform\b", re.IGNORECASE)
 _ANCHOR_RE = re.compile(r"<a\b[^>]*?href\s*=\s*[\"']([^\"'#][^\"']*)[\"'][^>]*>(.*?)</a>",
                         re.IGNORECASE | re.DOTALL)
 _BAD_HREF_RE = re.compile(r"^(?:mailto:|tel:|javascript:)|\.(?:png|jpe?g|gif|svg|webp|css|js|ics)(?:\?|$)",
@@ -360,11 +363,12 @@ def _strip_tags(s: str) -> str:
 
 
 def find_call_for_papers_link(page_html: str, base_url: str) -> Optional[str]:
-    """Pick ONE link for a call for papers: a PDF if any, else the portal page."""
+    """Pick ONE link for a call for papers. Ranking: strong (call for / abstract /
+    submission / poster / proposal / portal) PDF, strong page, then generic
+    submit/form PDF, generic page."""
     if not page_html:
         return None
-    pdfs: List[str] = []
-    pages: List[str] = []
+    ranked: List[List[str]] = [[], [], [], []]  # strong pdf, strong page, weak pdf, weak page
     for href, inner in _ANCHOR_RE.findall(page_html):
         href = _html.unescape(href.strip())
         if _BAD_HREF_RE.search(href):
@@ -377,8 +381,16 @@ def find_call_for_papers_link(page_html: str, base_url: str) -> Optional[str]:
             continue
         if url.split("#")[0].rstrip("/") == (base_url or "").split("#")[0].rstrip("/"):
             continue
-        (pdfs if urlparse(url).path.lower().endswith(".pdf") else pages).append(url)
-    return (pdfs or pages or [None])[0]
+        # weak when removing the generic words leaves no CFP evidence
+        strong = bool(_CFP_LINK_RE.sub(
+            lambda m: "" if _CFP_WEAK_ONLY_RE.fullmatch(m.group(0)) else "STRONG", label + " " + href
+        ).count("STRONG"))
+        is_pdf = urlparse(url).path.lower().endswith(".pdf")
+        ranked[(0 if strong else 2) + (0 if is_pdf else 1)].append(url)
+    for bucket in ranked:
+        if bucket:
+            return bucket[0]
+    return None
 
 
 def pdf_bytes_to_text(data: bytes, max_pages: int = _MAX_PDF_PAGES) -> str:

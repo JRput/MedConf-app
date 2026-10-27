@@ -405,10 +405,10 @@ def check_event_format(row, page_text, page_html, source) -> FieldVerdict:
 
 def check_event_type(row, page_text, page_html, source) -> FieldVerdict:
     v = row.get("event_type")
-    if v in ("conference", "course", "workshop"):
+    if v in ("conference", "course", "workshop", "degree"):
         return FieldVerdict("event_type", "OK", v)
     return FieldVerdict("event_type", "MISSING", v,
-                        reason="event_type must be conference|course|workshop")
+                        reason="event_type must be conference|course|workshop|degree")
 
 
 def check_specialty(row, page_text, page_html, source) -> FieldVerdict:
@@ -475,8 +475,10 @@ def check_abstract_status(row, page_text, page_html, source) -> FieldVerdict:
     an = row.get("abstract_deadline_note")
     et = row.get("event_type")
 
-    if et != "conference":
-        # Non-conferences rarely have abstracts
+    from .detector import abstract_applicable
+    if not abstract_applicable(row):
+        # Same rule as detector.abstract_applicable: conferences + workshops
+        # are checked; courses only when the title advertises a call.
         return FieldVerdict("abstract_status", "NOT_APPLICABLE",
                             reason=f"event_type={et} — abstracts uncommon")
 

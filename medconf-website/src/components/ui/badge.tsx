@@ -34,6 +34,8 @@ const badgeVariants = cva(
           "border-type-course-border bg-type-course-subtle text-type-course-text",
         workshop:
           "border-type-workshop-border bg-type-workshop-subtle text-type-workshop-text",
+        degree:
+          "border-type-degree-border bg-type-degree-subtle text-type-degree-text",
       },
       size: {
         default: "h-5",

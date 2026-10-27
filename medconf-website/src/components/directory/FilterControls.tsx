@@ -18,10 +18,11 @@ const FORMAT_OPTIONS: { value: DirectoryFormat; label: string }[] = [
   { value: 'online', label: 'Online' },
   { value: 'hybrid', label: 'Hybrid' },
 ]
-const TYPE_OPTIONS: { value: DirectoryType; label: string }[] = [
+const TYPE_OPTIONS: { value: DirectoryType; label: string; help?: string }[] = [
   { value: 'conference', label: 'Conference' },
   { value: 'course', label: 'Course' },
   { value: 'workshop', label: 'Workshop' },
+  { value: 'degree', label: 'Degree', help: 'Degree programmes (MSc, PgDip, PgCert, Diploma)' },
 ]
 const DATE_PRESETS: { value: DatePreset; label: string }[] = [
   { value: 'this-month', label: 'This month' },
@@ -175,7 +176,7 @@ export function FilterControls({
           onValueChange={(v) => onChange({ type: v as DirectoryType[] })}
         >
           {TYPE_OPTIONS.map((o) => (
-            <ToggleGroupItem key={o.value} value={o.value}>
+            <ToggleGroupItem key={o.value} value={o.value} title={o.help}>
               {o.label}
               <FacetCount n={facets?.type[o.value]} />
             </ToggleGroupItem>
@@ -259,6 +260,7 @@ export function FilterControls({
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
+        <p className="mt-1.5 text-[0.75rem] text-fg-subtle">Price bands compare the cheapest fee as a number, whatever its currency.</p>
         {typeof facets?.priceBucket.unknown === 'number' && facets.priceBucket.unknown > 0 && (
           <p className="mt-1.5 text-[0.75rem] text-fg-subtle">{facets.priceBucket.unknown} without a published price</p>
         )}

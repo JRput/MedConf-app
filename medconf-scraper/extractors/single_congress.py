@@ -30,6 +30,7 @@ from urllib.parse import urljoin, urlparse
 
 from playwright.sync_api import Page
 
+import money
 from logger import logger
 
 from .abstract_classifier import classify_submission
@@ -229,9 +230,6 @@ def _place_near(lines: List[str], ed: Dict[str, Any], idx: Optional[int], seg: O
 
 # ── fees ────────────────────────────────────────────────────────────────────
 
-_CUR_MAP = {"€": "EUR", "$": "USD", "£": "GBP", "EUR": "EUR", "USD": "USD", "GBP": "GBP", "CHF": "CHF"}
-_AMT_LINE_RE = re.compile(
-    r"^(?:(?P<c1>€|\$|£|EUR|USD|GBP|CHF)\s?)?(?P<n>\d{1,3}(?:[.,  ]\d{3})*(?:[.,]\d{2})?|\d+)\s*(?P<c2>€|EUR|USD|GBP|CHF)?\s*\*?$", re.I)
 _FREEWORD_RE = re.compile(r"^(?:complimentary|free(?: of charge)?|no charge|included)\*?$", re.I)
 _HEAD_MARK_RE = re.compile(r"^(?:category|ticket type|registration (?:category|type)|type|attendee type|delegate type|rate)$", re.I)
 _NOT_OPEN_RE = re.compile(
@@ -240,22 +238,21 @@ _NOT_OPEN_RE = re.compile(
 
 
 def parse_amount(s: str, default_cur: str) -> Optional[Tuple[float, str]]:
-    """Amount-only line ("EUR 800", "$1,395", "€ 1.060", "Complimentary") -> (amount, currency)."""
+    """Amount-only line ("EUR 800", "$1,395", "€ 1.060", "£1,250.00", "1.500,00 €", "Complimentary")
+    -> (amount, currency). Parsed by money.py; a line that is not just one priced amount (a bare
+    number, prose, a range, an unresolvable "kr") is None. `default_cur` is used only for the
+    free-word case, where no currency is printed."""
     s = (s or "").strip()
     if _FREEWORD_RE.match(s):
         return 0.0, default_cur
-    m = _AMT_LINE_RE.match(s)
-    if not m or not (m.group("c1") or m.group("c2")):
+    m = money.parse_amount(s, context=default_cur)
+    if m is None or m.currency is None or m.high is not None:
         return None
-    cur = _CUR_MAP.get((m.group("c1") or m.group("c2")).upper() if (m.group("c1") or m.group("c2")).isalpha() else (m.group("c1") or m.group("c2")), default_cur)
-    raw = m.group("n").replace(" ", "").replace(" ", "")
-    if re.match(r"^\d{1,3}(?:[.,]\d{3})+$", raw):
-        val = float(re.sub(r"[.,]", "", raw))
-    elif re.match(r"^\d+[.,]\d{2}$", raw):
-        val = float(raw.replace(",", "."))
-    else:
-        val = float(re.sub(r"[.,]", "", raw))
-    return val, cur
+    if re.sub(r"[\s*]", "", s[:m.span[0]] + s[m.span[1]:]):
+        return None
+    if not money.plausible(m.amount, m.currency):
+        return None
+    return m.amount, m.currency
 
 
 def _is_amt(line: str, cur: str) -> bool:

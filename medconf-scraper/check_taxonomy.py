@@ -83,6 +83,59 @@ def long_codes(rows: list[dict]) -> list[tuple[int, str]]:
     return sorted(out)
 
 
+# Coverage-run guard (2026-10-27): a source registered in the last 7 days must
+# have a build JSON (Conference_masterlist/wave*/) carrying `coverage_run`, which
+# harness.py writes when coverage checks run (default). Sources registered before
+# the cutoff are grandfathered; sources with no discoverable build JSON are skipped.
+COVERAGE_REQUIRED_FROM = "2026-10-28"
+BUILD_GLOB_ROOT = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "Conference_masterlist")
+
+
+def missing_coverage_runs(rows: list[dict], build_docs: list[dict], now=None,
+                          required_from: str = COVERAGE_REQUIRED_FROM) -> list[tuple[int, str]]:
+    from datetime import datetime, timedelta, timezone
+    now = now or datetime.now(timezone.utc)
+    cutoff = max(now - timedelta(days=7),
+                 datetime.fromisoformat(required_from).replace(tzinfo=timezone.utc))
+    by_id: dict = {}
+    by_url: dict = {}
+    for d in build_docs:
+        if d.get("source_id"):
+            by_id.setdefault(d["source_id"], []).append(d)
+        u = (d.get("source_row") or {}).get("base_url")
+        if u:
+            by_url.setdefault(u, []).append(d)
+    out = []
+    for r in rows:
+        if not r.get("active") or not r.get("created_at"):
+            continue
+        c = datetime.fromisoformat(str(r["created_at"]).replace("Z", "+00:00"))
+        if c.tzinfo is None:
+            c = c.replace(tzinfo=timezone.utc)
+        if c < cutoff:
+            continue
+        docs = by_id.get(r["id"]) or by_url.get(r.get("base_url")) or []
+        if docs and not any(d.get("coverage_run") for d in docs):
+            out.append((r["id"], r.get("source_name") or ""))
+    return sorted(out)
+
+
+def load_build_docs(root: str = BUILD_GLOB_ROOT) -> list[dict]:
+    import glob
+    import json
+    docs = []
+    for f in glob.glob(os.path.join(root, "wave*", "*.json")):
+        try:
+            with open(f, encoding="utf-8") as fh:
+                d = json.load(fh)
+        except (OSError, ValueError):
+            continue
+        if isinstance(d, dict) and "source_row" in d:
+            docs.append(d)
+    return docs
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--taxonomy", default=DEFAULT_TS, help="path to societies.ts")
@@ -111,7 +164,7 @@ def main() -> int:
         from supabase import create_client
         rows = (
             create_client(url, key).table("scraper_sources")
-            .select("id,society,active").execute().data
+            .select("id,society,active,source_name,base_url,created_at").execute().data
         )
     except Exception as e:  # network / auth / import
         print(f"ERROR: could not fetch scraper_sources: {e}", file=sys.stderr)
@@ -123,8 +176,15 @@ def main() -> int:
     for sid, soc in long_codes(rows):
         print(f"WARN     id={sid:03d}  society='{soc}' is {len(soc)} chars (> {MAX_CODE_LEN}); use an acronym or short brand")
 
+    no_cov = missing_coverage_runs(rows, load_build_docs())
+    for sid, nm in no_cov:
+        print(f"NO_COVERAGE_RUN  id={sid:03d}  {nm}: build JSON lacks `coverage_run` — rerun harness.py (coverage is default)")
+
+    if no_cov:
+        print(f"FAIL — {len(no_cov)} recently registered source(s) without a recorded coverage run")
     if missing:
         print(f"FAIL — {len(missing)} society code(s) missing from the website taxonomy")
+    if missing or no_cov:
         return 1
     n = len({r["society"] for r in rows if r.get("active") and r.get("society") and r["society"] != "Community"})
     print(f"OK — {n} active society codes all present in the website taxonomy")

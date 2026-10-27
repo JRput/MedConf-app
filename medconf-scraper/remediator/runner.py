@@ -26,7 +26,11 @@ from .explorer import (
     EXPLORERS, set_source_deadline, get_source_deadline, source_time_up,
     reset_fetch_state, fetch_stats, close_render_browser,
 )
-from .learned_patterns import record_success, get_promoted_patterns
+from .learned_patterns import (
+    record_success, get_promoted_patterns, resolve_subpage, patterns_path,
+)
+import re
+from urllib.parse import urldefrag, urlsplit, urlunsplit
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +81,100 @@ def _llm_call_factory():
             return None
 
     return call
+
+
+# Fixer order within a row: the owner's three fields first, so the per-source
+# budget is spent on fees / abstracts / venue before anything else.
+FIELD_PRIORITY = ("pricing", "abstract_status", "venue_name", "city")
+# Fields whose evidence is an amount/date on the page: a page shared by several
+# rows must not feed them whole-page text.
+SHARED_GUARDED_FIELDS = ("pricing", "abstract_status")
+WINDOW_AFTER = 1800
+
+
+def _order_fields(gaps: list) -> list:
+    rank = {f: i for i, f in enumerate(FIELD_PRIORITY)}
+    return sorted(gaps, key=lambda f: rank.get(f, len(rank)))  # stable
+
+
+def _base_url(url: Optional[str]) -> str:
+    """Grouping key: no #fragment, no query."""
+    if not url:
+        return ""
+    p = urlsplit(urldefrag(url)[0])
+    return urlunsplit((p.scheme, p.netloc.lower(), p.path.rstrip("/"), "", ""))
+
+
+def _shared_bases(rows: list) -> set:
+    counts: dict = defaultdict(int)
+    for r in rows:
+        b = _base_url(r.get("source_url"))
+        if b:
+            counts[b] += 1
+    return {b for b, n in counts.items() if n >= 2}
+
+
+def _squash(t: str) -> str:
+    return re.sub(r"\s+", " ", t or "").strip()
+
+
+def identity_window(row: dict, text: str, sibling_titles: Iterable[str] = ()) -> Optional[str]:
+    """Slice of a shared page that belongs to THIS row: from the row's full
+    title up to the next sibling's title (or WINDOW_AFTER chars). None when the
+    title is not on the page, or only occurs inside a longer sibling title.
+
+    Deliberately stricter than explorer.external_identity_ok, which accepts any
+    single title token and so passes every sibling on a shared page.
+    """
+    title = _squash(row.get("conference_name")).lower()
+    body = _squash(text)
+    low = body.lower()
+    if len(title) < 6 or not low:
+        return None
+    sibs = {_squash(t).lower() for t in sibling_titles}
+    sibs = {t for t in sibs if len(t) >= 6 and t != title}
+    longer = [t for t in sibs if title in t]
+    start = -1
+    pos = low.find(title)
+    while pos >= 0:
+        inside = any(
+            low.startswith(t, q) for t in longer
+            for q in range(max(0, pos - len(t) + len(title)), pos + 1))
+        if not inside:
+            start = pos
+            break
+        pos = low.find(title, pos + 1)
+    if start < 0:
+        return None
+    end = start + len(title) + WINDOW_AFTER
+    for t in sibs:
+        j = low.find(t, start + len(title))
+        if 0 <= j < end:
+            end = j
+    return body[start:end]
+
+
+def _gaps_with_page_amounts(row: dict, gaps: list, tiers: list, page_text: Optional[str],
+                            shared: bool, sibling_titles: Iterable[str] = ()) -> list:
+    """Re-run the detector's pricing check with `page_amount_count` for a row that
+    already has tiers: a page showing more distinct fee amounts than stored tiers
+    means the stored set is partial. Uses the row's own text (the identity window
+    on a shared page, nothing when the row's title is not on it). Only rows already
+    in the work list are re-checked: no extra page is fetched for them."""
+    if "pricing" in gaps or not tiers or not page_text or row.get("is_on_demand"):
+        return gaps
+    text = identity_window(row, page_text, sibling_titles) if shared else page_text
+    if not text:
+        return gaps
+    from .detector import detect_gaps
+    from .signals import page_amount_count
+    n = page_amount_count(text)
+    if "pricing" in detect_gaps(row, True, tiers=tiers, page_amount_count=n):
+        logger.info("remediator: %s: page shows %d fee amounts vs %d stored tiers: pricing gap",
+                    row.get("id"), n, len(tiers))
+        row["_pricing_gap_kind"] = "partial"
+        return [*gaps, "pricing"]
+    return gaps
 
 
 COMMUNITY_SOURCE_ID = 1000
@@ -205,7 +303,7 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
     # Pricing tier presence per conference
     conf_ids = [c["id"] for c in conferences]
     tiers = (
-        sb.table("pricing_tiers").select("conference_id").in_("conference_id", conf_ids)
+        sb.table("pricing_tiers").select("conference_id,tier_label,price_gbp").in_("conference_id", conf_ids)
         .execute().data
         or []
     )
@@ -229,6 +327,9 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
         f"{events_with_gaps}/{len(conferences)} rows have gaps"
     )
 
+    shared_bases = _shared_bases(conferences)
+    logger.info(f"remediator source {source_id}: {len(shared_bases)} shared page URL(s); "
+                f"learned patterns file: {patterns_path()}")
     llm_call = _llm_call_factory()
     reset_fetch_state()
     set_source_deadline(started + SOURCE_BUDGET_S)
@@ -257,16 +358,39 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
             except Exception as e:
                 logger.warning(f"remediator: attempt stamp failed for {row['id']}: {e}")
             url = row.get("source_url")
-            page_text = cache.get(url) if url else None
-            page_html = cache.get_html(url) if url else None
+            shared = _base_url(url) in shared_bases
+            fetch_url = urldefrag(url)[0] if (url and shared) else url
+            page_text = cache.get(fetch_url) if fetch_url else None
+            page_html = cache.get_html(fetch_url) if fetch_url else None
             unfixed = []
             row = {**row, "_detail_is_multipage": bool(source.get("detail_is_multipage")),
                    "_page_html": page_html or ""}
+            gaps = _gaps_with_page_amounts(
+                row, gaps, pricing_by_conf.get(row["id"]) or [], page_text, shared,
+                [c.get("conference_name") or "" for c in conferences
+                 if c["id"] != row["id"] and _base_url(c.get("source_url")) == _base_url(url)])
             done_fields: set = set()
-            for field in gaps:
+            for field in _order_fields(gaps):
                 if field in done_fields:
                     continue
                 fixer = FIXERS.get(field)
+                f_text, f_html, f_url = page_text, page_html, url
+                if shared and field in SHARED_GUARDED_FIELDS:
+                    win = identity_window(
+                        row, page_text or "",
+                        [c.get("conference_name") or "" for c in conferences
+                         if c["id"] != row["id"]
+                         and _base_url(c.get("source_url")) == _base_url(url)])
+                    if win is None:
+                        logger.info(
+                            f"remediator: shared-page guard: skipped "
+                            f"{row['id']}.{field} (page {_base_url(url)} is shared "
+                            f"and the row's title is not on it)")
+                        unfixed.append(field)
+                        continue
+                    # Window text only; no promoted replay or explorer (both
+                    # sweep the whole shared page / its links per row).
+                    f_text, f_html, f_url = win, None, None
                 value: Any = None
                 method: Optional[str] = None
                 trail_dict: Optional[dict] = None
@@ -276,10 +400,10 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                 if fixer:
                     try:
                         if field == "specialty":
-                            value, method = fixer(row, page_text or "",
+                            value, method = fixer(row, f_text or "",
                                                   llm_call, society=society)
                         else:
-                            value, method = fixer(row, page_text or "", llm_call)
+                            value, method = fixer(row, f_text or "", llm_call)
                     except Exception as e:
                         logger.warning(
                             f"remediator: fixer {field} crashed on {row['id']}: {e}"
@@ -290,14 +414,14 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                 # <method>/<subpage> on this domain 3+ times, skip the LLM
                 # step and go straight to that sub-page. Saves an LLM
                 # call per event on well-known sources.
-                if value is None and url:
+                if value is None and f_url:
                     try:
-                        promoted = get_promoted_patterns(url, field)
+                        promoted = get_promoted_patterns(f_url, field)
                         for p in promoted:
                             sub = p.get("subpage_path")
                             if not sub:
                                 continue
-                            sub_url = url.rstrip("/") + sub
+                            sub_url = resolve_subpage(f_url, sub)
                             sub_text = cache.get(sub_url)
                             if not sub_text:
                                 continue
@@ -319,13 +443,13 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
 
                 result = None
                 # TIER 2 — explorer escalation when Tier 1 returns null
-                if value is None and field in EXPLORERS and url and not source_time_up():
+                if value is None and field in EXPLORERS and f_url and not source_time_up():
                     try:
                         explorer = EXPLORERS[field]
                         result = explorer(
                             row=row,
-                            page_text=page_text or "",
-                            page_html=page_html,
+                            page_text=f_text or "",
+                            page_html=f_html,
                             base_url=url,
                             llm_call=llm_call,
                         )

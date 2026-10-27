@@ -23,6 +23,9 @@ import re
 import html as _html
 from typing import List, Dict, Any, Optional, Tuple
 
+import money
+from logger import logger
+
 
 # Headings that we accept as a pricing-section marker. If a <table>
 # sits under a heading matching any of these, we parse it.
@@ -42,37 +45,10 @@ FEE_HEADING_TOKENS = (
 )
 
 
-# Currency hint keywords found in headings / adjacent text.
-_CURRENCY_HINTS = (
-    ("EUR", "EUR"), ("€", "EUR"), ("Euro", "EUR"), ("euros", "EUR"),
-    ("GBP", "GBP"), ("£", "GBP"), ("Pounds", "GBP"), ("Sterling", "GBP"),
-    ("USD", "USD"), ("$", "USD"), ("Dollars", "USD"),
-    ("CHF", "CHF"), ("Swiss Francs", "CHF"),
-    ("SGD", "SGD"), ("Singapore", "SGD"),
-    ("HKD", "HKD"), ("Hong Kong Dollars", "HKD"),
-    ("BRL", "BRL"), ("Reais", "BRL"),
-)
-
-
-# Price cell patterns — any of these count as a "price" cell.
-_PRICE_CELL_RE = re.compile(
-    r"""
-    ^\s*
-    (?:[£$€]\s*)?                # optional prefix currency
-    (
-        \d{1,3}(?:[ .,]\d{3})*   # thousands separator: space, dot, comma
-        (?:[.,]\d{1,2})?         # optional decimal (. or ,)
-        |
-        \d+(?:[.,]\d{1,2})?      # simpler pattern
-    )
-    \s*
-    (?:[£$€]|EUR|GBP|USD|CHF|SGD|HKD|BRL)?  # optional suffix
-    \s*
-    (?:[*+†\d]+)?                # trailing footnote marker
-    \s*$
-    """,
-    re.I | re.X,
-)
+# Currency detection / amount parsing live in money.py (ticket A1, 2026-10-27).
+# Nothing in this module defaults a currency: a table whose currency cannot be
+# detected from its heading / table text / price cells is DROPPED with a warning
+# unless the caller passes an explicit non-empty `default_currency`.
 
 
 def _clean(html: str) -> str:
@@ -84,78 +60,55 @@ def _clean(html: str) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
-def _parse_price(cell: str) -> Optional[float]:
-    """Parse "1 200,00", "550.00", "1.500 EUR", "50", "£1,234.50" → float."""
+_CELL_LEFTOVER_RE = re.compile(
+    r"(?i)[\s*+\u2020\u2021]*(?:\(?\s*(?:\+|plus|excl\.?|incl\.?|ex\.?|inc\.?)?\s*(?:vat|tax)\s*\)?)?[\s*+\u2020\u2021]*")
+
+
+def _cell_money(cell: str) -> Optional[money.Money]:
+    """The single price a table cell holds ('1 200,00', '550.00', '1.500 EUR', '£1,234.50',
+    'S$465') or None. Ranges, labels with prose, zero and implausible amounts are not prices."""
     if not cell:
         return None
-    s = cell.strip()
-    # Strip currency suffixes + prefixes + trailing footnote markers
-    s = re.sub(
-        r"\s*(?:EUR|GBP|USD|CHF|SGD|HKD|BRL|€|£|\$)\s*", "", s, flags=re.I
-    )
-    s = re.sub(r"[*+†]+\s*$", "", s).strip()
-    if not s:
+    m = money.parse_amount(cell)
+    if m is None or m.high is not None:
         return None
-    # Detect number format
-    if "," in s and "." in s:
-        # Both — US style with thousands (1,200.50)
-        s = s.replace(",", "")
-    elif re.match(r"^\d{1,3}(?:,\d{3})+$", s.replace(" ", "")):
-        # 1,125 / 12,500 — comma thousands with no decimals (ESP 'EUR 1,125'
-        # was read as 1.125 → 1.13 before 2026-10-14)
-        s = s.replace(" ", "").replace(",", "")
-    elif "," in s:
-        # European decimal (1 200,00 or 1200,50)
-        s = s.replace(" ", "").replace(",", ".")
-    elif re.match(r"^\d{1,3}(?:\.\d{3})+$", s):
-        # 1.500 (European thousand-sep, no decimal)
-        s = s.replace(".", "")
-    else:
-        s = s.replace(" ", "")
-    try:
-        val = float(s)
-    except ValueError:
+    leftover = cell[:m.span[0]] + cell[m.span[1]:]
+    if not _CELL_LEFTOVER_RE.fullmatch(leftover):
         return None
-    # Reasonable price range guard: 1 to 50,000
-    if 0.0 < val <= 50000.0:
-        return val
-    return None
+    if not (m.amount > 0 and money.plausible(m.amount, m.currency)):
+        return None
+    return m
 
 
-def _detect_currency(context: str, default: str = "GBP") -> str:
-    """Given a section heading + nearby text, guess the currency."""
-    found = _currency_hint(context)
-    return found or default
+def _parse_price(cell: str) -> Optional[float]:
+    """Parse "1 200,00", "550.00", "1.500 EUR", "50", "£1,234.50" -> float (None if not a price)."""
+    m = _cell_money(cell)
+    return m.amount if m else None
+
+
+def _detect_currency(context: str, default: str = "") -> str:
+    """Given a section heading + nearby text, the currency it EVIDENCES, else `default`
+    (which is empty unless the caller passes one deliberately)."""
+    return _currency_hint(context) or default
 
 
 def _currency_hint(context: str) -> Optional[str]:
-    if not context:
-        return None
-    ctx_lower = context.lower()
-    for hint, curr in _CURRENCY_HINTS:
-        # Case-insensitive match, but require word-ish boundary
-        if re.search(rf"\b{re.escape(hint.lower())}\b", ctx_lower) or hint in context:
-            return curr
-    return None
-
-
-_CELL_CURRENCY_RE = re.compile(r"(?i)(?:^|\s)([£$€]|EUR|GBP|USD|CHF|SGD|HKD|BRL)\s*\d|\d\s*([£$€]|EUR|GBP|USD|CHF|SGD|HKD|BRL)(?:\s|$|[*+†])")
-_SYMBOL_TO_CODE = {"£": "GBP", "$": "USD", "€": "EUR"}
+    return money.detect_currency(context)
 
 
 def _cells_currency(cell_texts: List[str]) -> Optional[str]:
     """Currency written in the price cells themselves ('550 EUR', '£120',
-    '$1,295'), by majority. IUSTI 2026 (2026-10-14): the only EUR marker on
+    '$1,295', 'S$465'), by majority. IUSTI 2026 (2026-10-14): the only EUR marker on
     the page was the cell suffix, beyond the heading/first-800-chars window,
     so the remediator dropped a complete 16-tier grid as 'unknown currency'."""
     votes: Dict[str, int] = {}
     for t in cell_texts:
-        m = _CELL_CURRENCY_RE.search(t or "")
-        if not m:
+        if not t:
             continue
-        tok = (m.group(1) or m.group(2)).upper()
-        code = _SYMBOL_TO_CODE.get(tok, tok)
-        votes[code] = votes.get(code, 0) + 1
+        m = money.parse_amount(t)
+        if m is None or not m.currency or m.high is not None:
+            continue
+        votes[m.currency] = votes.get(m.currency, 0) + 1
     if not votes:
         return None
     return max(votes, key=votes.get)
@@ -230,7 +183,7 @@ def _fee_columns(row_cells: List[List[str]]) -> Dict[int, Dict[str, Any]]:
 def parse_pricing_tables(
     html: str,
     *,
-    default_currency: str = "GBP",
+    default_currency: str = "",
     max_tiers: int = 60,
 ) -> List[Dict[str, Any]]:
     """Extract pricing tiers from any HTML page that renders fees as
@@ -260,6 +213,11 @@ def parse_pricing_tables(
         currency = (_currency_hint(currency_ctx)
                     or _cells_currency([c for cells in row_cells for c in cells[1:]])
                     or default_currency)
+        if not currency:
+            logger.warning(
+                f"pricing_tables: fee table under {heading!r} has no detectable currency "
+                f"(no code/symbol in heading, table text or price cells) - dropped, not defaulted")
+            continue
 
         # Column headers of a fee GRID (Early / Regular / Late, Member /
         # Non-member ...): one tier per price cell, labelled with its column,

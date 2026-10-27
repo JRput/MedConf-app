@@ -41,10 +41,16 @@ jobs:
             source_ids: "25,26,27,28,29,34,38,39,42,43,45"
           - group: E
             source_ids: "30,31,32,33,35,36,37,41"
+          # F and G were 14 sources each; group F took 82.8 of 90 min on run
+          # 40480890293 (2026-10-27). Split in two 7-source halves, letters kept.
           - group: F
-            source_ids: "46,47,48,49,50,51,52,53,54,55,56,57,58,59"
+            source_ids: "46,47,48,49,50,51,52"
+          - group: F2
+            source_ids: "53,54,55,56,57,58,59"
           - group: G
-            source_ids: "60,61,62,63,64,65,66,67,68,69,70,71,73,74"
+            source_ids: "60,61,62,63,64,65,66"
+          - group: G2
+            source_ids: "67,68,69,70,71,73,74"
           - group: H
             source_ids: "75,76,77,78,79,80,81,82,83,84"
           - group: I
@@ -82,6 +88,16 @@ jobs:
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
 
+      # Level 2 (2026-10-27): learned_patterns.json was never persisted between
+      # runs (CI does not commit it back). Per-group cache key, restore latest.
+      - name: Restore learned patterns
+        uses: actions/cache/restore@v4
+        with:
+          path: reports/remediation/learned_patterns.json
+          key: learned-patterns-${{ matrix.group }}-${{ github.run_id }}
+          restore-keys: |
+            learned-patterns-${{ matrix.group }}-
+
       - name: Run remediator on group ${{ matrix.group }}
         working-directory: medconf-scraper
         env:
@@ -97,12 +113,79 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python -m remediator --sources "${{ matrix.source_ids }}"
 
+      - name: Save learned patterns
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: reports/remediation/learned_patterns.json
+          key: learned-patterns-${{ matrix.group }}-${{ github.run_id }}
+
       - name: Upload remediation reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: remediation-reports-group-${{ matrix.group }}-${{ github.run_id }}
           path: reports/remediation/**
+          if-no-files-found: warn
+          retention-days: 30
+
+  # Advisory full-field audit of every source (added 2026-10-27, coverage
+  # mission ticket F). Never turns the run red; the JSON verdicts are the
+  # artifact. remediator.audit has no --all flag, so loop over the group ids.
+  audit-report:
+    name: Advisory audit (all sources)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    continue-on-error: true
+    needs: remediate
+    if: ${{ !cancelled() }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: medconf-scraper/requirements.txt
+
+      - name: Install Python dependencies
+        working-directory: medconf-scraper
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Playwright Chromium
+        run: python -m playwright install --with-deps chromium
+
+      - name: Audit every active source (advisory)
+        working-directory: medconf-scraper
+        continue-on-error: true
+        env:
+          KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+          KIMI_BASE_URL: https://integrate.api.nvidia.com/v1
+          KIMI_MODEL_CHAIN: "nvidia/nemotron-3.5-lightning-30b-a3b,meta/muse-glimmer-30b,openai/gpt-oss-20b"
+          KIMI_VISION_MODEL_CHAIN: "meta/muse-glimmer-30b,nvidia/nemotron-3.5-super-vl-120b-a12b,meta/llama-3.2-11b-vision-instruct"
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          python - <<'PY' > /tmp/source_ids.txt
+          import re, pathlib
+          t = pathlib.Path("../.github/workflows/remediator-daily.yml").read_text()
+          ids = sorted({int(i) for m in re.findall(r'source_ids: "([\d,]+)"', t) for i in m.split(",")})
+          print(" ".join(map(str, ids)))
+          PY
+          for id in $(cat /tmp/source_ids.txt); do
+            timeout 300 python -m remediator.audit --source "$id" > /dev/null 2>&1 || echo "audit source $id: non-PASS or error (advisory)"
+          done
+
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-reports-${{ github.run_id }}
+          path: reports/audit/**
           if-no-files-found: warn
           retention-days: 30
 

@@ -126,18 +126,18 @@ class RCSEngExtractor(BaseExtractor):
         #   two prices    → Member / Non-Member
         #   three+ prices → Member / Non-Member / Trainee or similar — label sequentially
         if len(prices) == 1:
-            return [{"tier_label": "Standard", "price_gbp": prices[0],
+            return [{"tier_label": "Standard", "price_gbp": prices[0], "currency": "GBP",
                      "is_early_bird": False, "early_bird_deadline": None}]
         if len(prices) == 2:
             return [
-                {"tier_label": "Member",     "price_gbp": prices[0], "is_early_bird": False, "early_bird_deadline": None},
-                {"tier_label": "Non-Member", "price_gbp": prices[1], "is_early_bird": False, "early_bird_deadline": None},
+                {"tier_label": "Member",     "price_gbp": prices[0], "currency": "GBP", "is_early_bird": False, "early_bird_deadline": None},
+                {"tier_label": "Non-Member", "price_gbp": prices[1], "currency": "GBP", "is_early_bird": False, "early_bird_deadline": None},
             ]
         # 3+ prices — generic labels
         labels = ["Member", "Non-Member", "Trainee", "Student", "Other"]
         return [
             {"tier_label": labels[i] if i < len(labels) else f"Tier {i+1}",
-             "price_gbp": p, "is_early_bird": False, "early_bird_deadline": None}
+             "price_gbp": p, "currency": "GBP", "is_early_bird": False, "early_bird_deadline": None}
             for i, p in enumerate(prices)
         ]
 

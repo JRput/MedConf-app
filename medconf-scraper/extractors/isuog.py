@@ -42,6 +42,8 @@ from typing import Any, Callable, Dict, List, Optional
 
 from playwright.sync_api import Page
 
+import money
+
 from .base import BaseExtractor
 from .http_fetch import fetch_html
 from .abstract_classifier import extract_abstract_info
@@ -62,8 +64,6 @@ _MONTHS = {
 }
 
 _COUNTRY_ALIASES = {"uk": "United Kingdom", "usa": "United States", "us": "United States"}
-
-_CURRENCY_SYMBOLS = {"£": "GBP", "$": "USD", "€": "EUR"}
 
 _CHALLENGE_RE = re.compile(r"just a moment|cf-chl|sgcaptcha|attention required", re.I)
 
@@ -142,10 +142,12 @@ def _parse_long_date(text: str) -> Optional[date]:
 
 
 def _parse_price(cell: str) -> Optional[tuple[float, str]]:
-    m = re.search(r"([£$€])\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)", cell)
-    if not m:
+    """First amount in a fee cell via `money.parse_amount` (£ € bare-$=USD, S$ A$, ISO codes,
+    EU decimals); a cell that does not state a currency is not a price."""
+    m = money.parse_amount(cell or "")
+    if not m or not m.currency or m.high is not None or m.amount <= 0:
         return None
-    return float(m.group(2).replace(",", "")), _CURRENCY_SYMBOLS[m.group(1)]
+    return m.amount, m.currency
 
 
 _ENTRY_JS = r"""() => {
@@ -456,7 +458,7 @@ class IsuogExtractor(BaseExtractor):
         fm = re.search(r"\b(?:course|registration)\s+fees?\s*:\s*([^\n]{3,200})", text, re.I)
         if fm:
             line = fm.group(1)
-            code = r"(GBP|USD|EUR|SEK|DKK|NOK|CHF|CAD|AUD|INR|JPY|CNY|HKD|SGD|BRL)"
+            code = r"((?-i:" + "|".join(sorted(money.KNOWN_CODES)) + r"))"
             num = r"([0-9][0-9,. ]*[0-9]|[0-9])"
             amt = cur = None
             # "total 21875 SEK" / "total: SEK 21875" first, then the first "<n> <CUR>" / "<CUR> <n>"
@@ -472,13 +474,9 @@ class IsuogExtractor(BaseExtractor):
             if not amt:
                 sym = _parse_price(line)
                 if sym:
-                    amt, cur = str(sym[0]), {v: k for k, v in _CURRENCY_SYMBOLS.items()}[sym[1]]
-                    cur = sym[1]
+                    amt, cur = str(sym[0]), sym[1]
             if amt and cur:
-                try:
-                    price = float(re.sub(r"[ ,]", "", amt))
-                except ValueError:
-                    price = None
+                price = money.parse_number(str(amt).strip(), cur.upper())
                 if price is not None:
                     return [{"tier_label": "Registration · Course fee · Standard", "price_gbp": price,
                              "currency": cur.upper(), "is_early_bird": False, "early_bird_deadline": None}]

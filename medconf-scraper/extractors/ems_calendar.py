@@ -28,6 +28,8 @@ from datetime import date
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
+import money
+
 from logger import logger
 
 from .http_fetch import fetch_html
@@ -39,8 +41,15 @@ _MONTHS = {"jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6, "jul": 7,
 _MON_RE = r"(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)"
 _ARTICLE_RE = re.compile(r"(?is)<article\b.*?</article>")
 _TAG_RE = re.compile(r"<[^>]+>")
-_SYM = {"£": "GBP", "€": "EUR", "$": "USD"}
-_AMOUNT = r"([£€$])\s*([0-9][0-9,]*(?:\.[0-9]{1,2})?)"
+# symbol / prefix code ("£", "S$", "EUR") + number text; read by `money.parse_amount`
+# (bare "$" = USD, "S$"/"A$" recognised, "1.500,00" EU decimals).
+_AMOUNT = r"([£€$]|[A-Za-z]{1,3}\$|[A-Z]{3}(?=\s?\d))\s*([0-9][0-9.,']*[0-9]|[0-9])"
+
+
+def _amt(sym: str, num: str) -> Optional[Tuple[float, str]]:
+    """(amount, ISO currency) for a matched symbol + number, or None (unstated currency, range)."""
+    m = money.parse_amount(f"{sym}{num}")
+    return (m.amount, m.currency) if m and m.currency and m.high is None else None
 _COOKIE_JUNK_RE = re.compile(r"\{\{\s*cookieConsents\s*\}\}|please accept\s*cookies", re.I)
 _SOLD_OUT_RE = re.compile(r"\b(?:sold out|fully booked|event full|no places (?:left|remaining))\b", re.I)
 _ONLINE_RE = re.compile(r"^(?:online|virtual|webinar|zoom|teams|remote|livestream)\b", re.I)
@@ -174,12 +183,12 @@ def ems_fee_tiers(lines: List[str], default_currency: str = "GBP") -> List[Dict[
     for ln in lines:
         ln = ln.strip()
         m = re.match(rf"^(?P<label>[^£€$]{{2,80}}?)\s*(?:-|–|:)\s*(?:approx\.?\s*)?{_AMOUNT}\s*(?:\(.*\))?\s*(?:\+\s*VAT)?\.?$", ln)
-        if m:
-            add(m.group("label"), float(m.group(3).replace(",", "")), _SYM[m.group(2)])
+        if m and _amt(m.group(2), m.group(3)):
+            add(m.group("label"), *_amt(m.group(2), m.group(3)))
             continue
         m = re.match(rf"^{_AMOUNT}\s+(?:for|per)\s+(?P<label>.{{2,60}})$", ln, re.I)
-        if m:
-            add(m.group("label"), float(m.group(2).replace(",", "")), _SYM[m.group(1)])
+        if m and _amt(m.group(1), m.group(2)):
+            add(m.group("label"), *_amt(m.group(1), m.group(2)))
             continue
         m = re.match(r"^free\s+(?:for|to)\s+(?P<label>.{2,60})$", ln, re.I)
         if m:
@@ -195,9 +204,10 @@ def ems_prose_fees(text: str, default_currency: str = "GBP") -> List[Dict[str, A
     pats = (rf"fee of {_AMOUNT}\s+is available\s+(?:only\s+)?(?:for|to)\s+([^.(]{{3,40}}?)\s*(?:[.(]|$)", rf"\(\s*{_AMOUNT}\s+for\s+([^)]{{3,40}})\)")
     for pat in pats:
         m = re.search(pat, t, re.I)
-        if m:
+        a = _amt(m.group(1), m.group(2)) if m else None
+        if a:
             label = m.group(3).strip(" .")
-            tiers.append({"tier_label": f"Registration \u00b7 {label}", "price_gbp": float(m.group(2).replace(",", "")), "currency": _SYM[m.group(1)],
+            tiers.append({"tier_label": f"Registration \u00b7 {label}", "price_gbp": a[0], "currency": a[1],
                           "is_early_bird": False, "early_bird_deadline": None})
     return tiers if len(tiers) else []
 
