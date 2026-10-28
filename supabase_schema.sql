@@ -862,14 +862,18 @@ BEGIN
       price := (t ->> 'price_gbp')::numeric;
       dl := NULL;
       IF COALESCE(t ->> 'early_bird_deadline', '') ~ '^\d{4}-\d{2}-\d{2}$' THEN
-        dl := (t ->> 'early_bird_deadline')::date;
+        BEGIN
+          dl := (t ->> 'early_bird_deadline')::date;
+        EXCEPTION WHEN others THEN
+          dl := NULL;   -- an impossible date (2027-02-31) drops the deadline, never the tier
+        END;
       END IF;
       IF price > 0 THEN any_pos := TRUE; END IF;
       v := v || jsonb_build_array(jsonb_build_object(
              'l', btrim(t ->> 'tier_label'), 'p', price, 'c', cur,
              'e', COALESCE((t ->> 'is_early_bird')::boolean, FALSE), 'd', dl));
     EXCEPTION WHEN others THEN
-      CONTINUE;   -- bad date / boolean: skip this tier only
+      CONTINUE;   -- bad boolean: skip this tier only (a bad date only nulls the deadline)
     END;
   END LOOP;
   IF NOT any_pos THEN RETURN 0; END IF;
