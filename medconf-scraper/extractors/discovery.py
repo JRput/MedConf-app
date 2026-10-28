@@ -1004,26 +1004,41 @@ def _foreign_year(s: str, years: set, start_date: Any = None) -> Optional[str]:
 ARCHIVE_SEGMENTS = frozenset({"past", "previous", "archive", "archives", "history"})   # Level 2 (FV8)
 
 
-def url_edition_reason(row: dict, url: str) -> Optional[str]:
-    """FV8: a prior edition's page under the event's own path. "other_year_path" when the
-    URL path (segments and filename) carries a 20xx year that is not the row's (years in the
-    row's own booking/source path count as the row's); "archive_path" when a segment is
-    past / previous / archive / archives / history (unless the row's own path has it)."""
-    path = urlparse(url or "").path.lower()
-    if not path:
-        return None
-    own_segs, own_years = set(), set()
-    for u in (row.get("booking_url"), row.get("source_url")):
-        p = urlparse(str(u or "")).path.lower()
-        own_segs.update(x for x in p.split("/") if x)
-        own_years.update(_YEAR_RE.findall(p))
-    allowed = row_years(row) | own_years
-    if any(y not in allowed for y in _YEAR_RE.findall(path)):
-        return "other_year_path"
+_TOKEN_SPLIT_RE = re.compile(r"[-_.]+")
+
+
+def _path_tokens(path: str) -> set:
+    """Every segment of a lower-cased URL path, whole AND split on - _ . (FV9)."""
+    out = set()
     for seg in (x for x in path.split("/") if x):
-        stem = seg.rsplit(".", 1)[0]
-        if (seg in ARCHIVE_SEGMENTS or stem in ARCHIVE_SEGMENTS) and seg not in own_segs:
-            return "archive_path"
+        out.add(seg)
+        out.update(t for t in _TOKEN_SPLIT_RE.split(seg) if t)
+    return out
+
+
+def url_edition_reason(row: dict, url: str) -> Optional[str]:
+    """FV8/FV9: a prior edition's page under the event's own path.
+    "other_year_path": the URL path (segments, filename) or QUERY string (keys and values)
+        carries a 20xx year that is not the row's; years anywhere in the row's own
+        booking/source URL (path or query) count as the row's.
+    "archive_path": a path segment, or a token of one split on - _ . (filename stem
+        included), EQUALS past / previous / archive / archives / history; tokens that also
+        occur in the row's own tokenised booking/source path stay allowed.
+    Two-digit years ("cu26") are deliberately not detected (too broad)."""
+    pu = urlparse(url or "")
+    path, query = pu.path.lower(), pu.query.lower()
+    if not path and not query:
+        return None
+    own_tokens, own_years = set(), set()
+    for u in (row.get("booking_url"), row.get("source_url")):
+        ou = urlparse(str(u or ""))
+        own_tokens |= _path_tokens(ou.path.lower())
+        own_years.update(_YEAR_RE.findall(ou.path.lower() + "?" + ou.query.lower()))
+    allowed = row_years(row) | own_years
+    if any(y not in allowed for y in _YEAR_RE.findall(path + "?" + query)):
+        return "other_year_path"
+    if any(t in ARCHIVE_SEGMENTS and t not in own_tokens for t in _path_tokens(path)):
+        return "archive_path"
     return None
 
 

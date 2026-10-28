@@ -1346,3 +1346,70 @@ def test_fv8_own_path_containing_own_year_and_year_hint_unaffected():
     html = "<html><body><h1>Cardio Congress 2027</h1><p>Member £300</p></body></html>"
     assert discovery.page_identity(r, "https://x.org/registration-2027", html, discovery._to_text(html),
                                    own=discovery.own_paths(r), via_hint=True)[0] == discovery.STRONG
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FV9: archive words are matched as TOKENS of each path segment / filename stem, and
+#      20xx years in the QUERY string count like years in the path.
+# ═══════════════════════════════════════════════════════════════════════════════
+_EB_AUG = "Early-bird fees (book by 31 August 2026)"
+
+
+@pytest.mark.parametrize("path,reason", [
+    ("past-congresses/registration", "archive_path"),
+    ("previous-meetings/fees", "archive_path"),
+    ("congress-archive/fees", "archive_path"),
+    ("past_events/fees", "archive_path"),
+    ("Past.Events/fees", "archive_path"),
+    ("registration?year=2026", "other_year_path"),
+    ("registration?edition=cardio-2026", "other_year_path"),
+    ("registration?2026=1", "other_year_path"),
+])
+def test_fv9_verifier_prior_edition_urls_rejected(path, reason):
+    assert _d_pid(_D_BASE + path, "Registration", _EB_AUG) == (discovery.REJECTED, reason)
+
+
+def test_fv9_verifier_pdf_archive_token_in_filename_rejected():
+    run = types.SimpleNamespace(row=_d_row(), shell_titles=[])
+    head = "Registration fees. Bookings before 30 November 2026. Delegate £300"
+    assert discovery._pdf_head_reason(run, head, "https://x.org/files/past-congress-fees.pdf") == "pdf_archive_path"
+    assert discovery._pdf_head_reason(run, head, "https://x.org/files/fees.pdf?year=2026") == "pdf_other_year_path"
+    assert discovery._pdf_head_reason(run, head, "https://x.org/files/fees.pdf") is None
+
+
+@pytest.mark.parametrize("seg", ["prehistory", "historyday", "pastoral", "archived-photos-x"])
+def test_fv9_archive_word_inside_a_longer_token_is_not_a_match(seg):
+    # "archived" is its own token, not "archive": token equality, never substring
+    assert _d_pid(_D_BASE + f"{seg}/fees", "Registration", "Fees")[0] == discovery.STRONG
+
+
+@pytest.mark.parametrize("own,page,title", [
+    ("https://x.org/congress-2027/", "https://x.org/congress-2027/registration", "Cardio Update 2027"),
+    ("https://x.org/history/hom-day/", "https://x.org/history/hom-day/fees", "History of Medicine Day 2027"),
+    ("https://x.org/2026-27/cardio/", "https://x.org/2026-27/cardio/fees", "Cardio Update 2027"),
+    ("https://x.org/history-of-medicine/", "https://x.org/history-of-medicine/fees", "Medicine Day 2027"),
+    ("https://x.org/past-and-present/", "https://x.org/past-and-present/registration", "Medicine Day 2027"),
+])
+def test_fv9_own_path_tokens_stay_allowed(own, page, title):
+    r = {"conference_name": title, "start_date": "2027-05-01", "booking_url": own}
+    html = "<html><body><h1>Fees</h1><p>Member £100</p></body></html>"
+    assert discovery.page_identity(r, page, html, discovery._to_text(html),
+                                   own=discovery.own_paths(r)) == (discovery.STRONG, "own_path")
+
+
+@pytest.mark.parametrize("q", ["ref=2027", "year=2027", "utm_source=newsletter"])
+def test_fv9_query_with_own_year_or_no_year_unaffected(q):
+    assert _d_pid(_D_BASE + f"registration?{q}", "Registration", "Fees") == (discovery.STRONG, "own_path")
+
+
+def test_fv9_year_in_own_booking_query_is_allowed():
+    r = _d_row(booking_url="https://x.org/congress/?cycle=2026")
+    assert _d_pid("https://x.org/congress/registration?cycle=2026", "Registration", "Fees", r=r) \
+        == (discovery.STRONG, "own_path")
+
+
+def test_fv9_controls_unchanged():
+    assert _x_pid("Early-bird fees (book by 31 December 2026)") == (discovery.STRONG, "own_path")
+    assert _pdf_reason("Registration fees. Bookings before 31 December 2026 receive the early rate.") is None
+    assert _d_pid(_D_BASE + "2026/registration", "Registration", _EB_AUG)[1] == "other_year_path"
+    assert _d_pid(_D_BASE + "past/registration", "Registration", _EB_AUG)[1] == "archive_path"
