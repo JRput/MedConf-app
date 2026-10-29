@@ -3,7 +3,7 @@
 
 import { Suspense, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { authErrorMessage, isUnconfirmedError, mapAuthError } from '@/lib/auth/errors'
@@ -26,7 +26,6 @@ export default function LoginPage() {
 
 function LoginForm() {
   const { signIn } = useAuth()
-  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
@@ -73,8 +72,17 @@ function LoginForm() {
       return
     }
 
-    setLoading(false)
-    router.push(nextPath)
+    // Full document navigation on purpose (2026-10-29). While the visitor was
+    // signed out, Next prefetched the gated Navbar links (/conferences,
+    // /societies, ...) and the middleware answered each with a redirect to
+    // this login page; the client router keeps those prefetched answers (the
+    // login page is static, so they stay fresh for minutes). A client-side
+    // router.push(nextPath) therefore replayed the stale redirect and bounced
+    // the freshly signed-in user straight back here on production, where
+    // prefetching is on. A hard navigation drops the client router cache and
+    // sends the new session cookies with the very first request, so the
+    // middleware sees the user. `loading` stays true until the page unloads.
+    window.location.assign(nextPath)
   }
 
   return (

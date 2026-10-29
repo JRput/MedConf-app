@@ -76,7 +76,10 @@ function SignUpForm() {
     // profile. Otherwise show the verify page with the address and `next`;
     // existing addresses take the same path (anti-enumeration).
     if (data?.session) {
-      router.push(nextPath || '/onboarding')
+      // Hard navigation, as on the login page: the client router may hold
+      // gated links prefetched while signed out (each a redirect back to the
+      // auth pages), and a client-side push would replay that redirect.
+      window.location.assign(nextPath || '/onboarding')
       return
     }
     const q = new URLSearchParams({ email: email.trim() })
