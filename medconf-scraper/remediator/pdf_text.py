@@ -25,12 +25,18 @@ NEG_LINK_RE = re.compile(
     r"endorse|application|abstract|sponsor|exhibit|terms|conditions|privacy|"
     r"cancellation|policy|poster|call[-_ ]for|guidelines|visa|accommodation|travel|"
     # Site-wide documents that are not one event's attendee fees (2026-10-30 incident).
-    r"\btraining|cost[-_ ]of|\bmembership|\bsubscription|\bexam(?:s|ination)?\b|medicare|"
-    r"fee[-_ ]schedule|\breport|\bminutes\b|\bagenda\b|\bbylaws\b|\bhandbook|"
+    r"\btraining|cost[-_ ]of|(?<![a-z])membership|(?<![a-z])subscription|(?<![a-z])exam(?:s|ination)?(?![a-z])|medicare|"
+    r"fee[-_ ]schedule|(?<![a-z])reports?(?![a-z])|\bminutes\b|\bagenda\b|\bbylaws\b|\bhandbook|"
     r"\bcurriculum|\bsyllabus|\bnewsletter|annual[-_ ]report", re.I)
+# Never overridden by the event-year + fee-word rule.
+HARD_NEG_RE = re.compile(
+    r"(?<![a-z])membership|(?<![a-z])subscription|medicare|fee[-_ ]schedule|"
+    r"(?<![a-z])exam(?:s|ination)?(?![a-z])", re.I)
+_NAME_REPORT_RE = re.compile(r"(?<![a-z])reports?(?![a-z])", re.I)
+_FEE_WORD_RE = re.compile(r"fees?|rates?|registration|pricing|tariff", re.I)
 # Text-level negative: the document itself reads as a membership/training/exam price list.
 NEG_TEXT_RE = re.compile(
-    r"membership fee|subscription|cost of training|examination fee|MRCPsych|CPD subscription", re.I)
+    r"membership fees?|membership rates?|annual membership|member(?:ship)? (?:fees?|rates?|subscription)|subscription|cost of training|examination fee|MRCPsych|CPD subscription", re.I)
 _YEAR20_RE = re.compile(r"(?<![0-9])(20\d\d)(?![0-9])")
 
 
@@ -41,11 +47,22 @@ def _row_start_year(row) -> Optional[int]:
 
 def document_gate(url: str, anchor_text: str, row: Optional[dict]) -> tuple:
     """Pure identity/negative check on a candidate document link. (ok, reason)."""
-    name = unquote(urlparse(url or "").path.rsplit("/", 1)[-1])
+    path = unquote(urlparse(url or "").path)
+    segs = [x for x in path.split("/") if x]
+    name = segs[-1] if segs else ""
+    for seg in segs[:-1]:
+        m = NEG_LINK_RE.search(seg)
+        if m:
+            return False, f"site_wide_document (path segment {m.group(0).strip()})"
     hay = f"{name} {anchor_text or ''}"
     m = NEG_LINK_RE.search(hay)
     if m:
-        return False, f"site_wide_document ({m.group(0).strip()})"
+        sy = _row_start_year(row)
+        override = (sy is not None and not HARD_NEG_RE.search(hay)
+                    and not _NAME_REPORT_RE.search(name)
+                    and str(sy) in name and _FEE_WORD_RE.search(name))
+        if not override:
+            return False, f"site_wide_document ({m.group(0).strip()})"
     if row:
         from extractors.discovery import url_edition_reason
         why = url_edition_reason(row, url)

@@ -222,7 +222,7 @@ def replay_gate(row: dict, sub_url: str, cache, shell_titles: Iterable[str]) -> 
 COMMUNITY_SOURCE_ID = 1000
 
 
-_DOC_SUFFIXES = (".pdf", ".docx", ".doc", ".xlsx", ".pptx")
+_DOC_SUFFIXES = (".pdf", ".docx", ".doc", ".xlsx", ".xls", ".pptx", ".ppt", ".odt", ".rtf")
 
 
 def _is_document_url(url) -> bool:

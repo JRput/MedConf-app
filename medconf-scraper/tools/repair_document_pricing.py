@@ -39,8 +39,8 @@ ROW_COLS = ("id,source_id,conference_name,start_date,source_url,booking_url,orga
             "archived,listing_hash,remediation_attempted_at")
 
 BAD_WORDS = re.compile(
-    r"training|cost[-_ ]of|membership|subscription|exam|medicare|fee[-_ ]schedule|report|minutes|"
-    r"agenda|policy|bylaws|handbook|newsletter|annual[-_ ]report", re.I)
+    r"\b(?:training (?:costs?|fees?|rates?)|cost of|membership|subscription|exams?|examinations?|medicare|fee schedule|"
+    r"reports?|minutes|agenda|policy|bylaws|handbook|newsletter|annual report)\b", re.I)
 YEAR = re.compile(r"(?<!\d)(20\d\d)(?!\d)")
 LABEL = re.compile(r"""'tier_label':\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")""")
 DOC_IN_METHOD = re.compile(r"(?:pdf|docx):(.+)$", re.I)
@@ -48,15 +48,18 @@ DOC_EXT = (".pdf", ".docx")
 
 
 # ---------------------------------------------------------------- pure helpers
-def document_is_bad(name: str, row_start_year: int | None) -> tuple[bool, str]:
+def document_is_bad(name: str, row_start_year: int | None, row_title: str | None = None) -> tuple[bool, str]:
     n = unquote(name or "")
-    m = BAD_WORDS.search(n)
+    words = re.sub(r"[-_.\s]+", " ", n)
+    m = BAD_WORDS.search(words)
     if m:
         return True, f"name matches '{m.group(0).lower()}'"
+    row_years = [int(y) for y in YEAR.findall(row_title or "")]
     if row_start_year:
-        for y in YEAR.findall(n):
-            if int(y) < row_start_year:
-                return True, f"name year {y} before event year {row_start_year}"
+        row_years.append(row_start_year)
+    name_years = [int(y) for y in YEAR.findall(n)]
+    if row_years and name_years and all(y < min(row_years) for y in name_years):
+        return True, f"name year {max(name_years)} before event year {min(row_years)}"
     return False, "looks event-specific"
 
 
@@ -85,14 +88,17 @@ def extract_labels(value_after: str) -> list[str]:
 
 
 def _norm(s: str) -> str:
-    return re.sub(r"\s+", " ", (s or "").strip().lower())[:40]
+    return re.sub(r"\s+", " ", (s or "").strip().lower())
 
 
 def labels_match(current: str, written: str) -> bool:
+    """Exact (normalised) match, or one label is a prefix of the other and the written label is >= 20 chars."""
     a, b = _norm(current), _norm(written)
-    if not a or not b or min(len(a), len(b)) < 8:
-        return a == b and bool(a)
-    return a.startswith(b) or b.startswith(a)
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    return len(b) >= 20 and min(len(a), len(b)) >= 20 and (a.startswith(b) or b.startswith(a))
 
 
 def _is_pricing_doc_patch(p: dict) -> bool:
@@ -153,7 +159,7 @@ def decide_tiers(row: dict, tiers: list[dict], pricing: dict | None) -> tuple[st
     doc = pricing["doc"]
     if not tiers:
         return "none", "row has no tiers now", doc
-    bad, why = document_is_bad(doc, start_year(row))
+    bad, why = document_is_bad(doc, start_year(row), row.get("conference_name"))
     if not bad:
         return "keep", f"{why}; review manually", doc
     written = pricing["labels"]
@@ -189,9 +195,9 @@ def decide_link(row: dict, field: str, link: dict | None) -> tuple[str, str]:
     if not is_doc_url(cur):
         return "ok", "not a document URL"
     name = url_doc_name(cur)
-    bad, why = document_is_bad(name, start_year(row))
+    bad, why = document_is_bad(name, start_year(row), row.get("conference_name"))
     if link and cur == link["url"]:
-        bad2, why2 = document_is_bad(link["doc"], start_year(row))
+        bad2, why2 = document_is_bad(link["doc"], start_year(row), row.get("conference_name"))
         bad, why = bad or bad2, why if bad else why2
     if not bad:
         return "keep", f"{why}; review manually"
@@ -253,35 +259,46 @@ def fetch_doc_link_rows() -> list[dict]:
         off += 1000
 
 
-def apply_row(row: dict, tdec: str, pricing: dict | None, ldecs: dict[str, str]) -> dict:
+def link_patch_url(url: str, row: dict, field: str) -> str:
+    return (f"{url}/rest/v1/conferences?id=eq.{row['id']}&archived=eq.false"
+            f"&{field}=eq.{quote(row[field], safe='')}")
+
+
+def stamp_patch_url(url: str, cid: int) -> str:
+    return f"{url}/rest/v1/conferences?id=eq.{cid}&archived=eq.false"
+
+
+def delete_decided_tiers(client, url: str, wh: dict, cid: int, decided: list[dict], fetcher=None) -> int:
+    """Delete exactly the tiers the decision pass saw; 0 (and nothing deleted) if the row's tier ids changed."""
+    fetcher = fetcher or fetch_tiers
+    cur = fetcher([cid]).get(cid, [])
+    if not cur or {t["id"] for t in cur} != {t["id"] for t in decided}:
+        print(f"row {cid}: tiers changed since read, skipped")
+        return 0
+    print(f"  {cid}: deleting tiers: " + " | ".join(t.get("tier_label") or "" for t in cur))
+    ids = ",".join(str(t["id"]) for t in sorted(decided, key=lambda t: t["id"]))
+    r = client.delete(f"{url}/rest/v1/pricing_tiers?conference_id=eq.{cid}&id=in.({ids})", headers=wh, timeout=60)
+    r.raise_for_status()
+    n = len(r.json())
+    print(f"  {cid}: deleted {n} tiers")
+    return n
+
+
+def apply_row(row: dict, tdec: str, decided_tiers: list[dict], ldecs: dict[str, str]) -> dict:
     url, hdr = _env()
     wh = {**hdr, "Content-Type": "application/json", "Prefer": "return=representation"}
     res = {"tiers": 0, "links": 0, "skipped": 0}
     did = False
     if tdec == "delete":
-        cur = fetch_tiers([row["id"]]).get(row["id"], [])
-        if pricing is None:  # explicit, foreman-verified list
-            ok = bool(cur)
-            print(f"  {row['id']}: explicit delete of labels: " + " | ".join(t["tier_label"] or "" for t in cur))
-        else:
-            ok = bool(cur) and any(labels_match(t["tier_label"], w) for t in cur for w in pricing["labels"]) \
-                and (pricing["truncated"] or all(any(labels_match(t["tier_label"], w) for w in pricing["labels"])
-                                                for t in cur))
-        if ok:
-            ids = ",".join(str(t["id"]) for t in cur)
-            r = httpx.delete(f"{url}/rest/v1/pricing_tiers?conference_id=eq.{row['id']}&id=in.({ids})",
-                             headers=wh, timeout=60)
-            r.raise_for_status()
-            res["tiers"] = len(r.json())
-            print(f"  {row['id']}: deleted {res['tiers']} tiers")
-            did = res["tiers"] > 0
-        else:
-            print(f"  {row['id']}: tiers changed since read, aborted tier delete")
+        n = delete_decided_tiers(httpx, url, wh, row["id"], decided_tiers)
+        res["tiers"] = n
+        did = n > 0
+        if n == 0:
             res["skipped"] += 1
     for field, d in ldecs.items():
         if d != "reset":
             continue
-        r = httpx.patch(f"{url}/rest/v1/conferences?id=eq.{row['id']}&{field}=eq.{quote(row[field], safe='')}",
+        r = httpx.patch(link_patch_url(url, row, field),
                         headers=wh, timeout=60, json={field: row["source_url"]})
         r.raise_for_status()
         if r.json():
@@ -292,7 +309,7 @@ def apply_row(row: dict, tdec: str, pricing: dict | None, ldecs: dict[str, str])
             print(f"  {row['id']}: {field} changed since read, skipped")
             res["skipped"] += 1
     if did:
-        r = httpx.patch(f"{url}/rest/v1/conferences?id=eq.{row['id']}", headers=wh, timeout=60,
+        r = httpx.patch(stamp_patch_url(url, row["id"]), headers=wh, timeout=60,
                         json={"remediation_attempted_at": None, "listing_hash": None})
         r.raise_for_status()
         print(f"  {row['id']}: stamps nulled")
@@ -363,7 +380,7 @@ def main(argv=None) -> int:
     tot = {"tiers": 0, "links": 0, "skipped": 0}
     for r, td, _, ld, _, f, _ in cands:
         if td == "delete" or any(v[0] == "reset" for v in ld.values()):
-            res = apply_row(r, td, f["pricing"], {k: v[0] for k, v in ld.items()})
+            res = apply_row(r, td, tiers.get(r["id"], []), {k: v[0] for k, v in ld.items()})
             for k in tot:
                 tot[k] += res[k]
     print(f"applied: tiers deleted={tot['tiers']} links reset={tot['links']} skipped={tot['skipped']}")

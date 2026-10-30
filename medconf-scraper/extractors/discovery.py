@@ -628,19 +628,31 @@ def _bad_sweep_label(label: str) -> bool:
                            and all(c in money.KNOWN_CODES for c in re.findall(r"[A-Za-z]{2,}", label)))
 
 
-def _dual_filter(line: str, found: list, billing: Optional[str]) -> list:
-    """Two amounts in different currencies joined by / or | ("8 400 SEK / 795 EUR") are ONE
-    price in two currencies: keep the billing currency's, else the first."""
-    keep, i = [], 0
+def _dual_groups(line: str, found: list) -> list:
+    """Runs of amounts in different currencies joined by / or | ("8 400 SEK / 795 EUR")."""
+    groups, i = [], 0
     while i < len(found):
         grp = [found[i]]
         while i + 1 < len(found) and re.fullmatch(r"\s*[/|]\s*", line[found[i].span[1]:found[i + 1].span[0]]) \
                 and found[i + 1].currency != grp[-1].currency:
             grp.append(found[i + 1])
             i += 1
-        pick = next((g for g in grp if billing and g.currency == billing), grp[0])
-        keep.append(pick)
+        groups.append(grp)
         i += 1
+    return groups
+
+
+def _dual_filter(line: str, found: list, billing: Optional[str]) -> list:
+    """Two amounts in different currencies joined by / or | are ONE price in two currencies:
+    keep the billing currency's, else the first. The kept amount's span starts at the GROUP's
+    start so its label is read from the text before the group, not from the dropped amount."""
+    keep = []
+    for grp in _dual_groups(line, found):
+        pick = next((g for g in grp if billing and g.currency == billing), grp[0])
+        if pick is not grp[0]:
+            pick = money.Money(amount=pick.amount, currency=pick.currency, high=pick.high,
+                               span=(grp[0].span[0], pick.span[1]))
+        keep.append(pick)
     return keep
 
 
@@ -652,8 +664,21 @@ def _money_sweep(lines_text: str) -> List[Dict[str, Any]]:
     lines = [re.sub(r"[ \t\xa0]+", " ", l).strip() for l in (lines_text or "").split("\n")]
     lines = [l for l in lines if l]
     head = (lines_text or "")[:4000]
-    bm = re.search(r"(?i)\b(?:billed|charged|invoiced|payable|prices?)\s+(?:are\s+)?in\s+([A-Z]{3})\b", lines_text or "")
-    billing = bm.group(1) if bm and bm.group(1) in money.KNOWN_CODES else None
+    billing: Optional[str] = None
+    offset = 0
+    joined = "\n".join(lines)
+    for line in lines:
+        try:
+            grps = [g for g in _dual_groups(line, money.find_amounts(line, context=head)) if len(g) > 1]
+        except Exception:  # noqa: BLE001
+            grps = []
+        if grps:
+            # the billing sentence must sit within 1,500 characters after the first dual line
+            bm = re.search(r"(?i)\b(?:billed|charged|invoiced|payable|prices?)\s+(?:are\s+)?in\s+([A-Z]{3})\b",
+                           joined[offset:offset + 1500])
+            billing = bm.group(1) if bm and bm.group(1) in money.KNOWN_CODES else None
+            break
+        offset += len(line) + 1
     tiers: List[Dict[str, Any]] = []
     for i, line in enumerate(lines):
         if _SIDE_CHARGE_RE.search(line):

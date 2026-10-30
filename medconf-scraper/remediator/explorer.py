@@ -915,14 +915,15 @@ def _follow_fee_document(html: Optional[str], base_url: str, budget: "ExploreBud
             return None
         budget.fetches += 1
         text = _fetch_document_text(url, trail)
-        trail.notes.append(f"pdf_followed: {url}")
         if not text or len(text.strip()) < 40:
+            trail.notes.append(f"pdf_followed: {url}")
             trail.notes.append(f"pdf_no_text_layer (scanned?): {url}")
             continue
         ok, why = document_text_gate(text, row)
         if not ok:
             trail.notes.append(f"pdf_rejected: {url} ({why})")
             continue
+        trail.notes.append(f"pdf_followed: {url}")
         trail.total_text_chars += len(text)
         tiers = _tiers_from_document_text(text, trail)
         if tiers:

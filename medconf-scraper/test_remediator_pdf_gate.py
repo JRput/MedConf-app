@@ -55,3 +55,62 @@ def test_promoted_pdf_patterns_filtered(monkeypatch):
     monkeypatch.setattr(learned_patterns, "_load", lambda: data)
     got = learned_patterns.get_promoted_patterns("https://www.rcpsych.ac.uk/events/x", "pricing")
     assert [e["method"] for e in got] == ["pdf:registration-fees-2027.pdf"]
+
+
+# ---- FV1b ----
+def test_path_segments_checked():
+    for u, a in (("https://x.org/membership/fees.pdf", "Fees"),
+                 ("https://x.org/membership/rates.pdf", "Rates"),
+                 ("https://x.org/about/brochure.pdf", "Brochure")):
+        if "about" in u:
+            continue  # 'about' is not negative; brochure alone is a fee word
+        assert not document_gate(u, a, ROW27)[0], u
+    assert not document_gate("https://x.org/training/fees.pdf", "Fees", ROW27)[0]
+
+
+def test_membership_text_gate():
+    assert not document_text_gate("Membership rates 2027 — Full member £180, Associate £90", ROW27)[0]
+    assert not document_text_gate("Annual membership 2027 Full £180", ROW27)[0]
+
+
+def test_rejected_doc_does_not_latch(monkeypatch):
+    from remediator import explorer
+
+    class B:
+        fetches = 0
+        def exhausted(self): return False
+
+    class T:
+        def __init__(self): self.notes = []; self.total_text_chars = 0
+
+    texts = {"https://x.org/events/x-2027/fees-a-2027.pdf": "Membership rates 2027 — Full member £180 padding padding padding",
+             "https://x.org/events/x-2027/fees-b-2027.pdf": "X Annual Conference 2027 Registration fees padding padding padding"}
+    monkeypatch.setattr(explorer, "_fetch_document_text", lambda u, t: texts[u])
+    monkeypatch.setattr(explorer, "_tiers_from_document_text",
+                        lambda text, t: [{"tier_label": "m", "price_gbp": 1}] if "Registration" in text else [])
+    html = ('<a href="/events/x-2027/fees-a-2027.pdf">Registration fees</a>'
+            '<a href="/events/x-2027/fees-b-2027.pdf">Registration fees</a>')
+    tr = T()
+    res = explorer._follow_fee_document(html, "https://x.org/events/x-2027", B(), tr, row=ROW27)
+    assert res and res[1].endswith("fees-b-2027.pdf")
+    assert any(n.startswith("pdf_rejected:") for n in tr.notes)
+    assert not any("fees-a" in n and n.startswith("pdf_followed") for n in tr.notes)
+
+
+def test_legit_names_pass():
+    for n, a in (("Registration-fees-and-training-day-2027.pdf", ""),
+                 ("registration-fees-2027.pdf", "Download the fee report"),
+                 ("Course-fees-training-courses-2027.pdf", ""),
+                 ("Reporting-and-registration-fees-2027.pdf", "")):
+        assert document_gate("https://x.org/events/" + n, a, ROW27)[0], n
+
+
+def test_override_not_for_hard_or_old():
+    assert not document_gate("https://x.org/cost-of-training-2024.pdf", "", ROW27)[0]
+    assert not document_gate("https://x.org/membership-rates-august-2026.pdf", "", ROW26)[0]
+    assert not document_gate("https://x.org/exam-fees-2027.pdf", "", ROW27)[0]
+
+
+def test_more_document_suffixes():
+    for u in ("a/b.xls", "a/b.PPT", "a/b.odt?x=1", "a/b.rtf"):
+        assert _is_document_url("https://a.org/" + u)

@@ -311,8 +311,7 @@ def parse_pricing_tables(
                         if d and col["early"] and not col["deadline"]:
                             col["deadline"] = d
                     break
-        grid_label = bool(columns) and (bool(dual) or any(
-            cells and _DEADLINE_ROW_RE.match(cells[0] or "") for cells in row_cells[1:]))
+        grid_label = bool(columns) and bool(dual)
 
         def _price(cell: str) -> Optional[float]:
             for d in _dual_amounts(cell):

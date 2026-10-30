@@ -77,3 +77,35 @@ def test_single_currency_table_unchanged():
     t = parse_pricing_tables(h)
     assert [(x["tier_label"], x["price_gbp"], x["currency"]) for x in t] == [
         ("Registration fees · Delegate", 550.0, "EUR"), ("Registration fees · Student", 250.0, "EUR")]
+
+
+_TWO = "Registration fees\nMember registration: 8 400 SEK / 795 EUR\nStudent registration: 4 000 SEK / 380 EUR\n"
+
+
+def test_billing_currency_second_amount_keeps_labels():
+    t = discovery._money_sweep(_TWO + "Fees are billed in EUR.")
+    assert [(x["tier_label"], x["price_gbp"], x["currency"]) for x in t] == [
+        ("Member registration", 795.0, "EUR"), ("Student registration", 380.0, "EUR")]
+
+
+def test_billing_currency_first_amount_unchanged():
+    t = discovery._money_sweep(_TWO + "Prices in SEK.")
+    assert [(x["tier_label"], x["price_gbp"], x["currency"]) for x in t] == [
+        ("Member registration", 8400.0, "SEK"), ("Student registration", 4000.0, "SEK")]
+
+
+def test_unrelated_billing_note_far_away_ignored():
+    text = ("Registration fees\nMember registration: 500 EUR / 550 USD\n" + "Filler line about the venue.\n" * 80
+            + "Parking is charged in USD.")
+    t = discovery._money_sweep(text)
+    assert [(x["price_gbp"], x["currency"]) for x in t] == [(500.0, "EUR")]
+
+
+def test_single_currency_dates_row_keeps_heading_and_deadline():
+    h = ("<h2>Registration fees</h2><table><tr><td>Category</td><td>Early bird</td><td>Standard</td></tr>"
+         "<tr><td>Dates</td><td>Until March 1, 2027</td><td>After March 1, 2027</td></tr>"
+         "<tr><td>Physician</td><td>$400</td><td>$500</td></tr></table>")
+    t = parse_pricing_tables(h)
+    assert [x["tier_label"] for x in t] == ["Registration fees \u00b7 Physician \u00b7 Early bird",
+                                            "Registration fees \u00b7 Physician \u00b7 Standard"]
+    assert t[0]["early_bird_deadline"] == "2027-03-01" and t[0]["is_early_bird"]
