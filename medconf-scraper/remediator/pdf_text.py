@@ -23,10 +23,57 @@ FEE_LINK_RE = re.compile(r"fee|price|pricing|cost|registration|brochure|rates?\b
 # Documents that mention a fee but are not attendee fee schedules.
 NEG_LINK_RE = re.compile(
     r"endorse|application|abstract|sponsor|exhibit|terms|conditions|privacy|"
-    r"cancellation|policy|poster|call[-_ ]for|guidelines|visa|accommodation|travel", re.I)
+    r"cancellation|policy|poster|call[-_ ]for|guidelines|visa|accommodation|travel|"
+    # Site-wide documents that are not one event's attendee fees (2026-10-30 incident).
+    r"\btraining|cost[-_ ]of|\bmembership|\bsubscription|\bexam(?:s|ination)?\b|medicare|"
+    r"fee[-_ ]schedule|\breport|\bminutes\b|\bagenda\b|\bbylaws\b|\bhandbook|"
+    r"\bcurriculum|\bsyllabus|\bnewsletter|annual[-_ ]report", re.I)
+# Text-level negative: the document itself reads as a membership/training/exam price list.
+NEG_TEXT_RE = re.compile(
+    r"membership fee|subscription|cost of training|examination fee|MRCPsych|CPD subscription", re.I)
+_YEAR20_RE = re.compile(r"(?<![0-9])(20\d\d)(?![0-9])")
 
 
-def find_fee_documents(html: str, base_url: str, limit: int = 3) -> list[tuple[str, str]]:
+def _row_start_year(row) -> Optional[int]:
+    y = str((row or {}).get("start_date") or "")[:4]
+    return int(y) if y.isdigit() and y.startswith("20") else None
+
+
+def document_gate(url: str, anchor_text: str, row: Optional[dict]) -> tuple:
+    """Pure identity/negative check on a candidate document link. (ok, reason)."""
+    name = unquote(urlparse(url or "").path.rsplit("/", 1)[-1])
+    hay = f"{name} {anchor_text or ''}"
+    m = NEG_LINK_RE.search(hay)
+    if m:
+        return False, f"site_wide_document ({m.group(0).strip()})"
+    if row:
+        from extractors.discovery import url_edition_reason
+        why = url_edition_reason(row, url)
+        if why:
+            return False, f"prior_edition: {why}"
+        sy = _row_start_year(row)
+        if sy:
+            for y in _YEAR20_RE.findall(name):
+                if int(y) < sy:
+                    return False, f"prior_edition: name carries {y} < {sy}"
+    return True, "ok"
+
+
+def document_text_gate(text: str, row: Optional[dict]) -> tuple:
+    """Identity check on a fetched document's first 2,000 characters. (ok, reason)."""
+    head = (text or "")[:2000]
+    if NEG_TEXT_RE.search(head):
+        return False, "reads as membership/training/exam document"
+    if row:
+        from extractors.discovery import _foreign_year, row_years
+        fy = _foreign_year(head, row_years(row), row.get("start_date"))
+        if fy:
+            return False, f"foreign_year {fy}"
+    return True, "ok"
+
+
+def find_fee_documents(html: str, base_url: str, limit: int = 3,
+                       row: Optional[dict] = None) -> list[tuple[str, str]]:
     """PDF/DOCX links whose href or anchor text looks like a fee document."""
     out: list[tuple[str, str]] = []
     seen: set = set()
@@ -40,6 +87,8 @@ def find_fee_documents(html: str, base_url: str, limit: int = 3) -> list[tuple[s
         name = unquote(urlparse(url).path.rsplit("/", 1)[-1])
         hay = f"{name} {text}"
         if not FEE_LINK_RE.search(hay) or NEG_LINK_RE.search(hay):
+            continue
+        if not document_gate(url, text, row)[0]:
             continue
         seen.add(url)
         out.append((url, text[:80] or name))

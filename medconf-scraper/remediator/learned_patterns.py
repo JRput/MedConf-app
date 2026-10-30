@@ -140,8 +140,19 @@ def get_promoted_patterns(source_url: str, field: str) -> list:
                 and entry.get("field") == field
                 and entry.get("promoted")):
             out.append(entry)
-    out.sort(key=lambda e: -e.get("hits", 0))
-    return out
+    from .pdf_text import NEG_LINK_RE
+    kept, suppressed = [], []
+    for e in out:
+        m = str(e.get("method") or "")
+        if m.startswith("pdf:") and NEG_LINK_RE.search(m[4:]):
+            suppressed.append(m)
+        else:
+            kept.append(e)
+    if suppressed:
+        logger.info("learned_patterns: suppressed %d promoted pdf pattern(s): %s",
+                    len(suppressed), ", ".join(suppressed[:5]))
+    kept.sort(key=lambda e: -e.get("hits", 0))
+    return kept
 
 
 def all_patterns_summary() -> dict:

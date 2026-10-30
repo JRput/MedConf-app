@@ -60,6 +60,53 @@ def _clean(html: str) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
+_SUPSUB_RE = re.compile(r"(?is)<(sup|sub)\b[^>]*>.*?</\1\s*>")
+_BR_RE = re.compile(r"(?i)<br\s*/?>")
+
+
+def _cell_text(cell_html: str) -> str:
+    """Cell text for money parsing: footnote markers (<sup>/<sub> content) are dropped and
+    <br> is a space, so "Early fee<br>SEK / EUR<sup>1</sup>" -> "Early fee SEK / EUR"."""
+    h = _SUPSUB_RE.sub(" ", cell_html or "")
+    return _clean(_BR_RE.sub(" ", h))
+
+
+_BILLED_RE = re.compile(
+    r"(?i)\b(?:billed|charged|invoiced|payable|paid|prices?|fees?|rates?)\s+(?:are\s+|is\s+)?(?:in|in\s+the\s+currency\s+of)\s+"
+    r"(?:the\s+)?([A-Z]{3}|euros?|pounds?(?:\s+sterling)?)\b")
+
+
+def _billing_currency(after_text: str) -> Optional[str]:
+    """Currency a note after the table says the fees are billed in ("Fees are billed in SEK")."""
+    m = _BILLED_RE.search(after_text or "")
+    if not m:
+        return None
+    tok = m.group(1)
+    cur = money.normalize_currency(tok.upper() if len(tok) == 3 else tok)
+    return cur if cur in money.KNOWN_CODES else None
+
+
+_DUAL_SEP_RE = re.compile(r"\s*[/|]\s*")
+
+
+def _dual_amounts(cell: str) -> List[money.Money]:
+    """The amounts of a cell like "8 400 SEK / 795 EUR" (two different currencies joined
+    by / or |), else []. A single-amount cell is not dual."""
+    if not cell:
+        return []
+    found = [m for m in money.find_amounts(cell) if m.currency and m.high is None]
+    if len(found) < 2 or len({m.currency for m in found}) < 2:
+        return []
+    for a, b in zip(found, found[1:]):
+        if not _DUAL_SEP_RE.fullmatch(cell[a.span[1]:b.span[0]]):
+            return []
+    return found
+
+
+_CODE_LIST_RE = re.compile(r"\b(?:" + "|".join(sorted(money.KNOWN_CODES, key=len, reverse=True)) + r")\b(?:\s*[/|]\s*\b(?:"
+                           + "|".join(sorted(money.KNOWN_CODES, key=len, reverse=True)) + r")\b)*")
+
+
 _CELL_LEFTOVER_RE = re.compile(
     r"(?i)[\s*+\u2020\u2021]*(?:\(?\s*(?:\+|plus|excl\.?|incl\.?|ex\.?|inc\.?)?\s*(?:vat|tax)\s*\)?)?[\s*+\u2020\u2021]*")
 
@@ -150,6 +197,25 @@ _COL_DEADLINE_RE = re.compile(
     rf"|(?:until|by|before|through|up to|ends?|closes?)\s+({_MONTH_NAME_RE})\.?\s+(\d{{1,2}})(?:st|nd|rd|th)?,?\s+(20\d\d)")
 _MONTH_NUM = {m: i + 1 for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"])}
 
+_DEADLINE_ROW_RE = re.compile(r"(?i)^\s*(?:dates?|deadlines?)\s*:?\s*$")
+_DMY_RE = re.compile(rf"(?i)\b(\d{{1,2}})(?:st|nd|rd|th)?\s+({_MONTH_NAME_RE})\.?,?\s+(20\d\d)\b")
+_MDY_RE = re.compile(rf"(?i)\b({_MONTH_NAME_RE})\.?\s+(\d{{1,2}})(?:st|nd|rd|th)?,?\s+(20\d\d)\b")
+
+
+def _cell_date(text: str) -> Optional[str]:
+    m = _DMY_RE.search(text or "")
+    try:
+        if m:
+            return f"{int(m.group(3))}-{_MONTH_NUM[m.group(2)[:3].lower()]:02d}-{int(m.group(1)):02d}"
+        m = _MDY_RE.search(text or "")
+        if m:
+            return f"{int(m.group(3))}-{_MONTH_NUM[m.group(1)[:3].lower()]:02d}-{int(m.group(2)):02d}"
+    except (KeyError, ValueError):
+        pass
+    return None
+
+
+
 
 def _fee_columns(row_cells: List[List[str]]) -> Dict[int, Dict[str, Any]]:
     """{cell_index: {name, early, deadline}} when the first row is a header of
@@ -157,12 +223,14 @@ def _fee_columns(row_cells: List[List[str]]) -> Dict[int, Dict[str, Any]]:
     if not row_cells:
         return {}
     header = row_cells[0]
-    if len(header) < 3 or any(_parse_price(c) is not None for c in header[1:] if c):
+    if len(header) < 3 or any(_parse_price(c) is not None for c in header[1:] if c and not _COL_HEADER_RE.search(c)):
         return {}
     cols: Dict[int, Dict[str, Any]] = {}
     for k, text in enumerate(header):
         if k == 0 or not text or not _COL_HEADER_RE.search(text):
             continue
+        text = _CODE_LIST_RE.sub(" ", text)          # "Early fee SEK / EUR" -> "Early fee"
+        text = re.sub(r"\s+", " ", text).strip()
         name = re.split(r"(?i)\s+(?:until|from|by|before|through|up to|after|starting)\b", text, 1)[0]
         name = re.sub(r"\s*\(.*?\)\s*$", "", name).strip(" :-–")[:40] or text[:40]
         deadline = None
@@ -205,14 +273,24 @@ def parse_pricing_tables(
         if not heading and not _table_has_fee_header_row(table_html):
             continue
         rows = re.findall(r"<tr[^>]*>(.*?)</tr>", table_html, re.DOTALL)
-        row_cells = [[_clean(c) for c in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", row, re.DOTALL)] for row in rows]
+        row_cells = [[_cell_text(c) for c in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", row, re.DOTALL)] for row in rows]
 
         # Detect currency from heading + first 800 chars of table (may
         # contain "(EUR)" after column header), else from the cells.
-        currency_ctx = (heading or "") + " " + table_html[:800]
-        currency = (_currency_hint(currency_ctx)
-                    or _cells_currency([c for cells in row_cells for c in cells[1:]])
-                    or default_currency)
+        all_cells = [c for cells in row_cells for c in cells[1:]]
+        dual = [d for d in (_dual_amounts(c) for c in all_cells) if d]
+        if dual:
+            # Dual-currency grid ("8 400 SEK / 795 EUR"): ONE currency for the whole table -
+            # the one a "billed in <CUR>" note after the table names, else the first in the cell.
+            after = _clean(html[m.end():m.end() + 1500])
+            currency = _billing_currency(after) or dual[0][0].currency
+            if not any(currency == d.currency for d in dual[0]):
+                currency = dual[0][0].currency
+        else:
+            currency_ctx = (heading or "") + " " + table_html[:800]
+            currency = (_currency_hint(currency_ctx)
+                        or _cells_currency(all_cells)
+                        or default_currency)
         if not currency:
             logger.warning(
                 f"pricing_tables: fee table under {heading!r} has no detectable currency "
@@ -224,6 +302,23 @@ def parse_pricing_tables(
         # early-bird flag + deadline from the column text. A table with a
         # single price column keeps the old last-cell behaviour.
         columns = _fee_columns(row_cells)
+        # "Dates | DEADLINE 15 DEC 2026 | ..." row: the early column's deadline.
+        if columns:
+            for cells in row_cells[1:]:
+                if cells and _DEADLINE_ROW_RE.match(cells[0] or ""):
+                    for k, col in columns.items():
+                        d = _cell_date(cells[k]) if k < len(cells) else None
+                        if d and col["early"] and not col["deadline"]:
+                            col["deadline"] = d
+                    break
+        grid_label = bool(columns) and (bool(dual) or any(
+            cells and _DEADLINE_ROW_RE.match(cells[0] or "") for cells in row_cells[1:]))
+
+        def _price(cell: str) -> Optional[float]:
+            for d in _dual_amounts(cell):
+                if d.currency == currency:
+                    return d.amount if d.amount > 0 and money.plausible(d.amount, d.currency) else None
+            return _parse_price(cell)
 
         for cells in row_cells:
             if len(cells) < 2:
@@ -235,12 +330,14 @@ def parse_pricing_tables(
             if label.lower() in {"category", "type", "rate", "amount",
                                   "price", "cost", "fee"}:
                 continue
-            section = f"{heading} · {label}"[:120] if heading else label[:120]
+            if _DEADLINE_ROW_RE.match(label):
+                continue
+            section = f"{heading} · {label}"[:120] if (heading and not grid_label) else label[:120]
             if columns:
                 for k, col in columns.items():
                     if k >= len(cells):
                         continue
-                    p = _parse_price(cells[k]) if cells[k] else None
+                    p = _price(cells[k]) if cells[k] else None
                     if p is None:
                         continue
                     tiers.append({
@@ -256,7 +353,7 @@ def parse_pricing_tables(
             for cell_text in reversed(cells[1:]):
                 if not cell_text:
                     continue
-                p = _parse_price(cell_text)
+                p = _price(cell_text)
                 if p is not None:
                     price = p
                     break

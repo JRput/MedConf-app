@@ -311,7 +311,11 @@ def _to_text(html: str, limit: Optional[int] = 250_000) -> str:
     return t if limit is None else t[:limit]
 
 
+_SUPSUB_RE = re.compile(r"(?is)<(sup|sub)\b[^>]*>.*?</\1\s*>")
+
+
 def _to_lines(html: str) -> str:
+    html = _SUPSUB_RE.sub(" ", html or "")      # footnote markers ("EUR<sup>1</sup>") are not amounts
     try:
         from remediator.fee_matrix import html_to_lines
         return html_to_lines(html)
@@ -609,6 +613,37 @@ def _label_for(lines: List[str], i: int, mny: "money.Money", head: str) -> Optio
     return None
 
 
+_BAD_SWEEP_LABEL_RE = re.compile(r"(?i)^\s*\d+\s*\)|indicative|billed\s+in|charged\s+in")
+_CODES_ONLY_RE = re.compile(r"^[\s/|,;:.\-\u2013\u2014()*\u20ac$\u00a3A-Z]{0,12}$")
+_SWEEP_MIN_AMOUNT = 5.0
+
+
+def _bad_sweep_label(label: str) -> bool:
+    """A label that is only currency codes / symbols / slashes, a footnote ("1) ..."), or a
+    billing note is no fee category."""
+    if _BAD_SWEEP_LABEL_RE.search(label):
+        return True
+    letters = re.sub(r"[^A-Za-z]", "", label)
+    return not letters or (len(letters) <= 12 and _CODES_ONLY_RE.match(label) is not None
+                           and all(c in money.KNOWN_CODES for c in re.findall(r"[A-Za-z]{2,}", label)))
+
+
+def _dual_filter(line: str, found: list, billing: Optional[str]) -> list:
+    """Two amounts in different currencies joined by / or | ("8 400 SEK / 795 EUR") are ONE
+    price in two currencies: keep the billing currency's, else the first."""
+    keep, i = [], 0
+    while i < len(found):
+        grp = [found[i]]
+        while i + 1 < len(found) and re.fullmatch(r"\s*[/|]\s*", line[found[i].span[1]:found[i + 1].span[0]]) \
+                and found[i + 1].currency != grp[-1].currency:
+            grp.append(found[i + 1])
+            i += 1
+        pick = next((g for g in grp if billing and g.currency == billing), grp[0])
+        keep.append(pick)
+        i += 1
+    return keep
+
+
 def _money_sweep(lines_text: str) -> List[Dict[str, Any]]:
     """Fee-context sweep: every line with a currency-bearing amount under fee
     context (a fee word in the label or the 12 lines above), side charges and
@@ -617,19 +652,21 @@ def _money_sweep(lines_text: str) -> List[Dict[str, Any]]:
     lines = [re.sub(r"[ \t\xa0]+", " ", l).strip() for l in (lines_text or "").split("\n")]
     lines = [l for l in lines if l]
     head = (lines_text or "")[:4000]
+    bm = re.search(r"(?i)\b(?:billed|charged|invoiced|payable|prices?)\s+(?:are\s+)?in\s+([A-Z]{3})\b", lines_text or "")
+    billing = bm.group(1) if bm and bm.group(1) in money.KNOWN_CODES else None
     tiers: List[Dict[str, Any]] = []
     for i, line in enumerate(lines):
         if _SIDE_CHARGE_RE.search(line):
             continue
         try:
-            found = money.find_amounts(line, context=head)
+            found = _dual_filter(line, money.find_amounts(line, context=head), billing)
         except Exception:  # noqa: BLE001
             continue
         for mny in found:
-            if mny.high is not None or mny.currency is None or mny.amount <= 0:
+            if mny.high is not None or mny.currency is None or mny.amount < _SWEEP_MIN_AMOUNT:
                 continue
             label = _label_for(lines, i, mny, head)
-            if label is None:
+            if label is None or _bad_sweep_label(label):
                 continue
             ctx = " ".join(lines[max(0, i - 12): i]) + " " + label
             if not _FEE_CTX_RE.search(ctx):

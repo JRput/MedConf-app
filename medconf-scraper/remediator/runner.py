@@ -222,6 +222,16 @@ def replay_gate(row: dict, sub_url: str, cache, shell_titles: Iterable[str]) -> 
 COMMUNITY_SOURCE_ID = 1000
 
 
+_DOC_SUFFIXES = (".pdf", ".docx", ".doc", ".xlsx", ".pptx")
+
+
+def _is_document_url(url) -> bool:
+    """True when the URL path (ignoring query/fragment) is a document file. Documents
+    are evidence for pricing, never a booking/organiser destination."""
+    from urllib.parse import urlparse
+    return urlparse(str(url or "")).path.lower().endswith(_DOC_SUFFIXES)
+
+
 def _url_patches_allowed(row: dict, source_id: Optional[int] = None) -> bool:
     """Community rows (source 1000) never get organiser_url / booking_url /
     source_url patched from fetched content: a hostile page must not be able to
@@ -639,6 +649,9 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                     # No fees, but the explorer reached an external event page:
                     # keep it as organiser_url so the next run can retry cheaply.
                     _ext = getattr(result, "external_url", None) if (result is not None and field == "pricing") else None
+                    if _ext and _is_document_url(_ext):
+                        logger.info("link_follow skipped: document url %s", _ext)
+                        _ext = None
                     if _ext and not shared and _url_patches_allowed(row, source_id) and row.get("organiser_url") in (None, "", row.get("source_url")):
                         if _patch_row(sb, row["id"], "organiser_url", _ext,
                                       expected=row.get("organiser_url")):
@@ -677,6 +690,9 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                     # organiser link (and the booking link, if it was just
                     # the listing page) at it.
                     ext = getattr(result, "external_url", None) if field == "pricing" else None
+                    if ext and _is_document_url(ext):
+                        logger.info("link_follow skipped: document url %s", ext)
+                        ext = None
                     if ext and not shared and _url_patches_allowed(row, source_id):
                         link_patches = {}
                         if row.get("organiser_url") in (None, "", row.get("source_url")):

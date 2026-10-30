@@ -904,13 +904,13 @@ def _tiers_from_document_text(text: str, trail: "AuditTrail") -> list:
 
 
 def _follow_fee_document(html: Optional[str], base_url: str, budget: "ExploreBudget",
-                         trail: "AuditTrail"):
+                         trail: "AuditTrail", row: Optional[dict] = None):
     """At most one fee-ish PDF/DOCX per event. Returns (tiers, url, method) or None.
     Records `pdf_followed: <url>` in the trail."""
     if not html or any(str(n).startswith("pdf_followed:") for n in trail.notes):
         return None
-    from .pdf_text import find_fee_documents
-    for url, _text in find_fee_documents(html, base_url, limit=2):
+    from .pdf_text import find_fee_documents, document_text_gate
+    for url, _text in find_fee_documents(html, base_url, limit=2, row=row):
         if budget.exhausted():
             return None
         budget.fetches += 1
@@ -918,6 +918,10 @@ def _follow_fee_document(html: Optional[str], base_url: str, budget: "ExploreBud
         trail.notes.append(f"pdf_followed: {url}")
         if not text or len(text.strip()) < 40:
             trail.notes.append(f"pdf_no_text_layer (scanned?): {url}")
+            continue
+        ok, why = document_text_gate(text, row)
+        if not ok:
+            trail.notes.append(f"pdf_rejected: {url} ({why})")
             continue
         trail.total_text_chars += len(text)
         tiers = _tiers_from_document_text(text, trail)
@@ -1158,7 +1162,7 @@ def ticketing_host_tiers(row: dict, text: Optional[str], html: Optional[str],
 
 
 def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudget",
-                                  trail: "AuditTrail", limit: int = 2):
+                                  trail: "AuditTrail", limit: int = 2, row: Optional[dict] = None):
     """On an external event site, fetch up to `limit` same-host registration/
     fees links and run the text sweep then the (budgeted) image pass on each.
     Returns (tiers, url, method) or None. Records `external_subpage_followed`."""
@@ -1181,7 +1185,7 @@ def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudg
         if tt:
             trail.notes.append(f"external_subpage_table: {len(tt)} tiers from {url}")
             return tt, url, "table"
-        _pdf = _follow_fee_document(sub_html, url, budget, trail)
+        _pdf = _follow_fee_document(sub_html, url, budget, trail, row=row)
         if _pdf:
             return _pdf
         rt, how = _rendered_fee_tiers(url, sub_html, trail)
@@ -1460,7 +1464,7 @@ def _follow_nav_pages(row: dict, html: str, base_url: str, trail: "AuditTrail",
                 trail.notes.append(f"nav_{how}: {len(tiers)} tiers from {url}")
                 found = (tiers, url, f"nav_{how}")
                 continue
-            _pdf = _follow_fee_document(p_html, url, budget, trail)
+            _pdf = _follow_fee_document(p_html, url, budget, trail, row=row)
             if _pdf:
                 found = _pdf
                 continue
@@ -1611,7 +1615,7 @@ def _explore_for_pricing(
                 trail.notes.append(f"vision_main_page_failed: {e}")
 
     # 1c. Fee PDF/DOCX linked from the main page.
-    _pdf = _follow_fee_document(page_html, base_url, budget, trail)
+    _pdf = _follow_fee_document(page_html, base_url, budget, trail, row=row)
     if _pdf:
         ptiers, purl, pmethod = _pdf
         trail.llm_reasoning = f"Found prices in linked fee document {purl}."
@@ -1775,7 +1779,7 @@ def _explore_for_pricing(
                     field="pricing", value=ttiers, method=f"subpage_table:{urlparse(url).path}",
                     audit_trail=trail, found=True,
                 )
-            _pdf = _follow_fee_document(sub_html, url, budget, trail)
+            _pdf = _follow_fee_document(sub_html, url, budget, trail, row=row)
             if _pdf:
                 ptiers, purl, pmethod = _pdf
                 trail.llm_reasoning = f"Found prices in fee document {purl} linked from {url}."
@@ -1939,7 +1943,7 @@ def _explore_for_pricing(
                             )
                     except Exception as e:
                         trail.notes.append(f"external_vision_failed: {e}")
-            _pdf = _follow_fee_document(sub_html, ext_url, budget, trail)
+            _pdf = _follow_fee_document(sub_html, ext_url, budget, trail, row=row)
             if _pdf:
                 ptiers, purl, pmethod = _pdf
                 trail.llm_reasoning = f"Followed external link to {ext_url}; fees in linked document {purl}."
@@ -1948,7 +1952,7 @@ def _explore_for_pricing(
             # Two-hop: the external congress site keeps fees on its own
             # "Registration" sub-page. Same-host, max 2, shared fetch caps.
             if sub_html:
-                hop = _follow_registration_subpages(sub_html, ext_url, budget, trail, limit=2)
+                hop = _follow_registration_subpages(sub_html, ext_url, budget, trail, limit=2, row=row)
                 if hop:
                     htiers, hop_url, hop_method = hop
                     trail.llm_reasoning = (
