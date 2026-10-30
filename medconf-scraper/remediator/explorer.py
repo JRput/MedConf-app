@@ -565,6 +565,7 @@ def source_time_up() -> bool:
 
 
 def reset_fetch_state() -> None:
+    _ROOT_MICROSITE_CACHE.clear()
     FETCH_CACHE.clear()
     EVENT_MATCH_CACHE.clear()
     RENDER_CACHE.clear()
@@ -1221,36 +1222,97 @@ def _norm_page_url(u: Optional[str]) -> str:
     return host + (p.path or "").rstrip("/") + (("?" + p.query) if p.query else "")
 
 
+_ROOT_MICROSITE_CACHE: dict = {}
+
+
+def _organiser_root_is_this_event(row: dict, organiser_url: str, page_url: str, html, text) -> bool:
+    """True when the row's organiser_url is a bare-host congress microsite whose ROOT page is
+    itself about this event (identity_match_strength strong). Cached per (url, title)."""
+    key = (organiser_url, row.get("conference_name"))
+    if key in _ROOT_MICROSITE_CACHE:
+        return _ROOT_MICROSITE_CACHE[key]
+    root_text = None
+    if _norm_page_url(page_url) == _norm_page_url(organiser_url):
+        root_text = text or (_html.unescape(re.sub(r"<[^>]+>", " ", html)) if html else None)
+    if not root_text:
+        try:
+            root_text, _h = fetch_page_text_and_html(organiser_url)
+        except Exception:
+            root_text = None
+    ok = bool(root_text) and _strong_event_identity(row, root_text)
+    if root_text:
+        _ROOT_MICROSITE_CACHE[key] = ok
+    return ok
+
+
 def external_evidence(row: Optional[dict], page_url: str, base_url: str, html: Optional[str] = None,
-                      text: Optional[str] = None, *, gated: bool = True):
+                      text: Optional[str] = None, *, gated: bool = True, via_own_page: bool = False):
     """(evidence_url, identity) for a page that is not the row's own page, or None.
 
     Accepted: a same-site page (`gated=True`: the caller already ran `_subpage_identity` and it
-    was STRONG), or an external page for which the scrape-time `page_identity` returns STRONG with
-    the row's organiser_url / booking_url paths counted as own paths (so the organiser site's
-    registration page, a page whose h1 equals the row title, ... qualify). A page that IS the
-    organiser_url / booking_url is also accepted unless page_identity REJECTS it.
+    was STRONG), or an external page for which the scrape-time `page_identity` returns STRONG
+    with the row's organiser_url / booking_url counted as own paths. Guards:
+      - a declared URL owns its children only through `own_paths` (a listing that is an ancestor
+        of the row's own URL owns nothing), and a child page reached only through a declared path
+        must NAME the row title in its heading / body unless the declared URL slug is the event's;
+      - "the page IS the declared link" counts only for a declared URL with a non-root path
+        (a bare host owns nothing) and never when page_identity REJECTS the page;
+      - a ticketing-host page reached from the row's own page (`via_own_page`) is strong when its
+        heading / <title> CONTAINS the row title;
+      - a dedicated microsite (bare-host organiser_url on a different host than the source) gets
+        the single-event relaxation (WEAK -> strong) only when its ROOT page is about this event.
     A different host, other-edition path, another event's heading or a generic page stays out."""
     if gated and _same_site_as_row(row, page_url, base_url):
         return page_url, "strong"
     if not row or not page_url:
         return None
     try:
-        from extractors.discovery import page_identity, own_paths, _own_path
+        from extractors.discovery import (page_identity, own_paths, _own_path, _under_own_path,
+                                          _norm, _has, _all_headings, _host)
         declared = [u for u in (row.get("organiser_url"), row.get("booking_url")) if u]
-        own = list(own_paths(row)) + [o for o in (_own_path(u) for u in declared) if o]
+        real_own = list(own_paths(row))
+        declared_own = []
+        for d in declared:
+            o = _own_path(d)
+            if o and o in own_paths({**row, "booking_url": d}):
+                declared_own.append(o)          # a listing ancestor of the row's own URL is dropped
         if not text and html:
             text = _html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))).strip()
-        verdict, _why = page_identity(row, page_url, html or "", text or "", own=own,
-                                      shell_titles=list(row.get("_shell_titles") or ()))
+        verdict, why = page_identity(row, page_url, html or "", text or "", own=real_own + declared_own,
+                                     shell_titles=list(row.get("_shell_titles") or ()))
         verdict = str(verdict).upper()
+        title_n = _norm(row.get("conference_name"))
+        heads_n = [_norm(h) for h in _all_headings(html or "")]
+        title_in_heading = bool(title_n) and any(_has(h, title_n) for h in heads_n)
+        title_in_body = bool(title_n) and _has(_norm((text or "")[:250_000]), title_n)
     except Exception:
         return None
-    if verdict == "STRONG":
-        return page_url, "strong"
+    if verdict == "REJECTED":
+        return None
     n = _norm_page_url(page_url)
-    if verdict != "REJECTED" and n and n in {_norm_page_url(u) for u in declared}:
+    if verdict == "STRONG":
+        if why == "own_path" and _under_own_path(page_url, declared_own) \
+                and not _under_own_path(page_url, real_own):
+            # strong only through a declared (organiser / booking) path: the page must name the event
+            slug_match = any(
+                any(t in o[1] for t in re.findall(r"[a-z0-9]{5,}", row.get("conference_name", "").lower()))
+                for o in declared_own)
+            if not (title_in_heading or title_in_body or slug_match):
+                return None
         return page_url, "strong"
+    # ---- WEAK from here
+    # exception: the page IS a declared link with a non-root path
+    if n and any(_own_path(d) and _norm_page_url(d) == n for d in declared):
+        return page_url, "strong"
+    # (a) ticketing host reached from the row's own page: heading / <title> contains the title
+    if via_own_page and TICKETING_HOST_RE.search(urlparse(page_url).netloc or "") and title_in_heading:
+        return page_url, "strong"
+    # (b) dedicated congress microsite
+    org = (row.get("organiser_url") or "").strip()
+    if org and not _own_path(org) and _host(org) and _host(org) == _host(page_url) \
+            and _host(org) != _host(row.get("source_url") or base_url):
+        if _organiser_root_is_this_event(row, org, page_url, html, text):
+            return page_url, "strong"
     return None
 
 
@@ -2044,7 +2106,7 @@ def _explore_for_pricing(
                     continue
             # Provenance: an external page is eligible only when it IS the row's organiser_url or
             # booking_url (or a gated same-site page); anything else is discarded outright.
-            ext_ev = external_evidence(row, ext_url, base_url, sub_html, sub_text)
+            ext_ev = external_evidence(row, ext_url, base_url, sub_html, sub_text, via_own_page=True)
             if ext_ev is None:
                 trail.notes.append(f"provenance_rejected: {ext_url}")
                 continue

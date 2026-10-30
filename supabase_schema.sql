@@ -176,7 +176,7 @@ CREATE TABLE IF NOT EXISTS pricing_tiers (
     evidence_url TEXT,
     evidence_identity TEXT CONSTRAINT pricing_tiers_evidence_identity_check CHECK (evidence_identity IN ('own_page','strong','legacy')),
     written_by TEXT,
-    written_at TIMESTAMPTZ DEFAULT now()
+    written_at TIMESTAMPTZ DEFAULT now()   -- migration adds it default-less then SET DEFAULT, so pre-provenance rows stay NULL
 );
 CREATE INDEX IF NOT EXISTS idx_pricing_tiers_session ON pricing_tiers(session_id);
 CREATE INDEX IF NOT EXISTS idx_conferences_event_type ON conferences(event_type);
@@ -629,9 +629,10 @@ DECLARE
   t JSONB;
   n INTEGER := 0;
 BEGIN
-  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong.
+  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong AND a non-empty evidence_url.
   FOR t IN SELECT * FROM jsonb_array_elements(COALESCE(p_tiers, '[]'::jsonb)) LOOP
-    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong') THEN
+    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong')
+       OR NULLIF(t ->> 'evidence_url', '') IS NULL THEN
       RAISE EXCEPTION 'provenance_rejected: %', COALESCE(t ->> 'tier_label', '');
     END IF;
   END LOOP;
@@ -859,9 +860,10 @@ DECLARE
   any_pos boolean := FALSE;
   n integer := 0;
 BEGIN
-  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong.
+  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong AND a non-empty evidence_url.
   FOR t IN SELECT * FROM jsonb_array_elements(COALESCE(p_tiers, '[]'::jsonb)) LOOP
-    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong') THEN
+    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong')
+       OR NULLIF(t ->> 'evidence_url', '') IS NULL THEN
       RAISE EXCEPTION 'provenance_rejected: %', COALESCE(t ->> 'tier_label', '');
     END IF;
   END LOOP;

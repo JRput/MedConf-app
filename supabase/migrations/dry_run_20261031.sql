@@ -2,6 +2,10 @@
 -- Regenerate rather than hand-edit if the migration changes.
 BEGIN;
 
+-- legacy fixture row created BEFORE the migration: its written_at must stay NULL
+INSERT INTO conferences (conference_name, source_url) VALUES ('dry-run legacy', 'https://dry-run.invalid/legacy');
+INSERT INTO pricing_tiers (conference_id, tier_label, price_gbp, currency) SELECT id,'Legacy',10,'GBP' FROM conferences WHERE source_url='https://dry-run.invalid/legacy';
+
 -- ============================================================
 -- Evidence provenance (2026-10-31)  -- mission "provenance"
 -- Additive: records WHICH page a price / venue / abstract fact came from, and how
@@ -24,7 +28,9 @@ ALTER TABLE public.pricing_tiers
   ADD COLUMN IF NOT EXISTS evidence_identity TEXT
     CONSTRAINT pricing_tiers_evidence_identity_check CHECK (evidence_identity IN ('own_page','strong','legacy')),
   ADD COLUMN IF NOT EXISTS written_by TEXT,
-  ADD COLUMN IF NOT EXISTS written_at TIMESTAMPTZ DEFAULT now();
+  ADD COLUMN IF NOT EXISTS written_at TIMESTAMPTZ;
+-- Default set AFTER the column exists so existing rows stay NULL (a default on ADD COLUMN would stamp them all).
+ALTER TABLE public.pricing_tiers ALTER COLUMN written_at SET DEFAULT now();
 
 ALTER TABLE public.conferences
   ADD COLUMN IF NOT EXISTS venue_evidence_url TEXT,
@@ -40,9 +46,10 @@ DECLARE
   t JSONB;
   n INTEGER := 0;
 BEGIN
-  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong.
+  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong AND a non-empty evidence_url.
   FOR t IN SELECT * FROM jsonb_array_elements(COALESCE(p_tiers, '[]'::jsonb)) LOOP
-    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong') THEN
+    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong')
+       OR NULLIF(t ->> 'evidence_url', '') IS NULL THEN
       RAISE EXCEPTION 'provenance_rejected: %', COALESCE(t ->> 'tier_label', '');
     END IF;
   END LOOP;
@@ -85,9 +92,10 @@ DECLARE
   any_pos boolean := FALSE;
   n integer := 0;
 BEGIN
-  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong.
+  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong AND a non-empty evidence_url.
   FOR t IN SELECT * FROM jsonb_array_elements(COALESCE(p_tiers, '[]'::jsonb)) LOOP
-    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong') THEN
+    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong')
+       OR NULLIF(t ->> 'evidence_url', '') IS NULL THEN
       RAISE EXCEPTION 'provenance_rejected: %', COALESCE(t ->> 'tier_label', '');
     END IF;
   END LOOP;
@@ -162,13 +170,15 @@ DO $t$
 DECLARE cid integer; r integer; caught boolean;
   good jsonb := '[{"tier_label":"Delegate","price_gbp":"120.00","currency":"EUR","evidence_url":"https://dry-run.invalid/fees","evidence_identity":"own_page","written_by":"remediator"},{"tier_label":"Trainee","price_gbp":"60","currency":"EUR","evidence_url":"https://dry-run.invalid/fees2","evidence_identity":"strong","written_by":"remediator"}]';
   bad jsonb  := '[{"tier_label":"Delegate","price_gbp":"120","currency":"EUR","evidence_url":"https://dry-run.invalid/fees","evidence_identity":"own_page"},{"tier_label":"Sneaky","price_gbp":"60","currency":"EUR","evidence_url":"https://other.invalid/x","evidence_identity":"legacy"}]';
+  nourl jsonb := '[{"tier_label":"NoUrl","price_gbp":"60","currency":"EUR","evidence_identity":"own_page"}]';
   missing jsonb := '[{"tier_label":"NoEvidence","price_gbp":"60","currency":"EUR"}]';
 BEGIN
+  IF (SELECT written_at FROM pricing_tiers WHERE tier_label='Legacy' AND conference_id=(SELECT id FROM conferences WHERE source_url='https://dry-run.invalid/legacy')) IS NOT NULL THEN RAISE EXCEPTION 'W1: existing row written_at was stamped'; END IF;
   -- insert_if_empty: good provenance
   INSERT INTO conferences (conference_name, source_url) VALUES ('dry-run ins', 'https://dry-run.invalid/i') RETURNING id INTO cid;
   r := public.remediator_insert_tiers_if_empty(cid, good);
   IF r <> 2 THEN RAISE EXCEPTION 'I1: expected 2 inserted, got %', r; END IF;
-  IF (SELECT count(*) FROM pricing_tiers WHERE conference_id=cid AND evidence_url IS NOT NULL AND evidence_identity IN ('own_page','strong') AND written_by='remediator' AND written_at IS NOT NULL) <> 2 THEN RAISE EXCEPTION 'I2: evidence not written'; END IF;
+  IF (SELECT count(*) FROM pricing_tiers WHERE conference_id=cid AND evidence_url IS NOT NULL AND evidence_identity IN ('own_page','strong') AND written_by='remediator' AND written_at IS NOT NULL) <> 2 THEN RAISE EXCEPTION 'I2: evidence not written (incl. written_at set)'; END IF;
   -- insert_if_empty: bad / missing provenance on an empty conference writes nothing
   INSERT INTO conferences (conference_name, source_url) VALUES ('dry-run ins bad', 'https://dry-run.invalid/ib') RETURNING id INTO cid;
   caught := FALSE;
@@ -180,6 +190,15 @@ BEGIN
   BEGIN PERFORM public.remediator_insert_tiers_if_empty(cid, missing);
   EXCEPTION WHEN raise_exception THEN caught := (SQLERRM = 'provenance_rejected: NoEvidence'); END;
   IF NOT caught THEN RAISE EXCEPTION 'I5: missing identity not rejected'; END IF;
+
+  caught := FALSE;
+  BEGIN PERFORM public.remediator_insert_tiers_if_empty(cid, nourl);
+  EXCEPTION WHEN raise_exception THEN caught := (SQLERRM = 'provenance_rejected: NoUrl'); END;
+  IF NOT caught THEN RAISE EXCEPTION 'I6: good identity but missing url not rejected (insert)'; END IF;
+  caught := FALSE;
+  BEGIN PERFORM public.remediator_replace_tiers_if_zero_or_generic(cid, nourl);
+  EXCEPTION WHEN raise_exception THEN caught := (SQLERRM = 'provenance_rejected: NoUrl'); END;
+  IF NOT caught THEN RAISE EXCEPTION 'I7: good identity but missing url not rejected (replace)'; END IF;
 
   -- replace_if_zero_or_generic: good provenance
   INSERT INTO conferences (conference_name, source_url) VALUES ('dry-run rep', 'https://dry-run.invalid/r') RETURNING id INTO cid;

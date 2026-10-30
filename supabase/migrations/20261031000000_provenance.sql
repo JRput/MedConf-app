@@ -20,7 +20,9 @@ ALTER TABLE public.pricing_tiers
   ADD COLUMN IF NOT EXISTS evidence_identity TEXT
     CONSTRAINT pricing_tiers_evidence_identity_check CHECK (evidence_identity IN ('own_page','strong','legacy')),
   ADD COLUMN IF NOT EXISTS written_by TEXT,
-  ADD COLUMN IF NOT EXISTS written_at TIMESTAMPTZ DEFAULT now();
+  ADD COLUMN IF NOT EXISTS written_at TIMESTAMPTZ;
+-- Default set AFTER the column exists so existing rows stay NULL (a default on ADD COLUMN would stamp them all).
+ALTER TABLE public.pricing_tiers ALTER COLUMN written_at SET DEFAULT now();
 
 ALTER TABLE public.conferences
   ADD COLUMN IF NOT EXISTS venue_evidence_url TEXT,
@@ -36,9 +38,10 @@ DECLARE
   t JSONB;
   n INTEGER := 0;
 BEGIN
-  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong.
+  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong AND a non-empty evidence_url.
   FOR t IN SELECT * FROM jsonb_array_elements(COALESCE(p_tiers, '[]'::jsonb)) LOOP
-    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong') THEN
+    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong')
+       OR NULLIF(t ->> 'evidence_url', '') IS NULL THEN
       RAISE EXCEPTION 'provenance_rejected: %', COALESCE(t ->> 'tier_label', '');
     END IF;
   END LOOP;
@@ -81,9 +84,10 @@ DECLARE
   any_pos boolean := FALSE;
   n integer := 0;
 BEGIN
-  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong.
+  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong AND a non-empty evidence_url.
   FOR t IN SELECT * FROM jsonb_array_elements(COALESCE(p_tiers, '[]'::jsonb)) LOOP
-    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong') THEN
+    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong')
+       OR NULLIF(t ->> 'evidence_url', '') IS NULL THEN
       RAISE EXCEPTION 'provenance_rejected: %', COALESCE(t ->> 'tier_label', '');
     END IF;
   END LOOP;

@@ -257,7 +257,7 @@ def test_pricing_organiser_site_subpage_under_its_path_is_strong(monkeypatch):
     main = "<html><body><p>Society Annual Meeting 2027</p></body></html>"
     fake_pages(monkeypatch, {SB: main,
                              org: f'<html><body><p>Society Annual Meeting 2027</p><a href="{reg}">Registration</a></body></html>',
-                             reg: f"<html><body><h1>Registration</h1>{TABLE}</body></html>"})
+                             reg: f"<html><body><h1>Registration</h1><p>Society Annual Meeting 2027</p>{TABLE}</body></html>"})
     res = _price(row={**ROW, "organiser_url": org}, html=main, text="x")
     assert res.found and (res.evidence_url, res.evidence_identity) == (reg, "strong")
 
@@ -614,3 +614,90 @@ def test_coverage_provenance_check():
                                         "venue_pct": None, "city_pct": None}, "sources": {}},
                             [], "2026-10-31", None, provenance="tiers without provenance written since 2026-10-31: 0")
     assert "tiers without provenance written since 2026-10-31: 0" in md
+
+
+# ======================================================================
+# 6. FV2: listing organiser_url, society homepage, ticketing / microsite recall, extractor evidence
+# ======================================================================
+def _ee(row, url, html, **kw):
+    return explorer.external_evidence(row, url, SB, html, None, **kw)
+
+
+def _page(h1, body="", title=None):
+    t = f"<title>{title}</title>" if title else ""
+    return f"<html><head>{t}</head><body><h1>{h1}</h1>{body}{TABLE}</body></html>"
+
+
+def test_listing_organiser_url_does_not_vouch_for_its_children():
+    row = {**ROW, "organiser_url": "https://royalmarsden.example/events"}
+    child = "https://royalmarsden.example/events/lung-masterclass/registration"
+    assert _ee(row, child, _page("Registration")) is None
+    # the same child naming THIS event is fine
+    ok = _ee(row, child, _page("Registration", "<p>Society Annual Meeting 2027</p>"))
+    assert ok == (child, "strong")
+
+
+def test_root_organiser_with_registration_page_naming_the_event_is_strong():
+    row = {**ROW, "organiser_url": "https://valdisere-vilgrain.com/"}
+    reg = "https://valdisere-vilgrain.com/registration"
+    assert _ee(row, reg, _page("Society Annual Meeting 2027 registration")) == (reg, "strong")
+
+
+def test_society_homepage_declared_as_organiser_is_not_evidence(monkeypatch):
+    root = "https://society.example/"
+    fake_pages(monkeypatch, {root: "<html><body><h1>Welcome to the Society</h1><p>Membership £120</p></body></html>"})
+    row = {**ROW, "organiser_url": root}
+    assert _ee(row, root, "<html><body><h1>Welcome to the Society</h1><p>Membership £120</p></body></html>") is None
+
+
+def test_declared_link_with_a_path_still_counts_when_not_rejected():
+    row = {**ROW, "organiser_url": "https://soc2.example/meeting"}
+    page = "https://soc2.example/meeting"
+    assert _ee(row, page, "<html><body><h1>Book your place</h1>£100</body></html>") == (page, "strong")
+
+
+EB = "https://www.eventbrite.co.uk/e/tickets-99"
+
+
+def test_ticketing_page_with_title_in_heading_reached_from_own_page_is_strong():
+    html = f"<html><head><title>Society Annual Meeting 2027 tickets | Eventbrite</title></head><body>£95</body></html>"
+    assert _ee(ROW, EB, html, via_own_page=True) == (EB, "strong")
+    other = "<html><head><title>Some other event tickets</title></head><body>£95</body></html>"
+    assert _ee(ROW, EB, other, via_own_page=True) is None
+
+
+ROW_C = {**ROW, "conference_name": "Cardiology Imaging Symposium 2027"}
+
+
+def test_microsite_root_about_this_event_vouches_for_its_pages(monkeypatch):
+    root = "https://abic2027.example/"
+    reg = root + "registration"
+    fake_pages(monkeypatch, {root: "<html><body><h1>Cardiology Imaging Symposium</h1>"
+                                   "<p>Welcome to the Cardiology Imaging Symposium</p></body></html>"})
+    row = {**ROW_C, "organiser_url": root}
+    assert _ee(row, reg, _page("Registration")) == (reg, "strong")
+
+
+def test_society_root_that_merely_mentions_the_event_does_not_vouch(monkeypatch):
+    root = "https://society.example/"
+    reg = root + "membership-registration"
+    fake_pages(monkeypatch, {root: "<html><body><h1>Welcome to the Society</h1><p>Our cardiology programme is growing.</p></body></html>"})
+    row = {**ROW_C, "organiser_url": root}
+    assert _ee(row, reg, _page("Registration")) is None
+
+
+def test_extractor_venue_and_abstract_are_stamped_own_page_and_discovery_overrides_only_its_fields():
+    from llm_agent import AgentLoop
+    merged = {"venue_name": "Hall", "city": "Leeds", "abstract_open": False, "abstract_deadline": None,
+              "abstract_deadline_note": None, "venue_evidence_url": "https://stale/", "venue_evidence_identity": "strong"}
+    AgentLoop._stamp_own_page_fields(merged, OWN)
+    assert (merged["venue_evidence_url"], merged["venue_evidence_identity"]) == (OWN, "own_page")   # stale replaced
+    assert "abstract_evidence_url" not in merged                      # nothing to stamp
+    merged["abstract_deadline"] = "2027-08-01"
+    AgentLoop._stamp_own_page_fields(merged, OWN)
+    assert merged["abstract_evidence_identity"] == "own_page"
+    # discovery fills only the empty fields: venue keeps the extractor's evidence
+    res = discovery.DiscoveryResult(venue_name="Other", city="Other")
+    res.field_evidence["venue"] = {"url": "https://x/travel", "identity": "strong"}
+    apply_to_row(merged, res)
+    assert merged["venue_evidence_url"] == OWN and merged["venue_name"] == "Hall"

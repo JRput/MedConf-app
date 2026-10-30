@@ -274,6 +274,7 @@ class AgentLoop:
             merged["_evidence"] = sorted(set(merged.get("_evidence") or []) | set(detail.get("_evidence") or []))
             merged["_evidence_aware"] = "_evidence" in detail
             self._stamp_own_page_tiers(merged, booking_url)
+            self._stamp_own_page_fields(merged, booking_url)
             self._ensure_submission_info(merged, booking_url)
             self._discover_missing(merged, booking_url)
             return merged
@@ -290,6 +291,20 @@ class AgentLoop:
             if isinstance(t, dict) and not (t.get("evidence_url") or t.get("evidence_identity")):
                 t["evidence_url"] = url
                 t["evidence_identity"] = "own_page"
+
+    @staticmethod
+    def _stamp_own_page_fields(merged: Dict[str, Any], url: str) -> None:
+        """Provenance for venue / abstract values the per-source extractor supplied: they come
+        from the page fetched for this row -> (url, own_page). Only fields actually present are
+        stamped; a re-detail that supplies the value again replaces any stale discovery evidence.
+        Discovery (apply_to_row) overrides only for the fields it itself fills."""
+        if merged.get("venue_name") or merged.get("city"):
+            merged["venue_evidence_url"] = url
+            merged["venue_evidence_identity"] = "own_page"
+        if (merged.get("abstract_deadline") or merged.get("abstract_deadline_note")
+                or merged.get("abstract_open") is True):
+            merged["abstract_evidence_url"] = url
+            merged["abstract_evidence_identity"] = "own_page"
 
     def _ensure_submission_info(self, merged: Dict[str, Any], url: str) -> None:
         """Pipeline-level guarantee (Mission P6): if the extractor left every
@@ -320,6 +335,14 @@ class AgentLoop:
             merged["abstract_open"] = bool(is_open)
             merged["abstract_deadline"] = deadline.isoformat() if deadline else None
             merged["abstract_deadline_note"] = note
+            if source == "page text":
+                merged["abstract_evidence_url"] = url
+                merged["abstract_evidence_identity"] = "own_page"
+            else:
+                # read off a followed call-for-papers link whose identity is not verified here:
+                # leave the provenance unknown rather than mislabel it
+                merged.pop("abstract_evidence_url", None)
+                merged.pop("abstract_evidence_identity", None)
             logger.info(f"  submission info from {source}: open={is_open} "
                         f"deadline={deadline} note={note}")
         except Exception as e:

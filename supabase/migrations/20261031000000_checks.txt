@@ -9,3 +9,5 @@ SELECT NOT has_function_privilege('anon','public.remediator_replace_tiers_if_zer
 SELECT (SELECT prosecdef FROM pg_proc WHERE oid='public.remediator_replace_tiers_if_zero_or_generic(bigint,jsonb)'::regprocedure) AND NOT (SELECT prosecdef FROM pg_proc WHERE oid='public.remediator_insert_tiers_if_empty(integer,jsonb)'::regprocedure) AS ok
 SELECT (SELECT bool_and(prosrc LIKE '%provenance_rejected%' AND prosrc LIKE '%FOR UPDATE%' AND prosrc LIKE '%evidence_identity%') FROM pg_proc WHERE proname IN ('remediator_insert_tiers_if_empty','remediator_replace_tiers_if_zero_or_generic')) AS ok
 SELECT (SELECT proconfig::text FROM pg_proc WHERE oid='public.remediator_replace_tiers_if_zero_or_generic(bigint,jsonb)'::regprocedure) LIKE '%search_path=public, pg_catalog%' AS ok
+SELECT (SELECT column_default FROM information_schema.columns WHERE table_schema='public' AND table_name='pricing_tiers' AND column_name='written_at') LIKE '%now()%' AS ok
+SELECT (SELECT count(*) FROM public.pricing_tiers WHERE written_at IS NOT NULL AND written_by IS NULL AND evidence_identity IS NULL) = 0 AS ok   -- no legacy row stamped by the migration
