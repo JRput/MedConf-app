@@ -61,6 +61,7 @@ class IdweekExtractor(BaseExtractor):
 
     # ------------------------------------------------------------ listing
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
+        self.verified_empty = None  # reset so a retried instance carries no stale reason
         html = self._fetch(HOME_URL)
         if not html:
             logger.warning("IDWeek: homepage unavailable - no shells")
@@ -71,6 +72,15 @@ class IdweekExtractor(BaseExtractor):
             text,
         )
         if not m:
+            years = re.findall(r"(?i)IDWeek\s+(20\d\d)", text)
+            if years:
+                year = max(years)
+                self.verified_empty = (
+                    f"IDWeek {year} edition over or dates not yet published "
+                    "(homepage shows no date line)"
+                )
+                logger.info(f"IDWeek: {self.verified_empty} - no shells")
+                return []
             logger.warning("IDWeek: could not parse date line on homepage - no shells")
             return []
         mon1, d1, mon2, d2, year, city, st = m.groups()
@@ -80,6 +90,7 @@ class IdweekExtractor(BaseExtractor):
         except (ValueError, KeyError):
             return []
         if end < date.today():
+            self.verified_empty = f"IDWeek {year} ended {end.isoformat()}; next edition not yet announced"
             logger.info(f"IDWeek: {year} meeting already over - no shells")
             return []
         city = city.strip().rstrip(",")

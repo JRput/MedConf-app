@@ -9,7 +9,8 @@ name: Scrape sources
 # stops the other sources in the group or the other groups.
 on:
   schedule:
-    - cron: '0 2 * * *'   # 02:00 UTC daily
+    # 02:17 UTC daily — off the :00 slot, which GitHub delays by hours under load (observed 5–6 h late 2026-10-23→30)
+    - cron: '17 2 * * *'
   workflow_dispatch:       # manual trigger from GitHub UI
 
 jobs:

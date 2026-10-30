@@ -16,7 +16,8 @@ name: Remediator daily
 # only fails if the process crashes outright.
 on:
   schedule:
-    - cron: '0 4 * * *'   # 04:00 UTC daily
+    # 04:23 UTC daily — off the :00 slot (GitHub delays top-of-hour schedules under load); keeps the ~2 h gap after the 02:17 scrape
+    - cron: '23 4 * * *'
   workflow_dispatch:       # manual trigger
 
 jobs:
@@ -132,6 +133,9 @@ jobs:
   # Advisory full-field audit of every source (added 2026-10-27, coverage
   # mission ticket F). Never turns the run red; the JSON verdicts are the
   # artifact. remediator.audit has no --all flag, so loop over the group ids.
+  # Wall-clock budget 70 min (BUDGET=4200 s, 240 s per source) starting at a
+  # day-rotated offset (day-of-year mod source count), so successive days cover
+  # different sources and the 90-min job cap is never hit by a timeout kill.
   audit-report:
     name: Advisory audit (all sources)
     runs-on: ubuntu-latest
@@ -170,22 +174,35 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
+          echo "AUDIT_DAY=$(date -u +%F)" >> "$GITHUB_ENV"
           python - <<'PY' > /tmp/source_ids.txt
           import re, pathlib
           t = pathlib.Path("../.github/workflows/remediator-daily.yml").read_text()
           ids = sorted({int(i) for m in re.findall(r'source_ids: "([\d,]+)"', t) for i in m.split(",")})
           print(" ".join(map(str, ids)))
           PY
-          for id in $(cat /tmp/source_ids.txt); do
-            timeout 300 python -m remediator.audit --source "$id" > /dev/null 2>&1 || echo "audit source $id: non-PASS or error (advisory)"
+          read -r -a ids < /tmp/source_ids.txt
+          n=${#ids[@]}
+          offset=$(( $(date -u +%j | sed 's/^0*//') % n ))
+          BUDGET=4200
+          PER=240
+          for (( k = 0; k < n; k++ )); do
+            idx=$(( (offset + k) % n ))
+            id=${ids[$idx]}
+            if (( SECONDS + PER > BUDGET )); then
+              echo "audit budget: stopping after $k of $n sources (${SECONDS}s)"
+              break
+            fi
+            timeout "$PER" python -m remediator.audit --source "$id" > /dev/null 2>&1 && echo "audit source $id: PASS" || echo "audit source $id: non-PASS or error (advisory)"
           done
+          echo "audit budget: audited $k of $n sources in ${SECONDS}s, start offset $offset"
 
       - name: Upload audit reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: audit-reports-${{ github.run_id }}
-          path: reports/audit/**
+          path: reports/audit/${{ env.AUDIT_DAY }}/**
           if-no-files-found: warn
           retention-days: 30
 

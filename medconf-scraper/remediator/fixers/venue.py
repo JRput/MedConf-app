@@ -117,32 +117,73 @@ Do not invent. Do not return navigation menu items. If unsure, return null."""
     return candidate, "llm_strict"
 
 
+_PREFIX_RE = re.compile("|".join(_VENUE_PREFIXES), re.I)
+_PREFIX_WINDOW = 160
+_POSTCODE_AREA_CITY = {
+    "SE": "London", "SW": "London", "NW": "London", "N": "London",
+    "E": "London", "W": "London", "WC": "London", "EC": "London",
+    "B": "Birmingham", "M": "Manchester", "L": "Liverpool",
+    "LS": "Leeds", "BS": "Bristol", "SO": "Southampton",
+    # "S" deliberately absent: it also covers Barnsley, Rotherham, Doncaster.
+}
+
+
+def _city_in(text: str) -> Optional[str]:
+    """Earliest whole-word _UK_CITIES match in text; longest name wins a tie."""
+    best = None  # (start, -len, city)
+    for city in _UK_CITIES:
+        m = re.search(rf"\b{re.escape(city)}\b", text)
+        if m:
+            key = (m.start(), -len(city), city)
+            if best is None or key < best:
+                best = key
+    return best[2] if best else None
+
+
+def _prefix_windows(page_text: str) -> list:
+    """The 160 characters following each Venue:/Location:/Address:/held at match.
+
+    Footer zone = the last 15 % of page_text when len(page_text) > 4000;
+    windows starting there are ignored (college addresses sit in footers).
+    """
+    footer_start = len(page_text) * 0.85 if len(page_text) > 4000 else None
+    out = []
+    for m in _PREFIX_RE.finditer(page_text):
+        if footer_start is not None and m.start() >= footer_start:
+            continue
+        out.append(page_text[m.end():m.end() + _PREFIX_WINDOW])
+    return out
+
+
 def fix_city(
     row: dict,
     page_text: str,
     llm_call: Callable[[str], Optional[str]],
 ) -> Tuple[Optional[str], Optional[str]]:
+    if row.get("event_format") == "online":
+        return None, None                      # a webinar has no city
     if not page_text:
         return None, None
-    # Heuristic: look for a known UK city in the body
-    for city in _UK_CITIES:
-        if re.search(rf"\b{re.escape(city)}\b", page_text):
-            return city, "heuristic_known_city"
 
-    # Postcode → city via prefix lookup
-    m = _UK_POSTCODE_RE.search(page_text)
-    if m:
-        pc = m.group(1).upper()
-        area = re.match(r"^([A-Z]{1,2})", pc)
-        if area:
-            mapping = {
-                "SE": "London", "SW": "London", "NW": "London", "N": "London",
-                "E": "London", "W": "London", "WC": "London", "EC": "London",
-                "B": "Birmingham", "M": "Manchester", "L": "Liverpool",
-                "LS": "Leeds", "S": "Sheffield", "BS": "Bristol",
-                "SO": "Southampton",
-            }
-            city = mapping.get(area.group(1))
+    # 1. Known city inside the stored venue name
+    c = _city_in(row.get("venue_name") or "")
+    if c:
+        return c, "heuristic_city_in_venue"
+
+    # 2. Known city right after a location prefix (never a bare word match:
+    #    EANM "Reading Mask" widget, college footer addresses - 2026-10-30)
+    windows = _prefix_windows(page_text)
+    for w in windows:
+        c = _city_in(w)
+        if c:
+            return c, "heuristic_city_after_prefix"
+
+    # 3. Postcode prefix, only for a postcode inside one of those windows
+    for w in windows:
+        m = _UK_POSTCODE_RE.search(w)
+        if m:
+            area = re.match(r"^([A-Z]{1,2})", m.group(1).upper())
+            city = _POSTCODE_AREA_CITY.get(area.group(1)) if area else None
             if city:
                 return city, "heuristic_postcode_prefix"
 

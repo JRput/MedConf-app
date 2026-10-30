@@ -164,6 +164,63 @@ def _txt(frag: str) -> str:
     return re.sub(r"\s+", " ", _html.unescape(re.sub(r"<[^>]+>", " ", frag))).replace("\xa0", " ").strip()
 
 
+_SENT_DATE_RE = re.compile(rf"(?:from\s+)?({_RANGE}),\s*(20\d\d)")
+_SENT_PLACE_RE = re.compile(
+    r"\bin\s+([A-Z][\w .'\u00c0-\u017f-]+?),\s*([A-Z][\w .'\u00c0-\u017f-]+?)(?:,|[.!;]|\s+and\b|\s*$)")
+
+
+def _sentence_form(text: str) -> "Optional[tuple]":
+    """Second wording: the date and the place sit apart in one sentence ("...held at <venue> in New Orleans, Louisiana,
+    and virtually from December 12-15, 2026"). Returns (date text, city, state/country) or None when either is missing."""
+    d = _SENT_DATE_RE.search(text)
+    p = _SENT_PLACE_RE.search(text)
+    if not d or not p:
+        return None
+    return f"{d.group(1)}, {d.group(2)}", p.group(1), p.group(2)
+
+
+_STRUCT_DATE_RE = re.compile(
+    r"^[A-Z][a-z]{2,8}\.?\s+\d{1,2}(?:,\s*20\d\d)?\s*[\u2013\u2014-]\s*(?:[A-Z][a-z]{2,8}\.?\s+)?\d{1,2},\s*20\d\d$")
+_STRUCT_PLACE_RE = re.compile(r"^([A-Z][A-Za-z\u00c0-\u017f .'-]+?),\s*([A-Z][\w .'\u00c0-\u017f-]+)$")
+
+
+def _heading_key(line: str) -> str:
+    """Heading comparison key: case-insensitive, punctuation dropped, the words 'in' and 'the' ignored, so the old
+    'Highlights of ASH in the Mediterranean, Middle East, and North Africa' equals the 2026-10 'Highlights of ASH in the
+    Mediterranean Middle East and North Africa'."""
+    words = re.sub(r"[^a-z0-9 ]+", "", (line or "").lower().replace("-", "")).split()
+    return " ".join(w for w in words if w not in ("in", "the"))
+
+
+def _structured_rows(seg: List[str], key: str, path: str, hybrid: bool) -> List[Dict[str, Any]]:
+    """2026-10 layout: a '<Mon D - D, YYYY>' line, then within 3 lines a '<City>, <State|Country>' line (North America:
+    'Washington D.C.' has no comma). One row per date/place pair."""
+    rows: List[Dict[str, Any]] = []
+    for k, l in enumerate(seg):
+        if not _STRUCT_DATE_RE.match(l):
+            continue
+        ds = find_dates(l)
+        if not ds:
+            continue
+        for l2 in seg[k + 1:k + 4]:
+            if _STRUCT_DATE_RE.match(l2):
+                break
+            dc = key == "na" and re.fullmatch(r"Washington,?\s+D\.?C\.?", l2)
+            pm = _STRUCT_PLACE_RE.match(l2)
+            if not (dc or pm):
+                continue
+            if dc:
+                city, region = "Washington, DC", _US
+            elif key == "na":
+                city, region = pm.group(1).strip(), _US
+            else:
+                city, region = pm.group(1).strip(), _COUNTRY_FIX.get(pm.group(2).strip(), pm.group(2).strip())
+            rows.append({"key": key, "path": path, "start": ds[0]["start"], "end": ds[0]["end"], "city": city,
+                         "region": region, "format": "hybrid" if hybrid else "in_person"})
+            break
+    return rows
+
+
 def parse_listing(html: str) -> List[Dict[str, Any]]:
     """/meetings HTML -> one dict per upcoming edition (pure): key, path, title, start, end, city, region, format."""
     body = re.sub(r"(?is)<(script|style|svg|noscript|nav|header|footer)\b.*?</\1\s*>", " ", html or "")
@@ -171,7 +228,7 @@ def parse_listing(html: str) -> List[Dict[str, Any]]:
     lines = html_to_lines(body)
     idx = {}
     for key, heading, _path in _PROGRAMMES:
-        hits = [i for i, l in enumerate(lines) if l == heading]
+        hits = [i for i, l in enumerate(lines) if _heading_key(l) == _heading_key(heading)]
         if hits:
             idx[key] = hits[-1]                       # the nav list repeats the titles; the section heading is the last hit
     order = sorted(idx.items(), key=lambda kv: kv[1])
@@ -195,22 +252,30 @@ def parse_listing(html: str) -> List[Dict[str, Any]]:
                         city = "Washington, DC" if m.group(3).replace(".", "") == "DC" else m.group(2).strip()
                         out.append({"key": key, "path": path, "start": ds[0]["start"], "end": ds[0]["end"], "city": city,
                                     "region": _US, "format": "in_person"})
+            if not any(r["key"] == "na" for r in out):
+                out.extend(_structured_rows(seg, key, path, bool(re.search(r"(?i)\b(?:virtual|online)\b", text))))
             continue
         m = re.search(rf"taking place\s+(?:in\s+|on\s+)?({_RANGE},\s*\d{{4}}),?\s+in\s+([A-Z][\w .'\u00c0-\u017f-]+?),\s*([A-Z][\w .'\u00c0-\u017f-]+?)(?:,|[.!]| and online|\s*$)", text)
-        if not m:
-            continue
-        ds = find_dates(m.group(1))
+        if m:
+            date_txt, city, country = m.group(1), m.group(2), m.group(3).strip()
+        else:
+            sent = _sentence_form(text)                # 2026-10: "held at <venue> in <City>, <State>, and virtually from <dates>"
+            if not sent:
+                out.extend(_structured_rows(seg, key, path, bool(re.search(r"(?i)\b(?:virtual|online)\b", text))))
+                continue
+            date_txt, city, country = sent
+        ds = find_dates(date_txt)
         if not ds:
             continue
-        country = m.group(3).strip()
         if key == "annual":
             country = _US                              # "New Orleans, Louisiana": the second part is a state
         title = None
         if key == "annual":
             t = re.search(r"(\d+(?:st|nd|rd|th) ASH Annual Meeting and Exposition)", text)
             title = t.group(1) if t else None
-        out.append({"key": key, "path": path, "start": ds[0]["start"], "end": ds[0]["end"], "city": m.group(2).strip(),
-                    "region": _COUNTRY_FIX.get(country, country), "format": "hybrid" if re.search(r"(?i)\band online\b", text[:600]) else "in_person",
+        out.append({"key": key, "path": path, "start": ds[0]["start"], "end": ds[0]["end"], "city": city.strip(),
+                    "region": _COUNTRY_FIX.get(country, country),
+                    "format": "hybrid" if re.search(r"(?i)\band (?:online|virtually)\b", text[:600]) else "in_person",
                     "title": title})
     return out
 
