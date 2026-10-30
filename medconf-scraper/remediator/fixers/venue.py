@@ -128,30 +128,95 @@ _POSTCODE_AREA_CITY = {
 }
 
 
+# A city name must stand alone: "-" is not a boundary ("Newcastle-under-Lyme"),
+# and only the canonical spelling or its ALL-CAPS form counts ("reading" does not).
+_CITY_FORMS = {}
+for _c in _UK_CITIES:
+    _CITY_FORMS[_c] = _c
+    _CITY_FORMS[_c.upper()] = _c
+_CITY_RE = re.compile(
+    r"(?<![\w-])(?:"
+    + "|".join(re.escape(f) for f in sorted(_CITY_FORMS, key=len, reverse=True))
+    + r")(?![\w-])"
+)
+_UK_POSTCODE_UPPER_RE = re.compile(r"\b([A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2})\b")
+_FOOTER_SIGNATURE_RE = re.compile(
+    r"(?i)(registered (charity|office|company)|company (no|number)|all rights reserved|\u00a9)"
+)
+_EMAIL_BEFORE_RE = re.compile(r"(?i)e-?mail\s*$")
+_SENTENCE_END_RE = re.compile(r"\. (?=[A-Z])")
+
+
+def _city_matches(text: str) -> list:
+    """(start, end, canonical_city) for every standalone city mention."""
+    return [(m.start(), m.end(), _CITY_FORMS[m.group(0)]) for m in _CITY_RE.finditer(text)]
+
+
 def _city_in(text: str) -> Optional[str]:
-    """Earliest whole-word _UK_CITIES match in text; longest name wins a tie."""
+    """Rule 1 (stored venue name): longest city name wins; on equal length the
+    LAST occurrence (the city usually trails the venue)."""
+    best = None  # (len, start, city)
+    for start, _end, city in _city_matches(text):
+        key = (len(city), start, city)
+        if best is None or key > best:
+            best = key
+    return best[2] if best else None
+
+
+def _address_token_end(window: str, end: int) -> bool:
+    """True when the city ending at `end` is delimited like an address token."""
+    rest = window[end:]
+    if not rest.strip():
+        return True
+    if rest[0] in ",.;)]}\n":
+        return True
+    if rest[0].isspace():
+        nxt = rest.lstrip()
+        # "London - Docklands", "Manchester | Central": a dash or pipe after the
+        # city is an address separator too (foreman tune after FV1, 2026-10-30)
+        return bool(nxt[:1].isdigit() or nxt[:1] in "-\u2013|" or _UK_POSTCODE_UPPER_RE.match(nxt))
+    return False
+
+
+def _city_in_window(window: str) -> Optional[str]:
+    """Rule 2: earliest address-token city in the window; longest name wins a tie."""
     best = None  # (start, -len, city)
-    for city in _UK_CITIES:
-        m = re.search(rf"\b{re.escape(city)}\b", text)
-        if m:
-            key = (m.start(), -len(city), city)
-            if best is None or key < best:
-                best = key
+    for start, end, city in _city_matches(window):
+        if not _address_token_end(window, end):
+            continue
+        key = (start, -len(city), city)
+        if best is None or key < best:
+            best = key
     return best[2] if best else None
 
 
 def _prefix_windows(page_text: str) -> list:
-    """The 160 characters following each Venue:/Location:/Address:/held at match.
+    """The text following each Venue:/Location:/Address:/held at match, up to 160
+    characters and cut at the first newline or ". " + capital (sentence end).
 
-    Footer zone = the last 15 % of page_text when len(page_text) > 4000;
-    windows starting there are ignored (college addresses sit in footers).
+    Skipped: prefixes inside a word/hyphenated word or right after "email";
+    windows starting in the footer zone (last 15 % when len > 2000); windows
+    carrying a footer signature (registered charity, (c), all rights reserved...).
     """
-    footer_start = len(page_text) * 0.85 if len(page_text) > 4000 else None
+    footer_start = len(page_text) * 0.85 if len(page_text) > 2000 else None
     out = []
     for m in _PREFIX_RE.finditer(page_text):
+        if m.start() > 0 and (page_text[m.start() - 1].isalpha() or page_text[m.start() - 1] == "-"):
+            continue
+        if _EMAIL_BEFORE_RE.search(page_text[max(0, m.start() - 8):m.start()]):
+            continue
         if footer_start is not None and m.start() >= footer_start:
             continue
-        out.append(page_text[m.end():m.end() + _PREFIX_WINDOW])
+        w = page_text[m.end():m.end() + _PREFIX_WINDOW]
+        if _FOOTER_SIGNATURE_RE.search(w):     # checked on the full window, before the cut
+            continue
+        nl = w.find("\n")
+        if nl >= 0:
+            w = w[:nl]
+        se = _SENTENCE_END_RE.search(w)
+        if se:
+            w = w[:se.start() + 1]
+        out.append(w)
     return out
 
 
@@ -162,27 +227,28 @@ def fix_city(
 ) -> Tuple[Optional[str], Optional[str]]:
     if row.get("event_format") == "online":
         return None, None                      # a webinar has no city
-    if not page_text:
-        return None, None
 
-    # 1. Known city inside the stored venue name
+    # 1. Known city inside the stored venue name (needs no page text)
     c = _city_in(row.get("venue_name") or "")
     if c:
         return c, "heuristic_city_in_venue"
+
+    if not page_text:
+        return None, None
 
     # 2. Known city right after a location prefix (never a bare word match:
     #    EANM "Reading Mask" widget, college footer addresses - 2026-10-30)
     windows = _prefix_windows(page_text)
     for w in windows:
-        c = _city_in(w)
+        c = _city_in_window(w)
         if c:
             return c, "heuristic_city_after_prefix"
 
-    # 3. Postcode prefix, only for a postcode inside one of those windows
+    # 3. Postcode prefix, only for an upper-case postcode inside one of those windows
     for w in windows:
-        m = _UK_POSTCODE_RE.search(w)
+        m = _UK_POSTCODE_UPPER_RE.search(w)
         if m:
-            area = re.match(r"^([A-Z]{1,2})", m.group(1).upper())
+            area = re.match(r"^([A-Z]{1,2})", m.group(1))
             city = _POSTCODE_AREA_CITY.get(area.group(1)) if area else None
             if city:
                 return city, "heuristic_postcode_prefix"

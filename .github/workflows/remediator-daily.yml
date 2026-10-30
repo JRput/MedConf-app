@@ -1,7 +1,7 @@
 name: Remediator daily
 
-# Runs 04:00 UTC daily — two hours after scrape-daily (02:00 UTC) and
-# one hour after specialty-alerts (03:00 UTC), so it sees any events
+# Runs 04:23 UTC daily (cron '23 4 * * *', off the :00 slot since 2026-10-30) — two
+# hours after scrape-daily (02:17 UTC) and after specialty-alerts (03:00 UTC), so it sees any events
 # freshly added or updated by the morning's scrape. Fills gaps the
 # base extractor couldn't (image-based pricing via vision LLM,
 # tab-hidden Salesforce content, sparse landing pages).

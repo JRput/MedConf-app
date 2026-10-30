@@ -5,7 +5,8 @@ Scans remediation reports for city patches with method heuristic_known_city
 nulls the cities the row data does not corroborate.
 
 Dry-run (default): prints a decision table and totals. Never writes.
---apply: PATCH {"city": null, "remediation_attempted_at": null} for "null" decisions.
+--apply: PATCH {"city": null, "remediation_attempted_at": null} for "null" decisions,
+        only where city still equals the value read (compare-and-swap).
 
 Run from medconf-scraper/:  ./.venv/bin/python tools/repair_heuristic_city.py [--reports DIR ...]
 """
@@ -17,6 +18,7 @@ import os
 import re
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 import httpx
 
@@ -85,6 +87,24 @@ def fetch_rows(ids: list[int]) -> list[dict]:
     return rows
 
 
+def apply_null(client, url: str, hdr: dict, row: dict) -> bool:
+    """Null the city of one row, compare-and-swap on the city that was read.
+
+    True = patched; False = row changed since read (skipped, not an error).
+    Non-2xx raises.
+    """
+    hdr = {**hdr, "Content-Type": "application/json", "Prefer": "return=representation"}
+    target = f"{url}/rest/v1/conferences?id=eq.{row['id']}&city=eq.{quote(row['city'], safe='')}"
+    resp = client.patch(target, headers=hdr, timeout=60,
+                        json={"city": None, "remediation_attempted_at": None})
+    resp.raise_for_status()
+    if not resp.json():
+        print(f"row {row['id']} changed since read, skipped")
+        return False
+    print(f"patched {row['id']} -> {resp.status_code}")
+    return True
+
+
 def _t(s, n):
     s = (s or "").replace("\n", " ")
     return s if len(s) <= n else s[: n - 1] + "…"
@@ -117,13 +137,13 @@ def main(argv=None) -> int:
     if not cands:
         sys.exit("refusing to apply: 0 candidates")
     url, hdr = _env()
-    hdr = {**hdr, "Content-Type": "application/json", "Prefer": "return=minimal"}
+    applied = skipped = 0
     for r, _, _ in nulls:
-        resp = httpx.patch(f"{url}/rest/v1/conferences?id=eq.{r['id']}", headers=hdr, timeout=60,
-                           json={"city": None, "remediation_attempted_at": None})
-        resp.raise_for_status()
-        print(f"patched {r['id']} -> {resp.status_code}")
-    print(f"applied {len(nulls)} nulls")
+        if apply_null(httpx, url, hdr, r):
+            applied += 1
+        else:
+            skipped += 1
+    print(f"applied {applied} nulls, skipped {skipped} (row changed since read)")
     return 0
 
 

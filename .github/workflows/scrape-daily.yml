@@ -1,7 +1,8 @@
 name: Scrape sources
 
 # Triggers:
-#   - Every day at 02:00 UTC, automatically
+#   - Every day at 02:17 UTC (cron '17 2 * * *' — moved off the :00 slot on 2026-10-30; GitHub delayed the
+#     02:00 schedule by 5–6 h every night 2026-10-23→30), automatically
 #   - On manual "Run workflow" button click in the GitHub Actions tab
 #
 # Sources run in 5 parallel groups (matrix strategy), ~8 sources per job,

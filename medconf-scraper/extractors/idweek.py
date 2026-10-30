@@ -41,6 +41,15 @@ _MONTHS = {m: i + 1 for i, m in enumerate(
 _MON = r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?"
 
 
+_OVER_SIGNAL_RE = re.compile(
+    r"(?i)(on-?demand|claim your idweek 20\d\d ce credits|thank you for (attending|joining))"
+)
+
+
+def _today() -> date:
+    return date.today()
+
+
 def _flatten(fragment: str) -> str:
     t = re.sub(r"(?is)<(script|style)[^>]*>.*?</\1>", " ", fragment)
     t = re.sub(r"(?s)<[^>]+>", " ", t)
@@ -73,7 +82,10 @@ class IdweekExtractor(BaseExtractor):
         )
         if not m:
             years = re.findall(r"(?i)IDWeek\s+(20\d\d)", text)
-            if years:
+            # Verified-empty only for an edition that is over: an "edition over"
+            # signal AND no IDWeek year later than today's (a later year means an
+            # upcoming edition is advertised, so a missing date line is a parser break).
+            if years and _OVER_SIGNAL_RE.search(text) and int(max(years)) <= _today().year:
                 year = max(years)
                 self.verified_empty = (
                     f"IDWeek {year} edition over or dates not yet published "
@@ -89,7 +101,7 @@ class IdweekExtractor(BaseExtractor):
             end = date(int(year), _MONTHS[(mon2 or mon1).lower()[:3]], int(d2))
         except (ValueError, KeyError):
             return []
-        if end < date.today():
+        if end < _today():
             self.verified_empty = f"IDWeek {year} ended {end.isoformat()}; next edition not yet announced"
             logger.info(f"IDWeek: {year} meeting already over - no shells")
             return []
