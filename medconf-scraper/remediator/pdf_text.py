@@ -28,20 +28,11 @@ NEG_LINK_RE = re.compile(
     r"\btraining|cost[-_ ]of|(?<![a-z])membership|(?<![a-z])subscription|(?<![a-z])exam(?:s|ination)?(?![a-z])|medicare|"
     r"fee[-_ ]schedule|(?<![a-z])reports?(?![a-z])|\bminutes\b|\bagenda\b|\bbylaws\b|\bhandbook|"
     r"\bcurriculum|\bsyllabus|\bnewsletter|annual[-_ ]report", re.I)
-# The pre-2026-10-30 negatives (exhibitor / sponsor / abstract / policy ... documents) are
-# never overridden by the event-year + fee-word rule either: "Exhibitor-rates-2027.pdf" is
-# still not attendee fees. Only the site-wide additions (training, report, curriculum ...)
-# may be overridden when the file name carries the event year and a fee word.
-BASELINE_NEG_RE = re.compile(
-    r"endorse|application|abstract|sponsor|exhibit|terms|conditions|privacy|"
-    r"cancellation|policy|poster|call[-_ ]for|guidelines|visa|accommodation|travel", re.I)
-# Never overridden by the event-year + fee-word rule.
-HARD_NEG_RE = re.compile(
-    r"(?<![a-z])membership|(?<![a-z])subscription|medicare|fee[-_ ]schedule|"
-    r"(?<![a-z])exam(?:s|ination)?(?![a-z])|cost[-_ ]of|training[-_ ](?:costs?|fees?|rates?)|"
-    r"(?<![a-z])trainee|(?<![a-z])curriculum|(?<![a-z])handbook|\bminutes\b|(?<![a-z])newsletter", re.I)
-_NAME_REPORT_RE = re.compile(r"(?<![a-z])reports?(?![a-z])", re.I)
-_FEE_WORD_RE = re.compile(r"fees?|rates?|registration|pricing|tariff", re.I)
+# No override of a negative name/anchor by "event year + fee word": every spelling rule the
+# verifier probed reopened another ("Training-programme-fees-2027.pdf" is a training-cost
+# schedule, "Registration-fees-and-training-day-2027.pdf" is not; a file name cannot tell them
+# apart). Fail closed: a document named with training / report / agenda / syllabus ... is
+# skipped and the audit flags the miss (2026-10-30).
 # Text-level negative: the document itself reads as a membership/training/exam price list.
 NEG_TEXT_RE = re.compile(
     r"membership fees?|membership rates?|annual membership|membership (?:fees?|rates?|subscription)|subscription|cost of training|training fees?|(?:core|higher|specialty) trainees?|examination fee|MRCPsych|CPD subscription", re.I)
@@ -65,16 +56,7 @@ def document_gate(url: str, anchor_text: str, row: Optional[dict]) -> tuple:
     hay = f"{name} {anchor_text or ''}"
     m = NEG_LINK_RE.search(hay)
     if m:
-        sy = _row_start_year(row)
-        # Only a NAME-only hit on one of the overridable words can be overridden: a negative
-        # anchor text ("Training costs report") is the site telling us what the document is.
-        override = (sy is not None and not HARD_NEG_RE.search(hay)
-                    and not BASELINE_NEG_RE.search(hay)
-                    and not NEG_LINK_RE.search(anchor_text or "")
-                    and not _NAME_REPORT_RE.search(name)
-                    and str(sy) in name and _FEE_WORD_RE.search(name))
-        if not override:
-            return False, f"site_wide_document ({m.group(0).strip()})"
+        return False, f"site_wide_document ({m.group(0).strip()})"
     if row:
         from extractors.discovery import url_edition_reason
         why = url_edition_reason(row, url)
@@ -117,7 +99,7 @@ def find_fee_documents(html: str, base_url: str, limit: int = 3,
         hay = f"{name} {text}"
         if not FEE_LINK_RE.search(hay):
             continue
-        # negatives are judged by document_gate (so its year + fee-word override can apply)
+        # negatives (name, anchor, path segments) and editions are judged by document_gate
         if not document_gate(url, text, row)[0]:
             continue
         seen.add(url)

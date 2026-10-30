@@ -98,13 +98,14 @@ def test_rejected_doc_does_not_latch(monkeypatch):
 
 
 def test_legit_names_pass():
-    for n, a in (("Registration-fees-and-training-day-2027.pdf", ""),
-                 ("registration-fees-2027.pdf", "Download the fees (PDF)"),
-                 ("Course-fees-training-courses-2027.pdf", ""),
+    for n, a in (("registration-fees-2027.pdf", "Download the fees (PDF)"),
                  ("Reporting-and-registration-fees-2027.pdf", "")):
         assert document_gate("https://x.org/events/" + n, a, ROW27)[0], n
-    # a negative ANCHOR is the site telling us what the document is: never overridden (fail-closed)
-    assert not document_gate("https://x.org/events/registration-fees-2027.pdf", "Download the fee report", ROW27)[0]
+    # fail-closed (override removed 2026-10-30): a negative word in the name or anchor always rejects
+    for n, a in (("Registration-fees-and-training-day-2027.pdf", ""),
+                 ("Course-fees-training-courses-2027.pdf", ""),
+                 ("registration-fees-2027.pdf", "Download the fee report")):
+        assert not document_gate("https://x.org/events/" + n, a, ROW27)[0], n
 
 
 def test_override_not_for_hard_or_old():
@@ -133,7 +134,7 @@ def test_find_fee_documents_lets_the_override_through_but_not_baseline_negatives
     ]
     html = "".join(f'<a href="{h}">{a}</a>' for h, a in links)
     got = [u.rsplit("/", 1)[-1] for u, _ in find_fee_documents(html, "https://x.org/events/x-2027/", limit=6, row=row)]
-    assert got == ["Registration-fees-and-training-day-2027.pdf", "Course-fees-training-courses-2027.pdf", "registration-fees-2027.pdf"]
+    assert got == ["registration-fees-2027.pdf"]   # override removed: training names fail closed
     for bad in ("Exhibitor-rates-2027.pdf", "Sponsorship-registration-2027.pdf", "Abstract-fees-2027.pdf",
                 "Accommodation-rates-2027.pdf", "Cancellation-fees-2027.pdf", "Policy-fees-2027.pdf"):
         assert document_gate(f"https://x.org/docs/{bad}", "", row)[0] is False, bad
@@ -165,5 +166,8 @@ def test_override_never_admits_training_cost_documents_or_negative_anchors():
     ]
     html = "".join(f'<a href="{h}">{a}</a>' for h, a in links)
     got = [u.rsplit("/", 1)[-1] for u, _ in find_fee_documents(html, "https://x.org/e/x-2027/", limit=10, row=row)]
-    assert got == ["Registration-fees-and-training-day-2027.pdf", "registration-fees-2027.pdf"], got
+    assert got == ["registration-fees-2027.pdf"], got
+    # the training-programme schedule the verifier found: rejected by name now, never priced
+    more = '<a href="/e/Training-programme-fees-2027.pdf"></a><a href="/e/TrainingFees2027.pdf"></a><a href="/e/Agenda-fees-2027.pdf">Programme and fees</a>'
+    assert find_fee_documents(more, "https://x.org/e/x-2027/", limit=10, row=row) == []
     assert document_text_gate("Training fees 2027/28. Core trainee \u00a3450. Higher specialty trainee \u00a3600.", row)[0] is False
