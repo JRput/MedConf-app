@@ -64,7 +64,7 @@ def test_stale_reason_is_reset_on_retry():
 
 
 def test_over_signal_with_current_year_is_verified_empty():
-    e = _ext("<html><body><p>IDWeek 2026 is over. Thank you for attending.</p></body></html>")
+    e = _ext("<html><body><p>Thank you for attending IDWeek 2026.</p></body></html>")
     assert e.list_shells_override() == []
     assert e.verified_empty and "2026" in e.verified_empty
 
@@ -79,3 +79,16 @@ def test_year_mention_without_over_signal_has_no_flag():
     e = _ext("<html><body><p>Welcome to IDWeek 2026</p></body></html>")
     assert e.list_shells_override() == []
     assert e.verified_empty is None
+
+
+def test_previous_edition_over_signal_does_not_flag_new_edition(monkeypatch):
+    monkeypatch.setattr(idweek_mod, "_today", lambda: _dt.date(2027, 5, 1))
+    e = _ext("<html><body><p>IDWeek 2027 Atlanta, Oct 21-25 2027. IDWeek 2026 on-demand available</p></body></html>")
+    assert e.list_shells_override() == []
+    assert e.verified_empty is None
+
+
+def test_real_ondemand_text_flags_2026():
+    e = _ext("<html><body><p>IDWeek 2026. Purchase on-Demand Access</p><p>Claim Your IDWeek 2026 CE Credits</p></body></html>")
+    assert e.list_shells_override() == []
+    assert "2026" in e.verified_empty

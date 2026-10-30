@@ -176,3 +176,35 @@ def test_city_followed_by_dash_or_pipe_separator():
     assert fix_city({}, "Venue: Manchester | Central", lambda _p: None) == ("Manchester", "heuristic_city_after_prefix")
     # a capitalised word after the city still does not count ("Reading Line", "Glasgow SEC")
     assert fix_city({}, "Location: Val d'Isere Accessibility Modules Reading Line Reading Mask", lambda _p: None) == (None, None)
+
+
+# ---------------------------------------------------------------- FV2
+@pytest.mark.parametrize("page,city", [
+    ("Venue: St. Thomas' Hospital, Westminster Bridge Rd, London SE1 7EH", "London"),
+    ("Venue: St. George's Hospital, Blackshaw Road, London SW17 0QT", "London"),
+    ("Venue: Leeds. Registration opens in London", "Leeds"),
+])
+def test_FV2_abbreviation_is_not_sentence_end(page, city):
+    assert fix_city({}, page, _none) == (city, "heuristic_city_after_prefix")
+
+
+@pytest.mark.parametrize("venue,city", [
+    ("Reading Road, London", "London"),
+    ("Thistle Hotel, Brighton Road, Leeds", "Leeds"),
+    ("York Hall, Old Ford Road, London", "London"),
+])
+def test_FV2_road_names_are_not_cities(venue, city):
+    assert fix_city({"venue_name": venue}, "x", _none) == (city, "heuristic_city_in_venue")
+
+
+def test_FV2_reading_room_is_not_a_city():
+    assert fix_city({"venue_name": "The Reading Room, British Library"}, "x", _none) == NONE
+
+
+def test_FV2_road_word_dropped_in_windows_too():
+    assert fix_city({}, "Venue: Reading Road, Henley", _none) == NONE
+
+
+def test_FV2_manchester_postcode_still_ok():
+    assert fix_city({}, "Venue: The Studio, Manchester M1 1AB", _none) == (
+        "Manchester", "heuristic_city_after_prefix")

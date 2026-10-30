@@ -144,12 +144,30 @@ _FOOTER_SIGNATURE_RE = re.compile(
     r"(?i)(registered (charity|office|company)|company (no|number)|all rights reserved|\u00a9)"
 )
 _EMAIL_BEFORE_RE = re.compile(r"(?i)e-?mail\s*$")
-_SENTENCE_END_RE = re.compile(r"\. (?=[A-Z])")
+_SENTENCE_END_RE = re.compile(r"([A-Za-z]+)\. (?=[A-Z])")
+_ABBREVIATIONS = {"st", "dr", "mr", "mrs", "ms", "prof", "rd", "no", "ave", "bldg", "mt"}
+# A city name followed by one of these is a road/room/building name, not a city.
+_STREET_WORD_RE = re.compile(
+    r"\s+(?:Road|Rd|Street|St|Lane|Avenue|Ave|Way|Court|Place|Room|Suite|Hall|House|Building)\b",
+    re.I,
+)
+
+
+def _sentence_cut(w: str) -> str:
+    """Cut at the first real sentence end; abbreviations (St., Dr., Rd. ...) and
+    tokens of two letters or fewer do not end a sentence."""
+    for m in _SENTENCE_END_RE.finditer(w):
+        tok = m.group(1).lower()
+        if tok in _ABBREVIATIONS or len(tok) <= 2:
+            continue
+        return w[:m.end(1) + 1]
+    return w
 
 
 def _city_matches(text: str) -> list:
     """(start, end, canonical_city) for every standalone city mention."""
-    return [(m.start(), m.end(), _CITY_FORMS[m.group(0)]) for m in _CITY_RE.finditer(text)]
+    return [(m.start(), m.end(), _CITY_FORMS[m.group(0)]) for m in _CITY_RE.finditer(text)
+            if not _STREET_WORD_RE.match(text, m.end())]
 
 
 def _city_in(text: str) -> Optional[str]:
@@ -213,9 +231,7 @@ def _prefix_windows(page_text: str) -> list:
         nl = w.find("\n")
         if nl >= 0:
             w = w[:nl]
-        se = _SENTENCE_END_RE.search(w)
-        if se:
-            w = w[:se.start() + 1]
+        w = _sentence_cut(w)
         out.append(w)
     return out
 

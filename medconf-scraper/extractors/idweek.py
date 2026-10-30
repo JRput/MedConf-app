@@ -41,9 +41,16 @@ _MONTHS = {m: i + 1 for i, m in enumerate(
 _MON = r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?"
 
 
-_OVER_SIGNAL_RE = re.compile(
-    r"(?i)(on-?demand|claim your idweek 20\d\d ce credits|thank you for (attending|joining))"
-)
+def _over_signal(text: str, year: str) -> bool:
+    """True when the page says the edition of `year` itself is over (an
+    on-demand or CE-credit line naming that year), not a previous edition."""
+    y = re.escape(year)
+    return bool(re.search(
+        rf"(?i)(idweek\s+{y}\D{{0,80}}on-?demand|on-?demand\D{{0,80}}idweek\s+{y}"
+        rf"|claim your idweek\s+{y} ce credits"
+        rf"|thank you for (attending|joining)\D{{0,40}}idweek\s+{y})",
+        text,
+    ))
 
 
 def _today() -> date:
@@ -85,7 +92,7 @@ class IdweekExtractor(BaseExtractor):
             # Verified-empty only for an edition that is over: an "edition over"
             # signal AND no IDWeek year later than today's (a later year means an
             # upcoming edition is advertised, so a missing date line is a parser break).
-            if years and _OVER_SIGNAL_RE.search(text) and int(max(years)) <= _today().year:
+            if years and int(max(years)) <= _today().year and _over_signal(text, max(years)):
                 year = max(years)
                 self.verified_empty = (
                     f"IDWeek {year} edition over or dates not yet published "
