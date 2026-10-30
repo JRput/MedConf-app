@@ -188,3 +188,29 @@ def test_single_event_site_still_rejects_prior_year_path():
     v, why = _subpage_identity({**SINGLE, "_single_event_site": True},
                                ROOT + "2024/registration", page("Registration"), "Registration")
     assert v == "REJECTED", (v, why)
+
+
+
+# --- foreman follow-up after the FV2 re-check (2026-10-30) ---
+def test_single_event_relaxation_only_on_a_dedicated_congress_host():
+    """A society site holding one live row gets NO relaxation; a root-path congress host does."""
+    society = {"id": 9001, "conference_name": "Basic Practical Skills Course", "start_date": "2027-02-01",
+               "source_url": "https://www.rcog.org.uk/careers-and-training/x/course", "_single_event_site": True}
+    join = "<h1>Join the society</h1><table><tr><td>Annual dues</td><td>\u00a3695</td></tr></table>"
+    v, why = _subpage_identity(society, "https://www.rcog.org.uk/membership/join", join, "Join the society annual dues 695")
+    assert v != "STRONG", (v, why)
+    v, why = _subpage_identity({**SINGLE, "_single_event_site": True}, ROOT + "attendees/registration",
+                               page("Registration"), "Registration DDW 2027")
+    assert (v, why) == ("STRONG", "single_event_site")
+    # no source_url -> no relaxation on any host
+    v, _ = _subpage_identity({**SINGLE, "source_url": None, "_single_event_site": True},
+                             "https://other.org/registration", page("Registration"), "Registration")
+    assert v != "STRONG"
+
+
+def test_tier3_nav_walk_call_is_own_site_gated():
+    import inspect, re
+    from remediator import explorer
+    src = inspect.getsource(explorer)
+    calls = re.findall(r"_follow_nav_pages\(row, sub_html, ext_url[^\n]*", src)
+    assert calls and all("own_site=True" in c for c in calls), calls

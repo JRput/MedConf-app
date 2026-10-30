@@ -1171,8 +1171,15 @@ def _subpage_identity(row: dict, url: str, html: Optional[str], text: Optional[s
         v, why = page_identity(row, url, html or "", text or "", own=own_paths(row),
                                shell_titles=list(shell_titles or ()))
         v = str(v).upper()
-        if (v == "WEAK" and row.get("_single_event_site")
-                and _same_site_as_row(row, url, row.get("source_url") or url)):
+        # Single-event relaxation: a WEAK same-host page counts as the event's own ONLY on a
+        # dedicated congress host — the source's one live row AND a root-path source_url
+        # (ddw.org/, ukio.org.uk/ ...). A society site that happens to hold one live row
+        # (rcog.org.uk/careers-and-training/.../course) gets no relaxation: its membership
+        # or course pages are site-wide (verifier repro 2026-10-30).
+        src = row.get("source_url") or ""
+        if (v == "WEAK" and row.get("_single_event_site") and src
+                and urlparse(src).path in ("", "/")
+                and _same_site_as_row(row, url, src)):
             return "STRONG", "single_event_site"
         return v, why
     except Exception:
@@ -2017,7 +2024,9 @@ def _explore_for_pricing(
             # No registration-named link anywhere: fees often sit under a nav
             # page such as "General Info" (Wix congress microsites).
             if sub_html:
-                nav = _follow_nav_pages(row, sub_html, ext_url, trail, extras, llm_call)
+                # own_site=True: the gate inside checks per URL, so a same-host organiser page
+                # cannot lead the nav walk to another event's fees (verifier 2026-10-30)
+                nav = _follow_nav_pages(row, sub_html, ext_url, trail, extras, llm_call, own_site=True)
                 if nav:
                     ntiers, nav_url, nav_method = nav
                     trail.llm_reasoning = (
