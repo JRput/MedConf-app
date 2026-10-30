@@ -38,12 +38,13 @@ BASELINE_NEG_RE = re.compile(
 # Never overridden by the event-year + fee-word rule.
 HARD_NEG_RE = re.compile(
     r"(?<![a-z])membership|(?<![a-z])subscription|medicare|fee[-_ ]schedule|"
-    r"(?<![a-z])exam(?:s|ination)?(?![a-z])", re.I)
+    r"(?<![a-z])exam(?:s|ination)?(?![a-z])|cost[-_ ]of|training[-_ ](?:costs?|fees?|rates?)|"
+    r"(?<![a-z])trainee|(?<![a-z])curriculum|(?<![a-z])handbook|\bminutes\b|(?<![a-z])newsletter", re.I)
 _NAME_REPORT_RE = re.compile(r"(?<![a-z])reports?(?![a-z])", re.I)
 _FEE_WORD_RE = re.compile(r"fees?|rates?|registration|pricing|tariff", re.I)
 # Text-level negative: the document itself reads as a membership/training/exam price list.
 NEG_TEXT_RE = re.compile(
-    r"membership fees?|membership rates?|annual membership|membership (?:fees?|rates?|subscription)|subscription|cost of training|examination fee|MRCPsych|CPD subscription", re.I)
+    r"membership fees?|membership rates?|annual membership|membership (?:fees?|rates?|subscription)|subscription|cost of training|training fees?|(?:core|higher|specialty) trainees?|examination fee|MRCPsych|CPD subscription", re.I)
 _YEAR20_RE = re.compile(r"(?<![0-9])(20\d\d)(?![0-9])")
 
 
@@ -65,8 +66,11 @@ def document_gate(url: str, anchor_text: str, row: Optional[dict]) -> tuple:
     m = NEG_LINK_RE.search(hay)
     if m:
         sy = _row_start_year(row)
+        # Only a NAME-only hit on one of the overridable words can be overridden: a negative
+        # anchor text ("Training costs report") is the site telling us what the document is.
         override = (sy is not None and not HARD_NEG_RE.search(hay)
                     and not BASELINE_NEG_RE.search(hay)
+                    and not NEG_LINK_RE.search(anchor_text or "")
                     and not _NAME_REPORT_RE.search(name)
                     and str(sy) in name and _FEE_WORD_RE.search(name))
         if not override:

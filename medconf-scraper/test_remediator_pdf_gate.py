@@ -99,10 +99,12 @@ def test_rejected_doc_does_not_latch(monkeypatch):
 
 def test_legit_names_pass():
     for n, a in (("Registration-fees-and-training-day-2027.pdf", ""),
-                 ("registration-fees-2027.pdf", "Download the fee report"),
+                 ("registration-fees-2027.pdf", "Download the fees (PDF)"),
                  ("Course-fees-training-courses-2027.pdf", ""),
                  ("Reporting-and-registration-fees-2027.pdf", "")):
         assert document_gate("https://x.org/events/" + n, a, ROW27)[0], n
+    # a negative ANCHOR is the site telling us what the document is: never overridden (fail-closed)
+    assert not document_gate("https://x.org/events/registration-fees-2027.pdf", "Download the fee report", ROW27)[0]
 
 
 def test_override_not_for_hard_or_old():
@@ -142,3 +144,26 @@ def test_text_gate_accepts_ordinary_member_fees_wording_but_not_membership_rates
     row = {"conference_name": "X Annual Conference 2027", "start_date": "2027-04-14"}
     assert document_text_gate("X Annual Conference 2027 Registration fees. Member fees: \u00a3250, Non-member \u00a3350", row)[0] is True
     assert document_text_gate("Membership rates 2027 \u2014 Full member \u00a3180, Associate \u00a390", row)[0] is False
+
+
+
+def test_override_never_admits_training_cost_documents_or_negative_anchors():
+    """Final re-check (2026-10-30): the override must not reopen the incident's own signature."""
+    from remediator.pdf_text import find_fee_documents, document_text_gate
+    row = {"conference_name": "X Annual Conference 2027", "start_date": "2027-04-14", "source_url": "https://x.org/e/x-2027/"}
+    links = [
+        ("/e/Cost-of-training-fees-2027.pdf", ""),
+        ("/e/registration-2027.pdf", "Training costs report"),
+        ("/e/training-fees-2027.pdf", "Fees"),
+        ("/e/Specialty-training-rates-2027.pdf", ""),
+        ("/e/Curriculum-fees-2027.pdf", ""),
+        ("/e/Trainee-handbook-fees-2027.pdf", ""),
+        ("/e/Minutes-fees-2027.pdf", ""),
+        ("/e/Newsletter-registration-2027.pdf", ""),
+        ("/e/Registration-fees-and-training-day-2027.pdf", "Fees"),
+        ("/e/registration-fees-2027.pdf", "Registration fees"),
+    ]
+    html = "".join(f'<a href="{h}">{a}</a>' for h, a in links)
+    got = [u.rsplit("/", 1)[-1] for u, _ in find_fee_documents(html, "https://x.org/e/x-2027/", limit=10, row=row)]
+    assert got == ["Registration-fees-and-training-day-2027.pdf", "registration-fees-2027.pdf"], got
+    assert document_text_gate("Training fees 2027/28. Core trainee \u00a3450. Higher specialty trainee \u00a3600.", row)[0] is False
