@@ -144,7 +144,7 @@ _FOOTER_SIGNATURE_RE = re.compile(
     r"(?i)(registered (charity|office|company)|company (no|number)|all rights reserved|\u00a9)"
 )
 _EMAIL_BEFORE_RE = re.compile(r"(?i)e-?mail\s*$")
-_SENTENCE_END_RE = re.compile(r"([A-Za-z]+)\. (?=[A-Z])")
+_SENTENCE_END_RE = re.compile(r"([A-Za-z0-9]+)\. (?=[A-Z])")
 _ABBREVIATIONS = {"st", "dr", "mr", "mrs", "ms", "prof", "rd", "no", "ave", "bldg", "mt"}
 # A city name followed by one of these is a road/room/building name, not a city.
 _STREET_WORD_RE = re.compile(
@@ -158,7 +158,8 @@ def _sentence_cut(w: str) -> str:
     tokens of two letters or fewer do not end a sentence."""
     for m in _SENTENCE_END_RE.finditer(w):
         tok = m.group(1).lower()
-        if tok in _ABBREVIATIONS or len(tok) <= 2:
+        # a token with a digit ("Level 2.", "Room 12.") is a real sentence end
+        if not any(ch.isdigit() for ch in tok) and (tok in _ABBREVIATIONS or len(tok) <= 2):
             continue
         return w[:m.end(1) + 1]
     return w

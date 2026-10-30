@@ -208,3 +208,11 @@ def test_FV2_road_word_dropped_in_windows_too():
 def test_FV2_manchester_postcode_still_ok():
     assert fix_city({}, "Venue: The Studio, Manchester M1 1AB", _none) == (
         "Manchester", "heuristic_city_after_prefix")
+
+
+def test_digit_ended_sentence_cuts_the_window():
+    """Foreman tune after the final re-check: "Level 2." / "Room 12." end a sentence."""
+    assert fix_city({}, "Venue: Hall 3, Level 2. Oxford, Cambridge and Leeds also host", lambda _p: None) == (None, None)
+    assert fix_city({}, "Venue: Room 12. Next date in Oxford, 2027", lambda _p: None) == (None, None)
+    # abbreviations still keep the window
+    assert fix_city({}, "Venue: St. Thomas' Hospital, Westminster Bridge Rd, London SE1 7EH", lambda _p: None) == ("London", "heuristic_city_after_prefix")
