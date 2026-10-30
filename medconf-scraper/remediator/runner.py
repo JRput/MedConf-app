@@ -593,7 +593,11 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                         result = explorer(
                             # Shared page: the organiser_url hop is only a loose token/date
                             # identity check, which passes every sibling. Skip it.
-                            row={**row, "organiser_url": None} if shared else row,
+                            row={**(({**row, "organiser_url": None}) if shared else row),
+                                 # Level 2: carried on the row copy so the three
+                                 # explorers keep one signature (page_identity gate)
+                                 "_shell_titles": [c.get("conference_name") or ""
+                                                   for c in conferences]},
                             page_text=f_text or "",
                             page_html=f_html,
                             base_url=url,

@@ -1162,6 +1162,26 @@ def ticketing_host_tiers(row: dict, text: Optional[str], html: Optional[str],
     return _ticketing_tiers(row, text, html, trail or AuditTrail())[0]
 
 
+def _subpage_identity(row: dict, url: str, html: Optional[str], text: Optional[str],
+                      shell_titles=()) -> tuple:
+    """(verdict, reason) from the scrape-time fail-closed page identity check.
+    Any error is REJECTED (fail closed)."""
+    try:
+        from extractors.discovery import page_identity, own_paths
+        v, why = page_identity(row, url, html or "", text or "", own=own_paths(row),
+                               shell_titles=list(shell_titles or ()))
+        return str(v).upper(), why
+    except Exception:
+        return "REJECTED", "identity_error"
+
+
+def _same_site_as_row(row: Optional[dict], url: str, base_url: str) -> bool:
+    if not row:
+        return False
+    host = urlparse(row.get("source_url") or base_url).netloc.lower()
+    return bool(host) and urlparse(url).netloc.lower() == host
+
+
 def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudget",
                                   trail: "AuditTrail", limit: int = 2, row: Optional[dict] = None):
     """On an external event site, fetch up to `limit` same-host registration/
@@ -1175,6 +1195,12 @@ def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudg
         sub_text, sub_html = budget.fetch(url)
         if not sub_text:
             continue
+        if _same_site_as_row(row, url, base_url):
+            _v, _why = _subpage_identity(row, url, sub_html, sub_text,
+                                         (row or {}).get("_shell_titles"))
+            if _v != "STRONG":
+                trail.notes.append(f"subpage_rejected: {url} ({_why})")
+                continue
         trail.subpages_fetched.append(url)
         trail.total_text_chars += len(sub_text)
         trail.notes.append(f"external_subpage_followed: {url} ({text})")
@@ -1760,6 +1786,11 @@ def _explore_for_pricing(
             if url in reg_link_text:
                 trail.notes.append(f"subpage_followed: {url} ({reg_link_text[url]})")
             trail.total_text_chars += len(sub_text)
+            # Fail-closed page identity (same check as scrape-time discovery)
+            _v, _why = _subpage_identity(row, url, sub_html, sub_text, row.get("_shell_titles"))
+            if _v != "STRONG":
+                trail.notes.append(f"subpage_rejected: {url} ({_why})")
+                continue
             # Event-identity gate — skip if this sub-page isn't about our event
             if not page_matches_event(sub_text, url):
                 continue
