@@ -111,3 +111,80 @@ def test_identity_error_fails_closed(monkeypatch):
     import extractors.discovery as d
     monkeypatch.setattr(d, "page_identity", lambda *a, **k: 1 / 0)
     assert _subpage_identity(ROW_1752, CONGRESS, "", "") == ("REJECTED", "identity_error")
+
+
+# ------------------------------------------------------------------ FV2
+SHELLS = ["International Congress 2026", ROW_1423["conference_name"]]
+INFO = HOST + "/events/congress/international-congress-2026/info"
+
+
+def _nav_row(row, shells=SHELLS, **extra):
+    return {**row, "_shell_titles": shells, **extra}
+
+
+def test_nav_walk_rejects_congress_info_page(monkeypatch):
+    row = _nav_row(ROW_1423)
+    main = f'<html><body><h1>{row["conference_name"]}</h1><nav><a href="{INFO}">Practical information</a></nav></body></html>'
+    fake(monkeypatch, {INFO: page("International Congress 2026 — Practical information",
+                                  "<h2>Registration fees</h2>")})
+    trail = AuditTrail()
+    got = explorer._follow_nav_pages(row, main, row["source_url"], trail, {}, None,
+                                     fetch_allowance=2, own_site=True)
+    assert got is None
+    assert any(n.startswith(f"subpage_rejected: {INFO} (") for n in trail.notes)
+    assert INFO not in trail.subpages_fetched
+
+
+def test_nav_walk_accepts_page_whose_h1_is_the_row_title(monkeypatch):
+    row = _nav_row(ROW_1423)
+    info = HOST + "/events/forum-info"
+    main = f'<html><body><h1>{row["conference_name"]}</h1><nav><a href="{info}">Practical information</a></nav></body></html>'
+    fake(monkeypatch, {info: page(row["conference_name"])})
+    got = explorer._follow_nav_pages(row, main, row["source_url"], AuditTrail(), {}, None,
+                                     fetch_allowance=2, own_site=True)
+    assert got and got[0]
+
+
+def test_same_host_organiser_url_is_gated(monkeypatch):
+    org = HOST + "/events/congress/international-congress-2026"
+    row = _nav_row({**ROW_1423, "organiser_url": org})
+    main = f'<html><body><h1>{row["conference_name"]}</h1></body></html>'
+    fake(monkeypatch, {row["source_url"]: main, org: page("International Congress 2026")})
+    res = explore_for_pricing(row=row, page_text="x", page_html=main,
+                              base_url=row["source_url"], llm_call=lambda p: "no")
+    assert not res.found
+    assert any(n.startswith(f"subpage_rejected: {org} (") for n in res.audit_trail.notes)
+
+
+def test_www_normalised_but_events_subdomain_is_external():
+    r = {"source_url": "https://www.rcpsych.ac.uk/e/x"}
+    assert explorer._same_site_as_row(r, "https://rcpsych.ac.uk/a", "")
+    assert explorer._same_site_as_row({"source_url": "https://rcpsych.ac.uk/e"}, "https://www.rcpsych.ac.uk/a", "")
+    assert not explorer._same_site_as_row(r, "https://events.rcpsych.ac.uk/a", "")
+
+
+def test_bare_host_hop_is_gated(monkeypatch):
+    bare = "https://rcpsych.ac.uk/events/congress/international-congress-2026/registration"
+    res = walk(ROW_1752, {bare: page("International Congress 2026 — Registration")}, monkeypatch, nav_href=bare)
+    assert not res.found
+    assert any(n.startswith("subpage_rejected: " + bare) for n in res.audit_trail.notes)
+
+
+ROOT = "https://www.ddw.org/"
+SINGLE = {"id": 9, "conference_name": "DDW 2027", "start_date": "2027-05-15", "source_url": ROOT}
+
+
+def test_single_event_site_weak_becomes_strong():
+    pg = page("Registration")
+    v, why = _subpage_identity({**SINGLE, "_single_event_site": True},
+                               ROOT + "attendees/registration", pg, "Registration DDW 2027")
+    assert (v, why) == ("STRONG", "single_event_site")
+    v2, _ = _subpage_identity({**SINGLE, "_single_event_site": False},
+                              ROOT + "attendees/registration", pg, "Registration DDW 2027")
+    assert v2 == "WEAK"
+
+
+def test_single_event_site_still_rejects_prior_year_path():
+    v, why = _subpage_identity({**SINGLE, "_single_event_site": True},
+                               ROOT + "2024/registration", page("Registration"), "Registration")
+    assert v == "REJECTED", (v, why)

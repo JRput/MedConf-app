@@ -1170,7 +1170,11 @@ def _subpage_identity(row: dict, url: str, html: Optional[str], text: Optional[s
         from extractors.discovery import page_identity, own_paths
         v, why = page_identity(row, url, html or "", text or "", own=own_paths(row),
                                shell_titles=list(shell_titles or ()))
-        return str(v).upper(), why
+        v = str(v).upper()
+        if (v == "WEAK" and row.get("_single_event_site")
+                and _same_site_as_row(row, url, row.get("source_url") or url)):
+            return "STRONG", "single_event_site"
+        return v, why
     except Exception:
         return "REJECTED", "identity_error"
 
@@ -1178,8 +1182,10 @@ def _subpage_identity(row: dict, url: str, html: Optional[str], text: Optional[s
 def _same_site_as_row(row: Optional[dict], url: str, base_url: str) -> bool:
     if not row:
         return False
-    host = urlparse(row.get("source_url") or base_url).netloc.lower()
-    return bool(host) and urlparse(url).netloc.lower() == host
+    def _h(u: str) -> str:
+        return urlparse(u or "").netloc.lower().removeprefix("www.")
+    host = _h(row.get("source_url") or base_url)
+    return bool(host) and _h(url) == host
 
 
 def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudget",
@@ -1439,7 +1445,8 @@ def nav_has_discovery_words(html: str, base_url: str) -> bool:
 
 
 def _follow_nav_pages(row: dict, html: str, base_url: str, trail: "AuditTrail",
-                      extras: dict, llm_call=None, fetch_allowance: Optional[int] = None):
+                      extras: dict, llm_call=None, fetch_allowance: Optional[int] = None,
+                      own_site: bool = False):
     """Microsite fallback: no registration-named link, so follow up to 3 of
     the site's top-level nav pages (General Info / Practical / Abstracts ...).
     Runs every fee detector on each page and the abstract classifier on
@@ -1476,6 +1483,11 @@ def _follow_nav_pages(row: dict, html: str, base_url: str, trail: "AuditTrail",
         flat = re.sub(r"\s+", " ", p_lines) if p_lines else (_t or "")
         if not (flat or p_html):
             continue
+        if own_site and _same_site_as_row(row, url, base_url):
+            _v, _why = _subpage_identity(row, url, p_html, flat, row.get("_shell_titles"))
+            if _v != "STRONG":
+                trail.notes.append(f"subpage_rejected: {url} ({_why})")
+                continue
         trail.subpages_fetched.append(url)
         trail.total_text_chars += len(flat or "")
         trail.notes.append(f"nav_page_followed: {url} ({text})")
@@ -1782,15 +1794,15 @@ def _explore_for_pricing(
             sub_text, sub_html = budget.fetch(url)
             if not sub_text:
                 continue
-            trail.subpages_fetched.append(url)
-            if url in reg_link_text:
-                trail.notes.append(f"subpage_followed: {url} ({reg_link_text[url]})")
-            trail.total_text_chars += len(sub_text)
             # Fail-closed page identity (same check as scrape-time discovery)
             _v, _why = _subpage_identity(row, url, sub_html, sub_text, row.get("_shell_titles"))
             if _v != "STRONG":
                 trail.notes.append(f"subpage_rejected: {url} ({_why})")
                 continue
+            trail.subpages_fetched.append(url)
+            if url in reg_link_text:
+                trail.notes.append(f"subpage_followed: {url} ({reg_link_text[url]})")
+            trail.total_text_chars += len(sub_text)
             # Event-identity gate — skip if this sub-page isn't about our event
             if not page_matches_event(sub_text, url):
                 continue
@@ -1862,7 +1874,8 @@ def _explore_for_pricing(
                                f"allowance {NAV_UNFLAGGED_ALLOWANCE} fetches")
             logger.info(f"explorer: nav walk on unflagged source {base_url}")
         nav = _follow_nav_pages(row, page_html, base_url, trail, extras, llm_call,
-                                fetch_allowance=None if _flagged else NAV_UNFLAGGED_ALLOWANCE)
+                                fetch_allowance=None if _flagged else NAV_UNFLAGGED_ALLOWANCE,
+                                own_site=True)
         if nav:
             ntiers, nav_url, nav_method = nav
             trail.llm_reasoning = f"Followed nav page {nav_url} of the event microsite. Found prices via {nav_method}."
@@ -1904,6 +1917,11 @@ def _explore_for_pricing(
             if not sub_text:
                 trail.notes.append(f"external_fetch_failed: {ext_url}")
                 continue
+            if _same_site_as_row(row, ext_url, base_url):
+                _v, _why = _subpage_identity(row, ext_url, sub_html, sub_text, row.get("_shell_titles"))
+                if _v != "STRONG":
+                    trail.notes.append(f"subpage_rejected: {ext_url} ({_why})")
+                    continue
             trail.subpages_fetched.append(ext_url)
             trail.total_text_chars += len(sub_text)
             trail.notes.append(f"external_followed: {ext_url} (link text: {link_text!r})")

@@ -597,7 +597,8 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                                  # Level 2: carried on the row copy so the three
                                  # explorers keep one signature (page_identity gate)
                                  "_shell_titles": [c.get("conference_name") or ""
-                                                   for c in conferences]},
+                                                   for c in conferences],
+                                 "_single_event_site": len(conferences) == 1},
                             page_text=f_text or "",
                             page_html=f_html,
                             base_url=url,
