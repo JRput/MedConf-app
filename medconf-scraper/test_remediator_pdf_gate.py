@@ -114,3 +114,31 @@ def test_override_not_for_hard_or_old():
 def test_more_document_suffixes():
     for u in ("a/b.xls", "a/b.PPT", "a/b.odt?x=1", "a/b.rtf"):
         assert _is_document_url("https://a.org/" + u)
+
+
+
+# --- foreman follow-up after the re-check (2026-10-30): the override must reach production ---
+def test_find_fee_documents_lets_the_override_through_but_not_baseline_negatives():
+    from remediator.pdf_text import find_fee_documents, document_gate
+    row = {"conference_name": "X Annual Conference 2027", "start_date": "2027-04-14", "source_url": "https://x.org/events/x-2027/"}
+    links = [
+        ("/docs/Registration-fees-and-training-day-2027.pdf", "Fees"),
+        ("/docs/Course-fees-training-courses-2027.pdf", "Course fees"),
+        ("/docs/Exhibitor-rates-2027.pdf", "Exhibitor rates"),
+        ("/docs/Sponsorship-registration-2027.pdf", "Sponsorship"),
+        ("/docs/Abstract-fees-2027.pdf", "Abstract fees"),
+        ("/docs/registration-fees-2027.pdf", "Registration fees 2027 (PDF)"),
+    ]
+    html = "".join(f'<a href="{h}">{a}</a>' for h, a in links)
+    got = [u.rsplit("/", 1)[-1] for u, _ in find_fee_documents(html, "https://x.org/events/x-2027/", limit=6, row=row)]
+    assert got == ["Registration-fees-and-training-day-2027.pdf", "Course-fees-training-courses-2027.pdf", "registration-fees-2027.pdf"]
+    for bad in ("Exhibitor-rates-2027.pdf", "Sponsorship-registration-2027.pdf", "Abstract-fees-2027.pdf",
+                "Accommodation-rates-2027.pdf", "Cancellation-fees-2027.pdf", "Policy-fees-2027.pdf"):
+        assert document_gate(f"https://x.org/docs/{bad}", "", row)[0] is False, bad
+
+
+def test_text_gate_accepts_ordinary_member_fees_wording_but_not_membership_rates():
+    from remediator.pdf_text import document_text_gate
+    row = {"conference_name": "X Annual Conference 2027", "start_date": "2027-04-14"}
+    assert document_text_gate("X Annual Conference 2027 Registration fees. Member fees: \u00a3250, Non-member \u00a3350", row)[0] is True
+    assert document_text_gate("Membership rates 2027 \u2014 Full member \u00a3180, Associate \u00a390", row)[0] is False

@@ -28,6 +28,13 @@ NEG_LINK_RE = re.compile(
     r"\btraining|cost[-_ ]of|(?<![a-z])membership|(?<![a-z])subscription|(?<![a-z])exam(?:s|ination)?(?![a-z])|medicare|"
     r"fee[-_ ]schedule|(?<![a-z])reports?(?![a-z])|\bminutes\b|\bagenda\b|\bbylaws\b|\bhandbook|"
     r"\bcurriculum|\bsyllabus|\bnewsletter|annual[-_ ]report", re.I)
+# The pre-2026-10-30 negatives (exhibitor / sponsor / abstract / policy ... documents) are
+# never overridden by the event-year + fee-word rule either: "Exhibitor-rates-2027.pdf" is
+# still not attendee fees. Only the site-wide additions (training, report, curriculum ...)
+# may be overridden when the file name carries the event year and a fee word.
+BASELINE_NEG_RE = re.compile(
+    r"endorse|application|abstract|sponsor|exhibit|terms|conditions|privacy|"
+    r"cancellation|policy|poster|call[-_ ]for|guidelines|visa|accommodation|travel", re.I)
 # Never overridden by the event-year + fee-word rule.
 HARD_NEG_RE = re.compile(
     r"(?<![a-z])membership|(?<![a-z])subscription|medicare|fee[-_ ]schedule|"
@@ -36,7 +43,7 @@ _NAME_REPORT_RE = re.compile(r"(?<![a-z])reports?(?![a-z])", re.I)
 _FEE_WORD_RE = re.compile(r"fees?|rates?|registration|pricing|tariff", re.I)
 # Text-level negative: the document itself reads as a membership/training/exam price list.
 NEG_TEXT_RE = re.compile(
-    r"membership fees?|membership rates?|annual membership|member(?:ship)? (?:fees?|rates?|subscription)|subscription|cost of training|examination fee|MRCPsych|CPD subscription", re.I)
+    r"membership fees?|membership rates?|annual membership|membership (?:fees?|rates?|subscription)|subscription|cost of training|examination fee|MRCPsych|CPD subscription", re.I)
 _YEAR20_RE = re.compile(r"(?<![0-9])(20\d\d)(?![0-9])")
 
 
@@ -59,6 +66,7 @@ def document_gate(url: str, anchor_text: str, row: Optional[dict]) -> tuple:
     if m:
         sy = _row_start_year(row)
         override = (sy is not None and not HARD_NEG_RE.search(hay)
+                    and not BASELINE_NEG_RE.search(hay)
                     and not _NAME_REPORT_RE.search(name)
                     and str(sy) in name and _FEE_WORD_RE.search(name))
         if not override:
@@ -103,8 +111,9 @@ def find_fee_documents(html: str, base_url: str, limit: int = 3,
             continue
         name = unquote(urlparse(url).path.rsplit("/", 1)[-1])
         hay = f"{name} {text}"
-        if not FEE_LINK_RE.search(hay) or NEG_LINK_RE.search(hay):
+        if not FEE_LINK_RE.search(hay):
             continue
+        # negatives are judged by document_gate (so its year + fee-word override can apply)
         if not document_gate(url, text, row)[0]:
             continue
         seen.add(url)
