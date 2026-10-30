@@ -672,8 +672,8 @@ ROW_C = {**ROW, "conference_name": "Cardiology Imaging Symposium 2027"}
 def test_microsite_root_about_this_event_vouches_for_its_pages(monkeypatch):
     root = "https://abic2027.example/"
     reg = root + "registration"
-    fake_pages(monkeypatch, {root: "<html><body><h1>Cardiology Imaging Symposium</h1>"
-                                   "<p>Welcome to the Cardiology Imaging Symposium</p></body></html>"})
+    fake_pages(monkeypatch, {root: "<html><head><title>Cardiology Imaging Symposium 2027 | Home</title></head>"
+                                   "<body><p>Welcome</p></body></html>"})
     row = {**ROW_C, "organiser_url": root}
     assert _ee(row, reg, _page("Registration")) == (reg, "strong")
 
@@ -684,6 +684,30 @@ def test_society_root_that_merely_mentions_the_event_does_not_vouch(monkeypatch)
     fake_pages(monkeypatch, {root: "<html><body><h1>Welcome to the Society</h1><p>Our cardiology programme is growing.</p></body></html>"})
     row = {**ROW_C, "organiser_url": root}
     assert _ee(row, reg, _page("Registration")) is None
+
+
+def test_society_root_naming_the_event_once_in_news_does_not_vouch(monkeypatch):
+    root = "https://society.example/"
+    fake_pages(monkeypatch, {root: "<html><body><h1>Welcome to the Society</h1><h2>News</h2>"
+                                   "<p>Advanced Breast Imaging Course announced. Membership £120.</p></body></html>"})
+    row = {**ROW, "conference_name": "Advanced Breast Imaging Course", "organiser_url": root}
+    assert _ee(row, root + "registration", "<html><body><h1>Registration</h1><p>£120</p></body></html>") is None
+
+
+def test_microsite_root_carrying_the_start_date_vouches(monkeypatch):
+    root = "https://abic2027.example/"
+    fake_pages(monkeypatch, {root: "<html><body><h1>Welcome</h1><p>Join us on 10 May 2027.</p></body></html>"})
+    row = {**ROW_C, "organiser_url": root}
+    assert _ee(row, root + "registration", _page("Registration")) is not None
+
+
+def test_royal_marsden_listing_child_is_rejected_even_with_a_slug_matching_own_path():
+    bopa = "https://bopa.org.uk/events/advanced-breast-imaging"
+    row = {"id": 2, "conference_name": "Advanced Breast Imaging Course", "start_date": "2027-05-10",
+           "source_url": bopa, "booking_url": bopa, "organiser_url": "https://royalmarsden.example/events"}
+    child = "https://royalmarsden.example/events/lung-masterclass/registration"
+    html = "<html><body><h1>Registration</h1><p>Lung Cancer Masterclass fees £450</p></body></html>"
+    assert explorer.external_evidence(row, child, bopa, html, None) is None
 
 
 def test_extractor_venue_and_abstract_are_stamped_own_page_and_discovery_overrides_only_its_fields():

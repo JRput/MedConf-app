@@ -771,6 +771,26 @@ def _external_page_tiers(text: Optional[str], html: Optional[str],
 _DATE_FMT = ("%-d %B %Y", "%d %B %Y", "%B %-d", "%-d %B", "%B %-d, %Y", "%-d %b %Y")
 
 
+def _text_has_start_date(row: dict, text: str) -> bool:
+    """The row's start date written out in `text` (any of _DATE_FMT)."""
+    low = (text or "").lower()
+    sd = (row.get("start_date") or "")[:10]
+    if not (low and sd):
+        return False
+    import datetime as _dt
+    try:
+        d = _dt.date.fromisoformat(sd)
+    except ValueError:
+        return False
+    for f in _DATE_FMT:
+        try:
+            if d.strftime(f).lower() in low:
+                return True
+        except ValueError:
+            pass
+    return False
+
+
 def external_identity_ok(row: dict, text: str) -> bool:
     """Loose identity gate for an external page that the event's OWN page
     linked explicitly (the link is the main identity evidence): accept on any
@@ -1231,16 +1251,25 @@ def _organiser_root_is_this_event(row: dict, organiser_url: str, page_url: str, 
     key = (organiser_url, row.get("conference_name"))
     if key in _ROOT_MICROSITE_CACHE:
         return _ROOT_MICROSITE_CACHE[key]
-    root_text = None
+    root_text, root_html = None, None
     if _norm_page_url(page_url) == _norm_page_url(organiser_url):
+        root_html = html
         root_text = text or (_html.unescape(re.sub(r"<[^>]+>", " ", html)) if html else None)
     if not root_text:
         try:
-            root_text, _h = fetch_page_text_and_html(organiser_url)
+            root_text, root_html = fetch_page_text_and_html(organiser_url)
         except Exception:
-            root_text = None
-    ok = bool(root_text) and _strong_event_identity(row, root_text)
+            root_text = root_html = None
+    ok = False
     if root_text:
+        # the ROOT must be about this event: its main heading / <title> equals or contains the
+        # row title, or it carries the row's start date. Token density alone is not enough.
+        from extractors.discovery import _norm, _has, _main_headings
+        title_n = _norm(row.get("conference_name"))
+        _tm = re.search(r"<title\b[^>]*>(.*?)</title\s*>", root_html or "", re.I | re.S)
+        heads = _main_headings(root_html or "") + ([_tm.group(1)] if _tm else [])
+        ok = (bool(title_n) and any(_has(_norm(h), title_n) for h in heads)) \
+            or _text_has_start_date(row, root_text)
         _ROOT_MICROSITE_CACHE[key] = ok
     return ok
 
@@ -1274,7 +1303,7 @@ def external_evidence(row: Optional[dict], page_url: str, base_url: str, html: O
         declared_own = []
         for d in declared:
             o = _own_path(d)
-            if o and o in own_paths({**row, "booking_url": d}):
+            if o and o not in real_own and o in own_paths({**row, "booking_url": d}):
                 declared_own.append(o)          # a listing ancestor of the row's own URL is dropped
         if not text and html:
             text = _html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))).strip()
@@ -1294,9 +1323,9 @@ def external_evidence(row: Optional[dict], page_url: str, base_url: str, html: O
         if why == "own_path" and _under_own_path(page_url, declared_own) \
                 and not _under_own_path(page_url, real_own):
             # strong only through a declared (organiser / booking) path: the page must name the event
-            slug_match = any(
-                any(t in o[1] for t in re.findall(r"[a-z0-9]{5,}", row.get("conference_name", "").lower()))
-                for o in declared_own)
+            toks = re.findall(r"[a-z0-9]{5,}", (row.get("conference_name") or "").lower())
+            slug_match = any(any(t in o[1] for t in toks)
+                             for o in declared_own if _under_own_path(page_url, [o]))
             if not (title_in_heading or title_in_body or slug_match):
                 return None
         return page_url, "strong"
