@@ -80,6 +80,12 @@ CREATE TABLE IF NOT EXISTS conferences (
     -- (e.g. "see event page for details"). When NULL, the date governs.
     abstract_deadline_note TEXT,
     abstract_deadline DATE,
+    -- Evidence provenance (2026-10-31, migration 20261031000000): which page a venue /
+    -- abstract fact came from; identity is own_page | strong | legacy, NULL = unknown.
+    venue_evidence_url TEXT,
+    venue_evidence_identity TEXT CONSTRAINT conferences_venue_evidence_identity_check CHECK (venue_evidence_identity IN ('own_page','strong','legacy')),
+    abstract_evidence_url TEXT,
+    abstract_evidence_identity TEXT CONSTRAINT conferences_abstract_evidence_identity_check CHECK (abstract_evidence_identity IN ('own_page','strong','legacy')),
     -- Remediator round-robin stamp (when the last remediation attempt started)
     remediation_attempted_at TIMESTAMPTZ,
     organiser_url TEXT,
@@ -165,7 +171,12 @@ CREATE TABLE IF NOT EXISTS pricing_tiers (
     currency TEXT NOT NULL DEFAULT 'GBP',
     is_early_bird BOOLEAN DEFAULT FALSE,
     early_bird_deadline DATE,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    -- Evidence provenance (2026-10-31, migration 20261031000000); NULL = unknown (pre-provenance rows).
+    evidence_url TEXT,
+    evidence_identity TEXT CONSTRAINT pricing_tiers_evidence_identity_check CHECK (evidence_identity IN ('own_page','strong','legacy')),
+    written_by TEXT,
+    written_at TIMESTAMPTZ DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_pricing_tiers_session ON pricing_tiers(session_id);
 CREATE INDEX IF NOT EXISTS idx_conferences_event_type ON conferences(event_type);
@@ -618,6 +629,12 @@ DECLARE
   t JSONB;
   n INTEGER := 0;
 BEGIN
+  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong.
+  FOR t IN SELECT * FROM jsonb_array_elements(COALESCE(p_tiers, '[]'::jsonb)) LOOP
+    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong') THEN
+      RAISE EXCEPTION 'provenance_rejected: %', COALESCE(t ->> 'tier_label', '');
+    END IF;
+  END LOOP;
   PERFORM 1 FROM conferences WHERE id = p_conference_id FOR UPDATE;
   IF NOT FOUND THEN
     RETURN 0;
@@ -629,11 +646,13 @@ BEGIN
     IF NULLIF(t ->> 'tier_label', '') IS NULL OR NULLIF(t ->> 'price_gbp', '') IS NULL THEN
       CONTINUE;
     END IF;
-    INSERT INTO pricing_tiers (conference_id, tier_label, price_gbp, currency, is_early_bird, early_bird_deadline)
+    INSERT INTO pricing_tiers (conference_id, tier_label, price_gbp, currency, is_early_bird, early_bird_deadline,
+                               evidence_url, evidence_identity, written_by)
     VALUES (p_conference_id, t ->> 'tier_label', (t ->> 'price_gbp')::numeric,
             COALESCE(NULLIF(t ->> 'currency', ''), 'GBP'),
             COALESCE((t ->> 'is_early_bird')::boolean, FALSE),
-            NULLIF(t ->> 'early_bird_deadline', '')::date);
+            NULLIF(t ->> 'early_bird_deadline', '')::date,
+            NULLIF(t ->> 'evidence_url', ''), t ->> 'evidence_identity', NULLIF(t ->> 'written_by', ''));
     n := n + 1;
   END LOOP;
   RETURN n;
@@ -840,6 +859,13 @@ DECLARE
   any_pos boolean := FALSE;
   n integer := 0;
 BEGIN
+  -- Provenance gate (2026-10-31): every tier must carry evidence_identity own_page|strong.
+  FOR t IN SELECT * FROM jsonb_array_elements(COALESCE(p_tiers, '[]'::jsonb)) LOOP
+    IF COALESCE(t ->> 'evidence_identity', '') NOT IN ('own_page', 'strong') THEN
+      RAISE EXCEPTION 'provenance_rejected: %', COALESCE(t ->> 'tier_label', '');
+    END IF;
+  END LOOP;
+
   PERFORM 1 FROM conferences WHERE id = p_conference_id FOR UPDATE;
   IF NOT FOUND THEN RETURN 0; END IF;
 
@@ -871,7 +897,9 @@ BEGIN
       IF price > 0 THEN any_pos := TRUE; END IF;
       v := v || jsonb_build_array(jsonb_build_object(
              'l', btrim(t ->> 'tier_label'), 'p', price, 'c', cur,
-             'e', COALESCE((t ->> 'is_early_bird')::boolean, FALSE), 'd', dl));
+             'e', COALESCE((t ->> 'is_early_bird')::boolean, FALSE), 'd', dl,
+             'u', NULLIF(t ->> 'evidence_url', ''), 'i', t ->> 'evidence_identity',
+             'w', NULLIF(t ->> 'written_by', '')));
     EXCEPTION WHEN others THEN
       CONTINUE;   -- bad boolean: skip this tier only (a bad date only nulls the deadline)
     END;
@@ -880,9 +908,10 @@ BEGIN
 
   DELETE FROM pricing_tiers WHERE conference_id = p_conference_id;
   FOR t IN SELECT * FROM jsonb_array_elements(v) LOOP
-    INSERT INTO pricing_tiers (conference_id, tier_label, price_gbp, currency, is_early_bird, early_bird_deadline)
+    INSERT INTO pricing_tiers (conference_id, tier_label, price_gbp, currency, is_early_bird, early_bird_deadline,
+                               evidence_url, evidence_identity, written_by)
     VALUES (p_conference_id, t ->> 'l', (t ->> 'p')::numeric, t ->> 'c', (t ->> 'e')::boolean,
-            NULLIF(t ->> 'd', 'null')::date);
+            NULLIF(t ->> 'd', 'null')::date, t ->> 'u', t ->> 'i', t ->> 'w');
     n := n + 1;
   END LOOP;
   RETURN n;

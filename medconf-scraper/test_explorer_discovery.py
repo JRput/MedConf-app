@@ -257,11 +257,13 @@ def test_pricing_follows_eventbrite_link_and_reads_offers(monkeypatch):
     calls = fake_pages(monkeypatch, {BASE: main, eb: _ld([
         {"@type": "Offer", "name": "Delegate", "price": "95", "priceCurrency": "GBP"},
         {"@type": "Offer", "name": "Holding fee", "price": "10", "priceCurrency": "GBP"}])})
-    res = explorer.explore_for_pricing(row=ROW, page_text="Society Annual Meeting 2027", page_html=main,
-                                       base_url=BASE, llm_call=lambda p: None)
+    # provenance: a ticketing page is eligible only when it IS the row's booking_url / organiser_url
+    res = explorer.explore_for_pricing(row={**ROW, "booking_url": eb}, page_text="Society Annual Meeting 2027",
+                                       page_html=main, base_url=BASE, llm_call=lambda p: None)
     assert res.found and res.method.startswith("ticketing_jsonld"), (res.method, res.audit_trail.notes)
     assert [t["price_gbp"] for t in res.value] == [95.0]
     assert res.external_url == eb
+    assert (res.evidence_url, res.evidence_identity) == (eb, "strong")
 
 
 # ---------------------------------------------------------------- 7. LLM sees sub-pages
@@ -539,20 +541,22 @@ def test_city_country_location_line_is_a_city_not_a_venue(line, city):
 
 def test_abstract_explorer_follows_organiser_site(monkeypatch):
     import remediator.fixers.abstract as fa
-    org = "https://congress.example.org/"
-    ab = "https://congress.example.org/abstracts/"
+    org = "https://congress.example.org/am27/"
+    ab = "https://congress.example.org/am27/abstracts/"
     monkeypatch.setattr(fa, "fix_abstract_status",
                         lambda row, text, llm: ({"abstract_open": True, "abstract_deadline": "2027-08-01"}, "stub")
                         if "deadline of 1 August" in text else ({"abstract_open": False}, "no_abstract_mention")
                         if "abstract" not in text.lower() else (None, None))
     main = "<html><body><p>Society Annual Meeting 2027 stub</p></body></html>"
     fake_pages(monkeypatch, {BASE: main,
-                             org: '<html><body>Society Annual Meeting 2027 <a href="/abstracts/">Abstracts</a></body></html>',
+                             org: '<html><body>Society Annual Meeting 2027 <a href="/am27/abstracts/">Abstracts</a></body></html>',
                              ab: "<html><body>Society Annual Meeting 2027 abstracts: regular submission deadline of 1 August</body></html>"})
     res = explorer.explore_for_abstract_status(row={**ROW, "organiser_url": org}, page_text="Society Annual Meeting 2027 stub",
                                                page_html=main, base_url=BASE, llm_call=lambda p: None)
+    # provenance: the organiser_url path counts as an own path, so its sub-page is STRONG
     assert res.found and res.value["abstract_deadline"] == "2027-08-01"
     assert res.external_url == ab
+    assert (res.evidence_url, res.evidence_identity) == (ab, "strong")
 
 
 def test_main_no_abstract_mention_is_not_final_when_organiser_unreachable(monkeypatch):

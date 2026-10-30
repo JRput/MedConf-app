@@ -84,12 +84,34 @@ def update_conference(conference_id: int, data: Dict[str, Any]) -> None:
     supabase.table("conferences").update(data).eq("id", conference_id).execute()
 
 
+PROVENANCE_IDENTITIES = ("own_page", "strong")
+
+
+def tiers_have_provenance(tiers: List[Dict[str, Any]]) -> bool:
+    """True when EVERY tier carries an evidence_url and an evidence_identity in
+    PROVENANCE_IDENTITIES (the write boundary rule; mirrors the RPCs' provenance_rejected)."""
+    return all(
+        t.get("evidence_url") and t.get("evidence_identity") in PROVENANCE_IDENTITIES
+        for t in tiers
+    )
+
+
 def insert_pricing_tiers(conference_id: int, tiers: List[Dict[str, Any]]) -> None:
     """Insert pricing tier rows for a conference.
 
     Each tier may carry a `session_id` (UUID string) to scope it to one
     course_sessions row. Pass it through if present; conference-flat tiers
-    leave it null."""
+    leave it null.
+
+    PROVENANCE: every tier must carry `evidence_url` + `evidence_identity`
+    (own_page | strong). A batch with any tier lacking them is dropped whole
+    (logged `provenance_rejected`, no write). Rows are stamped written_by='scraper'."""
+    if tiers and not tiers_have_provenance(tiers):
+        bad = [t.get("tier_label") for t in tiers
+               if not (t.get("evidence_url") and t.get("evidence_identity") in PROVENANCE_IDENTITIES)]
+        logger.warning(f"provenance_rejected insert_pricing_tiers: conference {conference_id} "
+                       f"batch of {len(tiers)} tier(s) dropped; no evidence_url/identity on {bad[:5]!r}")
+        return
     rows = []
     for t in tiers:
         cur = money.normalize_currency(t.get("currency"))
@@ -105,6 +127,9 @@ def insert_pricing_tiers(conference_id: int, tiers: List[Dict[str, Any]]) -> Non
             "currency": cur,
             "is_early_bird": t.get("is_early_bird", False),
             "early_bird_deadline": t.get("early_bird_deadline"),
+            "evidence_url": t["evidence_url"],
+            "evidence_identity": t["evidence_identity"],
+            "written_by": "scraper",
         }
         if t.get("session_id"):
             row["session_id"] = t["session_id"]

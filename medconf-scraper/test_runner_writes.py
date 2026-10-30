@@ -140,6 +140,7 @@ def _pricing_result(external_url=None):
     tier = {"tier_label": "Member", "price_gbp": 100, "currency": "GBP"}
     return SimpleNamespace(
         found=True, value=[tier], method="text", external_url=external_url,
+        evidence_url=SRC, evidence_identity="own_page",
         extras={}, audit_trail=SimpleNamespace(subpages_fetched=[]),
         to_dict=lambda: {})
 
@@ -280,7 +281,8 @@ def test_abstract_status_side_finding_not_overwritten(monkeypatch):
     def explorer(**kw):
         sb.tables["conferences"][0]["abstract_open"] = False  # concurrent edit
         r = _pricing_result()
-        r.extras = {"abstract_status": AB_VALUE}
+        r.extras = {"abstract_status": AB_VALUE,
+                    "abstract_status_evidence": {"url": SRC, "identity": "strong"}}
         return r
 
     applied = _run(monkeypatch, sb, ["pricing", "abstract_status"],
@@ -296,7 +298,8 @@ def test_abstract_status_side_finding_happy_path(monkeypatch):
 
     def explorer(**kw):
         r = _pricing_result()
-        r.extras = {"abstract_status": AB_VALUE}
+        r.extras = {"abstract_status": AB_VALUE,
+                    "abstract_status_evidence": {"url": SRC, "identity": "strong"}}
         return r
 
     applied = _run(monkeypatch, sb, ["pricing", "abstract_status"],

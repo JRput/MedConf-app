@@ -305,8 +305,30 @@ def _skip_changed(conference_id: int, field: str) -> bool:
     return False
 
 
+# Fields whose value must carry provenance (the page it was read from + how sure we are it is
+# this event's). Mirrors the DB rule: only "own_page" / "strong" evidence is writable.
+PROVENANCE_FIELDS = ("pricing", "venue_name", "city", "abstract_status")
+PROVENANCE_IDENTITIES = ("own_page", "strong")
+
+
+def _clean_evidence(ev) -> Optional[tuple]:
+    """(url, identity) when `ev` is a usable pair, else None."""
+    try:
+        url, ident = ev
+    except (TypeError, ValueError):
+        return None
+    if url and ident in PROVENANCE_IDENTITIES:
+        return str(url), ident
+    return None
+
+
+def _evidence_columns(field: str, ev: tuple) -> dict:
+    prefix = "abstract" if field == "abstract_status" else "venue"
+    return {f"{prefix}_evidence_url": ev[0], f"{prefix}_evidence_identity": ev[1]}
+
+
 def _patch_row(supabase, conference_id: int, field: str, value: Any,
-               expected: Any = None, replace: bool = False) -> bool:
+               expected: Any = None, replace: bool = False, evidence=None) -> bool:
     """Apply one patch to the conferences row. Returns True only if it landed.
 
     Compare-and-swap (2026-10-24): the remediator fills gaps, so every write is
@@ -316,6 +338,11 @@ def _patch_row(supabase, conference_id: int, field: str, value: Any,
     updated rows (update() defaults to return=representation), so an empty
     `data` means nothing was written.
     """
+    ev = _clean_evidence(evidence)
+    if field in ("venue_name", "city", "abstract_status") and ev is None:
+        # write boundary: no evidence url + own_page/strong identity, no write
+        logger.warning(f"remediator: provenance_rejected {conference_id}.{field}: no evidence")
+        return False
     try:
         if field == "pricing":
             # Atomic: the DB function inserts only if the conference has no
@@ -331,6 +358,9 @@ def _patch_row(supabase, conference_id: int, field: str, value: Any,
                     "is_early_bird": t.get("is_early_bird", False),
                     "early_bird_deadline": t.get("early_bird_deadline"),
                 })
+                if ev:
+                    rows[-1].update(evidence_url=ev[0], evidence_identity=ev[1],
+                                    written_by="remediator")
             res = supabase.rpc(
                 REPLACE_TIERS_RPC if replace else "remediator_insert_tiers_if_empty",
                 {"p_conference_id": conference_id, "p_tiers": rows},
@@ -347,7 +377,8 @@ def _patch_row(supabase, conference_id: int, field: str, value: Any,
             # value is a dict of field updates; `expected` is the row as read.
             # All three columns the patch may touch must still hold the values
             # read (None -> IS NULL, bool -> true/false text for PostgREST).
-            q = supabase.table("conferences").update(value).eq("id", conference_id)
+            q = supabase.table("conferences").update({**value, **_evidence_columns(field, ev)}) \
+                .eq("id", conference_id)
             src = expected if isinstance(expected, dict) else {}
             for col in ("abstract_open", "abstract_deadline", "abstract_deadline_note"):
                 v = src.get(col)
@@ -357,7 +388,10 @@ def _patch_row(supabase, conference_id: int, field: str, value: Any,
                     q = q.eq(col, str(v).lower() if isinstance(v, bool) else v)
             res = q.execute()
         else:
-            q = supabase.table("conferences").update({field: value}).eq("id", conference_id)
+            payload = {field: value}
+            if field in ("venue_name", "city"):
+                payload.update(_evidence_columns(field, ev))
+            q = supabase.table("conferences").update(payload).eq("id", conference_id)
             if expected is None:
                 q = q.is_(field, "null")
             else:
@@ -529,6 +563,7 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                 method: Optional[str] = None
                 trail_dict: Optional[dict] = None
                 result = None
+                ev: Optional[tuple] = None       # (evidence_url, identity) of `value`
 
                 # TIER 1 — quick fixer
                 if fixer:
@@ -538,6 +573,9 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                                                   llm_call, society=society)
                         else:
                             value, method = fixer(row, f_text or "", llm_call)
+                        if value is not None:
+                            # the quick fixer reads the row's own page text
+                            ev = (fetch_url or url, "own_page")
                     except Exception as e:
                         logger.warning(
                             f"remediator: fixer {field} crashed on {row['id']}: {e}"
@@ -579,6 +617,7 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                                     if v is not None:
                                         value = v
                                         method = f"promoted:{p['method']}:{sub}"
+                                        ev = (sub_url, "strong")   # replay_gate: page_identity STRONG
                                         break
                                 except Exception:
                                     pass
@@ -613,10 +652,16 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                         # Side finding from a nav page (abstract deadline on
                         # an "Abstracts" page found while hunting for fees).
                         _ab = (getattr(result, "extras", None) or {}).get("abstract_status")
+                        _abev = (getattr(result, "extras", None) or {}).get("abstract_status_evidence") or {}
+                        _abev = (_abev.get("url"), _abev.get("identity"))
                         if _ab and field == "pricing" and "abstract_status" in gaps \
+                                and _clean_evidence(_abev) is None:
+                            logger.warning(f"remediator: provenance_rejected {row['id']}.abstract_status "
+                                           f"(nav side finding): no evidence")
+                        elif _ab and field == "pricing" and "abstract_status" in gaps \
                                 and validate("abstract_status", _ab):
                             if _patch_row(sb, row["id"], "abstract_status", _ab,
-                                      expected=row):
+                                      expected=row, evidence=_abev):
                                 done_fields.add("abstract_status")
                                 patches_applied.append({
                                     "conference_id": row["id"],
@@ -629,6 +674,8 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                         if result.found and result.value is not None:
                             value = result.value
                             method = f"explorer:{result.method}"
+                            ev = _clean_evidence((getattr(result, "evidence_url", None),
+                                                  getattr(result, "evidence_identity", None)))
                             # Record for learning loop
                             try:
                                 subpath = None
@@ -670,6 +717,17 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                             })
                     unfixed.append(field)
                     continue
+                if field in PROVENANCE_FIELDS and _clean_evidence(ev) is None:
+                    logger.warning(f"remediator: provenance_rejected {row['id']}.{field}: "
+                                   f"no evidence url/identity ({method}); counted unfixed")
+                    patches_rejected.append({
+                        "conference_id": row["id"],
+                        "field": field,
+                        "rejected_value": str(value)[:200],
+                        "method": f"provenance_rejected:{method}",
+                    })
+                    unfixed.append(field)
+                    continue
                 if not validate(field, value):
                     patches_rejected.append({
                         "conference_id": row["id"],
@@ -682,7 +740,8 @@ def remediate_source(source_id: int, only_ids: Optional[Iterable[int]] = None) -
                 if _patch_row(sb, row["id"], field, value,
                               expected=row if field == "abstract_status" else row.get(field),
                               replace=(field == "pricing"
-                                       and row.get("_pricing_gap_kind") in ("zero", "partial"))):
+                                       and row.get("_pricing_gap_kind") in ("zero", "partial")),
+                              evidence=ev):
                     patches_applied.append({
                         "conference_id": row["id"],
                         "conference_name": (row.get("conference_name") or "")[:60],

@@ -72,9 +72,17 @@ class ExploreResult:
     # Side findings the runner may patch (e.g. {"abstract_status": {...}} found
     # on a nav page while hunting for fees).
     extras: dict = field(default_factory=dict)
+    # Provenance of the value: the page it was read from and how sure we are it is THIS
+    # event's. identity is "own_page" (the row's own page) or "strong" (a page that passed
+    # the fail-closed identity gate / is the row's organiser_url or booking_url). None = unknown
+    # and the runner refuses to write it.
+    evidence_url: Optional[str] = None
+    evidence_identity: Optional[str] = None
 
     def to_dict(self) -> dict:
         return {
+            "evidence_url": self.evidence_url,
+            "evidence_identity": self.evidence_identity,
             "extras": self.extras,
             "field": self.field,
             "value": self.value,
@@ -930,7 +938,7 @@ def _follow_fee_document(html: Optional[str], base_url: str, budget: "ExploreBud
             from urllib.parse import unquote
             name = unquote(urlparse(url).path.rsplit("/", 1)[-1])
             trail.notes.append(f"pdf_tiers: {len(tiers)} from {url}")
-            return tiers, url, f"pdf:{name}"
+            return _found(tiers, url, f"pdf:{name}", base_url, html)
         return None  # one document per event
     return None
 
@@ -1186,6 +1194,88 @@ def _subpage_identity(row: dict, url: str, html: Optional[str], text: Optional[s
         return "REJECTED", "identity_error"
 
 
+PROVENANCE_IDENTITIES = ("own_page", "strong")
+
+
+class _Found(tuple):
+    """(tiers, url, method) with `.page`: the HTML page the tiers were read from
+    (for a document, the page that linked it). Unpacks exactly like the plain tuple."""
+    page: Optional[str] = None
+    html: Optional[str] = None
+    text: Optional[str] = None
+
+
+def _found(tiers, url: str, method: str, page: Optional[str], html: Optional[str] = None,
+           text: Optional[str] = None) -> "_Found":
+    f = _Found((tiers, url, method))
+    f.page, f.html, f.text = page, html, text
+    return f
+
+
+def _norm_page_url(u: Optional[str]) -> str:
+    """scheme-less, www-less, fragment-less, trailing-slash-less form for URL equality."""
+    p = urlparse(str(u or "").strip())
+    host = p.netloc.lower().removeprefix("www.")
+    if not host:
+        return ""
+    return host + (p.path or "").rstrip("/") + (("?" + p.query) if p.query else "")
+
+
+def external_evidence(row: Optional[dict], page_url: str, base_url: str, html: Optional[str] = None,
+                      text: Optional[str] = None, *, gated: bool = True):
+    """(evidence_url, identity) for a page that is not the row's own page, or None.
+
+    Accepted: a same-site page (`gated=True`: the caller already ran `_subpage_identity` and it
+    was STRONG), or an external page for which the scrape-time `page_identity` returns STRONG with
+    the row's organiser_url / booking_url paths counted as own paths (so the organiser site's
+    registration page, a page whose h1 equals the row title, ... qualify). A page that IS the
+    organiser_url / booking_url is also accepted unless page_identity REJECTS it.
+    A different host, other-edition path, another event's heading or a generic page stays out."""
+    if gated and _same_site_as_row(row, page_url, base_url):
+        return page_url, "strong"
+    if not row or not page_url:
+        return None
+    try:
+        from extractors.discovery import page_identity, own_paths, _own_path
+        declared = [u for u in (row.get("organiser_url"), row.get("booking_url")) if u]
+        own = list(own_paths(row)) + [o for o in (_own_path(u) for u in declared) if o]
+        if not text and html:
+            text = _html.unescape(re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html))).strip()
+        verdict, _why = page_identity(row, page_url, html or "", text or "", own=own,
+                                      shell_titles=list(row.get("_shell_titles") or ()))
+        verdict = str(verdict).upper()
+    except Exception:
+        return None
+    if verdict == "STRONG":
+        return page_url, "strong"
+    n = _norm_page_url(page_url)
+    if verdict != "REJECTED" and n and n in {_norm_page_url(u) for u in declared}:
+        return page_url, "strong"
+    return None
+
+
+def _price_in_text(price, text: str) -> bool:
+    try:
+        fm = f"{float(price):.2f}"
+    except (TypeError, ValueError):
+        return False
+    whole, frac = fm.split(".")
+    flat = re.sub(r"(?<=\d)[,\u202f\u00a0](?=\d{3}\b)", "", text or "")
+    pat = rf"(?<![\d.]){whole}(?:\.{frac[0]}{frac[1]}?)?(?!\d)" if frac != "00" else rf"(?<![\d.]){whole}(?:\.00?)?(?!\d)"
+    return re.search(pat, flat) is not None
+
+
+def _locate_evidence(tiers: list, sources: list):
+    """Which provenance-eligible page the tiers came from: (url, identity) of the source whose
+    text carries the most tier prices (>= 1), or None. `sources` = [(url, identity, text)]."""
+    best, best_n = None, 0
+    for url, ident, text in sources:
+        n = sum(1 for t in tiers if _price_in_text(t.get("price_gbp"), text))
+        if n > best_n:
+            best, best_n = (url, ident), n
+    return best
+
+
 def _same_site_as_row(row: Optional[dict], url: str, base_url: str) -> bool:
     if not row:
         return False
@@ -1220,18 +1310,18 @@ def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudg
         tiers = _sweep(sub_text)
         if tiers:
             trail.notes.append(f"external_subpage_text: {len(tiers)} tiers from {url}")
-            return tiers, url, "text"
+            return _found(tiers, url, "text", url, sub_html, sub_text)
         tt = _plain_table_tiers(sub_html, trail)
         if tt:
             trail.notes.append(f"external_subpage_table: {len(tt)} tiers from {url}")
-            return tt, url, "table"
+            return _found(tt, url, "table", url, sub_html, sub_text)
         _pdf = _follow_fee_document(sub_html, url, budget, trail, row=row)
         if _pdf:
             return _pdf
         rt, how = _rendered_fee_tiers(url, sub_html, trail)
         if rt:
             trail.notes.append(f"external_subpage_rendered_{how}: {len(rt)} tiers from {url}")
-            return rt, url, f"rendered_{how}"
+            return _found(rt, url, f"rendered_{how}", url, sub_html, sub_text)
         if sub_html and vision_time_left() and not source_time_up():
             images = find_money_images(sub_html, url, limit=4, trail=trail)
             if images:
@@ -1245,7 +1335,7 @@ def _follow_registration_subpages(html: str, base_url: str, budget: "ExploreBudg
                     trail.images_ocred += len(images)
                     if vt:
                         trail.notes.append(f"external_subpage_vision: {len(vt)} tiers from {url}")
-                        return vt, url, "vision"
+                        return _found(vt, url, "vision", url, sub_html, sub_text)
                 except Exception as e:
                     trail.notes.append(f"external_subpage_vision_failed: {e}")
     return None
@@ -1502,23 +1592,33 @@ def _follow_nav_pages(row: dict, html: str, base_url: str, trail: "AuditTrail",
             ab = _nav_abstract_status(row, flat or "")
             if ab:
                 extras["abstract_status"] = ab
+                # provenance of the side finding: the runner refuses to write it without this
+                if _same_site_as_row(row, url, base_url) and own_site:
+                    _aev = (url, "strong")          # passed _subpage_identity above
+                else:
+                    _aev = external_evidence(row, url, base_url, p_html, flat, gated=False)
+                if _aev:
+                    extras["abstract_status_evidence"] = {"url": _aev[0], "identity": _aev[1]}
+                else:
+                    trail.notes.append(f"provenance_rejected: {url} (nav abstract page)")
                 trail.notes.append(
                     f"nav_abstract: deadline {ab['abstract_deadline']} open={ab['abstract_open']} from {url}")
         if kind == "fees" and not found:
             tiers, how = _external_page_tiers(flat, p_html, trail, lines=p_lines)
             if tiers:
                 trail.notes.append(f"nav_{how}: {len(tiers)} tiers from {url}")
-                found = (tiers, url, f"nav_{how}")
+                found = _found(tiers, url, f"nav_{how}", url, p_html, flat)
                 continue
             _pdf = _follow_fee_document(p_html, url, budget, trail, row=row)
             if _pdf:
-                found = _pdf
+                found = _pdf       # .page = this nav page (the document's linking page)
+                found.text = flat
                 continue
             if not rendered:
                 rt, how = _rendered_fee_tiers(url, p_html, trail)
                 if rt:
                     trail.notes.append(f"nav_rendered_{how}: {len(rt)} tiers from {url}")
-                    found = (rt, url, f"nav_rendered_{how}")
+                    found = _found(rt, url, f"nav_rendered_{how}", url, p_html, flat)
                     continue
             if p_html and vision_time_left() and not source_time_up():
                 images = find_money_images(p_html, url, limit=4, trail=trail)
@@ -1533,7 +1633,7 @@ def _follow_nav_pages(row: dict, html: str, base_url: str, trail: "AuditTrail",
                         trail.images_ocred += len(images)
                         if vt:
                             trail.notes.append(f"nav_vision: {len(vt)} tiers from {url}")
-                            found = (vt, url, "nav_vision")
+                            found = _found(vt, url, "nav_vision", url, p_html, flat)
                     except Exception as e:
                         trail.notes.append(f"nav_vision_failed: {e}")
     return found
@@ -1608,11 +1708,15 @@ def _explore_for_pricing(
     accumulated_tiers: list = []
     budget = ExploreBudget()
     _sub_chars = [0]
+    # provenance-eligible pages whose text feeds the final LLM pass: (url, identity, text)
+    evidence_sources: list = [(base_url, "own_page", page_text or "")]
 
-    def _accumulate(url: str, txt: Optional[str]) -> None:
+    def _accumulate(url: str, txt: Optional[str], identity: Optional[str] = None) -> None:
         """Feed the final LLM pass the text of each identity-checked sub-page
         (6 000 chars per page, 20 000 in total)."""
         nonlocal accumulated_text
+        if txt and identity in PROVENANCE_IDENTITIES:
+            evidence_sources.append((url, identity, txt))
         room = SUBPAGE_TEXT_TOTAL_CAP - _sub_chars[0]
         if not txt or room <= 0:
             return
@@ -1633,6 +1737,7 @@ def _explore_for_pricing(
         return ExploreResult(
             field="pricing", value=tiers, method="tab_text_regex",
             audit_trail=trail, found=True,
+            evidence_url=base_url, evidence_identity="own_page",
         )
 
     # 1b. Main-page fee image: only an image sitting under this page's own
@@ -1656,6 +1761,7 @@ def _explore_for_pricing(
                     return ExploreResult(
                         field="pricing", value=vtiers, method="vision_main_page",
                         audit_trail=trail, found=True,
+                        evidence_url=base_url, evidence_identity="own_page",
                     )
             except Exception as e:
                 trail.notes.append(f"vision_main_page_failed: {e}")
@@ -1666,7 +1772,8 @@ def _explore_for_pricing(
         ptiers, purl, pmethod = _pdf
         trail.llm_reasoning = f"Found prices in linked fee document {purl}."
         return ExploreResult(field="pricing", value=ptiers, method=pmethod,
-                             audit_trail=trail, found=True, external_url=purl)
+                             audit_trail=trail, found=True, external_url=purl,
+                             evidence_url=base_url, evidence_identity="own_page")
 
     # 2. Walk same-domain sub-pages if HTML available
     parsed = urlparse(base_url)
@@ -1813,14 +1920,14 @@ def _explore_for_pricing(
             # Event-identity gate — skip if this sub-page isn't about our event
             if not page_matches_event(sub_text, url):
                 continue
-            _accumulate(url, sub_text)
+            _accumulate(url, sub_text, "strong")
             tiers = _text_pricing_sweep(sub_text)
             if tiers:
                 trail.llm_reasoning = f"Found prices on sub-page {url} via text regex sweep."
                 trail.notes.append(f"regex_sweep_subpage: {len(tiers)} tiers from {url}")
                 return ExploreResult(
                     field="pricing", value=tiers, method=f"subpage_text:{urlparse(url).path}",
-                    audit_trail=trail, found=True,
+                    audit_trail=trail, found=True, evidence_url=url, evidence_identity="strong",
                 )
             ttiers = _plain_table_tiers(sub_html, trail)
             if ttiers:
@@ -1828,14 +1935,15 @@ def _explore_for_pricing(
                 trail.notes.append(f"table_subpage: {len(ttiers)} tiers from {url}")
                 return ExploreResult(
                     field="pricing", value=ttiers, method=f"subpage_table:{urlparse(url).path}",
-                    audit_trail=trail, found=True,
+                    audit_trail=trail, found=True, evidence_url=url, evidence_identity="strong",
                 )
             _pdf = _follow_fee_document(sub_html, url, budget, trail, row=row)
             if _pdf:
                 ptiers, purl, pmethod = _pdf
                 trail.llm_reasoning = f"Found prices in fee document {purl} linked from {url}."
                 return ExploreResult(field="pricing", value=ptiers, method=pmethod,
-                                     audit_trail=trail, found=True, external_url=purl)
+                                     audit_trail=trail, found=True, external_url=purl,
+                                     evidence_url=url, evidence_identity="strong")
             # Script-driven fee grid on a registration-named page: render it once.
             if url in reg_link_text:
                 rtiers, rhow = _rendered_fee_tiers(url, sub_html, trail)
@@ -1845,7 +1953,7 @@ def _explore_for_pricing(
                     return ExploreResult(
                         field="pricing", value=rtiers,
                         method=f"subpage_rendered_{rhow}:{urlparse(url).path}",
-                        audit_trail=trail, found=True,
+                        audit_trail=trail, found=True, evidence_url=url, evidence_identity="strong",
                     )
             # No text prices — collect fee images
             if sub_html:
@@ -1863,7 +1971,7 @@ def _explore_for_pricing(
                             trail.notes.append(f"vision_subpage: {len(vtiers)} tiers from {url}")
                             return ExploreResult(
                                 field="pricing", value=vtiers, method=f"vision_subpage:{urlparse(url).path}",
-                                audit_trail=trail, found=True,
+                                audit_trail=trail, found=True, evidence_url=url, evidence_identity="strong",
                             )
                     except Exception as e:
                         trail.notes.append(f"vision_failed_on_{url}: {e}")
@@ -1885,12 +1993,17 @@ def _explore_for_pricing(
                                 own_site=True)
         if nav:
             ntiers, nav_url, nav_method = nav
-            trail.llm_reasoning = f"Followed nav page {nav_url} of the event microsite. Found prices via {nav_method}."
-            return ExploreResult(
-                field="pricing", value=ntiers,
-                method=(nav_method if nav_method.startswith("pdf:") else f"subpage_{nav_method}:{urlparse(nav_url).path}"),
-                audit_trail=trail, found=True,
-            )
+            _nev = external_evidence(row, getattr(nav, "page", None) or nav_url, base_url,
+                                 getattr(nav, "html", None), getattr(nav, "text", None))
+            if _nev is None:
+                trail.notes.append(f"provenance_rejected: {getattr(nav, 'page', None) or nav_url}")
+            else:
+                trail.llm_reasoning = f"Followed nav page {nav_url} of the event microsite. Found prices via {nav_method}."
+                return ExploreResult(
+                    field="pricing", value=ntiers,
+                    method=(nav_method if nav_method.startswith("pdf:") else f"subpage_{nav_method}:{urlparse(nav_url).path}"),
+                    audit_trail=trail, found=True, evidence_url=_nev[0], evidence_identity=_nev[1],
+                )
 
     # Note: We deliberately do NOT run vision LLM on the main event page's
     # images here. Doing so picks up unrelated site-wide promo banners (e.g.
@@ -1929,6 +2042,12 @@ def _explore_for_pricing(
                 if _v != "STRONG":
                     trail.notes.append(f"subpage_rejected: {ext_url} ({_why})")
                     continue
+            # Provenance: an external page is eligible only when it IS the row's organiser_url or
+            # booking_url (or a gated same-site page); anything else is discarded outright.
+            ext_ev = external_evidence(row, ext_url, base_url, sub_html, sub_text)
+            if ext_ev is None:
+                trail.notes.append(f"provenance_rejected: {ext_url}")
+                continue
             trail.subpages_fetched.append(ext_url)
             trail.total_text_chars += len(sub_text)
             trail.notes.append(f"external_followed: {ext_url} (link text: {link_text!r})")
@@ -1940,7 +2059,7 @@ def _explore_for_pricing(
                 trail.notes.append(f"external_identity_rejected: {ext_url}")
                 continue
             external_seen = external_seen or ext_url
-            _accumulate(ext_url, sub_text)
+            _accumulate(ext_url, sub_text, ext_ev[1])
             # Ticketing hosts (Eventbrite, Exordo, ...) are a SOURCE of fees: read
             # JSON-LD offers / inline ticket data / the sanitised page text.
             _ticketing = bool(TICKETING_HOST_RE.search(urlparse(ext_url).netloc or ""))
@@ -1955,6 +2074,7 @@ def _explore_for_pricing(
                         field="pricing", value=tk_tiers,
                         method=f"ticketing_{tk_how}:{urlparse(ext_url).netloc}",
                         audit_trail=trail, found=True, external_url=ext_url,
+                        evidence_url=ext_ev[0], evidence_identity=ext_ev[1],
                     )
                 # Nothing usable on the ticket page: its sub-links are marketing pages
                 # (eventbrite.co.uk/l/sell-tickets), and its holding fees / deposits are
@@ -1973,6 +2093,7 @@ def _explore_for_pricing(
                     field="pricing", value=tiers,
                     method=f"external_{'text' if _how == 'text' else _how}:{urlparse(ext_url).netloc}",
                     audit_trail=trail, found=True, external_url=ext_url,
+                    evidence_url=ext_ev[0], evidence_identity=ext_ev[1],
                 )
             # External page might also have fee images
             if sub_html:
@@ -1997,6 +2118,7 @@ def _explore_for_pricing(
                                 field="pricing", value=vtiers,
                                 method=f"external_vision:{urlparse(ext_url).netloc}",
                                 audit_trail=trail, found=True, external_url=ext_url,
+                                evidence_url=ext_ev[0], evidence_identity=ext_ev[1],
                             )
                     except Exception as e:
                         trail.notes.append(f"external_vision_failed: {e}")
@@ -2005,12 +2127,17 @@ def _explore_for_pricing(
                 ptiers, purl, pmethod = _pdf
                 trail.llm_reasoning = f"Followed external link to {ext_url}; fees in linked document {purl}."
                 return ExploreResult(field="pricing", value=ptiers, method=pmethod,
-                                     audit_trail=trail, found=True, external_url=ext_url)
+                                     audit_trail=trail, found=True, external_url=ext_url,
+                                     evidence_url=ext_ev[0], evidence_identity=ext_ev[1])
             # Two-hop: the external congress site keeps fees on its own
             # "Registration" sub-page. Same-host, max 2, shared fetch caps.
             if sub_html:
                 hop = _follow_registration_subpages(sub_html, ext_url, budget, trail, limit=2, row=row)
-                if hop:
+                hop_ev = external_evidence(row, getattr(hop, "page", None) or hop[1], base_url,
+                                           getattr(hop, "html", None), getattr(hop, "text", None)) if hop else None
+                if hop and hop_ev is None:
+                    trail.notes.append(f"provenance_rejected: {getattr(hop, 'page', None) or hop[1]}")
+                if hop and hop_ev:
                     htiers, hop_url, hop_method = hop
                     trail.llm_reasoning = (
                         f"Followed external link {link_text!r} to {ext_url}, then its "
@@ -2020,6 +2147,7 @@ def _explore_for_pricing(
                         method=(hop_method if hop_method.startswith("pdf:")
                                 else f"external_subpage_{hop_method}:{urlparse(hop_url).netloc}"),
                         audit_trail=trail, found=True, external_url=ext_url,
+                        evidence_url=hop_ev[0], evidence_identity=hop_ev[1],
                     )
             # No registration-named link anywhere: fees often sit under a nav
             # page such as "General Info" (Wix congress microsites).
@@ -2027,16 +2155,20 @@ def _explore_for_pricing(
                 # own_site=True: the gate inside checks per URL, so a same-host organiser page
                 # cannot lead the nav walk to another event's fees (verifier 2026-10-30)
                 nav = _follow_nav_pages(row, sub_html, ext_url, trail, extras, llm_call, own_site=True)
-                if nav:
+                nav_ev = external_evidence(row, getattr(nav, "page", None) or nav[1], base_url,
+                                           getattr(nav, "html", None), getattr(nav, "text", None)) if nav else None
+                if nav and nav_ev is None:
+                    trail.notes.append(f"provenance_rejected: {getattr(nav, 'page', None) or nav[1]}")
+                if nav and nav_ev:
                     ntiers, nav_url, nav_method = nav
                     trail.llm_reasoning = (
                         f"Followed external link {link_text!r} to {ext_url}, then nav page "
                         f"{nav_url}. Found prices via {nav_method}.")
                     return ExploreResult(
                         field="pricing", value=ntiers,
-                        method=(nav_method if nav_method.startswith("pdf:")
-                                else f"external_{nav_method}:{urlparse(nav_url).netloc}"),
+                        method=(nav_method if nav_method.startswith("pdf:") else f"external_{nav_method}:{urlparse(nav_url).netloc}"),
                         audit_trail=trail, found=True, external_url=ext_url,
+                        evidence_url=nav_ev[0], evidence_identity=nav_ev[1],
                     )
 
     # 4. LLM with full context: ask if anywhere we've collected mentions money
@@ -2107,9 +2239,18 @@ PAGE TEXT:
             field="pricing", value=None, method="not_found",
             audit_trail=trail, found=False, external_url=external_seen,
         )
+    # The tiers came out of text accumulated from several pages: carry the evidence of the
+    # provenance-eligible page whose text actually holds their prices; none -> discard.
+    _lev = _locate_evidence(out_tiers, evidence_sources)
+    if _lev is None:
+        trail.notes.append("provenance_rejected: llm_full_context tiers not locatable on any eligible page")
+        return ExploreResult(
+            field="pricing", value=None, method="not_found",
+            audit_trail=trail, found=False, external_url=external_seen,
+        )
     return ExploreResult(
         field="pricing", value=out_tiers, method="llm_full_context",
-        audit_trail=trail, found=True,
+        audit_trail=trail, found=True, evidence_url=_lev[0], evidence_identity=_lev[1],
     )
 
 
@@ -2173,6 +2314,7 @@ def explore_for_abstract_status(
         return ExploreResult(
             field="abstract_status", value=val, method=f"main:{method}",
             audit_trail=trail, found=True,
+            evidence_url=base_url, evidence_identity="own_page",
         )
     if val:
         # The MAIN page not naming abstracts is not proof: keep looking (sub-pages,
@@ -2203,16 +2345,24 @@ def explore_for_abstract_status(
             if budget.exhausted():
                 trail.notes.append("explore_budget_exhausted: stopped sub-page walk")
                 break
-            if urlparse(url).path.lower().endswith(".pdf"):
+            is_doc = urlparse(url).path.lower().endswith(".pdf")
+            sub_html = None
+            if is_doc:
                 if budget.exhausted():
                     trail.notes.append("explore_budget_exhausted: stopped sub-page walk")
                     break
                 budget.fetches += 1
                 sub_text = _fetch_document_text(url, trail)
             else:
-                sub_text, _ = budget.fetch(url)
+                sub_text, sub_html = budget.fetch(url)
             if not sub_text:
                 continue
+            if not is_doc:
+                # Fail-closed page identity, exactly as pricing: STRONG or nothing is used
+                _v, _why = _subpage_identity(row, url, sub_html, sub_text, row.get("_shell_titles"))
+                if _v != "STRONG":
+                    trail.notes.append(f"subpage_rejected: {url} ({_why})")
+                    continue
             logger.info(f"explorer: abstract page read {url}")
             trail.subpages_fetched.append(url)
             trail.total_text_chars += len(sub_text)
@@ -2227,9 +2377,12 @@ def explore_for_abstract_status(
             if val:
                 trail.llm_reasoning = f"Sub-page abstract fixer succeeded at {url} via {method}."
                 trail.notes.append(f"subpage_fixer: {url} → {method}")
+                # a document inherits the page it was linked from (the event's own page)
                 return ExploreResult(
                     field="abstract_status", value=val,
                     method=f"subpage:{urlparse(url).path}", audit_trail=trail, found=True,
+                    evidence_url=(base_url if is_doc else url),
+                    evidence_identity=("own_page" if is_doc else "strong"),
                 )
 
     # 2b. One external-organiser hop (EANM stub -> the congress's own site).
@@ -2250,25 +2403,32 @@ def explore_for_abstract_status(
             trail.total_text_chars += len(o_text)
             logger.info(f"explorer: abstract external organiser page followed {organiser}")
             trail.notes.append(f"abstract_external_followed: {organiser}")
-            o_pages = [(organiser, o_text)]
+            o_pages = [(organiser, o_text, o_html)]
             o_links = find_abstract_links(o_html or "", organiser, limit=2)
             for u, t in o_links:
                 pt, _ph = ebudget.fetch(u)
                 if pt:
                     trail.subpages_fetched.append(u)
                     trail.notes.append(f"abstract_external_page_followed: {u} ({t})")
-                    o_pages.append((u, pt))
+                    o_pages.append((u, pt, _ph))
                 else:
                     external_unreached = True
-            for u, pt in o_pages:
+            for u, pt, ph in o_pages:
                 if not _ABSTRACT_PAGE_RE.search(pt):
                     continue
                 val2, method2 = fix_abstract_status(row, pt, llm_call)
                 if val2:
+                    # eligible only when this page IS the row's organiser_url / booking_url
+                    _aev = external_evidence(row, u, base_url, ph, pt, gated=False)
+                    if _aev is None:
+                        trail.notes.append(f"provenance_rejected: {u}")
+                        reached_with_word.append(u)
+                        continue
                     trail.llm_reasoning = f"Organiser-site abstract fixer succeeded at {u} via {method2}."
                     return ExploreResult(field="abstract_status", value=val2,
                                          method=f"external:{urlparse(u).netloc}:{method2}",
-                                         audit_trail=trail, found=True, external_url=u)
+                                         audit_trail=trail, found=True, external_url=u,
+                                         evidence_url=_aev[0], evidence_identity=_aev[1])
                 reached_with_word.append(u)
 
     # 3. LLM with full context for explicit-closed wording
@@ -2296,6 +2456,7 @@ def explore_for_abstract_status(
         return ExploreResult(
             field="abstract_status", value={"abstract_open": False},
             method="no_abstract_anywhere", audit_trail=trail, found=True,
+            evidence_url=base_url, evidence_identity="own_page",
         )
 
     prompt = f"""You are looking for abstract-submission status for a medical conference.
@@ -2343,6 +2504,7 @@ PAGE TEXT:
         return ExploreResult(
             field="abstract_status", value={"abstract_open": False},
             method="llm_no_programme", audit_trail=trail, found=True,
+            evidence_url=base_url, evidence_identity="own_page",
         )
     if status == "closed":
         result = {"abstract_open": False}
@@ -2351,6 +2513,7 @@ PAGE TEXT:
         return ExploreResult(
             field="abstract_status", value=result,
             method="llm_closed", audit_trail=trail, found=True,
+            evidence_url=base_url, evidence_identity="own_page",
         )
     if status == "open":
         result = {"abstract_open": True}
@@ -2364,6 +2527,7 @@ PAGE TEXT:
         return ExploreResult(
             field="abstract_status", value=result,
             method="llm_open", audit_trail=trail, found=True,
+            evidence_url=base_url, evidence_identity="own_page",
         )
     return ExploreResult(
         field="abstract_status", value=None, method="not_found",
@@ -2564,15 +2728,15 @@ def explore_for_venue(row: dict, html: Optional[str], base_url: str, trail: "Aud
     Returns {"venue_name","city","method","url"} or None."""
     budget = budget or ExploreBudget()
 
-    def hit(pl: dict, url: str) -> dict:
+    def hit(pl: dict, url: str, identity: str) -> dict:
         logger.info(f"explorer: venue found via {pl['method']} at {url}: "
                     f"{pl.get('venue_name')!r} / {pl.get('city')!r}")
         trail.notes.append(f"venue_found: {pl['method']} at {url}")
-        return {**pl, "url": url}
+        return {**pl, "url": url, "identity": identity}
 
     pl = extract_place_from_html(html or "", base_url)
     if pl:
-        return hit(pl, base_url)
+        return hit(pl, base_url, "own_page")
 
     pages = 0
     for url, text in find_venue_links(html or "", base_url, limit=VENUE_MAX_PAGES):
@@ -2585,14 +2749,16 @@ def explore_for_venue(row: dict, html: Optional[str], base_url: str, trail: "Aud
             continue
         trail.subpages_fetched.append(url)
         trail.total_text_chars += len(sub_text)
-        if outside_event_path(base_url, url) and not _strong_event_identity(row, sub_text):
-            trail.notes.append(f"venue_page_rejected_identity: {url}")
+        # Fail-closed page identity, exactly as pricing: STRONG or the page is not used
+        _v, _why = _subpage_identity(row, url, sub_html, sub_text, row.get("_shell_titles"))
+        if _v != "STRONG":
+            trail.notes.append(f"subpage_rejected: {url} ({_why})")
             continue
         logger.info(f"explorer: venue page followed {url} ({text})")
         trail.notes.append(f"venue_page_followed: {url} ({text})")
         pl = extract_place_from_html(sub_html or "", url)
         if pl:
-            return hit(pl, url)
+            return hit(pl, url, "strong")
 
     organiser = (row.get("organiser_url") or "").strip()
     src = (row.get("source_url") or base_url or "").split("#")[0].rstrip("/")
@@ -2609,7 +2775,11 @@ def explore_for_venue(row: dict, html: Optional[str], base_url: str, trail: "Aud
                 trail.notes.append(f"venue_external_followed: {organiser}")
                 pl = extract_place_from_html(o_html or "", organiser)
                 if pl:
-                    return hit(pl, organiser)
+                    # the organiser page IS the row's organiser_url -> eligible
+                    _oev = external_evidence(row, organiser, base_url, o_html, o_text, gated=False)
+                    if _oev:
+                        return hit(pl, _oev[0], _oev[1])
+                    trail.notes.append(f"provenance_rejected: {organiser}")
                 for url, text in find_venue_links(o_html or "", organiser, limit=1):
                     if budget.exhausted():
                         break
@@ -2620,7 +2790,11 @@ def explore_for_venue(row: dict, html: Optional[str], base_url: str, trail: "Aud
                     trail.notes.append(f"venue_external_page_followed: {url} ({text})")
                     pl = extract_place_from_html(v_html or "", url)
                     if pl:
-                        return hit(pl, url)
+                        _vev = external_evidence(row, url, base_url, v_html, v_text, gated=False)
+                        if _vev is None:
+                            trail.notes.append(f"provenance_rejected: {url}")
+                            continue
+                        return hit(pl, _vev[0], _vev[1])
     return None
 
 
@@ -2639,7 +2813,8 @@ def _venue_field_explorer(field_name: str):
                                  audit_trail=trail, found=False)
         trail.llm_reasoning = f"{field_name} from {got['method']} at {got['url']}."
         return ExploreResult(field=field_name, value=value, method=f"venue_{got['method']}",
-                             audit_trail=trail, found=True)
+                             audit_trail=trail, found=True,
+                             evidence_url=got.get("url"), evidence_identity=got.get("identity"))
     return run
 
 

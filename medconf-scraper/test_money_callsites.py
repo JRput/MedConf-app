@@ -21,7 +21,8 @@ def _conf(tiers, **kw):
 
 
 def _tier(price, cur=None, label="Member"):
-    t = {"tier_label": label, "price_gbp": price}
+    t = {"tier_label": label, "price_gbp": price,
+         "evidence_url": "https://e.org/x", "evidence_identity": "own_page"}
     if cur is not None:
         t["currency"] = cur
     return t

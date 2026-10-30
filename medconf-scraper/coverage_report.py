@@ -13,6 +13,10 @@ Per ACTIVE source (non-archived events only):
 Writes reports/coverage/<date>.json + .md, prints a GitHub job summary when
 GITHUB_STEP_SUMMARY is set, and compares with reports/coverage/baseline.json.
 
+Provenance line: "tiers without provenance written since 2026-10-31: N" counts pricing_tiers
+rows written since the provenance migration with no evidence_identity; N > 0 is red (exit 1),
+same as a regression. If the columns do not exist yet it prints "provenance columns absent".
+
 Exit codes: 0 ok (also: DB/transport error -> "coverage check skipped"), 1 regression,
 2 config error (missing SUPABASE_URL / SUPABASE_KEY).
 Regression (red) = a source with >= MIN_EVENTS events whose metric is more than
@@ -36,6 +40,7 @@ MAX_DROP_PP = 10.0
 RECENT_DAYS = 7
 METRICS = ("fees_pct", "abstracts_pct", "venue_pct", "city_pct")
 PAGE = 1000  # PostgREST row cap (HQ LESSONS #87)
+PROVENANCE_SINCE = "2026-10-31"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 COVERAGE_DIR = REPO_ROOT / "reports" / "coverage"
@@ -168,7 +173,23 @@ def load_previous(out_dir: Path, day: str) -> dict | None:
         return None
 
 
-def render_markdown(current: dict, problems: list[str], day: str, advisories: list[str] | None = None) -> str:
+def provenance_check(client, since: str = PROVENANCE_SINCE) -> tuple[str, int]:
+    """(report line, N). N = pricing_tiers written on/after `since` with evidence_identity NULL;
+    N is 0 when the columns are absent or the query fails (the line says so, never red)."""
+    try:
+        res = (client.table("pricing_tiers").select("id", count="exact")
+               .gte("written_at", since).is_("evidence_identity", "null").limit(1).execute())
+        n = res.count if getattr(res, "count", None) is not None else len(res.data or [])
+        return f"tiers without provenance written since {since}: {n}", int(n)
+    except Exception as e:  # noqa: BLE001
+        text = f"{getattr(e, 'code', '')} {e}"
+        if any(m in text for m in ("42703", "does not exist", "evidence_identity", "written_at")):
+            return "provenance columns absent", 0
+        return f"provenance check skipped ({type(e).__name__}: {str(e)[:120]})", 0
+
+
+def render_markdown(current: dict, problems: list[str], day: str, advisories: list[str] | None = None,
+                    provenance: str | None = None) -> str:
     def f(v):
         return "n/a" if v is None else f"{v:.0f}%"
     t = current["totals"]
@@ -177,6 +198,8 @@ def render_markdown(current: dict, problems: list[str], day: str, advisories: li
              f"| venue {f(t['venue_pct'])} | city {f(t['city_pct'])}", ""]
     lines += ["**Regressions:** " + ("none" if not problems else ""), ""]
     lines += [f"- {p}" for p in problems]
+    if provenance:
+        lines += ["", f"**Provenance:** {provenance}"]
     if advisories:
         lines += ["", "**Advisory (never red):**", ""] + [f"- {a}" for a in advisories]
     lines += ["", "| id | source | events | fees | abstracts | venue | city |", "|---|---|---|---|---|---|---|"]
@@ -222,6 +245,7 @@ def main() -> int:
                            "id,source_id,event_type,event_format,venue_name,city,abstract_deadline,"
                            "abstract_deadline_note,is_on_demand", archived=False)
         tiers = {r["conference_id"] for r in _fetch_all(cl, "pricing_tiers", "id,conference_id")}
+        prov_line, prov_n = provenance_check(cl)
     except Exception as e:
         # A transient DB / network error says nothing about coverage: never red.
         msg = f"coverage check skipped: could not read Supabase ({type(e).__name__}: {str(e)[:200]})"
@@ -243,6 +267,8 @@ def main() -> int:
     baseline = json.loads(bp.read_text()) if bp.exists() else None
     previous = load_previous(Path(args.out_dir), day)
     problems, advisories = evaluate(baseline, current, recent_source_ids(sources, now), previous)
+    if prov_n > 0:
+        problems.append(prov_line)      # red, same mechanism as a regression
     if baseline is None:
         print("NOTE: no baseline file; regression comparison skipped")
 
@@ -251,7 +277,7 @@ def main() -> int:
     current["regressions"] = problems
     current["advisories"] = advisories
     (out / f"{day}.json").write_text(json.dumps(current, indent=2))
-    md = render_markdown(current, problems, day, advisories)
+    md = render_markdown(current, problems, day, advisories, provenance=prov_line)
     (out / f"{day}.md").write_text(md)
     print(md)
     summ = os.getenv("GITHUB_STEP_SUMMARY")

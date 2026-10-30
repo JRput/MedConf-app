@@ -516,6 +516,7 @@ def _run(monkeypatch, sid, found):
     result = SimpleNamespace(
         found=found, value=[tier] if found else None, method="text",
         external_url="https://evil.example/reg", extras={},
+        evidence_url="https://e.org/x", evidence_identity="own_page",
         audit_trail=SimpleNamespace(subpages_fetched=[]),
         to_dict=lambda: {})
     monkeypatch.setattr(runner, "_get_supabase", lambda: sb)

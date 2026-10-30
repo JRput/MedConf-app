@@ -82,6 +82,9 @@ export interface PricingTier {
   currency: string
   is_early_bird: boolean
   early_bird_deadline: string | null
+  // Provenance (nullable; absent until the migration is applied / on old rows).
+  evidence_url?: string | null
+  evidence_identity?: string | null
 }
 
 export interface UserProfile {

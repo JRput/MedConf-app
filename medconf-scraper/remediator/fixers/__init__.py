@@ -9,6 +9,11 @@ Returns:
 - (fixed_value, method_used) on success
 - (None, None) on failure / can't extract
 
+PROVENANCE: a Tier 1 fixer only ever sees the row's own page text, so the runner stamps
+its value with (that page's url, "own_page"). Values from the explorer carry the explorer's
+own evidence (`ExploreResult.evidence_url/evidence_identity`); a pricing / venue / abstract
+value without evidence is refused at the write.
+
 Each fixer should be defensive: returns None rather than guessing when
 the page doesn't clearly contain the field.
 """

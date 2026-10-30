@@ -25,6 +25,7 @@ from database import (
     insert_conference,
     update_conference,
     insert_pricing_tiers,
+    tiers_have_provenance,
     delete_pricing_tiers,
     delete_course_sessions,
     insert_course_sessions,
@@ -329,6 +330,14 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
 
             cleaned = validation["data"]
             tiers = cleaned.pop("pricing_tiers", []) or []
+            tiers_rejected = False
+            if tiers and not tiers_have_provenance(tiers):
+                # write boundary: a batch without own_page/strong evidence is never written,
+                # and the stored tiers are left alone (no delete either)
+                tiers_rejected = True
+                logger.warning(f"  provenance_rejected: {cleaned.get('conference_name', '?')[:50]!r} "
+                               f"{len(tiers)} tier(s) carry no evidence_url/identity - dropped, stored tiers kept")
+                tiers = []
             # course_sessions is a sidecar payload, not a conferences column
             sessions = cleaned.pop("sessions", None)
 
@@ -375,7 +384,7 @@ def scrape_source(source: Dict[str, Any]) -> Dict[str, Any]:
                 if not tiers and refresh_days and existing and existing.get("pricing_tiers"):
                     logger.info(f"  {cleaned.get('conference_name', '?')[:50]}: no tiers parsed; "
                                 f"kept {len(existing['pricing_tiers'])} stored tier(s) (delete skipped)")
-                if tiers or not refresh_days:
+                if (tiers or not refresh_days) and not tiers_rejected:
                     # opted-in sources never wipe stored fees on an empty parse
                     delete_pricing_tiers(conference_id)
                 if tiers:

@@ -273,12 +273,23 @@ class AgentLoop:
             # all (ESMO). Both popped by scraper.py.
             merged["_evidence"] = sorted(set(merged.get("_evidence") or []) | set(detail.get("_evidence") or []))
             merged["_evidence_aware"] = "_evidence" in detail
+            self._stamp_own_page_tiers(merged, booking_url)
             self._ensure_submission_info(merged, booking_url)
             self._discover_missing(merged, booking_url)
             return merged
         except Exception as e:
             logger.warning(f"  Detail extraction failed for '{title_short}': {e}")
             return self._merge_shell_only(shell)
+
+    @staticmethod
+    def _stamp_own_page_tiers(merged: Dict[str, Any], url: str) -> None:
+        """Provenance: tiers the per-source extractor produced come from the page fetched
+        for this row (booking_url) -> (url, own_page). An extractor that already reports
+        its own evidence_url/evidence_identity keeps it. Discovery stamps its own tiers."""
+        for t in merged.get("pricing_tiers") or []:
+            if isinstance(t, dict) and not (t.get("evidence_url") or t.get("evidence_identity")):
+                t["evidence_url"] = url
+                t["evidence_identity"] = "own_page"
 
     def _ensure_submission_info(self, merged: Dict[str, Any], url: str) -> None:
         """Pipeline-level guarantee (Mission P6): if the extractor left every

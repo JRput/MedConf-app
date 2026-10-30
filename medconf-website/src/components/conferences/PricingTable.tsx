@@ -21,6 +21,26 @@ interface PricingTableProps {
   organiserUrl?: string | null
 }
 
+/** The one URL every displayed tier was published at, or null when absent or mixed. */
+function sharedEvidenceUrl(tiers: DisplayTier[]): string | null {
+  if (tiers.length === 0) return null
+  const first = tiers[0].evidence_url
+  if (!first || !tiers.every((t) => t.evidence_url === first)) return null
+  try {
+    const u = new URL(first)
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null
+  } catch {
+    return null
+  }
+  return first
+}
+
+function evidenceLabel(url: string): string {
+  const u = new URL(url)
+  const path = u.pathname === '/' ? '' : u.pathname.replace(/\/$/, '')
+  return u.hostname.replace(/^www\./, '') + path
+}
+
 function OrganiserLink({ href, className }: { href: string; className?: string }) {
   return (
     <a
@@ -55,6 +75,7 @@ function isAddOn(label: string): boolean {
 
 export function PricingTable({ tiers, organiserUrl, conference }: PricingTableProps) {
   const fromCommunity = tiers.length > 0 && tiers.every((t) => t.fromCommunity)
+  const evidenceUrl = sharedEvidenceUrl(tiers)
   // Separate optional add-ons (lunch, dinner, workshop) from core
   // registration tiers. Only bucket if there are >=2 add-ons — a single
   // one is noise not worth its own section.
@@ -274,6 +295,20 @@ export function PricingTable({ tiers, organiserUrl, conference }: PricingTablePr
             </table>
           )}
         </div>
+      )}
+
+      {evidenceUrl && (
+        <p className="text-[0.8125rem] text-fg-subtle">
+          <a
+            href={evidenceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 hover:underline"
+          >
+            Fees as published on {evidenceLabel(evidenceUrl)}
+            <ArrowUpRight className="size-3.5" aria-hidden />
+          </a>
+        </p>
       )}
 
       <p className="type-caption text-fg-subtle">

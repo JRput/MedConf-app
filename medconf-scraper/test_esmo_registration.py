@@ -292,7 +292,8 @@ class _FakeAgent:
                 "description": "d" * 60, "specialty": "Oncology",
                 "venue_name": None, "city": None, "event_format": "online",
                 "pricing_tiers": [{"tier_label": "Early registration · ESMO Member",
-                                   "price_gbp": 360.0, "currency": "EUR"}],
+                                   "price_gbp": 360.0, "currency": "EUR",
+                                   "evidence_url": shell["booking_url"], "evidence_identity": "own_page"}],
                 "is_flagship": False, "organiser_url": shell["booking_url"]}
 
 

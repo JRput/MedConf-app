@@ -118,6 +118,13 @@ class DiscoveryResult:
     abstract_deadline_note: Optional[str] = None
     evidence: List[Dict[str, Any]] = field(default_factory=list)
     deferred: List[str] = field(default_factory=list)
+    # per-field provenance: "pricing_tiers" | "venue" | "abstract" -> {"url", "identity"}
+    # identity is "own_page" (the event's own page) or "strong" (page_identity STRONG).
+    field_evidence: Dict[str, Dict[str, str]] = field(default_factory=dict)
+
+    def evidence_for(self, fieldname: str) -> Optional[Dict[str, str]]:
+        """{"url","identity"} of the step that produced `fieldname`, or None."""
+        return self.field_evidence.get(fieldname)
 
     def has_abstract(self) -> bool:
         return bool(self.abstract_deadline or self.abstract_deadline_note or self.abstract_open)
@@ -1231,6 +1238,7 @@ class _Run:
         self.today = date.today()
         self.start = _is_date(row.get("start_date"))
         self.images: List[str] = []
+        self.image_evidence: Dict[str, Tuple[str, str]] = {}   # image src -> (page url, identity)
         self.pdfs: List[Tuple[str, str]] = []
 
     # clock
@@ -1250,6 +1258,11 @@ class _Run:
     def any_needed(self) -> bool:
         return any(self.need(f) for f in _FIELD_ORDER)
 
+    def _stamp(self, fieldname: str, url: str, identity: Optional[str]) -> None:
+        """Record which page produced `fieldname` (only own_page / strong are recordable)."""
+        if identity in ("own_page", STRONG) and url:
+            self.res.field_evidence[fieldname] = {"url": url, "identity": identity}
+
     def log(self, step: str, url: str, found: List[str], t_start: float) -> None:
         self.res.evidence.append({"step": step, "url": url, "found": found,
                                   "elapsed_ms": int((self.budget.clock() - t_start) * 1000)})
@@ -1263,6 +1276,11 @@ class _Run:
         REJECTED page is recorded in evidence and contributes NOTHING. Returns False then."""
         found: List[str] = []
         ident: Optional[Tuple[str, str]] = None
+        ev_identity: Optional[str] = None
+        if step == "page" and not verify:
+            ev_identity = "own_page"          # the event's own page, not fetched here
+        elif step.startswith("pdf:"):
+            ev_identity = STRONG              # passed _pdf_head_reason before parse
         if verify:
             ident = page_identity(self.row, url, html, text, own=self.own, via_hint=via_hint,
                                   shell_titles=self.shell_titles)
@@ -1272,6 +1290,7 @@ class _Run:
                                           "identity": ident[0], "detail": ident[1],
                                           "elapsed_ms": int((self.budget.clock() - t_start) * 1000)})
                 return False
+            ev_identity = STRONG
         if self.need(FIELD_FEES):
             if external and _is_ticketing_host(url):
                 # identity + same-date gated, holding fees / deposits removed (explorer)
@@ -1280,6 +1299,7 @@ class _Run:
                 tiers, how = _fees_from(html, lines_text)
             if tiers:
                 self.res.tiers = tiers
+                self._stamp("pricing_tiers", url, ev_identity)
                 found.append(f"fees:{len(tiers)} via {how}")
         if self.need(FIELD_VENUE):
             pl = _place_from(html, text, url)
@@ -1288,6 +1308,7 @@ class _Run:
                     self.res.venue_name = pl["venue_name"]
                 if pl.get("city") and not self.res.city and not self.row.get("city"):
                     self.res.city = pl["city"]
+                self._stamp("venue", url, ev_identity)
                 found.append(f"venue:{pl.get('method')}")
         if self.need(FIELD_ABSTRACT):
             try:
@@ -1297,6 +1318,7 @@ class _Run:
                     self.res.abstract_open = bool(is_open)
                     self.res.abstract_deadline = deadline.isoformat() if deadline else None
                     self.res.abstract_deadline_note = note
+                    self._stamp("abstract", url, ev_identity)
                     found.append(f"abstract:{'deadline' if deadline else 'note'}")
             except Exception as e:  # noqa: BLE001
                 logger.debug(f"discovery: abstract classify failed: {e}")
@@ -1305,6 +1327,8 @@ class _Run:
                 for src in _fee_images(html, url, strict=(step == "page")):
                     if src not in self.images:
                         self.images.append(src)
+                        if ev_identity:
+                            self.image_evidence[src] = (url, ev_identity)
             for u, label in _pdf_links(html, url):
                 if all(u != p[0] for p in self.pdfs):
                     self.pdfs.append((u, label))
@@ -1611,26 +1635,45 @@ def _read_images(run: _Run) -> None:
         label = "data-image" if src.startswith("data:") else src[:120]
         if tiers:
             res.tiers = tiers
+            pg = run.image_evidence.get(src)
+            if pg:
+                run._stamp("pricing_tiers", pg[0], pg[1])
         run.log("vision", label, [f"fees:{len(tiers)}"] if tiers else [], t)
 
 
 # ── merge ────────────────────────────────────────────────────────────────────────
+def _carry(row: dict, fieldname: str, res: DiscoveryResult) -> None:
+    """Copy a field's evidence onto the row's `<field>_evidence_url/_identity` columns."""
+    ev = res.evidence_for(fieldname)
+    if ev:
+        row[f"{fieldname}_evidence_url"] = ev["url"]
+        row[f"{fieldname}_evidence_identity"] = ev["identity"]
+
+
 def apply_to_row(row: dict, res: DiscoveryResult) -> List[str]:
     """Merge a result into EMPTY fields of `row`; returns the fields written."""
     written: List[str] = []
     if res.tiers and not row.get("pricing_tiers"):
+        ev = res.evidence_for("pricing_tiers")
+        if ev:
+            for t in res.tiers:
+                t["evidence_url"] = ev["url"]
+                t["evidence_identity"] = ev["identity"]
         row["pricing_tiers"] = res.tiers
         written.append("pricing_tiers")
     if res.venue_name and not row.get("venue_name"):
         row["venue_name"] = res.venue_name
         written.append("venue_name")
+        _carry(row, "venue", res)
     if res.city and not row.get("city"):
         row["city"] = res.city
         written.append("city")
+        _carry(row, "venue", res)
     if res.has_abstract() and not (row.get("abstract_deadline") or row.get("abstract_deadline_note")
                                    or row.get("abstract_open") is True):
         row["abstract_open"] = bool(res.abstract_open)
         row["abstract_deadline"] = res.abstract_deadline
         row["abstract_deadline_note"] = res.abstract_deadline_note
         written.append("abstract")
+        _carry(row, "abstract", res)
     return written
