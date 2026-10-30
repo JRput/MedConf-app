@@ -1269,7 +1269,7 @@ def _organiser_root_is_this_event(row: dict, organiser_url: str, page_url: str, 
         _tm = re.search(r"<title\b[^>]*>(.*?)</title\s*>", root_html or "", re.I | re.S)
         heads = _main_headings(root_html or "") + ([_tm.group(1)] if _tm else [])
         ok = (bool(title_n) and any(_has(_norm(h), title_n) for h in heads)) \
-            or _text_has_start_date(row, root_text)
+            or _text_has_start_date(row, " ".join(heads) + " " + (root_text or "")[:500])
         _ROOT_MICROSITE_CACHE[key] = ok
     return ok
 

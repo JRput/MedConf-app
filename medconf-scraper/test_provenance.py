@@ -701,6 +701,15 @@ def test_microsite_root_carrying_the_start_date_vouches(monkeypatch):
     assert _ee(row, root + "registration", _page("Registration")) is not None
 
 
+def test_root_date_deep_in_the_body_does_not_vouch(monkeypatch):
+    root = "https://society.example/"
+    filler = "<p>" + "Society news and membership information. " * 30 + "</p>"
+    fake_pages(monkeypatch, {root: f"<html><body><h1>Welcome to the Society</h1>{filler}"
+                                   "<p>News: Cardiology Imaging Symposium, 10 May 2027.</p></body></html>"})
+    row = {**ROW_C, "organiser_url": root}
+    assert _ee(row, root + "registration", _page("Registration")) is None
+
+
 def test_royal_marsden_listing_child_is_rejected_even_with_a_slug_matching_own_path():
     bopa = "https://bopa.org.uk/events/advanced-breast-imaging"
     row = {"id": 2, "conference_name": "Advanced Breast Imaging Course", "start_date": "2027-05-10",
