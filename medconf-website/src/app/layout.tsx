@@ -9,6 +9,7 @@ import { AccentProvider, accentNoFlashScript } from '@/components/theme/AccentPr
 import { SiteChrome } from '@/components/layout/SiteChrome'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { CookieConsent } from '@/components/analytics/CookieConsent'
 
 // Display: Figtree. Geometric-humanist, tightens well at large sizes and has a
 // genuinely distinct 600/700 — it carries headings without needing colour.
@@ -79,6 +80,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <Footer />
               </SiteChrome>
               <Toaster />
+              {/* Renders nothing unless NEXT_PUBLIC_GA_MEASUREMENT_ID is set (production only). */}
+              <CookieConsent />
             </TooltipProvider>
           </AccentProvider>
         </ThemeProvider>

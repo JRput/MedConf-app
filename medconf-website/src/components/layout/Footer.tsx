@@ -1,5 +1,6 @@
 // src/components/layout/Footer.tsx
 import Link from 'next/link'
+import { CookieSettingsButton } from '@/components/analytics/CookieSettingsButton'
 
 export function Footer() {
   return (
@@ -37,6 +38,9 @@ export function Footer() {
               <FooterLink href="#">Privacy policy</FooterLink>
               <FooterLink href="#">Terms of service</FooterLink>
               <FooterLink href="#">Contact</FooterLink>
+              <li>
+                <CookieSettingsButton className="text-[0.8125rem] text-fg-muted transition-colors duration-150 hover:text-fg" />
+              </li>
             </ul>
           </div>
         </div>
