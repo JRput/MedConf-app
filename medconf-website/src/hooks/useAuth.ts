@@ -76,9 +76,9 @@ export function useAuth() {
     return { error }
   }
 
-  const signOut = async () => {
+  const signOut = async (opts?: { scope?: 'local' | 'global' | 'others' }) => {
     clearNextCookie()
-    const { error } = await supabase.auth.signOut()
+    const { error } = opts?.scope ? await supabase.auth.signOut({ scope: opts.scope }) : await supabase.auth.signOut()
     if (error) {
       const e = error as { status?: number; name?: string }
       console.warn('[auth] signOut failed', e.status, e.name)

@@ -15,6 +15,14 @@ import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { toast } from 'sonner'
+import { SpecialtyAlertToggle } from '@/components/settings/SpecialtyAlertToggle'
+import { DeleteAccountSection } from '@/components/settings/DeleteAccountSection'
+import {
+  DELETE_ACCOUNT_ERROR,
+  SPECIALTY_ALERT_ERROR,
+  deleteMyAccount,
+  saveSpecialtyAlerts,
+} from '@/components/settings/actions'
 
 function toSpecialtySlug(raw: string | null): string | null {
   if (!raw) return null
@@ -32,6 +40,12 @@ export default function SettingsPage() {
   const [fullName, setFullName] = useState('')
   const [specialtySlug, setSpecialtySlug] = useState<string | null>(null)
   const [grade, setGrade] = useState<string | null>(null)
+  const [alertsOn, setAlertsOn] = useState(true)
+  const [alertsBusy, setAlertsBusy] = useState(false)
+  const [alertsStatus, setAlertsStatus] = useState<string | null>(null)
+  const [alertsError, setAlertsError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -48,6 +62,57 @@ export default function SettingsPage() {
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  useEffect(() => {
+    if (!user) return
+    supabase
+      .from('notification_preferences')
+      .select('email_new_conferences')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        // No row yet: onboarding default is on.
+        setAlertsOn(data?.email_new_conferences ?? true)
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
+
+  const handleAlertsChange = async (next: boolean) => {
+    if (!user || alertsBusy) return
+    const previous = alertsOn
+    setAlertsOn(next)
+    setAlertsBusy(true)
+    setAlertsError(null)
+    setAlertsStatus(null)
+    const { ok } = await saveSpecialtyAlerts(supabase, user.id, next)
+    setAlertsBusy(false)
+    if (!ok) {
+      setAlertsOn(previous)
+      setAlertsError(SPECIALTY_ALERT_ERROR)
+      return
+    }
+    setAlertsStatus(next ? 'Specialty alerts are on.' : 'Specialty alerts are off.')
+  }
+
+  const handleDeleteAccount = async () => {
+    if (deleting) return
+    setDeleting(true)
+    setDeleteError(null)
+    const { ok } = await deleteMyAccount(supabase)
+    if (!ok) {
+      setDeleting(false)
+      setDeleteError(DELETE_ACCOUNT_ERROR)
+      return
+    }
+    // The auth user is gone, so a server sign-out may be rejected; clear local state.
+    try {
+      await signOut({ scope: 'local' })
+    } catch {
+      // ignore: the session is already invalid
+    }
+    router.push('/')
+    router.refresh()
+  }
 
   const handleSave = async () => {
     if (!user) return
@@ -113,7 +178,14 @@ export default function SettingsPage() {
         </AccountSection>
 
         <AccountSection title="Notifications">
-          <div className="rounded-lg border border-border bg-surface p-5">
+          <div className="space-y-4 rounded-lg border border-border bg-surface p-5">
+            <SpecialtyAlertToggle
+              checked={alertsOn}
+              disabled={alertsBusy}
+              onChange={handleAlertsChange}
+              status={alertsStatus}
+              error={alertsError}
+            />
             <p className="type-small text-fg-muted">
               In-app notifications for saved-event reminders and specialty alerts are on by default — see the bell icon. Email digests
               are coming soon.
@@ -128,6 +200,12 @@ export default function SettingsPage() {
             <LogOut className="size-4" />
             Sign out
           </Button>
+        </AccountSection>
+
+        <Separator />
+
+        <AccountSection title="Delete account">
+          <DeleteAccountSection onConfirm={handleDeleteAccount} error={deleteError} deleting={deleting} />
         </AccountSection>
       </div>
     </AccountContainer>

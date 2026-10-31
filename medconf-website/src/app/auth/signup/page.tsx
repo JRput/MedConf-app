@@ -145,7 +145,7 @@ function SignUpForm() {
           {loading ? 'Creating account…' : 'Create account'}
         </Button>
 
-        <AuthTerms />
+        <AuthTerms variant="signup" />
       </form>
     </AuthCard>
   )

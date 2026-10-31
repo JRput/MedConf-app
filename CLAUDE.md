@@ -154,9 +154,21 @@ Scraper run logs live in `medconf-scraper/*.log` (RCGP runs especially).
 - **Dedupe key:** `conferences.source_url` is unique. If extraction yields no source URL, scraper synthesises one from `name|date|city|venue` MD5 hash (see [scraper.py](medconf-scraper/scraper.py:60-75)).
 - **Archival:** expired conferences are archived (`archived = TRUE`), never deleted.
 - **Specialty / region:** plain text fields for now; standardise via enum later if needed.
+- **Legal docs move with the code:** see §5a — new personal data, suppliers, cookies, storage keys or third-party scripts require a `legal/privacy.md` / `legal/cookies.md` update in the same change.
 - **Society codes:** `scraper_sources.society` is a SHORT code (acronym or short brand, e.g. `BOA`, `Vascular Society`) shared by every row of one society. It is the filter chip label, the `?society=` URL value and the key of `medconf-website/src/lib/taxonomy/societies.ts`. **Registering a source is not done until the code is in that file** (name, kind, country) — the site falls back to the bare code under "Other", and the daily `taxonomy-check` job in `scrape-daily.yml` fails red until it is added. Check locally: `./.venv/bin/python check_taxonomy.py` (scraper) or `npm run check:societies` (website). Missed on waves 2a–2d (HQ LESSONS #25).
 
 ---
+
+## 5a. Legal pages (added 2026-10-31)
+
+- Source of truth: `legal/terms.md`, `legal/privacy.md`, `legal/cookies.md` (drafts, **not solicitor-reviewed**; brief in `legal/CLAUDE_CODE_BRIEF.md`, never published). Rendered at build time to `/terms`, `/privacy`, `/cookies` (public, in the sitemap); front-matter and HTML comments never render.
+- **Brand name is temporary.** The drafts say "MediCon"; the UI says "MedConf". Both render from `SITE_NAME` in `medconf-website/src/lib/site.ts` — a rename is a one-line change. The owner decides which name shows until the rename.
+- **Contact email is temporary.** `hellomedicon@gmail.com` (`CONTACT_EMAIL` in `site.ts`) until a custom domain exists; then replace it everywhere (legal pages, footer, auth sender) and the `medconf.vercel.app` references (Supabase Auth Site URL + allowlist too).
+- **Solicitor review** is required before any paid feature (sponsored listings, ads, affiliates, organiser accounts) launches.
+- **Standing rule:** any change that collects new personal data, adds a supplier/service, or adds a cookie / localStorage key / third-party script or embed **must update `legal/privacy.md` and/or `legal/cookies.md` in the same change and bump `last_updated`.**
+- Future-features legal checklist: brief §4 (analytics done; Turnstile, Resend, email digests opt-in unticked, sponsored labels, ads consent, affiliates, organiser terms, social sign-in, custom domain, rename, EU representative). Review it whenever one of those is built.
+- Google Analytics (brief §2a): off until `NEXT_PUBLIC_GA_MEASUREMENT_ID` (`G-M2DLMQR888`) is set in Vercel **Production** only, after the legal pages are live; never send user id/email/name/`?q=` to GA; new custom events go through `sanitizeUrl()`.
+- Tracked TODO: inactive-account deletion (3 years + 30-day notice email) is not built — needs an email provider; earliest trigger is years away.
 
 ## 6. CLAUDE HQ + Memory
 

@@ -8,6 +8,7 @@
 import Link from 'next/link'
 import { AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { SITE_NAME } from '@/lib/site'
 import { Input } from '@/components/ui/input'
 
 export function AuthCard({
@@ -108,12 +109,26 @@ export function AuthError({ message, className }: { message: string; className?:
   )
 }
 
-/** The "By continuing…" line. Same wording on login and signup. */
-export function AuthTerms() {
+/** Consent line under the auth forms. `signup` carries the 18+ / Terms wording. */
+export function AuthTerms({ variant = 'login' }: { variant?: 'signup' | 'login' }) {
+  const link = 'underline underline-offset-2 hover:text-fg'
   return (
     <p className="mt-4 text-[0.75rem] leading-relaxed text-fg-subtle">
-      By continuing you accept that MedConf lists third-party events and handles no registration or payment — fees and
-      CPD points are shown as the organiser publishes them.
+      {variant === 'signup' ? (
+        <>
+          By creating an account you confirm you&apos;re 18 or over and agree to our{' '}
+          <Link href="/terms" className={link}>Terms of Use</Link>. Read how we use your information in our{' '}
+          <Link href="/privacy" className={link}>Privacy Policy</Link>.
+        </>
+      ) : (
+        <>
+          By signing in you agree to our{' '}
+          <Link href="/terms" className={link}>Terms of Use</Link> and{' '}
+          <Link href="/privacy" className={link}>Privacy Policy</Link>.
+        </>
+      )}{' '}
+      {SITE_NAME} lists third-party events and handles no registration or payment, so fees and CPD points are shown as
+      the organiser publishes them.
     </p>
   )
 }

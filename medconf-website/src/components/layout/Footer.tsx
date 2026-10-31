@@ -1,5 +1,6 @@
 // src/components/layout/Footer.tsx
 import Link from 'next/link'
+import { SITE_NAME, CONTACT_EMAIL } from '@/lib/site'
 import { CookieSettingsButton } from '@/components/analytics/CookieSettingsButton'
 
 export function Footer() {
@@ -35,9 +36,10 @@ export function Footer() {
           <div>
             <h3 className="type-mono-label mb-3 text-fg-subtle">Legal</h3>
             <ul className="space-y-2.5">
-              <FooterLink href="#">Privacy policy</FooterLink>
-              <FooterLink href="#">Terms of service</FooterLink>
-              <FooterLink href="#">Contact</FooterLink>
+              <FooterLink href="/privacy">Privacy policy</FooterLink>
+              <FooterLink href="/terms">Terms of service</FooterLink>
+              <FooterLink href="/cookies">Cookie policy</FooterLink>
+              <FooterLink href={`mailto:${CONTACT_EMAIL}`}>Contact</FooterLink>
               <li>
                 <CookieSettingsButton className="text-[0.8125rem] text-fg-muted transition-colors duration-150 hover:text-fg" />
               </li>
@@ -46,7 +48,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-border-subtle pt-6 sm:flex-row">
-          <p className="text-[0.8125rem] text-fg-subtle">© {new Date().getFullYear()} MedConf.</p>
+          <p className="text-[0.8125rem] text-fg-subtle">© {new Date().getFullYear()} {SITE_NAME}.</p>
           <p className="text-[0.8125rem] text-fg-subtle">Data refreshed daily · not affiliated with any listed society</p>
         </div>
       </div>

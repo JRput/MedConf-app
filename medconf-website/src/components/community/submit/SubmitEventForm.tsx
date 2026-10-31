@@ -361,7 +361,9 @@ export function SubmitEventForm() {
                   aria-invalid={!!err('consent')}
                   aria-describedby={err('consent') ? 'sub-consent-error' : undefined}
                 />
-                The information is public, accurate to my knowledge, and MedConf may edit or decline it.
+                The information is public, accurate to my knowledge, and MedConf may edit or decline it. See our{' '}
+                <Link href="/terms" target="_blank" className="underline underline-offset-2">Terms</Link> and{' '}
+                <Link href="/privacy" target="_blank" className="underline underline-offset-2">Privacy Policy</Link>.
               </label>
               {err('consent') && (
                 <p id="sub-consent-error" role="alert" className="type-caption text-danger-text">

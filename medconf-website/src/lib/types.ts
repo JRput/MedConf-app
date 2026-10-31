@@ -93,9 +93,6 @@ export interface UserProfile {
   full_name: string | null
   role: string | null
   specialty: string | null
-  region: string | null
-  institution: string | null
-  country: string
   profile_completed_at: string | null
   last_specialty_alert_at: string | null
   created_at: string

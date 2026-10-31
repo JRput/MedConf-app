@@ -55,7 +55,7 @@ async function fetchSubmitters(supabase: ReturnType<typeof createSupabaseClient>
 }
 async function decorate(supabase: ReturnType<typeof createSupabaseClient>, rows: Contribution[]): Promise<QueueItem[]> {
   const confIds = [...new Set(rows.filter((r) => r.conference_id != null).map((r) => r.conference_id as number))]
-  const userIds = [...new Set(rows.map((r) => r.user_id))]
+  const userIds = [...new Set(rows.map((r) => r.user_id).filter((u): u is string => u != null))]
   const [names, subs] = await Promise.all([fetchConferenceNames(supabase, confIds), fetchSubmitters(supabase, userIds)])
   return rows.map((r) => ({
     ...r,
@@ -63,7 +63,7 @@ async function decorate(supabase: ReturnType<typeof createSupabaseClient>, rows:
       r.kind === 'new_event' && r.status !== 'merged'
         ? newEventName(r)
         : (r.conference_id != null ? names.get(r.conference_id) : undefined) ?? (r.kind === 'new_event' ? newEventName(r) : 'Listing removed'),
-    submitter: subs.get(r.user_id) ?? null,
+    submitter: r.user_id ? subs.get(r.user_id) ?? null : null,
   }))
 }
 

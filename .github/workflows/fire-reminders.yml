@@ -36,3 +36,12 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: python fire_reminders.py
+
+      - name: Purge notifications older than 12 months
+        # Retention job; a failure here must not block reminders.
+        continue-on-error: true
+        working-directory: medconf-scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: python purge_notifications.py

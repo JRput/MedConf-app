@@ -193,9 +193,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     full_name TEXT,
     role TEXT,
     specialty TEXT,
-    region TEXT,
-    institution TEXT,
-    country TEXT DEFAULT 'United Kingdom',
+    -- (20261101000000) institution / region / country dropped: no longer collected or read.
     -- NULL = onboarding wizard not yet completed. Route guard uses this
     -- to bounce signed-in users to /onboarding until they finish the
     -- 3-step wizard. Set on the final wizard step's submit.
@@ -514,7 +512,9 @@ ON CONFLICT (base_url) DO NOTHING;
 -- conference; kind='new_event' gets conference_id on approval.
 CREATE TABLE IF NOT EXISTS community_contributions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    -- NULL = submitter deleted their account (20261101000000): only published / merged rows survive,
+    -- anonymised (note + evidence_url cleared); unpublished rows are deleted by delete_my_account().
+    user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     kind TEXT NOT NULL CHECK (kind IN ('new_event','add_info')),
     conference_id INTEGER REFERENCES conferences(id) ON DELETE CASCADE,
     status TEXT NOT NULL DEFAULT 'pending'
@@ -527,7 +527,7 @@ CREATE TABLE IF NOT EXISTS community_contributions (
     evidence_url TEXT,                 -- private, for the moderator
     note TEXT,                         -- private, for the moderator
     final_payload JSONB,               -- what the moderator approved
-    moderator_id UUID REFERENCES auth.users(id),
+    moderator_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
     moderator_note TEXT,
     reviewed_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -584,7 +584,17 @@ CREATE INDEX IF NOT EXISTS idx_community_tiers_conf_published ON community_tiers
 --   trg_community_contributions_before_update (owner may only resubmit).
 -- RLS: contributions SELECT owner or admin, INSERT owner, UPDATE owner only
 --   needs_info -> pending; facts/tiers SELECT where is_published or admin;
---   no client writes on facts/tiers.
+--   no client writes on facts/tiers. Owner policies use auth.uid() = user_id, never true for a NULL owner.
+-- Account deletion (20261101000000): public.delete_my_account() RETURNS void, SECURITY DEFINER
+--   (search_path public, auth), EXECUTE for authenticated only. Deletes the caller's contributions whose
+--   status is not published / merged, anonymises the rest (user_id, note, evidence_url -> NULL), then deletes
+--   the auth.users row (cascades to user_profiles, notification_preferences, saved_conferences,
+--   user_reminders, notifications). The erase logic lives in _erase_user_contributions(uid) (advisory lock,
+--   no grants), called by delete_my_account() via a BEFORE DELETE trigger on auth.users, so dashboard / GoTrue
+--   deletions behave identically. community_contributions_before_update() is SECURITY DEFINER and, when
+--   medconf.account_deletion = 'on' or the referenced auth user is gone, lets only user_id / moderator_id /
+--   note / evidence_url change (to NULL); trg_notifications_skip_orphan drops (and logs) 'contribution_update'
+--   notification inserts whose user_id IS NULL.
 -- Seed: scraper_sources id 1000 'Community submissions' (active FALSE, society 'Community').
 -- Hardening (20261018000001): community_url_ok()/community_validate_payload()
 --   enforce http(s) URLs, length caps and <= 12 tiers on insert, resubmit,
@@ -920,3 +930,7 @@ BEGIN
 END $$;
 REVOKE EXECUTE ON FUNCTION public.remediator_replace_tiers_if_zero_or_generic(bigint, jsonb) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.remediator_replace_tiers_if_zero_or_generic(bigint, jsonb) TO service_role;
+
+-- Account deletion (20261101000000; body in the migration)
+REVOKE ALL ON FUNCTION public.delete_my_account() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.delete_my_account() TO authenticated;

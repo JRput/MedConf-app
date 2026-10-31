@@ -87,7 +87,7 @@ export interface NewEventPayload {
 
 export interface Contribution {
   id: string
-  user_id: string
+  user_id: string | null
   kind: ContributionKind
   conference_id: number | null
   status: ContributionStatus
