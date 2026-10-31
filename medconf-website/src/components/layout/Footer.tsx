@@ -13,13 +13,22 @@ export function Footer() {
               <div className="flex size-7 items-center justify-center rounded-md bg-brand">
                 <span className="text-xs font-bold text-fg-onbrand">M</span>
               </div>
-              <span className="type-h3 text-fg-strong">MedConf</span>
+              <span className="type-h3 text-fg-strong">{SITE_NAME}</span>
             </div>
             <p className="mt-3 max-w-md text-[0.8125rem] leading-relaxed text-fg-muted">
               A directory of medical conferences, courses and CPD opportunities, pulled daily from royal colleges,
               faculties, specialist societies and international congresses. We don&apos;t take bookings — every
               listing links through to the organiser&apos;s own registration page.
             </p>
+            <div className="mt-5 inline-flex flex-col gap-1 rounded-lg border border-border bg-surface px-4 py-3">
+              <span className="type-mono-label text-fg-subtle">Contact us</span>
+              <a
+                href={`mailto:${CONTACT_EMAIL}`}
+                className="text-[0.8125rem] font-medium text-fg transition-colors duration-150 hover:text-brand-text"
+              >
+                {CONTACT_EMAIL}
+              </a>
+            </div>
           </div>
 
           <div>
@@ -39,7 +48,6 @@ export function Footer() {
               <FooterLink href="/privacy">Privacy policy</FooterLink>
               <FooterLink href="/terms">Terms of service</FooterLink>
               <FooterLink href="/cookies">Cookie policy</FooterLink>
-              <FooterLink href={`mailto:${CONTACT_EMAIL}`}>Contact</FooterLink>
               <li>
                 <CookieSettingsButton className="text-[0.8125rem] text-fg-muted transition-colors duration-150 hover:text-fg" />
               </li>

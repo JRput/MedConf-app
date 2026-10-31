@@ -1,59 +1,48 @@
 ---
 title: Terms of Use
 slug: /terms
-status: DRAFT — not yet reviewed by a solicitor
-last_updated: "[[PLACEHOLDER: publication date, e.g. 1 December 2026]]"
+status: Plain-English rewrite, 31 Oct 2026 — not yet reviewed by a solicitor
+last_updated: "31 October 2026"
 ---
 
 <!--
-  DRAFT NOTES FOR CLAUDE CODE (do not render)
-  - Every [[PLACEHOLDER: ...]] must be filled in or removed before this page goes live.
-  - Brand name "MediCon" is temporary — the site will be renamed. Replace every "MediCon" when the final name is chosen.
-  - Contact email hellomedicon@gmail.com is a temporary placeholder until a custom domain exists.
-  - HTML comments starting "FUTURE:" are reserved slots for features not yet live. See legal/CLAUDE_CODE_BRIEF.md.
+  NOTES FOR CLAUDE CODE (not rendered)
+  - "MediCon" and hellomedicon@gmail.com are swapped for SITE_NAME / CONTACT_EMAIL (src/lib/site.ts) at render time.
+  - Sections 5, 6 and 9 are kept word-for-word at the owner's request — don't reword them.
+  - Owner decisions (31 Oct 2026): no liability cap, no inactive-account deletion, contact = footer email box for now.
+  - Still owed before launch: the operator's legal name and a postal address must be shown somewhere on the site
+    (UK e-commerce rules) — a Contact page or the footer, not necessarily these terms. See legal/CLAUDE_CODE_BRIEF.md.
+  - FUTURE: organiser self-service accounts, sponsored listings, ads and affiliates — see section 11 and the brief.
 -->
 
 # Terms of Use
 
-**Last updated:** [[PLACEHOLDER: publication date]]
+**Last updated:** 31 October 2026
 
-Welcome to MediCon. These terms explain the rules for using our website and the services on it (together, the **Platform**). Please read them carefully. By creating an account or using the Platform, you agree to these terms. If you don't agree, please don't use the Platform.
-
-These terms should be read alongside our [Privacy Policy](/privacy) and [Cookie Policy](/cookies), which explain how we handle your personal information.
-
----
+Welcome to MediCon. These terms cover your use of our website and its features (the **Platform**). By creating an account or using MediCon, you agree to them, so please give them a read. They work alongside our [Privacy Policy](/privacy) and [Cookie Policy](/cookies).
 
 ## 1. Who we are
 
-MediCon is a directory of medical conferences, courses, workshops and CPD events. It is operated by **[[PLACEHOLDER: operator's full legal name, e.g. "Jane Smith, trading as MediCon" or "MediCon Ltd, company number 12345678"]]**, whose address is **[[PLACEHOLDER: geographic postal address]]** ("**MediCon**", "**we**", "**us**", "**our**").
-
-You can contact us at **hellomedicon@gmail.com**.
+MediCon is a directory of medical conferences, courses, workshops and CPD events. You can get in touch with us any time at hellomedicon@gmail.com.
 
 ## 2. Who can use MediCon
 
-- You must be **18 or over** to create an account or use the Platform.
-- MediCon is designed for medical students, doctors, nurses, allied health professionals and others with a professional interest in medical education. You don't need to prove your professional status to use it.
-- MediCon is used by people in the UK and internationally. If you use it from outside the UK, you are responsible for complying with any local laws that apply to you.
+MediCon is for people aged **18 or over**. It's built for medical students, doctors, nurses, allied health professionals and anyone with a professional interest in medical education. People use it from the UK and around the world — if you're outside the UK, please make sure your use follows your local laws.
 
 ## 3. Your account
 
-- Some parts of the Platform — including the full directory, search, society pages, saved events, reminders, your calendar and community submissions — are only available when you're signed in.
-- You must give a valid email address that you control and keep your password secure. Don't share your account with anyone else.
-- You are responsible for activity on your account. If you think someone else has accessed it, change your password and contact us straight away.
-- The specialty and grade you choose are used to tailor what you see. Please keep them reasonably accurate.
-- You can delete your account at any time from your account **Settings**. See section 13 and our [Privacy Policy](/privacy) for what happens to your information.
+Some features — the full directory, search, society pages, saved events, reminders, your calendar and community submissions — need an account.
 
-## 4. What MediCon is — and what it isn't
+- Please use an email address you have access to, keep your password safe, and don't share your account.
+- Keep your specialty and grade up to date so we can show you the most relevant events.
+- If you think someone else has got into your account, change your password and let us know.
+- You can delete your account at any time from **Settings**.
 
-**MediCon is an information directory.** We gather information about events from organisers' public websites and from our community, and we present it in one place so you can search and compare.
+## 4. What MediCon is — and isn't
 
-**MediCon does not:**
+MediCon is an information directory. We bring together events from organisers' public websites and from our community so you can search and compare them in one place.
 
-- take bookings, registrations or payments for any event;
-- act as an agent for any event organiser;
-- organise, run, accredit or endorse any event listed.
-
-When you follow a link to register, you leave MediCon and deal directly with the organiser. **Your contract for any event is with the organiser, not with us.** The organiser's own terms, prices, cancellation and refund policies apply.
+We don't take bookings or payments, and we don't organise, run or accredit any of the events listed. When you click through to register, you're dealing directly with the organiser, and their own terms, prices and refund policies apply.
 
 ## 5. Accuracy of listings — please always check with the organiser
 
@@ -76,38 +65,19 @@ Unless we clearly say otherwise, MediCon is **not affiliated with, endorsed by o
 
 Names, logos and trade marks of organisers belong to their owners. We use them only to identify events and their organisers accurately.
 
-## 7. Organisers: corrections and removal
+## 7. For organisers
 
-If you organise an event listed on MediCon and something is wrong, or you would prefer your events not to be listed, email us at **hellomedicon@gmail.com** with:
-
-- the event name and the MediCon page link;
-- what needs to change (or that you want it removed); and
-- how we can confirm you're authorised to act for the organiser (for example, an email from the organiser's domain).
-
-We aim to respond within **[[PLACEHOLDER: e.g. 5 working days]]** and to correct or remove listings promptly where the request is reasonable.
-
-<!-- FUTURE: Organiser self-service listings. When organisers can create or manage their own listings, add a section here (or separate Organiser Terms) covering: organiser accounts, accuracy warranties, licence to display, editorial control, removal, and any fees. -->
+If you run an event listed on MediCon and something needs correcting — or you'd rather your events weren't listed — just email us at hellomedicon@gmail.com and we'll sort it out promptly.
 
 ## 8. Community contributions
 
-You can help improve MediCon by submitting new events or adding missing information to existing listings (**Contributions**).
+You can help keep MediCon up to date by submitting new events or adding missing details to existing ones.
 
-**When you submit a Contribution, you confirm that:**
-
-- the information is accurate to the best of your knowledge and is publicly available or yours to share;
-- it doesn't include anyone else's personal information (such as a named individual's contact details), confidential information, or anything you don't have the right to share;
-- it isn't misleading, defamatory, offensive, unlawful, spam or advertising disguised as a listing; and
-- if you're connected to the event (for example, you work for the organiser), you'll say so in the note to our moderators.
-
-**How we handle Contributions:**
-
-- Every Contribution is reviewed by us before it appears. We may edit, combine, correct, decline or later remove any Contribution, at our discretion and without giving a reason.
-- We may use automated tools, including AI, to check a Contribution against the organiser's website.
-- Published Contributions are shown with a "Community" label. **We don't show your name or email address publicly.**
-- Any evidence link or private note you add is only seen by our moderators.
-- There's a limit on how many Contributions you can have waiting for review at once.
-
-**Licence you give us:** you keep any rights you have in your Contribution, but you give MediCon a worldwide, non-exclusive, royalty-free, perpetual and irrevocable licence to use, reproduce, adapt, publish and display it (including as part of the Platform's listings and in any future version of the Platform). This lets published information stay accurate and available even if you later delete your account. If you delete your account, published Contributions stay on the Platform but are no longer linked to you.
+- Please only share information that's accurate and publicly available, and don't include anyone's personal details.
+- If you're connected to the event (for example, you work for the organiser), please mention it in your note to us.
+- We review every contribution before it appears, and we may edit, decline or later remove it.
+- Published contributions show a "Community" label — we never display your name or email address.
+- You keep any rights you have in what you submit, and you give us permission to publish it as part of MediCon, including after you delete your account.
 
 ## 9. Acceptable use
 
@@ -123,59 +93,32 @@ When using MediCon, you must not:
 - submit content that is unlawful, misleading, defamatory, hateful, harassing, sexually explicit, or that infringes anyone's rights;
 - impersonate any person or organisation, or misrepresent your connection with them.
 
-## 10. Reporting content and complaints
+## 10. Our content
 
-If you see a listing or Contribution that is inaccurate, unlawful or inappropriate, please email **hellomedicon@gmail.com** with a link to the page and a short explanation. We'll review reports and act where appropriate. If you have a complaint about how we've handled a report, or about the Platform generally, contact us at the same address and we'll respond as quickly as we reasonably can.
+MediCon's design, software and branding, and the way we organise listings, belong to us. Event details themselves come from the organisers. You're welcome to use MediCon to find events for your own learning and professional development.
 
-## 11. Our content and intellectual property
+## 11. Sponsored content, advertising and affiliate links
 
-The Platform's design, software, text we write, logos and branding, and the way we select, organise and present listings, belong to MediCon or our licensors.
+MediCon is free to use. In future we may show sponsored or featured events, adverts, or affiliate links (where we earn a small commission if you book through a link). If we do, they'll always be clearly labelled, and a sponsored listing isn't an endorsement from us.
 
-Information about events (such as their names, descriptions and fees) belongs to, or originates from, the relevant organisers.
+## 12. Changes to MediCon and your account
 
-We give you a personal, non-transferable, revocable licence to use the Platform to find events for your own education and professional development. This doesn't give you any other rights in the Platform or its content.
+MediCon is free and still growing, so we may add, change or remove features from time to time. We may suspend or close an account if it's used in a way that breaks these terms or puts other users or the Platform at risk. You can stop using MediCon whenever you like, and delete your account in **Settings**.
 
-## 12. Sponsored content, advertising and affiliate links
+## 13. Our responsibility to you
 
-MediCon is currently free to use. To keep it free, we may in future show:
+MediCon is provided free of charge on an "as is" and "as available" basis. We do our best to keep it running smoothly and accurately, but we can't promise it will always be available or error-free, and we're not responsible for the events themselves, the organisers, or other websites we link to.
 
-- **sponsored or featured events**, where an organiser pays for extra visibility;
-- **advertising**; and
-- **affiliate links**, where we may earn a commission if you book or buy something after following a link.
+To the fullest extent permitted by law, MediCon is not liable for indirect, incidental or consequential damages arising from your use of the Platform. Nothing in these terms limits any liability that can't legally be limited, or affects your legal rights as a consumer.
 
-If we do, we will **clearly label** sponsored listings, adverts and affiliate links so you can tell them apart from ordinary listings. Payment doesn't change the accuracy standards we apply to listings, and a sponsored listing isn't an endorsement of the event by MediCon. Your dealings with any advertiser or affiliate partner are between you and them.
+## 14. Changes to these terms
 
-<!-- FUTURE: When sponsored listings / ads / affiliates go live: (1) confirm labels used on-site match this section ("Sponsored", "Ad", "Affiliate link"); (2) explain how sponsored placement affects ordering/ranking; (3) update the Privacy Policy and Cookie Policy (ad/affiliate tracking will likely need a consent banner); (4) consider separate Advertiser / Sponsor Terms. -->
+We may update these terms from time to time. The date at the top shows the latest version, and we'll let you know about any significant changes. If you keep using MediCon after an update, the new terms apply.
 
-## 13. Changes, suspension and ending your use
+## 15. Governing law
 
-- **Changes to the Platform.** MediCon is provided free of charge and is under active development. We may change, add or remove features, or suspend or stop the Platform (in whole or part), at any time. Where reasonably possible, we'll give notice of significant changes.
-- **Suspending or closing accounts.** We may suspend or close your account, or remove your access, if we reasonably believe you've broken these terms, if we need to for legal or security reasons, or if your account has been inactive for a long period (we'll email you before deleting an inactive account — see our [Privacy Policy](/privacy)).
-- **Deleting your account.** You can delete your account at any time from **Settings**. Deleting it ends these terms between us, except for the sections that by their nature should continue (including sections 8, 11, 14 and 16).
+These terms are governed by the laws of England and Wales, unless the law where you live gives you other rights.
 
-## 14. Our responsibility to you
+## 16. Contact us
 
-- MediCon is provided **free of charge** and on an **"as is" and "as available"** basis. We don't promise that the Platform will always be available, uninterrupted or error-free, or that listings will be complete, accurate or up to date.
-- We are not responsible for events, organisers or third-party websites — including cancellations, changes, the quality of an event, CPD accreditation decisions, or anything you pay to an organiser. Links to third-party websites are provided for convenience; we don't control those websites.
-- **To the fullest extent permitted by law, MediCon is not liable for any indirect, incidental, special or consequential loss or damage arising from your use of, or inability to use, the Platform.** This includes, for example, loss of profit, income or opportunity; missed deadlines or abstract submissions; non-refundable registration, travel or accommodation costs; study leave; or lost data.
-- To the fullest extent permitted by law, our total liability to you for all claims arising out of or in connection with the Platform or these terms is limited to **£100**.
-
-**Nothing in these terms limits or excludes our liability** for death or personal injury caused by our negligence, for fraud or fraudulent misrepresentation, or for anything else that cannot be limited or excluded by law. If you're a consumer, nothing in these terms affects your legal rights.
-
-## 15. Changes to these terms
-
-We may update these terms from time to time — for example, when we add new features or when the law changes. We'll show the date of the latest version at the top of this page. If we make significant changes, we'll let you know by email or by a notice on the Platform before they take effect. If you keep using MediCon after the changes take effect, you'll be bound by the updated terms; if you don't agree with them, you can delete your account.
-
-## 16. General
-
-- **Law and courts.** These terms are governed by the law of England and Wales. Disputes will be dealt with by the courts of England and Wales, except that if you live in Scotland or Northern Ireland you can also bring proceedings in your local courts. If you live in another country, you may also have the benefit of mandatory consumer protections in the country where you live.
-- **Transfer.** We may transfer our rights and obligations under these terms to another organisation (for example, if MediCon is renamed, incorporated or sold). We'll tell you if this happens and it won't reduce your rights. You may not transfer your rights under these terms.
-- **If part of these terms is invalid**, the rest will still apply.
-- **No waiver.** If we don't enforce a term straight away, we can still enforce it later.
-- **Third parties.** Nobody other than you and MediCon has any right to enforce these terms.
-- **Entire agreement.** These terms, together with our Privacy Policy and Cookie Policy, are the whole agreement between you and us about the Platform.
-
-## 17. Contact us
-
-Email: **hellomedicon@gmail.com**
-Post: **[[PLACEHOLDER: geographic postal address]]**
+Questions about these terms? Email us at hellomedicon@gmail.com.

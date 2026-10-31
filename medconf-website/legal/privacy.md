@@ -1,165 +1,113 @@
 ---
 title: Privacy Policy
 slug: /privacy
-status: DRAFT — not yet reviewed by a solicitor
-last_updated: "[[PLACEHOLDER: publication date]]"
+status: Plain-English rewrite, 31 Oct 2026 — not yet reviewed by a solicitor
+last_updated: "31 October 2026"
 ---
 
 <!--
-  DRAFT NOTES FOR CLAUDE CODE (do not render)
-  - Every [[PLACEHOLDER: ...]] must be filled in or removed before this page goes live.
-  - "MediCon" is a temporary brand name; hellomedicon@gmail.com is a temporary contact address.
-  - Several statements below describe features that must exist BEFORE publication
-    (self-serve account deletion, specialty-alert toggle, retention jobs). See legal/CLAUDE_CODE_BRIEF.md, section "Must do before publishing".
-  - HTML comments starting "FUTURE:" are reserved slots for features not yet live.
+  NOTES FOR CLAUDE CODE (not rendered)
+  - "MediCon" and hellomedicon@gmail.com are swapped for SITE_NAME / CONTACT_EMAIL at render time.
+  - Suppliers are described by type on purpose (UK GDPR allows "categories of recipients"). Keep an internal list of the
+    actual suppliers in legal/CLAUDE_CODE_BRIEF.md so we can answer requests. Google Analytics is named because the
+    Cookie Policy and banner name it.
+  - Any new data, supplier type, cookie or tracking: update this page and cookies.md in the same change and bump last_updated.
+  - Still owed before launch: the operator's legal name must appear somewhere on the site (with a postal address — UK
+    e-commerce rules). Once it does, add "MediCon is run by <name>" to section 1.
+  - FUTURE: marketing/digest emails (needs opt-in consent + unsubscribe), sponsored listings, ads, affiliate tracking.
 -->
 
 # Privacy Policy
 
-**Last updated:** [[PLACEHOLDER: publication date]]
+**Last updated:** 31 October 2026
 
-This policy explains what personal information MediCon collects when you use our website and services (the **Platform**), why we collect it, who we share it with, how long we keep it, and the rights you have. We've tried to keep it short and in plain English.
+This policy explains what personal information MediCon collects, how we use it, and the choices you have. We've kept it short and in plain English.
 
 ## 1. Who we are
 
-MediCon is operated by **[[PLACEHOLDER: operator's full legal name / company name and number]]**, of **[[PLACEHOLDER: geographic postal address]]** ("**MediCon**", "**we**", "**us**"). We are the **controller** of your personal information, which means we decide how and why it's used.
+MediCon runs this website and is responsible for looking after your personal information. If you have any questions about your data, email us at hellomedicon@gmail.com.
 
-[[PLACEHOLDER: ICO registration number, e.g. "We are registered with the Information Commissioner's Office under number ZA123456."]]
+## 2. What we collect
 
-Questions or requests about your personal information: **hellomedicon@gmail.com**.
+**Information you give us**
 
-<!-- FUTURE: If MediCon actively targets users in the EU/EEA and does not qualify for the exemption in Article 27(2) EU GDPR, add the name and contact details of an EU representative here. -->
+- Your email address and password (your password is stored securely and we can never see it)
+- Your specialty and grade, and your name if you choose to add it
+- Events you save, reminders you set and your personal calendar
+- Event details you submit to the community, along with any note or link you add for our moderators
+- Anything you send us when you get in touch
 
-## 2. The information we collect
+**Information collected automatically**
 
-### Information you give us
+- Basic technical details such as your IP address, browser type and the pages you request — these help us run the site and keep it secure
+- **If you accept analytics cookies**, Google Analytics collects information about how you use the site — for example, which pages you visit, how you found us, your device type and your approximate location. We remove personal details such as email addresses from page addresses before anything is sent, and we never share your name or account details with Google.
 
-| What | Details |
-|---|---|
-| **Account details** | Your email address and password. Your password is stored by our authentication provider in a securely hashed form — we can never see it. |
-| **Profile** | Your specialty and grade (for example, "Registrar" or "Medical Student"), which you choose when you set up your account. Optionally, your name, if you add it in Settings. |
-| **Your activity on MediCon** | Events you save, reminders you set (for example, an abstract deadline reminder), your personal calendar of saved events, and the in-app notifications we send you. |
-| **Community contributions** | Event details you submit or add to existing listings, any evidence link and private note you add for our moderators, and the outcome of our review (including any message our moderators send you). |
-| **Messages to us** | If you email us, your email address, the content of your message and our reply. |
+We don't ask for health information or any information about patients, so please don't include it.
 
-### Information collected automatically
+## 3. How we use it
 
-| What | Details |
-|---|---|
-| **Sign-in and security records** | When you sign up, sign in, reset your password or verify your email, our authentication provider records technical information such as the date and time, your IP address and your browser type. |
-| **Website request logs** | Like almost all websites, our hosting provider automatically records basic technical information about requests to the site (such as IP address, browser type, the page requested and the time) to deliver the site and keep it secure. |
-| **Cookies and local storage** | A small number of strictly necessary cookies keep you signed in, and your device stores your display preferences and recent searches. We **don't** use analytics, advertising or tracking cookies. See our [Cookie Policy](/cookies). |
+- **To run your account and the site's features** — signing in, saved events, reminders, your calendar and notifications *(to provide the service you signed up for)*
+- **To show you relevant events** — based on your specialty, including in-app alerts about new events, which you can turn off in Settings *(to provide the service)*
+- **To review community contributions** and let you know the outcome *(our legitimate interest in keeping listings accurate and free of spam)*
+- **To keep MediCon secure** and fix problems *(our legitimate interest in running a safe, reliable site)*
+- **To understand how the site is used** with Google Analytics, so we can improve it *(your consent — only if you accept analytics cookies)*
+- **To reply to you** and meet any legal obligations
 
-We don't ask for, and you shouldn't give us, any **health information** or other "special category" information, or any information about patients.
+We use automated tools, some powered by AI, to gather event information from organisers' websites and to check community submissions. These tools work with event details only — never your name or email address — and a person reviews every submission before it's published.
 
-<!-- FUTURE: analytics. If an analytics tool is added (e.g. Vercel Analytics, Plausible, PostHog, Google Analytics), add it to this table, to section 3 (lawful basis: legitimate interests, or consent if non-exempt cookies are used), to section 5 (suppliers) and to the Cookie Policy. -->
-
-## 3. How we use your information, and our lawful basis
-
-Data protection law requires us to have a valid reason ("lawful basis") for each way we use your information.
-
-| Why we use it | Information used | Lawful basis |
-|---|---|---|
-| To create and run your account, let you sign in, and send essential account emails (email verification, password reset) | Account details, sign-in records | **Contract** — we need it to provide the service you've signed up for |
-| To provide the Platform's features: the full directory, saved events, reminders, your calendar, in-app notifications | Account details, activity | **Contract** |
-| To tailor the Platform to you — for example, showing events and deadlines in your specialty on your dashboard and sending in-app alerts about new events in your specialty | Profile, activity | **Contract**. You can change your specialty at any time and turn specialty alerts off in Settings |
-| To review, check and publish community contributions, and to tell you the outcome | Contributions, account email (seen by moderators) | **Legitimate interests** — keeping listings accurate and the Platform free of spam and abuse |
-| To keep the Platform and your account secure, prevent misuse, and fix problems | Sign-in records, request logs, account details | **Legitimate interests** — running a safe, reliable service |
-| To understand, in aggregate, how the Platform is used (for example, how many people have saved an event or chosen a specialty), so we can improve it | Profile, activity — counted in aggregate | **Legitimate interests** — improving the Platform |
-| To reply to your messages and handle requests and complaints | Messages to us, account details | **Legitimate interests**, or **legal obligation** where the request is about your data protection rights |
-| To comply with the law and deal with legal claims | Any relevant information | **Legal obligation** / **legitimate interests** |
-
-Where we rely on **legitimate interests**, we've considered that our interests are not outweighed by your rights, and you can object (see section 7).
-
-**Automated tools and AI.** We use automated tools, some using AI, to collect and check event information from organisers' public websites, and to check community contributions against the organiser's website. When we check a contribution, we send the **event details** you submitted and the organiser's web page to an AI model provider — **we don't send your name or email address**. A human moderator makes every decision about whether a contribution is published. We don't make any decisions about you based solely on automated processing that have legal or similarly significant effects on you.
-
-**We don't sell your personal information**, and we don't share it with event organisers, societies or advertisers.
-
-<!-- FUTURE: email marketing / digests. MediCon does not currently send marketing emails. Before launching email digests ("new events in your specialty", newsletters, etc.): collect opt-in consent with an UNTICKED box, include an unsubscribe link in every email, add a row here (lawful basis: consent), and add the email provider to section 5. -->
-
-<!-- FUTURE: sponsored/featured events, advertising and affiliate links. Before launch, add rows covering any personal data used for ads or affiliate tracking (likely lawful basis: consent, collected via a cookie banner), name the ad/affiliate networks in section 5, and state clearly whether ads are personalised. Contextual (non-personalised) ads and plain affiliate links without tracking cookies keep this simpler. -->
+We don't currently send marketing emails. If we ever do, we'll ask first, and you'll always be able to unsubscribe.
 
 ## 4. Who can see your information
 
-- **You.** Your saved events, reminders, calendar and notifications are private to your account.
-- **Our moderators.** People we authorise to review community contributions can see the contributions you submit, any private note or evidence link, and your email address and name (if you've added one). They only use this to review contributions and contact you about them.
-- **Other users** never see your name, email address, specialty or saved events. Published contributions are labelled "Community" without identifying you.
-- **Our suppliers** (see section 5), only to provide their services to us.
-- **Others, where required.** We may disclose information if required by law, to protect the rights, safety or property of MediCon, our users or others, or as part of a sale, reorganisation or renaming of MediCon (in which case the new operator would be bound by this policy).
+Your saved events, reminders and calendar are private to you. Other users can't see your name, email address or specialty. Contributions you submit are published with a "Community" label, without your name. Our moderators can see the email address linked to a contribution so they can review it and get back to you.
 
-## 5. Our suppliers
+## 5. Sharing your information
 
-We use trusted service providers ("processors") who handle personal information on our behalf and only on our instructions:
+We don't sell your personal information.
 
-| Supplier | What they do for us | Where |
-|---|---|---|
-| **Supabase** | Database and user authentication (accounts, sign-in, password storage) | Data stored in Ireland (EU) |
-| **Vercel** | Hosts and delivers the website | USA, with a global network of servers |
-| **Google (Gmail)** | Sends account emails such as email verification and password reset | USA / global |
-| **GitHub (Microsoft)** | Runs our scheduled jobs — for example, sending your reminders and specialty alerts and processing contributions | USA / global |
-| **NVIDIA** | Provides the AI model used to read event web pages and check community contributions (event details only — not your name or email) | USA |
+We use a small number of trusted service providers to run MediCon — for website hosting, our database and sign-in system, sending account emails, analytics (Google Analytics, only if you accept) and AI tools that check event details. They only use your information to provide their service to us.
 
-[[PLACEHOLDER: update this table whenever a supplier is added or changed — e.g. Resend (email), Cloudflare Turnstile (bot protection).]]
+Some of these providers are based outside the UK, including in the US. When that's the case, we make sure appropriate safeguards are in place to protect your information.
 
-### International transfers
+## 6. Cookies
 
-Some suppliers process information outside the UK. Where they do, we make sure there are appropriate safeguards — for example, the transfer is to a country the UK has recognised as providing adequate protection (such as the EU, or the USA for organisations certified under the UK Extension to the EU–US Data Privacy Framework), or we rely on the UK International Data Transfer Agreement or Addendum. Contact us if you'd like more information.
+We use a few essential cookies to keep you signed in, and Google Analytics cookies only if you accept them. You can change your choice at any time using **Cookie settings** at the bottom of every page. See our [Cookie Policy](/cookies) for the full details.
 
-## 6. How long we keep your information
+## 7. How long we keep it
 
-| Information | How long |
-|---|---|
-| Account details, profile, saved events, reminders and calendar | Until you delete your account |
-| In-app notifications | Up to 12 months, or until you delete your account if sooner |
-| **Inactive accounts** | If you haven't signed in for **3 years**, we'll email you. If you don't sign in within 30 days of that email, we'll delete your account |
-| Community contributions — not published (pending, declined, expired) | Until you delete your account |
-| Community contributions — published | The published event information stays on the Platform, but when you delete your account it's no longer linked to you, and your private notes are deleted |
-| Emails and complaints you send us | Up to 2 years after the matter is closed |
-| Sign-in records and website request logs | Kept by our suppliers for limited periods for security purposes — typically a few days to a few weeks |
-| Backups | Deleted information may remain in secure backups for up to [[PLACEHOLDER: e.g. 30]] days before being overwritten |
+- **Your account and everything in it** — until you delete your account, which you can do at any time in Settings
+- **Contributions that have been published** — the event information stays on MediCon, but it's no longer linked to you once you delete your account
+- **Analytics data** — automatically deleted by Google after 14 months
+- **Everything else** — only for as long as we need it, and then deleted
 
-We may keep information for longer if we need to for legal reasons, such as dealing with a legal claim.
+## 8. Your rights
 
-## 7. Your rights
+Depending on where you live, you can ask us to:
 
-You have the right to:
+- give you a copy of your information
+- correct anything that's wrong (you can also update your profile in Settings)
+- delete your information (you can also delete your account in Settings)
+- limit or stop how we use it
+- send your information to you in a format you can reuse
 
-- **Access** — ask for a copy of the personal information we hold about you;
-- **Rectification** — ask us to correct inaccurate or incomplete information (you can update your name, specialty and grade yourself in Settings);
-- **Erasure** — ask us to delete your information (you can delete your account yourself in **Settings**);
-- **Restriction** — ask us to limit how we use your information;
-- **Object** — object to our use of your information where we rely on legitimate interests;
-- **Portability** — ask for the information you've given us in a structured, machine-readable format.
+You can also withdraw your consent to analytics at any time using **Cookie settings**. To make a request, just email hellomedicon@gmail.com.
 
-You also have the right to withdraw any consent you've given us at any time (this won't affect anything we did before you withdrew it).
+## 9. Complaints
 
-To make a request, email **hellomedicon@gmail.com**. We may need to confirm your identity. We'll respond within one month (this can be extended in some circumstances, in which case we'll tell you). Making a request is free in most cases.
+If you're unhappy with how we've handled your information, please email us first and we'll do our best to put it right. You can also contact the UK's data protection regulator, the Information Commissioner's Office, at [ico.org.uk/make-a-complaint](https://ico.org.uk/make-a-complaint/), or the data protection authority in your country.
 
-## 8. Complaints
+## 10. Keeping your information safe
 
-If you're unhappy with how we've handled your personal information, please contact us first at **hellomedicon@gmail.com** so we can try to put it right. We'll acknowledge your complaint within 30 days, look into it, and let you know the outcome without undue delay.
+We use sensible security measures to protect your information, including encrypted connections and access controls. No system is completely secure, so please use a strong password and let us know if you think your account has been compromised.
 
-You also have the right to complain to the UK's data protection regulator, the **Information Commissioner's Office (ICO)**: [ico.org.uk/make-a-complaint](https://ico.org.uk/make-a-complaint/), or 0303 123 1113.
+## 11. Age
 
-If you live in the European Economic Area, you can also complain to the data protection authority in your country.
-
-## 9. Keeping your information secure
-
-We use appropriate technical and organisational measures to protect your information, including encrypted (HTTPS) connections, securely hashed passwords, database access rules that restrict each user to their own data, and limiting access to people who need it. No system is completely secure, so please use a strong, unique password and tell us straight away if you think your account has been compromised.
-
-## 10. Age limit
-
-MediCon is only for people aged **18 or over**. We don't knowingly collect information from anyone under 18. If you think someone under 18 has created an account, please contact us and we'll delete it.
-
-## 11. Links to other websites
-
-MediCon links to event organisers' websites and other third-party sites (such as map services). Once you leave MediCon, those websites' own privacy policies apply. We're not responsible for how they handle your information.
+MediCon is for people aged 18 or over. If you think someone younger has created an account, please let us know and we'll remove it.
 
 ## 12. Changes to this policy
 
-We'll update this policy when we change how we use personal information — for example, when we add new features. The date at the top shows when it was last updated. If the changes are significant, we'll tell you by email or a notice on the Platform.
+We may update this policy from time to time. The date at the top shows the latest version, and we'll let you know about any significant changes.
 
 ## 13. Contact us
 
-Email: **hellomedicon@gmail.com**
-Post: **[[PLACEHOLDER: geographic postal address]]**
+Questions about your privacy? Email us at hellomedicon@gmail.com.

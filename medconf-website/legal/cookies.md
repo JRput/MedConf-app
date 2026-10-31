@@ -1,93 +1,59 @@
 ---
 title: Cookie Policy
 slug: /cookies
-status: DRAFT — not yet reviewed by a solicitor
-last_updated: "[[PLACEHOLDER: publication date]]"
+status: Plain-English rewrite, 31 Oct 2026 — not yet reviewed by a solicitor
+last_updated: "31 October 2026"
 ---
 
 <!--
-  DRAFT NOTES FOR CLAUDE CODE (do not render)
-  - The table below reflects the code as of 31 Oct 2026. Re-audit (grep for document.cookie, cookies().set,
-    localStorage, sessionStorage, third-party <script>/<iframe>) before publishing and whenever a feature is added.
-  - The Supabase cookie name includes the project ref (currently zcpszfbmvfylicpxgsfc). Replace [project-ref] if you
-    prefer to show the exact name, and update it if the Supabase project changes.
-  - A consent banner exists for Google Analytics (src/components/analytics/CookieConsent.tsx). Adding ads, affiliate tracking,
-    embedded maps/videos or Cloudflare Turnstile means revisiting this page and the banner text; bump CONSENT_VERSION in
-    src/lib/analytics/consent.ts if the banner starts asking for more. See legal/CLAUDE_CODE_BRIEF.md.
+  NOTES FOR CLAUDE CODE (not rendered)
+  - This page describes cookies by category on purpose (owner's choice, 31 Oct 2026). The exact list lives here so
+    we can answer detailed questions — keep it in sync with the code:
+      Essential cookies: sb-<project-ref>-auth-token (chunked .0/.1; up to 400 days or sign-out),
+        sb-<project-ref>-auth-token-code-verifier (PKCE, removed after the step), mc_next (1 hour),
+        mc_consent (cookie choice, 6 months).
+      Local storage: medconf-theme, medconf-accent, medconf:recent-searches, medconf:submit-draft:<user id>.
+      Analytics (after consent only): _ga, _ga_M2DLMQR888 (~13 months; cookie_expires in src/lib/analytics/config.ts).
+  - Re-audit (document.cookie, cookies().set, localStorage, sessionStorage, <script>, <iframe>) whenever a feature is
+    added; update this page if a new category, purpose or third party appears, and bump last_updated.
+  - Consent banner: src/components/analytics/CookieConsent.tsx. Bump CONSENT_VERSION in src/lib/analytics/consent.ts if
+    the banner starts asking consent for anything else.
+  - FUTURE: advertising / affiliate tracking cookies need prior consent — add a separate banner choice and a section here.
 -->
 
 # Cookie Policy
 
-**Last updated:** [[PLACEHOLDER: publication date]]
+**Last updated:** 31 October 2026
 
-This policy explains how MediCon uses cookies and similar technologies on our website.
+This page explains the cookies and similar technologies MediCon uses, and how you can control them.
 
-## The short version
+## In short
 
-- We use cookies and device storage that are **needed to make the site work** or that **remember choices you make**, such as light or dark mode. UK law allows these without consent, as long as we explain them clearly — which is what this page does.
-- With your permission, we also use **Google Analytics** cookies to understand how the site is used. These are **only set if you click "Accept analytics"** in our cookie banner. If you reject them, or ignore the banner, they're never set.
-- We **don't** use advertising, social media or cross-site tracking cookies.
-- You can change your choice at any time using **Cookie settings** at the bottom of every page.
+- We use a few **essential cookies** to keep you signed in, and we save some **preferences** (like light or dark mode) in your browser.
+- With your permission, we use **Google Analytics** to understand how the site is used. These cookies are only set if you click **"Accept analytics"** — if you reject them or ignore the banner, they're never set.
+- We don't use advertising or social media tracking cookies.
+- You can change your mind at any time using **Cookie settings** at the bottom of every page.
 
-## What are cookies and local storage?
+## What cookies are
 
-**Cookies** are small text files a website saves on your device so it can recognise your browser. **Local storage** is a similar feature that lets a website save small amounts of information in your browser. Information in local storage stays on your device and isn't sent to us automatically.
+Cookies are small text files a website saves in your browser so it can remember you. Local storage works in a similar way, but the information stays on your device and isn't sent to us.
 
-## What we use
+## The cookies we use
 
-### Strictly necessary cookies
+**Essential cookies** keep you signed in, take you back to the right page after you sign in, and remember your cookie choice. The site can't work without them, so they can't be switched off. They last from an hour up to about a year, or until you sign out.
 
-These keep you signed in and make sign-in work securely. The Platform can't work without them.
+**Preferences** such as light or dark mode, your recent searches and any event submission you're still writing are saved in your browser only. We never receive them, and they stay until you clear your browser data.
 
-| Name | Purpose | How long it lasts |
-|---|---|---|
-| `sb-[project-ref]-auth-token` (may be split into parts ending `.0`, `.1`, …) | Keeps you signed in to your account. Set by our authentication provider, Supabase, on our own domain | Up to 400 days, or until you sign out |
-| `sb-[project-ref]-auth-token-code-verifier` | A one-time security code used while you sign in, verify your email or reset your password | Short-lived; normally removed once the step is complete |
-| `mc_next` | Remembers the page you were trying to reach, so we can take you back there after you sign up or verify your email | 1 hour |
-| `mc_consent` | Remembers whether you accepted or rejected analytics cookies, so we don't ask you on every page | 6 months |
+**Analytics cookies (only if you accept).** Google Analytics sets two cookies that tell visits apart, so we can see which pages are popular and how people find us. We've set it up to remove personal details from page addresses and to switch off Google's advertising features. These cookies last about 13 months, and we delete them if you change your mind in Cookie settings. The information is processed by Google — you can read [how Google uses this information](https://policies.google.com/technologies/partner-sites).
 
-### Preferences stored on your device (local storage)
+## Other websites
 
-These remember choices you make. They're only saved on your device, and we never receive them.
+When you click through to an organiser's website or a map, that site may use its own cookies. We don't embed these services in our pages, so they can't set cookies through MediCon.
 
-| Name | Purpose | How long it lasts |
-|---|---|---|
-| `medconf-theme` | Remembers whether you chose light or dark mode | Until you clear your browser storage |
-| `medconf-accent` | Remembers the colour accent you chose | Until you clear your browser storage |
-| `medconf:recent-searches` | Remembers your recent searches in the quick-search box so you can repeat them | Until you clear your browser storage |
-| `medconf:submit-draft:<user id>` | Keeps your in-progress "Submit an event" form (event details and fee rows you have typed) so a page reload does not lose it; removed when the submission is sent or you clear it | Until sent or cleared |
+## Managing cookies
 
-### Analytics cookies — only if you accept
+Use **Cookie settings** at the bottom of any page to change your analytics choice. You can also delete cookies and site data in your browser settings — just note that deleting the essential cookies will sign you out.
 
-If you click **"Accept analytics"**, we load Google Analytics, which sets these cookies on our website to tell visits apart and measure how the site is used. We've configured it to remove personal details from page addresses and to turn off Google's advertising features. The information is sent to Google — see [how Google uses information from sites that use its services](https://policies.google.com/technologies/partner-sites).
+## Changes and questions
 
-| Name | Purpose | How long it lasts |
-|---|---|---|
-| `_ga` | Distinguishes one visitor's browser from another with a random identifier | About 13 months |
-| `_ga_M2DLMQR888` | Keeps track of your current visit (session) | About 13 months |
-
-If you later choose **"Reject analytics"** in Cookie settings, we delete these cookies and stop loading Google Analytics. You can also install Google's [opt-out browser add-on](https://tools.google.com/dlpage/gaoptout).
-
-<!-- If GA settings change (Google signals, advertising features, user-ID, cookie lifetime in src/lib/analytics/config.ts), update this section. If a cookieless/first-party analytics tool replaces GA, note the PECR statistical-purposes exemption (in force since 5 Feb 2026) requires clear info + a simple opt-out. -->
-
-<!-- FUTURE: advertising, sponsored listings and affiliate links. Ad networks and affiliate tracking almost always use cookies that need prior consent. Before launch: add a consent banner (reject as easy as accept, nothing non-essential set before consent), list each cookie and provider here, and add a "Cookie settings" link in the footer. -->
-
-<!-- FUTURE: Cloudflare Turnstile (bot protection on sign-up/sign-in) — list its cookie/storage use here as strictly necessary for security. -->
-
-## Third-party websites
-
-MediCon links to event organisers' websites and to services such as Google Maps. We don't embed these services in our pages, so they can't set cookies through MediCon. If you follow a link, the other website may use its own cookies — please check its cookie policy.
-
-## How to control cookies and local storage
-
-You can change your analytics choice at any time using **Cookie settings** at the bottom of every page.
-
-You can also block or delete cookies and clear local storage in your browser settings. Most browsers explain how in their help pages. If you block or delete the strictly necessary cookies, you'll be signed out and won't be able to use the parts of MediCon that need an account. Clearing local storage resets your display preferences and recent searches.
-
-## Changes to this policy
-
-We'll update this page if we change the cookies or similar technologies we use. The date at the top shows when it was last updated. If we start using any other cookies that need your consent, we'll ask for it before setting them.
-
-## Contact us
-
-Questions about cookies: **hellomedicon@gmail.com**. For more about how we handle personal information, see our [Privacy Policy](/privacy).
+We'll update this page if the cookies we use change, and we'll always ask before setting any new cookies that need your permission. Questions? Email us at hellomedicon@gmail.com.
