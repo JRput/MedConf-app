@@ -167,7 +167,8 @@ Scraper run logs live in `medconf-scraper/*.log` (RCGP runs especially).
 - **Solicitor review** is required before any paid feature (sponsored listings, ads, affiliates, organiser accounts) launches.
 - **Standing rule:** any change that collects new personal data, adds a supplier/service, or adds a cookie / localStorage key / third-party script or embed **must update `medconf-website/legal/privacy.md` and/or `cookies.md` in the same change and bump `last_updated`.**
 - Future-features legal checklist: brief §4 (analytics done; Turnstile, Resend, email digests opt-in unticked, sponsored labels, ads consent, affiliates, organiser terms, social sign-in, custom domain, rename, EU representative). Review it whenever one of those is built.
-- Google Analytics (brief §2a): off until `NEXT_PUBLIC_GA_MEASUREMENT_ID` (`G-M2DLMQR888`) is set in Vercel **Production** only, after the legal pages are live; never send user id/email/name/`?q=` to GA; new custom events go through `sanitizeUrl()`.
+- **Legal pages LIVE 2026-10-31** (plain-English rewrite of terms, privacy and cookie policy, `Last updated: 31 October 2026`, no placeholders; footer "Contact us" box with the email). **Still owed on the site (UK e-commerce rules): the operator's legal name and a postal address** once the owner decides what to publish.
+- Google Analytics (brief §2a): **`NEXT_PUBLIC_GA_MEASUREMENT_ID=G-M2DLMQR888` set in Vercel Production only on 2026-10-31 and the site rebuilt** (a plain `vercel redeploy` reused the cached build — a Git push was needed); consent banner + gtag after Accept to be confirmed in a real browser (headless checks hit the Vercel Security Checkpoint); never send user id/email/name/`?q=` to GA; new custom events go through `sanitizeUrl()`.
 - Tracked TODO: inactive-account deletion (3 years + 30-day notice email) is not built — needs an email provider; earliest trigger is years away.
 
 ## 6. CLAUDE HQ + Memory
