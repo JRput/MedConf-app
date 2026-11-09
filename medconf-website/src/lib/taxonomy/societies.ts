@@ -163,7 +163,7 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   AMWC: { short: 'AMWC', name: 'Aesthetic & Anti-Aging Medicine World Congress (AMWC)', kind: 'international', country: 'FR' },
   BAD: { short: 'BAD', name: 'British Association of Dermatologists', kind: 'specialist', country: 'UK' },
   BSPED: { short: 'BSPED', name: 'British Society for Paediatric Endocrinology and Diabetes', kind: 'specialist', country: 'UK' },
-  'Digital Health Rewired': { short: 'Rewired', name: 'Digital Health Rewired', kind: 'other', country: 'UK' },
+  'Digital Health Rewired': { short: 'Digital Health Rewired', name: 'Digital Health Rewired', kind: 'other', country: 'UK' },
   ACR: { short: 'ACR', name: 'American College of Rheumatology', kind: 'international', country: 'US' },
   ATS: { short: 'ATS', name: 'American Thoracic Society', kind: 'international', country: 'US' },
   BCS: { short: 'BCS', name: 'British Cardiovascular Society', kind: 'specialist', country: 'UK' },
