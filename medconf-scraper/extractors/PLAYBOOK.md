@@ -151,6 +151,7 @@ Registration touches four places. Step 4 was missed on waves 2a–2d, so the new
 3. **Identical CI groups** in `.github/workflows/scrape-daily.yml` and `remediator-daily.yml`.
 4. **Add the society to `medconf-website/src/lib/taxonomy/societies.ts`** (name, kind, country). Until then the site shows the bare code under "Other" via the runtime fallback, and the daily `taxonomy-check` job fails red.
 5. **Before pushing**, run `./.venv/bin/python check_taxonomy.py` (in `medconf-scraper/`) and `npm run check:societies` (in `medconf-website/`).
+6. **Live scrape + stored-row diff (added 2026-11-09, HQ LESSONS #95).** The build harness reads static HTML; production reads the Playwright DOM, and the two can take different paths (BAD Annual Meeting: a slider plugin fails under Playwright, the extractor fell back to `/venue/` and shared heuristics stored a nav item as the venue and the late-breaking date as the deadline — after builder, harness and reviewer had all passed it). So the gate ends with one real `./.venv/bin/python main.py --run-now --source N`, then a field-by-field comparison of the stored row (`conferences` + `pricing_tiers` incl. `evidence_url`/`evidence_identity`) against the harness JSON, then `python -m remediator.audit --source N`. Any field that differs is a finding, not noise.
 
 ---
 
