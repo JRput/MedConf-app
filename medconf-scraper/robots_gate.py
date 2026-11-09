@@ -20,6 +20,9 @@ from logger import logger
 ROBOTS_TTL = 24 * 3600.0     # rationale: robots.txt rarely changes; a daily cron never needs fresher
 CRAWL_DELAY_CAP = 10.0       # rationale: a hostile Crawl-delay must not stall a 20 s per-event clock
 ROBOTS_TIMEOUT = 5.0
+MAX_RULE_LEN = 1024      # longer rules are skipped
+MAX_WILDCARDS = 10       # rules with more '*' are skipped
+MAX_PATH_LEN = 2048      # longer paths match no rule
 BOT_TOKEN = "MedConfBot"
 _BROWSER_UA = "Mozilla/5.0 (compatible; MedConfBot)"
 
@@ -65,8 +68,9 @@ class _Rules:
                 agents.append(v.lower())
             elif k in ("allow", "disallow") and agents:
                 in_rules = True
-                if v:     # empty Disallow allows everything; empty Allow is a no-op
-                    rules.append((k == "allow", self._rx(v), len(v)))
+                spec = self._rx(v) if v else None   # empty Disallow allows everything; empty Allow is a no-op
+                if spec is not None:
+                    rules.append((k == "allow", spec, len(v)))
             elif k == "crawl-delay" and agents:
                 in_rules = True
                 try:
@@ -77,12 +81,35 @@ class _Rules:
 
     @staticmethod
     def _rx(pattern: str):
+        """Linear matcher spec (pieces, anchored_end) or None to skip a hostile rule."""
         pattern = unquote(pattern)
+        if len(pattern) > MAX_RULE_LEN or pattern.count("*") > MAX_WILDCARDS:
+            return None
         anchored = pattern.endswith("$")
         if anchored:
             pattern = pattern[:-1]
-        body = ".*".join(re.escape(x) for x in pattern.split("*"))
-        return re.compile(body + ("$" if anchored else ""), re.DOTALL)
+        pattern = re.sub(r"\*+", "*", pattern)
+        return pattern.split("*"), anchored
+
+    @staticmethod
+    def _match(spec, path: str) -> bool:
+        pieces, anchored = spec
+        if len(pieces) == 1:
+            return path == pieces[0] if anchored else path.startswith(pieces[0])
+        if not path.startswith(pieces[0]):
+            return False
+        pos = len(pieces[0])
+        for piece in pieces[1:-1]:
+            if not piece:
+                continue
+            i = path.find(piece, pos)
+            if i < 0:
+                return False
+            pos = i + len(piece)
+        last = pieces[-1]
+        if anchored:
+            return path.endswith(last) and len(path) - len(last) >= pos
+        return path.find(last, pos) >= 0
 
     def _select(self, uas):
         low = [u.lower() for u in uas]
@@ -92,10 +119,12 @@ class _Rules:
     def can_fetch(self, uas, url: str) -> bool:
         p = urlparse(url)
         path = unquote((p.path or "/") + (("?" + p.query) if p.query else ""))
+        if len(path) > MAX_PATH_LEN:
+            return True          # too long for any rule to be matched safely
         best_len, best_allow = -1, True
         for _a, rules, _d in self._select(uas):
             for allow, rx, ln in rules:
-                if rx.match(path) and (ln > best_len or (ln == best_len and allow)):
+                if self._match(rx, path) and (ln > best_len or (ln == best_len and allow)):
                     best_len, best_allow = ln, allow
         return best_allow
 
