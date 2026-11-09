@@ -509,6 +509,32 @@ def ended_edition(html: str, lines: List[str], today: Optional[date] = None) -> 
     return {"start": best[0], "end": best[1]} if best else None
 
 
+def _in_menu_run(lines: List[str], i: int) -> bool:
+    """True when lines[i] sits in a run of short label-only lines (a flattened nav/menu), not in prose."""
+    def label(x: str) -> bool:
+        return len(x) <= 40 and not re.search(r"[.!?:]$|\d{4}", x) and len(x.split()) <= 4
+    n = 1
+    j = i - 1
+    while j >= 0 and label(lines[j]):
+        n, j = n + 1, j - 1
+    j = i + 1
+    while j < len(lines) and label(lines[j]):
+        n, j = n + 1, j + 1
+    return n >= 5
+
+
+def _venue_from_body(lines: List[str]) -> Optional[str]:
+    """Venue named by a venue page's body prose: 'Liverpool Experience Campus (LEX) is a conference centre ...'
+    (menu runs and the page header are skipped)."""
+    for i, ln in enumerate(lines):
+        if _in_menu_run(lines, i):
+            continue
+        m = re.match(r"^((?:The )?[A-Z][\w'\u2019&-]+(?: [A-Za-z][\w'\u2019&-]+){1,5}?)(?: \([^)]{2,20}\))? (?:is|offers|has|sits|lies|stands)\b", ln)
+        if m and _VENUE_KW_RE.search(m.group(1)) and sane_venue(m.group(1)):
+            return m.group(1)
+    return None
+
+
 class SingleCongressExtractor(BaseExtractor):
     HOME_URL: str = ""
     FREE_PATTERN: Optional["re.Pattern[str]"] = None       # edition page text that means attendance is free ("free-to-attend") -> one 0 tier
@@ -706,13 +732,13 @@ class SingleCongressExtractor(BaseExtractor):
                     if m:
                         vraws.append(m.group(1))
                         break
-                    if re.match(r"(?i)^(?:the )?venue$", ln):
+                    if re.match(r"(?i)^(?:the )?venue$", ln) and not _in_menu_run(vl, n_):
                         nxt = next((x for x in vl[n_ + 1:n_ + 4] if not x.endswith(":") and len(x) <= 60 and not re.search(r"[.!?]$", x)), None)
                         if nxt:
                             vraws.append(nxt)
                             break
                 else:
-                    hv = self.venue_from_lines(vl)
+                    hv = self.venue_from_lines(vl) or _venue_from_body(vl)
                     if hv:
                         vraws.append(hv)
             for raw in vraws:

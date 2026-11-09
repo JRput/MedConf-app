@@ -271,3 +271,16 @@ def test_cpd_credit_count_ignores_category_qualifier():
     assert float(_CPD_RE.search("This activity offers 12 CME credits").group(1)) == 12
     assert _CPD_RE.search("Approved for Category 1 CME credits") is None
     assert _CPD_RE.search("Section 3 CPD points are available") is None
+
+
+def test_venue_heading_ignores_flattened_nav_menu():
+    # FF1 (2026-11-09): BAD /venue/ page - "Social | Venue | Wellbeing" menu run was read as venue "Wellbeing".
+    from pathlib import Path
+    html = (Path(__file__).parent / "test_fixtures" / "bad_annual_venue_live_2026-11-09.html").read_text()
+    ex = _Fake(None)
+    ex.VENUE_URLS = ("https://fake.example/venue/",)
+    ex._fetch_aux = lambda urls, base_html, base_url, cap: {"https://fake.example/venue/": html}
+    shell = {"title": "FAKE 2027", "start_date": "2027-07-06", "end_date": "2027-07-08", "edition_year": 2027, "booking_url": "https://fake.example/"}
+    out = ex.detail_from_html("<html><body><p>FAKE 2027</p></body></html>", "https://fake.example/", shell, None)
+    assert out.get("venue_name") == "Liverpool Experience Campus"
+    assert "Wellbeing" not in str(out.get("venue_name"))
