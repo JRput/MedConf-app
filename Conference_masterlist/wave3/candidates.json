@@ -1,0 +1,262 @@
+[
+ {
+  "domain": "aap.org",
+  "candidate_urls": [
+   "https://aapexperience.org/future-dates/",
+   "https://aapexperience.org/"
+  ]
+ },
+ {
+  "domain": "amwc-conference.com",
+  "candidate_urls": [
+   "https://www.amwc-conference.com/",
+   "https://www.amwc-conference.com/en/home.html"
+  ]
+ },
+ {
+  "domain": "bad.org.uk",
+  "candidate_urls": [
+   "https://badannualmeeting.co.uk/",
+   "https://www.bad.org.uk/"
+  ]
+ },
+ {
+  "domain": "bsped.org.uk",
+  "candidate_urls": [
+   "https://www.bsped.org.uk/meetings/forthcoming-meetings/",
+   "https://www.bsped.org.uk/"
+  ]
+ },
+ {
+  "domain": "digitalhealthrewired.com",
+  "candidate_urls": [
+   "https://digitalhealthrewired.com/",
+   "https://digitalhealthrewired.com/programme"
+  ]
+ },
+ {
+  "domain": "rheumatology.org",
+  "candidate_urls": [
+   "https://rheumatology.org/meetings/acr-convergence/",
+   "https://rheumatology.org/"
+  ]
+ },
+ {
+  "domain": "thoracic.org",
+  "candidate_urls": [
+   "https://site.thoracic.org/conference",
+   "https://conference.thoracic.org/"
+  ]
+ },
+ {
+  "domain": "eular.org",
+  "candidate_urls": [
+   "https://congress.eular.org/",
+   "https://congress.eular.org/registration.cfm"
+  ]
+ },
+ {
+  "domain": "britishcardiovascularsociety.org",
+  "candidate_urls": [
+   "https://britishcardiovascularsociety.org.uk/courses/",
+   "https://britishcardiovascularsociety.org.uk/annual-conference/"
+  ]
+ },
+ {
+  "domain": "england.nhs.uk",
+  "candidate_urls": [
+   "https://www.events.england.nhs.uk/events",
+   "https://www.events.england.nhs.uk/"
+  ]
+ },
+ {
+  "domain": "imcas.com",
+  "candidate_urls": [
+   "https://www.imcas.com/en/worldwide-events",
+   "https://www.imcas.com/en"
+  ]
+ },
+ {
+  "domain": "ors.org",
+  "candidate_urls": [
+   "https://www.ors.org/events/",
+   "https://www.ors.org/annual-meeting/"
+  ]
+ },
+ {
+  "domain": "astro.org",
+  "candidate_urls": [
+   "https://www.astro.org/meetings-and-education",
+   "https://www.astro.org/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "professional.heart.org",
+  "candidate_urls": [
+   "https://professional.heart.org/en/meetings",
+   "https://professional.heart.org/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "himss.org",
+  "candidate_urls": [
+   "https://www.himss.org/events",
+   "https://www.himss.org/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "esska.org",
+  "candidate_urls": [
+   "https://esska.org/events",
+   "https://esska.org/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "eans.org",
+  "candidate_urls": [
+   "https://www.eans.org/events",
+   "https://www.eans.org/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "theabn.org",
+  "candidate_urls": [
+   "https://www.theabn.org/events",
+   "https://www.theabn.org/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "uscap.org",
+  "candidate_urls": [
+   "https://www.uscap.org/meetings",
+   "https://www.uscap.org/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "faceconference.com",
+  "candidate_urls": [
+   "https://www.faceconference.com/",
+   "https://faceconference.com/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "baskonline.com",
+  "candidate_urls": [
+   "https://baskonline.com/events/",
+   "https://baskonline.com/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "facultyofclinicalinformatics.org.uk",
+  "candidate_urls": [
+   "https://facultyofclinicalinformatics.org.uk/events",
+   "https://facultyofclinicalinformatics.org.uk/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "phemcast.co.uk",
+  "candidate_urls": [
+   "https://phemcast.co.uk/courses",
+   "https://phemcast.co.uk/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "matacourses.com",
+  "candidate_urls": [
+   "https://matacourses.com/",
+   "https://www.matacourses.com/courses/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "aao.org",
+  "candidate_urls": [
+   "https://www.aao.org/annual-meeting/past-and-future-meetings",
+   "https://www.aao.org/annual-meeting"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "endocrinology.org",
+  "candidate_urls": [
+   "https://www.endocrinology.org/events/",
+   "https://www.endocrinology.org/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "nihr.ac.uk",
+  "candidate_urls": [
+   "https://www.nihr.ac.uk/events",
+   "https://www.nihr.ac.uk/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "rcoa.ac.uk",
+  "candidate_urls": [
+   "https://www.rcoa.ac.uk/events",
+   "https://www.rcoa.ac.uk/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "biasp.org",
+  "candidate_urls": [
+   "https://biasp.org/events/",
+   "https://biasp.org/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "wfns.org",
+  "candidate_urls": [
+   "https://wfns.org/events",
+   "https://wfns.org/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "esge.com",
+  "candidate_urls": [
+   "https://www.esge.com/events",
+   "https://www.esge.com/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "ese-hormones.org",
+  "candidate_urls": [
+   "https://www.ese-hormones.org/education-and-training/events-key-dates/",
+   "https://www.ese-hormones.org/"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "congress.ehaweb.org",
+  "candidate_urls": [
+   "https://congress.ehaweb.org/",
+   "https://ehaweb.org/congress"
+  ],
+  "reprobe": true
+ },
+ {
+  "domain": "reviseradiology.com",
+  "candidate_urls": [
+   "https://www.reviseradiology.com/courses",
+   "https://www.reviseradiology.com/events"
+  ],
+  "reprobe": true
+ }
+]

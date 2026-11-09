@@ -1,0 +1,326 @@
+{
+ "generated": "2026-11-09",
+ "next_free_id": 159,
+ "excluded_owner_call": {
+  "doctorsacademy.org": "commercial MRCS course shop (owner ruling 2026-10-21 excluded commercial shops; owner to confirm)",
+  "harleyacademy.com / skinvivatraining.com": "commercial aesthetics training (same ruling)",
+  "medicalprotection.org": "course dates behind Totara login; public hub has no dated events"
+ },
+ "batches": {
+  "3-S single_congress": [
+   {
+    "domain": "aap.org",
+    "source_id": 147,
+    "slug": "aap",
+    "candidate_urls": [
+     "https://aapexperience.org/future-dates/",
+     "https://aapexperience.org/"
+    ],
+    "recon": {
+     "domain": "aap.org",
+     "status": "resolved",
+     "listing_url": "https://aapexperience.org/future-dates/",
+     "platform": "wordpress_other",
+     "js_required": false,
+     "event_type_mix": "conference",
+     "detail_topology": "mixed",
+     "pagination": "none",
+     "volume_estimate": 4,
+     "expected_found": [
+      "AAP National Conference & Exhibition"
+     ],
+     "api_url": "https://aapexperience26.eventscribe.net/",
+     "bot_protection": "cloudflare",
+     "notes": "AAP National Conference & Exhibition is a single annual flagship conference with multiple future instances (2026-2029). Main listing page (aapexperience.org/future-dates/) shows upcoming conference dates/venues; detailed session schedules hosted on EventScribe platform (aapexperience26.eventscribe.net) behind Cloudflare protection. WordPress-based main portal.",
+     "batch": 2
+    }
+   },
+   {
+    "domain": "amwc-conference.com",
+    "source_id": 148,
+    "slug": "amwc",
+    "candidate_urls": [
+     "https://www.amwc-conference.com/",
+     "https://www.amwc-conference.com/en/home.html"
+    ],
+    "recon": {
+     "domain": "amwc-conference.com",
+     "status": "resolved",
+     "platform": "spa",
+     "js_required": true,
+     "listing_url": "https://www.amwc-conference.com",
+     "event_type_mix": "conference",
+     "detail_topology": "on_event_page",
+     "volume_estimate": 1,
+     "pagination": "none",
+     "bot_protection": "none",
+     "expected_found": [
+      "AMWC"
+     ],
+     "notes": "Single flagship conference: Aesthetic & Anti-Aging Medicine World Congress 2027 in Cannes. Built with Next.js (SPA requiring client-side rendering). Informa-owned property. Metadata confirms 2027 event date via og:image.",
+     "api_url": "",
+     "batch": 2
+    }
+   },
+   {
+    "domain": "bad.org.uk",
+    "source_id": 149,
+    "slug": "bad_annual",
+    "candidate_urls": [
+     "https://badannualmeeting.co.uk/",
+     "https://www.bad.org.uk/"
+    ],
+    "recon": {
+     "domain": "bad.org.uk",
+     "status": "resolved",
+     "platform": "spa",
+     "listing_url": "https://badannualmeeting.co.uk/",
+     "js_required": true,
+     "bot_protection": "none",
+     "event_type_mix": "conference",
+     "volume_estimate": 1,
+     "pagination": "none",
+     "detail_topology": "on_event_page",
+     "expected_found": [
+      "BAD Annual Meeting"
+     ],
+     "notes": "BAD Annual Meeting 2027 hosted at separate domain badannualmeeting.co.uk (WordPress). Main bad.org.uk site has /events-content page but it's a Next.js SPA with no server-rendered event content. One confirmed upcoming conference: BAD 2027 Liverpool, 29 June - 1 July 2027.",
+     "batch": 2
+    }
+   },
+   {
+    "domain": "bsped.org.uk",
+    "source_id": 150,
+    "slug": "bsped",
+    "candidate_urls": [
+     "https://www.bsped.org.uk/meetings/forthcoming-meetings/",
+     "https://www.bsped.org.uk/"
+    ],
+    "recon": {
+     "domain": "bsped.org.uk",
+     "status": "resolved",
+     "platform": "external_registrar",
+     "listing_url": "https://www.bsped.org.uk/meetings/forthcoming-meetings/",
+     "js_required": false,
+     "event_type_mix": "conference",
+     "detail_topology": "tabs",
+     "pagination": "none",
+     "volume_estimate": 1,
+     "expected_found": [
+      "BSPED Annual Meeting"
+     ],
+     "bot_protection": "none",
+     "notes": "Homepage navigation links to /meetings/forthcoming-meetings/ which displays the 53rd Annual Meeting (8-10 December 2026) with full event details in a multi-tab EventsForce portal (tabs: Welcome, Important Dates, Programme, Registration, Abstracts, Social Events, Exhibitors/Sponsors, Industry Programme, Venue, Travel, Accommodation, FAQs). Static Bootstrap HTML site with no JavaScript requirement or bot protection encountered.",
+     "batch": 2
+    }
+   },
+   {
+    "domain": "digitalhealthrewired.com",
+    "source_id": 151,
+    "slug": "rewired",
+    "candidate_urls": [
+     "https://digitalhealthrewired.com/",
+     "https://digitalhealthrewired.com/programme"
+    ],
+    "recon": {
+     "domain": "digitalhealthrewired.com",
+     "status": "resolved",
+     "platform": "external_registrar",
+     "listing_url": "https://digitalhealthrewired.com",
+     "js_required": false,
+     "event_type_mix": "conference",
+     "volume_estimate": 1,
+     "pagination": "none",
+     "detail_topology": "on_event_page",
+     "bot_protection": "none",
+     "expected_found": [
+      "Digital Health Rewired"
+     ],
+     "notes": "Single-flagship-conference site (Digital Health Rewired 2027, 16-17 March 2027, Birmingham NEC). Powered by ASP.events SHOWOFF platform. Homepage has structured event data with dates. A /programme page exists for session details but content is JS-rendered.",
+     "batch": 2
+    }
+   },
+   {
+    "domain": "rheumatology.org",
+    "source_id": 152,
+    "slug": "acr",
+    "candidate_urls": [
+     "https://rheumatology.org/meetings/acr-convergence/",
+     "https://rheumatology.org/"
+    ],
+    "recon": {
+     "domain": "rheumatology.org",
+     "status": "resolved",
+     "platform": "spa",
+     "js_required": true,
+     "listing_url": "https://rheumatology.org/meetings/acr-convergence/",
+     "api_url": "",
+     "bot_protection": "none",
+     "detail_topology": "on_event_page",
+     "event_type_mix": "conference",
+     "pagination": "none",
+     "volume_estimate": 1,
+     "expected_found": [
+      "ACR Convergence"
+     ],
+     "notes": "ACR Convergence is a single flagship annual conference with its own dedicated detail page. The site is a Next.js SPA requiring client-side rendering. Upcoming event dates (2026-2027) found in page content.",
+     "batch": 2
+    }
+   },
+   {
+    "domain": "thoracic.org",
+    "source_id": 153,
+    "slug": "ats",
+    "candidate_urls": [
+     "https://site.thoracic.org/conference",
+     "https://conference.thoracic.org/"
+    ],
+    "recon": {
+     "domain": "thoracic.org",
+     "status": "resolved",
+     "listing_url": "https://site.thoracic.org/conference",
+     "platform": "spa",
+     "js_required": true,
+     "event_type_mix": "conference",
+     "detail_topology": "on_event_page",
+     "volume_estimate": 2,
+     "pagination": "none",
+     "bot_protection": "none",
+     "expected_found": [
+      "ATS International Conference"
+     ],
+     "api_url": "",
+     "notes": "Flagship annual medical conference. Site is SPA-based requiring JS. ATS 2026 (abstract deadline Nov 4, 2026) and ATS 2027 (New Orleans, proposal deadline Oct 14, 2026) confirmed with dated content visible.",
+     "batch": 2
+    }
+   },
+   {
+    "domain": "eular.org",
+    "source_id": 154,
+    "slug": "eular_congress",
+    "candidate_urls": [
+     "https://congress.eular.org/",
+     "https://congress.eular.org/registration.cfm"
+    ],
+    "recon": {
+     "domain": "congress.eular.org",
+     "status": "resolved",
+     "platform": "unknown",
+     "js_required": false,
+     "listing_url": "https://congress.eular.org/",
+     "notes": "Found during wave 2d: the EULAR Annual Congress (Berlin, June 2027) lives on congress.eular.org, not eular.org/event (source 134 covers eular.org events). ColdFusion .cfm pages likely (registration.cfm). Confirm the dated home page, registration fees and abstract key dates."
+    }
+   }
+  ],
+  "3-M multi_event": [
+   {
+    "domain": "britishcardiovascularsociety.org",
+    "source_id": 155,
+    "slug": "bcs",
+    "candidate_urls": [
+     "https://britishcardiovascularsociety.org.uk/courses/",
+     "https://britishcardiovascularsociety.org.uk/annual-conference/"
+    ],
+    "recon": {
+     "domain": "britishcardiovascularsociety.org",
+     "status": "resolved",
+     "platform": "external_registrar",
+     "js_required": false,
+     "listing_url": "https://britishcardiovascularsociety.org.uk/courses/",
+     "api_url": "",
+     "event_type_mix": "mixed",
+     "detail_topology": "external",
+     "pagination": "none",
+     "volume_estimate": 5,
+     "bot_protection": "none",
+     "expected_found": [
+      "BCS Annual Conference"
+     ],
+     "notes": "BCS hosts its flagship 2027 Annual Conference internally and manages training courses through EventsAir registrar (eventsair.site). Main /courses/ listing page at /courses/ shows multiple upcoming dated courses (e.g. National Training Day 2026-09-23, Year in Cardiology 2026-12-11) with venue info inline; clicking events links to external EventsAir registration pages. Annual conference information on dedicated /annual-conference/ page referencing Manchester Central 2027 event. WordPress-based main site with content-rich navigation.",
+     "batch": 2
+    }
+   },
+   {
+    "domain": "england.nhs.uk",
+    "source_id": 156,
+    "slug": "nhs_england_events",
+    "candidate_urls": [
+     "https://www.events.england.nhs.uk/events",
+     "https://www.events.england.nhs.uk/"
+    ],
+    "recon": {
+     "domain": "england.nhs.uk",
+     "status": "resolved",
+     "platform": "spa",
+     "js_required": true,
+     "listing_url": "https://www.events.england.nhs.uk/events",
+     "event_type_mix": "conference",
+     "detail_topology": "on_event_page",
+     "pagination": "query_param",
+     "bot_protection": "none",
+     "expected_found": [
+      "Workforce education"
+     ],
+     "volume_estimate": 50,
+     "api_url": "",
+     "notes": "NHS England events portal (events.england.nhs.uk subdomain) with integrated ticketing system. Events show full details on event page: date, time, location, organizer info. Workforce education events confirmed including NHS College of Leadership and Management workshops. Pagination via query params (?page=2). Built by Sigma Technology, uses Materialize CSS framework.",
+     "batch": 2
+    }
+   },
+   {
+    "domain": "imcas.com",
+    "source_id": 157,
+    "slug": "imcas",
+    "candidate_urls": [
+     "https://www.imcas.com/en/worldwide-events",
+     "https://www.imcas.com/en"
+    ],
+    "recon": {
+     "domain": "imcas.com",
+     "status": "resolved",
+     "platform": "spa",
+     "js_required": true,
+     "listing_url": "https://www.imcas.com/en/worldwide-events",
+     "event_type_mix": "conference",
+     "volume_estimate": 5,
+     "pagination": "infinite_scroll",
+     "detail_topology": "on_event_page",
+     "bot_protection": "none",
+     "expected_found": [
+      "IMCAS World Congress"
+     ],
+     "api_url": "https://www.imcas.com/en/worldwide-events",
+     "notes": "Custom SPA with Algolia search. Events (IMCAS China 2026 27-29 Aug, IMCAS World 2027 28-30 Jan, IMCAS Americas 2027 20-22 May, IMCAS Asia 2027 4-6 Jun, INVEST by IMCAS 2027) rendered server-side in HTML with module-based JS client. Individual congress pages carry details and side-events. No auth wall. Status 200, clean fetch.",
+     "batch": 2
+    }
+   },
+   {
+    "domain": "ors.org",
+    "source_id": 158,
+    "slug": "ors",
+    "candidate_urls": [
+     "https://www.ors.org/events/",
+     "https://www.ors.org/annual-meeting/"
+    ],
+    "recon": {
+     "domain": "ors.org",
+     "status": "resolved",
+     "platform": "wordpress_other",
+     "listing_url": "https://www.ors.org/events/",
+     "js_required": true,
+     "bot_protection": "none",
+     "api_url": "",
+     "event_type_mix": "conference",
+     "detail_topology": "on_event_page",
+     "pagination": "none",
+     "volume_estimate": 12,
+     "expected_found": [
+      "ORS Annual Meeting"
+     ],
+     "notes": "ORS maintains a Tockify-embedded calendar at /events/ (requires JS to render) alongside individual event pages for flagship conferences. Confirmed 2027 Annual Meeting (Feb 19-23, 2027) and multiple symposia with future dates. WordPress site with static event pages + dynamic calendar.",
+     "batch": 2
+    }
+   }
+  ]
+ }
+}
