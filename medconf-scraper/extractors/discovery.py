@@ -266,10 +266,22 @@ def _vision_pricing(image_urls: List[str], stop_at: float, timeout: Optional[flo
     timeout inside vision, and the whole call is hard-capped at it here as well."""
     import vision
     import robots_gate
-    image_urls = [u for u in image_urls if u.startswith("data:") or robots_gate.allowed(u)]
+    kept: List[str] = []
+    for u in image_urls:
+        left = stop_at - time.time()
+        if left <= 0:
+            return []                                   # per-event clock already spent
+        if u.startswith("data:"):
+            kept.append(u)
+        elif _hard_cap(lambda u=u: robots_gate.allowed(u), max(0.1, left)) is True:
+            kept.append(u)                              # False (disallowed) or None (timed out) skips it
+    image_urls = kept
     if not image_urls:
         return []
-    limit = max(1.0, timeout if timeout is not None else stop_at - time.time())
+    left = stop_at - time.time()
+    if left <= 0:
+        return []
+    limit = max(1.0, timeout if timeout is not None else left)
     return vision.call_with_hard_timeout(
         lambda: vision.extract_pricing_from_images(image_urls, stop_at=stop_at,
                                                    fetch_timeout=limit, call_timeout=limit),

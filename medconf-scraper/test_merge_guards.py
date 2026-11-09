@@ -83,3 +83,12 @@ def test_corroborated_venue_line_passes():
 
 def test_structured_methods_unaffected():
     assert discovery._venue_line_ok({"venue_name": "ExCeL", "method": "jsonld_location"}, {}, "") is True
+
+
+def test_drop_nav_venue_fast_on_large_page():
+    import time
+    html = "<html><body>" + "<nav><ul><li class='menu-item'><a href='/x'>Item</a>" * 20000 + "x" * 600_000
+    merged = {"venue_name": "Wellbeing"}
+    t = time.time()
+    _agent(html)._drop_nav_venue(merged)
+    assert time.time() - t < 0.5

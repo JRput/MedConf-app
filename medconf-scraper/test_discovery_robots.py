@@ -134,3 +134,27 @@ def test_percent_decoded_and_query(monkeypatch):
     assert not _allowed(monkeypatch, t, "https://a.org/a%20b")
     assert not _allowed(monkeypatch, t, "https://a.org/p?token=1")
     assert _allowed(monkeypatch, "User-agent: *\nDisallow:\n", "https://a.org/anything")
+
+
+def test_vision_pricing_slow_robots_returns_empty_without_vision(monkeypatch):
+    import time, sys, types
+    import vision
+    called = []
+    monkeypatch.setattr(vision, "extract_pricing_from_images", lambda *a, **k: called.append(1) or [])
+    monkeypatch.setattr(robots_gate, "allowed", lambda u: time.sleep(2) or True)
+    t = time.time()
+    out = discovery._vision_pricing(["https://x.example/a.jpg"], stop_at=time.time() + 0.3)
+    assert out == [] and not called and time.time() - t < 1.5
+
+
+def test_hostile_wildcards_are_linear(monkeypatch):
+    import time as _t
+    path = "/" + "a" * 2000
+    for stars in (10, 50):
+        t = "User-agent: *\nDisallow: /" + "*a" * stars + "b$\n"
+        robots_gate.reset()
+        _robots(monkeypatch, t)
+        t0 = _t.monotonic()
+        assert robots_gate.allowed("https://a.org" + path)
+        assert _t.monotonic() - t0 < 0.05
+    assert robots_gate.allowed("https://a.org/" + "a" * 3000)      # over-long path matches no rule

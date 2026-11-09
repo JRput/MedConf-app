@@ -287,12 +287,52 @@ class AgentLoop:
     def _nav_anchor_texts(html: str) -> set:
         """Lower-cased visible text of every link that sits in site chrome (a nav/header/footer
         element, or an <li> whose class names a menu)."""
-        import html as _h
-        out = set()
-        chrome = re.compile(r"(?is)<(nav|header|footer)\b.*?</\1\s*>|<li\b[^>]*class=[\"'][^\"']*menu[^\"']*[\"'][^>]*>.*?</li\s*>")
-        for blk in chrome.finditer(html or ""):
-            for a in re.finditer(r"(?is)<a\b[^>]*>(.*?)</a\s*>", blk.group(0)):
-                t = re.sub(r"\s+", " ", _h.unescape(re.sub(r"<[^>]+>", " ", a.group(1)))).strip().lower()
+        from html.parser import HTMLParser
+
+        out: set = set()
+
+        class _P(HTMLParser):          # linear stdlib parse, no backtracking
+            def __init__(self):
+                super().__init__(convert_charrefs=True)
+                self.stack: List[bool] = []   # per open element: does it open a chrome scope?
+                self.chrome = 0
+                self.in_a = False
+                self.buf: List[str] = []
+
+            def handle_starttag(self, tag, attrs):
+                if tag in ("br", "img", "input", "meta", "link", "hr"):
+                    return
+                cls = dict(attrs).get("class") or ""
+                opens = tag in ("nav", "header", "footer") or (tag == "li" and "menu" in cls)
+                self.stack.append(opens)
+                self.chrome += opens
+                if tag == "a" and self.chrome:
+                    self.in_a, self.buf = True, []
+
+            def handle_endtag(self, tag):
+                if tag == "a" and self.in_a:
+                    t = re.sub(r"\s+", " ", " ".join(self.buf)).strip().lower()
+                    if t:
+                        out.add(t)
+                    self.in_a = False
+                if self.stack:
+                    self.chrome -= self.stack.pop()
+
+            def handle_data(self, data):
+                if self.in_a:
+                    self.buf.append(data)
+
+        try:
+            _P().feed((html or "")[:500_000])
+        except Exception:
+            pass
+        return out
+        def _menu(li):
+            return any("menu" in c for c in (li.get("class") or []))
+        blocks = soup.find_all(["nav", "header", "footer"]) + [li for li in soup.find_all("li") if _menu(li)]
+        for blk in blocks:
+            for a in blk.find_all("a"):
+                t = re.sub(r"\s+", " ", a.get_text(" ")).strip().lower()
                 if t:
                     out.add(t)
         return out
