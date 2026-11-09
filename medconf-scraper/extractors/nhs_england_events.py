@@ -135,6 +135,23 @@ def _title_specialty(title: str) -> Optional[str]:
     return None
 
 
+def _format_from_cues(dates: List[str], title: str, body: str, has_place: bool) -> Optional[str]:
+    """Format when the location block gives no venue and no Teams/webinar cue: a real address means in_person; 'Location TBC' with a
+    learning-programme cue ('animation-based', e-learning, self-paced, modules) or a date span over two weeks is an online
+    programme; otherwise unknown (None) rather than a guess. Pure."""
+    if has_place:
+        return "in_person"
+    if re.search(r"(?i)animation-based|e-?learning|self-paced|online module|learning programme", f"{title} {body[:800]}"):
+        return "online"
+    if len(dates) > 1 and dates[0] and dates[-1]:
+        try:
+            if (date.fromisoformat(dates[-1]) - date.fromisoformat(dates[0])).days > 14:
+                return "online"
+        except ValueError:
+            pass
+    return None
+
+
 def event_type_for(title: str) -> str:
     t = title.lower()
     if re.search(r"conference|symposium|network day|summit|annual|forum|congress", t):
@@ -250,6 +267,10 @@ class NhsEnglandEventsExtractor(BaseExtractor):
         elif shell.get("venue_raw"):
             out.update(split_address(shell["venue_raw"]))
 
+        if not out.get("event_format"):
+            out["event_format"] = _format_from_cues(found, title, body_text, bool(out.get("venue_name") or out.get("city")))
+            if out["event_format"] is None:
+                out.pop("event_format")
         out["pricing_tiers"] = parse_tickets(html, title)
         if _is_sold_out(html):
             out["is_sold_out"] = True

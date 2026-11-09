@@ -65,3 +65,36 @@ def test_fee_page_must_name_the_edition(monkeypatch):
     assert ext._fees(stale) == []
     wrong_year = {"title": "ORS 2028 Annual Meeting", "start_date": "2028-02-11", "fee_url": "https://www.ors.org/register2027/"}
     assert ext._fees(wrong_year) == []                                   # a 2027 grid is never attached to a 2028 row
+
+
+def test_call_pages_give_real_abstract_status():
+    g = ors.parse_call_page(ors.content_lines(_read("ors_call_general.html")), "2027")
+    late = ors.parse_call_page(ors.content_lines(_read("ors_call_late.html")), "2027")
+    assert g["open"] is False and late["late"] and late["open"] and late["deadline"] == "2026-11-09" and late["general_deadline"] == "2026-08-31"
+    assert ors.parse_call_page(ors.content_lines(_read("ors_call_late.html")), "2028") is None          # another edition's heading
+    on_last_day = ors.combine_calls([g, late], TODAY)
+    assert on_last_day == {"open": True, "deadline": "2026-11-09", "note": "General call closed; late-breaking abstracts open"}
+    after = ors.combine_calls([g, late], date(2026, 11, 10))
+    assert after == {"open": False, "deadline": "2026-11-09", "note": None}                              # flips closed the day after
+    assert ors.combine_calls([], TODAY) is None
+
+
+def test_annual_meeting_detail_has_description_and_closed_general_call(monkeypatch):
+    pages = {"https://www.ors.org/2027-annual-meeting/": _read("ors_annual_meeting.html"),
+             "https://www.ors.org/2027-call-for-abstracts/": _read("ors_call_general.html"),
+             "https://www.ors.org/2027latebreakingabstracts/": _read("ors_call_late.html")}
+    monkeypatch.setattr(ors, "fetch_html", lambda url, **k: pages.get(url.split("#")[0]))
+    monkeypatch.setattr(ors.robots_gate, "allowed", lambda u: True)
+    monkeypatch.setattr(ors.OrsExtractor, "_fees", lambda self, shell: [])
+    monkeypatch.setattr(ors, "date", type("D", (date,), {"today": classmethod(lambda cls: TODAY)}))
+    shell = {"title": "ORS 2027 Annual Meeting", "booking_url": "https://www.ors.org/2027-annual-meeting/", "start_date": "2027-02-19",
+             "end_date": "2027-02-23", "venue": "Moscone West Convention Center", "city": "San Francisco", "state": "California"}
+    out = ors.OrsExtractor({"id": 158}).extract_detail(None, shell, lambda p: None)
+    assert out["description"].startswith("ORS 2027 Annual Meeting takes place 19\u201323 February 2027 at Moscone West")
+    assert "Hip Society" in out["description"]
+    assert out["abstract_open"] is True and out["abstract_deadline"] == "2026-11-09"            # never open without a deadline here
+
+
+def test_description_names_the_event():
+    assert ors.with_title_token("Focuses on problem-solving with discussions.", "ORS Musculoskeletal Biology Workshop 2027").startswith("ORS Musculoskeletal")
+    assert ors.with_title_token("The Musculoskeletal Biology Workshop focuses ...", "ORS Musculoskeletal Biology Workshop 2027").startswith("The Musculo")

@@ -61,3 +61,14 @@ def test_extract_detail(monkeypatch):
     assert out["start_date"] == "2026-11-17" and out["start_time"] == "09:30" and out["event_format"] == "in_person"
     assert out["city"] == "London" and out["venue_name"].startswith("Park Plaza") and out["pricing_tiers"][0]["price_gbp"] == 0.0
     assert out["society"] == "NHS England" and out["event_type"] == "workshop" and out["description"].startswith("Join us for the in-person meeting")
+
+
+def test_location_tbc_learning_programme_is_online_and_never_blank_without_cause(monkeypatch):
+    html = _read("nhs_england_events_detail_tbc.html")
+    monkeypatch.setattr(nhs, "fetch_html", lambda *a, **k: html)
+    shell = {"title": "Who gets to be a Physiotherapist? Negotiating Participation in Physiotherapy Education",
+             "booking_url": "https://www.events.england.nhs.uk/532291", "start_date": "2026-12-02", "venue_raw": None}
+    out = nhs.NhsEnglandEventsExtractor({"id": 156}).extract_detail(None, shell, lambda p: None)
+    assert out["event_format"] == "online" and out["end_date"] == "2027-04-28" and "city" not in out
+    assert nhs._format_from_cues(["2026-12-01"], "A meeting", "Join us on the day", False) is None     # unknown stays unknown
+    assert nhs._format_from_cues([], "A meeting", "", True) == "in_person"

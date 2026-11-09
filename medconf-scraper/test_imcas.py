@@ -42,5 +42,10 @@ def test_extract_detail_world_2027(monkeypatch):
     out = imcas.ImcasExtractor({"id": 157}).extract_detail(None, shell, lambda p: None)
     assert out["venue_name"] == "Palais des Congrès de Paris" and out["city"] == "Paris" and out["event_format"] == "hybrid"
     assert out["end_date"] == "2027-01-30" and out["pricing_tiers"] == [] and out["event_type"] == "conference"
-    assert out["description"].startswith("Step into the future of dermatology")
+    assert out["description"].startswith("IMCAS World 2027: Step into the future of dermatology")
     assert imcas.ImcasExtractor.DISCOVERY_ENABLED is False             # robots.txt disallows /*/registration
+
+
+def test_description_names_the_event():
+    assert imcas.with_title_token("Step into the future of dermatology.", "IMCAS World 2027").startswith("IMCAS World 2027: Step into")
+    assert imcas.with_title_token("IMCAS Americas 2027 in Sao Paulo is the central meeting point.", "IMCAS Americas 2027").startswith("IMCAS Americas")

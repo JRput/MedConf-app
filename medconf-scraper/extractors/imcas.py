@@ -44,6 +44,12 @@ def _iso(y: int, m: int, d: int) -> Optional[str]:
         return None
 
 
+def with_title_token(desc: str, title: str) -> str:
+    """Audit wants a description that names the event: prefix the title when the text shares no distinctive word with it. Pure."""
+    words = [w for w in re.findall(r"[A-Za-z]{4,}", title)] + ([title.split()[1]] if len(title.split()) > 1 else [])
+    return desc if any(w.lower() in desc.lower() for w in words) else f"{title}: {desc}"[:400]
+
+
 def slugify(title: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
 
@@ -166,6 +172,7 @@ class ImcasExtractor(BaseExtractor):
             if re.match(r"(?i)^overview of the latest", l):
                 break
             if len(l) >= 90 and not re.match(r"(?i)^(please note|congress available|secure your spot|expand your network)", l):
-                out["description"] = l if len(l) <= 400 else (l[:400].rsplit(". ", 1)[0] + "." if ". " in l[:400] else l[:397] + "...")
+                l = l if len(l) <= 400 else (l[:400].rsplit(". ", 1)[0] + "." if ". " in l[:400] else l[:397] + "...")
+                out["description"] = with_title_token(l, title)
                 break
         return out
