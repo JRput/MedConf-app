@@ -87,3 +87,50 @@ def test_disallowed_image_not_sent_to_vision(monkeypatch):
     monkeypatch.setattr(vision, "extract_pricing_from_images",
                         lambda *a, **k: pytest.fail("vision must not fetch a disallowed image"))
     assert discovery._vision_pricing(["https://a.org/img/fees.png"], 0, 5) == []
+
+
+def _allowed(monkeypatch, text, url):
+    robots_gate.reset()
+    _robots(monkeypatch, text)
+    return robots_gate.allowed(url)
+
+
+IMCAS = "User-agent: *\nDisallow: /*/registration\n"
+
+
+def test_wildcard_blocks_language_prefixed_paths(monkeypatch):
+    assert not _allowed(monkeypatch, IMCAS, "https://www.imcas.com/en/registration")
+    assert not _allowed(monkeypatch, IMCAS, "https://www.imcas.com/fr/registration/step2")
+    assert not _allowed(monkeypatch, IMCAS, "https://www.imcas.com/en/registrationfaq")   # Google prefix semantics
+    assert _allowed(monkeypatch, IMCAS, "https://www.imcas.com/en/programme")
+
+
+def test_dollar_anchors_exact_path(monkeypatch):
+    t = "User-agent: *\nDisallow: /path$\n"
+    assert not _allowed(monkeypatch, t, "https://a.org/path")
+    assert _allowed(monkeypatch, t, "https://a.org/path/more")
+    assert _allowed(monkeypatch, t, "https://a.org/pathx")
+
+
+def test_longer_allow_beats_disallow(monkeypatch):
+    t = IMCAS + "Allow: /en/registration/thanks\n"
+    assert _allowed(monkeypatch, t, "https://a.org/en/registration/thanks")
+    assert not _allowed(monkeypatch, t, "https://a.org/en/registration/other")
+
+
+def test_equal_length_allow_wins(monkeypatch):
+    t = "User-agent: *\nDisallow: /x\nAllow: /x\n"
+    assert _allowed(monkeypatch, t, "https://a.org/x")
+
+
+def test_specific_agent_group_overrides_star(monkeypatch):
+    t = "User-agent: *\nDisallow: /\n\nUser-agent: MedConfBot\nDisallow: /secret\n"
+    assert _allowed(monkeypatch, t, "https://a.org/open")
+    assert not _allowed(monkeypatch, t, "https://a.org/secret")
+
+
+def test_percent_decoded_and_query(monkeypatch):
+    t = "User-agent: *\nDisallow: /a b\nDisallow: /*?token=\n"
+    assert not _allowed(monkeypatch, t, "https://a.org/a%20b")
+    assert not _allowed(monkeypatch, t, "https://a.org/p?token=1")
+    assert _allowed(monkeypatch, "User-agent: *\nDisallow:\n", "https://a.org/anything")

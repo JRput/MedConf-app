@@ -12,8 +12,8 @@ from __future__ import annotations
 
 import time
 from typing import Dict, Optional, Tuple
-from urllib import robotparser
-from urllib.parse import urlparse
+import re
+from urllib.parse import unquote, urlparse
 
 from logger import logger
 
@@ -24,7 +24,7 @@ BOT_TOKEN = "MedConfBot"
 _BROWSER_UA = "Mozilla/5.0 (compatible; MedConfBot)"
 
 # origin -> (fetched_at, parser or None when allow-all)
-_cache: Dict[str, Tuple[float, Optional[robotparser.RobotFileParser]]] = {}
+_cache: Dict[str, Tuple[float, Optional['_Rules']]] = {}
 _last_hit: Dict[str, float] = {}
 _logged: set = set()
 
@@ -39,6 +39,69 @@ def _user_agents():
     except Exception:  # noqa: BLE001
         pass
     return uas
+
+
+class _Rules:
+    """Parsed robots.txt with Google semantics: per-agent groups (most specific wins,
+    else `*`), `*` wildcard, `$` end anchor, longest match wins, Allow beats Disallow on a
+    tie, percent-decoded paths, query string part of the path."""
+
+    def __init__(self, text: str):
+        self.groups = []     # (agents[list lower], rules[(allow, regex, length)], delay)
+        agents, rules, delay, in_rules = [], [], None, False
+        def flush():
+            if agents:
+                self.groups.append((list(agents), list(rules), delay))
+        for raw in text.splitlines():
+            line = raw.split("#", 1)[0].strip()
+            if ":" not in line:
+                continue
+            k, v = line.split(":", 1)
+            k, v = k.strip().lower(), v.strip()
+            if k == "user-agent":
+                if in_rules:
+                    flush()
+                    agents, rules, delay, in_rules = [], [], None, False
+                agents.append(v.lower())
+            elif k in ("allow", "disallow") and agents:
+                in_rules = True
+                if v:     # empty Disallow allows everything; empty Allow is a no-op
+                    rules.append((k == "allow", self._rx(v), len(v)))
+            elif k == "crawl-delay" and agents:
+                in_rules = True
+                try:
+                    delay = float(v)
+                except ValueError:
+                    pass
+        flush()
+
+    @staticmethod
+    def _rx(pattern: str):
+        pattern = unquote(pattern)
+        anchored = pattern.endswith("$")
+        if anchored:
+            pattern = pattern[:-1]
+        body = ".*".join(re.escape(x) for x in pattern.split("*"))
+        return re.compile(body + ("$" if anchored else ""), re.DOTALL)
+
+    def _select(self, uas):
+        low = [u.lower() for u in uas]
+        named = [g for g in self.groups if any(a != "*" and a and any(a in u for u in low) for a in g[0])]
+        return named or [g for g in self.groups if "*" in g[0]]
+
+    def can_fetch(self, uas, url: str) -> bool:
+        p = urlparse(url)
+        path = unquote((p.path or "/") + (("?" + p.query) if p.query else ""))
+        best_len, best_allow = -1, True
+        for _a, rules, _d in self._select(uas):
+            for allow, rx, ln in rules:
+                if rx.match(path) and (ln > best_len or (ln == best_len and allow)):
+                    best_len, best_allow = ln, allow
+        return best_allow
+
+    def crawl_delay(self, uas):
+        ds = [g[2] for g in self._select(uas) if g[2] is not None]
+        return max(ds) if ds else None
 
 
 def _fetch_robots_text(origin: str) -> Optional[str]:
@@ -71,17 +134,16 @@ def _origin(url: str) -> Optional[str]:
     return f"{p.scheme}://{p.netloc}".lower()
 
 
-def _parser_for(origin: str) -> Optional[robotparser.RobotFileParser]:
+def _parser_for(origin: str) -> Optional['_Rules']:
     now = time.monotonic()
     hit = _cache.get(origin)
     if hit and now - hit[0] < ROBOTS_TTL:
         return hit[1]
-    rp: Optional[robotparser.RobotFileParser] = None
+    rp: Optional['_Rules'] = None
     try:
         text = _fetch_robots_text(origin)
         if text:
-            rp = robotparser.RobotFileParser()
-            rp.parse(text.splitlines())
+            rp = _Rules(text)
     except Exception as e:  # noqa: BLE001
         logger.debug(f"robots_gate: parse failed {origin}: {type(e).__name__}")
         rp = None
@@ -97,7 +159,7 @@ def allowed(url: str) -> bool:
     if rp is None:
         return True
     try:
-        ok = all(rp.can_fetch(ua, url) for ua in _user_agents())
+        ok = rp.can_fetch(_user_agents(), url)
     except Exception:  # noqa: BLE001
         return True
     if not ok and url not in _logged:
@@ -114,13 +176,10 @@ def pace(url: str) -> None:
     rp = _cache.get(origin, (0, None))[1]
     delay = None
     if rp is not None:
-        for ua in _user_agents():
-            try:
-                d = rp.crawl_delay(ua)
-            except Exception:  # noqa: BLE001
-                d = None
-            if d is not None:
-                delay = max(delay or 0.0, float(d))
+        try:
+            delay = rp.crawl_delay(_user_agents())
+        except Exception:  # noqa: BLE001
+            delay = None
     if delay:
         delay = min(delay, CRAWL_DELAY_CAP)
         last = _last_hit.get(origin)
