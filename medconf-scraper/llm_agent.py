@@ -273,6 +273,7 @@ class AgentLoop:
             # all (ESMO). Both popped by scraper.py.
             merged["_evidence"] = sorted(set(merged.get("_evidence") or []) | set(detail.get("_evidence") or []))
             merged["_evidence_aware"] = "_evidence" in detail
+            self._drop_nav_venue(merged)
             self._stamp_own_page_tiers(merged, booking_url)
             self._stamp_own_page_fields(merged, booking_url)
             self._ensure_submission_info(merged, booking_url)
@@ -281,6 +282,38 @@ class AgentLoop:
         except Exception as e:
             logger.warning(f"  Detail extraction failed for '{title_short}': {e}")
             return self._merge_shell_only(shell)
+
+    @staticmethod
+    def _nav_anchor_texts(html: str) -> set:
+        """Lower-cased visible text of every link that sits in site chrome (a nav/header/footer
+        element, or an <li> whose class names a menu)."""
+        import html as _h
+        out = set()
+        chrome = re.compile(r"(?is)<(nav|header|footer)\b.*?</\1\s*>|<li\b[^>]*class=[\"'][^\"']*menu[^\"']*[\"'][^>]*>.*?</li\s*>")
+        for blk in chrome.finditer(html or ""):
+            for a in re.finditer(r"(?is)<a\b[^>]*>(.*?)</a\s*>", blk.group(0)):
+                t = re.sub(r"\s+", " ", _h.unescape(re.sub(r"<[^>]+>", " ", a.group(1)))).strip().lower()
+                if t:
+                    out.add(t)
+        return out
+
+    def _drop_nav_venue(self, merged: Dict[str, Any]) -> None:
+        """Fail-closed guard on the extractor's venue: a venue_name that is exactly the text of a
+        navigation/menu link and has no venue word ("Wellbeing", a site menu item that follows the
+        "Venue" menu entry) is a scraped menu label, not a place. Dropped (city kept). Never raises."""
+        try:
+            v = merged.get("venue_name")
+            if not v:
+                return
+            from extractors.tribe_events import _VENUE_WORD_RE
+            if _VENUE_WORD_RE.search(v):
+                return
+            html = self.browser.page.content()
+            if re.sub(r"\s+", " ", v).strip().lower() in self._nav_anchor_texts(html):
+                logger.warning(f"  venue_name {v!r} is a navigation link, not a venue - dropped")
+                merged["venue_name"] = None
+        except Exception as e:
+            logger.debug(f"  nav-venue guard skipped: {e}")
 
     @staticmethod
     def _stamp_own_page_tiers(merged: Dict[str, Any], url: str) -> None:

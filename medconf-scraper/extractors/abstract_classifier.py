@@ -241,6 +241,37 @@ def _find_programme(page_text: str) -> Tuple[Optional[str], List[str]]:
     return label, windows
 
 
+# A page that lists several deadlines (main call, special-interest-group, late-breaking) must not
+# be read as its LAST/first-window one: the late-breaking slot is a secondary programme.
+_SECONDARY_DEADLINE_RE = re.compile(
+    r"late[\s-]*break|hot[\s-]*topic|special\s+interest|\bSIGs?\b|concurrent\s+session|sub[\s-]*committee", re.IGNORECASE)
+
+
+def _pick_programme_deadline(windows: List[str], today: date,
+                             event_start: Optional[date]) -> Optional[date]:
+    """Deadline from the programme windows. One candidate date -> that date (unchanged
+    behaviour). Several distinct dates -> drop those whose own line says late-breaking /
+    special-interest-group / concurrent-session, then take the EARLIEST upcoming one (else
+    the first remaining in page order). Secondary-only pages keep the first date found."""
+    cands: List[Tuple[date, bool]] = []
+    for w in windows:
+        for rx in _PROGRAMME_DEADLINE_RE:
+            for m in rx.finditer(w):
+                parsed = _parse_date_phrase_flex(m.group(1), today, event_start)
+                if not parsed:
+                    continue
+                line_start = w.rfind("\n", 0, m.start()) + 1
+                ctx = w[max(line_start, m.start() - 60):m.end()]
+                cands.append((parsed, bool(_SECONDARY_DEADLINE_RE.search(ctx))))
+    if not cands:
+        return None
+    if len({d for d, _ in cands}) == 1:
+        return cands[0][0]
+    main = [d for d, sec in cands if not sec] or [d for d, _ in cands]
+    upcoming = sorted(d for d in main if d >= today)
+    return upcoming[0] if upcoming else main[0]
+
+
 def classify_submission(
     page_text: str,
     today: Optional[date] = None,
@@ -273,17 +304,7 @@ def classify_submission(
                 deadline = parsed
                 break
     if deadline is None and prog_windows:
-        for w in prog_windows:
-            for rx in _PROGRAMME_DEADLINE_RE:
-                for m in rx.finditer(w):
-                    parsed = _parse_date_phrase_flex(m.group(1), today, event_start)
-                    if parsed:
-                        deadline = parsed
-                        break
-                if deadline:
-                    break
-            if deadline:
-                break
+        deadline = _pick_programme_deadline(prog_windows, today, event_start)
 
     if is_explicitly_closed:
         note = None

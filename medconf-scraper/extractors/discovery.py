@@ -193,6 +193,13 @@ def _get_capped(url: str, timeout: float, max_bytes: int, headers: Optional[dict
     """(status, body, encoding) or None, inside a total read deadline of `timeout` s and a
     hard size cap. Safe-fetch mode goes through the hop-validated client (its own deadline)."""
     import safe_fetch
+    import robots_gate
+    t_start = time.monotonic()
+    ok = _hard_cap(lambda: robots_gate.allowed(url), timeout)     # robots fetch shares the read deadline
+    if ok is False:
+        return None
+    robots_gate.pace(url)
+    timeout = max(0.1, timeout - (time.monotonic() - t_start))
     if safe_fetch.enabled():
         got = _hard_cap(lambda: safe_fetch.fetch_validated(
             url, safe_fetch.check_url_safe, max_bytes=max_bytes + 1,
@@ -258,6 +265,10 @@ def _vision_pricing(image_urls: List[str], stop_at: float, timeout: Optional[flo
     """The remaining budget is BOTH the per-image download timeout and the hard call
     timeout inside vision, and the whole call is hard-capped at it here as well."""
     import vision
+    import robots_gate
+    image_urls = [u for u in image_urls if u.startswith("data:") or robots_gate.allowed(u)]
+    if not image_urls:
+        return []
     limit = max(1.0, timeout if timeout is not None else stop_at - time.time())
     return vision.call_with_hard_timeout(
         lambda: vision.extract_pricing_from_images(image_urls, stop_at=stop_at,
@@ -742,6 +753,33 @@ def _fees_from(html: str, lines_text: str) -> Tuple[List[Dict[str, Any]], str]:
         logger.debug(f"discovery: fee_matrix failed: {e}")
     t = _money_sweep(lines_text)
     return (t, "money_sweep") if t else ([], "")
+
+
+_PERSON_CTX_RE = re.compile(
+    r"(?i)\b(?:MD|PhD|MPH|RN|FRCP|FRCS|ATSF|Prof(?:essor)?|Dr\.?|Associate|Assistant|Chair|Endowed|Department|Dept\.?|Division|Faculty|Fellow|Director|Speakers?|Lecturer|Resident)\b")
+
+
+def _venue_line_ok(pl: Dict[str, Any], row: Dict[str, Any], text: str) -> bool:
+    """Fail-closed gate for the weakest place method, `venue_keyword_line` (ANY short line that
+    contains a venue word). A match is kept only if the page ties it to this event: the row's city
+    (or the found city) sits on the same line or an adjacent one, and the lines around it do not
+    read as a person's title / affiliation. ATS 2027 (2026-11-09) took 'Medical University' from a
+    speaker affiliation ('... Medical University of South Carolina'). Other methods are structured
+    or labelled and pass unchanged."""
+    if pl.get("method") != "venue_keyword_line" or not pl.get("venue_name"):
+        return True
+    venue = str(pl["venue_name"]).lower()
+    lines = [l.strip() for l in (text or "").splitlines()]
+    anchors = [city.lower() for city in (pl.get("city"), row.get("city")) if city]
+    for i, l in enumerate(lines):
+        if venue not in l.lower():
+            continue
+        window = lines[max(0, i - 2): i + 3]
+        if any(_PERSON_CTX_RE.search(w) for w in window):
+            continue
+        if any(a in w.lower() for a in anchors for w in window):
+            return True
+    return False
 
 
 def _city_guess(parts: List[str]) -> Optional[str]:
@@ -1303,6 +1341,9 @@ class _Run:
                 found.append(f"fees:{len(tiers)} via {how}")
         if self.need(FIELD_VENUE):
             pl = _place_from(html, text, url)
+            if pl and not _venue_line_ok(pl, self.row, text):
+                found.append("venue:rejected_uncorroborated_venue_line")
+                pl = None
             if pl:
                 if pl.get("venue_name") and not self.res.venue_name and not self.row.get("venue_name"):
                     self.res.venue_name = pl["venue_name"]
