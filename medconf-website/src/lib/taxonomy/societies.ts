@@ -158,6 +158,18 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   ESHRE: { short: 'ESHRE', name: 'European Society of Human Reproduction and Embryology', kind: 'international', country: 'EU' },
   ASH: { short: 'ASH', name: 'American Society of Hematology', kind: 'international', country: 'US' },
   AUGIS: { short: 'AUGIS', name: 'Association of Upper Gastrointestinal Surgeons of Great Britain and Ireland', kind: 'specialist', country: 'UK' },
+  // Wave 3 (2026-11-09)
+  AAP: { short: 'AAP', name: 'American Academy of Pediatrics', kind: 'international', country: 'US' },
+  AMWC: { short: 'AMWC', name: 'Aesthetic & Anti-Aging Medicine World Congress (AMWC)', kind: 'international', country: 'FR' },
+  BAD: { short: 'BAD', name: 'British Association of Dermatologists', kind: 'specialist', country: 'UK' },
+  BSPED: { short: 'BSPED', name: 'British Society for Paediatric Endocrinology and Diabetes', kind: 'specialist', country: 'UK' },
+  'Digital Health Rewired': { short: 'Rewired', name: 'Digital Health Rewired', kind: 'other', country: 'UK' },
+  ACR: { short: 'ACR', name: 'American College of Rheumatology', kind: 'international', country: 'US' },
+  ATS: { short: 'ATS', name: 'American Thoracic Society', kind: 'international', country: 'US' },
+  BCS: { short: 'BCS', name: 'British Cardiovascular Society', kind: 'specialist', country: 'UK' },
+  'NHS England': { short: 'NHS England', name: 'NHS England (events portal)', kind: 'other', country: 'UK' },
+  IMCAS: { short: 'IMCAS', name: 'International Master Course on Aging Science (IMCAS)', kind: 'international', country: 'FR' },
+  ORS: { short: 'ORS', name: 'Orthopaedic Research Society', kind: 'international', country: 'US' },
   // AAN (American Academy of Neurology), AAD (American Academy of Dermatology) and
   // CNS (Congress of Neurological Surgeons) were excluded by the owner on 2026-10-23
   // (their terms forbid automated access / third-party reuse). scraper_sources rows

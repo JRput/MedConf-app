@@ -1,0 +1,71 @@
+{
+ "source_id": 156,
+ "slug": "nhs_england_events",
+ "class_name": "NhsEnglandEventsExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/nhs_england_events.py",
+ "source_row": {
+  "source_name": "NHS England Events",
+  "society": "NHS England",
+  "base_url": "https://www.events.england.nhs.uk/events",
+  "default_event_type": "mixed",
+  "pagination_type": "page_query",
+  "pagination_template": "https://www.events.england.nhs.uk/events?page={n}",
+  "max_pages_hint": 5,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Server-rendered Sigma ticketing portal. Listing /events?page=N (about 20 cards a page; walk until a page adds no new card). Card: data-url=/<id>, title, 'DD Month YYYY', ' - location'. Detail /<id>: h1, .mvp_date, .mvp_address, .mvp_ticket blocks (label + FREE/price chip + Fully Booked badge), .mvp_body description. Titles are filtered by a clinical/education cue list minus an admin/comms/IT drop list; dropped titles are logged."
+ },
+ "registry_comment": "NHS England events portal (156): server-rendered Sigma listing, clinician-CPD title gate, free/paid ticket blocks; GBP",
+ "concerns": [
+  "Relevance gate (Level 2): the portal lists 59 upcoming events over 4 pages; 31 are kept by a title rule (clinical / education / clinical-leadership cue AND no admin cue; unmatched titles DEFAULT TO DROPPED). Dropped titles are logged at INFO (e.g. Spend Comparison inductions, Copilot, CIPD routes, communications/speechwriting/finance courses, co-production forums, Staff Survey, supplier open days, NHS App webinar, Clock Club). The rule is conservative: some borderline items (e.g. AEMHP focus groups, Staff Standard: Violence Prevention) are dropped; extend the cue lists in nhs_england_events.py if the owner wants more.",
+  "Most kept events are free NHS England webinars on Teams (with_venue is low because location is online/TBC): one 0.00 tier from the FREE chip, ticket names that echo the title become 'Registration'. Paid tickets would be parsed from the price chip (none seen). Events with 'Ticket sales finished' show no ticket block, so no tiers.",
+  "Specialty is the shared title classifier only (page text mis-tagged a renal day as Cardiology) plus a few title cues; the classifier's General Practice catch-all is ignored unless the title says GP/primary care; default 'Multi-specialty'. Location TBC events are marked online only when the title/body says webinar/online/Teams.",
+  "Pagination: walks ?page=N until a page adds no new card (cap 12); 0.5 s between pages. robots.txt only disallows admin/basket/search paths. Booking URLs redirect to /events/<slug>; fine. No LLM calls. Tests: test_nhs_england_events.py."
+ ],
+ "coverage_run": {
+  "date": "2026-11-09",
+  "pages_checked": 2,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ },
+ "probe_results": {
+  "shells": 31,
+  "shells_forced_fallback": 31,
+  "details_tested": 8,
+  "with_date": 8,
+  "with_pricing": 6,
+  "with_venue": 1,
+  "with_description": 8,
+  "with_specialty": 8
+ },
+ "test_urls": [
+  "https://www.events.england.nhs.uk/512525",
+  "https://www.events.england.nhs.uk/475003",
+  "https://www.events.england.nhs.uk/530459"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.events.england.nhs.uk/512525",
+   "field": "date/venue/fee",
+   "site_says": "17 November 2026 9:30am-5:00pm; Park Plaza London Waterloo, 6 Hercules Road, London SE1 7DP; FREE",
+   "extractor_says": "2026-11-17 09:30; venue Park Plaza London Waterloo, 6 Hercules Road; city London; one GBP 0 tier",
+   "match": true
+  },
+  {
+   "url": "https://www.events.england.nhs.uk/475003",
+   "field": "venue/ticket",
+   "site_says": "18 November 2026 9:00am-5:00pm; St James Building, Oxford Street, Manchester; 'Ticket sales finished'",
+   "extractor_says": "venue St James Building, Oxford Street; city Manchester; no tiers; not sold out",
+   "match": true
+  },
+  {
+   "url": "https://www.events.england.nhs.uk/530459",
+   "field": "ticket/format",
+   "site_says": "Delegate FREE with 'Fully Booked' badge; Location TBC; 'online via Microsoft Teams' in text",
+   "extractor_says": "is_sold_out true; 1 GBP 0 tier; event_format online",
+   "match": true
+  }
+ ]
+}

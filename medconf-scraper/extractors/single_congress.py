@@ -31,6 +31,7 @@ from urllib.parse import urljoin, urlparse
 from playwright.sync_api import Page
 
 import money
+from browser import has_content_shape, looks_like_challenge
 from logger import logger
 
 from .abstract_classifier import classify_submission
@@ -468,6 +469,46 @@ def anchors(html: str, base: str) -> List[Tuple[str, str]]:
     return out
 
 
+# CPD credit count: a number that is DIRECTLY the count. "Category N" / "Section N" are qualifiers, never counts
+# ("Category 1 CME credits" has no count; "up to 32.5 AMA PRA Category 1 Credits" is 32.5).
+_CPD_RE = re.compile(
+    r"(?<![\d.])(?<!Category )(?<!Section )(?<!Cat\. )(\d{1,3}(?:\.\d+)?)\s*"
+    r"(?:AMA\s+PRA\s+Category\s*1\s+Credits?|(?:CME|CPD|EACCME)\s*(?:credits?|points?|hours?))", re.I)
+
+
+def ended_edition(html: str, lines: List[str], today: Optional[date] = None) -> Optional[Dict[str, str]]:
+    """Latest edition the page shows that is already OVER: {start,end}. None if the page shows none.
+    Only explicit-year multi-day ranges on short event-style lines, or JSON-LD Events, count (a lone dated news
+    post must not read as an edition); used to tell 'between editions' from 'page we could not parse'."""
+    today = today or date.today()
+    floor = today - timedelta(days=1100)
+    best: Optional[Tuple[str, str]] = None
+
+    def consider(s: str, e: str, multi: bool) -> None:
+        nonlocal best
+        try:
+            ds, de = date.fromisoformat(s), date.fromisoformat(e)
+        except ValueError:
+            return
+        if de < today and ds >= floor and 0 <= (de - ds).days <= 10 and (multi or ds != de):
+            if best is None or e > best[1]:
+                best = (s, e)
+
+    for ev in json_ld_events(html):
+        s, e = (ev.get("startDate") or "")[:10], (ev.get("endDate") or ev.get("startDate") or "")[:10]
+        consider(s, e, True)
+    for ln in lines:
+        if len(ln) > 220:
+            continue
+        for seg in _SEP_RE.split(ln):
+            if _NOT_EVENT_SEG_RE.search(seg):
+                continue
+            for d in find_dates(norm_dates(seg, None), today):
+                if d["start"] != d["end"]:
+                    consider(d["start"], d["end"], False)
+    return {"start": best[0], "end": best[1]} if best else None
+
+
 class SingleCongressExtractor(BaseExtractor):
     HOME_URL: str = ""
     FREE_PATTERN: Optional["re.Pattern[str]"] = None       # edition page text that means attendance is free ("free-to-attend") -> one 0 tier
@@ -515,6 +556,21 @@ class SingleCongressExtractor(BaseExtractor):
             ed.update(url=url, lines=lines)
         return ed
 
+    def _default_verified_empty(self, home: Optional[str], today: date) -> None:
+        """Between editions: the page WAS fetched (real content, not a challenge) and shows an edition that is
+        already over, with no later one found by the hooks above -> 'verified empty' (a real answer, not a failure).
+        A failed fetch, a thin/challenge page or a page with no ended edition stays a failure. A subclass that already
+        set verified_empty keeps precedence."""
+        if getattr(self, "verified_empty", None) or not home:
+            return
+        if looks_like_challenge(home) or not has_content_shape(home):
+            return
+        ended = ended_edition(home, html_lines(home), today)
+        if not ended:
+            return
+        name = self.EVENT_NAME or self.SOCIETY or "edition"
+        self.verified_empty = f"{name} {ended['end'][:4]} ended {ended['end']}; no later edition listed"
+
     # ---- listing ----------------------------------------------------------
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
         home = self._get(self.HOME_URL)
@@ -551,6 +607,7 @@ class SingleCongressExtractor(BaseExtractor):
                     break
         if not ed:
             logger.info(f"{self.SOCIETY}: no upcoming edition announced on {tried}")
+            self._default_verified_empty(home, today)
             return []
         ev = ed.get("ld")
         shell: Dict[str, Any] = {
@@ -724,7 +781,7 @@ class SingleCongressExtractor(BaseExtractor):
             out["specialty"] = spec
 
         # CPD (explicit "N CME credits" only)
-        m = re.search(r"(\d{1,3}(?:\.\d+)?)\s*(?:AMA PRA Category 1 Credits?|CME|CPD|EACCME)\s*(?:credits?|points?|hours?)", " ".join(l for l in lines if not other_year.search(l)), re.I)
+        m = _CPD_RE.search(" ".join(l for l in lines if not other_year.search(l)))
         if m and 0.5 <= float(m.group(1)) <= 100:
             out["cpd_points"] = float(m.group(1))
             out["cpd_accredited"] = True

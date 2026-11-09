@@ -145,6 +145,18 @@ from .sbns import SbnsExtractor
 from .aad import AadExtractor
 from .aan import AanExtractor
 from .augis import AugisExtractor
+from .aap import AapExtractor
+from .amwc import AmwcExtractor
+from .bad_annual import BadAnnualExtractor
+from .bsped import BspedExtractor
+from .rewired import RewiredExtractor
+from .acr import AcrExtractor
+from .ats import AtsExtractor
+from .eular_congress import EularCongressExtractor
+from .bcs import BcsExtractor
+from .nhs_england_events import NhsEnglandEventsExtractor
+from .imcas import ImcasExtractor
+from .ors import OrsExtractor
 from .cns import CnsExtractor
 from .eshre import EshreExtractor
 from .eular import EularExtractor
@@ -303,6 +315,18 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     141: AadExtractor,                        # 141: AAD (aad.org): Annual Meeting 2027/2028, summer educational meeting, Hands-On: Cosmetics course; USD; NO AI use allowed by site terms
     142: CnsExtractor,                        # 142: CNS (cns.org): Annual Meeting, courses, joint section meetings and listed third-party symposia; JS listings via browser; USD; NO AI use allowed by site terms
     143: AugisExtractor,                      # 143: AUGIS (augis.org): upper GI surgery events table + ASM banner; booking behind member login so no fees; Cvent summary hop for time/venue
+    147: AapExtractor,                        # 147: AAP National Conference (aapexperience.org): next edition from /future-dates/; fees only once the registration page names that year; 10 s crawl delay
+    148: AmwcExtractor,                       # 148: AMWC Cannes (amwc-conference.com): Informa site; EUR early/final tiers from /register/; poster abstract deadline
+    149: BadAnnualExtractor,                  # 149: BAD Annual Meeting (badannualmeeting.co.uk): next edition; no tiers until /registration/ shows that year
+    150: BspedExtractor,                      # 150: BSPED Annual Meeting (bsped.org.uk): dates/city from forthcoming-meetings; EventsForce microsite is robots Disallow: / so no fees/venue
+    151: RewiredExtractor,                    # 151: Digital Health Rewired (digitalhealthrewired.com): GBP tiers incl. free public sector; speaker call dates
+    152: AcrExtractor,                        # 152: ACR Convergence (rheumatology.org): current edition while running, verified_empty between editions, USD tiers
+    153: AtsExtractor,                        # 153: ATS International Conference (thoracic.org): next edition; fees/venue only when published for that year
+    154: EularCongressExtractor,              # 154: EULAR Congress (congress.eular.org): congress only (eular.org events = 134); EUR tiers; abstract deadline
+    155: BcsExtractor,                        # 155: BCS (britishcardiovascularsociety.org.uk): dated courses on EventsAir microsites + Annual Conference (dates from the rate-card PDF); GBP
+    156: NhsEnglandEventsExtractor,           # 156: NHS England events portal (events.england.nhs.uk): paged ticketing portal, clinical/education/leadership relevance gate, dropped titles logged
+    157: ImcasExtractor,                      # 157: IMCAS (imcas.com): own congresses only (World/Americas/Asia/China); /registration robots-disallowed so no fees; discovery off
+    158: OrsExtractor,                        # 158: ORS (ors.org): menu-listed event pages + future annual meetings; USD grid on /register<year>/ only when the heading names the year
 }
 
 

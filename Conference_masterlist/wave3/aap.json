@@ -1,0 +1,71 @@
+{
+ "source_id": 147,
+ "slug": "aap",
+ "class_name": "AapExtractor",
+ "status": "partial",
+ "file_written": "medconf-scraper/extractors/aap.py",
+ "source_row": {
+  "source_name": "AAP National Conference & Exhibition",
+  "society": "AAP",
+  "base_url": "https://aapexperience.org/future-dates/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "aapexperience.org/future-dates/ lists blocks 'year / city / venue / dates'; the first not-yet-finished block is the edition. Cloudflare throttles plain HTTP on some paths; registration page is the previous edition until switched, so fees are gated on 'the <year> National Conference'. Abstract deadline is the 'Abstract Submission Deadline' line on the call-for-educational-content page, not the session-proposal date."
+ },
+ "registry_comment": "AAP National Conference & Exhibition single-congress site (one upcoming edition) - single_congress family",
+ "coverage_run": {
+  "date": "2026-11-09",
+  "pages_checked": 1,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ },
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://aapexperience.org/future-dates/",
+  "https://aapexperience.org/call-for-educational-content/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://aapexperience.org/future-dates/",
+   "field": "dates/venue",
+   "site_says": "2027 / Chicago / McCormick Place / October 15-19, 2027",
+   "extractor_says": "2027-10-15..2027-10-19, McCormick Place, Chicago",
+   "match": true
+  },
+  {
+   "url": "https://aapexperience.org/call-for-educational-content/",
+   "field": "abstract_deadline",
+   "site_says": "Due April 9, 2027: Abstract Submission Deadline (session proposals due Nov 20, 2026)",
+   "extractor_says": "2027-04-09, note keeps the proposal date",
+   "match": true
+  },
+  {
+   "url": "https://aapexperience.org/future-dates/",
+   "field": "next edition",
+   "site_says": "2026 San Diego already held; next row 2027 Chicago",
+   "extractor_says": "title AAP National Conference 2027",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Cloudflare: aapexperience.org answers 403 'Attention Required' to plain HTTP for /conference-registration/ and /abstracts/, and my dev traffic (about 25 requests) made even /future-dates/ 403 for a while. Shell count was 1 on most runs and 0 on runs made while throttled; the last normal run could not be repeated for that reason. Needs the runner probe result before registering; if runners are challenged finish as blocked.",
+  "Fees: none attached. /conference-registration/ describes the 2026 San Diego conference (rates $370-$1315); it only names 2027 for recording-access dates, so the family year gate would have let 2026 rates through on a browser fetch. Hook fees_from_pages requires 'the 2027 National Conference' text, so tiers appear only when the page switches to the next edition.",
+  "robots.txt Crawl-delay 10: REQUEST_GAP_S = 10 (about 40 s per run).",
+  "Coverage checklist: fee page (2026 only), nav Registration/Abstracts (Cloudflare 403), call-for-educational-content page (abstract deadline) checked; no PDFs/images/two-hop sites followed. Abstracts page /abstracts/ never loadable, so the 2027 abstract deadline comes only from the call page.",
+  "Description is the site's generic future-dates sentence."
+ ]
+}

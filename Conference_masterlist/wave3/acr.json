@@ -1,0 +1,71 @@
+{
+ "source_id": 152,
+ "slug": "acr",
+ "class_name": "AcrExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/acr.py",
+ "source_row": {
+  "source_name": "ACR Convergence",
+  "society": "ACR",
+  "base_url": "https://rheumatology.org/meetings/acr-convergence/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "rheumatology.org Next.js page: 'Date:' and 'Location:' label lines; fees are Member/Nonmember x Early/General x In Person Plus/In Person text grids on /annual-meeting-registration (expired early rates skipped). CPD points not recorded (182.75 total)."
+ },
+ "registry_comment": "ACR Convergence single-congress site (one upcoming edition) - single_congress family",
+ "coverage_run": {
+  "date": "2026-11-09",
+  "pages_checked": 1,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ },
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://rheumatology.org/meetings/acr-convergence/",
+  "https://rheumatology.org/annual-meeting-registration"
+ ],
+ "spot_check": [
+  {
+   "url": "https://rheumatology.org/meetings/acr-convergence/",
+   "field": "dates/place",
+   "site_says": "Date: November 6-11, 2026 / Location: Orlando, FL",
+   "extractor_says": "2026-11-06..2026-11-11, Orlando, United States",
+   "match": true
+  },
+  {
+   "url": "https://rheumatology.org/annual-meeting-registration",
+   "field": "venue",
+   "site_says": "held ... in the West Building of the Orange County Convention Center in Orlando, Florida",
+   "extractor_says": "Orange County Convention Center",
+   "match": true
+  },
+  {
+   "url": "https://rheumatology.org/annual-meeting-registration",
+   "field": "fees",
+   "site_says": "General rate through Nov 11: ACR member In Person $1,400; Nonmember physician In Person $2,150; On Demand $699/$1,225",
+   "extractor_says": "13 tiers, USD, early rates (through Aug 26) skipped as expired",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "The edition on the page is ACR Convergence 2026, in progress until 11 Nov 2026. After it ends the page names no later dates (checked 2026-11-09: only '2027 Financial Relationships Disclosures (to be announced)'), so the extractor sets verified_empty ('ACR Convergence 2026 ended; no 2027 edition dates announced on the event page') instead of failing; a fetch failure leaves verified_empty None. It rolls to 2027 automatically once the page shows dates. Tested with today faked to 2026-11-12.",
+  "cpd_points is dropped on purpose: the page says 'maximum of 182.75 AMA PRA Category 1 Credits' (live plus on demand) and the family reader mis-read 'Category 1 CME credits' as 1 credit. cpd_accredited stays True. FAMILY GAP (shared file): the CME regex should ignore 'Category 1'.",
+  "Venue name comes from the registration page prose and city from the event page; both are the same-site pages for this edition. Provenance stamping marks both as own_page of the event page.",
+  "Member discount tiers (ACR vs ARP vs transitional) are public prices on the page; ultrasound/practice-summit add-ons ($90-$2,095) are not tiers. Fee grid parser is bespoke (family matrix cannot pair Member/Nonmember x Early/General x In Person Plus/In Person).",
+  "Coverage checklist: event page, registration page, nav links checked; no PDFs/images. Site is a server-rendered Next.js page, httpx works; robots.txt allows these paths."
+ ]
+}

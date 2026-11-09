@@ -1,0 +1,90 @@
+{
+ "source_id": 157,
+ "slug": "imcas",
+ "class_name": "ImcasExtractor",
+ "status": "partial",
+ "file_written": "medconf-scraper/extractors/imcas.py",
+ "source_row": {
+  "source_name": "IMCAS",
+  "society": "IMCAS",
+  "base_url": "https://www.imcas.com/en/worldwide-events",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Server-rendered. The site-wide Congresses menu (on /en/worldwide-events) lists IMCAS's own congresses as 'IMCAS World 2027' + '28 - 30 January 2027, PARIS & ONLINE'; each links to /en/imcas-<name>-<year>. The agenda itself lists other organisers' congresses (dropped, logged). INVEST investor day dropped. Congress page hero: weekday date range then 'Venue, City'; status block gives abstract open/closed. /registration is robots-disallowed so no fee tiers."
+ },
+ "registry_comment": "IMCAS (157): own congresses from the Congresses menu, third-party agenda rows dropped; hybrid World + Americas/Asia/China; no fees (registration robots-disallowed)",
+ "concerns": [
+  "Scope decision (Level 2): /en/worldwide-events is mostly OTHER organisers' congresses (ASDS, JSAPS, SFED ... 23 on the November view) that only link out and have no IMCAS page. They are NOT IMCAS events, so they are dropped and listed in the log; only IMCAS's own congresses (World, Americas, Asia, China 2027) are kept. If the owner wants the partner congresses listed, they need their own source rows. INVEST by IMCAS (investor / C-level day at invest.imcas.com) is dropped as not clinician CPD.",
+  "No fee tiers (status partial): registration lives under /en/imcas-*/registration, which robots.txt disallows (`Disallow: /*/registration`), so it is not fetched; fees are probably also login/badge based. The congress pages show no public prices. Members' fees unknown.",
+  "SHARED-ENGINE FINDING (Level 3, not changed): the scrape-time discovery engine has no robots.txt awareness. Run on the World 2027 page on 2026-11-09 it fetched /en/imcas-world-2027/registration and two /registration/badge/<id> pages. I therefore set DISCOVERY_ENABLED = False for IMCAS. Abstract deadlines still come from the pipeline's own call-for-papers follow (`_ensure_submission_info` finds /submit-abstract for World, Americas and Asia; not China, which has none); the harness cannot exercise that step and reports SUBMISSION_NO_DEADLINE (the World page's deadline, 30 Sep 2026, is verified to parse via classify_page_submission). Ask: add a robots.txt check (or a per-extractor DISCOVERY_DISALLOW) to discovery.py.",
+  "Dates come from the site-wide Congresses menu (present on every page); hybrid detected from 'PARIS & ONLINE'. Country comes from a small city table for IMCAS's own host cities. CME: accreditation page says an EACCME application 'has been made' so cpd_accredited is left unset. Terms of use (legal-information page) contain no robot/AI/scraping clause. No LLM calls. Tests: test_imcas.py."
+ ],
+ "coverage_run": {
+  "date": "2026-11-09",
+  "pages_checked": 2,
+  "warnings": [
+   {
+    "code": "PRICE_SAME_SITE_LINK",
+    "message": "no tiers but the page links to a same-site registration/fees page",
+    "url": "https://www.imcas.com/en/imcas-world-2027",
+    "evidence": "Register -> https://www.imcas.com/en/imcas-world-2027/registration"
+   },
+   {
+    "code": "SUBMISSION_NO_DEADLINE",
+    "message": "page advertises a call for papers / submission programme but no deadline or note is set",
+    "url": "https://www.imcas.com/en/imcas-world-2027",
+    "evidence": ""
+   },
+   {
+    "code": "SUBMISSION_NO_DEADLINE",
+    "message": "page advertises a call for papers / submission programme but no deadline or note is set",
+    "url": "https://www.imcas.com/en/imcas-asia-2027",
+    "evidence": ""
+   }
+  ],
+  "blocking": true,
+  "exit_code": 2
+ },
+ "probe_results": {
+  "shells": 4,
+  "shells_forced_fallback": 4,
+  "details_tested": 4,
+  "with_date": 4,
+  "with_pricing": 0,
+  "with_venue": 4,
+  "with_description": 4,
+  "with_specialty": 4
+ },
+ "test_urls": [
+  "https://www.imcas.com/en/imcas-world-2027",
+  "https://www.imcas.com/en/imcas-americas-2027",
+  "https://www.imcas.com/en/imcas-asia-2027"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.imcas.com/en/imcas-world-2027",
+   "field": "dates/venue",
+   "site_says": "28 - 30 January 2027, PARIS & ONLINE; Palais des Congres de Paris, Paris",
+   "extractor_says": "2027-01-28..2027-01-30; Palais des Congres de Paris; Paris; France; hybrid",
+   "match": true
+  },
+  {
+   "url": "https://www.imcas.com/en/imcas-americas-2027",
+   "field": "venue",
+   "site_says": "The World Trade Center Sao Paulo, Sao Paulo - SP; 20 - 22 May 2027",
+   "extractor_says": "2027-05-20..2027-05-22; The World Trade Center Sao Paulo; Sao Paulo; Brazil",
+   "match": true
+  },
+  {
+   "url": "https://www.imcas.com/en/imcas-asia-2027",
+   "field": "venue",
+   "site_says": "Queen Sirikit National Convention Center, Bangkok; 4 - 6 June 2027",
+   "extractor_says": "2027-06-04..2027-06-06; Bangkok; Thailand",
+   "match": true
+  }
+ ]
+}

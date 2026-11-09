@@ -1,0 +1,80 @@
+{
+  "source_id": 155,
+  "slug": "bcs",
+  "class_name": "BcsExtractor",
+  "status": "done",
+  "file_written": "medconf-scraper/extractors/bcs.py",
+  "source_row": {
+    "source_name": "British Cardiovascular Society (BCS)",
+    "society": "BCS",
+    "base_url": "https://britishcardiovascularsociety.org.uk/courses/",
+    "default_event_type": "mixed",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Listing: /courses/ Elementor loop, one card per dated course (h6 link to the course's own EventsAir microsite, ISO date, optional venue/city lines). Plus the next Annual Conference from /annual-conference/ whose dates come from the organiser's linked rate-card PDF. Detail: server-rendered EventsAir page with date line, venue/location line and a Pricing / Attendance fee block of 'label £amount' lines (regular/early bird on one line). Courses are course, webinars workshop; conference row has no tiers (delegate fees unpublished)."
+  },
+  "registry_comment": "BCS (155): /courses/ EventsAir microsites + Annual Conference from the rate-card PDF; GBP; Cardiology",
+  "concerns": [
+    "Listing /courses/ (7 dated courses/webinar) + the Annual Conference 2027 = 8 shells. The conference has no dated text on its own page ('watch this space'); the dates come from the organiser's own linked exhibitor rate-card PDF. If that PDF disappears the conference row is not emitted (never guessed).",
+    "Coverage checklist: fees verified per course on each EventsAir microsite (the booking_url IS the fee page). Empty tiers justified: the Managing Early Sudden Cardiac Death webinar shows no price on its page (registration form is JS, 'Loading agenda...'); the Annual Conference has no delegate fees yet (the rate card prices exhibition stands only, which the harness flags as PRICE_SAME_SITE_LINK: a false positive for attendee fees). No image fee tables, no two-hop sites seen.",
+    "Cardio-Oncology course page says 'REGISTRATION CLOSED: DEADLINE 17.00HRS ON MONDAY 9 NOVEMBER 2026' (today); the event (16 Nov) is kept, is_sold_out not set (closed is not sold out).",
+    "EventsAir pages differ per course; fee lines are parsed from the block under 'Pricing:' / 'Attendance fee' (regular/early-bird on one line supported). A new layout (e.g. a table) would give no tiers, not wrong ones. Early-bird deadlines are not stated on the pages (promo codes only), so early_bird_deadline is null.",
+    "Webinars are event_type workshop, other courses course. cpd_accredited left unset: pages say CPD 'is being applied for'. Members' fees are public here. robots.txt crawl-delay 10: only 2 own-site pages + 1 PDF per run; each course lives on its own EventsAir host.",
+    "No LLM calls; description is the first real paragraph. Tests: test_bcs.py."
+  ],
+  "coverage_run": {
+    "date": "2026-11-09",
+    "pages_checked": 8,
+    "warnings": [
+      {
+        "code": "PRICE_SAME_SITE_LINK",
+        "message": "no tiers but the page links to a same-site registration/fees page",
+        "url": "https://britishcardiovascularsociety.org.uk/annual-conference/",
+        "evidence": "2027 Rate card -> https://britishcardiovascularsociety.org.uk/wp-content/uploads/2026/08/BCS2027-conference-rate-card-Exhibition-and-Symposium-packages.pdf"
+      }
+    ],
+    "blocking": true,
+    "exit_code": 2
+  },
+  "probe_results": {
+    "shells": 8,
+    "shells_forced_fallback": 8,
+    "details_tested": 8,
+    "with_date": 8,
+    "with_pricing": 6,
+    "with_venue": 5,
+    "with_description": 8,
+    "with_specialty": 8
+  },
+  "test_urls": [
+    "https://bcs-bcs-mayo-clinic-cardiology-review-course-2027.eventsairsite.com",
+    "https://bcs-bcs-cvd-prevention-course.eventsairsite.com/",
+    "https://britishcardiovascularsociety.org.uk/annual-conference/"
+  ],
+  "spot_check": [
+    {
+      "url": "https://bcs-bcs-mayo-clinic-cardiology-review-course-2027.eventsairsite.com",
+      "field": "dates + fees",
+      "site_says": "15 - 19 March 2027; Members regular £998/ early bird £898 ... Non-members £1,995 / early bird £1,596",
+      "extractor_says": "2027-03-15..2027-03-19; 9 GBP tiers incl. early-bird flags",
+      "match": true
+    },
+    {
+      "url": "https://bcs-bcs-cvd-prevention-course.eventsairsite.com/",
+      "field": "fees + venue",
+      "site_says": "Attendance fee: £105 / £216 / £462; Location: Royal College of Physicians, London",
+      "extractor_says": "3 tiers 105/216/462; venue RCP, city London",
+      "match": true
+    },
+    {
+      "url": "https://britishcardiovascularsociety.org.uk/annual-conference/",
+      "field": "dates",
+      "site_says": "rate-card PDF linked on the page: 'BCS Annual Conference Monday 7 - Wednesday 9 June 2027, Manchester Central'",
+      "extractor_says": "2027-06-07..2027-06-09, Manchester Central, Manchester",
+      "match": true
+    }
+  ]
+}

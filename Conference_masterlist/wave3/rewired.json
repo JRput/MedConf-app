@@ -1,0 +1,71 @@
+{
+ "source_id": 151,
+ "slug": "rewired",
+ "class_name": "RewiredExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/rewired.py",
+ "source_row": {
+  "source_name": "Digital Health Rewired",
+  "society": "Digital Health Rewired",
+  "base_url": "https://digitalhealthrewired.com/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "ASP.events site; JSON-LD Event gives dates and the NEC Birmingham venue. Fees are cards on /tickets-pricing (free public/third sector, GBP +VAT private and start-up); speaker call on /call-speakers."
+ },
+ "registry_comment": "Digital Health Rewired single-congress site (one upcoming edition) - single_congress family",
+ "coverage_run": {
+  "date": "2026-11-09",
+  "pages_checked": 1,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ },
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://digitalhealthrewired.com/",
+  "https://digitalhealthrewired.com/tickets-pricing",
+  "https://digitalhealthrewired.com/call-speakers"
+ ],
+ "spot_check": [
+  {
+   "url": "https://digitalhealthrewired.com/",
+   "field": "dates/venue",
+   "site_says": "JSON-LD 2027-03-16..17, The NEC Birmingham",
+   "extractor_says": "2027-03-16..2027-03-17, NEC Birmingham, Birmingham, England",
+   "match": true
+  },
+  {
+   "url": "https://digitalhealthrewired.com/tickets-pricing",
+   "field": "fees",
+   "site_says": "Public/third sector Free; Private two-day GBP 789 +VAT (999 on the door); Start-up GBP 199 +VAT",
+   "extractor_says": "4 tiers: 0, 789 (book ahead), 999 (on the door), 199",
+   "match": true
+  },
+  {
+   "url": "https://digitalhealthrewired.com/call-speakers",
+   "field": "submission",
+   "site_says": "Speaker applications closed on Friday 25 September 2026",
+   "extractor_says": "abstract_open False, deadline 2026-09-25, note 'Call for speakers'",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Business and NHS-digital audience, not clinical CPD: relevance is the plan's call. No CPD points published.",
+  "Tier labels carry '+VAT' (prices are ex-VAT); the 'Book ahead' price has no printed end date so early_bird_deadline is None. 20% group discount is a rule, not a price, and is not a tier.",
+  "Register buttons go to forms.reg.buzz (a form, no fees) and are not followed. robots.txt only blocks /sites/ and tracking-query URLs.",
+  "Coverage checklist: home JSON-LD, /tickets-pricing, /call-speakers, /overview checked; agenda PDF not needed. The speaker call is recorded as an abstract-style window (closed)."
+ ]
+}

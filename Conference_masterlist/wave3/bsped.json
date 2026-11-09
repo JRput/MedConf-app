@@ -1,0 +1,63 @@
+{
+ "source_id": 150,
+ "slug": "bsped",
+ "class_name": "BspedExtractor",
+ "status": "partial",
+ "file_written": "medconf-scraper/extractors/bsped.py",
+ "source_row": {
+  "source_name": "BSPED Annual Meeting",
+  "society": "BSPED",
+  "base_url": "https://www.bsped.org.uk/meetings/forthcoming-meetings/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "bsped.org.uk/meetings/forthcoming-meetings/ lists title/date/city only. All details sit on an EventsForce microsite with robots Disallow /, deliberately not fetched."
+ },
+ "registry_comment": "BSPED Annual Meeting single-congress site (one upcoming edition) - single_congress family",
+ "coverage_run": {
+  "date": "2026-11-09",
+  "pages_checked": 1,
+  "warnings": [
+   {
+    "code": "PRICE_EXTERNAL_LINK",
+    "message": "no tiers but the page links to an external registration/event site",
+    "url": "https://www.bsped.org.uk/meetings/forthcoming-meetings/",
+    "evidence": "53rd Meeting of the British Society for Paediatric Endocrinology and Diabetes -  -> https://www.eventsforce.net/hg3/frontend/reg/thome.csp?pageID=143210&eventID=353"
+   }
+  ],
+  "blocking": true,
+  "exit_code": 2
+ },
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 0,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.bsped.org.uk/meetings/forthcoming-meetings/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.bsped.org.uk/meetings/forthcoming-meetings/",
+   "field": "dates",
+   "site_says": "53rd Meeting of the British Society for Paediatric Endocrinology and Diabetes - Bristol / 8-10 December 2026",
+   "extractor_says": "2026-12-08..2026-12-10, Bristol, England",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Registration, abstracts, venue and programme live on an EventsForce microsite (eventsforce.net/hg3/frontend/reg/thome.csp?...eventID=353) whose robots.txt is 'User-agent: * / Disallow: /'. The extractor does not fetch it, so no fees, abstract info or venue (I read that page once by hand during recon, which showed Bristol Beacon; that value is NOT used).",
+  "SHARED-FILE ASK (Level 3): extractors/discovery.py runs at scrape time for every source and may follow the eventsforce link; it has no robots.txt check. Please make discovery skip hosts whose robots.txt disallows all, or exclude this host for source 150.",
+  "PRICE_EXTERNAL_LINK coverage warning is exactly that disallowed registrar link; it is not a gap I can close.",
+  "Edition is 8-10 December 2026, so it drops off after it ends; the next edition will appear on the same page.",
+  "Coverage checklist: edition page only. No PDFs/images/two-hop sites followed (registrar disallows crawling)."
+ ]
+}

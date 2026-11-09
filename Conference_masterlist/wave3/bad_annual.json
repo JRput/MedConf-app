@@ -1,0 +1,77 @@
+{
+ "source_id": 149,
+ "slug": "bad_annual",
+ "class_name": "BadAnnualExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/bad_annual.py",
+ "source_row": {
+  "source_name": "BAD Annual Meeting",
+  "society": "BAD",
+  "base_url": "https://badannualmeeting.co.uk/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "badannualmeeting.co.uk home slider gives 'Liverpool Experience Campus 29 June - 1 July 2027'; abstract deadlines on /abstracts/. /registration/ stays on the previous edition until registration opens (Feb 2027), so no tiers."
+ },
+ "registry_comment": "BAD Annual Meeting single-congress site (one upcoming edition) - single_congress family",
+ "coverage_run": {
+  "date": "2026-11-09",
+  "pages_checked": 1,
+  "warnings": [
+   {
+    "code": "PRICE_IMAGE_ON_PAGE",
+    "message": "no tiers but a fee/registration heading is followed by an image",
+    "url": "https://badannualmeeting.co.uk/",
+    "evidence": "heading 'Registration' image https://badannualmeeting.co.uk/wp-content/uploads/2026/08/IMG_0985-scaled.jpg"
+   }
+  ],
+  "blocking": true,
+  "exit_code": 2
+ },
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://badannualmeeting.co.uk/",
+  "https://badannualmeeting.co.uk/abstracts/",
+  "https://badannualmeeting.co.uk/registration/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://badannualmeeting.co.uk/",
+   "field": "dates/venue",
+   "site_says": "Liverpool Experience Campus 29 June - 1 July 2027",
+   "extractor_says": "2027-06-29..2027-07-01, Liverpool Experience Campus, Liverpool, England",
+   "match": true
+  },
+  {
+   "url": "https://badannualmeeting.co.uk/abstracts/",
+   "field": "abstract_deadline",
+   "site_says": "Main Meeting Abstract Deadline - Midnight on 11 January 2027",
+   "extractor_says": "2027-01-11",
+   "match": true
+  },
+  {
+   "url": "https://badannualmeeting.co.uk/registration/",
+   "field": "fees",
+   "site_says": "106th (2026 Manchester) rates only; 'Registration will open in February 2027'",
+   "extractor_says": "no tiers",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "No 2027 fees yet: /registration/ still shows the 2026 Manchester meeting and the home page says registration opens in February 2027. The family year gate returned no tiers; re-check once registration opens (CPD 'anticipated 18 category 1' is also 2026 text and not recorded).",
+  "PRICE_IMAGE_ON_PAGE coverage warning is a false positive: the image under the 'Registration' heading is a slider photo (IMG_0985).",
+  "Coverage checklist: home, /registration/, /abstracts/, /venue/ checked; SIG deadline 8 Feb 2027 and late-breaking 17 May 2027 exist but only the nearest main deadline is stored. region 'England' is derived from the city (Liverpool) via a small city to nation map."
+ ]
+}

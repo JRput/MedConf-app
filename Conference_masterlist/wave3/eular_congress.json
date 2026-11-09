@@ -1,0 +1,71 @@
+{
+ "source_id": 154,
+ "slug": "eular_congress",
+ "class_name": "EularCongressExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/eular_congress.py",
+ "source_row": {
+  "source_name": "EULAR European Congress of Rheumatology",
+  "society": "EULAR",
+  "base_url": "https://congress.eular.org/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "congress.eular.org (Congress only, eular.org events are source 134). Home 'EULAR 2027 | 9 - 12 June 2027'; fee grid on /congress-registration (early until 31 March, regular from 1 April, EUR incl. VAT); abstract key dates on /abstractgeneralinfo."
+ },
+ "registry_comment": "EULAR European Congress of Rheumatology single-congress site (one upcoming edition) - single_congress family",
+ "coverage_run": {
+  "date": "2026-11-09",
+  "pages_checked": 1,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ },
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://congress.eular.org/",
+  "https://congress.eular.org/congress-registration",
+  "https://congress.eular.org/abstractgeneralinfo"
+ ],
+ "spot_check": [
+  {
+   "url": "https://congress.eular.org/",
+   "field": "dates",
+   "site_says": "EULAR 2027 | 9 - 12 June 2027, Berlin",
+   "extractor_says": "2027-06-09..2027-06-12",
+   "match": true
+  },
+  {
+   "url": "https://congress.eular.org/congress-registration",
+   "field": "fees",
+   "site_says": "Delegate EUR 879 until 31 March 2027, EUR 925 from 1 April; Exhibitor EUR 200; Congress Dinner EUR 95",
+   "extractor_says": "16 tiers, EUR, early deadline 2027-03-31",
+   "match": true
+  },
+  {
+   "url": "https://congress.eular.org/abstractgeneralinfo",
+   "field": "abstract_deadline",
+   "site_says": "Submission Deadline 15 January 2027, 23:59 CET",
+   "extractor_says": "2027-01-15, open",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Congress only: eular.org events are source 134 and are not duplicated.",
+  "Prices are the public non-member rates incl. VAT; myEULAR Blue/upgraded member discounts (EUR 25 / 50) are stated separately and not applied. Student and Press rows show '-' (different registration process) and are skipped, not recorded as free. The Congress Dinner is a social-event tier.",
+  "Venue is Messe Berlin, Berlin, Germany from the registration page opening sentence. The page's 'Location:' line (Palais am Funkturm) is the Congress Dinner venue and is deliberately NOT used. City 'Berlin' is taken from 'onsite in Berlin'.",
+  "Accreditation text says EULAR 'will apply' for EACCME/UEMS credits: no cpd points recorded. Coverage checklist: home, registration, abstracts pages checked; Late-Breaking abstract window not yet announced."
+ ]
+}

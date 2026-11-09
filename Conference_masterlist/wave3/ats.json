@@ -1,0 +1,85 @@
+{
+ "source_id": 153,
+ "slug": "ats",
+ "class_name": "AtsExtractor",
+ "status": "partial",
+ "file_written": "medconf-scraper/extractors/ats.py",
+ "source_row": {
+  "source_name": "ATS International Conference",
+  "society": "ATS",
+  "base_url": "https://site.thoracic.org/conference",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "site.thoracic.org/conference home ends with 'Attend ATS 2027 / May 14-19, 2027 / New Orleans, LA'. No 2027 fees yet. Abstract call page says deadline passed plus the late-breaking date."
+ },
+ "registry_comment": "ATS International Conference single-congress site (one upcoming edition) - single_congress family",
+ "coverage_run": {
+  "date": "2026-11-09",
+  "pages_checked": 1,
+  "warnings": [
+   {
+    "code": "PRICE_TEXT_ON_PAGE",
+    "message": "no tiers but the page shows currency amounts",
+    "url": "https://site.thoracic.org/conference",
+    "evidence": "$10,000 and pitch live at ATS 2027 in New O"
+   },
+   {
+    "code": "PRICE_EXTERNAL_LINK",
+    "message": "no tiers but the page links to an external registration/event site",
+    "url": "https://site.thoracic.org/conference",
+    "evidence": "Learn More -> http://cookiesandyou.com/; Register Now -> https://atsedplus.thoracic.org/content/pass-2026-pediatric-pulmonary-boards-confidence; Learn More -> https://atsnow.thoracic.org/"
+   }
+  ],
+  "blocking": true,
+  "exit_code": 2
+ },
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 0,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://site.thoracic.org/conference",
+  "https://site.thoracic.org/conference/program/call-for-scientific-abstracts-and-case-reports",
+  "https://site.thoracic.org/conference/attendees/future-conferences"
+ ],
+ "spot_check": [
+  {
+   "url": "https://site.thoracic.org/conference",
+   "field": "dates/place",
+   "site_says": "Attend ATS 2027 / May 14-19, 2027 / New Orleans, LA",
+   "extractor_says": "2027-05-14..2027-05-19, New Orleans, United States",
+   "match": true
+  },
+  {
+   "url": "https://site.thoracic.org/conference/program/call-for-scientific-abstracts-and-case-reports",
+   "field": "abstract",
+   "site_says": "The deadline has passed ... late breaking abstracts deadline Wednesday, Jan. 27, 2027",
+   "extractor_says": "abstract_open False, deadline 2027-01-27, note names both",
+   "match": true
+  },
+  {
+   "url": "https://site.thoracic.org/conference/attendees/future-conferences",
+   "field": "next editions",
+   "site_says": "May 14-19, 2027; May 19-24, 2028; May 18-23, 2029",
+   "extractor_says": "only the 2027 row is used",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "No 2027 registration fees or venue name are published yet (registration paths 404; CME/accreditation pages still describe ATS 2026), so no tiers and no venue_name. Coverage warnings PRICE_TEXT_ON_PAGE ($10,000 BEAR Cage prize) and PRICE_EXTERNAL_LINK (ATS Ed+ 2026 pediatric board-review pass, ATS NOW) are not conference fees.",
+  "Cloudflare-style 403s appeared on sub-pages after about 20 requests from my IP and cleared; the family retries 3 times. One harness run during throttling returned 0 shells; repeat runs (normal and forced fallback) returned 1.",
+  "abstract_deadline holds the late-breaking date although abstract_open is False (details due in December); the main call closed without a printed date.",
+  "Nav discovery is disabled (the nav is a deep news-style tree of 2026 pages and promotions); the abstract page is an explicit URL. Coverage checklist: home, About, abstract call, CME page, future-conferences checked; no PDFs/images/external sites with fees.",
+  "ATS 'Future Conferences' lists 2028 and 2029 rows too; only the edition on the home page is emitted."
+ ]
+}

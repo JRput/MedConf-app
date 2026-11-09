@@ -68,6 +68,10 @@ jobs:
             source_ids: "116,117,118,119,120,121,122"
           - group: O
             source_ids: "134,135,136,137,139,143"
+          - group: P
+            source_ids: "147,148,149,150,151,152,153,154"
+          - group: Q
+            source_ids: "155,156,157,158"
 
     steps:
       - name: Check out repository

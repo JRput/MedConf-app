@@ -84,22 +84,22 @@ def _agent(text, html=""):
 
 
 def test_merge_step_fills_when_extractor_did_not():
-    rec = {"start_date": "2026-11-11", "abstract_open": False,
+    rec = {"start_date": "2027-11-11", "abstract_open": False,
            "abstract_deadline": None, "abstract_deadline_note": None}
-    _agent("Poster competition. The deadline for submissions is 7th November 2026.") \
+    _agent("Poster competition. The deadline for submissions is 7th November 2027.") \
         ._ensure_submission_info(rec, BASE)
-    assert rec["abstract_open"] is True and rec["abstract_deadline"] == "2026-11-07"
+    assert rec["abstract_open"] is True and rec["abstract_deadline"] == "2027-11-07"
 
 
 def test_extractor_values_win():
-    rec = {"start_date": "2026-11-11", "abstract_open": False,
+    rec = {"start_date": "2027-11-11", "abstract_open": False,
            "abstract_deadline": "2026-09-01", "abstract_deadline_note": None}
-    _agent("Poster competition. The deadline for submissions is 7th November 2026.") \
+    _agent("Poster competition. The deadline for submissions is 7th November 2027.") \
         ._ensure_submission_info(rec, BASE)
     assert rec["abstract_deadline"] == "2026-09-01" and rec["abstract_open"] is False
-    rec2 = {"start_date": "2026-11-11", "abstract_open": True,
+    rec2 = {"start_date": "2027-11-11", "abstract_open": True,
             "abstract_deadline": None, "abstract_deadline_note": None}
-    _agent("Call for papers. Deadline for submissions is 7th November 2026.") \
+    _agent("Call for papers. Deadline for submissions is 7th November 2027.") \
         ._ensure_submission_info(rec2, BASE)
     assert rec2["abstract_deadline"] is None
 

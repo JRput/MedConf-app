@@ -1,0 +1,71 @@
+{
+ "source_id": 158,
+ "slug": "ors",
+ "class_name": "OrsExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/ors.py",
+ "source_row": {
+  "source_name": "Orthopaedic Research Society (ORS)",
+  "society": "ORS",
+  "base_url": "https://www.ors.org/events/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "/events/ is a Tockify JS widget (not used). Listing = the site menu items under Events (before Previous Meetings): each is a static event page; keep those that parse to an upcoming 'Month D - D, YYYY' block with venue and City, State lines. Save-the-date annual meetings on /futureannualmeetings/ within 18 months become extra shells. Annual Meeting links Rates and Information (/register2027/) with a member/non-member x early/regular USD grid; a registration page is used only if its own heading names the event year (workshop link still points at the 2025 page)."
+ },
+ "registry_comment": "ORS (158): static event pages from the Events menu + save-the-date annual meetings; USD; Orthopaedics; Annual Meeting fee grid from /register2027/",
+ "concerns": [
+  "The /events/ Tockify calendar (third-party JS widget) is NOT used; the listing is the site menu under Events, each candidate page parsed for a dated 'Month D - D, YYYY' block. Kept: 2027 Annual Meeting, ORS-ISTS Tendon Summit (2-5 Jun 2027), MSK Biology Workshop (17-22 Jul 2027), plus the ORS 2028 Annual Meeting from the save-the-date page (venue and dates only; 2029 is beyond the 18-month horizon). Dropped and logged: PSRS 8th Spine Symposium (finished 5 Nov 2026), programmes without dates.",
+  "Fees only for the Annual Meeting, from /register2027/ (linked 'Rates and Information'); accepted only because that page's own heading names 2027 (evidence_identity 'strong'). The workshop's 'Registration' link still points at the 2025 rate page, which is rejected by the same heading check, so the workshop has no tiers ('Additional details to follow'); the Tendon Summit has no registration yet. Add-on workshop fees on the Annual Meeting page are not parsed. Membership dues table is ignored.",
+  "Abstracts parsed with an ORS-specific rule because the shared classifier took the 'Notifications Sent' date as the deadline: Tendon opens 1 Dec 2026, deadline 5 Feb 2027; Annual Meeting 'General Call: Closed / Late Breaking: Open' -> open with a note, no deadline (the late-breaking end date sits on the future-meetings page without a year). The 2028 save-the-date row carries abstract_deadline_note 'Abstract dates not announced yet' so the pipeline cannot copy the 2027 windows from the shared future-meetings page onto it.",
+  "Annual Meeting has no descriptive paragraph on its page, so description is null (not invented). Region carries 'United States' (city + country convention). Currency USD. robots.txt only blocks search and wp-admin. No LLM calls. Tests: test_ors.py."
+ ],
+ "coverage_run": {
+  "date": "2026-11-09",
+  "pages_checked": 2,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ },
+ "probe_results": {
+  "shells": 4,
+  "shells_forced_fallback": 4,
+  "details_tested": 4,
+  "with_date": 4,
+  "with_pricing": 1,
+  "with_venue": 4,
+  "with_description": 3,
+  "with_specialty": 4
+ },
+ "test_urls": [
+  "https://www.ors.org/2027-annual-meeting/",
+  "https://www.ors.org/register2027/",
+  "https://www.ors.org/2027tendon/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.ors.org/2027-annual-meeting/",
+   "field": "dates/venue",
+   "site_says": "February 19 - 23, 2027; Moscone West Convention Center, San Francisco, California",
+   "extractor_says": "2027-02-19..2027-02-23; Moscone West Convention Center; San Francisco; United States",
+   "match": true
+  },
+  {
+   "url": "https://www.ors.org/register2027/",
+   "field": "fees",
+   "site_says": "Student $365 early / $495; Established $815 / $1155; Non-Member $1245 / $1580; early bird ends December 31, 2026",
+   "extractor_says": "14 USD tiers, early-bird deadline 2026-12-31",
+   "match": true
+  },
+  {
+   "url": "https://www.ors.org/2027tendon/",
+   "field": "dates/abstracts",
+   "site_says": "June 2-5, 2027 Hyatt Regency Boston, Boston, MA; abstracts open Dec 1 2026, deadline Feb 5 2027",
+   "extractor_says": "2027-06-02..2027-06-05; Boston; abstract_open false, deadline 2027-02-05",
+   "match": true
+  }
+ ]
+}

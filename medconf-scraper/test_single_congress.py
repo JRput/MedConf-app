@@ -180,3 +180,94 @@ def test_parse_amount_decimal_pence_not_read_as_thousands():
     assert parse_amount("£1,250.00", "EUR") == (1250.0, "GBP")
     assert parse_amount("€ 1.500,00", "EUR") == (1500.0, "EUR")
     assert parse_amount("$1,395.50", "USD") == (1395.5, "USD")
+
+
+# ---- between editions: verified_empty default (2026-11-09) ----------------------------------------------------
+import extractors.single_congress as _sc
+
+
+class _Fake(SingleCongressExtractor):
+    HOME_URL = "https://fake.example/"
+    SOCIETY = "FAKE"
+    EVENT_NAME = "FAKE"
+    FOLLOW_YEAR_LINKS = False
+
+    def __init__(self, body):
+        super().__init__({"id": 1, "source_name": "fake"})
+        self.body = body
+
+    def _get(self, url, tries=3):
+        return self.body
+
+
+_FILLER = "".join(f'<p><a href="/p{i}">Page {i}</a></p>' for i in range(5))
+ENDED_HTML = ("<html><head><title>FAKE</title></head><body>" + _FILLER +
+              "<p>8-10 June 2026 &middot; Liverpool Experience Campus</p></body></html>")
+UPCOMING_HTML = ("<html><head><title>FAKE</title></head><body>" + _FILLER +
+                 "<p>7-9 June 2027 &middot; Liverpool Experience Campus</p></body></html>")
+CHALLENGE_HTML = ("<html><head><title>Just a moment...</title></head><body>" + _FILLER +
+                  "<p>8-10 June 2026 &middot; Liverpool</p><p>Checking your browser before accessing</p></body></html>")
+
+
+def _today(monkeypatch, d=date(2026, 11, 9)):
+    class _D(date):
+        @classmethod
+        def today(cls):
+            return d
+    monkeypatch.setattr(_sc, "date", _D)
+
+
+def test_ended_edition_fetched_page_is_verified_empty(monkeypatch):
+    _today(monkeypatch)
+    ex = _Fake(ENDED_HTML)
+    assert ex.list_shells_override() == []
+    assert ex.verified_empty == "FAKE 2026 ended 2026-06-10; no later edition listed"
+
+
+def test_ended_edition_fetch_failed_stays_failure(monkeypatch):
+    _today(monkeypatch)
+    ex = _Fake(None)
+    assert ex.list_shells_override() == []
+    assert ex.verified_empty is None
+
+
+def test_challenge_or_thin_page_stays_failure(monkeypatch):
+    _today(monkeypatch)
+    ex = _Fake(CHALLENGE_HTML)
+    assert ex.list_shells_override() == []
+    assert ex.verified_empty is None
+    thin = _Fake("<html><body><p>8-10 June 2026</p></body></html>" + " " * 600)   # no links: not a real page
+    thin.list_shells_override()
+    assert thin.verified_empty is None
+
+
+def test_page_without_any_edition_stays_failure(monkeypatch):
+    _today(monkeypatch)
+    ex = _Fake("<html><body>" + _FILLER + "<p>Welcome to our congress</p></body></html>")
+    assert ex.list_shells_override() == []
+    assert ex.verified_empty is None
+
+
+def test_upcoming_edition_unchanged(monkeypatch):
+    _today(monkeypatch)
+    ex = _Fake(UPCOMING_HTML)
+    shells = ex.list_shells_override()
+    assert [s["title"] for s in shells] == ["FAKE 2027"]
+    assert shells[0]["start_date"] == "2027-06-07" and ex.verified_empty is None
+
+
+def test_subclass_verified_empty_not_overwritten(monkeypatch):
+    _today(monkeypatch)
+    ex = _Fake(ENDED_HTML)
+    ex.verified_empty = "subclass reason"
+    ex.list_shells_override()
+    assert ex.verified_empty == "subclass reason"
+
+
+def test_cpd_credit_count_ignores_category_qualifier():
+    import re as _re
+    from extractors.single_congress import _CPD_RE
+    assert float(_CPD_RE.search("up to 32.5 AMA PRA Category 1 Credits").group(1)) == 32.5
+    assert float(_CPD_RE.search("This activity offers 12 CME credits").group(1)) == 12
+    assert _CPD_RE.search("Approved for Category 1 CME credits") is None
+    assert _CPD_RE.search("Section 3 CPD points are available") is None

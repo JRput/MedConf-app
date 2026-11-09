@@ -1,0 +1,638 @@
+[
+ {
+  "domain": "aap.org",
+  "results": [
+   {
+    "url": "https://aapexperience.org/future-dates/",
+    "cleared": true,
+    "secs": 3.5,
+    "title": "Mark Your Calendars \u2013 AAP Experience",
+    "len": 175315,
+    "reason": "",
+    "marker": "(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a57fff0dad7ea600',a=document.createElement('script');a."
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "amwc-conference.com",
+  "results": [
+   {
+    "url": "https://www.amwc-conference.com/",
+    "cleared": true,
+    "secs": 4.4,
+    "title": "Aesthetic & Anti-Aging Medicine World Congress",
+    "len": 1198630,
+    "reason": "",
+    "marker": ".page()}(window,document,\"ttq\");</script>\n<iframe src=\"https://www.google.com/recaptcha/api2/aframe\" width=\"0\" height=\"0\" style=\"display: none;\" data-airgap-id=\"80\"></"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "bad.org.uk",
+  "results": [
+   {
+    "url": "https://badannualmeeting.co.uk/",
+    "cleared": true,
+    "secs": 3.4,
+    "title": "BAD Annual Meeting - BAD Annual Meeting",
+    "len": 243797,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "bsped.org.uk",
+  "results": [
+   {
+    "url": "https://www.bsped.org.uk/meetings/forthcoming-meetings/",
+    "cleared": true,
+    "secs": 12.6,
+    "title": "Forthcoming Meetings | BSPED",
+    "len": 50724,
+    "reason": "",
+    "marker": "(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a57fff8cdef54a77',a=document.createElement('script');a."
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "digitalhealthrewired.com",
+  "results": [
+   {
+    "url": "https://digitalhealthrewired.com/",
+    "cleared": true,
+    "secs": 5.7,
+    "title": "Digital Health Rewired",
+    "len": 400372,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "rheumatology.org",
+  "results": [
+   {
+    "url": "https://rheumatology.org/meetings/acr-convergence/",
+    "cleared": true,
+    "secs": 2.9,
+    "title": "ACR Convergence | American College of Rheumatology",
+    "len": 281375,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "thoracic.org",
+  "results": [
+   {
+    "url": "https://site.thoracic.org/conference",
+    "cleared": true,
+    "secs": 5.2,
+    "title": "American Thoracic Society | Conference",
+    "len": 217062,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "eular.org",
+  "results": [
+   {
+    "url": "https://congress.eular.org/",
+    "cleared": true,
+    "secs": 4.0,
+    "title": "EULAR 2027 | EULAR Congress",
+    "len": 49556,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "britishcardiovascularsociety.org",
+  "results": [
+   {
+    "url": "https://britishcardiovascularsociety.org.uk/courses/",
+    "cleared": true,
+    "secs": 3.2,
+    "title": "Courses, Training & Exams - British Cardiovascular Society",
+    "len": 385976,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "england.nhs.uk",
+  "results": [
+   {
+    "url": "https://www.events.england.nhs.uk/events",
+    "cleared": true,
+    "secs": 4.4,
+    "title": "Events | NHS England Events",
+    "len": 56580,
+    "reason": "",
+    "marker": " type=\"text/javascript\" async=\"\" charset=\"utf-8\" src=\"https://www.gstatic.com/recaptcha/releases/0lEGiwO4Qwx5R9ArxUy0mBpf/recaptcha__en.js\" crossorigin=\"anonymous\" int"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "imcas.com",
+  "results": [
+   {
+    "url": "https://www.imcas.com/en/worldwide-events",
+    "cleared": true,
+    "secs": 4.6,
+    "title": "Worldwide Events Agenda - IMCAS",
+    "len": 570549,
+    "reason": "",
+    "marker": "elect/style.css\">\n    \n\n    \n    <script src=\"https://challenges.cloudflare.com/turnstile/v0/api.js\" async=\"\" defer=\"\"></script>\n\n<script src=\"https://static.axept.io/be"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "ors.org",
+  "results": [
+   {
+    "url": "https://www.ors.org/events/",
+    "cleared": true,
+    "secs": 3.7,
+    "title": "Orthopaedic Events - ORS",
+    "len": 166531,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "astro.org",
+  "results": [
+   {
+    "url": "https://www.astro.org/meetings-and-education",
+    "cleared": false,
+    "secs": 11.7,
+    "title": "Just a moment...",
+    "len": 44856,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html lang=\"en-us\" dir=\"ltr\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><m"
+   },
+   {
+    "url": "https://www.astro.org/",
+    "cleared": true,
+    "secs": 3.8,
+    "title": "Home - American Society for Radiation Oncology (ASTRO)",
+    "len": 397337,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "professional.heart.org",
+  "results": [
+   {
+    "url": "https://professional.heart.org/en/meetings",
+    "cleared": false,
+    "secs": 11.1,
+    "title": "Just a moment...",
+    "len": 44864,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html lang=\"en-us\" dir=\"ltr\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><m"
+   },
+   {
+    "url": "https://professional.heart.org/",
+    "cleared": true,
+    "secs": 4.5,
+    "title": "Professional Heart Daily",
+    "len": 254213,
+    "reason": "",
+    "marker": "%2F\" title=\"TTD Universal Pixel\"></iframe><iframe src=\"https://www.google.com/recaptcha/api2/aframe\" width=\"0\" height=\"0\" style=\"display: none;\"></iframe></body><ifram"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "himss.org",
+  "results": [
+   {
+    "url": "https://www.himss.org/events",
+    "cleared": false,
+    "secs": 11.5,
+    "title": "Just a moment...",
+    "len": 44595,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html lang=\"en-us\" dir=\"ltr\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><m"
+   },
+   {
+    "url": "https://www.himss.org/",
+    "cleared": true,
+    "secs": 5.2,
+    "title": "Healthcare Information and Management Systems Society | HIMS",
+    "len": 267860,
+    "reason": "",
+    "marker": "(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a580017fbc957a66',a=document.createElement('script');a."
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "esska.org",
+  "results": [
+   {
+    "url": "https://esska.org/events",
+    "cleared": false,
+    "secs": 11.8,
+    "title": "Just a moment...",
+    "len": 44771,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html lang=\"en-us\" dir=\"ltr\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><m"
+   },
+   {
+    "url": "https://esska.org/",
+    "cleared": true,
+    "secs": 4.3,
+    "title": "European Society of Sports Traumatology, Knee Surgery and Ar",
+    "len": 128585,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "eans.org",
+  "results": [
+   {
+    "url": "https://www.eans.org/events",
+    "cleared": true,
+    "secs": 3.9,
+    "title": "Community Calendar - European Association of Neurosurgical S",
+    "len": 48058,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "theabn.org",
+  "results": [
+   {
+    "url": "https://www.theabn.org/events",
+    "cleared": true,
+    "secs": 4.4,
+    "title": "Community Calendar - Association of British Neurologists",
+    "len": 51418,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "uscap.org",
+  "results": [
+   {
+    "url": "https://www.uscap.org/meetings",
+    "cleared": false,
+    "secs": 2.9,
+    "title": "",
+    "len": 39,
+    "reason": "no-content-shape",
+    "marker": ""
+   },
+   {
+    "url": "https://www.uscap.org/",
+    "cleared": false,
+    "secs": 2.1,
+    "title": "",
+    "len": 39,
+    "reason": "no-content-shape",
+    "marker": ""
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "faceconference.com",
+  "results": [
+   {
+    "url": "https://www.faceconference.com/",
+    "cleared": true,
+    "secs": 4.5,
+    "title": "The Aesthetic Show UK",
+    "len": 1155317,
+    "reason": "",
+    "marker": "999px; width: 0px; height: 0px;\"></iframe><iframe src=\"https://www.google.com/recaptcha/api2/aframe\" width=\"0\" height=\"0\" style=\"display: none;\" data-airgap-id=\"43\"></"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "baskonline.com",
+  "results": [
+   {
+    "url": "https://baskonline.com/events/",
+    "cleared": false,
+    "secs": 10.7,
+    "title": "Attention Required! | Cloudflare",
+    "len": 4697,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html class=\"no-js\" lang=\"en-US\"><!--<![endif]--><head>\n<title>Attention Required! | Cloudflare</title>\n<meta charset=\"UTF-8\">\n<meta http-equiv=\"Content-Type\" co"
+   },
+   {
+    "url": "https://baskonline.com/",
+    "cleared": false,
+    "secs": 10.6,
+    "title": "Attention Required! | Cloudflare",
+    "len": 4697,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html class=\"no-js\" lang=\"en-US\"><!--<![endif]--><head>\n<title>Attention Required! | Cloudflare</title>\n<meta charset=\"UTF-8\">\n<meta http-equiv=\"Content-Type\" co"
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "facultyofclinicalinformatics.org.uk",
+  "results": [
+   {
+    "url": "https://facultyofclinicalinformatics.org.uk/events",
+    "cleared": false,
+    "secs": 10.8,
+    "title": "Attention Required! | Cloudflare",
+    "len": 4718,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html class=\"no-js\" lang=\"en-US\"><!--<![endif]--><head>\n<title>Attention Required! | Cloudflare</title>\n<meta charset=\"UTF-8\">\n<meta http-equiv=\"Content-Type\" co"
+   },
+   {
+    "url": "https://facultyofclinicalinformatics.org.uk/",
+    "cleared": false,
+    "secs": 10.6,
+    "title": "Attention Required! | Cloudflare",
+    "len": 4718,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html class=\"no-js\" lang=\"en-US\"><!--<![endif]--><head>\n<title>Attention Required! | Cloudflare</title>\n<meta charset=\"UTF-8\">\n<meta http-equiv=\"Content-Type\" co"
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "phemcast.co.uk",
+  "results": [
+   {
+    "url": "https://phemcast.co.uk/courses",
+    "cleared": true,
+    "secs": 7.1,
+    "title": "Page not found | phemcast",
+    "len": 80806,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "matacourses.com",
+  "results": [
+   {
+    "url": "https://matacourses.com/",
+    "cleared": false,
+    "secs": 2.4,
+    "title": "WordPress \u203a Error",
+    "len": 3067,
+    "reason": "no-content-shape",
+    "marker": ""
+   },
+   {
+    "url": "https://www.matacourses.com/courses/",
+    "cleared": false,
+    "secs": 2.3,
+    "title": "WordPress \u203a Error",
+    "len": 3067,
+    "reason": "no-content-shape",
+    "marker": ""
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "aao.org",
+  "results": [
+   {
+    "url": "https://www.aao.org/annual-meeting/past-and-future-meetings",
+    "cleared": false,
+    "secs": 2.2,
+    "title": "403 Forbidden",
+    "len": 117,
+    "reason": "no-content-shape",
+    "marker": ""
+   },
+   {
+    "url": "https://www.aao.org/annual-meeting",
+    "cleared": false,
+    "secs": 2.1,
+    "title": "403 Forbidden",
+    "len": 117,
+    "reason": "no-content-shape",
+    "marker": ""
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "endocrinology.org",
+  "results": [
+   {
+    "url": "https://www.endocrinology.org/events/",
+    "cleared": false,
+    "secs": 11.7,
+    "title": "Just a moment...",
+    "len": 44694,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html lang=\"en-us\" dir=\"ltr\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><m"
+   },
+   {
+    "url": "https://www.endocrinology.org/",
+    "cleared": false,
+    "secs": 11.3,
+    "title": "Just a moment...",
+    "len": 44651,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html lang=\"en-us\" dir=\"ltr\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><m"
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "nihr.ac.uk",
+  "results": [
+   {
+    "url": "https://www.nihr.ac.uk/events",
+    "cleared": false,
+    "secs": 4.7,
+    "title": "ERROR: The request could not be satisfied",
+    "len": 923,
+    "reason": "no-content-shape",
+    "marker": ""
+   },
+   {
+    "url": "https://www.nihr.ac.uk/",
+    "cleared": false,
+    "secs": 2.0,
+    "title": "ERROR: The request could not be satisfied",
+    "len": 923,
+    "reason": "no-content-shape",
+    "marker": ""
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "rcoa.ac.uk",
+  "results": [
+   {
+    "url": "https://www.rcoa.ac.uk/events",
+    "cleared": false,
+    "secs": 11.9,
+    "title": "Just a moment...",
+    "len": 44774,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html lang=\"en-us\" dir=\"ltr\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><m"
+   },
+   {
+    "url": "https://www.rcoa.ac.uk/",
+    "cleared": false,
+    "secs": 11.6,
+    "title": "Just a moment...",
+    "len": 44756,
+    "reason": "challenge",
+    "marker": "<!DOCTYPE html><html lang=\"en-us\" dir=\"ltr\"><head><title>Just a moment...</title><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"><m"
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "biasp.org",
+  "results": [
+   {
+    "url": "https://biasp.org/events/",
+    "cleared": false,
+    "secs": 12.3,
+    "title": "Security Verification",
+    "len": 5713,
+    "reason": "challenge",
+    "marker": "one'\">\n            <meta http-equiv=\"refresh\" content=\"360\">\n            <title>Security Verification</title>\n            <script data-cfasync=\"false\" nonce=\"\">\n                // S"
+   },
+   {
+    "url": "https://biasp.org/",
+    "cleared": false,
+    "secs": 11.9,
+    "title": "Security Verification",
+    "len": 5713,
+    "reason": "challenge",
+    "marker": "one'\">\n            <meta http-equiv=\"refresh\" content=\"360\">\n            <title>Security Verification</title>\n            <script data-cfasync=\"false\" nonce=\"\">\n                // S"
+   }
+  ],
+  "cleared": false
+ },
+ {
+  "domain": "wfns.org",
+  "results": [
+   {
+    "url": "https://wfns.org/events",
+    "cleared": true,
+    "secs": 5.5,
+    "title": "World Federation of Neurosurgical Societies | World Federati",
+    "len": 1492468,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "esge.com",
+  "results": [
+   {
+    "url": "https://www.esge.com/events",
+    "cleared": true,
+    "secs": 4.2,
+    "title": "Events | ESGE",
+    "len": 197212,
+    "reason": "",
+    "marker": "kiebotDialogDetailBodyContentCookieInfoTitle\" role=\"heading\" aria-level=\"4\">_GRECAPTCHA</strong><span class=\"CybotCookiebotDialogDetailBodyContentCookieInfoDescription"
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "ese-hormones.org",
+  "results": [
+   {
+    "url": "https://www.ese-hormones.org/education-and-training/events-key-dates/",
+    "cleared": true,
+    "secs": 3.2,
+    "title": "Events & Key Dates | ESE",
+    "len": 355543,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "congress.ehaweb.org",
+  "results": [
+   {
+    "url": "https://congress.ehaweb.org/",
+    "cleared": true,
+    "secs": 7.0,
+    "title": "m-anage.com",
+    "len": 104800,
+    "reason": "",
+    "marker": ""
+   }
+  ],
+  "cleared": true
+ },
+ {
+  "domain": "reviseradiology.com",
+  "results": [
+   {
+    "url": "https://www.reviseradiology.com/courses",
+    "cleared": false,
+    "secs": 2.6,
+    "title": "",
+    "len": 39,
+    "reason": "no-content-shape",
+    "marker": ""
+   },
+   {
+    "url": "https://www.reviseradiology.com/events",
+    "cleared": false,
+    "secs": 2.5,
+    "title": "",
+    "len": 39,
+    "reason": "no-content-shape",
+    "marker": ""
+   }
+  ],
+  "cleared": false
+ }
+]

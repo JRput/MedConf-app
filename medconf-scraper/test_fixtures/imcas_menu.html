@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+ <title>Worldwide Events Agenda - IMCAS</title>
+</head>
+<body id="website-body" class="overflow-scroll text-[--primary-color] ">
+<div class="fixed inset-0 z-50 bg-[--primary-color] bg-opacity-20 pointer-events-none hidden w-[5000px] h-[5000px]"
+ id="search-background"></div>
+<a href="#main-content"
+ class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100000] focus:bg-white focus:text-[--primary-color] focus:px-4 focus:py-3 focus:rounded-md focus:shadow-lg">Skip to main content</a>
+ r<header class="relative isolate z-[99999] bg-white">
+ <nav id="navbar" class=" white-header shadow-sm shadow-slate-300 navbar-header w-full fixed z-10 top-0 mx-auto flex items-center justify-between px-6 py-6 lg:px-8" aria-label="Global">
+ <div class="navbar-logo flex mr-12">
+ <a href="/" class="company-logo -m-1.5 p-1.5">
+ <span class="sr-only">IMCAS</span>
+ <img class="brand-logo lg:h-8 h-6 w-auto" src="https://assets.imcas.com/home/logo_imcas_navyblue.svg" alt="">
+ </a>
+ </div>
+ <div class="burger-menu flex lg:hidden items-center gap-4">
+ <button type="button" id="header-search-trigger-mobile"
+ class="js-header-search-trigger -m-2.5 bg-transparent inline-flex items-center justify-center rounded-md p-2.5">
+ <span class="sr-only">Search...</span>
+ <i class="fa-regular text-2xl fa-magnifying-glass"></i>
+ </button>
+ <button type="button" id="open-burger-menu-button" aria-expanded="false" aria-controls="mobilePanel" class="-m-2.5 bg-transparent inline-flex items-center justify-center rounded-md p-2.5">
+ <span class="sr-only">Open menu</span>
+ <i class="fa-solid text-2xl fa-bars" aria-hidden="true"></i>
+ </button>
+ </div>
+ <div class="navbar-items hidden lg:flex lg:items-center lg:gap-x-12">
+ <div id="congresses-container" class="navbar-items-container " data-ref="congresses">
+ <div class="navbar-item relative flex h-10 space-y-2">
+ <div id="congresses-border" class="hover-border absolute w-full border-b-4 top-0 rounded-bl-md rounded-br-md hidden"></div>
+ <button type="button" data-ref="congresses" class="nav-button flex items-center gap-x-1 lg:text-base xl:text-lg leading-6" aria-expanded="false" aria-haspopup="true" aria-controls="congresses-panel">
+ Congresses
+ <i class="fa-regular fa-chevron-down"></i>
+ <i class="fa-regular fa-chevron-up"></i>
+ </button>
+ </div>
+ <div id="congresses-panel" class="navbar-menu-items absolute inset-x-0 top-0 -z-10 pt-20 hidden shadow-lg">
+ <div id="congresses-panel-items" class="mx-auto relative text-left mb-4">
+ <div class="w-fit max-w-[75%]">
+ <div class="flex items-start gap-5 flex-wrap">
+ <div class="cursor-pointer 2xl:w-[225px] xl:w-[198px] w-[180px] h-[180px] bg-bottom bg-cover overflow-hidden rounded-md relative "
+ style="background-image:url('https://assets.imcas.com/congresses/imcas2027/website_cover.png?cv=1794260698')">
+ <a href="https://www.imcas.com/en/imcas-world-2027" class="w-full rounded-md ">
+ <div class="w-full rounded-md h-full p-4 flex flex-col justify-end items-start"
+ style="background-image: linear-gradient(to top, #004976, rgba(0,0,0,0));color:#ffffff;">
+ <p class="2xl:text-xl text-base ">IMCAS World 2027</p>
+ <p class="text-xs ">
+ 28 - 30 January 2027
+ </p>
+ <p>PARIS &amp; ONLINE</p>
+ </div>
+ </a>
+</div>
+ <div class="cursor-pointer 2xl:w-[225px] xl:w-[198px] w-[180px] h-[180px] bg-bottom bg-cover overflow-hidden rounded-md relative "
+ style="background-image:url('https://assets.imcas.com/congresses/americas2027/website_cover.png?cv=1794260698')">
+ <a href="https://www.imcas.com/en/imcas-americas-2027" class="w-full rounded-md ">
+ <div class="w-full rounded-md h-full p-4 flex flex-col justify-end items-start"
+ style="background-image: linear-gradient(to top, #f08b71, rgba(0,0,0,0));color:#ffffff;">
+ <p class="2xl:text-xl text-base ">IMCAS Americas 2027</p>
+ <p class="text-xs ">
+ 20 - 22 May 2027
+ </p>
+ <p>SAO PAULO - SP</p>
+ </div>
+ </a>
+</div>
+ <div class="cursor-pointer 2xl:w-[225px] xl:w-[198px] w-[180px] h-[180px] bg-bottom bg-cover overflow-hidden rounded-md relative "
+ style="background-image:url('https://assets.imcas.com/congresses/asia2027/website_cover.png?cv=1794260698')">
+ <a href="https://www.imcas.com/en/imcas-asia-2027" class="w-full rounded-md ">
+ <div class="w-full rounded-md h-full p-4 flex flex-col justify-end items-start"
+ style="background-image: linear-gradient(to top, #1c9d5b, rgba(0,0,0,0));color:#ffffff;">
+ <p class="2xl:text-xl text-base ">IMCAS Asia 2027</p>
+ <p class="text-xs ">
+ 4 - 6 June 2027
+ </p>
+ <p>BANGKOK</p>
+ </div>
+ </a>
+</div>
+ <div class="cursor-pointer 2xl:w-[225px] xl:w-[198px] w-[180px] h-[180px] bg-bottom bg-cover overflow-hidden rounded-md relative "
+ style="background-image:url('https://assets.imcas.com/congresses/china2027/website_cover.png?cv=1794260698')">
+ <a href="https://www.imcas.com/en/imcas-china-2027" class="w-full rounded-md ">
+ <div class="w-full rounded-md h-full p-4 flex flex-col justify-end items-start"
+ style="background-image: linear-gradient(to top, #a53051, rgba(0,0,0,0));color:#ffffff;">
+ <p class="2xl:text-xl text-base ">IMCAS China 2027</p>
+ <p class="text-xs ">
+ 26 - 28 August 2027
+ </p>
+ <p>SHANGHAI</p>
+ </div>
+ </a>
+</div>
+ </div>
+ <div class="w-full separator h-px my-2 origin-top scale-y-[0.5] bg-white/50"></div>
+ <div class="w-full invest-congress border-l-4 rounded-md bg-bottom bg-cover overflow-hidden p-4 flex justify-between gap-5 items-center" style="background-image: linear-gradient(to right, #1e2445, #1ba2dd); color: white;border-left-color:#1ba2dd">
+ <div class="flex-1 flex gap-5 items-center flex-wrap">
+ <img class="shrink-0 w-36" alt="INVEST by IMCAS" src="https://assets.imcas.com/congress_introduction/invest/logo_with_baseline.svg"/>
+ <p class="flex flex-col text-sm">
+ <span class="italic">
+ Dermatology, Aesthetics & Longevity Investment Day
+ </span>
+ <span class="text-white/50"> For C-Level Executives & Investors on January 27th, 2027 in PARIS</span>
+ </p>
+ </div>
+ <button class="md:text-sm text-xs px-4 py-2 rounded-md p-2"
+ style="background-color: #1e2445;color:white"><a target="_blank" href="https://invest.imcas.com/">Discover INVEST</a></button>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ <div id="academy-container" class="navbar-items-container " data-ref="academy" >
+ <div class="navbar-item relative z-[99999] h-10 flex space-y-2">
+ <div id="academy-border" class=" hover-border absolute w-full border-b-4 top-0 rounded-bl-md rounded-br-md hidden"></div>
+ <a class="absolute h-full w-full" href="https://www.imcas.com/en/academy/library" aria-label="Academy"></a>
+ <button type="button" data-ref="academy" class="nav-button flex items-center lg:text-base xl:text-lg gap-x-1 leading-6" aria-expanded="false" aria-haspopup="true" aria-controls="academy-panel">
+ Academy
+ <i class="fa-regular fa-chevron-down"></i>
+ <i class="fa-regular fa-chevron-up"></i>
+ </button>
+ </div>
+ <div id="academy-panel" class="navbar-menu-items absolute inset-x-0 top-0 -z-10 pt-20 transition hidden shadow-lg ">
+ <div id="academy-panel-items" class="mx-auto relative flex items-start gap-5 mb-4 text-left">
+ <div class="cursor-pointer 2xl:w-[225px] xl:w-[198px] w-[180px] h-[180px] bg-bottom bg-cover overflow-hidden rounded-md relative "
+ style="background-image:url('https://assets.imcas.com/home/webinar.jpeg')">
+ <a href="https://www.imcas.com/en/academy/webinars" class="w-full rounded-md ">
+ <div class="w-full rounded-md h-full p-4 flex flex-col justify-end items-start"
+ style="background-image: linear-gradient(to top, #030712, rgba(0,0,0,0));color:#FFFFFF;">
+ <p class="2xl:text-xl text-base ">Webinars</p>
+ <p class="text-xs ">
+ Live and on-demand access to the latest in aesthetic medicine
+ </p>
+ <p></p>
+ </div>
+ </a>
+</div>
+ <div class="cursor-pointer 2xl:w-[225px] xl:w-[198px] w-[180px] h-[180px] bg-bottom bg-cover overflow-hidden rounded-md relative "
+ style="background-image:url('https://assets.imcas.com/home/library.jpg')">
+ <a href="https://www.imcas.com/en/academy/library" class="w-full rounded-md ">
+ <div class="w-full rounded-md h-full p-4 flex flex-col justify-end items-start"
+ style="background-image: linear-gradient(to top, #030712, rgba(0,0,0,0));color:#FFFFFF;">
+ <p class="2xl:text-xl text-base ">Library</p>
+ <p class="text-xs ">
+ Our playlists & lectures
+ </p>
+ <p></p>
+ </div>
+ </a>
+</div>
+ <div class="cursor-pointer 2xl:w-[225px] xl:w-[198px] w-[180px] h-[180px] bg-bottom bg-cover overflow-hidden rounded-md relative !bg-center "
+ style="background-image:url('https://assets.imcas.com/magazines/9-BQ9ilKbM/thumbs.jpg')">
+ <a href="https://www.imcas.com/en/academy/insider" class="w-full rounded-md ">
+ <div class="w-full rounded-md h-full p-4 flex flex-col justify-end items-start"
+ style="background-image: linear-gradient(to top, #030712, rgba(0,0,0,0));color:#FFFFFF;">
+ <p class="2xl:text-xl text-base ">Insider magazine</p>
+ <p class="text-xs ">
+ Read the IMCAS Insider magazine
+ </p>
+ <p></p>
+ </div>
+ </a>
+</div>
+ <div class="cursor-pointer 2xl:w-[225px] xl:w-[198px] w-[180px] h-[180px] bg-bottom bg-cover overflow-hidden rounded-md relative !bg-top"
+ style="background-image:url('https://assets.imcas.com/academy/podcasts/thumbs/rox_podcast_post.png')">
+ <a href="https://www.imcas.com/en/academy/podcasts" class="w-full rounded-md ">
+ <div class="w-full rounded-md h-full p-4 flex flex-col justify-end items-start"
+ style="background-image: linear-gradient(to top, #030712, rgba(0,0,0,0));color:#FFFFFF;">
+ <p class="2xl:text-xl text-base ">Podcasts</p>
+ <p class="text-xs ">
+ Listen to Doc Talk, the official IMCAS podcast
+ </p>
+ <p></p>
+ </div>
+ </a>
+</div>
+ </div>
+ </div>
+ </div>
+ <div id="community-container" class="navbar-items-container " data-ref="community" >
+ <div class="navbar-item relative z-[99999] h-10 flex space-y-2">
+ <div id="community-border" class="hover-border absolute w-full border-b-4 top-0 rounded-bl-md rounded-br-md hidden"></div>
+ <button type="button" data-ref="community" class="nav-button flex items-center lg:text-base xl:text-lg gap-x-1 leading-6" aria-expanded="false" aria-haspopup="true" aria-controls="community-panel">
+ Community
+ <i class="fa-regular fa-chevron-down"></i>
+ <i class="fa-regular fa-chevron-up"></i>
+ </button>
+ </div>
+ <div id="community-panel" class="navbar-menu-items absolute inset-x-0 top-0 -z-10 pt-20 transition hidden shadow-lg ">
+ <div id="community-panel-items" class="mx-auto relative flex flex-col items-start text-left">
+ <ul role="list" class="navbar-submenu">
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/alert">
+ <p class="lg:text-base xl:text-lg">IMCAS Alert</p>
+ <p class="text-xs">The go-to forum for expert advice on safe practice</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/blog">
+ <p class="lg:text-base xl:text-lg">Blog</p>
+ <p class="text-xs">New articles written by physicians, for physicians</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/members">
+ <p class="lg:text-base xl:text-lg">IMCAS Infinite Members</p>
+ <p class="text-xs">A worldwide network of physicians committed to scientific education & excellence</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/scientific-partners">
+ <p class="lg:text-base xl:text-lg">Partners</p>
+ <p class="text-xs">Learn more about our partner societies, events, and publications</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/worldwide-events">
+ <p class="lg:text-base xl:text-lg">Worldwide events</p>
+ <p class="text-xs">Explore the list of upcoming congresses worldwide</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/reports">
+ <p class="lg:text-base xl:text-lg">Reports and documents</p>
+ </a>
+ </li>
+ </ul>
+ </div>
+ </div>
+ </div>
+ <div id="about-container" class="navbar-items-container " data-ref="about" >
+ <div class="navbar-item relative z-[99999] h-10 flex space-y-2">
+ <div id="about-border" class="hover-border absolute w-full border-b-4 top-0 rounded-bl-md rounded-br-md hidden"></div>
+ <button type="button" data-ref="about" class="nav-button flex items-center lg:text-base xl:text-lg gap-x-1 leading-6" aria-expanded="false" aria-haspopup="true" aria-controls="about-panel">
+ About
+ <i class="fa-regular fa-chevron-down"></i>
+ <i class="fa-regular fa-chevron-up"></i>
+ </button>
+ </div>
+ <div id="about-panel" class="navbar-menu-items absolute inset-x-0 top-0 -z-10 pt-20 transition hidden shadow-lg ">
+ <div id="about-panel-items" class="mx-auto relative flex flex-col items-start text-left">
+ <ul role="list" class="navbar-submenu">
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/about">
+ <p class="lg:text-base xl:text-lg">About IMCAS</p>
+ <p class="text-xs">Who we are and what we do</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white focus:opacity-100 focus:white flex flex-col">
+ <a href="https://www.imcas.com/en/feedback">
+ <p class="lg:text-base xl:text-lg">Feedback</p>
+ <p class="text-xs">Check out testimonials about us</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white focus:opacity-100 focus:white flex flex-col">
+ <a href="https://www.imcas.com/en/press">
+ <p class="lg:text-base xl:text-lg">Media & Press</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/faq">
+ <p class="lg:text-base xl:text-lg">FAQ</p>
+ <p class="text-xs">View our most Frequently Asked Questions</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/contact">
+ <p class="lg:text-base xl:text-lg">Contact</p>
+ <p class="text-xs">How can we help?</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://imcasfund.org/" target="_blank">
+ <p class="lg:text-base xl:text-lg">IMCAS Fund</p>
+ </a>
+ </li>
+ </ul>
+ </div>
+ </div>
+ </div>
+ <div class="h-10 membership-container">
+ <a text="membership" href="https://www.imcas.com/en/membership" class="inline-block nav-button hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium xl:mt-2.5 lg:mt-3 lg:text-base xl:text-lg leading-6">
+ Membership
+ </a>
+ <div class="underline-membership h-px w-full bg-gradient-to-r from-transparent via-[--underline-membership-color] to-transparent"></div>
+ </div>
+ </div>
+ <div class="hidden navbar-end lg:flex lg:flex-1 lg:justify-end items-center gap-4 w-full">
+ <button type="button" id="header-search-trigger"
+ class="js-header-search-trigger flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-100 transition-colors"
+ aria-label="Search...">
+ <i class="fa-regular fa-magnifying-glass text-lg"></i>
+ </button>
+ <div id="Dhf00IOHEDWF36a3mt37Lh0ZSNlyXeILWrPDaH5UsBDZZVqDV7WaVVBCPSMchaYw" title="" class="w-fit tooltip ">
+ <a id="link-Dhf00IOHEDWF36a3mt37Lh0ZSNlyXeILWrPDaH5UsBDZZVqDV7WaVVBCPSMchaYw" href="https://www.imcas.com/en/login" data-buttonid="Dhf00IOHEDWF36a3mt37Lh0ZSNlyXeILWrPDaH5UsBDZZVqDV7WaVVBCPSMchaYw" data-selected="0" data-text="Add this option" data-status="" rel=""
+ class="relative tooltip "
+ >
+ <span id="button-Dhf00IOHEDWF36a3mt37Lh0ZSNlyXeILWrPDaH5UsBDZZVqDV7WaVVBCPSMchaYw" 
+ class="flex justify-center items-center gap-2 w-fit text-center bg-[--primary-color] border border-[--primary-color] text-white hover:bg-[--button-hover] hover:border-[--button-hover] focus:outline focus:outline-1 focus:outline-[--button-outline] focus:bg-[--button-hover] focus:border-[--button-hover] focus:-outline-offset-[3px] active:bg-[--button-active] active:border-[--button-active] min-h-7 px-3 py-0.5 text-xs rounded sign-up-button "
+ >
+ <span id="button-text-Dhf00IOHEDWF36a3mt37Lh0ZSNlyXeILWrPDaH5UsBDZZVqDV7WaVVBCPSMchaYw">Sign in</span>
+ <p id="button-loader-Dhf00IOHEDWF36a3mt37Lh0ZSNlyXeILWrPDaH5UsBDZZVqDV7WaVVBCPSMchaYw" class="hidden">
+ <span class="loader size-5 inline-block rounded-[50%] border-t-[3px] border-t-white border-r-[3px] border-r-transparent box-border"></span>
+ </p>
+ </span>
+ </a>
+</div>
+ <div class="relative lang-container">
+ <button type="button" id="collapse_langs_desktop_header" data-contentId="content_langs_desktop_header" data-icon="cldh_icon" aria-expanded="false" aria-controls="content_langs_desktop_header" aria-label="Choose your language (EN)" class="cursor-pointer leading-6 uppercase collapse-title">en <i id="cldh_icon" class="fa-regular fa-chevron-down text-xs" aria-hidden="true"></i></button>
+ </div>
+ </div>
+ </nav>
+ <div class="lg:hidden hidden mobile-header" id="mobilePanel" role="dialog" aria-modal="true" aria-label="Open menu">
+ <div class="fixed inset-0 z-10"></div>
+ <div class="fixed mobile-background inset-y-0 left-0 z-10 w-full lg:overflow-y-auto overflow-y-scroll gray pl-6 py-6 sm:max-w-xl sm:ring-1 sm:ring-gray-900/10">
+ <div class="navbar-logo flex items-center justify-between">
+ <a href="/" class="company-logo -m-1.5 p-1.5">
+ <span class="sr-only">IMCAS</span>
+ <img class="brand-logo h-6 w-auto" src="https://assets.imcas.com/home/logo_imcas_navyblue.svg" alt="">
+ </a>
+ <div class="flex space-x-2 items-center">
+ <button type="button" class="rounded-md bg-transparent pr-6 close-header-mobile-menu">
+ <span class="sr-only">Close menu</span>
+ <i class="fa-regular text-2xl fa-xmark"></i>
+ </button>
+ </div>
+ </div>
+ <div class="navbar-mobile-items mt-6 flow-root">
+ <div class="-my-6 mr-6 divide-y divide-[--secondary-color]">
+ <div class="space-y-2 py-6 flex">
+ <div class="w-1/2">
+ <div class="-mx-3 w-full">
+ <button type="button" data-ref="congresses" class="nav-button mobile flex self-start w-full items-center gap-2 py-2 text-base leading-7 text-white no-selected-border">
+ Congresses
+ <i id="congresses-arrow-mobile" class="fa-regular fa-chevron-right"></i>
+ </button>
+ </div>
+ <div class="-mx-3 w-full">
+ <button type="button" data-ref="academy" class="nav-button mobile flex self-start w-full items-center gap-2 py-2 text-base leading-7 text-white no-selected-border">
+ Academy
+ <i id="academy-arrow-mobile" class="fa-regular fa-chevron-right"></i>
+ </button>
+ </div>
+ <div class="-mx-3 w-full">
+ <button type="button" data-ref="community" class="nav-button mobile flex self-start w-full items-center gap-2 py-2 text-base leading-7 text-white no-selected-border">
+ Community
+ <i id="community-arrow-mobile" class="fa-regular fa-chevron-right"></i>
+ </button>
+ </div>
+ <div class="-mx-3 w-full">
+ <button type="button" data-ref="about" class="nav-button mobile flex self-start w-full items-center gap-2 py-2 text-base leading-7 text-white no-selected-border ">
+ About
+ <i id="about-arrow-mobile" class="fa-regular fa-chevron-right"></i>
+ </button>
+ </div>
+ <div class="-mx-3 w-full">
+ <a text="membership" href="https://www.imcas.com/en/membership" class="inline-block nav-button hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium py-2 text-base leading-7">
+ Membership
+ <div class="underline-membership h-px w-full bg-gradient-to-r from-transparent via-[--underline-membership-color] to-transparent"></div>
+ </a>
+ </div>
+ </div>
+ <div id="panel-mobile" class="w-fit close-header-mobile-menu">
+ <div id="congresses-panel-items-mobile" class="hidden max-h-[400px] overflow-y-scroll gray space-y-5">
+ <div class="mx-auto relative flex flex-col items-start text-left">
+ <ul role="list" class="navbar-submenu cursor-pointer">
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/imcas-world-2027">
+ <p class="lg:text-base xl:text-lg">IMCAS World 2027</p>
+ <p class="text-xs">28 - 30 January 2027, PARIS & ONLINE</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/imcas-americas-2027">
+ <p class="lg:text-base xl:text-lg">IMCAS Americas 2027</p>
+ <p class="text-xs">20 - 22 May 2027, SAO PAULO - SP</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/imcas-asia-2027">
+ <p class="lg:text-base xl:text-lg">IMCAS Asia 2027</p>
+ <p class="text-xs">4 - 6 June 2027, BANGKOK</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/imcas-china-2027">
+ <p class="lg:text-base xl:text-lg">IMCAS China 2027</p>
+ <p class="text-xs">26 - 28 August 2027, SHANGHAI</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://invest.imcas.com/" target="_blank">
+ <p class="lg:text-base xl:text-lg">INVEST by IMCAS 2027</p>
+ <p class="text-xs">January 27th, 2027, PARIS
+ </p>
+ </a>
+ </li>
+ </ul>
+ </div>
+ </div>
+ <div id="academy-panel-items-mobile" class="mt-1 hidden max-h-[400px] overflow-y-scroll gray space-y-5">
+ <div class="mx-auto relative flex flex-col items-start text-left">
+ <ul role="list" class="navbar-submenu cursor-pointer">
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/academy/webinars">
+ <p class="lg:text-base xl:text-lg">Webinars</p>
+ <p class="text-xs">Live and on-demand access to the latest in aesthetic medicine</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/academy/library">
+ <p class="lg:text-base xl:text-lg">Library</p>
+ <p class="text-xs">Our playlists & lectures</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/academy/insider">
+ <p class="lg:text-base xl:text-lg">Insider magazine</p>
+ <p class="text-xs">Read the IMCAS Insider magazine</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/academy/podcasts">
+ <p class="lg:text-base xl:text-lg">Podcasts</p>
+ <p class="text-xs">Listen to Doc Talk, the official IMCAS podcast</p>
+ </a>
+ </li>
+ </ul>
+ </div>
+ </div>
+ <div id="community-panel-items-mobile" class="mt-1 hidden">
+ <div class="mx-auto relative flex flex-col items-start text-left">
+ <ul role="list" class="navbar-submenu cursor-pointer">
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/alert">
+ <p class="lg:text-base xl:text-lg">IMCAS Alert</p>
+ <p class="text-xs">The go-to forum for expert advice on safe practice</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/blog">
+ <p class="lg:text-base xl:text-lg">Blog</p>
+ <p class="text-xs">New articles written by physicians, for physicians</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/members">
+ <p class="lg:text-base xl:text-lg">IMCAS Infinite Members</p>
+ <p class="text-xs">A worldwide network of physicians committed to scientific education & excellence</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/scientific-partners">
+ <p class="lg:text-base xl:text-lg">Partners</p>
+ <p class="text-xs">Learn more about our partner societies, events, and publications</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/worldwide-events">
+ <p class="lg:text-base xl:text-lg">Worldwide events</p>
+ <p class="text-xs">Explore the list of upcoming congresses worldwide</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/reports">
+ <p class="lg:text-base xl:text-lg">Reports and documents</p>
+ </a>
+ </li>
+ </ul>
+ </div>
+ </div>
+ <div id="about-panel-items-mobile" class="mt-1 hidden">
+ <div class="mx-auto relative flex flex-col items-start text-left">
+ <ul role="list" class="navbar-submenu cursor-pointer">
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white flex flex-col">
+ <a href="https://www.imcas.com/en/about">
+ <p class="lg:text-base xl:text-lg">About IMCAS</p>
+ <p class="text-xs">Who we are and what we do</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white focus:opacity-100 focus:white flex flex-col">
+ <a href="https://www.imcas.com/en/feedback">
+ <p class="lg:text-base xl:text-lg">Feedback</p>
+ <p class="text-xs">Check out testimonials about us</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/faq">
+ <p class="lg:text-base xl:text-lg">FAQ</p>
+ <p class="text-xs">View our most Frequently Asked Questions</p>
+ </a>
+ </li>
+ <li class="py-5 border-t-[.5px] opacity-50 hover:opacity-100 hover:white">
+ <a href="https://www.imcas.com/en/contact">
+ <p class="lg:text-base xl:text-lg">Contact</p>
+ <p class="text-xs">How can we help?</p>
+ </a>
+ </li>
+ </ul>
+ </div>
+ </div>
+ </div>
+ </div>
+ <div class="py-6 pr-3 text-start space-y-4 mobile-divider">
+ <div class="flex flex-wrap gap-2 items-center">
+ <div id="efH7M9D7ogkQLMEJelGSqgo8pmUlITAnCwsj3k5mwvR7BQoIdBc6IvE5nmORZJVV" title="" class="w-fit tooltip ">
+ <a id="link-efH7M9D7ogkQLMEJelGSqgo8pmUlITAnCwsj3k5mwvR7BQoIdBc6IvE5nmORZJVV" href="https://www.imcas.com/en/login" data-buttonid="efH7M9D7ogkQLMEJelGSqgo8pmUlITAnCwsj3k5mwvR7BQoIdBc6IvE5nmORZJVV" data-selected="0" data-text="Add this option" data-status="" rel=""
+ class="relative tooltip "
+ >
+ <span id="button-efH7M9D7ogkQLMEJelGSqgo8pmUlITAnCwsj3k5mwvR7BQoIdBc6IvE5nmORZJVV" 
+ class="flex justify-center items-center gap-2 w-fit text-center bg-[--primary-color] border border-[--primary-color] text-white hover:bg-[--button-hover] hover:border-[--button-hover] focus:outline focus:outline-1 focus:outline-[--button-outline] focus:bg-[--button-hover] focus:border-[--button-hover] focus:-outline-offset-[3px] active:bg-[--button-active] active:border-[--button-active] min-h-7 px-3 py-0.5 text-xs rounded sign-up-button "
+ >
+ <span id="button-text-efH7M9D7ogkQLMEJelGSqgo8pmUlITAnCwsj3k5mwvR7BQoIdBc6IvE5nmORZJVV">Sign in</span>
+ <p id="button-loader-efH7M9D7ogkQLMEJelGSqgo8pmUlITAnCwsj3k5mwvR7BQoIdBc6IvE5nmORZJVV" class="hidden">
+ <span class="loader size-5 inline-block rounded-[50%] border-t-[3px] border-t-white border-r-[3px] border-r-transparent box-border"></span>
+ </p>
+ </span>
+ </a>
+</div>
+ </div>
+ <div class="mt-10 flex gap-4">
+ <button type="button" class="cursor-pointer lang uppercase underline underline-offset-4" data-value="en" lang="en" aria-label="English">en</button>
+ <button type="button" class="cursor-pointer lang uppercase " data-value="es" lang="es" aria-label="Español">es</button>
+ <button type="button" class="cursor-pointer lang uppercase " data-value="fr" lang="fr" aria-label="Français">fr</button>
+ <button type="button" class="cursor-pointer lang uppercase " data-value="pt" lang="pt" aria-label="Português">pt</button>
+ <button type="button" class="cursor-pointer lang uppercase " data-value="ru" lang="ru" aria-label="Русский">ru</button>
+ <button type="button" class="cursor-pointer lang uppercase " data-value="zh" lang="zh" aria-label="简体中文">zh</button>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ <div class="header-search-bar hidden lg:block z-[60] top-0 w-full h-80 search-bar-white fixed" id="search-content" style="display: none">
+ <div class="flex justify-between lg:px-8 px-6 py-6">
+ <div class="navbar-logo flex">
+ <a href="/" class="company-logo -m-1.5 p-1.5">
+ <span class="sr-only">IMCAS</span>
+ <img class="brand-logo lg:h-8 h-6 w-auto" id="" src="https://assets.imcas.com/home/logo_imcas_navyblue.svg" alt="">
+ </a>
+ </div>
+ <div id="ZUcBLag4lc8pEMJsCCeETFAVz7Axa5oAdlhCBkPOtmvB0jWRAdXI1Ee4tkxvqx3D" title="" class="w-fit tooltip ">
+ <a id="link-ZUcBLag4lc8pEMJsCCeETFAVz7Axa5oAdlhCBkPOtmvB0jWRAdXI1Ee4tkxvqx3D" data-buttonid="ZUcBLag4lc8pEMJsCCeETFAVz7Axa5oAdlhCBkPOtmvB0jWRAdXI1Ee4tkxvqx3D" data-selected="0" data-text="Add this option" data-status="" rel=""
+ class="relative tooltip "
+ >
+ <button type="button" id="button-ZUcBLag4lc8pEMJsCCeETFAVz7Axa5oAdlhCBkPOtmvB0jWRAdXI1Ee4tkxvqx3D" 
+ class="flex justify-center items-center gap-2 w-fit bg-[--primary-color] border border-[--primary-color] text-white hover:bg-[--button-hover] hover:border-[--button-hover] focus:outline focus:outline-1 focus:outline-[--button-outline] focus:bg-[--button-hover] focus:border-[--button-hover] focus:-outline-offset-[3px] active:bg-[--button-active] active:border-[--button-active] min-h-7 px-3 py-0.5 text-xs rounded cancel-search-bar-button "
+ >
+ <span id="button-text-ZUcBLag4lc8pEMJsCCeETFAVz7Axa5oAdlhCBkPOtmvB0jWRAdXI1Ee4tkxvqx3D">Cancel</span>
+ <p id="button-loader-ZUcBLag4lc8pEMJsCCeETFAVz7Axa5oAdlhCBkPOtmvB0jWRAdXI1Ee4tkxvqx3D" class="hidden">
+ <span class="loader size-5 inline-block rounded-[50%] border-t-[3px] border-t-white border-r-[3px] border-r-transparent box-border"></span>
+ </p>
+ </button>
+ </a>
+</div>
+ </div>
+ <div class="flex justify-center items-center h-40">
+ <div class="w-3/4 px-3 py-2">
+ <div class="w-full flex lg:text-base text-sm border border-indigo-200 rounded-md items-center px-3.5 py-3 focus:border-[--counter-text] focus:border-2 custom-input-shadow text-[--secondary-color] search-bar">
+ <i class="fa-regular fa-magnifying-glass text-indigo-200"></i>
+ <input id="search-bar-header" type="search" aria-label="Search..." placeholder="Search..." class="w-full bg-transparent text-white focus:outline-none truncate p-0 pl-3.5 focus:ring-transparent border-0 placeholder:text-[#6F6C90] input-search-bar">
+ </div>
+ </div>
+ </div>
+ </div>
+ <div id="content_langs_desktop_header" data-visibility="0" class="hidden z-10 right-0 w-40 h-fit lang-container-white fixed ">
+ <div class="flex justify-start">
+ <div class="flex flex-col">
+ <button type="button" class="p-2 cursor-pointer lang hover:underline text-left" data-value="en" lang="en">English</button>
+ <button type="button" class="p-2 cursor-pointer lang hover:underline text-left" data-value="es" lang="es">Español</button>
+ <button type="button" class="p-2 cursor-pointer lang hover:underline text-left" data-value="fr" lang="fr">Français</button>
+ <button type="button" class="p-2 cursor-pointer lang hover:underline text-left" data-value="pt" lang="pt">Português</button>
+ <button type="button" class="p-2 cursor-pointer lang hover:underline text-left" data-value="ru" lang="ru">Русский</button>
+ <button type="button" class="p-2 cursor-pointer lang hover:underline text-left" data-value="zh" lang="zh">简体中文</button>
+ </div>
+ </div>
+ </div>
+<div id="header-search-overlay" class="hidden fixed inset-0 z-[999999] items-start justify-center"
+ role="dialog" aria-modal="true">
+ <div id="header-search-overlay-bg" class="absolute inset-0 bg-black/40"></div>
+ <div class="relative mt-[10vh] lg:mt-[15vh] w-full max-w-3xl px-4 text-[--primary-color]">
+ <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+ <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
+ <i class="fa-regular fa-magnifying-glass text-xl text-slate-500"></i>
+ <input id="header-search-input" type="search" autocomplete="off"
+ aria-label="Search for sessions, podcasts, articles, speakers..."
+ class="flex-1 border-0 focus:outline-none focus:ring-0 text-lg text-[--primary-color] placeholder:text-slate-500"
+ placeholder="Search for sessions, podcasts, articles, speakers..."/>
+ <button id="header-search-close" type="button"
+ class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-slate-100 transition-colors"
+ aria-label="Close">
+ <i class="fa-regular fa-xmark text-lg text-slate-500"></i>
+ </button>
+ </div>
+ <div id="result-main-container-header-search-input"
+ class="hidden max-h-[60vh] overflow-y-auto" style="scrollbar-width: thin;">
+ <ul id="result-container-header-search-input" class="flex flex-col"></ul>
+ </div>
+ </div>
+ </div>
+</div>
+</header>
+ <main id="main-content" tabindex="-1" class="outline-none">
+ <div class="margin-observer">
+ <div id="banner-img-8IvBpZg3d8"
+ class="relative lg:h-[300px] h-[300px] bg-cover bg-no-repeat !text-white overflow-hidden bg-bottom"
+ style="background-image:url('https://assets.imcas.com/orphan_pages/worldwide_events_banner.png')"
+ >
+ <div id="submenu-header"
+ class="lg:block hidden z-[999] fixed md:px-12 px-4 lg:pb-0 pb-2 h-14 w-full bg-[--primary-color] text-white cursor-pointer text-base"
+ >
+ <div id="submenu-container"
+ class="lg:overflow-x-auto white scrollbar flex h-full gap-10 items-center">
+ <div data-text="IMCAS Alert" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="alert-border-desktop" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md invisible "></div>
+ <a text="IMCAS Alert" href="https://www.imcas.com/en/alert" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium ">IMCAS Alert</a>
+ </div>
+<div data-text="Blog" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="blog-border-desktop" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md invisible "></div>
+ <a text="Blog" href="https://www.imcas.com/en/blog" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium ">Blog</a>
+</div>
+<div data-text="IMCAS Infinite Members" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="blog-border-desktop" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md invisible "></div>
+ <a text="IMCAS Infinite Members" href="https://www.imcas.com/en/members" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium ">IMCAS Infinite Members</a>
+</div>
+<div data-text="Partners" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="partners-border-desktop" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md invisible "></div>
+ <a href="https://www.imcas.com/en/scientific-partners" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium " text="Partners">Partners</a>
+</div>
+<div data-text="Worldwide events" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="wwe-border-desktop" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md visible "></div>
+ <a href="https://www.imcas.com/en/worldwide-events" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium font-medium " text="Worldwide events">Worldwide events</a>
+</div>
+<div data-text="Reports and documents" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="reports-border-desktop" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md invisible "></div>
+ <a href="https://www.imcas.com/en/reports" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium " text="Reports and documents">Reports and documents</a>
+</div>
+ </div>
+</div>
+<aside class="lg:hidden block sidebar fixed top-0 left-0 h-full w-64 bg-[--primary-color] transform transition-transform duration-300 -translate-x-64 z-[9999]"
+ >
+ <div class="relative h-full w-64 p-4">
+ <button type="button" id="sidebarToggle" class="absolute w-max px-4 left-full top-0 min-w-12 flex items-center gap-2 focus:outline-none active:outline-none justify-center h-12 bg-[--primary-color] rounded-br-lg transition"
+ >
+ <i class="icon-cross fa-light hidden fa-xmark"></i>
+ <i class="icon-bar fa-light fa-bars"></i>
+ <span class="flex-1">Community</span>
+ </button>
+ <div id="submenu-header-mobile" class="w-full relative flex flex-col gap-5">
+ <div data-text="IMCAS Alert" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="alert-border-mobile" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md invisible "></div>
+ <a text="IMCAS Alert" href="https://www.imcas.com/en/alert" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium ">IMCAS Alert</a>
+ </div>
+<div data-text="Blog" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="blog-border-mobile" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md invisible "></div>
+ <a text="Blog" href="https://www.imcas.com/en/blog" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium ">Blog</a>
+</div>
+<div data-text="IMCAS Infinite Members" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="blog-border-mobile" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md invisible "></div>
+ <a text="IMCAS Infinite Members" href="https://www.imcas.com/en/members" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium ">IMCAS Infinite Members</a>
+</div>
+<div data-text="Partners" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="partners-border-mobile" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md invisible "></div>
+ <a href="https://www.imcas.com/en/scientific-partners" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium " text="Partners">Partners</a>
+</div>
+<div data-text="Worldwide events" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="wwe-border-mobile" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md visible "></div>
+ <a href="https://www.imcas.com/en/worldwide-events" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium font-medium " text="Worldwide events">Worldwide events</a>
+</div>
+<div data-text="Reports and documents" class="relative submenu-item h-full min-w-fit flex items-center">
+ <div id="reports-border-mobile" class="submenu-item-border w-full border-b-[6px] absolute top-0 border-b-white rounded-bl-md rounded-br-md invisible "></div>
+ <a href="https://www.imcas.com/en/reports" class="inline-block lg:pt-0 pt-4 hover:font-medium before:block before:invisible before:content-[attr(text)] before:h-0 before:overflow-hidden before:font-medium " text="Reports and documents">Reports and documents</a>
+</div>
+ </div>
+ </div>
+</aside>
+ <div class="w-full h-full " style="background-color: #35353566" >
+ <div class="relative z-10 flex items-center justify-center w-full h-full lg:py-20 py-10 additional-padding-observer ">
+ <div class="flex-1 xl:px-40 lg:px-20 px-8">
+ <div class="flex justify-center align-content-center flex-col space-y-2 text-center">
+ <h1 id="title-8IvBpZg3d8"
+ class=" 2xl:text-6xl xl:text-5xl text-4xl secondary-font ">Worldwide Events Agenda</h1>
+ <p class="xl:text-2xl text-lg text-white">List of upcoming congresses worldwide in dermatology, plastic surgery and aesthetic medecine</p>
+ </div>
+ </div>
+ </div>
+ </div>
+</div>
+ </div>
+ <div class="flex justify-center lg:px-20 px-8 pt-16 pb-10">
+ <div class="boxed-content">
+ <form id="event-filters-form" method="GET" action="https://www.imcas.com/en/worldwide-events">
+ <div class="flex justify-center mb-10">
+ <div class="text-[--primary-color] capitalize text-xl lg:text-3xl"> November 2026 </div>
+ </div>
+ <div class="flex flex-col gap-4 lg:flex-row lg:gap-10">
+ <div class="flex flex-col space-y-10">
+ <div>
+ <div id="worldwide_event_date-parent-container" class="relative events-filter-input">
+ <input id="worldwide_event_date-year" name="worldwide_event_date-year" class="hidden" type="number" value="2026">
+ <div class=" relative">
+ <input id="worldwide_event_date" type="hidden" name="worldwide_event_date" data-label="" class="custom-input w-full lg:text-base text-sm border border-indigo-200 cursor-pointer rounded-md py-3 px-3.5 focus:outline-none focus:ring-transparent focus:border-[--counter-text] disabled:opacity-50 disabled:pointer-events-none read-only:opacity-50 read-only:pointer-events-none focus:border-2 custom-input-shadow text-[--secondary-color] placeholder:text-slate-500 "
+ placeholder=""
+ value="">
+ </div>
+ <div id="worldwide_event_date-datepicker-container">
+ </div>
+ </div>
+ </div>
+ <div class="flex gap-1 w-fit mt-5 flex-row items-center ">
+ <label class="text-[--secondary-color] primary-font-medium lg:text-base text-sm ">See full year</label>
+ <label for="worldwide_event_full_year" class="flex items-center cursor-pointer toggle-switch">
+ <span class="me-3 text-sm font-regular"></span>
+ <input id="worldwide_event_full_year" name="worldwide_event_full_year" type="checkbox" value="1" class="peer sr-only toggle-switch-input events-filter-input" />
+ <div class="relative w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full custom-input-shadow peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:size-5 after:transition-all peer-checked:bg-[--primary-color]"></div>
+ <span class="ms-3 text-sm font-regular"></span>
+ </label>
+</div>
+ <div>
+<div data-id="specialty" data-mode="light" id="select-full-container-specialty"
+ class="custom-input-group flex flex-col cursor-pointer select-container-imcas-select ">
+ <div class="w-full flex flex-col items-center">
+ <div class="w-full flex flex-col gap-1">
+ <div id="input-select-input-container-specialty" class="w-full flex input-select-imcas-container ">
+ <div class="w-full flex flex-col items-center relative lg:text-base text-sm ">
+ <div data-id="specialty" data-mode="light" class="w-full search-bar-imcas-select">
+ <div id="specialty-container" data-open="0" data-id="specialty"
+ class="custom-input custom-input-select border rounded-md bg-white text-[--secondary-color] border-indigo-200 focus:border-[#001466] custom-input-shadow flex focus:outline-none focus:ring-transparent c-events-filter-input rounded-r-none ">
+ <div class="flex flex-auto flex-wrap text-[--primary-color] "></div>
+ <input autocomplete="false" placeholder="Specialty" type="text"
+ id="specialty-combobox" aria-label="Specialty" data-label="" data-access="1"
+ data-id="specialty" data-mode="light" value="" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-controls="options-container-specialty" aria-autocomplete="none" inputmode="none"
+ class="input-select-imcas select-none py-3 px-3.5 rounded-md border-0 pointer-events-none appearance-none bg-transparent outline-none w-full placeholder:text-slate-500 disabled select-text-imcas-select lg:text-base text-sm ">
+ <div class="w-8 py-1 pr-3.5 flex items-center svg-select-imcas-select">
+ <button type="button" tabindex="-1" aria-hidden="true"
+ class="cursor-pointer w-6 h-6 bg-transparent outline-none focus:outline-none">
+ <i class="fa-regular fa-chevron-down chevron-down-imcas-select"
+ data-id="specialty" ></i>
+ <i class="fa-regular fa-chevron-up chevron-up-imcas-select hidden"
+ data-id="specialty" ></i>
+ </button>
+ </div>
+ </div>
+ </div>
+ <div data-id="specialty" data-mode="light"
+ class="absolute shadow max-h-select overflow-y-auto bg-white blue top-100 z-[60] w-full rounded svelte-5uyqqj hidden flex flex-col options-imcas-select ">
+ <div data-id="specialty" data-mode="light" class="search-select-imcas-select-container w-full px-3 py-2">
+ <div class="w-full flex lg:text-base text-sm border border-indigo-200 focus:border-[--counter-text] rounded-md items-center px-3.5 py-3 focus:border-2 custom-input-shadow select-search-bar-container search-bar">
+ <i class="fa-regular fa-magnifying-glass text-indigo-200 "></i>
+ <input id="select-imcas-search-text-bar-specialty" data-id="specialty" data-mode="light"
+ data-label="" aria-label="Search..."
+ type="text" placeholder="Search... "
+ class="w-full focus:outline-none truncate p-0 pl-3.5 focus:ring-transparent border-0 placeholder:text-slate-500 text-[--secondary-color] search-select-imcas-select input-search-bar">
+ <button type="button" data-id="specialty" data-mode="light" aria-label="Clear the search" class="search-select-imcas-select-delete cursor-pointer bg-transparent p-0 leading-none text-indigo-300 "><i class="fa-regular fa-xmark" aria-hidden="true"></i></button>
+ </div>
+ </div>
+ <div id="options-container-specialty" data-mode="light" role="listbox" >
+ </div>
+ </div>
+ </div>
+ <button type="button" data-id="specialty" data-mode="light"
+ class="p-2 flex items-center border border-l-0 lg:text-base text-sm rounded-r-md border-indigo-200 bg-indigo-50 custom-input-shadow btn-clear-imcas-select ">Clear</button>
+ </div>
+ </div>
+ </div>
+</div>
+<input data-id="specialty" class="input-hidden-select-imcas-select events-filter-input"
+ data-label="" data-mode="light"
+ data-ref="" name="specialty" id="specialty" type="hidden" value="">
+ </div>
+ <div>
+ <div class="grid grid-cols-2 sm:flex sm:flex-col gap-2">
+ <label id="label-nCDA41GEzqZzQplNGRER07a474JJz0dG" class="custom-input-group relative cursor-pointer lg:text-base text-sm flex w-fit justify-start items-start gap-2 flex-row-reverse "
+ for="nCDA41GEzqZzQplNGRER07a474JJz0dG">
+ <span class=" text-[--secondary-color] text-start lg:text-base text-sm primary-font-medium" style="">All Areas </span>
+ <input class="peer absolute top-0 left-0 opacity-0 w-[16px] h-[16px] text-[--primary-color] focus:ring-[--primary-color] cursor-pointer focus:ring-1 events-filter-input"
+ id="nCDA41GEzqZzQplNGRER07a474JJz0dG" data-label="" type="radio" name="area" value=""
+ checked
+ />
+ <span class="custom-input cursor-pointer custom-input-radio box w-[18px] h-[18px] peer-focus-visible:ring-2 peer-focus-visible:ring-[--primary-color] peer-focus-visible:ring-offset-1 rounded-full flex-shrink-0 flex justify-center items-center border bg-white border-[#D0D5DD] ">
+ <i class="radio-radio fa-solid fa-circle text-[8px] text-[#00187A] hidden"></i>
+</span>
+</label>
+ <label id="label-Bxe4c7LAaB055KYyuJ09G1M6pvR2VGrP" class="custom-input-group relative cursor-pointer lg:text-base text-sm flex w-fit justify-start items-start gap-2 flex-row-reverse "
+ for="Bxe4c7LAaB055KYyuJ09G1M6pvR2VGrP">
+ <span class=" text-[--secondary-color] text-start lg:text-base text-sm primary-font-medium" style="color: #D35400">Africa </span>
+ <input class="peer absolute top-0 left-0 opacity-0 w-[16px] h-[16px] text-[--primary-color] focus:ring-[--primary-color] cursor-pointer focus:ring-1 events-filter-input"
+ id="Bxe4c7LAaB055KYyuJ09G1M6pvR2VGrP" data-label="" type="radio" name="area" value="38"
+ />
+ <span class="custom-input cursor-pointer custom-input-radio box w-[18px] h-[18px] peer-focus-visible:ring-2 peer-focus-visible:ring-[--primary-color] peer-focus-visible:ring-offset-1 rounded-full flex-shrink-0 flex justify-center items-center border bg-white border-[#D0D5DD] ">
+ <i class="radio-radio fa-solid fa-circle text-[8px] text-[#00187A] hidden"></i>
+</span>
+</label>
+ <label id="label-GfkTz4PPWHAOrx24LLvnsPqXfWrAsFb6" class="custom-input-group relative cursor-pointer lg:text-base text-sm flex w-fit justify-start items-start gap-2 flex-row-reverse "
+ for="GfkTz4PPWHAOrx24LLvnsPqXfWrAsFb6">
+ <span class=" text-[--secondary-color] text-start lg:text-base text-sm primary-font-medium" style="color: #049372">Asia </span>
+ <input class="peer absolute top-0 left-0 opacity-0 w-[16px] h-[16px] text-[--primary-color] focus:ring-[--primary-color] cursor-pointer focus:ring-1 events-filter-input"
+ id="GfkTz4PPWHAOrx24LLvnsPqXfWrAsFb6" data-label="" type="radio" name="area" value="40"
+ />
+ <span class="custom-input cursor-pointer custom-input-radio box w-[18px] h-[18px] peer-focus-visible:ring-2 peer-focus-visible:ring-[--primary-color] peer-focus-visible:ring-offset-1 rounded-full flex-shrink-0 flex justify-center items-center border bg-white border-[#D0D5DD] ">
+ <i class="radio-radio fa-solid fa-circle text-[8px] text-[#00187A] hidden"></i>
+</span>
+</label>
+ <label id="label-JG6rymJ2QDmQCNFgQl3fHUa3TuIVEuG1" class="custom-input-group relative cursor-pointer lg:text-base text-sm flex w-fit justify-start items-start gap-2 flex-row-reverse "
+ for="JG6rymJ2QDmQCNFgQl3fHUa3TuIVEuG1">
+ <span class=" text-[--secondary-color] text-start lg:text-base text-sm primary-font-medium" style="color: #3498DB">Europe </span>
+ <input class="peer absolute top-0 left-0 opacity-0 w-[16px] h-[16px] text-[--primary-color] focus:ring-[--primary-color] cursor-pointer focus:ring-1 events-filter-input"
+ id="JG6rymJ2QDmQCNFgQl3fHUa3TuIVEuG1" data-label="" type="radio" name="area" value="28"
+ />
+ <span class="custom-input cursor-pointer custom-input-radio box w-[18px] h-[18px] peer-focus-visible:ring-2 peer-focus-visible:ring-[--primary-color] peer-focus-visible:ring-offset-1 rounded-full flex-shrink-0 flex justify-center items-center border bg-white border-[#D0D5DD] ">
+ <i class="radio-radio fa-solid fa-circle text-[8px] text-[#00187A] hidden"></i>
+</span>
+</label>
+ <label id="label-SscWo9ieQ4A55wPDCjzYwnTQxYVQtVUv" class="custom-input-group relative cursor-pointer lg:text-base text-sm flex w-fit justify-start items-start gap-2 flex-row-reverse "
+ for="SscWo9ieQ4A55wPDCjzYwnTQxYVQtVUv">
+ <span class=" text-[--secondary-color] text-start lg:text-base text-sm primary-font-medium" style="color: #EA0041">Latin America </span>
+ <input class="peer absolute top-0 left-0 opacity-0 w-[16px] h-[16px] text-[--primary-color] focus:ring-[--primary-color] cursor-pointer focus:ring-1 events-filter-input"
+ id="SscWo9ieQ4A55wPDCjzYwnTQxYVQtVUv" data-label="" type="radio" name="area" value="34"
+ />
+ <span class="custom-input cursor-pointer custom-input-radio box w-[18px] h-[18px] peer-focus-visible:ring-2 peer-focus-visible:ring-[--primary-color] peer-focus-visible:ring-offset-1 rounded-full flex-shrink-0 flex justify-center items-center border bg-white border-[#D0D5DD] ">
+ <i class="radio-radio fa-solid fa-circle text-[8px] text-[#00187A] hidden"></i>
+</span>
+</label>
+ <label id="label-3zu7PFF7fdcazMDhEcUoaD5XOMvvx9op" class="custom-input-group relative cursor-pointer lg:text-base text-sm flex w-fit justify-start items-start gap-2 flex-row-reverse "
+ for="3zu7PFF7fdcazMDhEcUoaD5XOMvvx9op">
+ <span class=" text-[--secondary-color] text-start lg:text-base text-sm primary-font-medium" style="color: #FF8600">Middle East </span>
+ <input class="peer absolute top-0 left-0 opacity-0 w-[16px] h-[16px] text-[--primary-color] focus:ring-[--primary-color] cursor-pointer focus:ring-1 events-filter-input"
+ id="3zu7PFF7fdcazMDhEcUoaD5XOMvvx9op" data-label="" type="radio" name="area" value="36"
+ />
+ <span class="custom-input cursor-pointer custom-input-radio box w-[18px] h-[18px] peer-focus-visible:ring-2 peer-focus-visible:ring-[--primary-color] peer-focus-visible:ring-offset-1 rounded-full flex-shrink-0 flex justify-center items-center border bg-white border-[#D0D5DD] ">
+ <i class="radio-radio fa-solid fa-circle text-[8px] text-[#00187A] hidden"></i>
+</span>
+</label>
+ <label id="label-AmXt4dgNsVrDVnGBFPyo4Ge3pu4UIjWw" class="custom-input-group relative cursor-pointer lg:text-base text-sm flex w-fit justify-start items-start gap-2 flex-row-reverse "
+ for="AmXt4dgNsVrDVnGBFPyo4Ge3pu4UIjWw">
+ <span class=" text-[--secondary-color] text-start lg:text-base text-sm primary-font-medium" style="color: #BE90D4">North America </span>
+ <input class="peer absolute top-0 left-0 opacity-0 w-[16px] h-[16px] text-[--primary-color] focus:ring-[--primary-color] cursor-pointer focus:ring-1 events-filter-input"
+ id="AmXt4dgNsVrDVnGBFPyo4Ge3pu4UIjWw" data-label="" type="radio" name="area" value="32"
+ />
+ <span class="custom-input cursor-pointer custom-input-radio box w-[18px] h-[18px] peer-focus-visible:ring-2 peer-focus-visible:ring-[--primary-color] peer-focus-visible:ring-offset-1 rounded-full flex-shrink-0 flex justify-center items-center border bg-white border-[#D0D5DD] ">
+ <i class="radio-radio fa-solid fa-circle text-[8px] text-[#00187A] hidden"></i>
+</span>
+</label>
+ <label id="label-l0tn0hVVKHegc2vz5JEigEuosyX3bj0z" class="custom-input-group relative cursor-pointer lg:text-base text-sm flex w-fit justify-start items-start gap-2 flex-row-reverse "
+ for="l0tn0hVVKHegc2vz5JEigEuosyX3bj0z">
+ <span class=" text-[--secondary-color] text-start lg:text-base text-sm primary-font-medium" style="color: #36D7B7">Oceania </span>
+ <input class="peer absolute top-0 left-0 opacity-0 w-[16px] h-[16px] text-[--primary-color] focus:ring-[--primary-color] cursor-pointer focus:ring-1 events-filter-input"
+ id="l0tn0hVVKHegc2vz5JEigEuosyX3bj0z" data-label="" type="radio" name="area" value="42"
+ />
+ <span class="custom-input cursor-pointer custom-input-radio box w-[18px] h-[18px] peer-focus-visible:ring-2 peer-focus-visible:ring-[--primary-color] peer-focus-visible:ring-offset-1 rounded-full flex-shrink-0 flex justify-center items-center border bg-white border-[#D0D5DD] ">
+ <i class="radio-radio fa-solid fa-circle text-[8px] text-[#00187A] hidden"></i>
+</span>
+</label>
+ </div>
+ </div>
+ <div>
+ <div class="flex gap-1 w-fit flex-col ">
+ <label class="text-[--secondary-color] primary-font-medium lg:text-base text-sm ">Show Partners only</label>
+ <label for="toggle-show-partner" class="flex items-center cursor-pointer toggle-switch">
+ <span class="me-3 text-sm font-regular">No</span>
+ <input id="toggle-show-partner" name="toggle-show-partner" type="checkbox" value="1" class="peer sr-only toggle-switch-input events-filter-input" />
+ <div class="relative w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full custom-input-shadow peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:size-5 after:transition-all peer-checked:bg-[--primary-color]"></div>
+ <span class="ms-3 text-sm font-regular">Yes</span>
+ </label>
+</div>
+ </div>
+ </div>
+ <div class="">
+ <div class="grid sm:grid-col-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4 items-start">
+ <a class="block" href="https://pds.org.ph/event/49th-pds-annual-convention/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #049372;">
+ <div class="text-xs lg:text-base"> 04 - 06</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Annual Convention of the Philippine Dermatological Society (PDS) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Pasay City (Philippines)</div>
+ </div>
+ </div>
+ <div class="uppercase text-xs lg:text-base absolute bottom-0 right-0 flex justify-center border rounded-tl-lg rounded-br-lg pl-6 pr-6 text-white bg-[--primary-color] primary-font-medium"> Partner</div>
+ </div>
+ </a>
+ <a class="block" href="https://csaps.ca/medical-professionals-1/meeting-program-and-registration/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #BE90D4;">
+ <div class="text-xs lg:text-base"> 05 - 08</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Annual Meeting of the Canadian Society for Aesthetic Plastic Surgery (CSAPS) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Vancouver (Canada)</div>
+ </div>
+ </div>
+ <div class="uppercase text-xs lg:text-base absolute bottom-0 right-0 flex justify-center border rounded-tl-lg rounded-br-lg pl-6 pr-6 text-white bg-[--primary-color] primary-font-medium"> Partner</div>
+ </div>
+ </a>
+ <a class="block" href="https://www.asds.net/medical-professionals/annual-meeting" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #BE90D4;">
+ <div class="text-xs lg:text-base"> 05 - 08</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Annual Meeting of the American Society for Dermatologic Surgery (ASDS) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> San Diego, CA (United States)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://jsaps49.jp/outline.html" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #049372;">
+ <div class="text-xs lg:text-base"> 05 - 06</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Annual Meeting of Japan Society of Aesthetic Plastic Surgery (JSAPS) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Itoman (Japan)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://dermatodz.com/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #D35400;">
+ <div class="text-xs lg:text-base"> 05 - 06</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Congrès de la Société Algérienne de Dermatologie (SAD) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Alger (Algeria)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://conference.edsuae.com/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-black rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #FF8600;">
+ <div class="text-xs lg:text-base"> 06 - 08</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Emirates Dermatology Society Annual Conference (EDS) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Dubai (United Arab Emirates)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://saam.academy/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-black rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #FF8600;">
+ <div class="text-xs lg:text-base"> 06 - 07</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Scientific Academy of Aesthetic Medicine Conference (SAAM) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Riyadh (Saudi Arabia)</div>
+ </div>
+ </div>
+ <div class="uppercase text-xs lg:text-base absolute bottom-0 right-0 flex justify-center border rounded-tl-lg rounded-br-lg pl-6 pr-6 text-white bg-[--primary-color] primary-font-medium"> Partner</div>
+ </div>
+ </a>
+ <a class="block" href="https://www.spdv.pt/_7o_workshop_em_dermatologia_cosmetica_e_estetica" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #3498DB;">
+ <div class="text-xs lg:text-base"> 06 - 07</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Annual Workshop of the Grupo Portugues de Dermatologia Cosmética e Estética (GPDCE) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Lisboa (Portugal)</div>
+ </div>
+ </div>
+ <div class="uppercase text-xs lg:text-base absolute bottom-0 right-0 flex justify-center border rounded-tl-lg rounded-br-lg pl-6 pr-6 text-white bg-[--primary-color] primary-font-medium"> Partner</div>
+ </div>
+ </a>
+ <a class="block" href="https://www.prskorea.org/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #049372;">
+ <div class="text-xs lg:text-base"> 08 - 10</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> PRS Korea (KSPRS) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Seoul (South Korea)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://sbcpcongressobrasileiro.com.br/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #EA0041;">
+ <div class="text-xs lg:text-base"> 11 - 14</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Congresso Brasileira de Cirurgia Plastica (SBCP) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Belo Horizonte (Brazil)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://rcd2026hanoi.dalieu.vn/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #049372;">
+ <div class="text-xs lg:text-base"> 11 - 14</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Regional Conference of Dermatology 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Hanoi (Vietnam)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #3498DB;">
+ <div class="text-xs lg:text-base"> 11 - 15</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> International Congress of Hellenic Society of Dermatology &amp; Venereology (HSDV) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Thessaloniki (Greece)</div>
+ </div>
+ </div>
+ <div class="uppercase text-xs lg:text-base absolute bottom-0 right-0 flex justify-center border rounded-tl-lg rounded-br-lg pl-6 pr-6 text-white bg-[--primary-color] primary-font-medium"> Partner</div>
+ </div>
+ </a>
+ <a class="block" href="https://www.atoutcom.com/sfed/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <img class="h-auto w-full rounded-t-lg" src="https://comexposium-healthcare-uploads.s3-eu-west-1.amazonaws.com/worldwide_events/10463/banner/eDFt53GzX2KS00YgCeIpLLSRgXlpe9w0pfYWkf1n.jpg" alt="Journées de Dermatologie Esthétique (SFED) 2026">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #3498DB;">
+ <div class="text-xs lg:text-base"> 13 - 14</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Journées de Dermatologie Esthétique (SFED) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Paris (France)</div>
+ </div>
+ </div>
+ <div class="uppercase text-xs lg:text-base absolute bottom-0 right-0 flex justify-center border rounded-tl-lg rounded-br-lg pl-6 pr-6 text-white bg-[--primary-color] primary-font-medium"> Partner</div>
+ </div>
+ </a>
+ <a class="block" href="https://aaamed.org/congress/index.php" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #BE90D4;">
+ <div class="text-xs lg:text-base"> 13 - 15</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> American Academy of Aesthetic Medicine Congress (AAAM) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Miami, FL (United States)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://dermaconpty.com/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <img class="h-auto w-full rounded-t-lg" src="https://comexposium-healthcare-uploads.s3-eu-west-1.amazonaws.com/worldwide_events/10458/banner/zerS0AZAO8LF0b0NawqD9tMfowsfjuts7qHsPEx8.jpg" alt="Central American and Caribbean Dermatology Congress (APDERMA &amp; SCCAD) 2026">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #EA0041;">
+ <div class="text-xs lg:text-base"> 18 - 21</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Central American and Caribbean Dermatology Congress (APDERMA &amp; SCCAD) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Panama (Panama)</div>
+ </div>
+ </div>
+ <div class="uppercase text-xs lg:text-base absolute bottom-0 right-0 flex justify-center border rounded-tl-lg rounded-br-lg pl-6 pr-6 text-white bg-[--primary-color] primary-font-medium"> Partner</div>
+ </div>
+ </a>
+ <a class="block" href="https://www.facebook.com/groups/574750496006024/posts/3416226455191733/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #EA0041;">
+ <div class="text-xs lg:text-base"> 18 - 20</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Congreso de Sociedad Mexicana de Rinologia y Cirugia Plastica Facial (SMRCPF) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Monterrey (Mexico)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://www.sofcpre.fr/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #3498DB;">
+ <div class="text-xs lg:text-base"> 19 - 21</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Congrès National SoFCPRE 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Montrouge (France)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://aecepmeeting.com/en/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #3498DB;">
+ <div class="text-xs lg:text-base"> 19 - 21</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Asociación Española de Cirugía Estética y Plástica Annual Meeting (AECEP) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Madrid (Spain)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://www.instagram.com/p/DbqaVtfjIJL/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #EA0041;">
+ <div class="text-xs lg:text-base"> 19 - 19</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> CONGRESO EXME Medicina Estética y Antiaging – Aesthetic Medicine and Anti ageing (SOCOLME) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Bogotá (Colombia)</div>
+ </div>
+ </div>
+ <div class="uppercase text-xs lg:text-base absolute bottom-0 right-0 flex justify-center border rounded-tl-lg rounded-br-lg pl-6 pr-6 text-white bg-[--primary-color] primary-font-medium"> Partner</div>
+ </div>
+ </a>
+ <a class="block" href="https://icoplast.org/calendar/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #3498DB;">
+ <div class="text-xs lg:text-base"> 20 - 21</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Baltic Biennial Congress on Plastic and Reconstructive Surgery (LSPRS) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Vilnius (Lithuania)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://cirugiafacialyrinologia.org/congresos/xvi-curso-internacional-bogota-2026/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #EA0041;">
+ <div class="text-xs lg:text-base"> 25 - 28</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Curso Internacional de Cirugía Plástica Estética (SCCP) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Bogotá (Colombia)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ <a class="block" href="https://msprs.org.my/msprs-meeting-2026/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #049372;">
+ <div class="text-xs lg:text-base"> 27 - 29</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Malaysian Society of Plastic and Reconstructive Surgery Meeting (MSPRS) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Kuala Lumpur (Malaysia)</div>
+ </div>
+ </div>
+ <div class="uppercase text-xs lg:text-base absolute bottom-0 right-0 flex justify-center border rounded-tl-lg rounded-br-lg pl-6 pr-6 text-white bg-[--primary-color] primary-font-medium"> Partner</div>
+ </div>
+ </a>
+ <a class="block" href="https://www.aicpe.org/2025/11/rebirth-roma-21-novembre-larte-della-chirurgia-di-seno-e-corpo/" target="_blank" >
+ <div class="flex lg:min-h-36 border border-black-300 rounded-lg relative flex-col">
+ <div class="flex lg:flex-row gap-4 p-4 items-center">
+ <div class="w-20 h-20 sm:w-24 sm:h-24 border text-white rounded-lg flex justify-center items-center flex-col primary-font-medium flex-shrink-0"
+ style="background-color: #3498DB;">
+ <div class="text-xs lg:text-base"> 28 - 28</div>
+ <div class="text-xs lg:text-base"> Nov 
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 mb-4 sm:mb-0">
+ <div class="text-xs lg:text-base primary-font-medium"> Rebirth (AICPE) 2026</div>
+ <div class="text-xs lg:text-base"> <i class="fa-solid fa-location-dot mr-2" aria-hidden="true"></i> Rome (Italy)</div>
+ </div>
+ </div>
+ </div>
+ </a>
+ </div>
+ </div>
+ </div>
+ </form>
+ </div>
+ </div>
+</main>
+ <footer>
+ <div class="w-full bg-slate-100 text-[--primary-color] lg:hidden flex flex-col text-left px-5 space-y-2">
+ <img class="logo w-36 mt-10" src="https://assets.imcas.com/home/logo_imcas_navyblue.svg" alt="IMCAS">
+ <button type="button" id="footer-congresses" aria-expanded="false" aria-controls="footer-congresses-panel" onclick="openOrHidePanelFooter('footer-congresses-panel', 'footer-congresses-arrow')" class="w-full flex items-baseline justify-between border-b-[1px] pb-4 pt-10 border-b-[#001148]/20 ">
+ <span class="primary-font-medium">Congresses</span>
+ <i id="footer-congresses-arrow" class="fa-regular fa-chevron-down" aria-hidden="true"></i>
+ </button>
+ <div id="footer-congresses-panel" class="w-full mt-4 flex-col text-left space-y-2 hidden flex">
+ <a href="https://www.imcas.com/en/imcas-world-2027">IMCAS World 2027</a>
+ <a href="https://www.imcas.com/en/imcas-americas-2027">IMCAS Americas 2027</a>
+ <a href="https://www.imcas.com/en/imcas-asia-2027">IMCAS Asia 2027</a>
+ <a href="https://www.imcas.com/en/imcas-china-2027">IMCAS China 2027</a>
+ </div>
+ <button type="button" id="footer-about" aria-expanded="false" aria-controls="footer-about-panel" onclick="openOrHidePanelFooter('footer-about-panel', 'footer-about-arrow')" class="w-full flex items-baseline justify-between border-b-[1px] py-4 border-b-[#001148]/20">
+ <span class="primary-font-medium">About </span>
+ <i id="footer-about-arrow" class="fa-regular fa-chevron-down" aria-hidden="true"></i>
+ </button>
+ <div id="footer-about-panel" class="w-full mt-4 flex-col text-left space-y-2 hidden flex">
+ <a href="https://www.imcas.com/en/about">The IMCAS story</a>
+ <a href="https://www.imcas.com/en/scientific-partners">Scientific partners</a>
+ <a href="https://www.imcas.com/en/feedback">Feedback</a>
+ <a href="https://www.imcasfund.org/" target="_blank">IMCAS Fund</a>
+ </div>
+ <button type="button" id="learn" aria-expanded="false" aria-controls="learn-panel" onclick="openOrHidePanelFooter('learn-panel', 'learn-arrow')" class="w-full flex items-baseline justify-between border-b-[1px] py-4 border-b-[#001148]/20">
+ <span class="primary-font-medium">Discover IMCAS Academy</span>
+ <i id="learn-arrow" class="fa-regular fa-chevron-down" aria-hidden="true"></i>
+ </button>
+ <div id="learn-panel" class="w-full mt-4 flex-col text-left space-y-2 hidden flex">
+ <a href="https://www.imcas.com/en/academy/webinars">Webinars</a>
+ <a href="https://www.imcas.com/en/academy/library">Library</a>
+ <a href="https://www.imcas.com/en/academy/insider">Insider magazine</a>
+ <a href="https://www.imcas.com/en/academy/podcasts">Podcasts</a>
+ </div>
+ <div id="follow-panel" class="w-full pt-6 flex-col text-left space-y-4 flex">
+ <p class="primary-font-medium">Follow IMCAS</p>
+ <div class="flex gap-2 text-2xl">
+ <a href="https://www.facebook.com/imcascongress/" target="_blank" aria-label="Facebook">
+ <i class="fa-brands fa-square-facebook" aria-hidden="true"></i>
+ </a>
+ <a href="https://instagram.com/imcascongress/" target="_blank" aria-label="Instagram">
+ <i class="fa-brands fa-square-instagram" aria-hidden="true"></i>
+ </a>
+ <a href="https://www.linkedin.com/company/IMCAS/" target="_blank" aria-label="LinkedIn">
+ <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
+ </a>
+ <a href="https://www.youtube.com/user/ImcasCongress" target="_blank" aria-label="YouTube">
+ <i class="fa-brands fa-square-youtube" aria-hidden="true"></i>
+ </a>
+ <a href="https://chat.whatsapp.com/FqTIoTInK0TIIXWnUPMvt8" target="_blank" aria-label="WhatsApp">
+ <i class="fa-brands fa-square-whatsapp" aria-hidden="true"></i>
+ </a>
+ <a href="https://www.imcas.com/en/wechat" class="flex items-center">
+ <img src="https://www.imcas.com/img/social-media/wechat.svg" class="h-[21px]" alt="WeChat">
+ </a>
+ </div>
+ </div>
+ <div id="help-panel" class="w-full pt-6 flex-col text-left space-y-4 flex">
+ <p class="primary-font-medium">Need assistance? </p>
+ <div class="w-full flex flex-col space-y-4">
+ <a href="https://www.imcas.com/en/contact">Contact us</a>
+ <a href="https://www.imcas.com/en/faq">Read FAQs</a>
+ </div>
+ </div>
+ <div class="flex flex-col gap-4 pt-6">
+ <a href="https://www.imcas.com/en/privacy-policy">Privacy policy</a>
+ <button type="button" class="text-left" onclick="window.openAxeptioCookies && window.openAxeptioCookies()">Cookie settings</button>
+ <a href="https://www.imcas.com/en/legal-information">Legal information</a>
+ </div>
+ <div class="flex flex-col gap-2 pt-10 pb-2">
+ <span>© 2026 IMCAS International Master Course on Aging Science. All rights reserved.</span>
+ <span class="self-end"><a class="underline text-[--secondary-color] primary-font-semibold" target="_blank" href="https://www.imcas.com/en/accessibility">Accessibility : non-compliant</a></span>
+ </div>
+</div>
+<div class="w-full bg-slate-100 text-[--primary-color] lg:flex hidden text-sm justify-center lg:px-20 px-8 py-5">
+ <div class="boxed-content">
+ <div class="flex flex-col">
+ <div class="w-full grid grid-cols-5 gap-x-12 gap-y-8 p-4">
+ <img class="logo max-h-12 h-auto w-auto" src="https://assets.imcas.com/home/logo_imcas_navyblue.svg" alt="IMCAS">
+ <div class="w-full text-left space-y-4">
+ <p class="primary-font-medium"> Congresses</p>
+ <div class="w-full flex flex-col space-y-2">
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/imcas-world-2027">IMCAS World 2027</a>
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/imcas-americas-2027">IMCAS Americas 2027</a>
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/imcas-asia-2027">IMCAS Asia 2027</a>
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/imcas-china-2027">IMCAS China 2027</a>
+ </div>
+ </div>
+ <div class="w-full text-left space-y-4">
+ <p class="primary-font-medium">Discover IMCAS Academy</p>
+ <div class="w-full flex flex-col space-y-2">
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/academy/webinars">Webinars</a>
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/academy/library">Library</a>
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/academy/insider">Insider magazine</a>
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/academy/podcasts">Podcasts</a>
+ </div>
+ </div>
+ <div class="w-full text-left space-y-4">
+ <p class="primary-font-medium">About </p>
+ <div class="w-full flex flex-col space-y-2">
+ <a href="https://www.imcas.com/en/about" class="hover:underline underline-offset-2">The IMCAS story</a>
+ <a href="https://www.imcas.com/en/scientific-partners" class="hover:underline underline-offset-2">Scientific partners</a>
+ <a href="https://www.imcas.com/en/feedback" class="hover:underline underline-offset-2">Feedback</a>
+ <a href="https://www.imcas.com/en/press" class="hover:underline underline-offset-2">Media &amp; Press</a>
+ <a href="https://www.imcasfund.org/" target="_blank" class="hover:underline underline-offset-2">IMCAS Fund</a>
+ </div>
+ </div>
+ <div class="w-full text-left space-y-4">
+ <p class="primary-font-medium">Need assistance? </p>
+ <div class="w-full flex flex-col space-y-2">
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/contact">Contact us</a>
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/faq">Read FAQs</a>
+ </div>
+ </div>
+ </div>
+ <div class="w-full grid grid-cols-5 gap-x-12 gap-y-8 p-4 mb-10 border-t-[1px] border-[#001148]/20">
+ <div class="col-start-2 w-2/3 space-y-20">
+ <div class="text-left space-y-4">
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/privacy-policy">Privacy policy</a>
+ <button type="button" class="block text-left hover:underline underline-offset-2" onclick="window.openAxeptioCookies && window.openAxeptioCookies()">Cookie settings</button>
+ </div>
+ </div>
+ <div class="text-left space-y-4">
+ <div class="flex flex-col space-y-2">
+ <a class="hover:underline underline-offset-2" href="https://www.imcas.com/en/legal-information">Legal information</a>
+ </div>
+ </div>
+ <div class="w-full text-left space-y-4">
+ <p class="primary-font-medium">Follow IMCAS</p>
+ <div class="w-full flex gap-2 text-xl">
+ <a href="https://www.facebook.com/imcascongress/" target="_blank" aria-label="Facebook">
+ <i class="fa-brands fa-square-facebook" aria-hidden="true"></i>
+ </a>
+ <a href="https://instagram.com/imcascongress/" target="_blank" aria-label="Instagram">
+ <i class="fa-brands fa-square-instagram" aria-hidden="true"></i>
+ </a>
+ <a href="https://www.linkedin.com/company/IMCAS/" target="_blank" aria-label="LinkedIn">
+ <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
+ </a>
+ <a href="https://www.youtube.com/user/ImcasCongress" target="_blank" aria-label="YouTube">
+ <i class="fa-brands fa-square-youtube" aria-hidden="true"></i>
+ </a>
+ <a href="https://chat.whatsapp.com/FqTIoTInK0TIIXWnUPMvt8" target="_blank" aria-label="WhatsApp">
+ <i class="fa-brands fa-square-whatsapp" aria-hidden="true"></i>
+ </a>
+ <a href="https://www.imcas.com/en/wechat" class="flex items-center">
+ <img src="https://www.imcas.com/img/social-media/wechat.svg" class="h-[18px]" alt="WeChat">
+ </a>
+ </div>
+ </div>
+ </div>
+ <div class="flex flex-wrap justify-between items-center gap-5">
+ <span>© 2026 IMCAS International Master Course on Aging Science. All rights reserved.</span>
+ <span><a class="underline text-[--secondary-color] primary-font-semibold" target="_blank" href="https://www.imcas.com/en/accessibility">Accessibility : non-compliant</a></span>
+ </div>
+ </div>
+ </div>
+</div>
+ </footer>
+<div id="global-overlay"></div>
+<div id="global-processing-screen">
+ <i class="fal fa-spinner fa-pulse"></i> Processing, please wait...
+</div>
+<div id="global-form-missing-required-fields" class="jquery-modal">
+ <h4 id="" class="lg:text-2xl text-lg primary-font-light text-[--primary-color]">
+Error
+</h4>
+ <p>Please fill out all required fields. Here are the fields that are missing:</p>
+ <p id="global-form-missing-required-fields-details"></p>
+ <div id="am5B3WXB1ShFDILoTCFWRRwJZ1BmtuYT4bn4BWr1gExEB41OufrJsfc48jcKhn6r" title="" class="w-fit tooltip ">
+ <a id="link-am5B3WXB1ShFDILoTCFWRRwJZ1BmtuYT4bn4BWr1gExEB41OufrJsfc48jcKhn6r" data-buttonid="am5B3WXB1ShFDILoTCFWRRwJZ1BmtuYT4bn4BWr1gExEB41OufrJsfc48jcKhn6r" data-selected="0" data-text="Add this option" data-status="" rel="modal:close"
+ class="relative tooltip "
+ >
+ <button type="button" id="button-am5B3WXB1ShFDILoTCFWRRwJZ1BmtuYT4bn4BWr1gExEB41OufrJsfc48jcKhn6r" 
+ class="flex justify-center items-center gap-2 w-fit bg-[--primary-color] border border-[--primary-color] text-white hover:bg-[--button-hover] hover:border-[--button-hover] focus:outline focus:outline-1 focus:outline-[--button-outline] focus:bg-[--button-hover] focus:border-[--button-hover] focus:-outline-offset-[3px] active:bg-[--button-active] active:border-[--button-active] min-h-12 min-w-32 px-4 py-1 rounded-md text-sm mt-5 "
+ >
+ <span id="button-text-am5B3WXB1ShFDILoTCFWRRwJZ1BmtuYT4bn4BWr1gExEB41OufrJsfc48jcKhn6r">OK</span>
+ <p id="button-loader-am5B3WXB1ShFDILoTCFWRRwJZ1BmtuYT4bn4BWr1gExEB41OufrJsfc48jcKhn6r" class="hidden">
+ <span class="loader size-5 inline-block rounded-[50%] border-t-[3px] border-t-white border-r-[3px] border-r-transparent box-border"></span>
+ </p>
+ </button>
+ </a>
+</div>
+</div>
+ <div x-data="{ open: false, loaded: false, tipDismissed: false }"
+ x-init="$watch('open', value => document.body.classList.toggle('chatbase-open', value))"
+ x-on:keydown.escape.window="if (open) { open = false; $refs.toggle.focus(); } else { tipDismissed = true; }">
+ <button type="button"
+ x-ref="toggle"
+ x-on:click="open = !open; loaded = true"
+ x-on:mouseleave="tipDismissed = false"
+ x-on:blur="tipDismissed = false"
+ aria-expanded="false"
+ :aria-expanded="open.toString()"
+ aria-controls="chatbase-panel"
+ aria-label="Chat assistant"
+ class="group fixed z-[10000] bottom-4 right-4 grid place-items-center w-14 h-14 rounded-full bg-[--primary-color] text-white text-2xl shadow-xl ring-1 ring-black/10 transition transform hover:scale-105 hover:shadow-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--primary-color] focus-visible:ring-offset-2">
+ <span aria-hidden="true"
+ :class="{ '!hidden': open || tipDismissed }"
+ class="hidden sm:inline-flex absolute right-full top-1/2 mr-3 -translate-y-1/2 translate-x-2 whitespace-nowrap rounded-full bg-white/95 text-gray-900 text-sm px-4 py-2 shadow-lg ring-1 ring-black/5 invisible opacity-0 transition group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:visible group-focus-visible:opacity-100 group-focus-visible:translate-x-0">
+ Chat assistant
+ </span>
+ <span x-show="!open" aria-hidden="true"><i class="fal fa-comments-alt"></i></span>
+ <span x-show="open" style="display: none" aria-hidden="true"><i class="fal fa-times"></i></span>
+ </button>
+ <div id="chatbase-panel"
+ x-show="open"
+ style="display: none"
+ class="fixed z-[99999] bottom-20 right-4 flex flex-col w-[calc(100vw-2rem)] sm:w-[400px] h-[700px] max-h-[calc(100dvh-6rem)] bg-white rounded-xl shadow-2xl ring-1 ring-black/10 overflow-hidden">
+ <div class="flex items-center justify-between shrink-0 h-11 pl-4 pr-1 border-b border-gray-200">
+ <p class="text-sm font-semibold text-[--primary-color]">Chat assistant</p>
+ <button type="button"
+ x-on:click="open = false; $refs.toggle.focus()"
+ aria-label="Close"
+ class="grid place-items-center w-10 h-10 rounded-full text-lg text-[--primary-color] hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[--primary-color]">
+ <i class="fal fa-times" aria-hidden="true"></i>
+ </button>
+ </div>
+ <template x-if="loaded">
+ <iframe src="https://www.chatbase.co/chatbot-iframe/-l5YAzq-P4B9YkaRix0kh"
+ x-init="window.imcasChatbaseConnect($el)"
+ title="Chat assistant"
+ class="w-full flex-1 min-h-0 border-0"
+ referrerpolicy="no-referrer-when-downgrade"
+ allow="microphone"></iframe>
+ </template>
+ </div>
+ </div>
+</body>
+</html>

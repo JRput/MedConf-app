@@ -1,0 +1,72 @@
+{
+ "source_id": 148,
+ "slug": "amwc",
+ "class_name": "AmwcExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/amwc.py",
+ "source_row": {
+  "source_name": "AMWC (Aesthetic & Anti-Aging Medicine World Congress)",
+  "society": "AMWC",
+  "base_url": "https://www.amwc-conference.com/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Informa Next.js page (server-rendered). Dates from JSON-LD but widened to the visible header range (1-3 April). Fees on /register/ as '<pass> / struck price / current price / Offer ends <day month>'; abstract deadlines (oral/poster) have no year."
+ },
+ "registry_comment": "AMWC (Aesthetic & Anti-Aging Medicine World Congress) single-congress site (one upcoming edition) - single_congress family",
+ "coverage_run": {
+  "date": "2026-11-09",
+  "pages_checked": 1,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ },
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1
+ },
+ "test_urls": [
+  "https://www.amwc-conference.com/",
+  "https://www.amwc-conference.com/register/",
+  "https://www.amwc-conference.com/faculty/abstract-submission/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.amwc-conference.com/",
+   "field": "end_date",
+   "site_says": "header 'Cannes. 1-3 April 2027 | Palais des Festivals' (JSON-LD says 1-2 April)",
+   "extractor_says": "2027-04-01..2027-04-03",
+   "match": true
+  },
+  {
+   "url": "https://www.amwc-conference.com/register/",
+   "field": "fees",
+   "site_says": "Scientific Program Pass EUR 1,000 (struck EUR 1,120), offer ends 14th January",
+   "extractor_says": "Early bird 1000 until 14 Jan 2027; Final rate 1120 from 15 Jan 2027",
+   "match": true
+  },
+  {
+   "url": "https://www.amwc-conference.com/faculty/abstract-submission/",
+   "field": "abstract",
+   "site_says": "Oral presentation - October 31; Poster submission - December 31",
+   "extractor_says": "deadline 2026-12-31 (poster), note lists both",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "JSON-LD end date is wrong (1-2 April); the visible header and the compliance line both say three days. Header range wins when it starts on the same day.",
+  "Offer-end year assumed to be the congress year (January 14, 2027); the page prints no year. Abstract dates also have no year and take the year before the congress when they would otherwise fall after it.",
+  "The EUR 490 yearly AMS Premium membership on /register/ is a subscription, not an event fee, and is skipped. Group discount (10+ delegates) not priced.",
+  "Coverage checklist: edition page, /register/, abstract page, JSON-LD checked; external order.euromedicom.com checkout and the AMS video-on-demand link not followed. Next.js page is server-rendered (httpx works); forced fallback identical.",
+  "Coverage warning PRICE_EXTERNAL_LINK on the earlier fee-less run is resolved by the /register/ parse; hotel and AMS links are not fee pages."
+ ]
+}
