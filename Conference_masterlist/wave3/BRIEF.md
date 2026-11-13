@@ -47,3 +47,20 @@ what differs for wave 3.
 ## Final message (5–10 lines per source)
 status · shell count (normal / forced-fallback) · field coverage counts · 3 spot-checked
 URLs · concerns (coverage checklist items verified, anything unproven, shared-file asks).
+
+## Batch 3-C delta (2026-11-13)
+- **Today is 2026-11-13.** Your batch key is `3-C multi_event` or `3-C single_congress` in
+  `wave3/plan.json` (ids 159–165). Deliverables still `wave3/<slug>.json` + `extractors/<slug>.py`.
+- The four big US/EU sites (astro, heart, himss, esska) are NOT in this batch: their events
+  pages are challenged on the runner. Do not touch them.
+- **Robots:** `discovery.py` now consults `robots_gate.allowed(url)` before every sub-page
+  fetch. Your extractor must not fetch a URL `robots_gate.allowed()` returns False for;
+  say so in `concerns` when a fee/abstract page is disallowed (IMCAS/BSPED precedent:
+  fees stay absent, we respect robots).
+- **HQ LESSON #95:** the harness reads static HTML, production reads the Playwright DOM.
+  Where the page has sliders/menus, check the venue/abstract values you return against
+  the rendered page (`fetch_html`) not only the raw HTML. The foreman runs the live
+  `main.py --run-now --source N` after review; you cannot (no DB writes).
+- Family rule unchanged: single-congress sites subclass `SingleCongressExtractor`
+  constants-only; `verified_empty` is set family-wide once an edition has ended.
+- Keep total requests per site ≤ 40 across both harness runs. Never fight anti-bot.

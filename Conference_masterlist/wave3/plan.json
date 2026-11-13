@@ -1,6 +1,6 @@
 {
  "generated": "2026-11-09",
- "next_free_id": 159,
+ "next_free_id": 166,
  "excluded_owner_call": {
   "doctorsacademy.org": "commercial MRCS course shop (owner ruling 2026-10-21 excluded commercial shops; owner to confirm)",
   "harleyacademy.com / skinvivatraining.com": "commercial aesthetics training (same ruling)",
@@ -321,6 +321,195 @@
      "batch": 2
     }
    }
+  ],
+  "3-C multi_event": [
+   {
+    "domain": "eans.org",
+    "source_id": 159,
+    "slug": "eans",
+    "candidate_urls": [
+     "https://www.eans.org/events",
+     "https://www.eans.org/"
+    ],
+    "recon": {
+     "domain": "eans.org",
+     "status": "resolved_by_probe_2026-11-09",
+     "platform": "community_calendar",
+     "js_required": true,
+     "listing_url": "https://www.eans.org/events",
+     "event_type_mix": "conference",
+     "detail_topology": "on_event_page",
+     "bot_protection": "cloudflare_cleared_by_runner",
+     "expected_found": [
+      "EANS Congress 2027"
+     ],
+     "notes": "Runner probe 2026-11-09 cleared /events (title 'Community Calendar - European Association of Neurosurgical Societies', 48 KB). Curl is Cloudflare-challenged; use fetch_html (Playwright). Same calendar platform as theabn.org — share parsing via a family module ONLY if both prove identical in the harness.",
+     "batch": "3-C"
+    }
+   },
+   {
+    "domain": "theabn.org",
+    "source_id": 160,
+    "slug": "theabn",
+    "candidate_urls": [
+     "https://www.theabn.org/events",
+     "https://www.theabn.org/"
+    ],
+    "recon": {
+     "domain": "theabn.org",
+     "status": "resolved_by_probe_2026-11-09",
+     "platform": "community_calendar",
+     "js_required": true,
+     "listing_url": "https://www.theabn.org/events",
+     "event_type_mix": "conference",
+     "detail_topology": "on_event_page",
+     "bot_protection": "cloudflare_cleared_by_runner",
+     "expected_found": [
+      "ABN Annual Meeting 2027"
+     ],
+     "notes": "Runner probe cleared /events ('Community Calendar - Association of British Neurologists', 51 KB). Curl challenged. Expected ABN Annual Meeting; calendar may also list third-party neurology meetings — keep only dated clinician-CPD events, log drops.",
+     "batch": "3-C"
+    }
+   },
+   {
+    "domain": "wfns.org",
+    "source_id": 161,
+    "slug": "wfns",
+    "candidate_urls": [
+     "https://wfns.org/events",
+     "https://wfns.org/"
+    ],
+    "recon": {
+     "domain": "wfns.org",
+     "status": "resolved_by_probe_2026-11-09",
+     "platform": "unknown",
+     "js_required": true,
+     "listing_url": "https://wfns.org/events",
+     "event_type_mix": "conference",
+     "detail_topology": "on_event_page",
+     "bot_protection": "cloudflare_cleared_by_runner",
+     "expected_found": [
+      "WFNS World Congress"
+     ],
+     "notes": "Runner probe cleared /events (1.49 MB page, 2026-2027 conferences visible per recon). wfns.info is the blog — ignore. Listing is likely a long single page; keep only upcoming dated congresses/courses.",
+     "batch": "3-C"
+    }
+   },
+   {
+    "domain": "esge.com",
+    "source_id": 162,
+    "slug": "esge",
+    "candidate_urls": [
+     "https://www.esge.com/events",
+     "https://www.esge.com/"
+    ],
+    "recon": {
+     "domain": "esge.com",
+     "status": "resolved_by_probe_2026-11-09",
+     "platform": "spa",
+     "js_required": true,
+     "listing_url": "https://www.esge.com/events",
+     "event_type_mix": "mixed",
+     "detail_topology": "on_event_page",
+     "bot_protection": "cloudflare_cleared_by_runner",
+     "expected_found": [
+      "ESGE Days 2027"
+     ],
+     "notes": "AngularJS SPA (recon) but the runner probe cleared /events ('Events | ESGE', 197 KB rendered). Use fetch_html with a wait; discovery handles sub-pages. ESGE Days is the flagship; also courses/webinars.",
+     "batch": "3-C"
+    }
+   },
+   {
+    "domain": "ese-hormones.org",
+    "source_id": 163,
+    "slug": "ese_hormones",
+    "candidate_urls": [
+     "https://www.ese-hormones.org/education-and-training/events-key-dates/",
+     "https://www.ese-hormones.org/"
+    ],
+    "recon": {
+     "domain": "ese-hormones.org",
+     "status": "resolved_by_probe_2026-11-09",
+     "platform": "static_html",
+     "js_required": true,
+     "listing_url": "https://www.ese-hormones.org/education-and-training/events-key-dates/",
+     "event_type_mix": "mixed",
+     "detail_topology": "on_event_page",
+     "bot_protection": "cloudflare_cleared_by_runner",
+     "expected_found": [
+      "European Congress of Endocrinology 2027"
+     ],
+     "notes": "Probe cleared the events & key dates page (355 KB, JS-rendered list). Events partly delegated to external registrars — follow organiser links only through the shared helpers; ECE (European Congress of Endocrinology) is the flagship.",
+     "batch": "3-C"
+    }
+   }
+  ],
+  "3-C single_congress": [
+   {
+    "domain": "faceconference.com",
+    "source_id": 164,
+    "slug": "face",
+    "candidate_urls": [
+     "https://www.faceconference.com/"
+    ],
+    "recon": {
+     "domain": "faceconference.com",
+     "status": "resolved_by_probe_2026-11-09",
+     "platform": "unknown",
+     "js_required": true,
+     "listing_url": "https://www.faceconference.com/",
+     "event_type_mix": "conference",
+     "detail_topology": "on_event_page",
+     "bot_protection": "cloudflare_cleared_by_runner",
+     "expected_found": [
+      "FACE 2027"
+     ],
+     "notes": "Probe cleared the home page ('The Aesthetic Show UK', 1.16 MB). One annual aesthetics conference+exhibition (FACE). Level 2 inclusion: aesthetics conferences already in the directory (Interface Aesthetics 83, Derma Medical 71, IMCAS 157); it is a conference, not a course shop. Record clinician-facing registration fees only.",
+     "batch": "3-C"
+    }
+   },
+   {
+    "domain": "congress.ehaweb.org",
+    "source_id": 165,
+    "slug": "eha_congress",
+    "candidate_urls": [
+     "https://congress.ehaweb.org/",
+     "https://ehaweb.org/congress/"
+    ],
+    "recon": {
+     "domain": "congress.ehaweb.org",
+     "status": "resolved_by_probe_2026-11-09",
+     "platform": "external_registrar",
+     "js_required": true,
+     "listing_url": "https://congress.ehaweb.org/",
+     "event_type_mix": "conference",
+     "detail_topology": "on_event_page",
+     "bot_protection": "cloudflare_cleared_by_runner",
+     "expected_found": [
+      "EHA2027 Congress"
+     ],
+     "notes": "m-anage.com platform (probe title 'm-anage.com', 105 KB). ehaweb.org main domain 403s on the runner. If the public page carries no dated EHA Congress information without login, finish status 'blocked' with the evidence — never log in. Check the platform terms of use first (AAN/AAD/CNS precedent).",
+     "batch": "3-C"
+    }
+   }
+  ]
+ },
+ "parked_after_probe_2026-11-09": {
+  "astro.org": "events page challenged on the runner (home only cleared)",
+  "professional.heart.org": "same",
+  "himss.org": "same",
+  "esska.org": "same",
+  "still_blocked": [
+   "uscap",
+   "baskonline",
+   "facultyofclinicalinformatics",
+   "aao",
+   "endocrinology",
+   "nihr",
+   "rcoa",
+   "biasp",
+   "reviseradiology",
+   "matacourses"
   ]
  }
 }
