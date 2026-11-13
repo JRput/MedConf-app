@@ -1,0 +1,89 @@
+{
+ "source_id": 163,
+ "slug": "ese_hormones",
+ "class_name": "EseHormonesExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/ese_hormones.py",
+ "source_row": {
+  "source_name": "ESE Events & Key Dates",
+  "society": "ESE",
+  "base_url": "https://www.ese-hormones.org/education-and-training/events-key-dates/",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "extraction_instructions": "Umbraco + Vue list. Cards come from POST /umbraco/api/searchapi/search (called from inside the loaded listing page; filters [], pageNumber, resultsPerPage 50, rootNodeIds [8010]); result = Name, Url, Location, EventStartDate/EventEndDate{Day,Month,Year}, TagGroupContentType. Patient forums / awareness days / deadlines dropped. Detail: hero span, intro, optional two-header-row fee grid (parse_fee_grid), REGISTER link to registrar (organiser_url), Website link for external events.",
+  "detail_is_multipage": false,
+  "active": true
+ },
+ "registry_comment": "ESE (163): Umbraco search API called from the loaded listing page; two-row fee grid parser; registrar link as organiser_url",
+ "probe_results": {
+  "shells": 14,
+  "shells_forced_fallback": 14,
+  "details_tested": 4,
+  "with_date": 4,
+  "with_pricing": 0,
+  "with_venue": 0,
+  "with_description": 4,
+  "with_specialty": 4
+ },
+ "test_urls": [
+  "https://www.ese-hormones.org/education-and-training/events-key-dates/41st-ese-postgraduate-training-course-porto-portugal-2027/",
+  "https://www.ese-hormones.org/education-and-training/events-key-dates/european-congress-of-endocrinology-ece-2027/",
+  "https://www.ese-hormones.org/education-and-training/events-key-dates/europit-2026/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.ese-hormones.org/education-and-training/events-key-dates/41st-ese-postgraduate-training-course-porto-portugal-2027/",
+   "field": "fees",
+   "site_says": "In-person: EUR 265/395 (member), 180/265 (reduced), 465/690 (non-member) before/after Early Bird deadline Wed 09 Dec 2026; Online EUR 145/210, 95/145, 250/370",
+   "extractor_says": "12 EUR tiers 'Mode · Category · Timeframe', 6 early-bird flagged with deadline 2026-12-09; venue ALFANDEGA DO PORTO, city Porto, region Portugal, 2027-01-28..2027-01-31",
+   "match": true
+  },
+  {
+   "url": "https://www.ese-hormones.org/education-and-training/events-key-dates/european-congress-of-endocrinology-ece-2027/",
+   "field": "dates/place",
+   "site_says": "8 - 11 May 2027, Basel, Switzerland ('Save the Date', details later)",
+   "extractor_says": "2027-05-08..2027-05-11, city Basel, region Switzerland, no tiers",
+   "match": true
+  },
+  {
+   "url": "https://www.ese-hormones.org/education-and-training/events-key-dates/europit-2026/",
+   "field": "dates/place",
+   "site_says": "30 NOV - 02 DEC 2026, Annecy, France",
+   "extractor_says": "2026-11-30..2026-12-02, city Annecy, region France, in_person",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Listing comes from the site's own JSON search API (POST /umbraco/api/searchapi/search, the call the Vue page makes), executed from inside the loaded listing page with page.evaluate, so cookies/challenge state are the visitor's. API answered TotalItemCount 15, one page of 50. 14 shells = 15 minus 1 dropped. Shell counts normal and forced-fallback both 14. If the API call fails the extractor returns no shells (never a DOM guess); robots_gate.allowed() is checked for the API URL (ese robots.txt only blocks SemrushBot).",
+  "Relevance (Level 2): the ESE 'Patient Forums' content type (ESE Adrenal Patient Forum 2026) is for patients and is dropped and logged; awareness days / deadlines / key dates would be dropped too (none returned by the default query). Clinician courses, webinars (ESE Talks, Clinical Updates), congresses and External/Endorsed meetings are kept.",
+  "Fees: Porto PG course has a two-header-row grid (category row + 'Before/After Early Bird deadline' row) that the generic pricing_tables parser mangled (8 tiers, wrong labels, dropped columns), so ese_hormones.py has a bespoke parse_fee_grid (12 tiers verified against the page). Other events: no fee on the page; 'External Events' link to organiser sites (organiser_url from Register/Website links) - Harvard 'Clinical Endocrinology 2027' (learn.hms.harvard.edu) was fetch_failed in a scratch discover() run (httpx blocked), TALENT registers via endo.deskonline.info; ECE 2027 is a save-the-date with no fees yet. Member-only prices are not an issue (rates are public); 'Ukraine free' concession not modelled.",
+  "Coverage warnings explained: SINGLE_DAY_SUSPECT (2 rows, evidence '8-11 May 2027') is the ECE 2027 promo banner in the site chrome, not the event's own text; SUBMISSION_NO_DEADLINE on TALENT: the page names Young Investigator Spotlights/awards but gives no deadline; PRICE_EXTERNAL_LINK on TALENT and Harvard as above.",
+  "ESE 'ECE 2027' is a Save-the-date page without venue name or fees; the congress is also available as its own site later (not linked yet).",
+  "HQ LESSON #95: regexes accept single or double quotes (WFNS raw HTML uses single quotes, the rendered DOM double); extract_detail reads page.content() (the rendered DOM the pipeline sees) and only falls back to fetch_html when the page lacks the markup.",
+  "Terms/robots: footer links Privacy, Cookies, Accessibility, Disclaimer; the Disclaimer page (read in full) has no clause on automated access, scraping or AI use. robots.txt blocks only SemrushBot.",
+  "Taxonomy ask: society code 'ESE' (European Society of Endocrinology, international, Europe) in societies.ts; note existing 'Endocrine Society' (US) is a different body. Specialty from the shared title classifier with default 'Diabetes & Endocrinology'.",
+  "Requests to ese-hormones.org over development + both harness runs: about 40 including API calls, sequential."
+ ],
+ "coverage_run": {
+  "date": "2026-11-13",
+  "pages_checked": 2,
+  "warnings": [
+   {
+    "code": "PRICE_EXTERNAL_LINK",
+    "message": "no tiers but the page links to an external registration/event site",
+    "url": "https://www.ese-hormones.org/education-and-training/events-key-dates/talent-transition-adolescence-and-young-adults-endocrine-diseases-management/",
+    "evidence": "Register -> https://endo.deskonline.info/login"
+   },
+   {
+    "code": "SUBMISSION_NO_DEADLINE",
+    "message": "page advertises a call for papers / submission programme but no deadline or note is set",
+    "url": "https://www.ese-hormones.org/education-and-training/events-key-dates/talent-transition-adolescence-and-young-adults-endocrine-diseases-management/",
+    "evidence": ""
+   }
+  ],
+  "blocking": true,
+  "exit_code": 2
+ }
+}

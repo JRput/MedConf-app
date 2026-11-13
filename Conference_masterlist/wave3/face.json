@@ -1,0 +1,73 @@
+{
+ "source_id": 164,
+ "slug": "face",
+ "class_name": "FaceExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/face.py",
+ "source_row": {
+  "source_name": "The Aesthetic Show UK (FACE)",
+  "society": "TAS UK",
+  "base_url": "https://www.faceconference.com/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "faceconference.com is The Aesthetic Show UK (Informa, AMWC series), one annual conference + exhibition. Next.js site behind Cloudflare: plain HTTP gets 403, the Playwright fallback reads it. Home page carries JSON-LD Event. Between editions the family sets verified_empty."
+ },
+ "registry_comment": "The Aesthetic Show UK (faceconference.com) single-congress site (one upcoming edition) - single_congress family",
+ "coverage_run": {
+  "date": "2026-11-13",
+  "pages_checked": 0,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ },
+ "probe_results": {
+  "shells": 0,
+  "shells_forced_fallback": 0,
+  "details_tested": 0,
+  "with_date": 0,
+  "with_pricing": 0,
+  "with_venue": 0,
+  "with_description": 0,
+  "with_specialty": 0,
+  "verified_empty": "The Aesthetic Show UK 2026 ended 2026-06-27; no later edition listed"
+ },
+ "test_urls": [
+  "https://www.faceconference.com/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.faceconference.com/",
+   "field": "edition dates (JSON-LD)",
+   "site_says": "startDate 2026-06-26, endDate 2026-06-27, Convene Sancroft St Paul's, London; page text 'Thank you for attending ... first Aesthetic Show UK'",
+   "extractor_says": "0 shells, verified_empty 'ended 2026-06-27; no later edition listed'",
+   "match": true
+  },
+  {
+   "url": "https://www.faceconference.com/",
+   "field": "next edition",
+   "site_says": "No 2027 dates anywhere in rendered text (only TAS-UK-2027 image filenames); 'Next stop, AMWC Cannes, April 1-3'",
+   "extractor_says": "no upcoming edition",
+   "match": true
+  },
+  {
+   "url": "https://www.faceconference.com/robots.txt",
+   "field": "robots",
+   "site_says": "404 (no rules)",
+   "extractor_says": "robots_gate treats as allowed",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Between editions: 0 shells in both harness runs (normal and --force-fallback); fees, venue-on-page, abstracts and description are UNPROVEN until a 2027 edition is announced. REG_URLS (/registration-info/) and VENUE_URLS (/venue/) are linked from the nav but were not fetched or verified. Re-run the harness once 2027 dates appear.",
+  "Cloudflare: plain HTTP gets 403 on every fetch; only the Playwright path reads the site (log shows 'switched to alternate browser profile'). Treat as intermittent-blocked risk on runners; probe 2026-11-09 said cleared.",
+  "Terms: Informa Connect website terms (informaconnect.com/website-terms-of-use, linked from the footer) say 'You may not publish, distribute, extract, re-utilise, or reproduce any part of the Site ... other than as permitted by applicable law ... or solely educational, non-commercial purposes.' No explicit ban on automated access or AI use, so not stopped as blocked, but the foreman should decide (Level 2). AMWC (Informa/Euromedicom series, source 148) was onboarded under the same exposure.",
+  "Society code 'TAS UK' is my choice (the site's own abbreviation; 'FACE' is only the domain). It must be added to medconf-website/src/lib/taxonomy/societies.ts (name The Aesthetic Show UK, kind event/conference, country UK) before registering, and the foreman may prefer another code.",
+  "Canonical site is aestheticshow-uk.com (JSON-LD url); faceconference.com serves the same content. Not checked whether one redirects.",
+  "Coverage checklist: multi-day range, external fee links, fee images, Registration sub-page, two-hop and CFP pages cannot be verified with no live edition; only the home page and JSON-LD were checked. Exhibitor/sponsor packages must never be recorded as tiers.",
+  "robots.txt: faceconference.com 404 (allowed). Requests used: 4 browser page loads + 3 curl, well under 40."
+ ]
+}

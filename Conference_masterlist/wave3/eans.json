@@ -1,0 +1,85 @@
+{
+ "source_id": 159,
+ "slug": "eans",
+ "class_name": "EansExtractor",
+ "status": "partial",
+ "file_written": "medconf-scraper/extractors/eans.py",
+ "source_row": {
+  "source_name": "EANS Community Calendar",
+  "society": "EANS",
+  "base_url": "https://www.eans.org/events/event_list.asp",
+  "default_event_type": "mixed",
+  "pagination_type": "page_query",
+  "pagination_template": "https://www.eans.org/events/event_list.asp?DGPCrSrt=&DGPCrPg={n}",
+  "max_pages_hint": 3,
+  "extraction_instructions": "YourMembership community calendar (family module community_calendar.py). Listing /events/event_list.asp?DGPCrSrt=&DGPCrPg=N (15 rows a page; walk until a page adds no new id). Row: span#EventList<id> link, dd/mm/yyyy [» dd/mm/yyyy], optional Location. Detail EventDetails.aspx?id=: #SpTitleBar, bold date line, When/Where rows, free-text body with an external Info/Registration link (organiser_url). Rows already running are skipped; the EANS Annual Congress is added from /page/EANS_Congress 'Future Congresses'.",
+  "detail_is_multipage": false,
+  "active": true
+ },
+ "registry_comment": "EANS (159): YourMembership community calendar via community_calendar family; EANS Annual Congress added from the congress page; fees via organiser_url + discovery",
+ "probe_results": {
+  "shells": 23,
+  "shells_forced_fallback": 23,
+  "details_tested": 4,
+  "with_date": 4,
+  "with_pricing": 0,
+  "with_venue": 4,
+  "with_description": 2,
+  "with_specialty": 4
+ },
+ "test_urls": [
+  "https://www.eans.org/events/EventDetails.aspx?id=2052634",
+  "https://www.eans.org/events/EventDetails.aspx?id=2069325",
+  "https://www.eans.org/events/EventDetails.aspx?id=2087870",
+  "https://www.eans.org/page/EANS_Congress"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.eans.org/events/EventDetails.aspx?id=2052634",
+   "field": "dates/place/link",
+   "site_says": "13/11/2026 to 14/11/2026; Where: London; 'Info & Registration' -> https://www.qssimulationcentre.com/coursecal/functional-neurosurgery-course-2",
+   "extractor_says": "2026-11-13..2026-11-14, city London, organiser_url = that link",
+   "match": true
+  },
+  {
+   "url": "https://www.eans.org/events/EventDetails.aspx?id=2069325",
+   "field": "dates/venue",
+   "site_says": "25/11/2026 to 27/11/2026; Where: Pullman Melbourne Albert Park / Melbourne; WEBSITE link only",
+   "extractor_says": "2026-11-25..2026-11-27, venue Pullman Melbourne Albert Park, city Melbourne, organiser_url https://www.dccam.com.au/anzscos2026/Home",
+   "match": true
+  },
+  {
+   "url": "https://www.eans.org/page/EANS_Congress",
+   "field": "future congress",
+   "site_says": "Future Congresses: '2027 September 26-30, Basel, Switzerland'",
+   "extractor_says": "extra shell 'EANS Congress 2027' 2027-09-26..2027-09-30, city Basel, region Switzerland, description = first paragraph of the page",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Level 2: shared family module extractors/community_calendar.py (new file) used by eans.py and theabn.py. Rationale: the harness proved the two Community Calendar pages are the same YourMembership markup (span#EventList<id>, dd/mm/yyyy [» dd/mm/yyyy], Location line; detail #SpTitleBar, bold date line, When/Where rows, body after 'Go to Upcoming Event List'); parsing was verified identical on 3 EANS and 3 ABN detail pages. Each society file is constants only (ROOT, SOCIETY, DEFAULT_SPECIALTY) plus EANS's extra_shells hook.",
+  "Listing: 24 rows over 2 pages (15 + 9; page 3 empty). 23 shells = 24 - 2 rows already running (start before today: 'SURGICAL APPROACHES TO CRANIO-VERTEBRAL JUNCTION' 26/01-18/12/2026 and '2nd LEVEL MASTERS' COURSE' 02/03-18/12/2026, both logged and dropped by the 'upcoming only' rule; the owner may want rolling programmes like these kept) + 1 extra (EANS Congress 2027). Shell counts normal and forced-fallback both 23.",
+  "EANS Annual Congress (Level 2 addition): not in the calendar; parsed deterministically from the 'Future Congresses' bullets on /page/EANS_Congress (only editions with a full day range; 2028 'October Krakow' is skipped until dated). booking_url is the congress page, which carries one edition at a time, so when 2027 passes the same source_url will carry the next edition. The 2027 congress microsite is not linked yet, so no organiser_url/fees.",
+  "Relevance: all calendar categories (EANS events, training courses, national society events, congresses, community events) are neurosurgery meetings for clinicians; kept. Administrative/fundraising titles would be dropped and logged (none today).",
+  "Fees: none on any calendar page tested; Of the 9 detail pages opened, most carry an external Info/Registration/Website link (set as organiser_url). Harness coverage fires PRICE_EXTERNAL_LINK on those (German Spine Congress dwg-kongress.de, Mistakes on the Lake mistakeonthelake.it, London 2033647): empty pricing_tiers is justified for the page text and the nav, but the external hop is not proven in the pipeline because of the discovery budget issue below (checked with a scratch discover() run on 2052634: only same-site fetch_failed steps ran).",
+  "Shared-file ask (Level 3, not done): extractors/discovery.py `_fetch_html` is httpx-only and never launches Playwright, so same-site sub-pages on Cloudflare-challenged hosts (eans.org, theabn.org) return fetch_failed (observed with a scratch discover() run: Register.aspx / attendees.asp / /page/concessions all fetch_failed), and those failed same-site fetches use up the 2-fetch budget before the organiser_url external hop is tried (EANS Functional Neurosurgery Course: qssimulationcentre.com never fetched). Suggested: try `organiser_url` first, or do not count fetch_failed against max_html, or allow a browser fetch for hosts the extractor marks challenged. The external hop does work when it runs (WFNS spinalkurs.org: followed, identity strong, no fees on that page).",
+  "HQ LESSON #95: regexes accept single or double quotes (WFNS raw HTML uses single quotes, the rendered DOM double); extract_detail reads page.content() (the rendered DOM the pipeline sees) and only falls back to fetch_html when the page lacks the markup.",
+  "Terms/robots: see theabn concerns (YourMembership legal link is privacy only; robots disallows only /global_inc/ and /global_engine/).",
+  "Taxonomy ask: society code 'EANS' (European Association of Neurosurgical Societies, international, Europe) in societies.ts. Specialty is the fixed society field 'Neurosurgery' (the shared classifier tagged spine courses as musculoskeletal). event_type is left to the merge layer's title heuristic.",
+  "Requests to eans.org over development + both harness runs: about 40 (probe pages 12, harness runs 2 x (3 listing + 1 congress + 1 base + details)); at the budget limit, sequential."
+ ],
+ "coverage_run": {
+  "date": "2026-11-13",
+  "pages_checked": 2,
+  "warnings": [
+   {
+    "code": "PRICE_EXTERNAL_LINK",
+    "message": "no tiers but the page links to an external registration/event site",
+    "url": "https://www.eans.org/events/EventDetails.aspx?id=2033647",
+    "evidence": "Click here for more information -> https://www.sbns.org.uk/event-calendar/sbns-100.html"
+   }
+  ],
+  "blocking": true,
+  "exit_code": 2
+ }
+}

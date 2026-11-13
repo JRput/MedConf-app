@@ -1,0 +1,40 @@
+{
+ "source_id": 162,
+ "slug": "esge",
+ "class_name": null,
+ "status": "blocked",
+ "file_written": null,
+ "source_row": {
+  "source_name": "ESGE Event Calendar",
+  "society": "ESGE",
+  "base_url": "https://www.esge.com/events/event-calendar",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": false,
+  "extraction_instructions": "NOT BUILT: blocked by the site's Terms of Use (see concerns). For the record: AngularJS SPA; /events is a hub, the dated list is /events/event-calendar (rows: date range, linked title, 'City, Country - Venue', category tag)."
+ },
+ "registry_comment": "ESGE (162): BLOCKED, terms of use forbid automated access; not registered",
+ "probe_results": {
+  "shells": 0,
+  "shells_forced_fallback": 0,
+  "details_tested": 0,
+  "with_date": 0,
+  "with_pricing": 0,
+  "with_venue": 0,
+  "with_description": 0,
+  "with_specialty": 0
+ },
+ "test_urls": [
+  "https://www.esge.com/terms-of-use"
+ ],
+ "spot_check": [],
+ "concerns": [
+  "BLOCKED (Level 2, terms of use): https://www.esge.com/terms-of-use ('Last updated on: 2023-10-23') section 3 'Using the service' says the user agrees 'Not to use any automated systems or means to access, acquire, copy or monitor any part of the service', and section 4 'Content' repeats 'Not to use any automated systems or means, except for those provided by us, for the selection or downloading of the Content' (also personal, non-commercial use only). Per the wave 3 brief (AAN/AAD/CNS precedent) no extractor was written and the source should not be registered.",
+  "What was touched before the terms were read: 5 ordinary page loads of esge.com in a browser (events hub, robots.txt which is the SPA fallback, event calendar, endoscopy camp page, terms of use) to probe the site. Nothing was parsed into an extractor and nothing else will be fetched.",
+  "Suggestion for the owner (not done): ESGE Days 2027 (Lisbon, 29 Apr - 1 May 2027, Lisbon Congress Centre) runs on its own site https://esgedays.org, a separate domain with its own terms; it could be a single-congress candidate after that site's terms are checked.",
+  "No extractors/esge.py exists, so py_compile and harness runs do not apply to this slug."
+ ]
+}

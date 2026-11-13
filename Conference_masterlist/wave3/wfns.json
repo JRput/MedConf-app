@@ -1,0 +1,75 @@
+{
+ "source_id": 161,
+ "slug": "wfns",
+ "class_name": "WfnsExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/wfns.py",
+ "source_row": {
+  "source_name": "WFNS Events",
+  "society": "WFNS",
+  "base_url": "https://wfns.org/events",
+  "default_event_type": "mixed",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "extraction_instructions": "ASP.NET list, one long page (1.5 MB incl. archive). Only the #tab1 'Future Events' tab is read: table per event with day/month badge, link /events/<cat>/<id>/<slug>, bold date line, optional organiser website. Detail: h1 lblTitle, blue line '(dd/mm/yyyy - dd/mm/yyyy) / Venue, City, , Country', website link, announcement PDFs, body text. No fees published; organiser website becomes organiser_url.",
+  "detail_is_multipage": false,
+  "active": true
+ },
+ "registry_comment": "WFNS (161): ASP.NET future-events tab, detail '(dates) / place' line; organiser site as organiser_url",
+ "probe_results": {
+  "shells": 4,
+  "shells_forced_fallback": 4,
+  "details_tested": 4,
+  "with_date": 4,
+  "with_pricing": 0,
+  "with_venue": 4,
+  "with_description": 3,
+  "with_specialty": 4
+ },
+ "test_urls": [
+  "https://wfns.org/events/14/wfns-official-events/392/dr-mehmet-zileli-advanced-spine-surgery-course",
+  "https://wfns.org/events/14/wfns-official-events/388/chicagos-advanced-training-in-skull-base-surgery",
+  "https://wfns.org/events/14/wfns-official-events/394/2027-international-neurosurgical-oncology-congress"
+ ],
+ "spot_check": [
+  {
+   "url": "https://wfns.org/events/14/wfns-official-events/392/dr-mehmet-zileli-advanced-spine-surgery-course",
+   "field": "dates/venue",
+   "site_says": "(20/11/2026 - 22/11/2026) / Swiss Hotel Grand Efes, Izmir, Türkiye, , Türkiye; website https://www.spinalkurs.org/en/",
+   "extractor_says": "2026-11-20..2026-11-22, venue Swiss Hotel Grand Efes, city Izmir, region Türkiye, organiser_url spinalkurs.org",
+   "match": true
+  },
+  {
+   "url": "https://wfns.org/events/14/wfns-official-events/388/chicagos-advanced-training-in-skull-base-surgery",
+   "field": "dates/place",
+   "site_says": "(12/3/2027 - 14/3/2027) / Chicago, Illinois, , USA",
+   "extractor_says": "2027-03-12..2027-03-14, city Chicago, region USA",
+   "match": true
+  },
+  {
+   "url": "https://wfns.org/events/14/wfns-official-events/394/2027-international-neurosurgical-oncology-congress",
+   "field": "abstract",
+   "site_says": "Call for Abstracts Opens November 16, 2026; Abstract Submission Deadline March 1, 2027; Miami, Florida, USA; June 3-7, 2027",
+   "extractor_says": "abstract_open True, abstract_deadline 2027-03-01, city Miami, 2027-06-03..2027-06-07",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Listing: only the 'Future Events' tab (#tab1) of /events is read: 4 events (Zileli course, Chicago skull base course, 2027 International Neurosurgical Oncology Congress, WFNS 2027 World Congress, Bali). Shell counts normal and forced-fallback both 4. The 1.5 MB page also holds the past archive in #tab2 (never read). wfns.info (blog) ignored. The menu also has per-category pages (/events/14 Official, /events/17 Endorsed, /events/18 International); only the 'All Events' page was read, and the 4 future events found there all sit under /events/14 (Official), so a category-only listing missing from All Events is unproven.",
+  "Relevance: every event is neurosurgery for clinicians; webinars would be kept; only administrative titles (AGM, general assembly, committee/board meetings) are dropped and logged. None today.",
+  "Fees: WFNS publishes none (only announcement/brochure PDFs and an organiser website); pricing_tiers=[] justified against the page text, the file links and the organiser site (set as organiser_url; discovery followed spinalkurs.org with identity strong in a scratch run and found no fee there, its registration page is weak identity and was rejected, fail-closed). WFNS 2027 Bali: wfns2027bali.org set as organiser_url, no venue name published (city Bali only).",
+  "Abstract info is parsed from the page's own lines with abstract_classifier.classify_submission (the harness otherwise reports SUBMISSION_NO_DEADLINE because the pipeline classifier runs after the extractor).",
+  "HQ LESSON #95: regexes accept single or double quotes (WFNS raw HTML uses single quotes, the rendered DOM double); extract_detail reads page.content() (the rendered DOM the pipeline sees) and only falls back to fetch_html when the page lacks the markup.",
+  "Terms/robots: wfns.org/robots.txt is a 404 (no rules); site footer has only Cookie and Privacy policies, no terms of use or automation clause found.",
+  "Taxonomy ask: society code 'WFNS' (World Federation of Neurosurgical Societies, international, global) in societies.ts. Specialty fixed to 'Neurosurgery'.",
+  "Requests to wfns.org over development + both harness runs: about 20, sequential."
+ ],
+ "coverage_run": {
+  "date": "2026-11-13",
+  "pages_checked": 2,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ }
+}

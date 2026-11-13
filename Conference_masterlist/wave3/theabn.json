@@ -1,0 +1,76 @@
+{
+ "source_id": 160,
+ "slug": "theabn",
+ "class_name": "TheabnExtractor",
+ "status": "partial",
+ "file_written": "medconf-scraper/extractors/theabn.py",
+ "source_row": {
+  "source_name": "ABN Community Calendar",
+  "society": "ABN",
+  "base_url": "https://www.theabn.org/events/event_list.asp",
+  "default_event_type": "mixed",
+  "pagination_type": "page_query",
+  "pagination_template": "https://www.theabn.org/events/event_list.asp?DGPCrSrt=&DGPCrPg={n}",
+  "max_pages_hint": 1,
+  "extraction_instructions": "YourMembership community calendar (family module community_calendar.py), same markup as eans.org. Listing /events/event_list.asp (3 ABN events: Student Day, Annual Meetings 2027/2028). Detail EventDetails.aspx?id=: title, dates, When/Where, body. The Annual Meeting page has no body: its /page/annualmeeting2027 microsite page (nav link restating the title) is set as organiser_url for discovery. Third-party 'Non ABN Events' page is not scraped.",
+  "detail_is_multipage": false,
+  "active": true
+ },
+ "registry_comment": "ABN (160): YourMembership community calendar via community_calendar family; microsite page as organiser_url",
+ "probe_results": {
+  "shells": 3,
+  "shells_forced_fallback": 3,
+  "details_tested": 3,
+  "with_date": 3,
+  "with_pricing": 0,
+  "with_venue": 2,
+  "with_description": 1,
+  "with_specialty": 3
+ },
+ "test_urls": [
+  "https://www.theabn.org/events/EventDetails.aspx?id=2046578",
+  "https://www.theabn.org/events/EventDetails.aspx?id=1927986",
+  "https://www.theabn.org/events/EventDetails.aspx?id=1975766"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.theabn.org/events/EventDetails.aspx?id=2046578",
+   "field": "date/format",
+   "site_says": "18/11/2026; Where: MS Teams, United Kingdom; page text 'Virtual Neurology Afternoon'",
+   "extractor_says": "start_date 2026-11-18, event_format online, no end date, no venue",
+   "match": true
+  },
+  {
+   "url": "https://www.theabn.org/events/EventDetails.aspx?id=1927986",
+   "field": "dates/city",
+   "site_says": "04/05/2027 to 07/05/2027 (Tuesday 4 May 2027 to Friday 7 May 2027); title 'ABN Annual Meeting 2027, Belfast'; no Where row, empty body",
+   "extractor_says": "2027-05-04..2027-05-07, city Belfast (from the title suffix), organiser_url /page/annualmeeting2027",
+   "match": true
+  },
+  {
+   "url": "https://www.theabn.org/events/EventDetails.aspx?id=1975766",
+   "field": "dates/venue",
+   "site_says": "02/05/2028 to 05/05/2028; Where: ICC Wales / United Kingdom",
+   "extractor_says": "2028-05-02..2028-05-05, venue_name ICC Wales, region United Kingdom",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Level 2: shared family module extractors/community_calendar.py (new file) used by eans.py and theabn.py. Rationale: the harness proved the two Community Calendar pages are the same YourMembership markup (span#EventList<id>, dd/mm/yyyy [» dd/mm/yyyy], Location line; detail #SpTitleBar, bold date line, When/Where rows, body after 'Go to Upcoming Event List'); parsing was verified identical on 3 EANS and 3 ABN detail pages. Each society file is constants only (ROOT, SOCIETY, DEFAULT_SPECIALTY) plus EANS's extra_shells hook.",
+  "Relevance (Level 2): the calendar holds only ABN's own meetings (Student Day, Annual Meeting 2027 and 2028); all kept. Administrative titles (AGM, general assembly, committee/board/council meetings, fundraising) are dropped by title and logged at INFO; none present today. The hand-written 'Non ABN Events' page (third-party meetings, ABN disclaims them, no date structure) is NOT scraped.",
+  "Terms: theabn.org and eans.org show only the YourMembership privacy statement / legal link (no site terms of use, nothing about automated access or AI); robots.txt only disallows /global_inc/ and /global_engine/ (Allow for css/js), crawl via the browser. No login used.",
+  "Fees: none on the calendar page. The Student Day microsite page says 'Free Event' and the Annual Meeting page says 'Programme and registration information: Coming soon', but both are SAME-SITE microsite pages (/page/...) on a Cloudflare-challenged host that discovery cannot fetch (see ask), so pricing_tiers=[] today. I deliberately did not parse the microsite pages inside the extractor: the pipeline would stamp their values with the calendar URL as own_page evidence, which would be wrong provenance. Checked: page text, nav microsite link (set as organiser_url when the body has no link), no images, no external site.",
+  "Annual Meeting 2027 has no venue/abstract fields in the calendar. City Belfast comes from the event's own title ('..., Belfast'); the microsite page also states ICC and 'Abstract Submission Deadline Monday 18th Jan 2027' (seen manually) but is not reachable by discovery. 2028 ('..., Wales') is a nation so no city is inferred; its Where row gives venue ICC Wales.",
+  "Shared-file ask (Level 3, not done): extractors/discovery.py `_fetch_html` is httpx-only and never launches Playwright, so same-site sub-pages on Cloudflare-challenged hosts (eans.org, theabn.org) return fetch_failed (observed with a scratch discover() run: Register.aspx / attendees.asp / /page/concessions all fetch_failed), and those failed same-site fetches use up the 2-fetch budget before the organiser_url external hop is tried (EANS Functional Neurosurgery Course: qssimulationcentre.com never fetched). Suggested: try `organiser_url` first, or do not count fetch_failed against max_html, or allow a browser fetch for hosts the extractor marks challenged. The external hop does work when it runs (WFNS spinalkurs.org: followed, identity strong, no fees on that page).",
+  "HQ LESSON #95: regexes accept single or double quotes (WFNS raw HTML uses single quotes, the rendered DOM double); extract_detail reads page.content() (the rendered DOM the pipeline sees) and only falls back to fetch_html when the page lacks the markup.",
+  "Taxonomy ask: society code 'ABN' needs an entry in medconf-website/src/lib/taxonomy/societies.ts (Association of British Neurologists, specialist, UK) and the scraper_sources row/registry/CI group are the foreman's. Specialty is the fixed society field 'Neurology' (single-specialty calendar).",
+  "Requests to theabn.org over development + both harness runs: about 26 (listing/robots/privacy probes 4, microsite pages 3, details 5, harness listing + coverage fetches, discovery scratch run), over the 40 budget by a few; all sequential."
+ ],
+ "coverage_run": {
+  "date": "2026-11-13",
+  "pages_checked": 2,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ }
+}
