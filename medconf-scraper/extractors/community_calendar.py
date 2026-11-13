@@ -17,8 +17,10 @@ from datetime import date
 from typing import Any, Callable, Dict, List, Optional
 from urllib.parse import urljoin, urlparse
 
+import robots_gate
 from logger import logger
 
+from .abstract_classifier import classify_submission
 from .base import BaseExtractor
 from .http_fetch import fetch_html
 from .pricing_tables import parse_pricing_tables
@@ -141,17 +143,63 @@ def parse_detail(html: str, root: str) -> Dict[str, Any]:
     return out
 
 
-_TITLE_CITY_RE = re.compile(r"^.*\b20\d\d\s*,\s*([A-Z][A-Za-z.' -]{2,30})$")
-_NATIONS = {"wales", "scotland", "england", "ireland", "uk", "united kingdom", "northern ireland"}
+_TITLE_CITY_RE = re.compile(r"^.*\b20\d\d\s*,\s*(\S.{1,40}?)\s*$")
+_CITY_TOKEN_RE = re.compile(r"^[A-Z][A-Za-zÀ-ÖØ-öø-ÿ'’.-]{2,29}$")
+_TWO_WORD_CITIES = {"new york", "los angeles", "san diego", "san francisco", "tel aviv", "hong kong", "kuala lumpur", "buenos aires",
+                    "cape town", "new delhi", "rio de janeiro", "washington dc", "las vegas", "abu dhabi", "tel-aviv"}
+_NOT_PLACES = {"online", "virtual", "hybrid", "tbc", "tba", "tbd", "teams", "zoom", "webinar", "live", "remote", "digital", "tbc.",
+               "wales", "scotland", "england", "ireland", "uk", "united kingdom", "northern ireland", "europe", "asia", "africa",
+               "international", "global", "national", "regional", "part", "day", "meeting", "course", "congress", "conference",
+               "symposium", "workshop", "autumn", "spring", "summer", "winter", "edition", "programme", "program", "update"}
 
 
 def city_from_title(title: str) -> Optional[str]:
-    """'ABN Annual Meeting 2027, Belfast' -> 'Belfast': the event's own title names the host city after the year. Nations
-    ('... 2028, Wales') are not cities. Used only when the page has no Where row. Pure."""
+    """'ABN Annual Meeting 2027, Belfast' -> 'Belfast': the event's own title names the host city after the year. The candidate
+    must be ONE capitalised token (or a known two-word city) and not a format/placeholder/nation word (Online, Virtual, Hybrid,
+    TBC, TBA, Teams, Zoom, Webinar, Wales ...). Used only when the page has no Where row. Pure."""
     m = _TITLE_CITY_RE.match((title or "").strip())
-    if not m or m.group(1).strip().lower() in _NATIONS:
+    if not m:
         return None
-    return m.group(1).strip()
+    cand = m.group(1).strip()
+    low = cand.lower()
+    if low in _NOT_PLACES or any(w in _NOT_PLACES for w in re.split(r"[\s/&-]+", low)):
+        return None
+    if low in _TWO_WORD_CITIES or _CITY_TOKEN_RE.match(cand):
+        return cand
+    return None
+
+
+def empty_signal(html: str) -> bool:
+    """Positive proof of an empty YourMembership calendar: the EventList container is present and either says so in words
+    ('no upcoming events') or holds no event rows, no links and no date-like text. A container that simply failed to match the
+    row regex is NOT empty. Pure."""
+    m = re.search(r"""(?is)<table[^>]*id=["']EventList["'][^>]*>(.*?)</table>""", html or "")
+    if not m:
+        return False
+    inner = m.group(1)
+    if _BLOCK_SPLIT_RE.search(inner) or "<a " in inner.lower() or re.search(r"\d{1,2}/\d{1,2}/\d{4}", inner):
+        return False
+    text = _clean(inner)
+    return bool(re.search(r"(?i)\bno (?:upcoming )?events?\b", text)) or text.lower() in ("upcoming events", "")
+
+
+_VENUE_SENT_RE = re.compile(r"(?i)(?:will be )?held in ([A-Z][A-Za-zÀ-ÿ .'-]{2,40}?) at (?:the )?([A-Z][^.]{1,80}?)\s*$")
+
+
+def parse_microsite(html: str) -> Dict[str, Any]:
+    """The society's own event page (`/page/...`): `#CustomPageBody` text lines -> venue/city ('held in Belfast at the ICC'),
+    abstract status, public fee tables. Pure."""
+    m = re.search(r"""(?is)<div id=["']CustomPageBody["']>(.*?)<div id=["']ResourceCollection["']""", html or "")
+    body = m.group(1) if m else ""
+    lines = html_to_lines(re.sub(r"\s*\n\s*", " ", body))
+    out: Dict[str, Any] = {"lines": lines}
+    for l in lines:
+        vm = _VENUE_SENT_RE.search(l)
+        if vm:
+            out["city"], out["venue_name"] = vm.group(1).strip(), vm.group(2).strip()
+            break
+    out["body_html"] = body
+    return out
 
 
 _CTA_RE = re.compile(r"(?i)regist|info|website|more|here|programme|book|details|visit")
@@ -207,7 +255,7 @@ class CommunityCalendarExtractor(BaseExtractor):
         seen = set()
         dropped: List[str] = []
         total = 0
-        listing_ok = False
+        first_page_empty = False
         for page_no in range(1, MAX_PAGES + 1):
             url = self.ROOT + self.LISTING_PATH + ("" if page_no == 1 else f"?DGPCrSrt=&DGPCrPg={page_no}")
             html = fetch_html(url, browser=getattr(self, "browser", None), expect_selector="#SpContent")
@@ -216,7 +264,8 @@ class CommunityCalendarExtractor(BaseExtractor):
                     logger.warning(f"{self.SOCIETY} calendar: listing fetch failed")
                     return []
                 break
-            listing_ok = listing_ok or bool(re.search(r"""id=["']EventList["']""", html))
+            if page_no == 1:
+                first_page_empty = empty_signal(html)
             rows = [r for r in parse_listing(html, self.ROOT) if r["id"] not in seen]
             if not rows:
                 break
@@ -238,8 +287,11 @@ class CommunityCalendarExtractor(BaseExtractor):
         have = {s["booking_url"] for s in shells}
         shells.extend(s for s in extras if s["booking_url"] not in have)
         logger.info(f"{self.SOCIETY} calendar: {len(shells)} kept of {total} listed ({len(dropped)} dropped, {len(extras)} extra)")
-        if not shells and listing_ok:
-            self.verified_empty = f"{self.SOCIETY} community calendar loaded and lists no upcoming events"
+        if not shells and first_page_empty:
+            self.verified_empty = f"{self.SOCIETY} community calendar loaded: event list container present with no rows"
+        elif not shells:
+            logger.warning(f"{self.SOCIETY} calendar: 0 shells without a positive empty signal (parser break or all rows dropped); "
+                           f"not recorded as verified empty")
         return shells
 
     def extract_detail(self, page, shell: Dict[str, Any], llm_call: Callable[[str], Optional[str]]) -> Dict[str, Any]:
@@ -285,16 +337,86 @@ class CommunityCalendarExtractor(BaseExtractor):
         if org and org != url:
             out["organiser_url"] = org
 
-        if d.get("body_html"):
-            tiers = parse_pricing_tables(d["body_html"], default_currency="") or []
+        tiers = (parse_pricing_tables(d["body_html"], default_currency="") or []) if d.get("body_html") else []
+        for t in tiers:
+            t["evidence_url"], t["evidence_identity"] = url, "own_page"
+        if tiers:
+            out["pricing_tiers"] = tiers
+        if not tiers:
+            tiers = self._register_tiers(url)
             if tiers:
                 out["pricing_tiers"] = tiers
+        site = org if org and urlparse(org).netloc == urlparse(self.ROOT).netloc and urlparse(org).path.startswith("/page/") else None
+        if site:
+            self._merge_microsite(out, site, shell)
         body_text = " ".join(lines)
         cm = re.search(r"(\d+(?:\.\d+)?)\s*(?:external\s+)?CPD\s*(?:points?|credits?|hours?)", body_text, re.I)
         if cm:
             out["cpd_points"], out["cpd_accredited"] = float(cm.group(1)), True
         out["specialty"] = self.DEFAULT_SPECIALTY      # single-specialty society calendar: the shared classifier mis-tags spine courses as MSK
         return out
+
+    def _fetch_checked(self, url: str, expect: str) -> Optional[str]:
+        """One robots-checked fetch (browser fallback allowed). None when disallowed or unreachable."""
+        if not robots_gate.allowed(url):
+            logger.info(f"{self.SOCIETY} calendar: robots disallows {url}; skipped")
+            return None
+        return fetch_html(url, browser=getattr(self, "browser", None), expect_selector=expect)
+
+    def _register_tiers(self, event_url: str) -> List[Dict[str, Any]]:
+        """The event's own `Register.aspx?id=<id>` page: public fee tables only. Closed ('Registration Not Permitted'), login-gated
+        or member-only pages give nothing and the skip is logged."""
+        em = re.search(r"[?&]id=(\d+)", event_url or "")
+        if not em:
+            return []
+        url = f"{self.ROOT}/events/Register.aspx?id={em.group(1)}"
+        html = self._fetch_checked(url, "#SpContent")
+        if not html:
+            logger.info(f"{self.SOCIETY} calendar: register page not read for {event_url}")
+            return []
+        cm = re.search(r"""(?is)id=["']SpContent["'].*""", html)
+        body = cm.group(0) if cm else ""
+        if re.search(r"(?i)registration not permitted|registration for the event is closed|sign in to register|log ?in to register", body):
+            logger.info(f"{self.SOCIETY} calendar: register page gated or closed, no public fees: {url}")
+            return []
+        kept = []
+        for t in parse_pricing_tables(body, default_currency="") or []:
+            if re.search(r"(?i)members? only|member-only|login|log in", t.get("tier_label") or ""):
+                logger.info(f"{self.SOCIETY} calendar: member-only tier skipped: {t.get('tier_label')!r} ({url})")
+                continue
+            t["evidence_url"], t["evidence_identity"] = url, "own_page"
+            kept.append(t)
+        return kept
+
+    def _merge_microsite(self, out: Dict[str, Any], site_url: str, shell: Dict[str, Any]) -> None:
+        """The society's own page for this event (linked from the calendar entry): fills venue/city, abstract status and public
+        fee tables the calendar page lacks. Values flow out through the normal return (the pipeline stamps provenance)."""
+        html = self._fetch_checked(site_url, "#SpContent")
+        if not html:
+            return
+        m = parse_microsite(html)
+        if not out.get("venue_name") and m.get("venue_name"):
+            out["venue_name"] = m["venue_name"][:200]
+        if not out.get("city") and m.get("city"):
+            out["city"] = m["city"][:80]
+        if not any(out.get(k) for k in ("abstract_deadline", "abstract_deadline_note")):
+            try:
+                start = date.fromisoformat(out.get("start_date") or shell.get("start_date") or "")
+            except ValueError:
+                start = None
+            is_open, deadline, note = classify_submission("\n".join(m["lines"]), date.today(), start)
+            if deadline:
+                out["abstract_open"], out["abstract_deadline"] = is_open, deadline.isoformat()
+            elif note:
+                out["abstract_open"], out["abstract_deadline_note"] = is_open, note
+        if not out.get("pricing_tiers") and m.get("body_html"):
+            tiers = parse_pricing_tables(m["body_html"], default_currency="") or []
+            for t in tiers:
+                t["evidence_url"], t["evidence_identity"] = site_url, "own_page"
+            if tiers:
+                out["pricing_tiers"] = tiers
+        if re.search(r"(?i)\bfree event\b", " ".join(m["lines"])) and not out.get("pricing_tiers"):
+            logger.info(f"{self.SOCIETY} calendar: {site_url} says 'Free Event' but names no currency; no tier written")
 
     def extra_detail(self, page, shell: Dict[str, Any]) -> Dict[str, Any]:
         """Detail for a shell produced by `extra_shells()`; subclasses that add extras override this."""

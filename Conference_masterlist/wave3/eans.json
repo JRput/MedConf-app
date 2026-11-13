@@ -66,17 +66,20 @@
   "HQ LESSON #95: regexes accept single or double quotes (WFNS raw HTML uses single quotes, the rendered DOM double); extract_detail reads page.content() (the rendered DOM the pipeline sees) and only falls back to fetch_html when the page lacks the markup.",
   "Terms/robots: see theabn concerns (YourMembership legal link is privacy only; robots disallows only /global_inc/ and /global_engine/).",
   "Taxonomy ask: society code 'EANS' (European Association of Neurosurgical Societies, international, Europe) in societies.ts. Specialty is the fixed society field 'Neurosurgery' (the shared classifier tagged spine courses as musculoskeletal). event_type is left to the merge layer's title heuristic.",
-  "Requests to eans.org over development + both harness runs: about 40 (probe pages 12, harness runs 2 x (3 listing + 1 congress + 1 base + details)); at the budget limit, sequential."
+  "robots.txt (fetched once via fetch_html 2026-11-13, identical on eans.org and theabn.org; quoted verbatim): 'User-agent: *' Disallow: /global_inc/ ; Allow: /global_inc/*.css ; Allow: /global_inc/*.js ; 'User-agent: *' Disallow: /global_engine/ajax/ ; then Disallow: /global_engine/ for the agents *Google*, *googlebot*, *Slurp*, *sitecheck*, *mercator*, *ia_archiver*, *webcrawler*, *msnbot*, *scooter*; Sitemap: https://www.<host>/autositemapindex.xml. Nothing under /events/ or /page/ is disallowed, so Register.aspx and /page/... fetches pass robots_gate.allowed().",
+  "FM-3C: community_calendar now fetches, robots-checked and sequential, (a) each event's own /events/Register.aspx?id=<id> and (b) the same-site /page/... event page linked from the entry; fees via pricing_tables, public rates only, tiers carry evidence_url/own_page; venue and abstract only when the detail page lacks them.",
+  "Result for EANS (harness, 3 details of 23): no row gained fees from Register.aspx (sampled events answer 'Registration Not Permitted'; the closed/gated page is logged and skipped, member-only tiers would be skipped and logged). EANS entries mostly link to external organiser sites, which discovery still handles via organiser_url (see the earlier budget ask). city_from_title / verified_empty rules as in theabn. Harness shell count 23 (unchanged).",
+  "Requests to eans.org: about 52 over the whole task including the FM-3C run (each detail now adds one Register.aspx fetch); sequential. At scrape time EANS adds up to 22 Register.aspx fetches a run."
  ],
  "coverage_run": {
   "date": "2026-11-13",
-  "pages_checked": 2,
+  "pages_checked": 3,
   "warnings": [
    {
     "code": "PRICE_EXTERNAL_LINK",
     "message": "no tiers but the page links to an external registration/event site",
-    "url": "https://www.eans.org/events/EventDetails.aspx?id=2033647",
-    "evidence": "Click here for more information -> https://www.sbns.org.uk/event-calendar/sbns-100.html"
+    "url": "https://www.eans.org/events/EventDetails.aspx?id=2086345",
+    "evidence": "Find more information here -> https://www.corsi.univr.it/?ent=cs&id=975&lang=en"
    }
   ],
   "blocking": true,

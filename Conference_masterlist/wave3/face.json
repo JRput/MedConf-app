@@ -5,8 +5,8 @@
  "status": "done",
  "file_written": "medconf-scraper/extractors/face.py",
  "source_row": {
-  "source_name": "The Aesthetic Show UK (FACE)",
-  "society": "TAS UK",
+  "source_name": "FACE – The Aesthetic Show UK",
+  "society": "FACE",
   "base_url": "https://www.faceconference.com/",
   "default_event_type": "conference",
   "pagination_type": "single_page",

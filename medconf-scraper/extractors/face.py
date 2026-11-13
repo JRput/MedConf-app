@@ -9,7 +9,7 @@ from .single_congress import SingleCongressExtractor
 
 class FaceExtractor(SingleCongressExtractor):
     HOME_URL = "https://www.faceconference.com/"
-    SOCIETY = "TAS UK"
+    SOCIETY = "FACE"
     EVENT_NAME = "The Aesthetic Show UK"
     DEFAULT_SPECIALTY = "Aesthetic Medicine"
     DEFAULT_CURRENCY = "GBP"

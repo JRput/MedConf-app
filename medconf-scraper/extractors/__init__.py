@@ -157,6 +157,11 @@ from .bcs import BcsExtractor
 from .nhs_england_events import NhsEnglandEventsExtractor
 from .imcas import ImcasExtractor
 from .ors import OrsExtractor
+from .eans import EansExtractor
+from .theabn import TheabnExtractor
+from .wfns import WfnsExtractor
+from .ese_hormones import EseHormonesExtractor
+from .face import FaceExtractor
 from .cns import CnsExtractor
 from .eshre import EshreExtractor
 from .eular import EularExtractor
@@ -327,6 +332,11 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     156: NhsEnglandEventsExtractor,           # 156: NHS England events portal (events.england.nhs.uk): paged ticketing portal, clinical/education/leadership relevance gate, dropped titles logged
     157: ImcasExtractor,                      # 157: IMCAS (imcas.com): own congresses only (World/Americas/Asia/China); /registration robots-disallowed so no fees; discovery off
     158: OrsExtractor,                        # 158: ORS (ors.org): menu-listed event pages + future annual meetings; USD grid on /register<year>/ only when the heading names the year
+    159: EansExtractor,                       # 159: EANS (eans.org): YourMembership community calendar + EANS Congress page; community_calendar family; Cloudflare → browser fetch
+    160: TheabnExtractor,                     # 160: ABN (theabn.org): community calendar, ABN Annual Meeting; community_calendar family
+    161: WfnsExtractor,                       # 161: WFNS (wfns.org): Future Events tab, official courses/congresses; no fees published
+    163: EseHormonesExtractor,                # 163: ESE (ese-hormones.org): events & key dates via the site's search API; bespoke EUR fee grid (Porto course); ECE flagship
+    164: FaceExtractor,                       # 164: FACE / The Aesthetic Show UK (faceconference.com): single_congress, between editions → verified_empty
 }
 
 

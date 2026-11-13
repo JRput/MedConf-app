@@ -63,11 +63,12 @@
   "HQ LESSON #95: regexes accept single or double quotes (WFNS raw HTML uses single quotes, the rendered DOM double); extract_detail reads page.content() (the rendered DOM the pipeline sees) and only falls back to fetch_html when the page lacks the markup.",
   "Terms/robots: wfns.org/robots.txt is a 404 (no rules); site footer has only Cookie and Privacy policies, no terms of use or automation clause found.",
   "Taxonomy ask: society code 'WFNS' (World Federation of Neurosurgical Societies, international, global) in societies.ts. Specialty fixed to 'Neurosurgery'.",
-  "Requests to wfns.org over development + both harness runs: about 20, sequential."
+  "Requests to wfns.org over development + both harness runs: about 20, sequential.",
+  "FM-3C: verified_empty only when the #tab1 container is present with no links and no date-like text (or says 'no events'); otherwise [] without verified_empty so the run fails loudly. organiser_url is accepted only for http(s) URLs with a host (and not Teams/Zoom/Meet); tests in test_community_calendar.py. Harness shell count 4 (unchanged)."
  ],
  "coverage_run": {
   "date": "2026-11-13",
-  "pages_checked": 2,
+  "pages_checked": 4,
   "warnings": [],
   "blocking": false,
   "exit_code": 0

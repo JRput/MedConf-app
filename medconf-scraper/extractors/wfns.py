@@ -14,6 +14,7 @@ import html as html_lib
 import re
 import time
 from datetime import date
+from urllib.parse import urlparse
 from typing import Any, Callable, Dict, List, Optional
 
 from logger import logger
@@ -54,6 +55,26 @@ def _clean(s: str) -> str:
 
 def is_relevant(title: str) -> bool:
     return not _DROP_RE.search(title or "")
+
+
+def future_region(html: str) -> Optional[str]:
+    """The `#tab1` (Future Events) container HTML, or None when the page has no such container. Pure."""
+    m1 = re.search(r"""id=["']tab1["']""", html or "")
+    if not m1:
+        return None
+    m2 = re.search(r"""id=["']tab2["']""", html[m1.end():])
+    return html[m1.start(): m1.end() + m2.start()] if m2 else html[m1.start():]
+
+
+def empty_signal(html: str) -> bool:
+    """Positive proof of an empty future list: the container exists and holds no links and no date-like text (or says 'no events').
+    A container whose rows simply did not match the row regex is NOT empty. Pure."""
+    region = future_region(html)
+    if region is None:
+        return False
+    if "<a " in region.lower() or re.search(rf"(?i)\b(?:20\d\d|{_MON})\b", _clean(region)):
+        return bool(re.search(r"(?i)\bno (?:upcoming |future )?events\b", _clean(region))) and "<a " not in region.lower()
+    return True
 
 
 def parse_listing(html: str) -> List[Dict[str, Any]]:
@@ -191,8 +212,10 @@ class WfnsExtractor(BaseExtractor):
             shells.append({"title": r["title"], "booking_url": r["url"], "start_date": r["start_date"],
                            "end_date": r["end_date"], "organiser_url": r["website"]})
         logger.info(f"WFNS: {len(shells)} kept of {len(rows)} future events listed")
-        if not shells and re.search(r"""id=["']tab1["']""", html):
-            self.verified_empty = "WFNS 'Future Events' tab loaded and lists no upcoming events"
+        if not shells and empty_signal(html):
+            self.verified_empty = "WFNS 'Future Events' tab present with no links and no dates"
+        elif not shells:
+            logger.warning("WFNS: 0 shells without a positive empty signal (parser break or all rows dropped); not verified empty")
         return shells
 
     def extract_detail(self, page, shell: Dict[str, Any], llm_call: Callable[[str], Optional[str]]) -> Dict[str, Any]:
@@ -217,8 +240,10 @@ class WfnsExtractor(BaseExtractor):
         if not out.get("event_format") and _ONLINE_RE.search(f"{title} {shell.get('organiser_url') or ''}"):
             out["event_format"] = "online"
         web = d.get("website") or shell.get("organiser_url")
-        if web and not re.search(r"(?i)teams\.|zoom\.us|meet\.google", web):
-            out["organiser_url"] = web
+        if web:
+            pw = urlparse(web.strip())
+            if pw.scheme in ("http", "https") and pw.netloc and not re.search(r"(?i)teams\.|zoom\.us|meet\.google", web):
+                out["organiser_url"] = web.strip()
         desc = next((l for l in d.get("body_lines") or [] if len(l) >= 60 and re.match(r"[A-Za-z\"'(0-9]", l)), None)
         if desc:
             if len(desc) > 400:

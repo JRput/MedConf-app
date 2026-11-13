@@ -170,6 +170,12 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   'NHS England': { short: 'NHS England', name: 'NHS England (events portal)', kind: 'other', country: 'UK' },
   IMCAS: { short: 'IMCAS', name: 'International Master Course on Aging Science (IMCAS)', kind: 'international', country: 'FR' },
   ORS: { short: 'ORS', name: 'Orthopaedic Research Society', kind: 'international', country: 'US' },
+  // Wave 3 batch 3-C (2026-11-13)
+  EANS: { short: 'EANS', name: 'European Association of Neurosurgical Societies', kind: 'international', country: 'EU' },
+  ABN: { short: 'ABN', name: 'Association of British Neurologists', kind: 'specialist', country: 'UK' },
+  WFNS: { short: 'WFNS', name: 'World Federation of Neurosurgical Societies', kind: 'international', country: 'International' },
+  ESE: { short: 'ESE', name: 'European Society of Endocrinology', kind: 'international', country: 'EU' },
+  FACE: { short: 'FACE', name: 'FACE – The Aesthetic Show UK (Informa)', kind: 'other', country: 'UK' },
   // AAN (American Academy of Neurology), AAD (American Academy of Dermatology) and
   // CNS (Congress of Neurological Surgeons) were excluded by the owner on 2026-10-23
   // (their terms forbid automated access / third-party reuse). scraper_sources rows
