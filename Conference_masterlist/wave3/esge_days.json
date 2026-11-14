@@ -1,0 +1,82 @@
+{
+ "source_id": 162,
+ "slug": "esge_days",
+ "class_name": "EsgeDaysExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/esge_days.py",
+ "source_row": {
+  "source_name": "ESGE Days",
+  "society": "ESGE",
+  "base_url": "https://www.esgedays.org/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Congress site only (esgedays.org); never fetch esge.com (terms forbid automated access). Home page 'Essential Information' lists the key dates and 'April 29 - May 1, 2027: ESGE Days 2027 in Lisbon, Portugal' (the one-day pre-course line comes first). Fees: text grid on /registration/register-now. Abstract deadline: abstracts page 'November 17, 2026: Deadline for abstract submissions'. Venue: how-to-get page 'Venue Address : Lisbon Congress Centre'."
+ },
+ "registry_comment": "ESGE Days single-congress site (one upcoming edition) - single_congress family",
+ "coverage_run": {
+  "date": "2026-11-14",
+  "pages_checked": 1,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ },
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 1,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1,
+  "pricing_tiers": 30
+ },
+ "test_urls": [
+  "https://www.esgedays.org/",
+  "https://esgedays.org/registration/register-now",
+  "https://esgedays.org/abstracts/abstracts"
+ ],
+ "spot_check": [
+  {
+   "url": "https://www.esgedays.org/",
+   "field": "dates/place",
+   "site_says": "April 29 - May 1, 2027: ESGE Days 2027 in Lisbon, Portugal (April 28 pre-courses)",
+   "extractor_says": "2027-04-29..2027-05-01, Lisbon, Portugal",
+   "match": true
+  },
+  {
+   "url": "https://esgedays.org/registration/register-now",
+   "field": "fees",
+   "site_says": "Non-member in-person EUR 580 early (until 16 Mar 2027) / 730 / 835 late; virtual EUR 295; Member EUR 290/440/495; Student EUR 75/85/95",
+   "extractor_says": "30 EUR tiers incl. those values, early deadline 2027-03-16",
+   "match": true
+  },
+  {
+   "url": "https://esgedays.org/abstracts/abstracts",
+   "field": "abstract_deadline",
+   "site_says": "November 17, 2026: Deadline for abstract submissions; late breaking closes March 1, 2027",
+   "extractor_says": "2026-11-17, open, note 'Late-breaking abstracts close 1 March 2027'",
+   "match": true
+  },
+  {
+   "url": "https://esgedays.org/general-information/how-to-get-to-esge-days",
+   "field": "venue",
+   "site_says": "Venue Address : Lisbon Congress Centre, Praca das Industrias 1, 1300-307 Lisboa",
+   "extractor_says": "Lisbon Congress Centre, Lisbon, Portugal",
+   "match": true
+  }
+ ],
+ "concerns": [
+  "Hooks (Level 2), each proven by the harness: _edition_from (home lists the April 28 pre-course line first; family took it as the congress, giving 28 Apr start and city 'Pre-courses in Lisbon'); parse_place (strips 'X in' lead-in); fees_from_pages (text grid under category headings); apply_abstracts (family took 'Registration opens December 9, 2026' as the abstract deadline); venue_from_lines ('Venue Address : ...' has a space before the colon); detail_from_html (meta description replaces the 'Abstract submission closing soon' banner).",
+  "Robots: esgedays.org/robots.txt returns a soft 404 HTML page (noindex), no rules, so robots_gate allows all; never fetched esge.com. Pages fetched: home, register-now, abstracts, key-dates, how-to-get, general-terms PDF, imprint, plus 2 harness runs (about 20 requests total).",
+  "Terms: the site links only the participant and registration T&Cs (PDFs) and an imprint. Read the General T&Cs for Participants: no clause on robots, scraping, automated access or AI; only photo/recording rules. Imprint: none. The esge.com Terms of Use (automated access forbidden) were not fetched, as instructed.",
+  "Fees skipped on purpose: Press (free), Industry Representative badge (exhibitor/company staff), Postgraduate course industry rate, percentage-only rows (Least Developed Country 60% off, group 10% off). Add-on course prices exist only as late/on-site rates, with 'per course' for hands-on training. Members' fees are public (no login).",
+  "event_format is in_person although virtual participation is sold ('in Lisbon and online'); the family did not mark hybrid. Foreman may want hybrid.",
+  "Coverage checklist verified: multi-day range, Registration sub-page, abstract page with late-breaking dates, venue page. No external fee links, fee images or two-hop pages exist on this site.",
+  "Society code ESGE must exist in medconf-website/src/lib/taxonomy/societies.ts (the foreman owns registration)."
+ ]
+}
