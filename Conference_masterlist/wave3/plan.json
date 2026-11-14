@@ -492,6 +492,56 @@
      "batch": "3-C"
     }
    }
+  ],
+  "3-C2 single_congress": [
+   {
+    "domain": "esgedays.org",
+    "source_id": 162,
+    "slug": "esge_days",
+    "candidate_urls": [
+     "https://www.esgedays.org/",
+     "https://esgedays.org/"
+    ],
+    "recon": {
+     "domain": "esgedays.org",
+     "status": "resolved_by_probe_2026-11-14",
+     "platform": "single_congress_site",
+     "js_required": true,
+     "listing_url": "https://www.esgedays.org/",
+     "event_type_mix": "conference",
+     "detail_topology": "on_event_page",
+     "bot_protection": "cleared_by_runner_2026-11-14 (run 43532695582)",
+     "expected_found": [
+      "ESGE Days 2027"
+     ],
+     "notes": "Owner 2026-11-14: ESGE proceeds via the congress's own site. esge.com's Terms of Use (section 3, automated access forbidden) govern esge.com and are NOT linked from esgedays.org, which carries only participant/registration T&Cs and no robots.txt (404). Do not fetch anything on esge.com. Flagship ESGE Days 2027.",
+     "batch": "3-C2"
+    }
+   },
+   {
+    "domain": "ehaweb.org",
+    "source_id": 165,
+    "slug": "eha_congress",
+    "candidate_urls": [
+     "https://ehaweb.org/connect-network/eha2027-congress",
+     "https://ehaweb.org/congress/"
+    ],
+    "recon": {
+     "domain": "ehaweb.org",
+     "status": "resolved_by_probe_2026-11-14",
+     "platform": "single_congress_site",
+     "js_required": true,
+     "listing_url": "https://ehaweb.org/connect-network/eha2027-congress",
+     "event_type_mix": "conference",
+     "detail_topology": "on_event_page",
+     "bot_protection": "cleared_by_runner_2026-11-14 (run 43532695582)",
+     "expected_found": [
+      "EHA2027 Congress"
+     ],
+     "notes": "Owner 2026-11-14: alternative route. congress.ehaweb.org (m-anage) is robots Disallow: / — never fetch it, so fees stay absent unless published on ehaweb.org. ehaweb.org robots allows all; the runner's browser cleared the EHA2027 page (curl gets 403 — use fetch_html). Dates 10-13 June 2027 Barcelona, abstract deadline 1 March 2027 per the builder's earlier read.",
+     "batch": "3-C2"
+    }
+   }
   ]
  },
  "parked_after_probe_2026-11-09": {
