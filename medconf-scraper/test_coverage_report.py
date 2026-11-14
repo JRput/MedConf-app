@@ -114,3 +114,11 @@ def test_load_previous_ignores_baseline_and_today_and_future(tmp_path):
                  ("2026-10-28", "future"), ("baseline", "baseline")):
         (tmp_path / f"{n}.json").write_text(json.dumps({"date": d}))
     assert cr.load_previous(tmp_path, "2026-10-27") == {"date": "yesterday"}
+
+
+def test_needs_coverage_exempts_verified_empty_and_blocked_new_sources():
+    # 2026-11-14: ACR 152 (verified_empty = success with 0 rows) and FACE 164 kept the gate
+    # red for a week although nothing was wrong; blocked/unreachable are transient.
+    latest = {152: "success", 164: "success", 159: "blocked", 170: "unreachable",
+              165: "failed", 171: None, 172: "partial"}
+    assert cr.needs_coverage([152, 164, 159, 170, 165, 171, 172], latest) == [165, 171]

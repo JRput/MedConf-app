@@ -152,8 +152,8 @@ jobs:
             source_ids: "155,156,157,158"
             source_names: "BCS NHSEngland IMCAS ORS"
           - group: R
-            source_ids: "159,160,161,162,163,164,165"
-            source_names: "EANS ABN WFNS ESGEdays ESE FACE EHA"
+            source_ids: "159,160,161,162,163,164"
+            source_names: "EANS ABN WFNS ESGEdays ESE FACE"
 
     steps:
       - name: Check out repository

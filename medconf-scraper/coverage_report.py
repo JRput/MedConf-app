@@ -109,6 +109,29 @@ def recent_source_ids(sources: list[dict], now: datetime, days: int = RECENT_DAY
     return sorted(ids)
 
 
+def needs_coverage(recent_ids: list[int], latest_status: dict[int, str | None]) -> list[int]:
+    """Recent sources whose missing coverage entry is a real problem. A new source with no
+    live events is NOT a regression when its latest scrape ended `success` (0 cards is only
+    recorded as success when the extractor verified the listing empty — between-editions
+    congress sites such as ACR 152 / FACE 164, 2026-11-14) or when it was `blocked` /
+    `unreachable` (a transient access problem the scrape job already reports). It IS a
+    problem when the latest run `failed` or the source has never been scraped."""
+    return [sid for sid in recent_ids
+            if latest_status.get(sid) not in ("success", "partial", "blocked", "unreachable")]
+
+
+def latest_log_status(cl, ids: list[int]) -> dict[int, str | None]:
+    out: dict[int, str | None] = {}
+    for sid in ids:
+        try:
+            rows = (cl.table("scraper_logs").select("status").eq("source_id", sid)
+                    .order("id", desc=True).limit(1).execute().data)
+        except Exception:  # noqa: BLE001 — unknown status keeps the strict rule
+            rows = []
+        out[sid] = rows[0]["status"] if rows else None
+    return out
+
+
 def _drops(baseline: dict | None, current: dict, min_events: int | None, max_events: int | None = None):
     """{(sid, metric): (bv, nv, events, name)} for metrics more than MAX_DROP_PP under baseline."""
     out = {}
@@ -266,7 +289,9 @@ def main() -> int:
     bp = Path(args.baseline)
     baseline = json.loads(bp.read_text()) if bp.exists() else None
     previous = load_previous(Path(args.out_dir), day)
-    problems, advisories = evaluate(baseline, current, recent_source_ids(sources, now), previous)
+    recent = recent_source_ids(sources, now)
+    recent = needs_coverage(recent, latest_log_status(cl, recent))
+    problems, advisories = evaluate(baseline, current, recent, previous)
     if prov_n > 0:
         problems.append(prov_line)      # red, same mechanism as a regression
     if baseline is None:
