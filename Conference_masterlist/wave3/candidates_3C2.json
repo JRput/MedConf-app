@@ -1,0 +1,17 @@
+[
+ {
+  "domain": "esgedays.org",
+  "candidate_urls": [
+   "https://www.esgedays.org/",
+   "https://esgedays.org/"
+  ]
+ },
+ {
+  "domain": "ehaweb.org",
+  "candidate_urls": [
+   "https://ehaweb.org/connect-network/eha2027-congress",
+   "https://ehaweb.org/congress/",
+   "https://ehaweb.org/"
+  ]
+ }
+]
