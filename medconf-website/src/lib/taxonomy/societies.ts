@@ -176,6 +176,8 @@ export const SOCIETIES: Record<string, SocietyInfo> = {
   WFNS: { short: 'WFNS', name: 'World Federation of Neurosurgical Societies', kind: 'international', country: 'International' },
   ESE: { short: 'ESE', name: 'European Society of Endocrinology', kind: 'international', country: 'EU' },
   FACE: { short: 'FACE', name: 'FACE – The Aesthetic Show UK (Informa)', kind: 'other', country: 'UK' },
+  ESGE: { short: 'ESGE', name: 'European Society of Gastrointestinal Endoscopy', kind: 'international', country: 'EU' },
+  EHA: { short: 'EHA', name: 'European Hematology Association', kind: 'international', country: 'EU' },
   // AAN (American Academy of Neurology), AAD (American Academy of Dermatology) and
   // CNS (Congress of Neurological Surgeons) were excluded by the owner on 2026-10-23
   // (their terms forbid automated access / third-party reuse). scraper_sources rows

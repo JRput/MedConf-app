@@ -77,6 +77,10 @@ class EsgeDaysExtractor(SingleCongressExtractor):
         md = _meta(html, "description")
         if md and len(md) >= 50 and "ESGE Days" in md:
             out["description"] = re.sub(r"\s+", " ", md).strip()[:600]
+        # register-now sells Virtual participation as its own ticket; the family's hybrid
+        # rule only scans the home page head, which never says so (review 2026-11-14).
+        if out.get("event_format") == "in_person":
+            out["event_format"] = "hybrid"
         return out
 
     def fees_from_pages(self, pages: Dict[str, str], year: int) -> List[Dict[str, Any]]:

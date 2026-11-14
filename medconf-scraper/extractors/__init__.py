@@ -162,6 +162,8 @@ from .theabn import TheabnExtractor
 from .wfns import WfnsExtractor
 from .ese_hormones import EseHormonesExtractor
 from .face import FaceExtractor
+from .esge_days import EsgeDaysExtractor
+from .eha_congress import EhaCongressExtractor
 from .cns import CnsExtractor
 from .eshre import EshreExtractor
 from .eular import EularExtractor
@@ -337,6 +339,8 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     161: WfnsExtractor,                       # 161: WFNS (wfns.org): Future Events tab, official courses/congresses; no fees published
     163: EseHormonesExtractor,                # 163: ESE (ese-hormones.org): events & key dates via the site's search API; bespoke EUR fee grid (Porto course); ECE flagship
     164: FaceExtractor,                       # 164: FACE / The Aesthetic Show UK (faceconference.com): single_congress, between editions → verified_empty
+    162: EsgeDaysExtractor,                   # 162: ESGE Days (esgedays.org): single_congress; esge.com itself is off-limits (terms of use)
+    165: EhaCongressExtractor,                # 165: EHA Congress (ehaweb.org/connect-network): single_congress; congress.ehaweb.org robots Disallow / — never fetched
 }
 
 

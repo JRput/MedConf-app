@@ -45,6 +45,14 @@ class EhaCongressExtractor(SingleCongressExtractor):
     VENUE_URLS = ("https://ehaweb.org/connect-network/eha2027-congress/eha2027-details-and-deadlines",)
     MAX_AUX_PAGES = 1
 
+    def detail_from_html(self, html, url, shell, llm_call):
+        out = super().detail_from_html(html, url, shell, llm_call)
+        # The registration page has "Hybrid Registration fees" and "Virtual Registration fees";
+        # the home page carries no hybrid wording, so the family rule never fires (review 2026-11-14).
+        if out.get("event_format") == "in_person":
+            out["event_format"] = "hybrid"
+        return out
+
     def venue_from_lines(self, lines):
         for i, l in enumerate(lines[:-1]):
             if l == "Location" and lines[i + 1][:1].isupper():
