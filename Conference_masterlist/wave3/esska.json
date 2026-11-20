@@ -1,0 +1,82 @@
+{
+ "source_id": 167,
+ "slug": "esska_congress",
+ "class_name": "EsskaCongressExtractor",
+ "status": "done",
+ "file_written": "medconf-scraper/extractors/esska_congress.py",
+ "source_row": {
+  "source_name": "ESSKA Congress",
+  "society": "ESSKA",
+  "base_url": "https://esska-congress.org/",
+  "default_event_type": "conference",
+  "pagination_type": "single_page",
+  "pagination_template": null,
+  "max_pages_hint": 1,
+  "detail_is_multipage": false,
+  "active": true,
+  "extraction_instructions": "Congress site only (esska-congress.org); never fetch esska.org. Home page sentence 'The 23rd ESSKA Congress will take place in Gothenburg, Sweden, from June 7 to June 9, 2028'. Venue: 'Congress Venue' block of /about-esska-congress/. Fees and abstract deadline are not published yet (registration opens fall 2027)."
+ },
+ "coverage_run": {
+  "date": "2026-11-20",
+  "pages_checked": 1,
+  "warnings": [],
+  "blocking": false,
+  "exit_code": 0
+ },
+ "registry_comment": "ESSKA Congress single-congress site (one upcoming edition, biennial) - single_congress family",
+ "probe_results": {
+  "shells": 1,
+  "shells_forced_fallback": 1,
+  "details_tested": 1,
+  "with_date": 1,
+  "with_pricing": 0,
+  "with_venue": 1,
+  "with_description": 1,
+  "with_specialty": 1,
+  "pricing_tiers": 0
+ },
+ "test_urls": [
+  "https://esska-congress.org/",
+  "https://esska-congress.org/about-esska-congress/",
+  "https://esska-congress.org/scientific-programme/"
+ ],
+ "spot_check": [
+  {
+   "url": "https://esska-congress.org/",
+   "field": "dates/place",
+   "site_says": "The 23rd ESSKA Congress will take place in Gothenburg, Sweden, from June 7 to June 9, 2028",
+   "extractor_says": "2028-06-07..2028-06-09, Gothenburg, Sweden",
+   "match": true
+  },
+  {
+   "url": "https://esska-congress.org/about-esska-congress/",
+   "field": "venue",
+   "site_says": "Congress Venue: Svenska Mässan Gothia Towers",
+   "extractor_says": "Svenska Mässan Gothia Towers",
+   "match": true
+  },
+  {
+   "url": "https://esska-congress.org/scientific-programme/",
+   "field": "abstract/fees",
+   "site_says": "programme revealed next year; registration opens fall 2027",
+   "extractor_says": "no abstract deadline, no tiers",
+   "match": true
+  }
+ ],
+ "decisions": [
+  "Specialty 'Orthopaedics' (same label as EFORT 92).",
+  "Fee page choice: no public rate table exists (about page: 'REGISTRATION WILL OPEN IN FALL 2027'), so no tiers are written. REG_URLS pins the about page so discovery never follows the home page 'Registration' photo (EXHIBITION_Registration_*.jpg), which otherwise raises PRICE_SAME_SITE_LINK. Registration is run by KIT Group by e-mail contact only; no registration host on another domain is linked yet.",
+  "Abstract deadline: the programme page says the 2028 programme 'will be revealed next year'; no call for abstracts is published, so abstract fields stay empty.",
+  "Venue name: 'Svenska Mässan Gothia Towers' from the about page 'Congress Venue' block (meta description agrees); the programme page says 'Svenska Mässan' only.",
+  "Description: the site's meta description replaces the newsletter banner the family picks first.",
+  "Biennial: the home page already shows the 2028 edition, so the family's verified_empty path is not needed; after June 2028 the family default applies."
+ ],
+ "terms": "esska-congress.org legal notice is a plain imprint with no automated-access clause; robots.txt allows everything but /wp-admin/ and /wp-content/plugins/. esska.org is never fetched.",
+ "concerns": [
+  "Hooks (Level 2), each proven by the harness: place from the 'will take place in City, Country, from ...' sentence (family gave city 'from'), venue_from_lines (Congress Venue block), meta description.",
+  "Fees and abstract deadline are absent because the site publishes none yet; when registration opens (fall 2027) fees_from_pages falls back to the family generic parser on the about page, which may need a hook once a rate table exists. Unproven until then.",
+  "Requests to esska-congress.org: about 6 fetched by hand (robots, home, about, programme) plus 2 harness runs (about 5 each): under 20 in total.",
+  "Society code ESSKA must exist in medconf-website/src/lib/taxonomy/societies.ts (the foreman owns registration).",
+  "The harness rewrote medconf's esge_days.json when first run with it as a throwaway build file; restored byte-identical from HEAD."
+ ]
+}
