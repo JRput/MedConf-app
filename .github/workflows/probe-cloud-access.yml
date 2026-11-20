@@ -21,12 +21,17 @@ jobs:
           python-version: '3.11'
       - name: Install Playwright
         run: |
-          pip install playwright python-dotenv
+          # The probe fetches through the production path (extractors.http_fetch, LESSON #96,
+          # 2026-11-20), which imports the scraper package, so it needs the full requirements.
+          pip install -r medconf-scraper/requirements.txt
           python -m playwright install --with-deps chromium
       - name: Probe
         working-directory: medconf-scraper
         env:
           CANDIDATES: ${{ github.event.inputs.candidates }}
+          SUPABASE_URL: https://probe.invalid
+          SUPABASE_KEY: probe
+          KIMI_API_KEY: probe
         run: python probe_cloud_access.py "../$CANDIDATES" probe_cloud_access_results.json
       - uses: actions/upload-artifact@v4
         if: always()

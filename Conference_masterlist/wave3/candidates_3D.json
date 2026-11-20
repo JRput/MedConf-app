@@ -1,0 +1,37 @@
+[
+ {
+  "domain": "astro.org",
+  "candidate_urls": [
+   "https://www.astro.org/meetings-and-education/",
+   "https://www.astro.org/meetings-and-education/astro-meetings",
+   "https://www.astro.org/annual-meeting",
+   "https://annualmeeting.astro.org/"
+  ],
+  "notes": "9 Nov 2026 challenged page: https://www.astro.org/meetings-and-education/ (events page; home cleared). Alternatives: /meetings-and-education/astro-meetings, /annual-meeting, annualmeeting.astro.org. 20 Nov local curl: all four 403 'Just a moment...' Cloudflare challenge, so the existence of the last two is unconfirmed. robots.txt: www.astro.org/robots.txt also 403, unreadable; no Disallow could be checked, so respect robots once a readable copy exists."
+ },
+ {
+  "domain": "professional.heart.org",
+  "candidate_urls": [
+   "https://professional.heart.org/en/meetings",
+   "https://professional.heart.org/en/meetings/scientific-sessions",
+   "https://professional.heart.org/en/meetings/international-stroke-conference"
+  ],
+  "notes": "9 Nov 2026 challenged page: https://professional.heart.org/en/meetings (events listing). Alternatives: /meetings/scientific-sessions and /meetings/international-stroke-conference on the same host; no separate congress host was found (a guessed standalone Scientific Sessions host was not probed). 20 Nov local curl: all 403 'Attention Required! | Cloudflare'. robots.txt: professional.heart.org/robots.txt 403, unreadable."
+ },
+ {
+  "domain": "himss.org",
+  "candidate_urls": [
+   "https://www.himss.org/events",
+   "https://www.himssconference.com/"
+  ],
+  "notes": "9 Nov 2026 challenged page: https://www.himss.org/events. Alternative: https://www.himssconference.com/ (HIMSS27 congress site). 20 Nov local curl: himss.org/events 403 'Just a moment...'; himssconference.com 200 'HIMSS27 | HIMSS Global Health Conference & Exhibition' (271 KB). robots.txt: himss.org User-agent * group is Allow: / (AI-training bots incl. ClaudeBot disallowed by name, not MedConfBot); himssconference.com: User-agent * with empty Disallow. No candidate path is disallowed."
+ },
+ {
+  "domain": "esska.org",
+  "candidate_urls": [
+   "https://esska.org/events",
+   "https://esska-congress.org/"
+  ],
+  "notes": "9 Nov 2026 challenged page: https://esska.org/events. Alternative: https://esska-congress.org/ (apex; the www host 301s to it). 20 Nov local curl: esska.org/events 403 'Just a moment...'; esska-congress.org 200 'ESSKA Congress 2028'. robots.txt: esska.org/robots.txt 403, unreadable; esska-congress.org (read on the www host) disallows only /wp-content/plugins/ and /wp-admin/, so no candidate path is disallowed."
+ }
+]
