@@ -54,3 +54,18 @@ Owner decisions recorded: **EHA 165 — AUTHORISED to fetch ehaweb.org with the 
 4. **Build what clears** as batch 3-D (ids from 166, `next_free_id` in plan.json): single-congress subclasses for congress hosts; multi-event extractors only if a society events page itself clears. Same gate: harness ×2 → blind review → register → live scrape (cloud if home-blocked) → remediator → audit → group R/S → gate run. Terms-of-use check first on every new host.
 5. **Still parked / not today:** discovery httpx-only sub-page fetcher (Cloudflare hosts), 5xx listing → `unreachable` (ViVE), validator scheme rule, ACPGBI CFP contamination, AAP 147 nightly block, HQ repo `/sync` (LESSONS #92–#96 uncommitted).
 - 2026-11-14 01:05 UTC — **Confirmation run 43537251943: group R GREEN** (161/162/163 success; 159/160/164 `blocked`, tolerated), **coverage gate GREEN ("Regressions: none")**; only H (ARRS 78) and F2 (Advance HE 53) red, pre-existing. Watch for tomorrow: EANS/ABN/FACE were challenged on the runner in BOTH runs today after clearing the 9 Nov probe — if the nightly runs stay blocked they join AAP 147 as runner-challenged sources (tolerated only while a success within RECENT_SUCCESS_DAYS exists: today's local first scrape).
+
+## Batch 3-D prep (opened 2026-11-20 16:10 UTC) — EHA 165 bot agent + re-probe
+
+Baseline main `eee5649`, tree clean apart from the owner's files. Foreman = session model; workers `model: sonnet`; PRINCIPLES arm OFF.
+
+| id | tier | status | write set | evidence |
+|---|---|---|---|---|
+| w3-eha (FS-3C2) EHA 165 fetch with the honest `MedConfBot` agent (owner authorised 2026-11-14) | sonnet | DONE_WITH_CONCERNS (harness normal run: 1 shell, 10–13 Jun 2027, Fira Barcelona Gran Via, deadline 2027-03-01, 18 EUR tiers, hybrid; `--force-fallback` 0 shells because the Playwright fallback ignores custom headers, `http_fetch.py:184`); 26 tests | `extractors/eha_congress.py`, `test_eha_congress.py`, `wave3/eha_congress.json` | harness ×2 → 1 shell |
+| w3-probe probe through the production fetch path (LESSON #96) + `candidates_3D.json` (ASTRO, AHA, HIMSS, ESSKA + congress hosts) | sonnet | RUNNING | `probe_cloud_access.py`, `test_probe_cloud_access.py`, `wave3/candidates_3D.json` | local probe summary |
+| foreman after w3-eha | — | PENDING | `_activate_165.sql` via apply_migration.py; 165 back into group R in both workflows; push; `gh workflow run scrape-daily.yml` = live runner check of the bot agent | |
+| foreman after w3-probe | — | PENDING | push candidates first, then `gh workflow run probe-cloud-access.yml -f candidates=Conference_masterlist/wave3/candidates_3D.json`; read the artifact; decide batch 3-D (ids from 166) | |
+
+Log:
+- 2026-11-20 16:10 UTC — both tickets dispatched in parallel (disjoint write sets).
+- 2026-11-20 16:20 UTC — w3-eha landed; 165 ACTIVE (`_activate_165.sql` applied), back in group R in both workflows; pushed; gate run dispatched = first runner check of the bot agent. Earlier gate run 44766549269 (BOPA/EAU/EADV fixes): red only on H (ARRS 78) and the coverage gate (BOPA junk-row artefact, 2 consecutive reports).

@@ -11,11 +11,18 @@ Hooks (each proven by the harness / offline run on the saved pages):
   * the family classifier took "June 13" (late hybrid registration) as the abstract deadline: the deadline is read from
     "<date>: Deadline for abstract submission..." and the open date from "<date>: Abstract submission ... open".
 """
+import logging
 import re
+import time
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 
+from .http_fetch import fetch_html
 from .single_congress import SingleCongressExtractor, html_lines
+
+logger = logging.getLogger(__name__)
+
+BOT_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; MedConfBot)"}
 
 _MON = r"(?:January|February|March|April|May|June|July|August|September|October|November|December)"
 _AMT_RE = re.compile(r"^€\s?(\d[\d,]*)$")
@@ -34,6 +41,8 @@ def _fmt(d: date) -> str:
 
 
 class EhaCongressExtractor(SingleCongressExtractor):
+    """Fetches with the honest MedConfBot user agent, on the owner's explicit authorisation of 2026-11-14 for this
+    source only; no other source may copy this without the owner's say-so."""
     HOME_URL = "https://ehaweb.org/connect-network/eha2027-congress"
     SOCIETY = "EHA"
     EVENT_NAME = "EHA Congress"
@@ -44,6 +53,15 @@ class EhaCongressExtractor(SingleCongressExtractor):
     ABSTRACT_URLS = ("https://ehaweb.org/connect-network/eha2027-congress/eha2027-abstract-submission",)
     VENUE_URLS = ("https://ehaweb.org/connect-network/eha2027-congress/eha2027-details-and-deadlines",)
     MAX_AUX_PAGES = 1
+
+    def _get(self, url: str, tries: int = 3) -> Optional[str]:
+        for attempt in range(tries):
+            body = fetch_html(url, browser=getattr(self, "browser", None), headers=BOT_HEADERS)
+            if body and len(body) > 500:
+                return body
+            logger.warning(f"{self.SOCIETY}: fetch attempt {attempt + 1}/{tries} failed for {url}")
+            time.sleep(1.5 * (attempt + 1))
+        return None
 
     def detail_from_html(self, html, url, shell, llm_call):
         out = super().detail_from_html(html, url, shell, llm_call)
