@@ -19,7 +19,7 @@ Detail strategy:
 
 import re
 import httpx
-from datetime import date
+from datetime import date, timedelta
 from typing import Dict, Any, Optional, Callable, List
 from playwright.sync_api import Page
 
@@ -89,9 +89,14 @@ class BOPAExtractor(BaseExtractor):
     """British Oncology Pharmacy Association."""
 
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
-        today = date.today().isoformat()
-        url = f"{API_URL}?per_page=100&start_date={today}"
+        today = date.today()
+        # Ask from 30 days back: Tribe's start_date filter is on the START, so an
+        # event already under way (BOPA AI Hackathon, 18-25 Nov 2026) vanished
+        # from a from-today query. Events that have ENDED are skipped below.
+        since = (today - timedelta(days=30)).isoformat()
+        url = f"{API_URL}?per_page=100&start_date={since}"
         shells: List[Dict[str, Any]] = []
+        api_answered = False          # a 200 JSON answer, even an empty one, is the site's own reply
         try:
             with httpx.Client(timeout=30, follow_redirects=True,
                               headers={"User-Agent": USER_AGENT,
@@ -103,6 +108,7 @@ class BOPAExtractor(BaseExtractor):
                     if r.status_code != 200:
                         break
                     data = r.json()
+                    api_answered = True
                     events = data.get("events") or []
                     if not events:
                         break
@@ -111,6 +117,9 @@ class BOPAExtractor(BaseExtractor):
                         booking_url = e.get("url") or ""
                         if not title or not booking_url:
                             continue
+                        end_iso = (e.get("end_date") or e.get("start_date") or "")[:10]
+                        if end_iso and end_iso < today.isoformat():
+                            continue                      # already over
                         cats = [c.get("name") for c in (e.get("categories") or []) if c.get("name")]
                         venue = e.get("venue") or {}
                         if isinstance(venue, dict):
@@ -138,7 +147,18 @@ class BOPAExtractor(BaseExtractor):
             logger.warning(f"BOPA Tribe API fetch failed: {e}")
             return None
         logger.info(f"BOPA Tribe API returned {len(shells)} shells")
-        return shells if shells else None
+        if shells:
+            return shells
+        if api_answered:
+            # 2026-11-19: the API answered 200 with zero published upcoming events.
+            # Returning None here handed the listing to the generic page walker,
+            # which turned every /events/list/page/N/ (bopa.org.uk serves a 200
+            # page for ANY page number) into an "event" titled from the Tribe
+            # search bar heading, "Events Search and Views Navigation" (60 rows).
+            # Zero from the API is the site's answer: verified empty, no fallback.
+            self.verified_empty = "Tribe events API answered 200 with no published upcoming events"
+            return []
+        return None
 
     def extract_detail(
         self,
