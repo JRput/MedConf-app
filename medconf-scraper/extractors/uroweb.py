@@ -2,32 +2,35 @@
 """
 EAU (European Association of Urology) — Event Calendar extractor.
 
-Wave 2b source. https://uroweb.org/education-events/events is a Nuxt SPA.
-Page 1 is server-rendered but `?page=N` is ignored by the server: every
-later page is fetched client-side from the Craft CMS GraphQL endpoint
-(`https://cms.uroweb.org/graphql`) with a public bearer token that the site
-itself sends from the browser. We therefore:
+Wave 2b source. https://uroweb.org/education-events/events is a Nuxt app that
+is server-rendered, and (verified 2026-11-20) `?page=N` IS honoured by the
+server: every page ships the calendar's entries inside the
+`<script id="__NUXT_DATA__">` payload (Nuxt "devalue" format: one flat JSON
+array, objects refer to each other by index), 16 entries per page, together
+with the site's own `entryCount` (42 on 2026-11-20 = 16 + 16 + 10; page 4 is
+empty). The visible HTML holds only 6 `card card--small` blocks, so the
+payload — not the cards — is the complete source.
 
-  1. Load the listing in the real browser and capture the `Authorization`
-     header from the site's own GraphQL request (no token is hard-coded).
-  2. Page the same `entries(section: "educationAndEvents", type: "live",
-     isFuture: ["dateRange", true])` query the calendar uses (limit 16,
-     offset N) from inside that page, ≤1 request/s, until `entryCount` is
-     reached. Count is proven against the site's own `entryCount` (55 on
-     2026-10-03 — the "700" in recon was the sitemap, which also holds past
-     and on-demand entries; on-demand lives in a different Craft entry type
-     and is deliberately NOT listed here).
+  1. Fetch `?page=1..N` with `http_fetch.fetch_html` (plain httpx, project
+     default user agent; robots.txt is `Disallow:` empty) at ≤1 request/s
+     until `entryCount` is reached or a page comes back empty.
+  2. Decode the payload and keep upcoming entries (end date today or later).
+     On-demand entries live in a different Craft entry type and are not part
+     of this listing.
   3. Detail pages are server-rendered: `.lead`/first paragraph, a
      `table .event-details__label/.event-details__value` metadata block
      (Organiser, CME, Venue, Location "City, Country", Registration open).
 
+History: until 2026-11-16 the listing was paged from the Craft GraphQL
+endpoint with a bearer token sniffed from the browser; that capture stopped
+working ("could not capture the site's GraphQL authorization header") and the
+whole token-capture path was removed on 2026-11-20.
+
 No fees are published on EAU pages (registration happens on the organiser's
 site), so pricing_tiers is always [].
-
-Never hold a Page handle across `self.browser.navigate()` (a Cloudflare
-rotation closes the previous page); listing code re-reads `browser.page`.
 """
 
+import json
 import logging
 import re
 import time
@@ -42,49 +45,56 @@ from .base import BaseExtractor
 logger = logging.getLogger("medconf-scraper")
 
 LISTING_URL = "https://uroweb.org/education-events/events"
-GRAPHQL_URL = "https://cms.uroweb.org/graphql"
 SITE_ROOT = "https://uroweb.org/"
 PAGE_SIZE = 16
 REQUEST_GAP_S = 1.0
-MAX_PAGES = 80  # hard stop: 80 * 16 = 1280, far above the real total
+MAX_PAGES = 30  # hard stop: 30 * 16 = 480, far above the real total (42)
 
-_QUERY = """
-query Live($offset: Int) {
-  entries(section: "educationAndEvents" type: "live" offset: $offset limit: 16
-          isFuture: ["dateRange", true] orderBy: "dateRange ASC" site: ["uroweb"]) {
-    id title uri
-    ... on educationAndEvents_live_Entry {
-      membersOnly
-      dateRange { start end }
-      city venue
-      type: liveType { ... on liveTypes_Category { title } }
-      topics { ... on topics_topic_Entry { title } }
-    }
-  }
-  entryCount(section: "educationAndEvents" type: "live"
-             isFuture: ["dateRange", true] site: ["uroweb"])
-}
-"""
-
-_FETCH_JS = """async ([url, query, offset, auth]) => {
-  const r = await fetch(url, {
-    method: 'POST',
-    headers: {'content-type': 'application/json', authorization: auth},
-    body: JSON.stringify({query, variables: {offset}}),
-  });
-  if (!r.ok) throw new Error('graphql http ' + r.status);
-  return await r.json();
-}"""
-
-_TRANSPORT_RE = re.compile(
-    r"(?i)failed to fetch|networkerror|net::ERR_|timeout|graphql http (404|429|5\d\d)"
+_NUXT_DATA_RE = re.compile(
+    r'<script[^>]*\bid="__NUXT_DATA__"[^>]*>(.*?)</script>', re.S
 )
+_WRAPPERS = {"Reactive", "ShallowReactive", "Ref", "ShallowRef", "EmptyRef", "EmptyShallowRef"}
 
 
-def _is_transport_failure(exc: BaseException) -> bool:
-    """CMS down / unreachable / 5xx (as opposed to a changed schema or markup)."""
-    return bool(_TRANSPORT_RE.search(f"{type(exc).__name__}: {exc}"))
+def _resolve(data: List[Any], idx: Any, depth: int = 0) -> Any:
+    """Resolve one node of a Nuxt devalue payload into plain Python values."""
+    if not isinstance(idx, int) or idx < 0 or idx >= len(data) or depth > 8:
+        return None
+    v = data[idx]
+    if isinstance(v, dict):
+        return {k: _resolve(data, x, depth + 1) for k, x in v.items()}
+    if isinstance(v, list):
+        if v and isinstance(v[0], str):
+            if v[0] in _WRAPPERS and len(v) == 2:
+                return _resolve(data, v[1], depth + 1)
+            return None  # other tagged values (Date, Set, ...) are not used here
+        return [_resolve(data, x, depth + 1) for x in v]
+    return v
 
+
+def parse_listing_payload(html: str) -> Optional[Dict[str, Any]]:
+    """Decode a listing page. Returns {"entries": [...], "total": int|None}
+    or None when the payload / entries list cannot be found (markup change)."""
+    m = _NUXT_DATA_RE.search(html or "")
+    if not m:
+        return None
+    try:
+        data = json.loads(m.group(1))
+    except ValueError:
+        return None
+    if not isinstance(data, list):
+        return None
+    for node in data:
+        if isinstance(node, dict) and "entryCount" in node and "entries" in node:
+            entries = _resolve(data, node["entries"])
+            total = _resolve(data, node["entryCount"])
+            if not isinstance(entries, list):
+                return None
+            return {
+                "entries": [e for e in entries if isinstance(e, dict)],
+                "total": total if isinstance(total, int) else None,
+            }
+    return None
 
 _ISO_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
 
@@ -150,76 +160,40 @@ def _clean(text: Optional[str]) -> str:
 class UrowebExtractor(BaseExtractor):
 
     # ------------------------------------------------------------------ #
-    # Phase A — listing via the site's own GraphQL query
+    # Phase A — listing from the server-rendered Nuxt payload, ?page=N
     # ------------------------------------------------------------------ #
     def list_shells_override(self) -> Optional[List[Dict[str, Any]]]:
+        from extractors import http_fetch
+
         browser = getattr(self, "browser", None)
-        if browser is None:
-            return None
-        last_exc: Optional[BaseException] = None
-        for attempt in range(3):
-            try:
-                shells = self._walk_listing(browser)
-                if shells:
-                    return shells
-                last_exc = None
-                logger.warning("uroweb: empty listing (attempt %d)", attempt + 1)
-            except Exception as e:  # noqa: BLE001
-                last_exc = e
-                logger.warning("uroweb: listing attempt %d failed: %s", attempt + 1, e)
-            time.sleep(3)
-        logger.error("uroweb: listing failed after 3 tries — returning no shells")
-        # 2026-10-22: cms.uroweb.org answered nginx 404 to everything (the
-        # site's own SPA could not load either), so the in-page fetch threw
-        # "TypeError: Failed to fetch" and group F went red. A CMS outage /
-        # transport failure is transient: register it as `unreachable` so it
-        # is a WARNING under main.py's 3-strike rule. Markup/API changes
-        # (graphql errors, missing auth header, empty payload) stay hard fails.
-        if last_exc is not None and _is_transport_failure(last_exc):
-            from extractors import http_fetch
-            http_fetch.note_unreachable(
-                GRAPHQL_URL, ConnectionError(f"net::ERR_FAILED (cms outage): {last_exc}"), browser
-            )
-        return []
-
-    def _walk_listing(self, browser) -> List[Dict[str, Any]]:
-        browser.navigate(LISTING_URL)
-        page = browser.page
-        auth: Dict[str, str] = {}
-
-        def _on_request(req) -> None:
-            if "graphql" in req.url and req.headers.get("authorization"):
-                auth["v"] = req.headers["authorization"]
-
-        page.on("request", _on_request)
-        try:
-            # The SPA issues its GraphQL calls on load; reload so the listener
-            # (attached after navigate) sees them.
-            page.reload(wait_until="networkidle")
-        finally:
-            page.remove_listener("request", _on_request)
-        if "v" not in auth:
-            page.wait_for_timeout(3000)
-        if "v" not in auth:
-            raise RuntimeError("could not capture the site's GraphQL authorization header")
-
         entries: List[Dict[str, Any]] = []
         seen = set()
         total: Optional[int] = None
-        offset = 0
-        for _ in range(MAX_PAGES):
-            data = page.evaluate(_FETCH_JS, [GRAPHQL_URL, _QUERY, offset, auth["v"]])
-            if data.get("errors"):
-                raise RuntimeError(f"graphql errors: {str(data['errors'])[:200]}")
-            d = data["data"]
-            total = d.get("entryCount")
-            batch = d.get("entries") or []
+        for n in range(1, MAX_PAGES + 1):
+            url = LISTING_URL if n == 1 else f"{LISTING_URL}?page={n}"
+            html = http_fetch.fetch_html(url, browser=browser)
+            if not html:
+                if n == 1:
+                    logger.error("uroweb: listing fetch failed — generic fallback")
+                    return None
+                logger.warning("uroweb: page %d fetch failed — keeping %d entries", n, len(entries))
+                break
+            parsed = parse_listing_payload(html)
+            if parsed is None:
+                if n == 1:
+                    logger.error("uroweb: no __NUXT_DATA__ entries payload on page 1 (markup changed?)")
+                    return None
+                logger.warning("uroweb: page %d has no payload — keeping %d entries", n, len(entries))
+                break
+            if total is None:
+                total = parsed["total"]
+            batch = parsed["entries"]
             for e in batch:
-                if e.get("uri") and e["uri"] not in seen:
-                    seen.add(e["uri"])
+                uri = e.get("uri")
+                if uri and uri not in seen:
+                    seen.add(uri)
                     entries.append(e)
-            offset += PAGE_SIZE
-            if not batch or (total is not None and offset >= total):
+            if not batch or (total is not None and n * PAGE_SIZE >= total):
                 break
             time.sleep(REQUEST_GAP_S)
 
@@ -228,26 +202,35 @@ class UrowebExtractor(BaseExtractor):
         else:
             logger.info("uroweb: fetched %d events (site total %s)", len(entries), total)
 
+        shells = self._shells_from_entries(entries)
+        if not shells:
+            self.verified_empty = (
+                "EAU events calendar answered 200 and lists no upcoming event "
+                f"(site entryCount {total}, {len(entries)} entries decoded, all past)"
+            )
+        return shells
+
+    @staticmethod
+    def _shells_from_entries(entries: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         today = date.today().isoformat()
         shells: List[Dict[str, Any]] = []
         for e in entries:
             title = _clean(e.get("title"))
             start = _iso_date((e.get("dateRange") or {}).get("start"))
             end = _iso_date((e.get("dateRange") or {}).get("end")) or start
-            if not title or not start or (end or start) < today:
+            if not title or not start or not e.get("uri") or (end or start) < today:
                 continue
             live_type = ((e.get("type") or [{}])[0] or {}).get("title")
-            city = _clean(e.get("city")) or None
             shells.append({
                 "title": title,
                 "booking_url": SITE_ROOT + e["uri"].lstrip("/"),
                 "start_date": start,
                 "end_date": end,
-                "city": city,
+                "city": _clean(e.get("city")) or None,
                 "venue_name": _clean(e.get("venue")) or None,
                 "event_type": _event_type(live_type, title),
                 "category": live_type,
-                "topics": [t.get("title") for t in (e.get("topics") or []) if t.get("title")],
+                "topics": [t.get("title") for t in (e.get("topics") or []) if t and t.get("title")],
             })
         return shells
 

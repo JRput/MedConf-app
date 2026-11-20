@@ -57,7 +57,10 @@ def partner_venue(html: str, place: str) -> Optional[str]:
 
 
 class EadvExtractor(WordPressGenericExtractor):
-    LISTING_URL = "https://www.eadv.org/events/calendar/"
+    # Bare host on purpose: since 2026-11-14 www.eadv.org answers 403 to every request
+    # (robots.txt included) from the runner and from a laptop alike, while eadv.org, the
+    # canonical host the own pages above already use, serves the calendar normally.
+    LISTING_URL = "https://eadv.org/events/calendar/"
     SOCIETY = "EADV"
     DEFAULT_SPECIALTY = "Dermatology"
     PREFER_DEFAULT_SPECIALTY = True
