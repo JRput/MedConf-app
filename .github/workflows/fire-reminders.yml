@@ -1,11 +1,11 @@
 name: Fire reminders
 
-# Runs daily at 08:00 UTC and turns due user_reminders rows into
+# Runs daily at 07:07 UTC (was 08:00 until 2026-11-20) and turns due user_reminders rows into
 # in-app notifications. Idempotent — re-running the same day finds
 # nothing because the first run flips status from 'scheduled' to 'sent'.
 on:
   schedule:
-    - cron: '0 8 * * *'   # 08:00 UTC daily
+    - cron: '7 7 * * *'   # 07:07 UTC daily (off the :00 slot, 2026-11-20)
   workflow_dispatch:       # manual trigger from GitHub UI
 
 jobs:

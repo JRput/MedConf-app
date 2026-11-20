@@ -1,7 +1,7 @@
 name: Remediator daily
 
-# Runs 04:23 UTC daily (cron '23 4 * * *', off the :00 slot since 2026-10-30) — two
-# hours after scrape-daily (02:17 UTC) and after specialty-alerts (03:00 UTC), so it sees any events
+# Runs 03:47 UTC daily (cron '47 3 * * *'; was 04:23 until 2026-11-20, off the :00 slot since 2026-10-30) — two
+# hours after scrape-daily (01:41 UTC) and after specialty-alerts (02:29 UTC), so it sees any events
 # freshly added or updated by the morning's scrape. Fills gaps the
 # base extractor couldn't (image-based pricing via vision LLM,
 # tab-hidden Salesforce content, sparse landing pages).
@@ -16,8 +16,8 @@ name: Remediator daily
 # only fails if the process crashes outright.
 on:
   schedule:
-    # 04:23 UTC daily — off the :00 slot (GitHub delays top-of-hour schedules under load); keeps the ~2 h gap after the 02:17 scrape
-    - cron: '23 4 * * *'
+    # 03:47 UTC daily — off the :00 slot (GitHub delays top-of-hour schedules under load); keeps the ~2 h gap after the 01:41 scrape
+    - cron: '47 3 * * *'
   workflow_dispatch:       # manual trigger
 
 jobs:

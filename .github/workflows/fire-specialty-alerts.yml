@@ -1,13 +1,13 @@
 name: Fire specialty alerts
 
-# Runs daily at 03:00 UTC — one hour after the main scrape (02:00 UTC)
+# Runs daily at 02:29 UTC (was 03:00 until 2026-11-20) — about an hour after the main scrape (01:41 UTC)
 # so it sees any newly-added events. Per user, finds events created
 # after their last_specialty_alert_at watermark, fires one batched
 # in-app notification ("3 new Cardiology events"), and advances the
 # watermark. In-app only; no email send.
 on:
   schedule:
-    - cron: '0 3 * * *'   # 03:00 UTC daily
+    - cron: '29 2 * * *'  # 02:29 UTC daily (off the :00 slot, 2026-11-20)
   workflow_dispatch:       # manual trigger
 
 jobs:

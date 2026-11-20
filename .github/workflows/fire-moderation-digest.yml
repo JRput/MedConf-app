@@ -1,11 +1,11 @@
 name: Fire moderation digest
 
-# Runs daily at 09:00 UTC: expires stale community contributions, leaves one
+# Runs daily at 08:11 UTC (was 09:00 until 2026-11-20): expires stale community contributions, leaves one
 # unread 'moderation' notification per admin when items await review, and
 # logs the placeholder moderator email. Idempotent per day.
 on:
   schedule:
-    - cron: '0 9 * * *'   # 09:00 UTC daily
+    - cron: '11 8 * * *'  # 08:11 UTC daily (off the :00 slot, 2026-11-20)
   workflow_dispatch:       # manual trigger from GitHub UI
 
 jobs:

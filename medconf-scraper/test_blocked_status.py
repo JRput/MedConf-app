@@ -1,6 +1,8 @@
 """Anti-bot 'blocked' outcome: scrape_source status + group exit code."""
 import logging
 
+import pytest
+
 import main
 import scraper
 
@@ -24,6 +26,27 @@ class FakeAgent:
 
 
 SRC = {"id": 42, "source_name": "ARVO", "base_url": "https://arvo.example"}
+
+
+@pytest.fixture(autouse=True)
+def _no_production_writes(monkeypatch):
+    """Every test here runs the real ``main.run_single_source`` / ``scraper.scrape_source``
+    for a fake source. Before 2026-11-20 the tests that did not stub the writers
+    themselves inserted 278 'blocked by anti-bot challenge (https://arvo.example/events)'
+    rows for ARVO (42) into the production ``scraper_logs`` table and ran the real
+    archival passes, every time the suite ran with ``.env`` present. Nothing in this
+    file may reach the database."""
+    def _refuse(*a, **k):
+        raise AssertionError("test_blocked_status must not write to the database")
+    monkeypatch.setattr(main, "log_scrape_run", _refuse)
+    monkeypatch.setattr(main, "update_source_last_full_walk", _refuse)
+    for fn in ("archive_expired_conferences", "archive_undated_past_conferences",
+               "archive_stale_conferences", "close_passed_abstract_deadlines"):
+        monkeypatch.setattr(main, fn, _refuse)
+    monkeypatch.setattr(main, "get_recent_log_statuses", lambda sid, n: [])
+    monkeypatch.setattr(main, "get_last_success_at", lambda sid: None)
+    import database
+    monkeypatch.setattr(database, "insert_scraper_log", _refuse)
 
 
 def _scrape(monkeypatch, challenged):
@@ -262,6 +285,11 @@ def test_streak_tolerated_when_source_succeeded_this_week(monkeypatch, caplog):
     monkeypatch.setattr(scraper, "AgentLoop", FakeAgent)
     monkeypatch.setattr(main, "get_recent_log_statuses", lambda sid, n: ["blocked", "blocked"][:n])
     monkeypatch.setattr(main, "get_last_success_at", lambda sid: datetime.now(timezone.utc) - timedelta(days=1))
+    monkeypatch.setattr(main, "log_scrape_run", lambda s: None)
+    monkeypatch.setattr(main, "update_source_last_full_walk", lambda sid: None)
+    for fn in ("archive_expired_conferences", "archive_undated_past_conferences",
+               "archive_stale_conferences", "close_passed_abstract_deadlines"):
+        monkeypatch.setattr(main, fn, lambda *a, **k: 0)
     with caplog.at_level(logging.WARNING, logger="medconf-scraper"):
         rc = main.run_single_source(42)
     assert rc == 2
