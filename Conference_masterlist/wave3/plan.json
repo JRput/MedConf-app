@@ -1,6 +1,6 @@
 {
   "generated": "2026-11-09",
-  "next_free_id": 166,
+  "next_free_id": 168,
   "excluded_owner_call": {
     "doctorsacademy.org": "commercial MRCS course shop (owner ruling 2026-10-21 excluded commercial shops; owner to confirm)",
     "harleyacademy.com / skinvivatraining.com": "commercial aesthetics training (same ruling)",
@@ -573,5 +573,11 @@
       "professional.heart.org": "browser-only probe cleared, production fetch blocked (LESSON #96 false positive)"
     },
     "note": "verdicts now come from extractors.http_fetch.fetch_html on the runner; a browser-only clear no longer counts"
+  },
+  "batch_3-D_single_congress": {
+    "166": "himss_conference (himssconference.com)",
+    "167": "esska_congress (esska-congress.org)",
+    "registered": "2026-11-20",
+    "gate": "run 44773292227 green (H = ARRS 78 only)"
   }
 }
