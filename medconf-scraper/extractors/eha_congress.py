@@ -24,6 +24,8 @@ logger = logging.getLogger(__name__)
 
 BOT_HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; MedConfBot)"}
 
+_COOKIE_RE = re.compile(r"data collected by this provider|Learn more about this provider|cookie(?:s|bot)? (?:policy|consent|declaration)", re.I)
+_INTRO_RE = re.compile(r"Let[’']s meet at EHA|will once again offer|hematology community", re.I)
 _MON = r"(?:January|February|March|April|May|June|July|August|September|October|November|December)"
 _AMT_RE = re.compile(r"^€\s?(\d[\d,]*)$")
 _CUT_RE = re.compile(rf"^(Early|Regular|Late) fee: until (?:[^=]*= )?({_MON} \d{{1,2}}, 20\d\d)")
@@ -69,6 +71,17 @@ class EhaCongressExtractor(SingleCongressExtractor):
         # the home page carries no hybrid wording, so the family rule never fires (review 2026-11-14).
         if out.get("event_format") == "in_person":
             out["event_format"] = "hybrid"
+        # Runner run 2026-11-20 (gate 44769342718): the Playwright DOM carries the Cookiebot
+        # consent text ("Learn more about this provider / Some of the data collected by this
+        # provider...") ahead of the page copy, and the family's first-paragraph pick stored
+        # it as the description (LESSON #95). Take the congress's own intro sentences instead.
+        desc = out.get("description") or ""
+        if not desc or _COOKIE_RE.search(desc):
+            intro = [l for l in html_lines(html) if _INTRO_RE.search(l) and len(l) >= 40 and not _COOKIE_RE.search(l)]
+            if intro:
+                out["description"] = " ".join(intro[:2])[:600]
+            elif _COOKIE_RE.search(desc):
+                out.pop("description", None)
         return out
 
     def venue_from_lines(self, lines):
