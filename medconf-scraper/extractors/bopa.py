@@ -85,6 +85,63 @@ def _classify_event_type(title: str, cats: List[str]) -> str:
     return "conference"
 
 
+
+CONFERENCE_PAGE = "https://www.bopa.org.uk/latest-conference-{year}/"
+# hero line of the annual conference page: "1-3 October 2027  - Harrogate Convention Centre"
+_HERO_RE = re.compile(
+    r"(\d{1,2})\s*[-\u2013]\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})\s*[-\u2013]\s*([^<\n]{3,80}?)\s*(?:<|\n|$)")
+_ORDINAL_RE = re.compile(r"(\d{1,2})(?:st|nd|rd|th)\s+BOPA\s+(?:Annual\s+)?Conference", re.I)
+_SAVE_THE_DATE_RE = re.compile(r"save the date|more info will follow", re.I)
+
+
+def conference_page_shell(html: str, url: str, year: int) -> Optional[Dict[str, Any]]:
+    """The annual conference page (/latest-conference-<year>/) is a plain page, not a
+    Tribe event, so the events API never lists it (2026-11-20: the 2027 save-the-date
+    page sat in the database undated and 'online'). Build its shell from the hero
+    line; None when the page carries no hero line for that year."""
+    if not html:
+        return None
+    text = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", html, flags=re.S | re.I)
+    m = None
+    for cand in _HERO_RE.finditer(text):
+        if int(cand.group(4)) == year:
+            m = cand
+            break
+    if not m:
+        return None
+    try:
+        from datetime import datetime
+        month = datetime.strptime(m.group(3)[:3], "%b").month
+        start = date(year, month, int(m.group(1)))
+        end = date(year, month, int(m.group(2)))
+    except ValueError:
+        return None
+    if end < start:
+        return None
+    venue = re.sub(r"\s+", " ", _strip_html(m.group(5))).strip(" -\u2013")
+    city = None
+    cm = re.match(r"([A-Z][a-z]+)\s+(?:Convention|Conference|Exhibition)\s+Centre", venue)
+    if cm:
+        city = cm.group(1)
+    plain = _strip_html(text)
+    om = _ORDINAL_RE.search(plain)
+    n = om.group(1) if om else None
+    title = f"{n}{_suffix(int(n))} BOPA Annual Conference {year}" if n else f"BOPA Annual Conference {year}"
+    return {
+        "title": title, "booking_url": url, "source_url": url,
+        "start_date": start.isoformat(), "end_date": end.isoformat(),
+        "venue_name": venue or None, "city": city, "cost_raw": "", "description_html": "",
+        "categories": ["Conference"], "category": "Conference", "image_url": None,
+        "flagship_page": True, "save_the_date": bool(_SAVE_THE_DATE_RE.search(plain)),
+    }
+
+
+def _suffix(n: int) -> str:
+    if 10 <= n % 100 <= 20:
+        return "th"
+    return {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+
+
 class BOPAExtractor(BaseExtractor):
     """British Oncology Pharmacy Association."""
 
@@ -143,6 +200,21 @@ class BOPAExtractor(BaseExtractor):
                             "image_url": (e.get("image") or {}).get("url"),
                         })
                     page += 1
+                # the annual conference page, this year's or next year's, when the API
+                # does not already list a conference for that year
+                for year in (today.year, today.year + 1):
+                    if any(str(year) in sh["title"] and "conference" in sh["title"].lower()
+                           for sh in shells):
+                        continue
+                    try:
+                        pr = c.get(CONFERENCE_PAGE.format(year=year))
+                    except Exception as e:  # noqa: BLE001
+                        logger.warning(f"BOPA conference page {year} fetch failed: {e}")
+                        continue
+                    sh = conference_page_shell(pr.text, str(pr.url), year) if pr.status_code == 200 else None
+                    if sh and sh["end_date"] >= today.isoformat():
+                        shells.append(sh)
+                        break                 # a past year's page: try the next year
         except Exception as e:
             logger.warning(f"BOPA Tribe API fetch failed: {e}")
             return None
@@ -177,7 +249,9 @@ class BOPAExtractor(BaseExtractor):
         # 2. Format
         venue_name = shell.get("venue_name") or ""
         cat_text = " ".join(c.lower() for c in cats)
-        if venue_name:
+        if venue_name and re.search(r"virtual|online|zoom|webinar", venue_name, re.I):
+            out["event_format"] = "online"        # Tribe venue "Virtual – Online" (AI Hackathon)
+        elif venue_name:
             out["event_format"] = "in_person"
             out["venue_name"] = venue_name
             if shell.get("city"):
@@ -209,6 +283,19 @@ class BOPAExtractor(BaseExtractor):
 
         # 6. Society
         out["society"] = "BOPA"
+
+        # 6b. The annual conference page (conference_page_shell): flagship; a
+        # save-the-date page has no abstract call yet, and saying so keeps the
+        # discovery engine from reading the previous year's "Submit your
+        # abstract for BOPA <year-1>" link on the same page as this year's call.
+        if shell.get("flagship_page"):
+            out["is_flagship"] = True
+            out["description"] = (f"{title} will be held at {shell.get('venue_name') or 'a venue to be announced'} "
+                                  f"on {shell['start_date']} to {shell['end_date']}. "
+                                  "Registration and abstract details follow on the BOPA website.")
+            if shell.get("save_the_date"):
+                out["abstract_open"] = False
+                out["abstract_deadline_note"] = "Abstract submission not yet announced"
 
         # 7. Region — Tribe city → UK region (light heuristic)
         city = (shell.get("city") or "").lower()

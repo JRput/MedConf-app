@@ -89,3 +89,70 @@ def test_only_ended_events_is_verified_empty(monkeypatch):
     x = _extractor()
     assert x.list_shells_override() == []
     assert x.verified_empty
+
+
+HERO_HTML = """<html><body><nav>Latest Conference 2027</nav>
+<div class="hero">\n\t\t\t\t\t1-3 October 2027  - Harrogate Convention Centre\t\t\t\t</div>
+<h1>2027 BOPA Conference</h1>
+<p>The 30th BOPA Annual Conference in 2027 will be held at the Harrogate Convention Centre on 1-3 October 2027.</p>
+<p>More info will follow.</p><p>SAVE THE DATE</p>
+<a href="https://www.bopa.org.uk/abstract-submission-the-29th-annual-bopa-conference-in-2026/">Submit your abstract for BOPA 2026</a>
+</body></html>"""
+
+
+def test_conference_page_shell_from_hero_line():
+    sh = bopa.conference_page_shell(HERO_HTML, "https://www.bopa.org.uk/latest-conference-2027/", 2027)
+    assert sh["title"] == "30th BOPA Annual Conference 2027"
+    assert (sh["start_date"], sh["end_date"]) == ("2027-10-01", "2027-10-03")
+    assert sh["venue_name"] == "Harrogate Convention Centre" and sh["city"] == "Harrogate"
+    assert sh["flagship_page"] and sh["save_the_date"]
+    assert bopa.conference_page_shell(HERO_HTML, "u", 2028) is None      # wrong year
+    assert bopa.conference_page_shell("<html>no hero</html>", "u", 2027) is None
+
+
+def test_conference_page_detail_is_flagship_in_person_no_abstract_call():
+    sh = bopa.conference_page_shell(HERO_HTML, "https://www.bopa.org.uk/latest-conference-2027/", 2027)
+    out = _extractor().extract_detail(None, sh, lambda p: None)
+    assert out["event_format"] == "in_person" and out["venue_name"] == "Harrogate Convention Centre"
+    assert out["city"] == "Harrogate" and out["is_flagship"] is True
+    assert out["abstract_open"] is False and out["abstract_deadline_note"] == "Abstract submission not yet announced"
+    assert out["event_type"] == "conference"
+
+
+def test_listing_adds_conference_page_after_api(monkeypatch):
+    from datetime import date
+    y = date.today().year + 1
+    html = HERO_HTML.replace("2027", str(y))
+
+    class _Page(_Resp):
+        text = html
+        url = f"https://www.bopa.org.uk/latest-conference-{y}/"
+    # API: zero events; conference page for this year: 404; next year: the hero page
+    _patch(monkeypatch, [_Resp(200, {"events": []}), _Resp(404, {}), _Page(200, {})])
+    x = _extractor()
+    shells = x.list_shells_override()
+    assert [s["title"] for s in shells] == [f"30th BOPA Annual Conference {y}"]
+    assert x.verified_empty is None
+
+
+def test_past_year_page_does_not_stop_the_search(monkeypatch):
+    from datetime import date
+    y = date.today().year
+    past = HERO_HTML.replace("1-3 October 2027", f"2-3 January {y}").replace("2027", str(y))
+    nxt = HERO_HTML.replace("2027", str(y + 1))
+
+    class _P(_Resp):
+        def __init__(self, text, url):
+            super().__init__(200, {})
+            self.text, self.url = text, url
+    _patch(monkeypatch, [_Resp(200, {"events": []}),
+                         _P(past, f"https://www.bopa.org.uk/latest-conference-{y}/"),
+                         _P(nxt, f"https://www.bopa.org.uk/latest-conference-{y + 1}/")])
+    shells = _extractor().list_shells_override()
+    assert [s["title"] for s in shells] == [f"30th BOPA Annual Conference {y + 1}"]
+
+
+def test_virtual_venue_is_online():
+    out = _extractor().extract_detail(None, {"title": "BOPA AI Hackathon 2026", "venue_name": "Virtual &#8211; Online",
+                                             "categories": []}, lambda p: None)
+    assert out["event_format"] == "online" and "venue_name" not in out
