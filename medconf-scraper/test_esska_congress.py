@@ -54,3 +54,18 @@ def test_detail_place_venue_description_and_no_invented_fees(monkeypatch):
     assert out["event_format"] == "in_person" and out["specialty"] == "Orthopaedics"
     assert out["description"].startswith("ESSKA Congress 2028. Gothenburg, 7-9 June 2028")
     assert "pricing_tiers" not in out and "abstract_deadline" not in out
+
+
+def test_venue_hook_duplicated_menu_past_index_12_real_block_wins():
+    menu = ["Congress", "About ESSKA Congress", "Congress Leadership", "Congress Venue", "Programme", "Scientific Programme",
+            "Session Types", "Industry", "Partners", "Exhibitors", "Compliance", "About ESSKA", "Contact"]
+    lines = menu + ["Some heading"] + menu + ["Svenska prose line here is long enough to be prose, really."] \
+        + ["Congress Venue", "Svenska Mässan Gothia Towers", "Northern Europe\u2019s largest meeting place in the heart of Gothenburg."]
+    assert lines.index("Congress Venue", 20) > 12
+    assert EsskaCongressExtractor({"id": 0}).venue_from_lines(lines) == "Svenska Mässan Gothia Towers"
+
+
+def test_venue_hook_menu_only_returns_none():
+    menu = ["Congress", "About ESSKA Congress", "Congress Leadership", "Congress Venue", "Programme", "Scientific Programme",
+            "Session Types", "Industry", "Partners"]
+    assert EsskaCongressExtractor({"id": 0}).venue_from_lines(["x"] * 20 + menu + menu) is None

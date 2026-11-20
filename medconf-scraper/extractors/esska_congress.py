@@ -31,12 +31,19 @@ class EsskaCongressExtractor(SingleCongressExtractor):
     VENUE_URLS = ("https://esska-congress.org/about-esska-congress/",)
     MAX_AUX_PAGES = 2
 
+    @staticmethod
+    def _label(x: str) -> bool:
+        return len(x) <= 40 and not re.search(r"[.!?:]$|\d{4}", x) and len(x.split()) <= 4
+
     def venue_from_lines(self, lines: List[str]) -> Optional[str]:
-        for i, l in enumerate(lines[:-1]):
-            if l == "Congress Venue" and i > 12:       # the first hits are menu entries
-                nxt = lines[i + 1]
-                if 3 <= len(nxt) <= 60 and not re.search(r"[.!?]$", nxt):
-                    return nxt
+        # The real block is "Congress Venue" / <venue name> / <descriptive sentence>. A menu entry is followed by more
+        # short menu labels, so a candidate whose second following line is also a label is skipped (no index limit).
+        for i, l in enumerate(lines[:-2]):
+            if l != "Congress Venue":
+                continue
+            nxt, after = lines[i + 1], lines[i + 2]
+            if 3 <= len(nxt) <= 60 and not re.search(r"[.!?]$", nxt) and not self._label(after):
+                return nxt
         return None
 
     def detail_from_html(self, html: str, url: str, shell: Dict[str, Any], llm_call: Optional[Callable[[str], Optional[str]]]) -> Dict[str, Any]:

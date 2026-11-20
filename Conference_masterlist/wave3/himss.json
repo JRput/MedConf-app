@@ -1,87 +1,90 @@
 {
- "source_id": 166,
- "slug": "himss_conference",
- "class_name": "HimssConferenceExtractor",
- "status": "done",
- "source_row": {
-  "id": 166,
-  "source_name": "HIMSS Global Health Conference & Exhibition",
-  "society": "HIMSS",
-  "base_url": "https://www.himssconference.com/",
-  "default_event_type": "conference",
-  "pagination_type": "single_page",
-  "pagination_template": null,
-  "max_pages_hint": 1,
-  "detail_is_multipage": false,
-  "active": true,
-  "extraction_instructions": "Congress microsite only (himssconference.com; never himss.org). Home header 'April 5-8, 2027 | McCormick Place Convention Center | Chicago, IL'. Fees: /register/ pass cards in USD. Poster call: /call-for-posters/."
- },
- "coverage_run": {
-  "date": "2026-11-20",
-  "pages_checked": 1,
-  "warnings": [],
-  "blocking": false,
-  "exit_code": 0
- },
- "file_written": "medconf-scraper/extractors/himss_conference.py",
- "registry_comment": "HIMSS Global Health Conference & Exhibition single-congress site (one upcoming edition) - single_congress family",
- "probe_results": {
-  "shells": 1,
-  "shells_forced_fallback": 1,
-  "details_tested": 1,
-  "with_date": 1,
-  "with_pricing": 1,
-  "with_venue": 1,
-  "with_description": 1,
-  "with_specialty": 1,
-  "pricing_tiers": 23
- },
- "test_urls": [
-  "https://www.himssconference.com/",
-  "https://www.himssconference.com/register/",
-  "https://www.himssconference.com/call-for-posters/",
-  "https://www.himssconference.com/about-the-venue/"
- ],
- "terms": "himssconference.com footer links Informa Terms & Conditions, Cookie and Privacy Policies and a Code of Conduct. Informa generic T&Cs, no automated-access ban found; same exposure as FACE 164 / AMWC 148. robots.txt: User-agent * with empty Disallow (Yoast), sitemap listed. himss.org never fetched (403 on the runner, and not needed).",
- "spot_check": [
-  {
-   "url": "https://www.himssconference.com/",
-   "field": "dates/venue/city",
-   "site_says": "April 5-8, 2027 | McCormick Place Convention Center | Chicago, IL",
-   "extractor_says": "2027-04-05..2027-04-08, McCormick Place Convention Center, Chicago, United States",
-   "match": true
+  "source_id": 166,
+  "slug": "himss_conference",
+  "class_name": "HimssConferenceExtractor",
+  "status": "done",
+  "source_row": {
+    "id": 166,
+    "source_name": "HIMSS Global Health Conference & Exhibition",
+    "society": "HIMSS",
+    "base_url": "https://www.himssconference.com/",
+    "default_event_type": "conference",
+    "pagination_type": "single_page",
+    "pagination_template": null,
+    "max_pages_hint": 1,
+    "detail_is_multipage": false,
+    "active": true,
+    "extraction_instructions": "Congress microsite only (himssconference.com; never himss.org). Home header 'April 5-8, 2027 | McCormick Place Convention Center | Chicago, IL'. Fees: /register/ pass cards in USD. Poster call: /call-for-posters/."
   },
-  {
-   "url": "https://www.himssconference.com/register/",
-   "field": "fees",
-   "site_says": "Conference Plus Pass HIMSS Members $1,695 (Advance $1,945 from Dec 21, 2026); Non-Members $1,995/$2,295; Conference Pass $1,345/$1,495 members; Exhibit Hall Only $995/$1,095; Preconference Only $475/$555; Student $325",
-   "extractor_says": "23 USD tiers, early bird deadline 2026-12-20",
-   "match": true
+  "coverage_run": {
+    "date": "2026-11-20",
+    "pages_checked": 1,
+    "warnings": [],
+    "blocking": false,
+    "exit_code": 0
   },
-  {
-   "url": "https://www.himssconference.com/call-for-posters/",
-   "field": "abstract_deadline",
-   "site_says": "submission window closed 5:00 PM EST Sunday, October 11, 2026",
-   "extractor_says": "abstract_open false, deadline 2026-10-11",
-   "match": true
-  }
- ],
- "decisions": [
-  "Specialty label: 'Digital Health', reused from Digital Health Rewired 151 (rewired.json).",
-  "Call for proposals: the site has only /call-for-posters/ (not in the nav, found via page-sitemap.xml, robots allows). Mapped to the abstract fields as a poster call: abstract_deadline = its stated closing date 2026-10-11, abstract_open = False (closed). Notification date (31 Dec 2026) not stored.",
-  "Fee source: /register/ (Elementor raven-price-list cards). The displayed price is the early-bird rate; 'Advance Pricing goes into effect December 21, 2026' gives early_bird_deadline 2026-12-20 (day before). Each row yields an Early bird tier plus an Advance tier (from 21 December 2026).",
-  "Skipped on purpose: Market Suppliers rows (vendor company staff, same rule as ESGE Industry rows) and the free Press Pass. Government, HIMSS Member, Non-Member and Student are kept.",
-  "Venue: home header names 'McCormick Place Convention Center'; the venue page says 'McCormick Place'. The longer home-header name is stored. City/state come from the header's third segment via a hook because the family stops after the venue segment.",
-  "Description: the plain meta description (HIMSS27, Chicago); og:description is stale (HIMSS26, Las Vegas, March 2026) so it is never used.",
-  "Venue page is fetched only when the date line has no venue; here it is not needed (VENUE_URLS kept as fallback)."
- ],
- "concerns": [
-  "Lead expectation of Las Vegas / Venetian is the stale HIMSS26 og:description; the site states Chicago, McCormick Place for HIMSS27 (5-8 April 2027).",
-  "call-for-posters returned 403 to httpx once (second harness run); the production fetch path fell back to Playwright and succeeded. Intermittent, not a robots issue.",
-  "After 21 December 2026 the page will probably switch to the advance prices only; the parser then sees no 'goes into effect' sentence and emits Standard tiers (still correct).",
-  "After the congress ends the family sets verified_empty; the call-for-posters page will be gone/closed by then.",
-  "Informa blog pages mention 'save up to $700' (register-early blog); not parsed, no price table there.",
-  "Society code HIMSS must exist in medconf-website/src/lib/taxonomy/societies.ts (foreman owns registration).",
-  "Request count to himssconference.com about 30 including both harness runs; nothing fetched from himss.org."
- ]
+  "file_written": "medconf-scraper/extractors/himss_conference.py",
+  "registry_comment": "HIMSS Global Health Conference & Exhibition single-congress site (one upcoming edition) - single_congress family",
+  "probe_results": {
+    "shells": 1,
+    "shells_forced_fallback": 1,
+    "details_tested": 1,
+    "with_date": 1,
+    "with_pricing": 1,
+    "with_venue": 1,
+    "with_description": 1,
+    "with_specialty": 1,
+    "pricing_tiers": 23
+  },
+  "test_urls": [
+    "https://www.himssconference.com/",
+    "https://www.himssconference.com/register/",
+    "https://www.himssconference.com/call-for-posters/",
+    "https://www.himssconference.com/about-the-venue/"
+  ],
+  "terms": "himssconference.com footer links Informa Terms & Conditions, Cookie and Privacy Policies and a Code of Conduct. Informa generic T&Cs, no automated-access ban found; same exposure as FACE 164 / AMWC 148. robots.txt: User-agent * with empty Disallow (Yoast), sitemap listed. himss.org never fetched (403 on the runner, and not needed).",
+  "spot_check": [
+    {
+      "url": "https://www.himssconference.com/",
+      "field": "dates/venue/city",
+      "site_says": "April 5-8, 2027 | McCormick Place Convention Center | Chicago, IL",
+      "extractor_says": "2027-04-05..2027-04-08, McCormick Place Convention Center, Chicago, United States",
+      "match": true
+    },
+    {
+      "url": "https://www.himssconference.com/register/",
+      "field": "fees",
+      "site_says": "Conference Plus Pass HIMSS Members $1,695 (Advance $1,945 from Dec 21, 2026); Non-Members $1,995/$2,295; Conference Pass $1,345/$1,495 members; Exhibit Hall Only $995/$1,095; Preconference Only $475/$555; Student $325",
+      "extractor_says": "23 USD tiers, early bird deadline 2026-12-20",
+      "match": true
+    },
+    {
+      "url": "https://www.himssconference.com/call-for-posters/",
+      "field": "abstract_deadline",
+      "site_says": "submission window closed 5:00 PM EST Sunday, October 11, 2026",
+      "extractor_says": "abstract_open false, deadline 2026-10-11",
+      "match": true
+    }
+  ],
+  "decisions": [
+    "Specialty label: 'Digital Health', reused from Digital Health Rewired 151 (rewired.json).",
+    "Call for proposals: the site has only /call-for-posters/ (not in the nav, found via page-sitemap.xml, robots allows). Mapped to the abstract fields as a poster call: abstract_deadline = its stated closing date 2026-10-11, abstract_open = False (closed). Notification date (31 Dec 2026) not stored.",
+    "Fee source: /register/ (Elementor raven-price-list cards). The displayed price is the early-bird rate; 'Advance Pricing goes into effect December 21, 2026' gives early_bird_deadline 2026-12-20 (day before). Each row yields an Early bird tier plus an Advance tier (from 21 December 2026).",
+    "Skipped on purpose: Market Suppliers rows (vendor company staff, same rule as ESGE Industry rows) and the free Press Pass. Government, HIMSS Member, Non-Member and Student are kept.",
+    "Venue: home header names 'McCormick Place Convention Center'; the venue page says 'McCormick Place'. The longer home-header name is stored. City/state come from the header's third segment via a hook because the family stops after the venue segment.",
+    "Description: the plain meta description (HIMSS27, Chicago); og:description is stale (HIMSS26, Las Vegas, March 2026) so it is never used.",
+    "Venue page is fetched only when the date line has no venue; here it is not needed (VENUE_URLS kept as fallback).",
+    "FM-3D (2): the eligibility subtitle under a pass heading ('Qualified Providers', 'General Admission') is captured into the label as Section · Audience · Category · Timeframe; marketing/schedule subtitles ('Best Value Package', 'Tuesday – Thursday Exhibits', 'Monday Forums') are deliberately left out (rule: subtitle matches provider/general admission/student/government/member).",
+    "FM-3D (1): with no 'Advance Pricing goes into effect' date the early price is dead; a card with an Advance price emits it as the Standard tier, a single-price card emits that price as Standard.",
+    "FM-3D (3,4): description token is HIMSS<edition year yy>; the poster-deadline reader uses word boundaries, requires the page to mention this edition (family _mentions_edition) and ignores a date on/after the start date, else defers to the family reader."
+  ],
+  "concerns": [
+    "Lead expectation of Las Vegas / Venetian is the stale HIMSS26 og:description; the site states Chicago, McCormick Place for HIMSS27 (5-8 April 2027).",
+    "call-for-posters returned 403 to httpx once (second harness run); the production fetch path fell back to Playwright and succeeded. Intermittent, not a robots issue.",
+    "After 21 December 2026 the page will probably switch to the advance prices only; the parser then sees no 'goes into effect' sentence and emits Standard tiers (still correct).",
+    "After the congress ends the family sets verified_empty; the call-for-posters page will be gone/closed by then.",
+    "Informa blog pages mention 'save up to $700' (register-early blog); not parsed, no price table there.",
+    "Society code HIMSS must exist in medconf-website/src/lib/taxonomy/societies.ts (foreman owns registration).",
+    "Request count to himssconference.com about 30 including both harness runs; nothing fetched from himss.org."
+  ]
 }

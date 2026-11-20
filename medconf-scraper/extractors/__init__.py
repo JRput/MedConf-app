@@ -164,6 +164,8 @@ from .ese_hormones import EseHormonesExtractor
 from .face import FaceExtractor
 from .esge_days import EsgeDaysExtractor
 from .eha_congress import EhaCongressExtractor
+from .himss_conference import HimssConferenceExtractor
+from .esska_congress import EsskaCongressExtractor
 from .cns import CnsExtractor
 from .eshre import EshreExtractor
 from .eular import EularExtractor
@@ -341,6 +343,8 @@ EXTRACTOR_REGISTRY: Dict[int, type[BaseExtractor]] = {
     164: FaceExtractor,                       # 164: FACE / The Aesthetic Show UK (faceconference.com): single_congress, between editions → verified_empty
     162: EsgeDaysExtractor,                   # 162: ESGE Days (esgedays.org): single_congress; esge.com itself is off-limits (terms of use)
     165: EhaCongressExtractor,                # 165: EHA Congress (ehaweb.org/connect-network): single_congress; congress.ehaweb.org robots Disallow / — never fetched
+    166: HimssConferenceExtractor,          # 166: HIMSS Global Health Conference (himssconference.com): single_congress, USD pass cards; himss.org blocked on the runner — never fetched
+    167: EsskaCongressExtractor,            # 167: ESSKA Congress (esska-congress.org, biennial): single_congress; fees/abstracts not published until autumn 2027; esska.org blocked on the runner — never fetched
 }
 
 
